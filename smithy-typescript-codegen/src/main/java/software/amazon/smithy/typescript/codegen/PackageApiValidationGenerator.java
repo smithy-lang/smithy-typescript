@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
@@ -33,10 +32,10 @@ public final class PackageApiValidationGenerator {
     private final ServiceClosure closure;
 
     public PackageApiValidationGenerator(
-        TypeScriptWriter writer,
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider
+            TypeScriptWriter writer,
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider
     ) {
         this.writer = writer;
         this.settings = settings;
@@ -50,61 +49,60 @@ public final class PackageApiValidationGenerator {
      */
     public void writeTypeIndexTest() {
         writer.openBlock("""
-            export type {""",
-            """
-            } from "../dist-types/index.d";""",
-            () -> {
-                // exportable types include:
+                export type {""",
+                """
+                        } from "../dist-types/index.d";""",
+                () -> {
+                    // exportable types include:
 
-                // the barebones client
-                String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-                writer.write("$L", aggregateClientName + "Client,");
+                    // the barebones client
+                    String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+                    writer.write("$L", aggregateClientName + "Client,");
 
-                // the aggregate client
-                writer.write(aggregateClientName + ",");
+                    // the aggregate client
+                    writer.write(aggregateClientName + ",");
 
-                // all commands
-                Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
-                    settings.getService()
-                );
-                for (OperationShape operation : containedOperations) {
-                    String commandName = symbolProvider.toSymbol(operation).getName();
-                    writer.write("$L,", commandName);
-                    writer.write("$LInput,", commandName);
-                    writer.write("$LOutput,", commandName);
-                }
+                    // all commands
+                    Set<OperationShape> containedOperations = TopDownIndex.of(model)
+                            .getContainedOperations(
+                                    settings.getService());
+                    for (OperationShape operation : containedOperations) {
+                        String commandName = symbolProvider.toSymbol(operation).getName();
+                        writer.write("$L,", commandName);
+                        writer.write("$LInput,", commandName);
+                        writer.write("$LOutput,", commandName);
+                    }
 
-                // enums
-                TreeSet<Shape> enumShapes = closure.getEnums();
-                for (Shape enumShape : enumShapes) {
-                    writer.write("$L,", symbolProvider.toSymbol(enumShape).getName());
-                }
+                    // enums
+                    TreeSet<Shape> enumShapes = closure.getEnums();
+                    for (Shape enumShape : enumShapes) {
+                        writer.write("$L,", symbolProvider.toSymbol(enumShape).getName());
+                    }
 
-                // structure & union types & modeled errors
-                TreeSet<Shape> structuralShapes = closure.getStructuralNonErrorShapes();
-                for (Shape structuralShape : structuralShapes) {
-                    writer.write("$L,", symbolProvider.toSymbol(structuralShape).getName());
-                }
+                    // structure & union types & modeled errors
+                    TreeSet<Shape> structuralShapes = closure.getStructuralNonErrorShapes();
+                    for (Shape structuralShape : structuralShapes) {
+                        writer.write("$L,", symbolProvider.toSymbol(structuralShape).getName());
+                    }
 
-                TreeSet<Shape> errorShapes = closure.getErrorShapes();
-                for (Shape errorShape : errorShapes) {
-                    writer.write("$L,", symbolProvider.toSymbol(errorShape).getName());
-                }
+                    TreeSet<Shape> errorShapes = closure.getErrorShapes();
+                    for (Shape errorShape : errorShapes) {
+                        writer.write("$L,", symbolProvider.toSymbol(errorShape).getName());
+                    }
 
-                // synthetic base exception
-                String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
-                writer.write("$L,", baseExceptionName);
+                    // synthetic base exception
+                    String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
+                    writer.write("$L,", baseExceptionName);
 
-                // waiters
-                closure.getWaiterNames().forEach(waiter -> {
-                    writer.write("$L,", waiter);
+                    // waiters
+                    closure.getWaiterNames().forEach(waiter -> {
+                        writer.write("$L,", waiter);
+                    });
+                    // paginators
+                    closure.getPaginatorNames().forEach(paginator -> {
+                        writer.write("$L,", paginator);
+                    });
                 });
-                // paginators
-                closure.getPaginatorNames().forEach(paginator -> {
-                    writer.write("$L,", paginator);
-                });
-            }
-        );
     }
 
     /**
@@ -112,7 +110,7 @@ public final class PackageApiValidationGenerator {
      */
     public void writeRuntimeIndexTest() {
         writer.write("""
-            import assert from "node:assert";""");
+                import assert from "node:assert";""");
         // runtime components include:
 
         Path cjsIndex = Paths.get("./dist-cjs/index.js");
@@ -125,38 +123,36 @@ public final class PackageApiValidationGenerator {
         // the aggregate client
         writer.write("// clients");
         writer.write("""
-            assert(typeof $L === "function");""",
-            aggregateClientName + "Client"
-        );
+                assert(typeof $L === "function");""",
+                aggregateClientName + "Client");
         writer.write("""
-            assert(typeof $L === "function");""",
-            aggregateClientName
-        );
+                assert(typeof $L === "function");""",
+                aggregateClientName);
 
         // all commands
         writer.write("// commands");
-        Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
-            settings.getService()
-        );
+        Set<OperationShape> containedOperations = TopDownIndex.of(model)
+                .getContainedOperations(
+                        settings.getService());
         for (OperationShape operation : containedOperations) {
             Symbol operationSymbol = symbolProvider.toSymbol(operation);
             writer.addRelativeImport(operationSymbol.getName(), null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "function");""",
-                operationSymbol.getName()
-            );
+                    assert(typeof $L === "function");""",
+                    operationSymbol.getName());
         }
 
         // enums
 
         // string shapes with enum trait do not generate anything if
         // any enum value does not have a name.
-        TreeSet<Shape> enumShapes = closure.getEnums().stream()
-            .filter(shape -> shape
-                .getTrait(EnumTrait.class)
-                .map(EnumTrait::hasNames)
-                .orElse(true))
-            .collect(TreeSet::new, Set::add, Set::addAll);
+        TreeSet<Shape> enumShapes = closure.getEnums()
+                .stream()
+                .filter(shape -> shape
+                        .getTrait(EnumTrait.class)
+                        .map(EnumTrait::hasNames)
+                        .orElse(true))
+                .collect(TreeSet::new, Set::add, Set::addAll);
 
         if (!enumShapes.isEmpty()) {
             writer.write("// enums");
@@ -165,9 +161,8 @@ public final class PackageApiValidationGenerator {
             Symbol enumSymbol = symbolProvider.toSymbol(enumShape);
             writer.addRelativeImport(enumSymbol.getName(), null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "object");""",
-                enumSymbol.getName()
-            );
+                    assert(typeof $L === "object");""",
+                    enumSymbol.getName());
         }
 
         String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
@@ -179,10 +174,9 @@ public final class PackageApiValidationGenerator {
             Symbol errorSymbol = symbolProvider.toSymbol(error);
             writer.addRelativeImport(errorSymbol.getName(), null, cjsIndex);
             writer.write(
-                "assert($L.prototype instanceof $L);",
-                errorSymbol.getName(),
-                baseExceptionName
-            );
+                    "assert($L.prototype instanceof $L);",
+                    errorSymbol.getName(),
+                    baseExceptionName);
         }
         writer.addRelativeImport(baseExceptionName, null, cjsIndex);
         writer.write("assert($L.prototype instanceof Error);", baseExceptionName);
@@ -195,9 +189,8 @@ public final class PackageApiValidationGenerator {
         waiterNames.forEach(waiter -> {
             writer.addRelativeImport(waiter, null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "function");""",
-                waiter
-            );
+                    assert(typeof $L === "function");""",
+                    waiter);
         });
         TreeSet<String> paginatorNames = closure.getPaginatorNames();
         if (!paginatorNames.isEmpty()) {
@@ -206,9 +199,8 @@ public final class PackageApiValidationGenerator {
         paginatorNames.forEach(paginator -> {
             writer.addRelativeImport(paginator, null, cjsIndex);
             writer.write("""
-                assert(typeof $L === "function");""",
-                paginator
-            );
+                    assert(typeof $L === "function");""",
+                    paginator);
         });
 
         writer.write("console.log(`$L index test passed.`);", aggregateClientName);

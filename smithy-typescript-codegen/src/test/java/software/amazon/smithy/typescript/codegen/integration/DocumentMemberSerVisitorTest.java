@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,7 +74,7 @@ public class DocumentMemberSerVisitorTest {
         MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
         String delegate = "se_Foo(" + DATA_SOURCE + ", context)";
 
-        return ListUtils.of(new Object[][]{
+        return ListUtils.of(new Object[][] {
                 {BooleanShape.builder().id(id).build(), DATA_SOURCE},
                 {BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
                 {BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
@@ -82,8 +86,8 @@ public class DocumentMemberSerVisitorTest {
                 {ShortShape.builder().id(id).build(), DATA_SOURCE},
                 {StringShape.builder().id(id).build(), DATA_SOURCE},
                 {
-                    StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                    "__LazyJsonString.from(" + DATA_SOURCE + ")"
+                        StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
+                        "__LazyJsonString.from(" + DATA_SOURCE + ")"
                 },
                 {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
                 {DocumentShape.builder().id(id).build(), delegate},
@@ -129,11 +133,15 @@ public class DocumentMemberSerVisitorTest {
         public Symbol toSymbol(Shape shape) {
             if (shape instanceof CollectionShape) {
                 MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
-                return collectionMock.toBuilder().putProperty("shape",
-                    ListShape.builder().id(id).member(member).build()).build();
+                return collectionMock.toBuilder()
+                        .putProperty("shape",
+                                ListShape.builder().id(id).member(member).build())
+                        .build();
             }
-            return mock.toBuilder().putProperty("shape",
-                StructureShape.builder().id(id).build()).build();
+            return mock.toBuilder()
+                    .putProperty("shape",
+                            StructureShape.builder().id(id).build())
+                    .build();
         }
     }
 }

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.knowledge;
 
 import java.util.ArrayList;
@@ -96,8 +95,8 @@ public final class ServiceClosure implements KnowledgeIndex {
     private final Set<ShapeId> scanned = new HashSet<>();
 
     private ServiceClosure(
-        Model model,
-        ServiceShape service
+            Model model,
+            ServiceShape service
     ) {
         this.model = model;
         this.service = service;
@@ -280,7 +279,7 @@ public final class ServiceClosure implements KnowledgeIndex {
                     });
                 }
                 case BYTE, INT_ENUM, SHORT, INTEGER, LONG, FLOAT, DOUBLE, BIG_INTEGER, BIG_DECIMAL, BOOLEAN, STRING,
-                     TIMESTAMP, DOCUMENT, ENUM, BLOB -> {
+                        TIMESTAMP, DOCUMENT, ENUM, BLOB -> {
                     if (shape.isEnumShape() || shape.isIntEnumShape() || shape.hasTrait(EnumTrait.class)) {
                         enums.add(shape);
                     }

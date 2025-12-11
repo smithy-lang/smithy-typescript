@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,12 +32,12 @@ public class TypeScriptWriterTest {
         String result = writer.toString();
 
         assertEquals("""
-            %simport { Bar as __Bar } from "@smithy/types";
-            
-            import { Baz } from "./hello";
-            import { Qux as __Qux } from "./qux";
-            import { Foo } from "baz";
-            """.formatted(CODEGEN_INDICATOR), result);
+                %simport { Bar as __Bar } from "@smithy/types";
+
+                import { Baz } from "./hello";
+                import { Qux as __Qux } from "./qux";
+                import { Foo } from "baz";
+                """.formatted(CODEGEN_INDICATOR), result);
     }
 
     @Test
@@ -76,7 +80,7 @@ public class TypeScriptWriterTest {
         String result = writer.toString();
 
         assertEquals("""
-            %simport { symbol as __symbol } from "@smithy/core/submodule";
-            """.formatted(CODEGEN_INDICATOR).trim(), result.trim());
+                %simport { symbol as __symbol } from "@smithy/core/submodule";
+                """.formatted(CODEGEN_INDICATOR).trim(), result.trim());
     }
 }

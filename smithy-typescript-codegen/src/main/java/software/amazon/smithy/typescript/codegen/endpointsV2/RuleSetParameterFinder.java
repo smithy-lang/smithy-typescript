@@ -1,18 +1,7 @@
 /*
- * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.util.ArrayDeque;
@@ -62,9 +51,9 @@ public class RuleSetParameterFinder {
 
     public RuleSetParameterFinder(ServiceShape service) {
         this.service = service;
-        this.ruleset = service.getTrait(EndpointRuleSetTrait.class).orElseThrow(
-            () -> new RuntimeException("Service does not have EndpointRuleSetTrait.")
-        );
+        this.ruleset = service.getTrait(EndpointRuleSetTrait.class)
+                .orElseThrow(
+                        () -> new RuntimeException("Service does not have EndpointRuleSetTrait."));
     }
 
     /**
@@ -109,22 +98,23 @@ public class RuleSetParameterFinder {
                 } else if (arg.isStringNode()) {
                     String argString = arg.expectStringNode().getValue();
                     URL_PARAMETERS
-                        .matcher(argString)
-                        .results().forEach(matchResult -> {
-                            if (matchResult.groupCount() >= 1) {
-                                if (initialParams.contains(matchResult.group(1))) {
-                                    effectiveParams.add(matchResult.group(1));
+                            .matcher(argString)
+                            .results()
+                            .forEach(matchResult -> {
+                                if (matchResult.groupCount() >= 1) {
+                                    if (initialParams.contains(matchResult.group(1))) {
+                                        effectiveParams.add(matchResult.group(1));
+                                    }
                                 }
-                            }
-                        });
+                            });
                 }
             }
 
             while (!conditionQueue.isEmpty()) {
                 Condition condition = conditionQueue.poll();
                 ArrayNode argv = condition.toNode()
-                    .expectObjectNode()
-                    .expectArrayMember("argv");
+                        .expectObjectNode()
+                        .expectArrayMember("argv");
                 for (Node arg : argv) {
                     argQueue.add(arg);
                 }
@@ -144,14 +134,15 @@ public class RuleSetParameterFinder {
                 String urlString = url.toString();
 
                 URL_PARAMETERS
-                    .matcher(urlString)
-                    .results().forEach(matchResult -> {
-                        if (matchResult.groupCount() >= 1) {
-                            if (initialParams.contains(matchResult.group(1))) {
-                                effectiveParams.add(matchResult.group(1));
+                        .matcher(urlString)
+                        .results()
+                        .forEach(matchResult -> {
+                            if (matchResult.groupCount() >= 1) {
+                                if (initialParams.contains(matchResult.group(1))) {
+                                    effectiveParams.add(matchResult.group(1));
+                                }
                             }
-                        }
-                    });
+                        });
             } else if (rule instanceof ErrorRule errorRule) {
                 // no additional use of endpoint parameters in error rules.
             }
@@ -185,19 +176,18 @@ public class RuleSetParameterFinder {
                 ShapeType shapeType = definition.getType();
                 if (shapeType.isShapeType(ShapeType.STRING) || shapeType.isShapeType(ShapeType.BOOLEAN)) {
                     map.put(
-                        name,
-                        // "boolean" and "string" are directly usable in TS.
-                        definition.getType().toString().toLowerCase()
-                    );
+                            name,
+                            // "boolean" and "string" are directly usable in TS.
+                            definition.getType().toString().toLowerCase());
                 } else if (shapeType.isShapeType(ShapeType.LIST)) {
                     map.put(
-                        name,
-                        "string[]" // Only string lists are supported.
+                            name,
+                            "string[]" // Only string lists are supported.
                     );
                 } else {
                     throw new RuntimeException("unexpected type "
-                        + definition.getType().toString()
-                        + " received as clientContextParam.");
+                            + definition.getType().toString()
+                            + " received as clientContextParam.");
                 }
             });
         }
@@ -221,18 +211,18 @@ public class RuleSetParameterFinder {
                     value = definition.getValue().expectBooleanNode().toString();
                 } else if (definition.getValue().isArrayNode()) {
                     ArrayNode arrayNode = definition.getValue().expectArrayNode();
-                    value = arrayNode.getElements().stream()
-                      .map(element -> element.expectStringNode().getValue())
-                      .collect(Collectors.joining("`, `", "[`", "`]"));
+                    value = arrayNode.getElements()
+                            .stream()
+                            .map(element -> element.expectStringNode().getValue())
+                            .collect(Collectors.joining("`, `", "[`", "`]"));
                 } else {
                     throw new RuntimeException("unexpected type "
-                        + definition.getValue().getType().toString()
-                        + " received as staticContextParam.");
+                            + definition.getValue().getType().toString()
+                            + " received as staticContextParam.");
                 }
                 map.put(
-                    name,
-                    value
-                );
+                        name,
+                        value);
             });
         }
 
@@ -255,9 +245,8 @@ public class RuleSetParameterFinder {
                     ContextParamTrait contextParamTrait = trait.get();
                     String name = contextParamTrait.getName();
                     map.put(
-                        name,
-                        member.getMemberName()
-                    );
+                            name,
+                            member.getMemberName());
                 }
             });
         }
@@ -286,8 +275,8 @@ public class RuleSetParameterFinder {
                 }
 
                 // Close all open brackets.
-                value += ")".repeat((int) (
-                    value.chars().filter(ch -> ch == '(').count() - value.chars().filter(ch -> ch == ')').count()));
+                value += ")".repeat((int) (value.chars().filter(ch -> ch == '(').count()
+                        - value.chars().filter(ch -> ch == ')').count()));
 
                 map.put(name, value);
             });
@@ -302,7 +291,7 @@ public class RuleSetParameterFinder {
             if (path.startsWith("[") && !path.startsWith("[*]")) {
                 // Process MultiSelect List https://jmespath.org/specification.html#multiselect-list
                 if (value.endsWith("obj")) {
-                   value = value.substring(0, value.length() - 3);
+                    value = value.substring(0, value.length() - 3);
                 }
 
                 value += "[";
@@ -404,9 +393,8 @@ public class RuleSetParameterFinder {
                 if (parameterGenerator.isBuiltIn()) {
                     Map.Entry<String, String> nameAndType = parameterGenerator.getNameAndType();
                     map.put(
-                        nameAndType.getKey(),
-                        nameAndType.getValue()
-                    );
+                            nameAndType.getKey(),
+                            nameAndType.getValue());
                 }
             }
             return null;

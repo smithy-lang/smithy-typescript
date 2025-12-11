@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,10 +34,11 @@ public class SymbolProviderTest {
                 .addShape(shape)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
@@ -52,10 +57,11 @@ public class SymbolProviderTest {
                 .addShapes(shape1, shape2)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
@@ -80,10 +86,11 @@ public class SymbolProviderTest {
                 .addShape(shape)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
@@ -102,10 +109,11 @@ public class SymbolProviderTest {
                 .addShapes(struct, member)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         SymbolProvider provider = new SymbolVisitor(model, settings);
 
         Symbol structSymbol = provider.toSymbol(struct);
@@ -133,10 +141,11 @@ public class SymbolProviderTest {
                 .addShapes(list, listMember, record)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol listSymbol = provider.toSymbol(list);
@@ -150,10 +159,11 @@ public class SymbolProviderTest {
                 .addImport(getClass().getResource("output-structure.smithy"))
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         Shape command = model.expectShape(ShapeId.from("smithy.example#GetFoo"));
         SymbolProvider provider = new SymbolVisitor(model, settings);
@@ -166,8 +176,10 @@ public class SymbolProviderTest {
 
     @Test
     public void usesLazyJsonStringForJsonMediaType() {
-        StringShape jsonString = StringShape.builder().id("foo.bar#jsonString")
-                .addTrait(new MediaTypeTrait("application/json")).build();
+        StringShape jsonString = StringShape.builder()
+                .id("foo.bar#jsonString")
+                .addTrait(new MediaTypeTrait("application/json"))
+                .build();
         MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(jsonString).build();
         StructureShape struct = StructureShape.builder()
                 .id("foo.bar#test")
@@ -178,10 +190,11 @@ public class SymbolProviderTest {
                 .addShapes(struct, member, jsonString)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -206,10 +219,11 @@ public class SymbolProviderTest {
                 .addShapes(struct, member, stringShape)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -234,10 +248,11 @@ public class SymbolProviderTest {
                 .addShapes(struct, member, shape)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -254,10 +269,11 @@ public class SymbolProviderTest {
                 .addShapes(shape1, shape2)
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         SymbolProvider provider = new SymbolVisitor(model, settings, 1);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);

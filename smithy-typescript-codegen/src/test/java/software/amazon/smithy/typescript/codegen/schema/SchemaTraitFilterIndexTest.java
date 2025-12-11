@@ -1,5 +1,12 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.schema;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.model.Model;
@@ -34,10 +41,6 @@ import software.amazon.smithy.model.traits.XmlNamespaceTrait;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndexTest;
 import software.amazon.smithy.utils.SetUtils;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class SchemaTraitFilterIndexTest {
     private static Model model;
     private static SchemaTraitFilterIndex subject;
@@ -45,12 +48,11 @@ class SchemaTraitFilterIndexTest {
     @BeforeAll
     public static void before() {
         model = Model.assembler()
-            .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
-            .assemble()
-            .unwrap();
+                .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
+                .assemble()
+                .unwrap();
         subject = new SchemaTraitFilterIndex(model);
     }
-
 
     @Test
     void hasSchemaTraits() {
@@ -60,51 +62,47 @@ class SchemaTraitFilterIndexTest {
         for (Shape sparseShape : sparseShapes) {
             assertTrue(subject.hasSchemaTraits(sparseShape));
             assertTrue(
-                subject.includeTrait(
-                    sparseShape.getTrait(SparseTrait.class).get().toShapeId()
-                )
-            );
+                    subject.includeTrait(
+                            sparseShape.getTrait(SparseTrait.class).get().toShapeId()));
         }
     }
 
     @Test
     void includeTrait() {
         Set<ShapeId> excludedShapes = SetUtils.of(
-            TimestampFormatTrait.ID
-        );
+                TimestampFormatTrait.ID);
         for (ShapeId excludedShape : excludedShapes) {
             String presence = subject.includeTrait(excludedShape)
-                ? "should not be included"
-                : excludedShape.getName();
+                    ? "should not be included"
+                    : excludedShape.getName();
             assertEquals(excludedShape.getName(), presence);
         }
         Set<ShapeId> includedTraits = SetUtils.of(
-            SparseTrait.ID,
-            SensitiveTrait.ID,
-            IdempotencyTokenTrait.ID,
-            JsonNameTrait.ID,
-            MediaTypeTrait.ID,
-            XmlAttributeTrait.ID,
-            XmlFlattenedTrait.ID,
-            XmlNameTrait.ID,
-            XmlNamespaceTrait.ID,
-            EventHeaderTrait.ID,
-            EventPayloadTrait.ID,
-            StreamingTrait.ID,
-            RequiresLengthTrait.ID,
-            EndpointTrait.ID,
-            HttpErrorTrait.ID,
-            HttpHeaderTrait.ID,
-            HttpQueryTrait.ID,
-            HttpLabelTrait.ID,
-            HttpPayloadTrait.ID,
-            HttpPrefixHeadersTrait.ID,
-            HttpQueryParamsTrait.ID,
-            HttpResponseCodeTrait.ID,
-            HostLabelTrait.ID,
-            ErrorTrait.ID,
-            HttpTrait.ID
-        );
+                SparseTrait.ID,
+                SensitiveTrait.ID,
+                IdempotencyTokenTrait.ID,
+                JsonNameTrait.ID,
+                MediaTypeTrait.ID,
+                XmlAttributeTrait.ID,
+                XmlFlattenedTrait.ID,
+                XmlNameTrait.ID,
+                XmlNamespaceTrait.ID,
+                EventHeaderTrait.ID,
+                EventPayloadTrait.ID,
+                StreamingTrait.ID,
+                RequiresLengthTrait.ID,
+                EndpointTrait.ID,
+                HttpErrorTrait.ID,
+                HttpHeaderTrait.ID,
+                HttpQueryTrait.ID,
+                HttpLabelTrait.ID,
+                HttpPayloadTrait.ID,
+                HttpPrefixHeadersTrait.ID,
+                HttpQueryParamsTrait.ID,
+                HttpResponseCodeTrait.ID,
+                HostLabelTrait.ID,
+                ErrorTrait.ID,
+                HttpTrait.ID);
         for (ShapeId includedTrait : includedTraits) {
             String presence = subject.includeTrait(includedTrait) ? includedTrait.getName() : "is missing";
             assertEquals(includedTrait.getName(), presence);

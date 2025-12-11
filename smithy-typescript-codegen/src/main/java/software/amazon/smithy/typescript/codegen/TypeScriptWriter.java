@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
@@ -224,11 +213,13 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * As openBlock, but collapses all space between open and close strings
      * if the condition is not met.
      */
-    public TypeScriptWriter openCollapsibleBlock(String open,
-                                                 String close,
-                                                 boolean condition,
-                                                 Object[] args,
-                                                 Runnable runnable) {
+    public TypeScriptWriter openCollapsibleBlock(
+            String open,
+            String close,
+            boolean condition,
+            Object[] args,
+            Runnable runnable
+    ) {
         if (condition) {
             openBlock(open, close, args, runnable);
         } else {
@@ -237,14 +228,22 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return this;
     }
 
-    public TypeScriptWriter openCollapsibleBlock(String open, String close, boolean condition,
-                                                 Runnable runnable) {
+    public TypeScriptWriter openCollapsibleBlock(
+            String open,
+            String close,
+            boolean condition,
+            Runnable runnable
+    ) {
         return openCollapsibleBlock(open, close, condition, new Object[] {}, runnable);
     }
 
-    public TypeScriptWriter openCollapsibleBlock(String open, String close, boolean condition,
-                                                 Object arg1,
-                                                 Runnable runnable) {
+    public TypeScriptWriter openCollapsibleBlock(
+            String open,
+            String close,
+            boolean condition,
+            Object arg1,
+            Runnable runnable
+    ) {
         return openCollapsibleBlock(open, close, condition, new Object[] {arg1}, runnable);
     }
 
@@ -261,11 +260,11 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 .map(docs -> {
                     // Escape valid '{' and '}'
                     docs = docs.replace("{", "\\{")
-                        .replace("}", "\\}");
+                            .replace("}", "\\}");
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
                         String deprecationMessage = deprecatedTrait.getMessage()
-                            .orElse("deprecated");
+                                .orElse("deprecated");
                         String deprecationAnnotation = "@deprecated " + deprecationMessage;
                         docs = docs + "\n\n" + deprecationAnnotation;
                     }
@@ -273,7 +272,8 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     docs = addReleaseTag(shape, docs);
                     writeDocs(docs);
                     return true;
-                }).orElse(false);
+                })
+                .orElse(false);
     }
 
     /**
@@ -303,26 +303,27 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 .map(docs -> {
                     // Escape valid '{' and '}'
                     docs = docs.replace("{", "\\{")
-                        .replace("}", "\\}");
+                            .replace("}", "\\}");
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
                         DeprecatedTrait deprecatedTrait = member.getTrait(DeprecatedTrait.class)
-                            .or(() -> model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class))
-                            .orElseThrow();
+                                .or(() -> model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class))
+                                .orElseThrow();
                         String deprecationMessage = deprecatedTrait.getMessage()
-                            .orElse("deprecated");
+                                .orElse("deprecated");
                         String deprecationAnnotation = "@deprecated " + deprecationMessage;
                         docs = docs + "\n\n" + deprecationAnnotation;
                     }
                     docs = addReleaseTag(member, docs);
                     writeDocs(docs);
                     return true;
-                }).orElse(false);
+                })
+                .orElse(false);
     }
 
     private boolean isTargetDeprecated(Model model, MemberShape member) {
         return model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class).isPresent()
-               // don't consider deprecated prelude shapes (like PrimitiveBoolean)
-               && !Prelude.isPreludeShape(member.getTarget());
+                // don't consider deprecated prelude shapes (like PrimitiveBoolean)
+                && !Prelude.isPreludeShape(member.getTarget());
     }
 
     private String addReleaseTag(Shape shape, String docs) {
@@ -355,15 +356,14 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         if (importFrom.isDeclarablePackageImport()) {
             String packageName = importFrom.getPackageName();
             if (getDependencies()
-                .stream()
-                .map(SymbolDependency::getPackageName)
-                .noneMatch(packageName::equals)) {
+                    .stream()
+                    .map(SymbolDependency::getPackageName)
+                    .noneMatch(packageName::equals)) {
                 throw new CodegenException(
-                    """
-                    The import %s does not correspond to a registered dependency.
-                    TypeScriptWriter::addDependency() is required before ::addImport().
-                    """.formatted(from)
-                );
+                        """
+                                The import %s does not correspond to a registered dependency.
+                                TypeScriptWriter::addDependency() is required before ::addImport().
+                                """.formatted(from));
             }
         }
     }

@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
@@ -41,18 +30,18 @@ final class IndexGenerator {
     private IndexGenerator() {}
 
     static void writeIndex(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        ProtocolGenerator protocolGenerator,
-        TypeScriptWriter writer,
-        TypeScriptWriter modelIndexer
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            ProtocolGenerator protocolGenerator,
+            TypeScriptWriter writer,
+            TypeScriptWriter modelIndexer
     ) {
 
         writer.write("/* eslint-disable */");
-        settings.getService(model).getTrait(DocumentationTrait.class).ifPresent(trait ->
-                writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
-
+        settings.getService(model)
+                .getTrait(DocumentationTrait.class)
+                .ifPresent(trait -> writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
 
         if (settings.generateClient()) {
             writeClientExports(settings, model, symbolProvider, writer);
@@ -65,9 +54,8 @@ final class IndexGenerator {
 
         // write export statement for models
         writer.write(
-            // the header comment is already present in the upper writer.
-            modelIndexer.toString().replace("// smithy-typescript generated code", "")
-        );
+                // the header comment is already present in the upper writer.
+                modelIndexer.toString().replace("// smithy-typescript generated code", ""));
     }
 
     private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
@@ -76,10 +64,10 @@ final class IndexGenerator {
     }
 
     static void writeServerIndex(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        FileManifest fileManifest
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            FileManifest fileManifest
     ) {
         TypeScriptWriter writer = new TypeScriptWriter("");
         ServiceShape service = settings.getService(model);
@@ -90,15 +78,15 @@ final class IndexGenerator {
 
         writer.write("export * from \"./$L\"", symbol.getName());
         fileManifest.writeFile(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts").toString(),
-            writer.toString());
+                Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts").toString(),
+                writer.toString());
     }
 
     private static void writeClientExports(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        TypeScriptWriter writer
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            TypeScriptWriter writer
     ) {
         ServiceShape service = settings.getService(model);
         Symbol symbol = symbolProvider.toSymbol(service);
@@ -117,9 +105,8 @@ final class IndexGenerator {
         // Export Runtime Extension and Client ExtensionConfiguration interfaces
         writer.write("export type { RuntimeExtension } from \"./runtimeExtensions\";");
         writer.write(
-            "export type { $LExtensionConfiguration } from \"./extensionConfiguration\";",
-            normalizedClientName
-        );
+                "export type { $LExtensionConfiguration } from \"./extensionConfiguration\";",
+                normalizedClientName);
 
         // Write export statement for commands.
         writer.write("export * from \"./commands\";");

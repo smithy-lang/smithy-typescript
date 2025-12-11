@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -8,7 +12,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
@@ -26,7 +29,7 @@ public class TypeScriptDependencyTest {
     @Test
     public void getsUnconditionalDependencies() {
         assertThat(TypeScriptDependency.getUnconditionalDependencies(),
-                   hasItem(TypeScriptDependency.SMITHY_TYPES.dependency));
+                hasItem(TypeScriptDependency.SMITHY_TYPES.dependency));
     }
 
     @Test

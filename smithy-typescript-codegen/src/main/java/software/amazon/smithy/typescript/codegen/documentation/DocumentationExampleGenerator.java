@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.documentation;
 
 import java.util.Comparator;
@@ -48,21 +47,23 @@ public final class DocumentationExampleGenerator {
                     return indentation + "{ /* empty */ }";
                 }
                 String membersJoined = objectNode.getMembers()
-                    .entrySet()
-                    .stream()
-                    .sorted(Comparator.comparing(entry -> entry.getKey().getValue()))
-                    .map(entry -> indentation
-                        + "  "
-                        + entry.getKey().getValue()
-                        + ": "
-                        + write(entry.getValue(), indent + 2))
-                    .collect(Collectors.joining(",\n"));
+                        .entrySet()
+                        .stream()
+                        .sorted(Comparator.comparing(entry -> entry.getKey().getValue()))
+                        .map(entry -> indentation
+                                + "  "
+                                + entry.getKey().getValue()
+                                + ": "
+                                + write(entry.getValue(), indent + 2))
+                        .collect(Collectors.joining(",\n"));
 
                 return buffer
-                    .append("{\n")
-                    .append(membersJoined).append("\n")
-                    .append(indentation).append("}")
-                    .toString();
+                        .append("{\n")
+                        .append(membersJoined)
+                        .append("\n")
+                        .append(indentation)
+                        .append("}")
+                        .toString();
             }
             case ARRAY -> {
                 ArrayNode arrayNode = node.expectArrayNode();
@@ -70,17 +71,19 @@ public final class DocumentationExampleGenerator {
                     return indentation + "[]";
                 }
                 String membersJoined = arrayNode.getElements()
-                    .stream()
-                    .map(elementNode -> indentation
-                        + "  "
-                        + write(elementNode, indent + 2))
-                    .collect(Collectors.joining(",\n"));
+                        .stream()
+                        .map(elementNode -> indentation
+                                + "  "
+                                + write(elementNode, indent + 2))
+                        .collect(Collectors.joining(",\n"));
 
                 return buffer
-                    .append("[\n")
-                    .append(membersJoined).append("\n")
-                    .append(indentation).append("]")
-                    .toString();
+                        .append("[\n")
+                        .append(membersJoined)
+                        .append("\n")
+                        .append(indentation)
+                        .append("]")
+                        .toString();
             }
             case STRING -> {
                 StringNode stringNode = node.expectStringNode();

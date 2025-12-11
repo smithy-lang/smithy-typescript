@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http;
 
 import java.util.Optional;
@@ -29,13 +28,12 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  */
 @SmithyUnstableApi
 public record ConfigField(
-    String name,
-    Type type,
-    Symbol inputType,
-    Symbol resolvedType,
-    Optional<BiConsumer<TypeScriptWriter, ConfigField>> configFieldWriter,
-    Optional<Consumer<TypeScriptWriter>> docs
-) implements ToSmithyBuilder<ConfigField> {
+        String name,
+        Type type,
+        Symbol inputType,
+        Symbol resolvedType,
+        Optional<BiConsumer<TypeScriptWriter, ConfigField>> configFieldWriter,
+        Optional<Consumer<TypeScriptWriter>> docs) implements ToSmithyBuilder<ConfigField> {
 
     /**
      * Defines the type of the config field.
@@ -59,12 +57,12 @@ public record ConfigField(
     @Override
     public Builder toBuilder() {
         return builder()
-            .name(name)
-            .type(type)
-            .inputType(inputType)
-            .resolvedType(resolvedType)
-            .configFieldWriter(configFieldWriter.orElse(null))
-            .docs(docs.orElse(null));
+                .name(name)
+                .type(type)
+                .inputType(inputType)
+                .resolvedType(resolvedType)
+                .configFieldWriter(configFieldWriter.orElse(null))
+                .docs(docs.orElse(null));
     }
 
     public static final class Builder implements SmithyBuilder<ConfigField> {
@@ -78,12 +76,12 @@ public record ConfigField(
         @Override
         public ConfigField build() {
             return new ConfigField(
-                SmithyBuilder.requiredState("name", name),
-                SmithyBuilder.requiredState("type", type),
-                SmithyBuilder.requiredState("inputType", inputType),
-                SmithyBuilder.requiredState("resolvedType", resolvedType),
-                Optional.ofNullable(configFieldWriter),
-                Optional.ofNullable(docs));
+                    SmithyBuilder.requiredState("name", name),
+                    SmithyBuilder.requiredState("type", type),
+                    SmithyBuilder.requiredState("inputType", inputType),
+                    SmithyBuilder.requiredState("resolvedType", resolvedType),
+                    Optional.ofNullable(configFieldWriter),
+                    Optional.ofNullable(docs));
         }
 
         public Builder name(String name) {
@@ -119,33 +117,36 @@ public record ConfigField(
 
     @SmithyInternalApi
     public static void defaultMainConfigFieldWriter(
-        TypeScriptWriter w,
-        ConfigField configField
+            TypeScriptWriter w,
+            ConfigField configField
     ) {
         w.addDependency(TypeScriptDependency.SMITHY_CORE);
-        w.addImport("memoizeIdentityProvider", null,
-            TypeScriptDependency.SMITHY_CORE);
-        w.addImport("isIdentityExpired", null,
-            TypeScriptDependency.SMITHY_CORE);
-        w.addImport("doesIdentityRequireRefresh", null,
-            TypeScriptDependency.SMITHY_CORE);
+        w.addImport("memoizeIdentityProvider",
+                null,
+                TypeScriptDependency.SMITHY_CORE);
+        w.addImport("isIdentityExpired",
+                null,
+                TypeScriptDependency.SMITHY_CORE);
+        w.addImport("doesIdentityRequireRefresh",
+                null,
+                TypeScriptDependency.SMITHY_CORE);
         w.write("""
-            const $L = memoizeIdentityProvider(config.$L, isIdentityExpired, \
-            doesIdentityRequireRefresh);""",
-            configField.name(),
-            configField.name());
+                const $L = memoizeIdentityProvider(config.$L, isIdentityExpired, \
+                doesIdentityRequireRefresh);""",
+                configField.name(),
+                configField.name());
     }
 
     @SmithyInternalApi
     public static void defaultAuxiliaryConfigFieldWriter(
-        TypeScriptWriter w,
-        ConfigField configField
+            TypeScriptWriter w,
+            ConfigField configField
     ) {
         w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
         w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
         w.write("const $L = config.$L ? normalizeProvider(config.$L) : undefined;",
-            configField.name(),
-            configField.name(),
-            configField.name());
+                configField.name(),
+                configField.name(),
+                configField.name());
     }
 }

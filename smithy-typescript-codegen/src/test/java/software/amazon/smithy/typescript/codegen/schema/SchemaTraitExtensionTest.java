@@ -1,9 +1,13 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.schema;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.model.traits.JsonNameTrait;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SchemaTraitExtensionTest {
     private static final SchemaTraitExtension subject = SchemaTraitExtension.INSTANCE;
@@ -31,8 +35,7 @@ class SchemaTraitExtensionTest {
             throw new UnsupportedOperationException("wrong trait type");
         });
         assertEquals(
-            "test__test",
-            subject.render(trait)
-        );
+                "test__test",
+                subject.render(trait));
     }
 }

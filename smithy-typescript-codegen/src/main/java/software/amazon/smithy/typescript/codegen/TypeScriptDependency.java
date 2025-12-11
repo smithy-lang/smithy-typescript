@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.io.BufferedReader;
@@ -53,7 +42,8 @@ public enum TypeScriptDependency implements Dependency {
     UTIL_RETRY("dependencies", "@smithy/util-retry", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", false),
-    @Deprecated AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
+    @Deprecated
+    AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
     UTIL_ENDPOINTS("dependencies", "@smithy/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", true),
@@ -63,8 +53,10 @@ public enum TypeScriptDependency implements Dependency {
 
     AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", true),
 
-    @Deprecated AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", false),
-    @Deprecated AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", false),
+    @Deprecated
+    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", false),
+    @Deprecated
+    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", false),
     AWS_SDK_UTIL_BASE64("dependencies", "@smithy/util-base64", true),
 
     AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@smithy/util-body-length-browser", true),
@@ -72,15 +64,17 @@ public enum TypeScriptDependency implements Dependency {
 
     AWS_SDK_UTIL_UTF8("dependencies", "@smithy/util-utf8", true),
 
-    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter",  false),
+    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", false),
 
     AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", true),
     AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", true),
 
     NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", false),
 
-    @Deprecated UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
-    @Deprecated UUID("dependencies", "uuid", "^9.0.1", false),
+    @Deprecated
+    UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
+    @Deprecated
+    UUID("dependencies", "uuid", "^9.0.1", false),
     SMITHY_UUID("dependencies", "@smithy/uuid", false),
 
     // Conditionally added when httpChecksumRequired trait exists
@@ -96,11 +90,13 @@ public enum TypeScriptDependency implements Dependency {
 
     // Conditionally added when setting the auth middleware.
     UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", false),
-    @Deprecated AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", false),
+    @Deprecated
+    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
-    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@smithy/eventstream-serde-config-resolver",
-        false),
+    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies",
+            "@smithy/eventstream-serde-config-resolver",
+            false),
     AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", false),
     AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", false),
     AWS_SDK_EVENTSTREAM_CODEC("dependencies", "@smithy/eventstream-codec", false),
@@ -120,8 +116,10 @@ public enum TypeScriptDependency implements Dependency {
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
 
     // Conditionally added when streaming blob response payload exists.
-    @Deprecated UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", false),
-    @Deprecated UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", false),
+    @Deprecated
+    UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", false),
+    @Deprecated
+    UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", false),
     UTIL_STREAM("dependencies", "@smithy/util-stream", false),
 
     // Conditionally added when @aws.auth#sigv4 is used
@@ -129,7 +127,8 @@ public enum TypeScriptDependency implements Dependency {
 
     // This package should never have a major version, and should only use minor and patch versions in development.
     // Exports are located between @smithy/types and @smithy/core
-    @Deprecated EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
+    @Deprecated
+    EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
 
     // Conditionally added when specs have been generated.
     VITEST("devDependencies", "vitest", "^3.2.4", false),

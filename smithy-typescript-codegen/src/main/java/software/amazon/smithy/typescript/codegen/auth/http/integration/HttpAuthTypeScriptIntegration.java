@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
@@ -35,9 +34,9 @@ public interface HttpAuthTypeScriptIntegration extends TypeScriptIntegration {
      * @param settings settings
      */
     default void customizeSupportedHttpAuthSchemes(
-        SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex,
-        Model model,
-        TypeScriptSettings settings
+            SupportedHttpAuthSchemesIndex supportedHttpAuthSchemesIndex,
+            Model model,
+            TypeScriptSettings settings
     ) {
         // pass
     }

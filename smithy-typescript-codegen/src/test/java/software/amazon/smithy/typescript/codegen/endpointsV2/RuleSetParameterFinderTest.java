@@ -1,8 +1,14 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.endpointsV2;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,9 +17,6 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.language.EndpointRuleSet;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RuleSetParameterFinderTest {
@@ -113,7 +116,6 @@ class RuleSetParameterFinderTest {
             }
             """);
 
-
     @Test
     void getEffectiveParams(@Mock ServiceShape serviceShape, @Mock EndpointRuleSetTrait endpointRuleSetTrait) {
         EndpointRuleSet endpointRuleSet = EndpointRuleSet.fromNode(ruleSet);
@@ -123,7 +125,8 @@ class RuleSetParameterFinderTest {
 
         List<String> effectiveParams = subject.getEffectiveParams();
 
-        assertEquals(List.of("BasicParameter", "NestedParameter", "ShorthandParameter", "UrlOnlyParameter"), effectiveParams);
+        assertEquals(List.of("BasicParameter", "NestedParameter", "ShorthandParameter", "UrlOnlyParameter"),
+                effectiveParams);
     }
 
     @Test
@@ -132,27 +135,25 @@ class RuleSetParameterFinderTest {
         subject = new RuleSetParameterFinder(serviceShape);
 
         assertEquals(
-            """
-            Object.keys(input?.RequestItems ?? {})""",
-            subject.getJmesPathExpression("?.", "input", "keys(RequestItems)")
-        );
+                """
+                        Object.keys(input?.RequestItems ?? {})""",
+                subject.getJmesPathExpression("?.", "input", "keys(RequestItems)"));
 
         assertEquals(
-            """
-            input?.TableCreationParameters?.TableName""",
-            subject.getJmesPathExpression("?.", "input", "TableCreationParameters.TableName")
-        );
+                """
+                        input?.TableCreationParameters?.TableName""",
+                subject.getJmesPathExpression("?.", "input", "TableCreationParameters.TableName"));
 
         assertEquals(
-            """
-            input?.TransactItems?.map((obj: any) => obj?.Get?.TableName""",
-            subject.getJmesPathExpression("?.", "input", "TransactItems[*].Get.TableName")
-        );
+                """
+                        input?.TransactItems?.map((obj: any) => obj?.Get?.TableName""",
+                subject.getJmesPathExpression("?.", "input", "TransactItems[*].Get.TableName"));
 
         assertEquals(
-            """
-            input?.TransactItems?.map((obj: any) => [obj?.ConditionCheck?.TableName,obj?.Put?.TableName,obj?.Delete?.TableName,obj?.Update?.TableName].filter((i) => i)).flat()""",
-            subject.getJmesPathExpression("?.", "input", "TransactItems[*].[ConditionCheck.TableName, Put.TableName, Delete.TableName, Update.TableName][]")
-        );
+                """
+                        input?.TransactItems?.map((obj: any) => [obj?.ConditionCheck?.TableName,obj?.Put?.TableName,obj?.Delete?.TableName,obj?.Update?.TableName].filter((i) => i)).flat()""",
+                subject.getJmesPathExpression("?.",
+                        "input",
+                        "TransactItems[*].[ConditionCheck.TableName, Put.TableName, Delete.TableName, Update.TableName][]"));
     }
 }

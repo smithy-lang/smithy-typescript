@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.protocols;
 
 import java.util.Set;
@@ -19,7 +18,6 @@ import software.amazon.smithy.typescript.codegen.HttpProtocolTestGenerator;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
-
 
 /**
  * Utility methods for generating Smithy protocols.
@@ -42,9 +40,9 @@ public final class SmithyProtocolUtils {
      * @param visitor A ShapeVisitor that generates a serde function for shapes.
      */
     public static void generateDocumentBodyShapeSerde(
-        ProtocolGenerator.GenerationContext context,
-        Set<Shape> shapes,
-        ShapeVisitor<Void> visitor
+            ProtocolGenerator.GenerationContext context,
+            Set<Shape> shapes,
+            ShapeVisitor<Void> visitor
     ) {
         Walker shapeWalker = new Walker(NeighborProviderIndex.of(context.getModel()).getProvider());
         Set<Shape> shapesToGenerate = new TreeSet<>(shapes);
@@ -54,16 +52,16 @@ public final class SmithyProtocolUtils {
 
     public static void generateProtocolTests(ProtocolGenerator generator, ProtocolGenerator.GenerationContext context) {
         new HttpProtocolTestGenerator(context,
-            generator,
-            SmithyProtocolUtils::filterProtocolTests,
-            SmithyProtocolUtils::filterMalformedRequestTests).run();
+                generator,
+                SmithyProtocolUtils::filterProtocolTests,
+                SmithyProtocolUtils::filterMalformedRequestTests).run();
     }
 
     private static boolean filterProtocolTests(
-        ServiceShape service,
-        OperationShape operation,
-        HttpMessageTestCase testCase,
-        TypeScriptSettings settings
+            ServiceShape service,
+            OperationShape operation,
+            HttpMessageTestCase testCase,
+            TypeScriptSettings settings
     ) {
         if (testCase.getTags().contains("defaults")) {
             return true;
@@ -77,9 +75,9 @@ public final class SmithyProtocolUtils {
 
         // TODO(cbor): enable test when it's working with vitest 3.x
         if (settings.generateSchemas()
-            && (testCase.getId().equals("RpcV2CborInvalidGreetingError")
-                || testCase.getId().equals("RpcV2CborComplexError")
-                || testCase.getId().equals("RpcV2CborEmptyComplexError"))) {
+                && (testCase.getId().equals("RpcV2CborInvalidGreetingError")
+                        || testCase.getId().equals("RpcV2CborComplexError")
+                        || testCase.getId().equals("RpcV2CborEmptyComplexError"))) {
             return true;
         }
 
@@ -87,10 +85,10 @@ public final class SmithyProtocolUtils {
     }
 
     private static boolean filterMalformedRequestTests(
-        ServiceShape service,
-        OperationShape operation,
-        HttpMalformedRequestTestCase testCase,
-        TypeScriptSettings settings
+            ServiceShape service,
+            OperationShape operation,
+            HttpMalformedRequestTestCase testCase,
+            TypeScriptSettings settings
     ) {
         // Handling overflow/underflow of longs in JS is extraordinarily tricky.
         // Numbers are actually all 62-bit floats, and so any integral number is

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import software.amazon.smithy.model.Model;
@@ -47,11 +46,11 @@ public final class SchemaReferenceIndex implements KnowledgeIndex {
         ShapeType type = targetShape.getType();
         switch (type) {
             case STRING,
-                 BOOLEAN,
-                 BYTE, DOUBLE, FLOAT, SHORT, INTEGER, LONG,
-                 ENUM, INT_ENUM,
-                 BIG_INTEGER, BIG_DECIMAL,
-                 TIMESTAMP, BLOB, DOCUMENT -> {
+                    BOOLEAN,
+                    BYTE, DOUBLE, FLOAT, SHORT, INTEGER, LONG,
+                    ENUM, INT_ENUM,
+                    BIG_INTEGER, BIG_DECIMAL,
+                    TIMESTAMP, BLOB, DOCUMENT -> {
                 return false;
             }
             case LIST, SET, MAP -> {

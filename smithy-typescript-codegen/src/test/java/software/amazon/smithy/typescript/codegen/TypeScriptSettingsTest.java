@@ -1,4 +1,14 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,12 +29,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.protocols.ProtocolPriorityConfig;
 import software.amazon.smithy.utils.MapUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class TypeScriptSettingsTest {
     // these are mock protocol names.
@@ -36,10 +40,14 @@ public class TypeScriptSettingsTest {
     ShapeId query = ShapeId.from("namespace#query");
     ShapeId serviceQuery = ShapeId.from("namespace#serviceQuery");
     LinkedHashSet<ShapeId> protocolShapeIds = new LinkedHashSet<>(
-        List.of(
-            json1_0, json1_1, restJson1, rpcv2Cbor, restXml, query, serviceQuery
-        )
-    );
+            List.of(
+                    json1_0,
+                    json1_1,
+                    restJson1,
+                    rpcv2Cbor,
+                    restXml,
+                    query,
+                    serviceQuery));
 
     @Test
     public void resolvesDefaultService() {
@@ -47,10 +55,11 @@ public class TypeScriptSettingsTest {
                 .addImport(getClass().getResource("simple-service.smithy"))
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         assertThat(settings.getService(), equalTo(ShapeId.from("smithy.example#Example")));
     }
@@ -61,10 +70,11 @@ public class TypeScriptSettingsTest {
                 .addImport(getClass().getResource("simple-service.smithy"))
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         assertEquals(TypeScriptSettings.PackageManager.YARN, settings.getPackageManager());
     }
@@ -75,19 +85,22 @@ public class TypeScriptSettingsTest {
                 .addImport(getClass().getResource("simple-service.smithy"))
                 .assemble()
                 .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .withMember("packageManager", Node.from("npm"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("packageManager", Node.from("npm"))
+                        .build());
 
         assertEquals(TypeScriptSettings.PackageManager.NPM, settings.getPackageManager());
     }
 
-
     @ParameterizedTest
     @MethodSource("providePackageDescriptionTestCases")
-    void expectPackageDescriptionUpdatedByArtifactType(TypeScriptSettings.ArtifactType artifactType, String expectedDescription) {
+    void expectPackageDescriptionUpdatedByArtifactType(
+            TypeScriptSettings.ArtifactType artifactType,
+            String expectedDescription
+    ) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource("simple-service.smithy"))
                 .assemble()
@@ -107,14 +120,15 @@ public class TypeScriptSettingsTest {
     private static Stream<Arguments> providePackageDescriptionTestCases() {
         return Stream.of(
                 Arguments.of(TypeScriptSettings.ArtifactType.SSDK, "example server"),
-                Arguments.of(TypeScriptSettings.ArtifactType.CLIENT, "example client")
-        );
+                Arguments.of(TypeScriptSettings.ArtifactType.CLIENT, "example client"));
     }
 
     @Test
-    public void resolveServiceProtocolSelectJson(@Mock Model model,
-                                                 @Mock ServiceShape service,
-                                                 @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectJson(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -122,18 +136,21 @@ public class TypeScriptSettingsTest {
 
         // spec case 1.
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            rpcv2Cbor, null,
-            json1_0, null
-        ));
+                rpcv2Cbor,
+                null,
+                json1_0,
+                null));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         // JS customization has JSON at higher default priority than CBOR.
         assertEquals(json1_0, protocol);
     }
 
     @Test
-    public void resolveServiceProtocolSelectOnlyOption(@Mock Model model,
-                                                       @Mock ServiceShape service,
-                                                       @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectOnlyOption(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -141,16 +158,18 @@ public class TypeScriptSettingsTest {
 
         // spec case 2.
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            rpcv2Cbor, null
-        ));
+                rpcv2Cbor,
+                null));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         assertEquals(rpcv2Cbor, protocol);
     }
 
     @Test
-    public void resolveServiceProtocolSelectJsonOverQueryAndCbor(@Mock Model model,
-                                                                 @Mock ServiceShape service,
-                                                                 @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectJsonOverQueryAndCbor(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -158,19 +177,23 @@ public class TypeScriptSettingsTest {
 
         // spec case 3.
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            rpcv2Cbor, null,
-            json1_0, null,
-            query, null
-        ));
+                rpcv2Cbor,
+                null,
+                json1_0,
+                null,
+                query,
+                null));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         // JS customization has JSON at higher default priority than CBOR.
         assertEquals(json1_0, protocol);
     }
 
     @Test
-    public void resolveServiceProtocolSelectJsonOverQuery(@Mock Model model,
-                                                          @Mock ServiceShape service,
-                                                          @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectJsonOverQuery(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -178,17 +201,20 @@ public class TypeScriptSettingsTest {
 
         // spec case 4.
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            json1_0, null,
-            query, null
-        ));
+                json1_0,
+                null,
+                query,
+                null));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         assertEquals(json1_0, protocol);
     }
 
     @Test
-    public void resolveServiceProtocolSelectQueryWhenSingularOption(@Mock Model model,
-                                                                    @Mock ServiceShape service,
-                                                                    @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectQueryWhenSingularOption(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -196,16 +222,18 @@ public class TypeScriptSettingsTest {
 
         // spec case 5.
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            query, null
-        ));
+                query,
+                null));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         assertEquals(query, protocol);
     }
 
     @Test
-    public void resolveServiceProtocolSelectServiceCustomPriority(@Mock Model model,
-                                                                  @Mock ServiceShape service,
-                                                                  @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectServiceCustomPriority(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -213,31 +241,41 @@ public class TypeScriptSettingsTest {
 
         // service override, non-spec
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            json1_0, null,
-            json1_1, null,
-            restJson1, null,
-            rpcv2Cbor, null,
-            restXml, null,
-            query, null,
-            serviceQuery, null
-        ));
+                json1_0,
+                null,
+                json1_1,
+                null,
+                restJson1,
+                null,
+                rpcv2Cbor,
+                null,
+                restXml,
+                null,
+                query,
+                null,
+                serviceQuery,
+                null));
         subject.setProtocolPriority(new ProtocolPriorityConfig(
-            MapUtils.of(
-                serviceShapeId,
-                List.of(
-                    serviceQuery, rpcv2Cbor, json1_1, restJson1, restXml, query
-                )
-            ),
-            null
-        ));
+                MapUtils.of(
+                        serviceShapeId,
+                        List.of(
+                                serviceQuery,
+                                rpcv2Cbor,
+                                json1_1,
+                                restJson1,
+                                restXml,
+                                query)),
+                null));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         assertEquals(serviceQuery, protocol);
     }
 
     @Test
-    public void resolveServiceProtocolSelectDefaultCustomPriority(@Mock Model model,
-                                                                  @Mock ServiceShape service,
-                                                                  @Mock ServiceIndex serviceIndex) {
+    public void resolveServiceProtocolSelectDefaultCustomPriority(
+            @Mock Model model,
+            @Mock ServiceShape service,
+            @Mock ServiceIndex serviceIndex
+    ) {
         TypeScriptSettings subject = new TypeScriptSettings();
         when(model.getKnowledge(any(), any())).thenReturn(serviceIndex);
         ShapeId serviceShapeId = ShapeId.from("namespace#Service");
@@ -245,20 +283,28 @@ public class TypeScriptSettingsTest {
 
         // global default override
         when(serviceIndex.getProtocols(service)).thenReturn(MapUtils.of(
-            json1_0, null,
-            json1_1, null,
-            restJson1, null,
-            rpcv2Cbor, null,
-            restXml, null,
-            query, null,
-            serviceQuery, null
-        ));
+                json1_0,
+                null,
+                json1_1,
+                null,
+                restJson1,
+                null,
+                rpcv2Cbor,
+                null,
+                restXml,
+                null,
+                query,
+                null,
+                serviceQuery,
+                null));
         subject.setProtocolPriority(new ProtocolPriorityConfig(
-            null,
-            List.of(
-                rpcv2Cbor, json1_1, restJson1, restXml, query
-            )
-        ));
+                null,
+                List.of(
+                        rpcv2Cbor,
+                        json1_1,
+                        restJson1,
+                        restXml,
+                        query)));
         ShapeId protocol = subject.resolveServiceProtocol(model, service, protocolShapeIds);
         assertEquals(rpcv2Cbor, protocol);
     }
@@ -266,42 +312,40 @@ public class TypeScriptSettingsTest {
     @Test
     public void parseProtocolPriorityJson() {
         Model model = Model.assembler()
-            .addImport(getClass().getResource("simple-service.smithy"))
-            .assemble()
-            .unwrap();
+                .addImport(getClass().getResource("simple-service.smithy"))
+                .assemble()
+                .unwrap();
 
         ObjectNode settings = Node.objectNodeBuilder()
-            .withMember("service", Node.from("smithy.example#Example"))
-            .withMember("package", Node.from("example"))
-            .withMember("packageVersion", Node.from("1.0.0"))
-            .withMember("serviceProtocolPriority", Node.parse(
-                """
-                {
-                  "namespace#Service1": ["namespace#Protocol1", "namespace#Protocol2"],
-                  "namespace#Service2": ["namespace#Protocol2", "namespace#Protocol1"]
-                }
-                """))
-            .withMember("defaultProtocolPriority", Node.parse(
-                """
-                ["namespace#Protocol3", "namespace#Protocol4"]
-                """
-            ))
-            .build();
+                .withMember("service", Node.from("smithy.example#Example"))
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("serviceProtocolPriority",
+                        Node.parse(
+                                """
+                                        {
+                                          "namespace#Service1": ["namespace#Protocol1", "namespace#Protocol2"],
+                                          "namespace#Service2": ["namespace#Protocol2", "namespace#Protocol1"]
+                                        }
+                                        """))
+                .withMember("defaultProtocolPriority",
+                        Node.parse(
+                                """
+                                        ["namespace#Protocol3", "namespace#Protocol4"]
+                                        """))
+                .build();
 
         final TypeScriptSettings subject = TypeScriptSettings.from(model, settings);
 
         assertEquals(
-            ShapeId.from("namespace#Protocol2"),
-            subject.getProtocolPriority().getProtocolPriority(ShapeId.from("namespace#Service1")).get(1)
-        );
+                ShapeId.from("namespace#Protocol2"),
+                subject.getProtocolPriority().getProtocolPriority(ShapeId.from("namespace#Service1")).get(1));
         assertEquals(
-            ShapeId.from("namespace#Protocol2"),
-            subject.getProtocolPriority().getProtocolPriority(ShapeId.from("namespace#Service2")).get(0)
-        );
+                ShapeId.from("namespace#Protocol2"),
+                subject.getProtocolPriority().getProtocolPriority(ShapeId.from("namespace#Service2")).get(0));
         assertEquals(
-            ShapeId.from("namespace#Protocol4"),
-            subject.getProtocolPriority().getProtocolPriority(ShapeId.from("namespace#Service5")).get(1)
-        );
+                ShapeId.from("namespace#Protocol4"),
+                subject.getProtocolPriority().getProtocolPriority(ShapeId.from("namespace#Service5")).get(1));
     }
 
     @Test

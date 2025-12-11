@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import software.amazon.smithy.model.knowledge.HttpBinding;
@@ -27,8 +26,10 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
      * @param dataSource             The in-code location of the data to provide an output of
      *                               ({@code output.foo}, {@code entry}, etc.)
      */
-    public CborMemberDeserVisitor(ProtocolGenerator.GenerationContext context,
-                                  String dataSource) {
+    public CborMemberDeserVisitor(
+            ProtocolGenerator.GenerationContext context,
+            String dataSource
+    ) {
         super(context, dataSource, TimestampFormatTrait.Format.EPOCH_SECONDS);
         this.context = context;
         context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
@@ -77,13 +78,12 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
     @Override
     public String timestampShape(TimestampShape shape) {
         return HttpProtocolGeneratorUtils.getTimestampOutputParam(
-            context.getWriter(),
-            dataSource,
-            HttpBinding.Location.DOCUMENT,
-            shape,
-            TimestampFormatTrait.Format.EPOCH_SECONDS,
-            requiresNumericEpochSecondsInPayload(),
-            context.getSettings().generateClient()
-        );
+                context.getWriter(),
+                dataSource,
+                HttpBinding.Location.DOCUMENT,
+                shape,
+                TimestampFormatTrait.Format.EPOCH_SECONDS,
+                requiresNumericEpochSecondsInPayload(),
+                context.getSettings().generateClient());
     }
 }

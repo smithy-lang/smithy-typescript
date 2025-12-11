@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Set;
@@ -48,12 +37,12 @@ final class ServiceAggregatedClientGenerator implements Runnable {
     private final ApplicationProtocol applicationProtocol;
 
     ServiceAggregatedClientGenerator(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        String aggregateClientName,
-        TypeScriptWriter writer,
-        ApplicationProtocol applicationProtocol
+            TypeScriptSettings settings,
+            Model model,
+            SymbolProvider symbolProvider,
+            String aggregateClientName,
+            TypeScriptWriter writer,
+            ApplicationProtocol applicationProtocol
     ) {
         this.settings = settings;
         this.model = model;
@@ -63,9 +52,9 @@ final class ServiceAggregatedClientGenerator implements Runnable {
         this.aggregateClientName = aggregateClientName;
         this.applicationProtocol = applicationProtocol;
         serviceSymbol = symbolProvider.toSymbol(service)
-            .toBuilder()
-            .putProperty("typeOnly", false)
-            .build();
+                .toBuilder()
+                .putProperty("typeOnly", false)
+                .build();
     }
 
     @Override
@@ -75,9 +64,9 @@ final class ServiceAggregatedClientGenerator implements Runnable {
         writer.openBlock("const commands = {", "};", () -> {
             for (OperationShape operation : containedOperations) {
                 Symbol operationSymbol = symbolProvider.toSymbol(operation)
-                    .toBuilder()
-                    .putProperty("typeOnly", false)
-                    .build();
+                        .toBuilder()
+                        .putProperty("typeOnly", false)
+                        .build();
                 writer.write("$T,", operationSymbol);
             }
         });
@@ -92,35 +81,36 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);
                 writer.addUseImports(operationSymbol);
                 String methodName = StringUtils.uncapitalize(
-                    operationSymbol.getName().replaceAll("Command$", "")
-                );
+                        operationSymbol.getName().replaceAll("Command$", ""));
 
                 // Generate a multiple overloaded methods for each command.
                 writer.writeDocs(
-                    "@see {@link " + operationSymbol.getName() + "}"
-                );
-                boolean inputOptional = model.getShape(operation.getInputShape()).map(
-                    shape -> shape.getAllMembers().values().stream().noneMatch(MemberShape::isRequired)
-                ).orElse(true);
+                        "@see {@link " + operationSymbol.getName() + "}");
+                boolean inputOptional = model.getShape(operation.getInputShape())
+                        .map(
+                                shape -> shape.getAllMembers().values().stream().noneMatch(MemberShape::isRequired))
+                        .orElse(true);
                 if (inputOptional) {
                     writer.write("$L(): Promise<$T>;", methodName, output);
                 }
                 writer.write("""
-                    $1L(
-                      args: $2T,
-                      options?: $3T
-                    ): Promise<$4T>;
-                    $1L(
-                      args: $2T,
-                      cb: (err: any, data?: $4T) => void
-                    ): void;
-                    $1L(
-                      args: $2T,
-                      options: $3T,
-                      cb: (err: any, data?: $4T) => void
-                    ): void;""",
-                    methodName, input, applicationProtocol.getOptionsType(), output
-                );
+                        $1L(
+                          args: $2T,
+                          options?: $3T
+                        ): Promise<$4T>;
+                        $1L(
+                          args: $2T,
+                          cb: (err: any, data?: $4T) => void
+                        ): void;
+                        $1L(
+                          args: $2T,
+                          options: $3T,
+                          cb: (err: any, data?: $4T) => void
+                        ): void;""",
+                        methodName,
+                        input,
+                        applicationProtocol.getOptionsType(),
+                        output);
                 writer.write("");
             }
             writer.unwrite("\n");
@@ -131,8 +121,9 @@ final class ServiceAggregatedClientGenerator implements Runnable {
         // Generate the client and extend from the bare-bones client.
         writer.writeShapeDocs(service);
         writer.write("export class $L extends $T implements $L {}",
-            aggregateClientName, serviceSymbol, aggregateClientName
-        );
+                aggregateClientName,
+                serviceSymbol,
+                aggregateClientName);
 
         writer.addImport("createAggregatedClient", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.write("createAggregatedClient(commands, $L);", aggregateClientName);

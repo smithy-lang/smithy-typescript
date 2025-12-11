@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Objects;
@@ -41,10 +30,10 @@ public final class ApplicationProtocol {
      * @param responseType The type used to represent response messages for the protocol.
      */
     public ApplicationProtocol(
-        String name,
-        SymbolReference optionsType,
-        SymbolReference requestType,
-        SymbolReference responseType
+            String name,
+            SymbolReference optionsType,
+            SymbolReference requestType,
+            SymbolReference responseType
     ) {
         this.name = name;
         this.optionsType = optionsType;
@@ -59,34 +48,33 @@ public final class ApplicationProtocol {
      */
     public static ApplicationProtocol createDefaultHttpApplicationProtocol() {
         return new ApplicationProtocol(
-            "http",
-            SymbolReference.builder()
-                .symbol(createHttpSymbol(TypeScriptDependency.SMITHY_TYPES, "HttpHandlerOptions", true))
-                .alias("__HttpHandlerOptions")
-                .build(),
-            SymbolReference.builder()
-                .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpRequest", true))
-                .alias("__HttpRequest")
-                .build(),
-            SymbolReference.builder()
-                .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpResponse", true))
-                .alias("__HttpResponse")
-                .build()
-        );
+                "http",
+                SymbolReference.builder()
+                        .symbol(createHttpSymbol(TypeScriptDependency.SMITHY_TYPES, "HttpHandlerOptions", true))
+                        .alias("__HttpHandlerOptions")
+                        .build(),
+                SymbolReference.builder()
+                        .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpRequest", true))
+                        .alias("__HttpRequest")
+                        .build(),
+                SymbolReference.builder()
+                        .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpResponse", true))
+                        .alias("__HttpResponse")
+                        .build());
     }
 
     private static Symbol createHttpSymbol(TypeScriptDependency dependency, String symbolName, boolean typeOnly) {
         Symbol.Builder builder = Symbol.builder()
-            .namespace(dependency.packageName, "/")
-            .name(symbolName)
-            .addDependency(dependency)
-            .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)
-            .addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
+                .namespace(dependency.packageName, "/")
+                .name(symbolName)
+                .addDependency(dependency)
+                .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)
+                .addDependency(TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
         if (typeOnly) {
             builder.putProperty("typeOnly", true);
         }
         return builder
-            .build();
+                .build();
     }
 
     /**
@@ -156,8 +144,8 @@ public final class ApplicationProtocol {
 
         ApplicationProtocol that = (ApplicationProtocol) o;
         return optionsType.equals(that.optionsType)
-               && requestType.equals(that.requestType)
-               && responseType.equals(that.responseType);
+                && requestType.equals(that.requestType)
+                && responseType.equals(that.responseType);
     }
 
     @Override

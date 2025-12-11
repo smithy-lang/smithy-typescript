@@ -1,18 +1,7 @@
 /*
- * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
@@ -44,8 +33,10 @@ public final class EndpointsV2Generator implements Runnable {
     public static final String ENDPOINT_PARAMETERS_MODULE_NAME = "EndpointParameters";
     public static final String ENDPOINT_RESOLVER_MODULE_NAME = "endpointResolver";
     public static final String ENDPOINT_PARAMETERS_MODULE =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, EndpointsV2Generator.ENDPOINT_FOLDER,
-            EndpointsV2Generator.ENDPOINT_PARAMETERS_MODULE_NAME).toString();
+            Paths.get(".",
+                    CodegenUtils.SOURCE_FOLDER,
+                    EndpointsV2Generator.ENDPOINT_FOLDER,
+                    EndpointsV2Generator.ENDPOINT_PARAMETERS_MODULE_NAME).toString();
     public static final Dependency ENDPOINT_PARAMETERS_DEPENDENCY = new Dependency() {
         @Override
         public String getPackageName() {
@@ -58,8 +49,10 @@ public final class EndpointsV2Generator implements Runnable {
         }
     };
     public static final String ENDPOINT_RESOLVER_MODULE =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, EndpointsV2Generator.ENDPOINT_FOLDER,
-            EndpointsV2Generator.ENDPOINT_RESOLVER_MODULE_NAME).toString();
+            Paths.get(".",
+                    CodegenUtils.SOURCE_FOLDER,
+                    EndpointsV2Generator.ENDPOINT_FOLDER,
+                    EndpointsV2Generator.ENDPOINT_RESOLVER_MODULE_NAME).toString();
     public static final Dependency ENDPOINT_RESOLVER_DEPENDENCY = new Dependency() {
         @Override
         public String getPackageName() {
@@ -91,7 +84,7 @@ public final class EndpointsV2Generator implements Runnable {
         service = settings.getService(model);
         this.settings = settings;
         endpointRuleSetTrait = service.getTrait(EndpointRuleSetTrait.class)
-            .orElseThrow(() -> new RuntimeException("service or model preprocessor missing EndpointRuleSetTrait"));
+                .orElseThrow(() -> new RuntimeException("service or model preprocessor missing EndpointRuleSetTrait"));
         ruleSetParameterFinder = new RuleSetParameterFinder(service);
     }
 
@@ -107,102 +100,100 @@ public final class EndpointsV2Generator implements Runnable {
      */
     private void generateEndpointParameters() {
         this.delegator.useFileWriter(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
-            writer -> {
-                writer.addTypeImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
-                writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
+                writer -> {
+                    writer.addTypeImport("EndpointParameters",
+                            "__EndpointParameters",
+                            TypeScriptDependency.SMITHY_TYPES);
+                    writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
 
-                writer.writeDocs("@public");
-                writer.openBlock(
-                    "export interface ClientInputEndpointParameters {",
-                    "}",
-                    () -> {
-                        Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
-                        //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
-                        Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                        builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                        clientInputParams.putAll(builtInParams);
+                    writer.writeDocs("@public");
+                    writer.openBlock(
+                            "export interface ClientInputEndpointParameters {",
+                            "}",
+                            () -> {
+                                Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
+                                //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
+                                Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
+                                builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+                                clientInputParams.putAll(builtInParams);
 
-                        ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                        ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                            parameters.accept(new RuleSetParametersVisitor(writer, clientInputParams, true));
-                        });
-                    }
-                );
-
-                writer.write("");
-                writer.writeDocs("@public");
-                writer.write(
-                    """
-                    export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
-                      defaultSigningName: string;
-                    };"""
-                );
-                writer.write("");
-
-                writer.writeDocs("@internal");
-                writer.openBlock(
-                    """
-                        export const resolveClientEndpointParameters = <T>(
-                          options: T & ClientInputEndpointParameters
-                        ): T & ClientResolvedEndpointParameters => {""",
-                    "};",
-                    () -> {
-                        writer.openBlock("return Object.assign(options, {", "});", () -> {
-                            ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                                parameters.accept(new RuleSetParametersVisitor(writer, true));
+                                ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                                ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                    parameters.accept(new RuleSetParametersVisitor(writer, clientInputParams, true));
+                                });
                             });
-                            writer.write(
-                                "defaultSigningName: \"$L\",",
-                                settings.getDefaultSigningName()
-                            );
-                        });
-                    }
-                );
 
-                writer.write("");
+                    writer.write("");
+                    writer.writeDocs("@public");
+                    writer.write(
+                            """
+                                    export type ClientResolvedEndpointParameters = Omit<ClientInputEndpointParameters, "endpoint"> & {
+                                      defaultSigningName: string;
+                                    };""");
+                    writer.write("");
 
-                writer.writeDocs("@internal");
-                writer.openBlock(
-                    "export const commonParams = {", "} as const;",
-                    () -> {
-                        Set<String> paramNames = new HashSet<>();
+                    writer.writeDocs("@internal");
+                    writer.openBlock(
+                            """
+                                    export const resolveClientEndpointParameters = <T>(
+                                      options: T & ClientInputEndpointParameters
+                                    ): T & ClientResolvedEndpointParameters => {""",
+                            "};",
+                            () -> {
+                                writer.openBlock("return Object.assign(options, {", "});", () -> {
+                                    ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                                    ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                        parameters.accept(new RuleSetParametersVisitor(writer, true));
+                                    });
+                                    writer.write(
+                                            "defaultSigningName: \"$L\",",
+                                            settings.getDefaultSigningName());
+                                });
+                            });
 
-                        ruleSetParameterFinder.getClientContextParams().forEach((name, type) -> {
-                            if (!paramNames.contains(name)) {
-                                writer.write(
-                                    "$L: { type: \"clientContextParams\", name: \"$L\" },",
-                                    name, EndpointsParamNameMap.getLocalName(name));
-                            }
-                            paramNames.add(name);
-                        });
+                    writer.write("");
 
-                        ruleSetParameterFinder.getBuiltInParams().forEach((name, type) -> {
-                            if (!paramNames.contains(name)) {
-                                writer.write(
-                                    "$L: { type: \"builtInParams\", name: \"$L\" },",
-                                    name, EndpointsParamNameMap.getLocalName(name));
-                            }
-                            paramNames.add(name);
-                        });
-                    }
-                );
+                    writer.writeDocs("@internal");
+                    writer.openBlock(
+                            "export const commonParams = {",
+                            "} as const;",
+                            () -> {
+                                Set<String> paramNames = new HashSet<>();
 
-                writer.write("");
-                writer.writeDocs("@internal");
-                writer.openBlock(
-                    "export interface EndpointParameters extends __EndpointParameters {",
-                    "}",
-                    () -> {
-                        ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                        ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                            parameters.accept(new RuleSetParametersVisitor(writer));
-                        });
-                    }
-                );
-            }
-        );
+                                ruleSetParameterFinder.getClientContextParams().forEach((name, type) -> {
+                                    if (!paramNames.contains(name)) {
+                                        writer.write(
+                                                "$L: { type: \"clientContextParams\", name: \"$L\" },",
+                                                name,
+                                                EndpointsParamNameMap.getLocalName(name));
+                                    }
+                                    paramNames.add(name);
+                                });
+
+                                ruleSetParameterFinder.getBuiltInParams().forEach((name, type) -> {
+                                    if (!paramNames.contains(name)) {
+                                        writer.write(
+                                                "$L: { type: \"builtInParams\", name: \"$L\" },",
+                                                name,
+                                                EndpointsParamNameMap.getLocalName(name));
+                                    }
+                                    paramNames.add(name);
+                                });
+                            });
+
+                    writer.write("");
+                    writer.writeDocs("@internal");
+                    writer.openBlock(
+                            "export interface EndpointParameters extends __EndpointParameters {",
+                            "}",
+                            () -> {
+                                ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                                ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                    parameters.accept(new RuleSetParametersVisitor(writer));
+                                });
+                            });
+                });
     }
 
     /**
@@ -210,50 +201,54 @@ public final class EndpointsV2Generator implements Runnable {
      */
     private void generateEndpointResolver() {
         this.delegator.useFileWriter(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RESOLVER_FILE).toString(),
-            writer -> {
-                writer.addTypeImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.addTypeImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
+                Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RESOLVER_FILE).toString(),
+                writer -> {
+                    writer.addTypeImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
+                    writer.addTypeImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
 
-                writer.addDependency(TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.addTypeImport("EndpointParams", null, TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.addImport("resolveEndpoint", null, TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.addRelativeTypeImport("EndpointParameters", null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
-                        ENDPOINT_PARAMETERS_FILE.replace(".ts", "")));
-                writer.addRelativeImport("ruleSet", null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER,
-                        ENDPOINT_RULESET_FILE.replace(".ts", "")));
+                    writer.addDependency(TypeScriptDependency.UTIL_ENDPOINTS);
+                    writer.addTypeImport("EndpointParams", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                    writer.addImport("resolveEndpoint", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                    writer.addRelativeTypeImport("EndpointParameters",
+                            null,
+                            Paths.get(".",
+                                    CodegenUtils.SOURCE_FOLDER,
+                                    ENDPOINT_FOLDER,
+                                    ENDPOINT_PARAMETERS_FILE.replace(".ts", "")));
+                    writer.addRelativeImport("ruleSet",
+                            null,
+                            Paths.get(".",
+                                    CodegenUtils.SOURCE_FOLDER,
+                                    ENDPOINT_FOLDER,
+                                    ENDPOINT_RULESET_FILE.replace(".ts", "")));
 
-                writer.addImport("EndpointCache", null, TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.write("""
-                    const cache = new EndpointCache({
-                      size: 50,
-                      params: [$L],
-                    });
-                    """,
-                    ruleSetParameterFinder.getEffectiveParams()
-                        .stream().collect(Collectors.joining("\",\n \"", "\"", "\""))
-                );
+                    writer.addImport("EndpointCache", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                    writer.write("""
+                            const cache = new EndpointCache({
+                              size: 50,
+                              params: [$L],
+                            });
+                            """,
+                            ruleSetParameterFinder.getEffectiveParams()
+                                    .stream()
+                                    .collect(Collectors.joining("\",\n \"", "\"", "\"")));
 
-                writer.writeDocs("@internal");
-                writer.write(
-                """
-                    export const defaultEndpointResolver = (
-                      endpointParams: EndpointParameters,
-                      context: { logger?: Logger } = {}
-                    ): EndpointV2 => {
-                      return cache.get(endpointParams as EndpointParams, () =>
-                        resolveEndpoint(ruleSet, {
-                          endpointParams: endpointParams as EndpointParams,
-                          logger: context.logger,
-                        })
-                      );
-                    };
-                    """
-                );
-            }
-        );
+                    writer.writeDocs("@internal");
+                    writer.write(
+                            """
+                                    export const defaultEndpointResolver = (
+                                      endpointParams: EndpointParameters,
+                                      context: { logger?: Logger } = {}
+                                    ): EndpointV2 => {
+                                      return cache.get(endpointParams as EndpointParams, () =>
+                                        resolveEndpoint(ruleSet, {
+                                          endpointParams: endpointParams as EndpointParams,
+                                          logger: context.logger,
+                                        })
+                                      );
+                                    };
+                                    """);
+                });
     }
 
     /**
@@ -261,16 +256,14 @@ public final class EndpointsV2Generator implements Runnable {
      */
     private void generateEndpointRuleset() {
         this.delegator.useFileWriter(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RULESET_FILE).toString(),
-            writer -> {
-                writer.addTypeImport("RuleSetObject", null, TypeScriptDependency.SMITHY_TYPES);
+                Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_RULESET_FILE).toString(),
+                writer -> {
+                    writer.addTypeImport("RuleSetObject", null, TypeScriptDependency.SMITHY_TYPES);
 
-                writer.writeInline("export const ruleSet: RuleSetObject = ");
-                new RuleSetSerializer(
-                    endpointRuleSetTrait.getRuleSet(),
-                    writer
-                ).generate();
-            }
-        );
+                    writer.writeInline("export const ruleSet: RuleSetObject = ");
+                    new RuleSetSerializer(
+                            endpointRuleSetTrait.getRuleSet(),
+                            writer).generate();
+                });
     }
 }

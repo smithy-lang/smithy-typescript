@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -5,7 +9,6 @@ import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -81,20 +84,26 @@ public class RuntimeClientPluginTest {
 
         TypeScriptSettings createDefaultReadmeTrueSettings = new TypeScriptSettings();
         createDefaultReadmeTrueSettings.setCreateDefaultReadme(true);
-        assertThat(createDefaultReadmeFlagPlugin.matchesSettings(model, service, createDefaultReadmeTrueSettings), equalTo(true));
+        assertThat(createDefaultReadmeFlagPlugin.matchesSettings(model, service, createDefaultReadmeTrueSettings),
+                equalTo(true));
 
         TypeScriptSettings createDefaultReadmeFalseSettings = new TypeScriptSettings();
-        assertThat(createDefaultReadmeFlagPlugin.matchesSettings(model, service, createDefaultReadmeFalseSettings), equalTo(false));
+        assertThat(createDefaultReadmeFlagPlugin.matchesSettings(model, service, createDefaultReadmeFalseSettings),
+                equalTo(false));
     }
 
     @Test
     public void configuresWithDefaultConventions() {
-        Map<String, Object> resolveFunctionParams = new HashMap<String, Object>() {{
+        Map<String, Object> resolveFunctionParams = new HashMap<String, Object>() {
+            {
                 put("resolveFunctionParam", "resolveFunctionParam");
-        }};
-        Map<String, Object> pluginFunctionParams = new HashMap<String, Object>() {{
+            }
+        };
+        Map<String, Object> pluginFunctionParams = new HashMap<String, Object>() {
+            {
                 put("pluginFunctionParam", "pluginFunctionParam");
-        }};
+            }
+        };
 
         RuntimeClientPlugin plugin = RuntimeClientPlugin.builder()
                 .withConventions("foo/baz", "1.0.0", "Foo")
@@ -121,35 +130,38 @@ public class RuntimeClientPluginTest {
                 equalTo(pluginFunctionParams));
 
         assertThat(plugin.getInputConfig().get().getSymbol().getDependencies().get(0).getPackageName(),
-                   equalTo("foo/baz"));
+                equalTo("foo/baz"));
         assertThat(plugin.getResolvedConfig().get().getSymbol().getDependencies().get(0).getPackageName(),
-                   equalTo("foo/baz"));
+                equalTo("foo/baz"));
         assertThat(plugin.getResolveFunction().get().getSymbol().getDependencies().get(0).getPackageName(),
-                   equalTo("foo/baz"));
+                equalTo("foo/baz"));
         assertThat(plugin.getPluginFunction().get().getSymbol().getDependencies().get(0).getPackageName(),
-                   equalTo("foo/baz"));
+                equalTo("foo/baz"));
 
         assertThat(plugin.getInputConfig().get().getSymbol().getDependencies().get(0).getVersion(),
-                   equalTo("1.0.0"));
+                equalTo("1.0.0"));
         assertThat(plugin.getResolvedConfig().get().getSymbol().getDependencies().get(0).getVersion(),
-                   equalTo("1.0.0"));
+                equalTo("1.0.0"));
         assertThat(plugin.getResolveFunction().get().getSymbol().getDependencies().get(0).getVersion(),
-                   equalTo("1.0.0"));
+                equalTo("1.0.0"));
         assertThat(plugin.getPluginFunction().get().getSymbol().getDependencies().get(0).getVersion(),
-                   equalTo("1.0.0"));
+                equalTo("1.0.0"));
     }
 
     @Test
     public void allConfigSymbolsMustBeSetIfAnyAreSet() {
-        Assertions.assertThrows(IllegalStateException.class, () -> RuntimeClientPlugin.builder()
-                .inputConfig(Symbol.builder().namespace("foo", "/").name("abc").build()).build());
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> RuntimeClientPlugin.builder()
+                        .inputConfig(Symbol.builder().namespace("foo", "/").name("abc").build())
+                        .build());
     }
 
     @Test
     public void destroyFunctionRequiresResolvedConfig() {
-        Assertions.assertThrows(IllegalStateException.class, () -> RuntimeClientPlugin.builder()
-                .withConventions("foo/baz", "1.0.0", "Foo", RuntimeClientPlugin.Convention.HAS_DESTROY)
-                .build());
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> RuntimeClientPlugin.builder()
+                        .withConventions("foo/baz", "1.0.0", "Foo", RuntimeClientPlugin.Convention.HAS_DESTROY)
+                        .build());
     }
 
     @Test

@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Arrays;
@@ -51,7 +40,7 @@ public final class DefaultReadmeGenerator implements TypeScriptIntegration {
 
         codegenContext.writerDelegator().useFileWriter(README_FILENAME, "", writer -> {
             ServiceShape service = settings.getService(model);
-            String resource =  IoUtils.readUtf8Resource(getClass(), file);
+            String resource = IoUtils.readUtf8Resource(getClass(), file);
             resource = resource.replaceAll(Pattern.quote("${packageName}"), settings.getPackageName());
 
             String clientName = StringUtils.capitalize(service.getId().getName(service));
@@ -61,7 +50,8 @@ public final class DefaultReadmeGenerator implements TypeScriptIntegration {
             String rawDocumentation = service.getTrait(DocumentationTrait.class)
                     .map(DocumentationTrait::getValue)
                     .orElse("");
-            String documentation = Arrays.asList(rawDocumentation.split("\n")).stream()
+            String documentation = Arrays.asList(rawDocumentation.split("\n"))
+                    .stream()
                     .map(StringUtils::trim)
                     .collect(Collectors.joining("\n"));
             resource = resource.replaceAll(Pattern.quote("${documentation}"), Matcher.quoteReplacement(documentation));

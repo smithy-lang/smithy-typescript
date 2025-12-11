@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.util;
 
 import java.nio.file.Path;
@@ -120,8 +119,8 @@ public class StringStore {
      */
     private String allocateVariable(String literal) {
         String[] sections = Arrays.stream(literal.split("[-_\\s]"))
-            .filter(s -> !s.isEmpty())
-            .toArray(String[]::new);
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
         StringBuilder v = new StringBuilder("_");
         Queue<Character> deconfliction = new LinkedList<>();
         if (sections.length > 1) {
@@ -183,8 +182,8 @@ public class StringStore {
         private final StringStore store;
 
         private WithSchemaWriter(
-            TypeScriptWriter writer,
-            StringStore store
+                TypeScriptWriter writer,
+                StringStore store
         ) {
             this.writer = writer;
             this.store = store;
@@ -194,8 +193,9 @@ public class StringStore {
         public String var(String literal) {
             String var = store.var(literal);
             writer.addRelativeImport(
-                var, null, Path.of("./schemas_0")
-            );
+                    var,
+                    null,
+                    Path.of("./schemas_0"));
             return var;
         }
 
@@ -203,8 +203,9 @@ public class StringStore {
         public String var(String literal, String preferredPrefix) {
             String var = store.var(literal, preferredPrefix);
             writer.addRelativeImport(
-                var, null, Path.of("./schemas_0")
-            );
+                    var,
+                    null,
+                    Path.of("./schemas_0"));
             return var;
         }
     }

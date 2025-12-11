@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
@@ -60,40 +59,42 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
-            // Add the config if the service uses HTTP API key authorization.
-            RuntimeClientPlugin.builder()
-                    .inputConfig(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
-                            .name("HttpApiKeyAuthInputConfig")
-                            .build())
-                    .resolvedConfig(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
-                            .name("HttpApiKeyAuthResolvedConfig")
-                            .build())
-                    .resolveFunction(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
-                            .name("resolveHttpApiKeyAuthConfig")
-                            .build())
-                    .servicePredicate((m, s) -> hasEffectiveHttpApiKeyAuthTrait(m, s))
-                    .build(),
+                // Add the config if the service uses HTTP API key authorization.
+                RuntimeClientPlugin.builder()
+                        .inputConfig(Symbol.builder()
+                                .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                                .name("HttpApiKeyAuthInputConfig")
+                                .build())
+                        .resolvedConfig(Symbol.builder()
+                                .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                                .name("HttpApiKeyAuthResolvedConfig")
+                                .build())
+                        .resolveFunction(Symbol.builder()
+                                .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                                .name("resolveHttpApiKeyAuthConfig")
+                                .build())
+                        .servicePredicate((m, s) -> hasEffectiveHttpApiKeyAuthTrait(m, s))
+                        .build(),
 
-            // Add the middleware to operations that use HTTP API key authorization.
-            RuntimeClientPlugin.builder()
-                    .pluginFunction(Symbol.builder()
-                            .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
-                            .name("getHttpApiKeyAuthPlugin")
-                            .build())
-                    .additionalPluginFunctionParamsSupplier((m, s, o) -> new HashMap<String, Object>() {{
-                            // It's safe to do expectTrait() because the operation predicate ensures that the trait
-                            // exists `in` and `name` are required attributes of the trait, `scheme` is optional.
-                            put("in", s.expectTrait(HttpApiKeyAuthTrait.class).getIn().toString());
-                            put("name", s.expectTrait(HttpApiKeyAuthTrait.class).getName());
-                            s.expectTrait(HttpApiKeyAuthTrait.class).getScheme().ifPresent(scheme ->
-                                    put("scheme", scheme));
-                    }})
-                    .operationPredicate((m, s, o) -> hasEffectiveHttpApiKeyAuthTrait(m, s, o))
-                    .build()
-        );
+                // Add the middleware to operations that use HTTP API key authorization.
+                RuntimeClientPlugin.builder()
+                        .pluginFunction(Symbol.builder()
+                                .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                                .name("getHttpApiKeyAuthPlugin")
+                                .build())
+                        .additionalPluginFunctionParamsSupplier((m, s, o) -> new HashMap<String, Object>() {
+                            {
+                                // It's safe to do expectTrait() because the operation predicate ensures that the trait
+                                // exists `in` and `name` are required attributes of the trait, `scheme` is optional.
+                                put("in", s.expectTrait(HttpApiKeyAuthTrait.class).getIn().toString());
+                                put("name", s.expectTrait(HttpApiKeyAuthTrait.class).getName());
+                                s.expectTrait(HttpApiKeyAuthTrait.class)
+                                        .getScheme()
+                                        .ifPresent(scheme -> put("scheme", scheme));
+                            }
+                        })
+                        .operationPredicate((m, s, o) -> hasEffectiveHttpApiKeyAuthTrait(m, s, o))
+                        .build());
     }
 
     @Override
@@ -110,9 +111,9 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     }
 
     private void writeAdditionalFiles(
-        TypeScriptSettings settings,
-        Model model,
-        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
+            TypeScriptSettings settings,
+            Model model,
+            BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
     ) {
         ServiceShape service = settings.getService(model);
 
@@ -130,10 +131,10 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         writerFactory.accept(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", INTEGRATION_NAME, "index.ts").toString(),
                 writer -> {
-                        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_MIDDLEWARE);
-                        String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.ts");
-                        writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.ts");
-                        writer.write("$L", source);
+                    writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_MIDDLEWARE);
+                    String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.ts");
+                    writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.ts");
+                    writer.write("$L", source);
                 });
     }
 
@@ -151,8 +152,8 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
 
     // If no operations use it, then the service doesn't use it
     private static boolean hasEffectiveHttpApiKeyAuthTrait(
-        Model model,
-        ServiceShape service
+            Model model,
+            ServiceShape service
     ) {
         ServiceIndex serviceIndex = ServiceIndex.of(model);
         TopDownIndex topDownIndex = TopDownIndex.of(model);
@@ -168,14 +169,15 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     }
 
     private static boolean hasEffectiveHttpApiKeyAuthTrait(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
+            Model model,
+            ServiceShape service,
+            OperationShape operation
     ) {
         if (operation.hasTrait(OptionalAuthTrait.class)) {
             return false;
         }
         return ServiceIndex.of(model)
-            .getEffectiveAuthSchemes(service, operation).containsKey(HttpApiKeyAuthTrait.ID);
+                .getEffectiveAuthSchemes(service, operation)
+                .containsKey(HttpApiKeyAuthTrait.ID);
     }
 }

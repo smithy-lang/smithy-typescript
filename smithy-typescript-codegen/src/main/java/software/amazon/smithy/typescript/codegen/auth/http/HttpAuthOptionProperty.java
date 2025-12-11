@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http;
 
 import java.util.function.Consumer;
@@ -23,10 +22,9 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  */
 @SmithyUnstableApi
 public record HttpAuthOptionProperty(
-    String name,
-    Type type,
-    Function<Source, Consumer<TypeScriptWriter>> source
-) implements ToSmithyBuilder<HttpAuthOptionProperty> {
+        String name,
+        Type type,
+        Function<Source, Consumer<TypeScriptWriter>> source) implements ToSmithyBuilder<HttpAuthOptionProperty> {
     /**
      * Defines the type of the auth option property.
      */
@@ -42,9 +40,8 @@ public record HttpAuthOptionProperty(
     }
 
     public record Source(
-        HttpAuthScheme httpAuthScheme,
-        Trait trait
-    ) implements ToSmithyBuilder<Source> {
+            HttpAuthScheme httpAuthScheme,
+            Trait trait) implements ToSmithyBuilder<Source> {
         public static Builder builder() {
             return new Builder();
         }
@@ -52,8 +49,8 @@ public record HttpAuthOptionProperty(
         @Override
         public Builder toBuilder() {
             return builder()
-                .httpAuthScheme(httpAuthScheme)
-                .trait(trait);
+                    .httpAuthScheme(httpAuthScheme)
+                    .trait(trait);
         }
 
         public static final class Builder implements SmithyBuilder<Source> {
@@ -63,8 +60,8 @@ public record HttpAuthOptionProperty(
             @Override
             public Source build() {
                 return new Source(
-                    SmithyBuilder.requiredState("httpAuthScheme", httpAuthScheme),
-                    SmithyBuilder.requiredState("trait", trait));
+                        SmithyBuilder.requiredState("httpAuthScheme", httpAuthScheme),
+                        SmithyBuilder.requiredState("trait", trait));
             }
 
             public Builder httpAuthScheme(HttpAuthScheme httpAuthScheme) {
@@ -86,9 +83,9 @@ public record HttpAuthOptionProperty(
     @Override
     public Builder toBuilder() {
         return builder()
-            .name(name)
-            .type(type)
-            .source(source);
+                .name(name)
+                .type(type)
+                .source(source);
     }
 
     public static final class Builder implements SmithyBuilder<HttpAuthOptionProperty> {
@@ -99,9 +96,9 @@ public record HttpAuthOptionProperty(
         @Override
         public HttpAuthOptionProperty build() {
             return new HttpAuthOptionProperty(
-                SmithyBuilder.requiredState("name", name),
-                SmithyBuilder.requiredState("type", type),
-                SmithyBuilder.requiredState("source", source));
+                    SmithyBuilder.requiredState("name", name),
+                    SmithyBuilder.requiredState("type", type),
+                    SmithyBuilder.requiredState("source", source));
         }
 
         public Builder name(String name) {

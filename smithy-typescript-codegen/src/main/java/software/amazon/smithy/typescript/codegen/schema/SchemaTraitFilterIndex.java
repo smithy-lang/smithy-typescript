@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.util.HashMap;
@@ -49,50 +48,47 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class SchemaTraitFilterIndex implements KnowledgeIndex {
     private static final Set<ShapeId> EXCLUDED_TRAITS = SetUtils.of(
-        // excluded due to special schema handling.
-        TimestampFormatTrait.ID
-    );
+            // excluded due to special schema handling.
+            TimestampFormatTrait.ID);
 
     /**
      * All of these are added by scanning the ProtocolDefinition and AuthDefinition meta traits.
      * The hard coded initial list is shown as an example of what this set contains.
      */
     private final Set<ShapeId> includedTraits = new HashSet<>(
-        // (wrapped for mutability)
-        SetUtils.of(
-            SparseTrait.ID, // Shape serde
-            SensitiveTrait.ID,
-            IdempotencyTokenTrait.ID,
-            JsonNameTrait.ID, // Shape serde
-            MediaTypeTrait.ID, // JSON shape serde
-            XmlAttributeTrait.ID, // XML shape serde
-            XmlFlattenedTrait.ID, // XML shape serde
-            XmlNameTrait.ID, // XML shape serde
-            XmlNamespaceTrait.ID, // XML shape serde
-            StreamingTrait.ID, // HttpBindingProtocol handles streaming + payload members.
-            EndpointTrait.ID, // HttpProtocol
-            ErrorTrait.ID, // set by the ServiceException runtime classes.
-            RequiresLengthTrait.ID, // unhandled
+            // (wrapped for mutability)
+            SetUtils.of(
+                    SparseTrait.ID, // Shape serde
+                    SensitiveTrait.ID,
+                    IdempotencyTokenTrait.ID,
+                    JsonNameTrait.ID, // Shape serde
+                    MediaTypeTrait.ID, // JSON shape serde
+                    XmlAttributeTrait.ID, // XML shape serde
+                    XmlFlattenedTrait.ID, // XML shape serde
+                    XmlNameTrait.ID, // XML shape serde
+                    XmlNamespaceTrait.ID, // XML shape serde
+                    StreamingTrait.ID, // HttpBindingProtocol handles streaming + payload members.
+                    EndpointTrait.ID, // HttpProtocol
+                    ErrorTrait.ID, // set by the ServiceException runtime classes.
+                    RequiresLengthTrait.ID, // unhandled
 
-            EventHeaderTrait.ID, // @smithy/core/event-streams::EventStreamSerde
-            EventPayloadTrait.ID, // @smithy/core/event-streams::EventStreamSerde
+                    EventHeaderTrait.ID, // @smithy/core/event-streams::EventStreamSerde
+                    EventPayloadTrait.ID, // @smithy/core/event-streams::EventStreamSerde
 
-            // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
-            // but the actual HTTP response status code is used with no particular comparison
-            // with the trait's error code.
-            HttpErrorTrait.ID,
-            // the following HTTP traits are handled by HTTP binding protocol base class.
-            HttpTrait.ID,
-            HttpHeaderTrait.ID,
-            HttpQueryTrait.ID,
-            HttpLabelTrait.ID,
-            HttpPayloadTrait.ID,
-            HttpPrefixHeadersTrait.ID,
-            HttpQueryParamsTrait.ID,
-            HttpResponseCodeTrait.ID,
-            HostLabelTrait.ID
-        )
-    );
+                    // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
+                    // but the actual HTTP response status code is used with no particular comparison
+                    // with the trait's error code.
+                    HttpErrorTrait.ID,
+                    // the following HTTP traits are handled by HTTP binding protocol base class.
+                    HttpTrait.ID,
+                    HttpHeaderTrait.ID,
+                    HttpQueryTrait.ID,
+                    HttpLabelTrait.ID,
+                    HttpPayloadTrait.ID,
+                    HttpPrefixHeadersTrait.ID,
+                    HttpQueryParamsTrait.ID,
+                    HttpResponseCodeTrait.ID,
+                    HostLabelTrait.ID));
     private final Map<Shape, Boolean> cache = new HashMap<>();
     private final Model model;
 
@@ -149,21 +145,23 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
             return false;
         }
         boolean hasSchemaTraits = shape.getAllTraits()
-            .values()
-            .stream()
-            .map(Trait::toShapeId)
-            .anyMatch(this::includeTrait);
+                .values()
+                .stream()
+                .map(Trait::toShapeId)
+                .anyMatch(this::includeTrait);
 
         if (hasSchemaTraits) {
             cache.put(shape, true);
             return true;
         }
 
-        boolean membersHaveSchemaTraits = shape.getAllMembers().values().stream()
-            .anyMatch(ms -> hasSchemaTraits(ms, depth + 1));
+        boolean membersHaveSchemaTraits = shape.getAllMembers()
+                .values()
+                .stream()
+                .anyMatch(ms -> hasSchemaTraits(ms, depth + 1));
         boolean targetHasSchemaTraits = shape.asMemberShape()
-            .map(ms -> hasSchemaTraits(model.expectShape(ms.getTarget()), depth + 1))
-            .orElse(false);
+                .map(ms -> hasSchemaTraits(model.expectShape(ms.getTarget()), depth + 1))
+                .orElse(false);
 
         cache.put(shape, membersHaveSchemaTraits || targetHasSchemaTraits);
         return cache.get(shape);

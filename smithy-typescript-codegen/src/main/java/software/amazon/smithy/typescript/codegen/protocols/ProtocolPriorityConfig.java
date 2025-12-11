@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.protocols;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import software.amazon.smithy.model.shapes.ShapeId;
 
-
 /**
  * Allows customization of protocol selection for specific services or a global default ordering.
  */
@@ -21,11 +19,11 @@ public final class ProtocolPriorityConfig {
     private final List<ShapeId> customDefaultPriority;
 
     public ProtocolPriorityConfig(
-        Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations,
-        List<ShapeId> customDefaultPriority
+            Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations,
+            List<ShapeId> customDefaultPriority
     ) {
         this.serviceProtocolPriorityCustomizations =
-            Objects.requireNonNullElseGet(serviceProtocolPriorityCustomizations, HashMap::new);
+                Objects.requireNonNullElseGet(serviceProtocolPriorityCustomizations, HashMap::new);
         this.customDefaultPriority = customDefaultPriority;
     }
 
@@ -35,8 +33,7 @@ public final class ProtocolPriorityConfig {
      */
     public List<ShapeId> getProtocolPriority(ShapeId serviceShapeId) {
         return serviceProtocolPriorityCustomizations.getOrDefault(
-            serviceShapeId,
-            customDefaultPriority != null ? new ArrayList<>(customDefaultPriority) : null
-        );
+                serviceShapeId,
+                customDefaultPriority != null ? new ArrayList<>(customDefaultPriority) : null);
     }
 }

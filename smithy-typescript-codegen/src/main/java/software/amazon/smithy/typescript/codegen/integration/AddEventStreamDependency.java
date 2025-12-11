@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
@@ -47,8 +36,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
     @Override
     public List<String> runAfter() {
         return List.of(
-            new AddBuiltinPlugins().name()
-        );
+                new AddBuiltinPlugins().name());
     }
 
     @Override
@@ -56,10 +44,10 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         return ListUtils.of(
                 RuntimeClientPlugin.builder()
                         .withConventions(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
-                                "EventStreamSerde", RuntimeClientPlugin.Convention.HAS_CONFIG)
+                                "EventStreamSerde",
+                                RuntimeClientPlugin.Convention.HAS_CONFIG)
                         .servicePredicate(AddEventStreamDependency::hasEventStream)
-                        .build()
-        );
+                        .build());
     }
 
     @Override
@@ -74,7 +62,8 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         }
 
         writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
-        writer.addTypeImport("EventStreamSerdeProvider", "__EventStreamSerdeProvider",
+        writer.addTypeImport("EventStreamSerdeProvider",
+                "__EventStreamSerdeProvider",
                 TypeScriptDependency.SMITHY_TYPES);
         writer.writeDocs("The function that provides necessary utilities for generating and parsing event stream");
         writer.write("eventStreamSerdeProvider?: __EventStreamSerdeProvider;\n");
@@ -94,14 +83,16 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
             case NODE:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
-                    writer.addImport("eventStreamSerdeProvider", null,
+                    writer.addImport("eventStreamSerdeProvider",
+                            null,
                             TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
                     writer.write("eventStreamSerdeProvider");
                 });
             case BROWSER:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
-                    writer.addImport("eventStreamSerdeProvider", null,
+                    writer.addImport("eventStreamSerdeProvider",
+                            null,
                             TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
                     writer.write("eventStreamSerdeProvider");
                 });
@@ -112,7 +103,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override
     public List<? extends CodeInterceptor<? extends CodeSection, TypeScriptWriter>> interceptors(
-        TypeScriptCodegenContext codegenContext
+            TypeScriptCodegenContext codegenContext
     ) {
         return List.of(CodeInterceptor.appender(SmithyContextCodeSection.class, (w, s) -> {
             EventStreamIndex eventStreamIndex = EventStreamIndex.of(s.getModel());
@@ -146,8 +137,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         for (OperationShape operation : operations) {
             if (eventStreamIndex.getInputInfo(operation).isPresent()
-                    || eventStreamIndex.getOutputInfo(operation).isPresent()
-            ) {
+                    || eventStreamIndex.getOutputInfo(operation).isPresent()) {
                 return true;
             }
         }

@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.Map;
@@ -151,12 +140,14 @@ final class UnionGenerator implements Runnable {
         this(model, symbolProvider, writer, shape, false, false);
     }
 
-    UnionGenerator(Model model,
+    UnionGenerator(
+            Model model,
             SymbolProvider symbolProvider,
             TypeScriptWriter writer,
             UnionShape shape,
             boolean includeValidation,
-            boolean schemaMode) {
+            boolean schemaMode
+    ) {
         this.shape = shape;
         this.symbol = symbolProvider.toSymbol(shape);
         this.model = model;
@@ -187,15 +178,15 @@ final class UnionGenerator implements Runnable {
 
         // Write out the namespace that contains each variant and visitor.
         writer.writeDocs("@public")
-            .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
-                writeUnionMemberInterfaces();
-                writeVisitorType();
-                writeVisitorFunction();
-                if (includeValidation) {
-                    writeValidate();
-                }
-                writer.unwrite("\n");
-            });
+                .openBlock("export namespace $L {", "}", symbol.getName(), () -> {
+                    writeUnionMemberInterfaces();
+                    writeVisitorType();
+                    writeVisitorFunction();
+                    if (includeValidation) {
+                        writeValidate();
+                    }
+                    writer.unwrite("\n");
+                });
         writeFilterSensitiveLog(symbol.getName());
     }
 
@@ -206,7 +197,8 @@ final class UnionGenerator implements Runnable {
             writer.openBlock("export interface $L {", "}", name, () -> {
                 for (MemberShape variantMember : shape.getAllMembers().values()) {
                     if (variantMember.getMemberName().equals(member.getMemberName())) {
-                        writer.write("$L: $T;", symbolProvider.toMemberName(variantMember),
+                        writer.write("$L: $T;",
+                                symbolProvider.toMemberName(variantMember),
                                 symbolProvider.toSymbol(variantMember));
                     } else {
                         writer.write("$L?: never;", symbolProvider.toMemberName(variantMember));
@@ -231,13 +223,14 @@ final class UnionGenerator implements Runnable {
     private void writeVisitorType() {
         if (schemaMode) {
             writer.writeDocs("""
-                @deprecated unused in schema-serde mode.
-                """);
+                    @deprecated unused in schema-serde mode.
+                    """);
         }
         writer.openBlock("export interface Visitor<T> {", "}", () -> {
             for (MemberShape member : shape.getAllMembers().values()) {
                 writer.write("$L: (value: $T) => T;",
-                    symbolProvider.toMemberName(member), symbolProvider.toSymbol(member));
+                        symbolProvider.toMemberName(member),
+                        symbolProvider.toSymbol(member));
             }
             writer.write("_: (name: string, value: any) => T;");
         });
@@ -265,9 +258,11 @@ final class UnionGenerator implements Runnable {
         if (sensitiveDataFinder.findsSensitiveDataIn(shape) && !schemaMode) {
             String objectParam = "obj";
             writer.writeDocs("@internal");
-            writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {", "}",
+            writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => {",
+                    "}",
                     namespace,
-                    objectParam, symbol.getName(),
+                    objectParam,
+                    symbol.getName(),
                     () -> {
                         for (MemberShape member : shape.getAllMembers().values()) {
                             String memberName = symbolProvider.toMemberName(member);
@@ -279,27 +274,25 @@ final class UnionGenerator implements Runnable {
                                     sensitiveDataFinder);
 
                             writer.writeInline("""
-                                if (${1L}.${2L} !== undefined) {
-                                  return {
-                                    ${2L}:\s""",
-                                objectParam,
-                                memberName
-                            );
+                                    if (${1L}.${2L} !== undefined) {
+                                      return {
+                                        ${2L}:\s""",
+                                    objectParam,
+                                    memberName);
                             String memberParam = String.format("%s.%s", objectParam, memberName);
                             writer.indent(2);
                             structuredMemberWriter.writeMemberFilterSensitiveLog(
-                                writer, member,
-                                memberParam
-                            );
+                                    writer,
+                                    member,
+                                    memberParam);
                             writer.dedent(1);
                             writer.write("};");
                             writer.dedent(1);
                             writer.write("}");
                         }
                         writer.write(
-                            "if (${1L}.$$unknown !== undefined) return { [${1L}.$$unknown[0]]: \"UNKNOWN\" };",
-                            objectParam
-                        );
+                                "if (${1L}.$$unknown !== undefined) return { [${1L}.$$unknown[0]]: \"UNKNOWN\" };",
+                                objectParam);
                     });
         }
     }
@@ -316,8 +309,10 @@ final class UnionGenerator implements Runnable {
 
         writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
         writer.writeDocs("@internal");
-        writer.openBlock("export const validate = ($L: $L, path: string = \"\"): __ValidationFailure[] => {", "}",
-                "obj", symbol.getName(),
+        writer.openBlock("export const validate = ($L: $L, path: string = \"\"): __ValidationFailure[] => {",
+                "}",
+                "obj",
+                symbol.getName(),
                 () -> {
                     structuredMemberWriter.writeMemberValidatorFactory(writer, "memberValidators");
                     structuredMemberWriter.writeValidateMethodContents(writer, "obj");

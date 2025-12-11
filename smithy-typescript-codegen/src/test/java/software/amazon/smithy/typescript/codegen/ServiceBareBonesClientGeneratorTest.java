@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,11 +25,12 @@ public class ServiceBareBonesClientGeneratorTest {
     @Test
     public void addsCustomIntegrationDependencyFields() {
         Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("service", Node.from("smithy.example#Example"))
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("service", Node.from("smithy.example#Example"))
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         ApplicationProtocol applicationProtocol = ApplicationProtocol.createDefaultHttpApplicationProtocol();
@@ -44,12 +49,18 @@ public class ServiceBareBonesClientGeneratorTest {
             }
         });
 
-        new ServiceBareBonesClientGenerator(settings, model, symbolProvider, writer, integrations,
-                             Collections.emptyList(), applicationProtocol).run();
+        new ServiceBareBonesClientGenerator(settings,
+                model,
+                symbolProvider,
+                writer,
+                integrations,
+                Collections.emptyList(),
+                applicationProtocol).run();
 
-        assertThat(writer.toString(), containsString("  /**\n"
-                                                     + "   * Hello!\n"
-                                                     + "   */\n"
-                                                     + "  syn?: string;"));
+        assertThat(writer.toString(),
+                containsString("  /**\n"
+                        + "   * Hello!\n"
+                        + "   */\n"
+                        + "  syn?: string;"));
     }
 }

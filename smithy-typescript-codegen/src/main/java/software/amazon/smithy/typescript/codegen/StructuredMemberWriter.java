@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
@@ -75,17 +64,22 @@ final class StructuredMemberWriter {
         this(model, symbolProvider, members, RequiredMemberMode.NULLABLE);
     }
 
-    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members,
-                           RequiredMemberMode requiredMemberMode) {
+    StructuredMemberWriter(
+            Model model,
+            SymbolProvider symbolProvider,
+            Collection<MemberShape> members,
+            RequiredMemberMode requiredMemberMode
+    ) {
         this(model, symbolProvider, members, requiredMemberMode, new SensitiveDataFinder(model));
     }
 
     StructuredMemberWriter(
-        Model model,
-        SymbolProvider symbolProvider,
-        Collection<MemberShape> members,
-        RequiredMemberMode requiredMemberMode,
-        SensitiveDataFinder sensitiveDataFinder) {
+            Model model,
+            SymbolProvider symbolProvider,
+            Collection<MemberShape> members,
+            RequiredMemberMode requiredMemberMode,
+            SensitiveDataFinder sensitiveDataFinder
+    ) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.members = new LinkedHashSet<>(members);
@@ -105,19 +99,20 @@ final class StructuredMemberWriter {
             String memberName = getSanitizedMemberName(member);
             String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
             String typeSuffix = requiredMemberMode == RequiredMemberMode.NULLABLE
-                                && isRequiredMember(member) ? " | undefined" : "";
+                    && isRequiredMember(member) ? " | undefined" : "";
             if (optionalSuffix.equals("?")) {
                 typeSuffix = " | undefined"; // support exactOptionalPropertyTypes.
             }
             writer.write(
-                "${L}${L}${L}: ${T}${L};",
-                memberPrefix, memberName, optionalSuffix,
-                symbolProvider.toSymbol(member)
-                    .toBuilder()
-                    .putProperty("typeOnly", true)
-                    .build(),
-                typeSuffix
-            );
+                    "${L}${L}${L}: ${T}${L};",
+                    memberPrefix,
+                    memberName,
+                    optionalSuffix,
+                    symbolProvider.toSymbol(member)
+                            .toBuilder()
+                            .putProperty("typeOnly", true)
+                            .build(),
+                    typeSuffix);
 
             if (wroteDocs && position < members.size() - 1) {
                 writer.write("");
@@ -154,7 +149,8 @@ final class StructuredMemberWriter {
             writeMapFilterSensitiveLog(writer, mapMember, memberParam);
         } else {
             throw new CodegenException(String.format(
-                "MemberFilterSensitiveLog attempted for %s", memberTarget.getType()));
+                    "MemberFilterSensitiveLog attempted for %s",
+                    memberTarget.getType()));
         }
     }
 
@@ -167,8 +163,9 @@ final class StructuredMemberWriter {
         if (!isServerSdk) {
             writer.writeDocs("@internal");
         }
-        writer.addTypeImport("ExceptionOptionType", "__ExceptionOptionType",
-            TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addTypeImport("ExceptionOptionType",
+                "__ExceptionOptionType",
+                TypeScriptDependency.AWS_SMITHY_CLIENT);
         writer.openBlock("constructor(opts: __ExceptionOptionType<$L, __BaseException>) {", symbol.getName());
         writer.openBlock("super({", "});", () -> {
             writer.write("name: $S,", shape.getId().getName());
@@ -197,9 +194,10 @@ final class StructuredMemberWriter {
      * Recursively writes filterSensitiveLog for StructureShape.
      */
     private void writeStructureFilterSensitiveLog(
-        TypeScriptWriter writer,
-        Shape structureTarget,
-        String structureParam) {
+            TypeScriptWriter writer,
+            Shape structureTarget,
+            String structureParam
+    ) {
         if (structureTarget.hasTrait(SensitiveTrait.class)) {
             writeSensitiveString(writer);
         } else if (structureTarget.hasTrait(StreamingTrait.class) && structureTarget.isUnionShape()) {
@@ -227,9 +225,10 @@ final class StructuredMemberWriter {
      * Recursively writes filterSensitiveLog for CollectionShape.
      */
     private void writeCollectionFilterSensitiveLog(
-        TypeScriptWriter writer,
-        MemberShape collectionMember,
-        String collectionParam) {
+            TypeScriptWriter writer,
+            MemberShape collectionMember,
+            String collectionParam
+    ) {
         if (collectionMember.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
             writeSensitiveString(writer);
         } else if (model.expectShape(collectionMember.getTarget()) instanceof SimpleShape) {
@@ -257,14 +256,20 @@ final class StructuredMemberWriter {
             String valueParam = "value"; // value of the Object.entries() key-value pair
 
             // Reducer is common to all shapes.
-            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => (", "), {})",
-                mapParam, accParam, keyParam, valueParam, symbolProvider.toSymbol(mapMember), () -> {
-                    writer.openBlock("$L[$L] =", "", accParam, keyParam, () -> {
-                        writeMemberFilterSensitiveLog(writer, mapMember, valueParam);
-                        writer.writeInline(",");
+            writer.openBlock("Object.entries($L).reduce(($L: any, [$L, $L]: [string, $T]) => (",
+                    "), {})",
+                    mapParam,
+                    accParam,
+                    keyParam,
+                    valueParam,
+                    symbolProvider.toSymbol(mapMember),
+                    () -> {
+                        writer.openBlock("$L[$L] =", "", accParam, keyParam, () -> {
+                            writeMemberFilterSensitiveLog(writer, mapMember, valueParam);
+                            writer.writeInline(",");
+                        });
+                        writer.write(accParam);
                     });
-                    writer.write(accParam);
-                });
         }
     }
 
@@ -291,7 +296,7 @@ final class StructuredMemberWriter {
                 Collection<MemberShape> structureMemberList = ((StructureShape) memberTarget).getAllMembers().values();
                 for (MemberShape structureMember : structureMemberList) {
                     if (!parents.contains(symbolProvider.toMemberName(structureMember))
-                        && isMemberOverwriteRequired(structureMember, parents)) {
+                            && isMemberOverwriteRequired(structureMember, parents)) {
                         return true;
                     }
                 }
@@ -353,8 +358,8 @@ final class StructuredMemberWriter {
         writer.openBlock("const $L : {", "} = {};", cacheName, () -> {
             for (MemberShape member : members) {
                 writer.addImport("MultiConstraintValidator",
-                    "__MultiConstraintValidator",
-                    TypeScriptDependency.SERVER_COMMON);
+                        "__MultiConstraintValidator",
+                        TypeScriptDependency.SERVER_COMMON);
                 final Shape targetShape = model.expectShape(member.getTarget());
                 writer.writeInline("$L?: ", getSanitizedMemberName(member));
                 writer.writeInline("__MultiConstraintValidator<");
@@ -375,29 +380,29 @@ final class StructuredMemberWriter {
      */
     void writeMemberValidatorFactory(TypeScriptWriter writer, String cacheName) {
         writer.openBlock("function getMemberValidator<T extends keyof typeof $1L>(member: T): "
-                         + "NonNullable<typeof $1L[T]> {",
-            "}",
-            cacheName,
-            () -> {
-                writer.openBlock("if ($L[member] === undefined) {", "}", cacheName, () -> {
-                    writer.openBlock("switch (member) {", "}", () -> {
-                        for (MemberShape member : members) {
-                            final Shape targetShape = model.expectShape(member.getTarget());
-                            Collection<Trait> constraintTraits = getConstraintTraits(member);
-                            writer.openBlock("case $S: {", "}", getSanitizedMemberName(member), () -> {
-                                writer.writeInline("$L[$S] = ", cacheName, getSanitizedMemberName(member));
-                                if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
-                                    writeSensitiveWrappedMemberValidator(writer, targetShape, constraintTraits);
-                                } else {
-                                    writeMemberValidator(writer, targetShape, constraintTraits, ";");
-                                }
-                                writer.write("break;");
-                            });
-                        }
+                + "NonNullable<typeof $1L[T]> {",
+                "}",
+                cacheName,
+                () -> {
+                    writer.openBlock("if ($L[member] === undefined) {", "}", cacheName, () -> {
+                        writer.openBlock("switch (member) {", "}", () -> {
+                            for (MemberShape member : members) {
+                                final Shape targetShape = model.expectShape(member.getTarget());
+                                Collection<Trait> constraintTraits = getConstraintTraits(member);
+                                writer.openBlock("case $S: {", "}", getSanitizedMemberName(member), () -> {
+                                    writer.writeInline("$L[$S] = ", cacheName, getSanitizedMemberName(member));
+                                    if (member.getMemberTrait(model, SensitiveTrait.class).isPresent()) {
+                                        writeSensitiveWrappedMemberValidator(writer, targetShape, constraintTraits);
+                                    } else {
+                                        writeMemberValidator(writer, targetShape, constraintTraits, ";");
+                                    }
+                                    writer.write("break;");
+                                });
+                            }
+                        });
                     });
+                    writer.write("return $L[member]!!;", cacheName);
                 });
-                writer.write("return $L[member]!!;", cacheName);
-            });
     }
 
     /**
@@ -411,7 +416,7 @@ final class StructuredMemberWriter {
             for (MemberShape member : members) {
                 String optionalSuffix = "";
                 if (member.getMemberTrait(model, MediaTypeTrait.class).isPresent()
-                    && model.expectShape(member.getTarget()) instanceof StringShape) {
+                        && model.expectShape(member.getTarget()) instanceof StringShape) {
                     // lazy JSON wrapper validation should be done based on the serialized form of
                     // the object
                     optionalSuffix = "?.toString()";
@@ -421,10 +426,16 @@ final class StructuredMemberWriter {
                     // todo: validating event streams in unsupported.
                     writer.write("// unsupported event stream validation");
                     writer.write("// ...getMemberValidator($1S).validate($2L.$1L$4L, `$${path}/$3L`),",
-                        getSanitizedMemberName(member), param, member.getMemberName(), optionalSuffix);
+                            getSanitizedMemberName(member),
+                            param,
+                            member.getMemberName(),
+                            optionalSuffix);
                 } else {
                     writer.write("...getMemberValidator($1S).validate($2L.$1L$4L, `$${path}/$3L`),",
-                        getSanitizedMemberName(member), param, member.getMemberName(), optionalSuffix);
+                            getSanitizedMemberName(member),
+                            param,
+                            member.getMemberName(),
+                            optionalSuffix);
                 }
             }
         });
@@ -434,16 +445,19 @@ final class StructuredMemberWriter {
      * Writes a SensitiveConstraintValidator enclosing the shape validator for a
      * sensitive member.
      */
-    private void writeSensitiveWrappedMemberValidator(TypeScriptWriter writer,
-                                                      Shape targetShape,
-                                                      Collection<Trait> constraintTraits) {
+    private void writeSensitiveWrappedMemberValidator(
+            TypeScriptWriter writer,
+            Shape targetShape,
+            Collection<Trait> constraintTraits
+    ) {
         writer.addImport("SensitiveConstraintValidator",
-            "__SensitiveConstraintValidator",
-            TypeScriptDependency.SERVER_COMMON);
+                "__SensitiveConstraintValidator",
+                TypeScriptDependency.SERVER_COMMON);
         writer.writeInline("new __SensitiveConstraintValidator<");
         writeConstraintValidatorType(writer, targetShape);
-        writer.openBlock(">(", ");",
-            () -> writeMemberValidator(writer, targetShape, constraintTraits, ""));
+        writer.openBlock(">(",
+                ");",
+                () -> writeMemberValidator(writer, targetShape, constraintTraits, ""));
     }
 
     /**
@@ -456,10 +470,12 @@ final class StructuredMemberWriter {
      * @param trailer          what to append to the output (such as a comma or
      *                         semicolon)
      */
-    private void writeMemberValidator(TypeScriptWriter writer,
-                                      Shape shape,
-                                      Collection<Trait> constraintTraits,
-                                      String trailer) {
+    private void writeMemberValidator(
+            TypeScriptWriter writer,
+            Shape shape,
+            Collection<Trait> constraintTraits,
+            String trailer
+    ) {
         if (shape instanceof SimpleShape) {
             writeShapeValidator(writer, shape, constraintTraits, trailer);
             return;
@@ -467,58 +483,61 @@ final class StructuredMemberWriter {
 
         if (shape.isStructureShape() || shape.isUnionShape()) {
             writer.addImport("CompositeStructureValidator",
-                "__CompositeStructureValidator",
-                TypeScriptDependency.SERVER_COMMON);
-            writer.openBlock("new __CompositeStructureValidator<$T>(", ")" + trailer,
-                getValidatorValueType(shape),
-                () -> {
-                    writeShapeValidator(writer, shape, constraintTraits, ",");
-                    if (!shape.hasTrait(ErrorTrait.class)) {
-                        writer.write("$T.validate", symbolProvider.toSymbol(shape));
-                    } else {
-                        // todo: unsupported
-                        // Error classes have no static validator.
-                        writer.write("""
-                                () => [/*Error validator unsupported*/]""");
-                    }
-                });
+                    "__CompositeStructureValidator",
+                    TypeScriptDependency.SERVER_COMMON);
+            writer.openBlock("new __CompositeStructureValidator<$T>(",
+                    ")" + trailer,
+                    getValidatorValueType(shape),
+                    () -> {
+                        writeShapeValidator(writer, shape, constraintTraits, ",");
+                        if (!shape.hasTrait(ErrorTrait.class)) {
+                            writer.write("$T.validate", symbolProvider.toSymbol(shape));
+                        } else {
+                            // todo: unsupported
+                            // Error classes have no static validator.
+                            writer.write("""
+                                    () => [/*Error validator unsupported*/]""");
+                        }
+                    });
         } else if (shape.isListShape() || shape.isSetShape()) {
             writer.addImport("CompositeCollectionValidator",
-                "__CompositeCollectionValidator",
-                TypeScriptDependency.SERVER_COMMON);
+                    "__CompositeCollectionValidator",
+                    TypeScriptDependency.SERVER_COMMON);
             MemberShape collectionMemberShape = ((CollectionShape) shape).getMember();
             Shape collectionMemberTargetShape = model.expectShape(collectionMemberShape.getTarget());
-            writer.openBlock("new __CompositeCollectionValidator<$T>(", ")" + trailer,
-                getValidatorValueType(shape),
-                () -> {
-                    writeShapeValidator(writer, shape, constraintTraits, ",");
-                    writeMemberValidator(writer,
-                        collectionMemberTargetShape,
-                        getConstraintTraits(collectionMemberShape),
-                        "");
-                });
+            writer.openBlock("new __CompositeCollectionValidator<$T>(",
+                    ")" + trailer,
+                    getValidatorValueType(shape),
+                    () -> {
+                        writeShapeValidator(writer, shape, constraintTraits, ",");
+                        writeMemberValidator(writer,
+                                collectionMemberTargetShape,
+                                getConstraintTraits(collectionMemberShape),
+                                "");
+                    });
         } else if (shape.isMapShape()) {
             writer.addImport("CompositeMapValidator", "__CompositeMapValidator", TypeScriptDependency.SERVER_COMMON);
 
             MapShape mapShape = (MapShape) shape;
             final MemberShape keyShape = mapShape.getKey();
             final MemberShape valueShape = mapShape.getValue();
-            writer.openBlock("new __CompositeMapValidator<$T>(", ")" + trailer,
-                getValidatorValueType(shape),
-                () -> {
-                    writeShapeValidator(writer, mapShape, constraintTraits, ",");
-                    writeMemberValidator(writer,
-                        model.expectShape(keyShape.getTarget()),
-                        getConstraintTraits(keyShape),
-                        ",");
-                    writeMemberValidator(writer,
-                        model.expectShape(valueShape.getTarget()),
-                        getConstraintTraits(valueShape),
-                        "");
-                });
+            writer.openBlock("new __CompositeMapValidator<$T>(",
+                    ")" + trailer,
+                    getValidatorValueType(shape),
+                    () -> {
+                        writeShapeValidator(writer, mapShape, constraintTraits, ",");
+                        writeMemberValidator(writer,
+                                model.expectShape(keyShape.getTarget()),
+                                getConstraintTraits(keyShape),
+                                ",");
+                        writeMemberValidator(writer,
+                                model.expectShape(valueShape.getTarget()),
+                                getConstraintTraits(valueShape),
+                                "");
+                    });
         } else {
             throw new IllegalArgumentException(
-                String.format("Unsupported shape found when generating validator: %s", shape));
+                    String.format("Unsupported shape found when generating validator: %s", shape));
         }
     }
 
@@ -535,10 +554,12 @@ final class StructuredMemberWriter {
      * @param trailer     what to append to the output (for instance, a comma or
      *                    semicolon)
      */
-    private void writeShapeValidator(TypeScriptWriter writer,
-                                     Shape shape,
-                                     Collection<Trait> constraints,
-                                     String trailer) {
+    private void writeShapeValidator(
+            TypeScriptWriter writer,
+            Shape shape,
+            Collection<Trait> constraints,
+            String trailer
+    ) {
         boolean shouldWriteIntEnumValidator = shape.isIntEnumShape();
 
         if (constraints.isEmpty() && !shouldWriteIntEnumValidator) {
@@ -548,38 +569,41 @@ final class StructuredMemberWriter {
         }
 
         writer.addImport("CompositeValidator", "__CompositeValidator", TypeScriptDependency.SERVER_COMMON);
-        writer.openBlock("new __CompositeValidator<$T>([", "])" + trailer, getSymbolForValidatedType(shape),
-            () -> {
-                if (shouldWriteIntEnumValidator) {
-                    writer.addImport("IntegerEnumValidator", "__IntegerEnumValidator",
-                        TypeScriptDependency.SERVER_COMMON);
-                    writer.openBlock("new __IntegerEnumValidator([", "]),", () -> {
-                        for (int i : ((IntEnumShape) shape).getEnumValues().values()) {
-                            writer.write("$L,", i);
-                        }
-                    });
-                }
+        writer.openBlock("new __CompositeValidator<$T>([",
+                "])" + trailer,
+                getSymbolForValidatedType(shape),
+                () -> {
+                    if (shouldWriteIntEnumValidator) {
+                        writer.addImport("IntegerEnumValidator",
+                                "__IntegerEnumValidator",
+                                TypeScriptDependency.SERVER_COMMON);
+                        writer.openBlock("new __IntegerEnumValidator([", "]),", () -> {
+                            for (int i : ((IntEnumShape) shape).getEnumValues().values()) {
+                                writer.write("$L,", i);
+                            }
+                        });
+                    }
 
-                if (shape.isEnumShape()) {
-                    writer.addImport("EnumValidator", "__EnumValidator", TypeScriptDependency.SERVER_COMMON);
-                    Collection<MemberShape> enumValues = shape.asEnumShape().get().getAllMembers().values();
-                    writer.openBlock("new __EnumValidator([", "]),", () -> {
-                        for (MemberShape member : enumValues) {
-                            writer.write("$S,", member.expectTrait(EnumValueTrait.class).expectStringValue());
-                        }
-                        writer.write("], [");
-                        for (MemberShape member : shape.asEnumShape().get().getAllMembers().values()) {
-                            if (!member.hasTrait((InternalTrait.class))) {
+                    if (shape.isEnumShape()) {
+                        writer.addImport("EnumValidator", "__EnumValidator", TypeScriptDependency.SERVER_COMMON);
+                        Collection<MemberShape> enumValues = shape.asEnumShape().get().getAllMembers().values();
+                        writer.openBlock("new __EnumValidator([", "]),", () -> {
+                            for (MemberShape member : enumValues) {
                                 writer.write("$S,", member.expectTrait(EnumValueTrait.class).expectStringValue());
                             }
-                        }
-                    });
-                }
+                            writer.write("], [");
+                            for (MemberShape member : shape.asEnumShape().get().getAllMembers().values()) {
+                                if (!member.hasTrait((InternalTrait.class))) {
+                                    writer.write("$S,", member.expectTrait(EnumValueTrait.class).expectStringValue());
+                                }
+                            }
+                        });
+                    }
 
-                for (Trait t : constraints) {
-                    writeSingleConstraintValidator(writer, t);
-                }
-            });
+                    for (Trait t : constraints) {
+                        writeSingleConstraintValidator(writer, t);
+                    }
+                });
     }
 
     /**
@@ -606,8 +630,8 @@ final class StructuredMemberWriter {
             LengthTrait lengthTrait = (LengthTrait) trait;
             writer.addImport("LengthValidator", "__LengthValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __LengthValidator($L, $L),",
-                lengthTrait.getMin().map(Object::toString).orElse("undefined"),
-                lengthTrait.getMax().map(Object::toString).orElse("undefined"));
+                    lengthTrait.getMin().map(Object::toString).orElse("undefined"),
+                    lengthTrait.getMax().map(Object::toString).orElse("undefined"));
         } else if (trait instanceof PatternTrait) {
             writer.addImport("PatternValidator", "__PatternValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __PatternValidator($S),", ((PatternTrait) trait).getValue());
@@ -615,8 +639,8 @@ final class StructuredMemberWriter {
             RangeTrait rangeTrait = (RangeTrait) trait;
             writer.addImport("RangeValidator", "__RangeValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __RangeValidator($L, $L),",
-                rangeTrait.getMin().map(Object::toString).orElse("undefined"),
-                rangeTrait.getMax().map(Object::toString).orElse("undefined"));
+                    rangeTrait.getMin().map(Object::toString).orElse("undefined"),
+                    rangeTrait.getMax().map(Object::toString).orElse("undefined"));
         } else if (trait instanceof UniqueItemsTrait) {
             writer.addImport("UniqueItemsValidator", "__UniqueItemsValidator", TypeScriptDependency.SERVER_COMMON);
             writer.write("new __UniqueItemsValidator(),");
@@ -641,20 +665,18 @@ final class StructuredMemberWriter {
 
             if (keyType.equals("string")) {
                 writer.writeInline("Record<$T, $T>",
-                    getSymbolForValidatedType(mapShape.getKey()),
-                    getSymbolForValidatedType(mapShape.getValue())
-                );
+                        getSymbolForValidatedType(mapShape.getKey()),
+                        getSymbolForValidatedType(mapShape.getValue()));
             } else {
                 writer.writeInline("Partial<Record<$T, $T>>",
-                    getSymbolForValidatedType(mapShape.getKey()),
-                    getSymbolForValidatedType(mapShape.getValue())
-                );
+                        getSymbolForValidatedType(mapShape.getKey()),
+                        getSymbolForValidatedType(mapShape.getValue()));
             }
         } else if (shape instanceof SimpleShape) {
             writer.writeInline("$T", getSymbolForValidatedType(shape));
         } else {
             throw new IllegalArgumentException(
-                String.format("Unsupported shape found when generating validator: %s", shape));
+                    String.format("Unsupported shape found when generating validator: %s", shape));
         }
     }
 
@@ -677,7 +699,7 @@ final class StructuredMemberWriter {
             return getSymbolForValidatedType(shape);
         } else {
             throw new IllegalArgumentException(
-                String.format("Unsupported shape found when generating validator: %s", shape));
+                    String.format("Unsupported shape found when generating validator: %s", shape));
         }
     }
 
@@ -701,12 +723,13 @@ final class StructuredMemberWriter {
         // widen the symbol
         if (shape.isBlobShape() && shape.hasTrait(StreamingTrait.class)) {
             return symbolProvider.toSymbol(shape)
-                .toBuilder()
-                .addReference(Symbol.builder()
-                    .name("Readable").namespace("stream", "/")
-                    .build())
-                .name("Readable | ReadableStream | Blob | string | Uint8Array | Buffer")
-                .build();
+                    .toBuilder()
+                    .addReference(Symbol.builder()
+                            .name("Readable")
+                            .namespace("stream", "/")
+                            .build())
+                    .name("Readable | ReadableStream | Blob | string | Uint8Array | Buffer")
+                    .build();
         }
 
         return symbolProvider.toSymbol(shape);

@@ -1,5 +1,15 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator.README_FILENAME;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,13 +18,6 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static software.amazon.smithy.typescript.codegen.integration.DefaultReadmeGenerator.README_FILENAME;
 
 class DefaultDefaultReadmeGeneratorTest {
 
@@ -29,12 +32,13 @@ class DefaultDefaultReadmeGeneratorTest {
 
     @BeforeEach
     void setup() {
-        settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("service", Node.from("smithy.example#Example"))
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .withMember("createDefaultReadme", Node.from(true))
-                .build());
+        settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("service", Node.from("smithy.example#Example"))
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .withMember("createDefaultReadme", Node.from(true))
+                        .build());
 
         manifest = new MockManifest();
         symbolProvider = new SymbolVisitor(model, settings);

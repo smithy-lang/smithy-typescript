@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
@@ -23,13 +22,13 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class SupportNoAuth implements HttpAuthTypeScriptIntegration {
     private static final Consumer<TypeScriptWriter> NO_AUTH_IDENTITY_PROVIDER_WRITER =
-        w -> w.write("async () => ({})");
-    private static final Consumer<TypeScriptWriter> NO_AUTH_SIGNER_WRITER = w ->
-        w.write("new $T()", Symbol.builder()
-            .name("NoAuthSigner")
-            .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
-            .addDependency(TypeScriptDependency.SMITHY_CORE)
-            .build());
+            w -> w.write("async () => ({})");
+    private static final Consumer<TypeScriptWriter> NO_AUTH_SIGNER_WRITER = w -> w.write("new $T()",
+            Symbol.builder()
+                    .name("NoAuthSigner")
+                    .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
+                    .addDependency(TypeScriptDependency.SMITHY_CORE)
+                    .build());
 
     /**
      * Integration should be skipped if the `useLegacyAuth` flag is true.
@@ -42,10 +41,10 @@ public final class SupportNoAuth implements HttpAuthTypeScriptIntegration {
     @Override
     public Optional<HttpAuthScheme> getHttpAuthScheme() {
         return Optional.of(HttpAuthScheme.builder()
-            .schemeId(NoAuthTrait.ID)
-            .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-            .putDefaultIdentityProvider(LanguageTarget.SHARED, NO_AUTH_IDENTITY_PROVIDER_WRITER)
-            .putDefaultSigner(LanguageTarget.SHARED, NO_AUTH_SIGNER_WRITER)
-            .build());
+                .schemeId(NoAuthTrait.ID)
+                .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
+                .putDefaultIdentityProvider(LanguageTarget.SHARED, NO_AUTH_IDENTITY_PROVIDER_WRITER)
+                .putDefaultSigner(LanguageTarget.SHARED, NO_AUTH_SIGNER_WRITER)
+                .build());
     }
 }

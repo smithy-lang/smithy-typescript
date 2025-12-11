@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.documentation;
 
 import java.util.Arrays;
@@ -45,10 +44,10 @@ public abstract class StructureExampleGenerator {
      * ```
      */
     public static String generateStructuralHintDocumentation(
-        Shape shape,
-        Model model,
-        boolean isComment,
-        boolean isInput
+            Shape shape,
+            Model model,
+            boolean isComment,
+            boolean isInput
     ) {
         StringBuilder buffer = new StringBuilder();
         shape(shape, buffer, model, 0, new ShapeTracker(), isInput);
@@ -56,30 +55,33 @@ public abstract class StructureExampleGenerator {
         // replace non-leading whitespace with single space.
         String s = Arrays.stream(
                 buffer.toString()
-                    .split("\n"))
-            .map(line -> line.replaceAll(
-                    "([\\w\\\",:\\[\\{] )\\s+",
-                    "$1")
-                .replaceAll("\\s+$", ""))
-            .collect(Collectors.joining((isComment) ? "\n// " : "\n"));
+                        .split("\n"))
+                .map(line -> line.replaceAll(
+                        "([\\w\\\",:\\[\\{] )\\s+",
+                        "$1")
+                        .replaceAll("\\s+$", ""))
+                .collect(Collectors.joining((isComment) ? "\n// " : "\n"));
 
         return ((isComment) ? "// " : "") + s.replaceAll(",$", ";");
     }
 
-    private static void structure(StructureShape structureShape,
-                                  StringBuilder buffer,
-                                  Model model,
-                                  int indentation,
-                                  ShapeTracker shapeTracker,
-                                  boolean isInput) {
+    private static void structure(
+            StructureShape structureShape,
+            StringBuilder buffer,
+            Model model,
+            int indentation,
+            ShapeTracker shapeTracker,
+            boolean isInput
+    ) {
         if (structureShape.getAllMembers().isEmpty()) {
             append(indentation, buffer, "{},");
             checkRequired(indentation, buffer, structureShape);
         } else {
-            append(indentation, buffer,
-                "{" + (shapeTracker.getOccurrenceCount(structureShape) == 1
-                    ? " // " + structureShape.getId().getName()
-                    : ""));
+            append(indentation,
+                    buffer,
+                    "{" + (shapeTracker.getOccurrenceCount(structureShape) == 1
+                            ? " // " + structureShape.getId().getName()
+                            : ""));
             checkRequired(indentation, buffer, structureShape);
             structureShape.getAllMembers().values().forEach(member -> {
                 append(indentation + 2, buffer, member.getMemberName() + ": ");
@@ -89,15 +91,19 @@ public abstract class StructureExampleGenerator {
         }
     }
 
-    private static void union(UnionShape unionShape,
-                              StringBuilder buffer,
-                              Model model,
-                              int indentation,
-                              ShapeTracker shapeTracker,
-                              boolean isInput) {
-        append(indentation, buffer, "{" + (shapeTracker.getOccurrenceCount(unionShape) == 1
-            ? " // " + unionShape.getId().getName()
-            : "// ") + " Union: only one key present");
+    private static void union(
+            UnionShape unionShape,
+            StringBuilder buffer,
+            Model model,
+            int indentation,
+            ShapeTracker shapeTracker,
+            boolean isInput
+    ) {
+        append(indentation,
+                buffer,
+                "{" + (shapeTracker.getOccurrenceCount(unionShape) == 1
+                        ? " // " + unionShape.getId().getName()
+                        : "// ") + " Union: only one key present");
         checkRequired(indentation, buffer, unionShape);
         unionShape.getAllMembers().values().forEach(member -> {
             append(indentation + 2, buffer, member.getMemberName() + ": ");
@@ -106,12 +112,14 @@ public abstract class StructureExampleGenerator {
         append(indentation, buffer, "},\n");
     }
 
-    private static void shape(Shape shape,
-                              StringBuilder buffer,
-                              Model model,
-                              int indentation,
-                              ShapeTracker shapeTracker,
-                              boolean isInput) {
+    private static void shape(
+            Shape shape,
+            StringBuilder buffer,
+            Model model,
+            int indentation,
+            ShapeTracker shapeTracker,
+            boolean isInput
+    ) {
         Shape target;
         if (shape instanceof MemberShape) {
             target = model.getShape(((MemberShape) shape).getTarget()).get();
@@ -134,21 +142,24 @@ public abstract class StructureExampleGenerator {
                 case BLOB:
                     if (isInput) {
                         if (target.hasTrait(StreamingTrait.class)) {
-                            append(indentation, buffer,
-                                "\"MULTIPLE_TYPES_ACCEPTED\", // see \\@smithy/types -> StreamingBlobPayloadInputTypes"
-                            );
+                            append(indentation,
+                                    buffer,
+                                    "\"MULTIPLE_TYPES_ACCEPTED\", // see \\@smithy/types -> StreamingBlobPayloadInputTypes");
                         } else {
-                            append(indentation, buffer,
-                                """
-                                new Uint8Array(), // e.g. Buffer.from("") or new TextEncoder().encode("")""");
+                            append(indentation,
+                                    buffer,
+                                    """
+                                            new Uint8Array(), // e.g. Buffer.from("") or new TextEncoder().encode("")""");
                         }
                     } else {
                         if (target.hasTrait(StreamingTrait.class)) {
-                            append(indentation, buffer,
-                                "\"<SdkStream>\", // see \\@smithy/types -> StreamingBlobPayloadOutputTypes");
+                            append(indentation,
+                                    buffer,
+                                    "\"<SdkStream>\", // see \\@smithy/types -> StreamingBlobPayloadOutputTypes");
                         } else {
-                            append(indentation, buffer,
-                                "new Uint8Array(),");
+                            append(indentation,
+                                    buffer,
+                                    "new Uint8Array(),");
                         }
                     }
                     break;
@@ -185,23 +196,31 @@ public abstract class StructureExampleGenerator {
 
                 case SET:
                 case LIST:
-                    append(indentation, buffer, "[" + (shapeTracker.getOccurrenceCount(target) == 1
-                        ? " // " + target.getId().getName()
-                        : ""));
+                    append(indentation,
+                            buffer,
+                            "[" + (shapeTracker.getOccurrenceCount(target) == 1
+                                    ? " // " + target.getId().getName()
+                                    : ""));
                     checkRequired(indentation, buffer, shape);
                     ListShape list = (ListShape) target;
                     shape(list.getMember(), buffer, model, indentation + 2, shapeTracker, isInput);
                     append(indentation, buffer, "],\n");
                     break;
                 case MAP:
-                    append(indentation, buffer, "{" + (shapeTracker.getOccurrenceCount(target) == 1
-                        ? " // " + target.getId().getName()
-                        : ""));
+                    append(indentation,
+                            buffer,
+                            "{" + (shapeTracker.getOccurrenceCount(target) == 1
+                                    ? " // " + target.getId().getName()
+                                    : ""));
                     checkRequired(indentation, buffer, shape);
                     append(indentation + 2, buffer, "\"<keys>\": ");
                     MapShape map = (MapShape) target;
-                    shape(model.getShape(map.getValue().getTarget()).get(), buffer, model, indentation + 2,
-                        shapeTracker, isInput);
+                    shape(model.getShape(map.getValue().getTarget()).get(),
+                            buffer,
+                            model,
+                            indentation + 2,
+                            shapeTracker,
+                            isInput);
                     append(indentation, buffer, "},\n");
                     break;
 
@@ -217,19 +236,19 @@ public abstract class StructureExampleGenerator {
                 case ENUM:
                     EnumShape enumShape = (EnumShape) target;
                     String enumeration = enumShape.getEnumValues()
-                        .values()
-                        .stream()
-                        .map(s -> "\"" + s + "\"")
-                        .collect(Collectors.joining(" || "));
+                            .values()
+                            .stream()
+                            .map(s -> "\"" + s + "\"")
+                            .collect(Collectors.joining(" || "));
                     append(indentation, buffer, enumeration + ",");
                     break;
                 case INT_ENUM:
                     IntEnumShape intEnumShape = (IntEnumShape) target;
                     String intEnumeration = intEnumShape.getEnumValues()
-                        .values()
-                        .stream()
-                        .map(i -> Integer.toString(i))
-                        .collect(Collectors.joining(" || "));
+                            .values()
+                            .stream()
+                            .map(i -> Integer.toString(i))
+                            .collect(Collectors.joining(" || "));
                     append(indentation, buffer, intEnumeration + ",");
                     break;
                 case OPERATION:
@@ -313,9 +332,11 @@ public abstract class StructureExampleGenerator {
          * @return whether the shape should be truncated.
          */
         public boolean shouldTruncate(Shape shape) {
-            return (shape instanceof MapShape || shape instanceof UnionShape || shape instanceof StructureShape
-                || shape instanceof ListShape || shape instanceof SetShape)
-                && (getOccurrenceCount(shape) > 5 || getOccurrenceDepths(shape) > 2);
+            return (shape instanceof MapShape || shape instanceof UnionShape
+                    || shape instanceof StructureShape
+                    || shape instanceof ListShape
+                    || shape instanceof SetShape)
+                    && (getOccurrenceCount(shape) > 5 || getOccurrenceDepths(shape) > 2);
         }
 
         /**

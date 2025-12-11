@@ -1,5 +1,17 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,19 +22,13 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class PackageJsonGeneratorTest {
     @ParameterizedTest
     @MethodSource("providePackageDescriptionTestCases")
-    void expectPackageDescriptionUpdatedByArtifactType(TypeScriptSettings.ArtifactType artifactType, String expectedDescription) {
+    void expectPackageDescriptionUpdatedByArtifactType(
+            TypeScriptSettings.ArtifactType artifactType,
+            String expectedDescription
+    ) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource("simple-service.smithy"))
                 .assemble()
@@ -63,13 +69,16 @@ class PackageJsonGeneratorTest {
                 .withMember("packageDescription", Node.from("example description"))
                 .build();
 
-        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model, settings,
+        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model,
+                settings,
                 TypeScriptSettings.ArtifactType.CLIENT);
 
         var pjson = typeScriptSettings.getPackageJson();
         pjson = pjson.withMember("browser", Node.objectNode().withMember("example-browser", Node.from("example")));
-        pjson = pjson.withMember("react-native", Node.objectNode().withMember("example-react-native",
-                Node.from("example")));
+        pjson = pjson.withMember("react-native",
+                Node.objectNode()
+                        .withMember("example-react-native",
+                                Node.from("example")));
         typeScriptSettings.setPackageJson(pjson);
 
         PackageJsonGenerator.writePackageJson(typeScriptSettings, manifest, new HashMap<>());
@@ -112,7 +121,8 @@ class PackageJsonGeneratorTest {
                 .withMember("packageDescription", Node.from("example description"))
                 .build();
 
-        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model, settings,
+        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model,
+                settings,
                 TypeScriptSettings.ArtifactType.CLIENT);
 
         Map<String, Map<String, SymbolDependency>> deps = new HashMap<>();
@@ -149,7 +159,8 @@ class PackageJsonGeneratorTest {
                 .withMember("packageDescription", Node.from("example description"))
                 .build();
 
-        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model, settings,
+        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model,
+                settings,
                 TypeScriptSettings.ArtifactType.CLIENT);
 
         Map<String, Map<String, SymbolDependency>> deps = new HashMap<>();
@@ -182,7 +193,8 @@ class PackageJsonGeneratorTest {
                 .withMember("generateTypeDoc", true)
                 .build();
 
-        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model, settings,
+        final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(model,
+                settings,
                 TypeScriptSettings.ArtifactType.CLIENT);
 
         Map<String, Map<String, SymbolDependency>> deps = new HashMap<>();
@@ -201,7 +213,6 @@ class PackageJsonGeneratorTest {
     private static Stream<Arguments> providePackageDescriptionTestCases() {
         return Stream.of(
                 Arguments.of(TypeScriptSettings.ArtifactType.SSDK, "example server"),
-                Arguments.of(TypeScriptSettings.ArtifactType.CLIENT, "example client")
-        );
+                Arguments.of(TypeScriptSettings.ArtifactType.CLIENT, "example client"));
     }
 }

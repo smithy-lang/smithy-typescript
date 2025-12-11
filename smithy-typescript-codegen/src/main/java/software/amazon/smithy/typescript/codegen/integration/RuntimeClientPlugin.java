@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
@@ -82,8 +71,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         if (!(allNull || allSet)) {
             throw new IllegalStateException(
                     "If any of inputConfig, resolvedConfig, or resolveFunction are set, then all of "
-                    + "inputConfig, resolvedConfig, and resolveFunction must be set: inputConfig: "
-                    + inputConfig + ", resolvedConfig: " + resolvedConfig + ", resolveFunction: " + resolveFunction);
+                            + "inputConfig, resolvedConfig, and resolveFunction must be set: inputConfig: "
+                            + inputConfig + ", resolvedConfig: " + resolvedConfig + ", resolveFunction: "
+                            + resolveFunction);
         }
 
         if (destroyFunction != null && resolvedConfig == null) {
@@ -211,9 +201,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * for a parameter, and value is the value for a parameter.
      */
     public Map<String, Object> getAdditionalResolveFunctionParameters(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
+            Model model,
+            ServiceShape service,
+            OperationShape operation
     ) {
         if (additionalResolveFunctionParamsSupplier != null) {
             return additionalResolveFunctionParamsSupplier.apply(model, service, operation);
@@ -259,9 +249,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * for a parameter, and value is the value for a parameter.
      */
     public Map<String, Object> getAdditionalPluginFunctionParameters(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
+            Model model,
+            ServiceShape service,
+            OperationShape operation
     ) {
         if (additionalPluginFunctionParamsSupplier != null) {
             return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
@@ -282,9 +272,9 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
      * for a parameter, and value is the value for a parameter.
      */
     public Map<String, Object> getAdditionalPluginFunctionParameterWriterConsumers(
-        Model model,
-        ServiceShape service,
-        OperationShape operation
+            Model model,
+            ServiceShape service,
+            OperationShape operation
     ) {
         if (additionalPluginFunctionParamsSupplier != null) {
             return additionalPluginFunctionParamsSupplier.apply(model, service, operation);
@@ -398,12 +388,12 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
     @Override
     public String toString() {
         return "RuntimeClientPlugin{"
-               + "inputConfig=" + inputConfig
-               + ", resolvedConfig=" + resolvedConfig
-               + ", resolveFunction=" + resolveFunction
-               + ", pluginFunction=" + pluginFunction
-               + ", destroyFunction=" + destroyFunction
-               + '}';
+                + "inputConfig=" + inputConfig
+                + ", resolvedConfig=" + resolvedConfig
+                + ", resolveFunction=" + resolveFunction
+                + ", pluginFunction=" + pluginFunction
+                + ", destroyFunction=" + destroyFunction
+                + '}';
     }
 
     @Override
@@ -416,14 +406,14 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
 
         RuntimeClientPlugin that = (RuntimeClientPlugin) o;
         return Objects.equals(inputConfig, that.inputConfig)
-               && Objects.equals(resolvedConfig, that.resolvedConfig)
-               && Objects.equals(resolveFunction, that.resolveFunction)
-               && Objects.equals(additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier)
-               && Objects.equals(pluginFunction, that.pluginFunction)
-               && Objects.equals(additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier)
-               && Objects.equals(destroyFunction, that.destroyFunction)
-               && servicePredicate.equals(that.servicePredicate)
-               && operationPredicate.equals(that.operationPredicate);
+                && Objects.equals(resolvedConfig, that.resolvedConfig)
+                && Objects.equals(resolveFunction, that.resolveFunction)
+                && Objects.equals(additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier)
+                && Objects.equals(pluginFunction, that.pluginFunction)
+                && Objects.equals(additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier)
+                && Objects.equals(destroyFunction, that.destroyFunction)
+                && servicePredicate.equals(that.servicePredicate)
+                && operationPredicate.equals(that.operationPredicate);
     }
 
     @Override
@@ -578,13 +568,12 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @see #getResolveFunction()
          */
         public Builder resolveFunction(
-            Symbol resolveFunction,
-            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
+                Symbol resolveFunction,
+                FunctionParamsSupplier additionalResolveFunctionParamsSupplier
         ) {
             return resolveFunction(
-                SymbolReference.builder().symbol(resolveFunction).build(),
-                additionalResolveFunctionParamsSupplier
-            );
+                    SymbolReference.builder().symbol(resolveFunction).build(),
+                    additionalResolveFunctionParamsSupplier);
         }
 
         /**
@@ -600,7 +589,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @see #getResolveFunction()
          */
         public Builder additionalResolveFunctionParamsSupplier(
-            FunctionParamsSupplier additionalResolveFunctionParamsSupplier
+                FunctionParamsSupplier additionalResolveFunctionParamsSupplier
         ) {
             this.additionalResolveFunctionParamsSupplier = additionalResolveFunctionParamsSupplier;
             return this;
@@ -660,13 +649,12 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @see #getPluginFunction()
          */
         public Builder pluginFunction(
-            Symbol pluginFunction,
-            FunctionParamsSupplier additionalPluginFunctionParamsSupplier
+                Symbol pluginFunction,
+                FunctionParamsSupplier additionalPluginFunctionParamsSupplier
         ) {
             return pluginFunction(
-                SymbolReference.builder().symbol(pluginFunction).build(),
-                additionalPluginFunctionParamsSupplier
-            );
+                    SymbolReference.builder().symbol(pluginFunction).build(),
+                    additionalPluginFunctionParamsSupplier);
         }
 
         /**
@@ -679,7 +667,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * @see #getPluginFunction()
          */
         public Builder additionalPluginFunctionParamsSupplier(
-            FunctionParamsSupplier additionalPluginFunctionParamsSupplier
+                FunctionParamsSupplier additionalPluginFunctionParamsSupplier
         ) {
             this.additionalPluginFunctionParamsSupplier = additionalPluginFunctionParamsSupplier;
             return this;
@@ -808,7 +796,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          * Enables access to the writer for adding imports/dependencies.
          */
         public Builder withAdditionalOperationParams(
-            Map<String, CommandWriterConsumer> writeAdditionalOperationParams
+                Map<String, CommandWriterConsumer> writeAdditionalOperationParams
         ) {
             // enforce consistent sorting during codegen.
             this.writeAdditionalOperationParams = new TreeMap<>(writeAdditionalOperationParams);
@@ -867,14 +855,17 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                 switch (convention) {
                     case HAS_CONFIG:
                         inputConfig(Convention.createTypeSymbol(
-                            packageName, version, pluginName + "InputConfig")
-                        );
+                                packageName,
+                                version,
+                                pluginName + "InputConfig"));
                         resolvedConfig(Convention.createTypeSymbol(
-                            packageName, version, pluginName + "ResolvedConfig")
-                        );
+                                packageName,
+                                version,
+                                pluginName + "ResolvedConfig"));
                         resolveFunction(Convention.createSymbol(
-                            packageName, version, "resolve" + pluginName + "Config")
-                        );
+                                packageName,
+                                version,
+                                "resolve" + pluginName + "Config"));
                         break;
                     case HAS_MIDDLEWARE:
                         pluginFunction(Convention.createSymbol(packageName, version, "get" + pluginName + "Plugin"));
@@ -951,11 +942,11 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
 
         private static Symbol createTypeSymbol(String packageName, String version, String name) {
             return Symbol.builder()
-                .namespace(packageName, "/")
-                .name(name)
-                .putProperty("typeOnly", true)
-                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
-                .build();
+                    .namespace(packageName, "/")
+                    .name(name)
+                    .putProperty("typeOnly", true)
+                    .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
+                    .build();
         }
     }
 }

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.protocol.traits.Rpcv2CborTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.utils.SmithyInternalApi;
-
 
 /**
  *

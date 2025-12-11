@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.util.List;
@@ -19,27 +18,25 @@ import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.util.StringStore;
 
-
 class SchemaTraitWriter {
     private final Shape shape;
     private final SchemaReferenceIndex elision;
     private final StringStore stringStore;
     private final StringBuilder buffer = new StringBuilder();
     private final List<ShapeId> compressTraits = List.of(
-        HttpLabelTrait.ID,
-        IdempotentTrait.ID,
-        IdempotencyTokenTrait.ID,
-        SensitiveTrait.ID,
-        HttpPayloadTrait.ID,
-        HttpResponseCodeTrait.ID,
-        HttpQueryParamsTrait.ID
-    );
+            HttpLabelTrait.ID,
+            IdempotentTrait.ID,
+            IdempotencyTokenTrait.ID,
+            SensitiveTrait.ID,
+            HttpPayloadTrait.ID,
+            HttpResponseCodeTrait.ID,
+            HttpQueryParamsTrait.ID);
     private final SchemaTraitGenerator traitGenerator = new SchemaTraitGenerator();
 
     SchemaTraitWriter(
-        Shape shape,
-        SchemaReferenceIndex elision,
-        StringStore stringStore
+            Shape shape,
+            SchemaReferenceIndex elision,
+            StringStore stringStore
     ) {
         this.shape = shape;
         this.elision = elision;
@@ -62,11 +59,11 @@ class SchemaTraitWriter {
 
     private boolean mayUseCompressedTraits() {
         return shape.getAllTraits()
-            .values()
-            .stream()
-            .map(Trait::toShapeId)
-            .filter(elision.traits::includeTrait)
-            .allMatch(compressTraits::contains);
+                .values()
+                .stream()
+                .map(Trait::toShapeId)
+                .filter(elision.traits::includeTrait)
+                .allMatch(compressTraits::contains);
     }
 
     private void writeTraitsBitVector() {
@@ -87,11 +84,9 @@ class SchemaTraitWriter {
                 return;
             }
             buffer.append("""
-                [%s]: %s,\s""".formatted(
+                    [%s]: %s,\s""".formatted(
                     stringStore.var(shapeId.getName()),
-                    traitGenerator.serializeTraitData(trait, stringStore)
-                )
-            );
+                    traitGenerator.serializeTraitData(trait, stringStore)));
         });
 
         buffer.deleteCharAt(buffer.length() - 1);

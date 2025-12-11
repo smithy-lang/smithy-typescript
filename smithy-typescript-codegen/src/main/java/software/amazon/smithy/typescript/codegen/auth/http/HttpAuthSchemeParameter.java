@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http;
 
 import java.util.function.Consumer;
@@ -22,10 +21,9 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  */
 @SmithyUnstableApi
 public record HttpAuthSchemeParameter(
-    String name,
-    Consumer<TypeScriptWriter> type,
-    Consumer<TypeScriptWriter> source
-) implements ToSmithyBuilder<HttpAuthSchemeParameter> {
+        String name,
+        Consumer<TypeScriptWriter> type,
+        Consumer<TypeScriptWriter> source) implements ToSmithyBuilder<HttpAuthSchemeParameter> {
 
     public static Builder builder() {
         return new Builder();
@@ -34,9 +32,9 @@ public record HttpAuthSchemeParameter(
     @Override
     public SmithyBuilder<HttpAuthSchemeParameter> toBuilder() {
         return builder()
-            .name(name)
-            .type(type)
-            .source(source);
+                .name(name)
+                .type(type)
+                .source(source);
     }
 
     public static final class Builder implements SmithyBuilder<HttpAuthSchemeParameter> {
@@ -47,9 +45,9 @@ public record HttpAuthSchemeParameter(
         @Override
         public HttpAuthSchemeParameter build() {
             return new HttpAuthSchemeParameter(
-                SmithyBuilder.requiredState("name", name),
-                SmithyBuilder.requiredState("type", type),
-                SmithyBuilder.requiredState("source", source));
+                    SmithyBuilder.requiredState("name", name),
+                    SmithyBuilder.requiredState("type", type),
+                    SmithyBuilder.requiredState("source", source));
         }
 
         public Builder name(String name) {

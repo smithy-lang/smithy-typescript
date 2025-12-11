@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.knowledge;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -59,18 +63,24 @@ public class SerdeElisionIndexTest {
 
     @Test
     public void cannotElideNestedUnsupportedTypes() {
-        model = model.toBuilder().addShapes(
-                // Shim set shapes into 2.0 model.
-                SetShape.builder().id("foo.bar#BigDecimalSet").member(ShapeId.from("foo.bar#BigDecimal")).build(),
-                SetShape.builder().id("foo.bar#BigIntegerSet").member(ShapeId.from("foo.bar#BigInteger")).build(),
-                SetShape.builder().id("foo.bar#BlobSet").member(ShapeId.from("foo.bar#Blob")).build(),
-                SetShape.builder().id("foo.bar#DocumentSet").member(ShapeId.from("foo.bar#Document")).build(),
-                SetShape.builder().id("foo.bar#TimestampSet").member(ShapeId.from("foo.bar#Timestamp")).build(),
-                SetShape.builder().id("foo.bar#DoubleSet").member(ShapeId.from("foo.bar#Double")).build(),
-                SetShape.builder().id("foo.bar#FloatSet").member(ShapeId.from("foo.bar#Float")).build()
-        ).build();
+        model = model.toBuilder()
+                .addShapes(
+                        // Shim set shapes into 2.0 model.
+                        SetShape.builder()
+                                .id("foo.bar#BigDecimalSet")
+                                .member(ShapeId.from("foo.bar#BigDecimal"))
+                                .build(),
+                        SetShape.builder()
+                                .id("foo.bar#BigIntegerSet")
+                                .member(ShapeId.from("foo.bar#BigInteger"))
+                                .build(),
+                        SetShape.builder().id("foo.bar#BlobSet").member(ShapeId.from("foo.bar#Blob")).build(),
+                        SetShape.builder().id("foo.bar#DocumentSet").member(ShapeId.from("foo.bar#Document")).build(),
+                        SetShape.builder().id("foo.bar#TimestampSet").member(ShapeId.from("foo.bar#Timestamp")).build(),
+                        SetShape.builder().id("foo.bar#DoubleSet").member(ShapeId.from("foo.bar#Double")).build(),
+                        SetShape.builder().id("foo.bar#FloatSet").member(ShapeId.from("foo.bar#Float")).build())
+                .build();
         SerdeElisionIndex index = SerdeElisionIndex.of(model);
-
 
         assertFalse(index.mayElide(model.getShape(ShapeId.from("foo.bar#BigDecimalList")).get()));
         assertFalse(index.mayElide(model.getShape(ShapeId.from("foo.bar#BigIntegerList")).get()));

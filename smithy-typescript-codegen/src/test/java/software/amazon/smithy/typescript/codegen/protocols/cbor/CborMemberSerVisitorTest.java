@@ -1,4 +1,12 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,10 +21,6 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class CborMemberSerVisitorTest {
 
@@ -24,51 +28,46 @@ class CborMemberSerVisitorTest {
 
     @BeforeEach
     void setup(
-        @Mock ProtocolGenerator.GenerationContext context,
-        @Mock Model model,
-        @Mock TypeScriptWriter typeScriptWriter
+            @Mock ProtocolGenerator.GenerationContext context,
+            @Mock Model model,
+            @Mock TypeScriptWriter typeScriptWriter
     ) {
         when(context.getModel()).thenReturn(model);
         lenient().when(context.getWriter()).thenReturn(typeScriptWriter);
 
         subject = new CborMemberSerVisitor(
-            context,
-            "data"
-        );
+                context,
+                "data");
     }
 
     @Test
     void blobShape(@Mock BlobShape blob) {
         // no encoder for blob in cbor.
         assertEquals(
-            "data",
-            subject.blobShape(blob)
-        );
+                "data",
+                subject.blobShape(blob));
     }
 
     @Test
     void floatShape(@Mock FloatShape floatShape) {
         // no serializer function for float in cbor.
         assertEquals(
-            "data",
-            subject.floatShape(floatShape)
-        );
+                "data",
+                subject.floatShape(floatShape));
     }
 
     @Test
     void doubleShape(@Mock DoubleShape doubleShape) {
         // no serializer function for double in cbor.
         assertEquals(
-            "data",
-            subject.doubleShape(doubleShape)
-        );
+                "data",
+                subject.doubleShape(doubleShape));
     }
 
     @Test
     void timestampShape(@Mock TimestampShape timestampShape) {
         assertEquals(
-            "__dateToTag(data)",
-            subject.timestampShape(timestampShape)
-        );
+                "__dateToTag(data)",
+                subject.timestampShape(timestampShape));
     }
 }

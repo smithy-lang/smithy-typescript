@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.validation;
 
 import java.util.Set;
@@ -15,24 +14,23 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public class ImportFrom {
     public static final Set<String> NODE_NATIVE_DEPENDENCIES = SetUtils.of(
-        "buffer",
-        "child_process",
-        "crypto",
-        "dns",
-        "events",
-        "fs",
-        "http",
-        "http2",
-        "https",
-        "os",
-        "path",
-        "process",
-        "stream",
-        "tls",
-        "url",
-        "util",
-        "zlib"
-    );
+            "buffer",
+            "child_process",
+            "crypto",
+            "dns",
+            "events",
+            "fs",
+            "http",
+            "http2",
+            "https",
+            "os",
+            "path",
+            "process",
+            "stream",
+            "tls",
+            "url",
+            "util",
+            "zlib");
 
     private final String from;
 
@@ -49,7 +47,7 @@ public class ImportFrom {
     public boolean isNodejsNative() {
         String[] packageNameSegments = from.split("/");
         return from.startsWith("node:")
-            || NODE_NATIVE_DEPENDENCIES.contains(packageNameSegments[0]);
+                || NODE_NATIVE_DEPENDENCIES.contains(packageNameSegments[0]);
     }
 
     /**

@@ -1,18 +1,7 @@
 /*
- * Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
@@ -42,7 +31,7 @@ final class ServerCommandGenerator implements Runnable {
 
     static final String COMMANDS_FOLDER = "operations";
     private static final String NO_PROTOCOL_FOUND_SERDE_FUNCTION =
-        "(async (...args: any[]) => { throw new Error(\"No supported protocol was found\"); })";
+            "(async (...args: any[]) => { throw new Error(\"No supported protocol was found\"); })";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -120,14 +109,15 @@ final class ServerCommandGenerator implements Runnable {
             // Streaming makes the type of the object being validated weird on occasion.
             // Using `Parameters` here means we don't have to try to derive the weird type twice
             writer.write("export const validate: (obj: Parameters<typeof $1T.validate>[0]) => "
-                            + "__ValidationFailure[] = $1T.validate;", symbol);
+                    + "__ValidationFailure[] = $1T.validate;", symbol);
         });
     }
 
     private void writeOutputType(String typeName, Optional<StructureShape> outputShape) {
         if (outputShape.isPresent()) {
             writer.write("export interface $L extends $T {}",
-                    typeName, symbolProvider.toSymbol(outputShape.get()));
+                    typeName,
+                    symbolProvider.toSymbol(outputShape.get()));
         } else {
             writer.write("export interface $L {}", typeName);
         }
@@ -153,7 +143,9 @@ final class ServerCommandGenerator implements Runnable {
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
         writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
         writer.write("export type $L<Context> = __Operation<$T, $T, Context>",
-                operationSymbol.getName(), inputType, outputType);
+                operationSymbol.getName(),
+                inputType,
+                outputType);
         writer.write("");
     }
 
@@ -163,29 +155,40 @@ final class ServerCommandGenerator implements Runnable {
         Symbol serverSymbol = symbolProvider.toSymbol(model.expectShape(settings.getService()));
 
         writer.addImport("OperationSerializer", "__OperationSerializer", TypeScriptDependency.SERVER_COMMON);
-        writer.openBlock("export class $L implements __OperationSerializer<$T<any>, $S, $T> {", "}",
-                serializerName, serverSymbol, operationSymbol.getName(), errorsType, () -> {
-            if (protocolGenerator == null) {
-                writer.write("serialize = $L as any;", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
-                writer.write("deserialize = $L as any;", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
-            } else {
-                String serializerFunction =
-                    ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
-                writer.addRelativeImport(serializerFunction, null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
-                writer.write("serialize = $L;", serializerFunction);
-                String deserializerFunction =
-                    ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
-                writer.addRelativeImport(deserializerFunction, null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
-                writer.write("deserialize = $L;", deserializerFunction);
-            }
-            writer.write("");
-            writeErrorChecker();
-            writeErrorHandler();
-        });
+        writer.openBlock("export class $L implements __OperationSerializer<$T<any>, $S, $T> {",
+                "}",
+                serializerName,
+                serverSymbol,
+                operationSymbol.getName(),
+                errorsType,
+                () -> {
+                    if (protocolGenerator == null) {
+                        writer.write("serialize = $L as any;", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
+                        writer.write("deserialize = $L as any;", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
+                    } else {
+                        String serializerFunction =
+                                ProtocolGenerator.getGenericSerFunctionName(operationSymbol) + "Response";
+                        writer.addRelativeImport(serializerFunction,
+                                null,
+                                Paths.get(".",
+                                        CodegenUtils.SOURCE_FOLDER,
+                                        ProtocolGenerator.PROTOCOLS_FOLDER,
+                                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                        writer.write("serialize = $L;", serializerFunction);
+                        String deserializerFunction =
+                                ProtocolGenerator.getGenericDeserFunctionName(operationSymbol) + "Request";
+                        writer.addRelativeImport(deserializerFunction,
+                                null,
+                                Paths.get(".",
+                                        CodegenUtils.SOURCE_FOLDER,
+                                        ProtocolGenerator.PROTOCOLS_FOLDER,
+                                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                        writer.write("deserialize = $L;", deserializerFunction);
+                    }
+                    writer.write("");
+                    writeErrorChecker();
+                    writeErrorHandler();
+                });
         writer.write("");
     }
 
@@ -210,19 +213,22 @@ final class ServerCommandGenerator implements Runnable {
 
     private void writeErrorHandler() {
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
-        writer.openBlock("serializeError(error: $T, ctx: ServerSerdeContext): Promise<$T> {", "}",
-                errorsType, applicationProtocol.getResponseType(), () -> {
-            if (errors.isEmpty()) {
-                writer.write("throw error;");
-            } else {
-                writer.openBlock("switch (error.name) {", "}", () -> {
-                    for (StructureShape error : errors) {
-                        writeErrorHandlerCase(error);
+        writer.openBlock("serializeError(error: $T, ctx: ServerSerdeContext): Promise<$T> {",
+                "}",
+                errorsType,
+                applicationProtocol.getResponseType(),
+                () -> {
+                    if (errors.isEmpty()) {
+                        writer.write("throw error;");
+                    } else {
+                        writer.openBlock("switch (error.name) {", "}", () -> {
+                            for (StructureShape error : errors) {
+                                writeErrorHandlerCase(error);
+                            }
+                            writer.openBlock("default: {", "}", () -> writer.write("throw error;"));
+                        });
                     }
-                    writer.openBlock("default: {", "}", () -> writer.write("throw error;"));
                 });
-            }
-        });
         writer.write("");
     }
 
@@ -233,9 +239,12 @@ final class ServerCommandGenerator implements Runnable {
                 writer.write("return $L(error, ctx);", NO_PROTOCOL_FOUND_SERDE_FUNCTION);
             } else {
                 String serializerFunction = ProtocolGenerator.getGenericSerFunctionName(errorSymbol) + "Error";
-                writer.addRelativeImport(serializerFunction, null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                        ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
+                writer.addRelativeImport(serializerFunction,
+                        null,
+                        Paths.get(".",
+                                CodegenUtils.SOURCE_FOLDER,
+                                ProtocolGenerator.PROTOCOLS_FOLDER,
+                                ProtocolGenerator.getSanitizedName(protocolGenerator.getName())));
                 writer.write("return $L(error, ctx);", serializerFunction);
             }
         });
@@ -260,8 +269,8 @@ final class ServerCommandGenerator implements Runnable {
         }
 
         fileManifest.writeFile(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, COMMANDS_FOLDER, "index.ts")
-                .toString(),
-            writer.toString());
+                Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, COMMANDS_FOLDER, "index.ts")
+                        .toString(),
+                writer.toString());
     }
 }

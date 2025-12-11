@@ -1,18 +1,7 @@
 /*
- * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
@@ -54,7 +43,8 @@ class WaiterGenerator implements Runnable {
             ServiceShape service,
             OperationShape operation,
             TypeScriptWriter writer,
-            SymbolProvider symbolProvider) {
+            SymbolProvider symbolProvider
+    ) {
         this.waiterName = waiterName;
         this.waiter = waiter;
         this.writer = writer;
@@ -88,10 +78,11 @@ class WaiterGenerator implements Runnable {
                 + "waitFor" + waiterName + " does not throw error in non-success cases.");
         writer.openBlock("export const waitFor$L = async (params: WaiterConfiguration<$T>, input: $T): "
                 + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
-            writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
+                    writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };",
+                            waiter.getMinDelay(),
                             waiter.getMaxDelay());
-            writer.write("return createWaiter({...serviceDefaults, ...params}, input, checkState);");
-        });
+                    writer.write("return createWaiter({...serviceDefaults, ...params}, input, checkState);");
+                });
 
         // generates WaitUtil....
         writer.writeDocs(waiter.getDocumentation().orElse("") + " \n"
@@ -99,16 +90,21 @@ class WaiterGenerator implements Runnable {
                 + " @param input - The input to " + operationSymbol.getName() + " for polling.");
         writer.openBlock("export const waitUntil$L = async (params: WaiterConfiguration<$T>, input: $T): "
                 + "Promise<WaiterResult> => {", "}", waiterName, serviceSymbol, inputSymbol, () -> {
-            writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };", waiter.getMinDelay(),
-                    waiter.getMaxDelay());
-            writer.write("const result = await createWaiter({...serviceDefaults, ...params}, input, checkState);");
-            writer.write("return checkExceptions(result);");
-        });
+                    writer.write("const serviceDefaults = { minDelay: $L, maxDelay: $L };",
+                            waiter.getMinDelay(),
+                            waiter.getMaxDelay());
+                    writer.write(
+                            "const result = await createWaiter({...serviceDefaults, ...params}, input, checkState);");
+                    writer.write("return checkExceptions(result);");
+                });
     }
 
     private void generateAcceptors() {
-        writer.openBlock("const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {", "}",
-                serviceSymbol, inputSymbol, () -> {
+        writer.openBlock("const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {",
+                "}",
+                serviceSymbol,
+                inputSymbol,
+                () -> {
                     writer.write("let reason;");
                     writer.openBlock("try {", "}", () -> {
                         writer.write("let result: any = await client.send(new $T(input))", operationSymbol);
@@ -132,7 +128,8 @@ class WaiterGenerator implements Runnable {
                 }
             } else if (acceptor.getMatcher() instanceof Matcher.ErrorTypeMember) {
                 if (isException) {
-                    generateErrorMatcher(accessor, (Matcher.ErrorTypeMember) acceptor.getMatcher(),
+                    generateErrorMatcher(accessor,
+                            (Matcher.ErrorTypeMember) acceptor.getMatcher(),
                             acceptor.getState());
                 }
             } else if (acceptor.getMatcher() instanceof Matcher.InputOutputMember) {
@@ -157,8 +154,12 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateErrorMatcher(String accessor, Matcher.ErrorTypeMember member, AcceptorState state) {
-        writer.openBlock("if ($L.name && $L.name == $S) {", "}", accessor, accessor,
-                member.getValue(), () -> {
+        writer.openBlock("if ($L.name && $L.name == $S) {",
+                "}",
+                accessor,
+                accessor,
+                member.getValue(),
+                () -> {
                     writer.write("return $L", makeWaiterResult(state));
                 });
     }
@@ -191,20 +192,19 @@ class WaiterGenerator implements Runnable {
 
     private String makeWaiterResult(AcceptorState resultantState) {
         if (resultantState == AcceptorState.SUCCESS) {
-            return  "{ state: WaiterState.SUCCESS, reason }";
+            return "{ state: WaiterState.SUCCESS, reason }";
         } else if (resultantState == AcceptorState.FAILURE) {
-            return  "{ state: WaiterState.FAILURE, reason }";
+            return "{ state: WaiterState.FAILURE, reason }";
         } else if (resultantState == AcceptorState.RETRY) {
-            return  "{ state: WaiterState.RETRY, reason }";
+            return "{ state: WaiterState.RETRY, reason }";
         }
         throw new CodegenException("Hit an invalid acceptor state to codegen " + resultantState.toString());
     }
 
     private static String getModulePath(String fileLocation) {
         return fileLocation.substring(
-            fileLocation.lastIndexOf("/") + 1,
-            fileLocation.length()
-        ).replace(".ts", "");
+                fileLocation.lastIndexOf("/") + 1,
+                fileLocation.length()).replace(".ts", "");
     }
 
     static void writeIndex(
@@ -227,7 +227,7 @@ class WaiterGenerator implements Runnable {
         }
 
         fileManifest.writeFile(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, WAITERS_FOLDER,  "index.ts").toString(),
-            writer.toString());
+                Paths.get(CodegenUtils.SOURCE_FOLDER, WAITERS_FOLDER, "index.ts").toString(),
+                writer.toString());
     }
 }

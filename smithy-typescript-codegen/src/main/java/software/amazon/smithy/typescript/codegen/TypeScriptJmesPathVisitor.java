@@ -1,18 +1,7 @@
 /*
- * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
@@ -228,7 +217,10 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         expression.getRight().accept(this);
         String rightContext = executionContext;
 
-        executionContext = String.format("((%s || %s) && (%s || %s)) ", leftContext, rightContext, rightContext,
+        executionContext = String.format("((%s || %s) && (%s || %s)) ",
+                leftContext,
+                rightContext,
+                rightContext,
                 leftContext);
 
         return null;
@@ -247,12 +239,16 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
         String element = makeNewScope("element_");
         String result = makeNewScope("objectProjection_");
-        writer.openBlock("let $L = Object.values($L).map(($L: any) => {", "});", result,
-                executionContext, element, () -> {
-            executionContext = element;
-            expression.getRight().accept(this);
-            writer.write("return $L;", executionContext);
-        });
+        writer.openBlock("let $L = Object.values($L).map(($L: any) => {",
+                "});",
+                result,
+                executionContext,
+                element,
+                () -> {
+                    executionContext = element;
+                    expression.getRight().accept(this);
+                    writer.write("return $L;", executionContext);
+                });
         executionContext = result;
         return null;
     }
@@ -264,8 +260,12 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         if (!(expression.getRight() instanceof CurrentExpression)) {
             String element = makeNewScope("element_");
             String result = makeNewScope("projection_");
-            writer.openBlock("let $L = $L.map(($L: any) => {", "});", result,
-                    executionContext, element, () -> {
+            writer.openBlock("let $L = $L.map(($L: any) => {",
+                    "});",
+                    result,
+                    executionContext,
+                    element,
+                    () -> {
                         executionContext = element;
                         expression.getRight().accept(this);
                         writer.write("return $L;", executionContext);
@@ -284,12 +284,16 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
         String elementScope = makeNewScope("element_");
         String resultScope = makeNewScope("filterRes_");
-        writer.openBlock("let $L = $L.filter(($L: any) => {", "});", resultScope,
-                executionContext, elementScope, () -> {
-            executionContext = elementScope;
-            expression.getComparison().accept(this);
-            writer.write("return $L;", executionContext);
-        });
+        writer.openBlock("let $L = $L.filter(($L: any) => {",
+                "});",
+                resultScope,
+                executionContext,
+                elementScope,
+                () -> {
+                    executionContext = elementScope;
+                    expression.getComparison().accept(this);
+                    writer.write("return $L;", executionContext);
+                });
 
         executionContext = resultScope;
         return null;
@@ -346,17 +350,18 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     }
 
     private String serializeObject(Map<String, Object> obj) {
-        return "{" + obj.entrySet().stream()
-            .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
-            .collect(Collectors.joining(","))
-            + "}";
+        return "{" + obj.entrySet()
+                .stream()
+                .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
+                .collect(Collectors.joining(","))
+                + "}";
     }
 
     private String serializeArray(List<Object> array) {
         return "[" + array.stream()
-            .map(this::serializeValue)
-            .collect(Collectors.joining(","))
-            + "]";
+                .map(this::serializeValue)
+                .collect(Collectors.joining(","))
+                + "]";
     }
 
     @SuppressWarnings("unchecked")

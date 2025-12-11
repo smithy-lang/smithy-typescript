@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collection;
@@ -118,9 +107,11 @@ public interface ProtocolGenerator {
                     .collect(Collectors.joining(", "));
             throw new CodegenException(String.format(
                     "All of the protocols generated for a service must be runtime compatible, but "
-                    + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
-                    + "set of compatible protocols using the `protocols` option when generating %s.",
-                    getProtocol().getName(), protocolNames, service.getId()));
+                            + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
+                            + "set of compatible protocols using the `protocols` option when generating %s.",
+                    getProtocol().getName(),
+                    protocolNames,
+                    service.getId()));
         }
 
         return other;
@@ -131,8 +122,7 @@ public interface ProtocolGenerator {
      *
      * @param context Serde context.
      */
-    default void generateSharedComponents(GenerationContext context) {
-    }
+    default void generateSharedComponents(GenerationContext context) {}
 
     /**
      * Generates the code used to serialize the shapes of a service
@@ -317,8 +307,7 @@ public interface ProtocolGenerator {
         Map<String, ShapeId> errors = new LinkedHashMap<>();
         for (OperationShape operation : operations) {
             errors.putAll(
-                getOperationErrors(context, operation)
-            );
+                    getOperationErrors(context, operation));
         }
         return errors;
     }
@@ -327,7 +316,8 @@ public interface ProtocolGenerator {
      * @return map of fully qualified shape id to aliases and/or short names that should map to the same error.
      */
     default Map<String, TreeSet<String>> getErrorAliases(
-        GenerationContext context, Collection<OperationShape> operations
+            GenerationContext context,
+            Collection<OperationShape> operations
     ) {
         return Collections.emptyMap();
     }

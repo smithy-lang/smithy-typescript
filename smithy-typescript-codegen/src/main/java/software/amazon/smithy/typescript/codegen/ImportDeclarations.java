@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.io.File;
@@ -119,10 +108,10 @@ final class ImportDeclarations implements ImportContainer {
                     result.append("// @ts-ignore: ").append(importEntry.getValue().getRight().reason).append("\n");
                 }
                 result.append("import ")
-                    .append(importEntry.getValue().getLeft())
-                    .append(" from \"")
-                    .append(importEntry.getKey())
-                    .append("\";");
+                        .append(importEntry.getValue().getLeft())
+                        .append(" from \"")
+                        .append(importEntry.getKey())
+                        .append("\";");
                 if (ignore) {
                     result.append(" // eslint-disable-line");
                 }
@@ -136,9 +125,11 @@ final class ImportDeclarations implements ImportContainer {
         return result.toString();
     }
 
-    private static void createImports(Map<String, Map<String, String>> namedImports,
-                                      Map<String, Map<String, String>> namedTypeImports,
-                                      StringBuilder buffer) {
+    private static void createImports(
+            Map<String, Map<String, String>> namedImports,
+            Map<String, Map<String, String>> namedTypeImports,
+            StringBuilder buffer
+    ) {
         TreeSet<String> mergedModuleKeys = new TreeSet<>((a, b) -> {
             if (a.startsWith(".") && !b.startsWith(".")) {
                 return 1;
@@ -156,8 +147,8 @@ final class ImportDeclarations implements ImportContainer {
 
         // separate non-relative and relative imports.
         long separatorIndex = mergedModuleKeys.stream()
-            .filter(k -> !k.startsWith("."))
-            .count();
+                .filter(k -> !k.startsWith("."))
+                .count();
         int i = 0;
         boolean needsSeparator = separatorIndex > 0 && separatorIndex < mergedModuleKeys.size();
 
@@ -196,7 +187,7 @@ final class ImportDeclarations implements ImportContainer {
                 // "*" imports are not supported https://github.com/smithy-lang/smithy-typescript/issues/211
                 if ("*".equals(runtimeSymbol) || "*".equals(typeSymbol)) {
                     throw new CodegenException("Star imports are not supported, attempted for " + module
-                                               + ". Use default import instead.");
+                            + ". Use default import instead.");
                 }
 
                 if (runtimeSymbol != null) {

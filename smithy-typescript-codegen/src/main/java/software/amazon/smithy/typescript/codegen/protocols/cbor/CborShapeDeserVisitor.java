@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import java.util.Map;
@@ -24,7 +23,6 @@ import software.amazon.smithy.typescript.codegen.integration.DocumentShapeDeserV
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.typescript.codegen.validation.UnaryFunctionCall;
-
 
 public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
 
@@ -50,28 +48,26 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
             writer.write("const collection = (output || [])$L", filterExpression);
         } else {
             writer.openBlock(
-                "const collection = (output || [])$L.map((entry: any) => {",
-                "});",
-                filterExpression, () -> {
-                    if (filterExpression.isEmpty()) {
-                        writer.openBlock("if (entry === null) {", "}", () -> {
-                            if (!shape.hasTrait(SparseTrait.ID)) {
-                                writer.write(
-                                    "throw new TypeError('All elements of the non-sparse list $S must be non-null.');",
-                                    shape.getId()
-                                );
-                            } else {
-                                writer.write("return null as any;");
-                            }
-                        });
-                    }
+                    "const collection = (output || [])$L.map((entry: any) => {",
+                    "});",
+                    filterExpression,
+                    () -> {
+                        if (filterExpression.isEmpty()) {
+                            writer.openBlock("if (entry === null) {", "}", () -> {
+                                if (!shape.hasTrait(SparseTrait.ID)) {
+                                    writer.write(
+                                            "throw new TypeError('All elements of the non-sparse list $S must be non-null.');",
+                                            shape.getId());
+                                } else {
+                                    writer.write("return null as any;");
+                                }
+                            });
+                        }
 
-                    writer.write("return $L$L;",
-                        target.accept(getMemberVisitor("entry")),
-                        usesExpect(target) ? " as any" : ""
-                    );
-                }
-            );
+                        writer.write("return $L$L;",
+                                target.accept(getMemberVisitor("entry")),
+                                usesExpect(target) ? " as any" : "");
+                    });
         }
 
         writer.write("return collection;");
@@ -80,8 +76,8 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
     @Override
     protected void deserializeDocument(ProtocolGenerator.GenerationContext context, DocumentShape shape) {
         context.getWriter().write("""
-            return output; // document.
-            """);
+                return output; // document.
+                """);
     }
 
     @Override
@@ -91,28 +87,26 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
         SymbolProvider symbolProvider = context.getSymbolProvider();
 
         writer.openBlock("return Object.entries(output).reduce((acc: $T, [key, value]: [string, any]) => {",
-            "",
-            symbolProvider.toSymbol(shape),
-            () -> {
-                writer.openBlock("if (value !== null) {", "}", () -> {
-                    writer.write("acc[key as $T] = $L$L",
-                        symbolProvider.toSymbol(shape.getKey()),
-                        target.accept(getMemberVisitor("value")),
-                        usesExpect(target) ? " as any;" : ";"
-                    );
+                "",
+                symbolProvider.toSymbol(shape),
+                () -> {
+                    writer.openBlock("if (value !== null) {", "}", () -> {
+                        writer.write("acc[key as $T] = $L$L",
+                                symbolProvider.toSymbol(shape.getKey()),
+                                target.accept(getMemberVisitor("value")),
+                                usesExpect(target) ? " as any;" : ";");
+                    });
+
+                    if (shape.hasTrait(SparseTrait.ID)) {
+                        writer.write("else {")
+                                .indent();
+                        writer.write("acc[key as $T] = null as any;", symbolProvider.toSymbol(shape.getKey()))
+                                .dedent();
+                        writer.write("}");
+                    }
+
+                    writer.write("return acc;");
                 });
-
-                if (shape.hasTrait(SparseTrait.ID)) {
-                    writer.write("else {")
-                        .indent();
-                    writer.write("acc[key as $T] = null as any;", symbolProvider.toSymbol(shape.getKey()))
-                        .dedent();
-                    writer.write("}");
-                }
-
-                writer.write("return acc;");
-            }
-        );
         writer.writeInline("}, {} as $T);", symbolProvider.toSymbol(shape));
     }
 
@@ -145,14 +139,12 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
                         boolean isUnaryCall = UnaryFunctionCall.check(functionExpression);
                         if (isUnaryCall) {
                             writer.write("'$1L': $2L,",
-                                memberName,
-                                UnaryFunctionCall.toRef(functionExpression)
-                            );
+                                    memberName,
+                                    UnaryFunctionCall.toRef(functionExpression));
                         } else {
                             writer.write("'$1L': (_: any) => $2L,",
-                                memberName,
-                                functionExpression
-                            );
+                                    memberName,
+                                    functionExpression);
                         }
                     }
                 }
@@ -171,8 +163,7 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
             Shape target = model.expectShape(memberShape.getTarget());
 
             String memberValue = target.accept(
-                getMemberVisitor(PropertyAccessor.getFrom("output", memberName))
-            );
+                    getMemberVisitor(PropertyAccessor.getFrom("output", memberName)));
 
             if (usesExpect(target)) {
                 writer.openBlock("if ($L !== undefined) {", "}", memberValue, () -> {
@@ -180,18 +171,18 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
                 });
             } else {
                 writer.openBlock(
-                    "if ($1L != null) {", "}",
-                    PropertyAccessor.getFrom("output", memberName),
-                    () -> {
-                        writer.write("""
-                            return {
-                              $L: $L
-                            }
-                            """,
-                            memberName, memberValue
-                        );
-                    }
-                );
+                        "if ($1L != null) {",
+                        "}",
+                        PropertyAccessor.getFrom("output", memberName),
+                        () -> {
+                            writer.write("""
+                                    return {
+                                      $L: $L
+                                    }
+                                    """,
+                                    memberName,
+                                    memberValue);
+                        });
             }
         });
         writer.write("return { $$unknown: Object.entries(output)[0] };");
@@ -199,12 +190,12 @@ public class CborShapeDeserVisitor extends DocumentShapeDeserVisitor {
 
     private CborMemberDeserVisitor getMemberVisitor(String dataSource) {
         return new CborMemberDeserVisitor(
-            getContext(), dataSource
-        );
+                getContext(),
+                dataSource);
     }
 
     private boolean usesExpect(Shape shape) {
         return shape.isStringShape() || shape.isBooleanShape()
-            || (shape instanceof NumberShape && !shape.isBigDecimalShape() && !shape.isBigIntegerShape());
+                || (shape instanceof NumberShape && !shape.isBigDecimalShape() && !shape.isBigIntegerShape());
     }
 }

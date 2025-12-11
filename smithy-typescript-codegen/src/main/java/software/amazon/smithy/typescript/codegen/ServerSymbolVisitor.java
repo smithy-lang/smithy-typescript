@@ -1,18 +1,7 @@
 /*
- * Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import static software.amazon.smithy.typescript.codegen.TypeScriptDependency.SERVER_COMMON;
@@ -69,7 +58,7 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
     @Override
     public Symbol toSymbol(Shape shape) {
         if (shape.getType() == ShapeType.SERVICE
-            || shape.getType() == ShapeType.OPERATION) {
+                || shape.getType() == ShapeType.OPERATION) {
             Symbol symbol = shape.accept(this);
             LOGGER.fine(() -> "Creating symbol from " + shape + ": " + symbol);
             return escaper.escapeSymbol(shape, symbol);
@@ -120,8 +109,9 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
-        String prefixedNamespace = Paths.get(".", CodegenUtils.SOURCE_FOLDER,
-            (namespace.startsWith(".") ? namespace.substring(1) : namespace)).toString();
+        String prefixedNamespace = Paths.get(".",
+                CodegenUtils.SOURCE_FOLDER,
+                (namespace.startsWith(".") ? namespace.substring(1) : namespace)).toString();
         return createSymbolBuilder(shape, typeName, prefixedNamespace)
                 .definitionFile(toFilename(prefixedNamespace));
     }

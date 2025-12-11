@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.sections;
 
 import java.util.Map;
@@ -29,7 +28,7 @@ public final class HttpAuthSchemeParametersInterfaceCodeSection implements CodeS
         model = SmithyBuilder.requiredState("model", builder.model);
         symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
         httpAuthSchemeParameters =
-            SmithyBuilder.requiredState("httpAuthSchemeParameters", builder.httpAuthSchemeParameters);
+                SmithyBuilder.requiredState("httpAuthSchemeParameters", builder.httpAuthSchemeParameters);
     }
 
     public ServiceShape getService() {

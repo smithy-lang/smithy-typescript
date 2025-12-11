@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth;
 
 import java.nio.file.Paths;
@@ -38,7 +37,7 @@ public final class AuthUtils {
     public static final String HTTP_AUTH_FOLDER = "auth";
 
     public static final String HTTP_AUTH_SCHEME_PROVIDER_MODULE =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthSchemeProvider").toString();
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthSchemeProvider").toString();
 
     public static final String HTTP_AUTH_SCHEME_PROVIDER_PATH = HTTP_AUTH_SCHEME_PROVIDER_MODULE + ".ts";
 
@@ -55,7 +54,7 @@ public final class AuthUtils {
     };
 
     public static final String HTTP_AUTH_SCHEME_EXTENSION_MODULE =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthExtensionConfiguration").toString();
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthExtensionConfiguration").toString();
 
     public static final String HTTP_AUTH_SCHEME_EXTENSION_PATH = HTTP_AUTH_SCHEME_EXTENSION_MODULE + ".ts";
 
@@ -74,20 +73,20 @@ public final class AuthUtils {
     private AuthUtils() {}
 
     public static Map<ShapeId, HttpAuthScheme> getAllEffectiveNoAuthAwareAuthSchemes(
-        ServiceShape serviceShape,
-        ServiceIndex serviceIndex,
-        SupportedHttpAuthSchemesIndex authIndex,
-        TopDownIndex topDownIndex
+            ServiceShape serviceShape,
+            ServiceIndex serviceIndex,
+            SupportedHttpAuthSchemesIndex authIndex,
+            TopDownIndex topDownIndex
     ) {
         Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes = new TreeMap<>();
         var serviceEffectiveAuthSchemes =
-            serviceIndex.getEffectiveAuthSchemes(serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
+                serviceIndex.getEffectiveAuthSchemes(serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
         for (ShapeId shapeId : serviceEffectiveAuthSchemes.keySet()) {
             effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
         }
         for (var operation : topDownIndex.getContainedOperations(serviceShape)) {
             var operationEffectiveAuthSchemes =
-                serviceIndex.getEffectiveAuthSchemes(serviceShape, operation, AuthSchemeMode.NO_AUTH_AWARE);
+                    serviceIndex.getEffectiveAuthSchemes(serviceShape, operation, AuthSchemeMode.NO_AUTH_AWARE);
             for (ShapeId shapeId : operationEffectiveAuthSchemes.keySet()) {
                 effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
             }
@@ -115,11 +114,11 @@ public final class AuthUtils {
                     ConfigField existingConfigField = configFields.get(configField.name());
                     if (!configField.equals(existingConfigField)) {
                         throw new CodegenException("Contradicting `ConfigField` definitions for `"
-                            + configField.name()
-                            + "`; existing: "
-                            + existingConfigField
-                            + ", conflict: "
-                            + configField);
+                                + configField.name()
+                                + "`; existing: "
+                                + existingConfigField
+                                + ", conflict: "
+                                + configField);
                     }
                 } else {
                     configFields.put(configField.name(), configField);
@@ -130,7 +129,7 @@ public final class AuthUtils {
     }
 
     public static Map<Symbol, ResolveConfigFunction> collectResolveConfigFunctions(
-        Collection<HttpAuthScheme> httpAuthSchemes
+            Collection<HttpAuthScheme> httpAuthSchemes
     ) {
         Map<Symbol, ResolveConfigFunction> resolveConfigFunctions = new HashMap<>();
         for (HttpAuthScheme authScheme : httpAuthSchemes) {
@@ -140,14 +139,14 @@ public final class AuthUtils {
             for (ResolveConfigFunction fn : authScheme.getResolveConfigFunctions()) {
                 if (resolveConfigFunctions.containsKey(fn.resolveConfigFunction())) {
                     ResolveConfigFunction existingFn =
-                        resolveConfigFunctions.get(fn.resolveConfigFunction());
+                            resolveConfigFunctions.get(fn.resolveConfigFunction());
                     if (!fn.equals(existingFn)) {
                         throw new CodegenException("Contradicting `ResolveConfigFunction` definitions for `"
-                            + fn.resolveConfigFunction()
-                            + "`; existing: "
-                            + existingFn
-                            + ", conflict: "
-                            + fn);
+                                + fn.resolveConfigFunction()
+                                + "`; existing: "
+                                + existingFn
+                                + ", conflict: "
+                                + fn);
                     }
                 } else {
                     resolveConfigFunctions.put(fn.resolveConfigFunction(), fn);
@@ -158,7 +157,8 @@ public final class AuthUtils {
     }
 
     public static Map<String, HttpAuthSchemeParameter> collectHttpAuthSchemeParameters(
-        Collection<HttpAuthScheme> httpAuthSchemes) {
+            Collection<HttpAuthScheme> httpAuthSchemes
+    ) {
         Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters = new HashMap<>();
         for (HttpAuthScheme authScheme : httpAuthSchemes) {
             if (authScheme == null) {
@@ -169,11 +169,11 @@ public final class AuthUtils {
                     HttpAuthSchemeParameter existingParam = httpAuthSchemeParameters.get(param.name());
                     if (!param.equals(existingParam)) {
                         throw new CodegenException("Contradicting `HttpAuthSchemeParameter` definitions for `"
-                            + param.name()
-                            + "`; existing: "
-                            + existingParam
-                            + ", conflict: "
-                            + param);
+                                + param.name()
+                                + "`; existing: "
+                                + existingParam
+                                + ", conflict: "
+                                + param);
                     }
                 } else {
                     httpAuthSchemeParameters.put(param.name(), param);
@@ -184,8 +184,8 @@ public final class AuthUtils {
     }
 
     public static boolean areHttpAuthSchemesEqual(
-        Map<ShapeId, Trait> httpAuthSchemes1,
-        Map<ShapeId, Trait> httpAuthSchemes2
+            Map<ShapeId, Trait> httpAuthSchemes1,
+            Map<ShapeId, Trait> httpAuthSchemes2
     ) {
         if (httpAuthSchemes1.size() != httpAuthSchemes2.size()) {
             return false;

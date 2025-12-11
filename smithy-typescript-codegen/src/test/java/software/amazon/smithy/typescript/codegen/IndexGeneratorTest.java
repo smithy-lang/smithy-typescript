@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,12 +16,16 @@ public class IndexGeneratorTest {
 
     @Test
     public void writesIndex() {
-        Model model = Model.assembler().addImport(getClass().getResource("simple-service-with-operation.smithy")).assemble().unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("service", Node.from("smithy.example#Example"))
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("simple-service-with-operation.smithy"))
+                .assemble()
+                .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("service", Node.from("smithy.example#Example"))
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptWriter writer = new TypeScriptWriter("");
 

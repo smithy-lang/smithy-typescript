@@ -1,8 +1,13 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -19,173 +24,174 @@ public class StructureGeneratorTest {
     public void properlyGeneratesEmptyMessageMemberOfException() {
         testErrorStructureCodegen("error-test-empty.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void properlyGeneratesOptionalMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-message.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void properlyGeneratesRequiredMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-message.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void properlyGeneratesOptionalNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-optional-member-no-message.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  foo?: string | undefined;
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                    this.foo = opts.foo;
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          foo?: string | undefined;
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                            this.foo = opts.foo;
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void properlyGeneratesRequiredNonMessageMemberOfException() {
         testErrorStructureCodegen("error-test-required-member-no-message.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  foo: string | undefined;
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                    this.foo = opts.foo;
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          foo: string | undefined;
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                            this.foo = opts.foo;
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void generatesEmptyRetryableTrait() {
         testErrorStructureCodegen("error-test-retryable.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  $retryable = {};
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          $retryable = {};
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void generatesRetryableTraitWithThrottling() {
         testErrorStructureCodegen("error-test-retryable-throttling.smithy",
                 """
-                export class Err extends __BaseException {
-                  readonly name = "Err" as const;
-                  readonly $fault = "client" as const;
-                  $retryable = {
-                    throttling: true,
-                  };
-                  /**
-                   * @internal
-                   */
-                  constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
-                    super({
-                      name: "Err",
-                      $fault: "client",
-                      ...opts,
-                    });
-                    Object.setPrototypeOf(this, Err.prototype);
-                  }
-                }
-                """);
+                        export class Err extends __BaseException {
+                          readonly name = "Err" as const;
+                          readonly $fault = "client" as const;
+                          $retryable = {
+                            throttling: true,
+                          };
+                          /**
+                           * @internal
+                           */
+                          constructor(opts: __ExceptionOptionType<Err, __BaseException>) {
+                            super({
+                              name: "Err",
+                              $fault: "client",
+                              ...opts,
+                            });
+                            Object.setPrototypeOf(this, Err.prototype);
+                          }
+                        }
+                        """);
     }
 
     @Test
     public void properlyGeneratesRequiredMessageMemberNotBackwardCompatible() {
         testStructureCodegenBase("test-required-member.smithy",
                 """
-                export interface GetFooOutput {
-                  someRequiredMember: string;
-                }
-                """,
-                RequiredMemberMode.STRICT, true);
+                        export interface GetFooOutput {
+                          someRequiredMember: string;
+                        }
+                        """,
+                RequiredMemberMode.STRICT,
+                true);
     }
 
     private String testStructureCodegen(String file, String includedString) {
@@ -200,7 +206,8 @@ public class StructureGeneratorTest {
             String file,
             String testString,
             RequiredMemberMode requiredMemberMode,
-            boolean assertContains) {
+            boolean assertContains
+    ) {
         Model model = Model.assembler()
                 .addImport(getClass().getResource(file))
                 .assemble()
@@ -246,10 +253,11 @@ public class StructureGeneratorTest {
                 .addImport(getClass().getResource("simple-service.smithy"));
         struct.getAllMembers().values().forEach(assembler::addShape);
         Model model = assembler.assemble().unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
         new StructureGenerator(model, new SymbolVisitor(model, settings), writer, struct).run();
@@ -276,10 +284,11 @@ public class StructureGeneratorTest {
         OperationShape operation = OperationShape.builder().id("com.foo#Operation").output(struct).build();
         assembler.addShape(operation);
         Model model = assembler.assemble().unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
-                .withMember("package", Node.from("example"))
-                .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+        TypeScriptSettings settings = TypeScriptSettings.from(model,
+                Node.objectNodeBuilder()
+                        .withMember("package", Node.from("example"))
+                        .withMember("packageVersion", Node.from("1.0.0"))
+                        .build());
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
         new StructureGenerator(model, new SymbolVisitor(model, settings), writer, struct).run();

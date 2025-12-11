@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
@@ -85,7 +74,7 @@ public final class TypeScriptSettings {
     private ArtifactType artifactType = ArtifactType.CLIENT;
     private boolean disableDefaultValidation = false;
     private RequiredMemberMode requiredMemberMode =
-        RequiredMemberMode.NULLABLE;
+            RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
     private boolean createDefaultReadme = false;
     private boolean useLegacyAuth = false;
@@ -121,7 +110,8 @@ public final class TypeScriptSettings {
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
         settings.setPackageVersion(config.expectStringMember(PACKAGE_VERSION).getValue());
         settings.setPackageDescription(config.getStringMemberOrDefault(
-                PACKAGE_DESCRIPTION, settings.getDefaultDescription()));
+                PACKAGE_DESCRIPTION,
+                settings.getDefaultDescription()));
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
         config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
@@ -133,32 +123,29 @@ public final class TypeScriptSettings {
                 config.getBooleanMember(GENERATE_TYPEDOC).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
                 config.getStringMember(PACKAGE_MANAGER)
-                    .map(s -> PackageManager.fromString(s.getValue()))
-                    .orElse(PackageManager.YARN));
+                        .map(s -> PackageManager.fromString(s.getValue()))
+                        .orElse(PackageManager.YARN));
 
         if (artifactType == ArtifactType.SSDK) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
         settings.setRequiredMemberMode(
-            config.getStringMember(REQUIRED_MEMBER_MODE)
-                .map(s -> RequiredMemberMode.fromString(s.getValue()))
-                .orElse(RequiredMemberMode.NULLABLE));
+                config.getStringMember(REQUIRED_MEMBER_MODE)
+                        .map(s -> RequiredMemberMode.fromString(s.getValue()))
+                        .orElse(RequiredMemberMode.NULLABLE));
 
         settings.setPluginSettings(config);
         settings.readProtocolPriorityConfiguration(config);
         settings.setBigNumberMode(
-            config.getStringMemberOrDefault("bigNumberMode", "native")
-        );
+                config.getStringMemberOrDefault("bigNumberMode", "native"));
 
         // Internal undocumented configuration used to control rollout of schemas.
         // `true` will eventually be the only available option, and this should not be set by users.
         settings.setGenerateSchemas(
-            config.getBooleanMemberOrDefault("generateSchemas", false)
-        );
+                config.getBooleanMemberOrDefault("generateSchemas", false));
 
         settings.setGenerateIndexTests(
-            config.getBooleanMemberOrDefault("generateIndexTests", false)
-        );
+                config.getBooleanMemberOrDefault("generateIndexTests", false));
 
         return settings;
     }
@@ -187,10 +174,10 @@ public final class TypeScriptSettings {
 
         if (services.isEmpty()) {
             throw new CodegenException("Cannot infer a service to generate because the model does not "
-                                       + "contain any service shapes");
+                    + "contain any service shapes");
         } else if (services.size() > 1) {
             throw new CodegenException("Cannot infer a service to generate because the model contains "
-                                       + "multiple service shapes: " + services);
+                    + "multiple service shapes: " + services);
         } else {
             LOGGER.fine("Inferring service to generate as " + services.get(0));
             return services.get(0);
@@ -249,7 +236,7 @@ public final class TypeScriptSettings {
     public void setBigNumberMode(String mode) {
         if (!mode.equals("big.js") && !mode.equals("native")) {
             throw new IllegalArgumentException("""
-                bigNumberMode must be one of ["native", "big.js"]""");
+                    bigNumberMode must be one of ["native", "big.js"]""");
         }
         this.bigNumberMode = mode;
     }
@@ -406,15 +393,17 @@ public final class TypeScriptSettings {
     }
 
     public void setRequiredMemberMode(
-        RequiredMemberMode requiredMemberMode) {
-            if (requiredMemberMode != RequiredMemberMode.NULLABLE) {
-                LOGGER.warning(String.format("By setting the required member mode to '%s', a"
+            RequiredMemberMode requiredMemberMode
+    ) {
+        if (requiredMemberMode != RequiredMemberMode.NULLABLE) {
+            LOGGER.warning(String.format("By setting the required member mode to '%s', a"
                     + " member that has the '@required' trait applied CANNOT be 'undefined'."
                     + " It will be considered a BACKWARDS INCOMPATIBLE change for"
                     + " Smithy services even when the required constraint is dropped from a member.",
-                    requiredMemberMode.mode, RequiredMemberMode.NULLABLE.mode));
-            }
-            this.requiredMemberMode = requiredMemberMode;
+                    requiredMemberMode.mode,
+                    RequiredMemberMode.NULLABLE.mode));
+        }
+        this.requiredMemberMode = requiredMemberMode;
     }
 
     /**
@@ -447,9 +436,9 @@ public final class TypeScriptSettings {
     public void useLegacyAuth(boolean useLegacyAuth) {
         if (useLegacyAuth) {
             LOGGER.warning("""
-                Legacy auth is considered deprecated and is no longer in development,
-                and should only be used for backward compatibility concerns. Consider
-                migrating to the default identity and auth behavior.""");
+                    Legacy auth is considered deprecated and is no longer in development,
+                    and should only be used for backward compatibility concerns. Consider
+                    migrating to the default identity and auth behavior.""");
         }
         this.useLegacyAuth = useLegacyAuth;
     }
@@ -517,22 +506,24 @@ public final class TypeScriptSettings {
         if (resolvedProtocols.isEmpty()) {
             throw new UnresolvableProtocolException(
                     "Unable to derive the protocol setting of the service `" + service.getId() + "` because no "
-                    + "protocol definition traits were present. You need to set an explicit `protocol` to "
-                    + "generate in smithy-build.json to generate this service.");
+                            + "protocol definition traits were present. You need to set an explicit `protocol` to "
+                            + "generate in smithy-build.json to generate this service.");
         }
 
         List<ShapeId> protocolPriority = this.protocolPriorityConfig.getProtocolPriority(service.toShapeId());
         List<ShapeId> protocolPriorityList = protocolPriority != null && !protocolPriority.isEmpty()
-            ? protocolPriority
-            : new ArrayList<>(supportedProtocols);
+                ? protocolPriority
+                : new ArrayList<>(supportedProtocols);
 
         return protocolPriorityList.stream()
                 .filter(resolvedProtocols::contains)
                 .findFirst()
                 .orElseThrow(() -> new UnresolvableProtocolException(String.format(
                         "The %s service supports the following unsupported protocols %s. The following protocol "
-                        + "generators were found on the class path: %s",
-                        service.getId(), resolvedProtocols, supportedProtocols)));
+                                + "generators were found on the class path: %s",
+                        service.getId(),
+                        resolvedProtocols,
+                        supportedProtocols)));
     }
 
     /**
@@ -575,24 +566,46 @@ public final class TypeScriptSettings {
     public enum ArtifactType {
         CLIENT(SymbolVisitor::new,
                 Arrays.asList(
-                    PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                    SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                    CREATE_DEFAULT_README, USE_LEGACY_AUTH, GENERATE_TYPEDOC,
-                    GENERATE_INDEX_TESTS, BIG_NUMBER_MODE, GENERATE_SCHEMAS
-                )),
+                        PACKAGE,
+                        PACKAGE_DESCRIPTION,
+                        PACKAGE_JSON,
+                        PACKAGE_VERSION,
+                        PACKAGE_MANAGER,
+                        SERVICE,
+                        PROTOCOL,
+                        PRIVATE,
+                        REQUIRED_MEMBER_MODE,
+                        CREATE_DEFAULT_README,
+                        USE_LEGACY_AUTH,
+                        GENERATE_TYPEDOC,
+                        GENERATE_INDEX_TESTS,
+                        BIG_NUMBER_MODE,
+                        GENERATE_SCHEMAS)),
         SSDK((m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
                 Arrays.asList(
-                    PACKAGE, PACKAGE_DESCRIPTION, PACKAGE_JSON, PACKAGE_VERSION, PACKAGE_MANAGER,
-                    SERVICE, PROTOCOL, PRIVATE, REQUIRED_MEMBER_MODE,
-                    DISABLE_DEFAULT_VALIDATION, CREATE_DEFAULT_README, GENERATE_TYPEDOC,
-                    GENERATE_INDEX_TESTS, BIG_NUMBER_MODE, GENERATE_SCHEMAS
-                ));
+                        PACKAGE,
+                        PACKAGE_DESCRIPTION,
+                        PACKAGE_JSON,
+                        PACKAGE_VERSION,
+                        PACKAGE_MANAGER,
+                        SERVICE,
+                        PROTOCOL,
+                        PRIVATE,
+                        REQUIRED_MEMBER_MODE,
+                        DISABLE_DEFAULT_VALIDATION,
+                        CREATE_DEFAULT_README,
+                        GENERATE_TYPEDOC,
+                        GENERATE_INDEX_TESTS,
+                        BIG_NUMBER_MODE,
+                        GENERATE_SCHEMAS));
 
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
 
-        ArtifactType(BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory,
-                     List<String> configProperties) {
+        ArtifactType(
+                BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory,
+                List<String> configProperties
+        ) {
             this.symbolProviderFactory = symbolProviderFactory;
             this.configProperties = Collections.unmodifiableList(configProperties);
         }
@@ -702,33 +715,29 @@ public final class TypeScriptSettings {
                 ObjectNode objectNode = protocolPriorityNode.get();
                 objectNode.getMembers().forEach((StringNode k, Node v) -> {
                     ShapeId serviceShapeId = ShapeId.from(k.getValue());
-                    List<ShapeId> protocolList = v.asArrayNode().get().getElementsAs(
-                        e -> ShapeId.from(e.asStringNode().get().getValue())
-                    );
+                    List<ShapeId> protocolList = v.asArrayNode()
+                            .get()
+                            .getElementsAs(
+                                    e -> ShapeId.from(e.asStringNode().get().getValue()));
                     serviceProtocolPriorityCustomizations.put(
-                        serviceShapeId,
-                        protocolList
-                    );
+                            serviceShapeId,
+                            protocolList);
                 });
             }
             Optional<ArrayNode> defaultProtocolPriorityOpt = config.getArrayMember(DEFAULT_PROTOCOL_PRIORITY);
             if (defaultProtocolPriorityOpt.isPresent()) {
                 ArrayNode defaultProtocolPriorityStringArr = defaultProtocolPriorityOpt.get();
                 customDefaultPriority.addAll(
-                    defaultProtocolPriorityStringArr.getElementsAs(
-                        e -> ShapeId.from(e.asStringNode().get().getValue())
-                    )
-                );
+                        defaultProtocolPriorityStringArr.getElementsAs(
+                                e -> ShapeId.from(e.asStringNode().get().getValue())));
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                "Error while parsing serviceProtocolPriority or defaultProtocolPriority configuration fields",
-                e
-            );
+                    "Error while parsing serviceProtocolPriority or defaultProtocolPriority configuration fields",
+                    e);
         }
         protocolPriorityConfig = new ProtocolPriorityConfig(
-            serviceProtocolPriorityCustomizations,
-            customDefaultPriority.isEmpty() ? null : customDefaultPriority
-        );
+                serviceProtocolPriorityCustomizations,
+                customDefaultPriority.isEmpty() ? null : customDefaultPriority);
     }
 }

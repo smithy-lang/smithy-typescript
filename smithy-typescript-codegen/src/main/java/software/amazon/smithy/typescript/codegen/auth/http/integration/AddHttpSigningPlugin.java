@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import static software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention.HAS_MIDDLEWARE;
@@ -30,10 +29,10 @@ public class AddHttpSigningPlugin implements TypeScriptIntegration {
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return List.of(RuntimeClientPlugin.builder()
-            .withConventions(
-                TypeScriptDependency.SMITHY_CORE.dependency,
-                "HttpSigning",
-                HAS_MIDDLEWARE)
-            .build());
+                .withConventions(
+                        TypeScriptDependency.SMITHY_CORE.dependency,
+                        "HttpSigning",
+                        HAS_MIDDLEWARE)
+                .build());
     }
 }

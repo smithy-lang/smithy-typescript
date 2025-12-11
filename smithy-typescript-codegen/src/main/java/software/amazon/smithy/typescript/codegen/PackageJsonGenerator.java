@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.io.InputStream;
@@ -46,16 +35,15 @@ final class PackageJsonGenerator {
 
         ObjectNode userSuppliedPackageJson = settings.getPackageJson();
         ObjectNode defaultPackageJson = Node.parse(IoUtils.toUtf8String(resource))
-            .expectObjectNode();
+                .expectObjectNode();
 
         ObjectNode mergedScripts = defaultPackageJson.expectObjectMember("scripts")
-            .merge(
-                userSuppliedPackageJson.getObjectMember("scripts")
-                    .orElse(ObjectNode.builder().build())
-            );
+                .merge(
+                        userSuppliedPackageJson.getObjectMember("scripts")
+                                .orElse(ObjectNode.builder().build()));
 
         ObjectNode node = defaultPackageJson.merge(userSuppliedPackageJson)
-            .withMember("scripts", mergedScripts);
+                .withMember("scripts", mergedScripts);
 
         // Merge TypeScript dependencies into the package.json file.
         for (Map.Entry<String, Map<String, SymbolDependency>> depEntry : dependencies.entrySet()) {
@@ -74,24 +62,25 @@ final class PackageJsonGenerator {
             scripts = scripts.withMember("test", "yarn g:vitest run --passWithNoTests");
             node = node.withMember("scripts", scripts);
 
-            manifest.writeFile(VITEST_CONFIG_FILENAME, IoUtils.toUtf8String(
-                PackageJsonGenerator.class.getResourceAsStream(VITEST_CONFIG_FILENAME)));
+            manifest.writeFile(VITEST_CONFIG_FILENAME,
+                    IoUtils.toUtf8String(
+                            PackageJsonGenerator.class.getResourceAsStream(VITEST_CONFIG_FILENAME)));
         }
 
         if (settings.generateTypeDoc()) {
             // Add typedoc to the "devDependencies" if not present
             if (devDeps.getMember(TypeScriptDependency.TYPEDOC.packageName).isEmpty()) {
                 devDeps = devDeps.withMember(
-                    TypeScriptDependency.TYPEDOC.packageName,
-                    TypeScriptDependency.TYPEDOC.version);
+                        TypeScriptDependency.TYPEDOC.packageName,
+                        TypeScriptDependency.TYPEDOC.version);
                 node = node.withMember("devDependencies", devDeps);
             }
 
             // Add @smithy/service-client-documentation-generator to the "devDependencies" if not present
             if (devDeps.getMember(TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.packageName).isEmpty()) {
                 devDeps = devDeps.withMember(
-                    TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.packageName,
-                    TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.version);
+                        TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.packageName,
+                        TypeScriptDependency.AWS_SDK_CLIENT_DOCGEN.version);
                 node = node.withMember("devDependencies", devDeps);
             }
 
@@ -107,11 +96,15 @@ final class PackageJsonGenerator {
         // These are currently only generated for clients, but they may be needed for ssdk as well.
         if (settings.generateClient()) {
             // Add the Node vs Browser hook.
-            node = node.withMember("browser", node.getObjectMember("browser").orElse(Node.objectNode())
-                    .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.browser"));
+            node = node.withMember("browser",
+                    node.getObjectMember("browser")
+                            .orElse(Node.objectNode())
+                            .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.browser"));
             // Add the ReactNative hook.
-            node = node.withMember("react-native", node.getObjectMember("react-native").orElse(Node.objectNode())
-                    .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.native"));
+            node = node.withMember("react-native",
+                    node.getObjectMember("react-native")
+                            .orElse(Node.objectNode())
+                            .withMember("./dist-es/runtimeConfig", "./dist-es/runtimeConfig.native"));
         }
 
         // Set the package to private if required.
@@ -121,9 +114,8 @@ final class PackageJsonGenerator {
 
         if (!settings.generateIndexTests()) {
             node = node.withMember(
-                "scripts",
-                node.getObjectMember("scripts").get().withoutMember("test:index")
-            );
+                    "scripts",
+                    node.getObjectMember("scripts").get().withoutMember("test:index"));
         }
 
         // Expand template parameters.

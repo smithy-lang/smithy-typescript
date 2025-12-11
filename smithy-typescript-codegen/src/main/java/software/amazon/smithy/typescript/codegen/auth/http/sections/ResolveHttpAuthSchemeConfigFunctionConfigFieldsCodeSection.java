@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.sections;
 
 import java.util.List;
@@ -69,7 +68,7 @@ public final class ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection im
         private Model model;
         private SymbolProvider symbolProvider;
         private List<TypeScriptIntegration> integrations;
-        private Map<String, ConfigField>  configFields;
+        private Map<String, ConfigField> configFields;
 
         @Override
         public ResolveHttpAuthSchemeConfigFunctionConfigFieldsCodeSection build() {

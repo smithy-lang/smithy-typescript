@@ -1,4 +1,10 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.schema;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,8 +15,6 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndexTest;
 import software.amazon.smithy.typescript.codegen.util.StringStore;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class SchemaTraitWriterTest {
     private static Model model;
     private static SchemaReferenceIndex schemaReferenceIndex;
@@ -19,15 +23,14 @@ class SchemaTraitWriterTest {
     @BeforeAll
     public static void before() {
         model = Model.assembler()
-            .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
-            .assemble()
-            .unwrap();
+                .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
+                .assemble()
+                .unwrap();
         schemaReferenceIndex = new SchemaReferenceIndex(model);
         subject = new SchemaTraitWriter(
-            null,
-            schemaReferenceIndex,
-            new StringStore()
-        );
+                null,
+                schemaReferenceIndex,
+                new StringStore());
     }
 
     @Test
@@ -36,13 +39,12 @@ class SchemaTraitWriterTest {
         assertEquals(1, streamingShapes.size());
         for (Shape streamingShape : streamingShapes) {
             subject = new SchemaTraitWriter(
-                streamingShape,
-                schemaReferenceIndex,
-                new StringStore()
-            );
+                    streamingShape,
+                    schemaReferenceIndex,
+                    new StringStore());
             String codeGeneration = subject.toString();
             assertEquals("""
-                { [_s]: 1 }""", codeGeneration);
+                    { [_s]: 1 }""", codeGeneration);
         }
     }
 }
