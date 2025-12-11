@@ -11,12 +11,10 @@ import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 
 public class LongValidatorTest {
+
     @Test
     public void findsDoubles() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("long-validation.smithy"))
-                .assemble()
-                .unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("long-validation.smithy")).assemble().unwrap();
         TypeScriptSettings settings = new TypeScriptSettings();
         settings.setService(ShapeId.from("smithy.example#Example"));
         LongValidator validator = new LongValidator(settings);

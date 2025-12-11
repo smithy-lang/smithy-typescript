@@ -85,8 +85,7 @@ public final class ApplicationProtocol {
         if (typeOnly) {
             builder.putProperty("typeOnly", true);
         }
-        return builder
-            .build();
+        return builder.build();
     }
 
     /**
@@ -155,9 +154,11 @@ public final class ApplicationProtocol {
         }
 
         ApplicationProtocol that = (ApplicationProtocol) o;
-        return optionsType.equals(that.optionsType)
-               && requestType.equals(that.requestType)
-               && responseType.equals(that.responseType);
+        return (
+            optionsType.equals(that.optionsType) &&
+            requestType.equals(that.requestType) &&
+            responseType.equals(that.responseType)
+        );
     }
 
     @Override

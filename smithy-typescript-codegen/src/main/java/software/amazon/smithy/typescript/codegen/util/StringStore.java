@@ -28,6 +28,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class StringStore {
+
     /**
      * Words are the component strings found within `camelCaseWords` or `header-dashed-words`.
      */
@@ -179,13 +180,11 @@ public class StringStore {
 
     @SmithyInternalApi
     public static final class WithSchemaWriter extends StringStore {
+
         private final TypeScriptWriter writer;
         private final StringStore store;
 
-        private WithSchemaWriter(
-            TypeScriptWriter writer,
-            StringStore store
-        ) {
+        private WithSchemaWriter(TypeScriptWriter writer, StringStore store) {
             this.writer = writer;
             this.store = store;
         }
@@ -193,18 +192,14 @@ public class StringStore {
         @Override
         public String var(String literal) {
             String var = store.var(literal);
-            writer.addRelativeImport(
-                var, null, Path.of("./schemas_0")
-            );
+            writer.addRelativeImport(var, null, Path.of("./schemas_0"));
             return var;
         }
 
         @Override
         public String var(String literal, String preferredPrefix) {
             String var = store.var(literal, preferredPrefix);
-            writer.addRelativeImport(
-                var, null, Path.of("./schemas_0")
-            );
+            writer.addRelativeImport(var, null, Path.of("./schemas_0"));
             return var;
         }
     }

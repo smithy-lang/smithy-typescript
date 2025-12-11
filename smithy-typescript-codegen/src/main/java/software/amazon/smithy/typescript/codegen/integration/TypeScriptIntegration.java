@@ -40,8 +40,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public interface TypeScriptIntegration
-        extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
-
+    extends SmithyIntegration<TypeScriptSettings, TypeScriptWriter, TypeScriptCodegenContext> {
     /**
      * Filters the integration based on {@link TypeScriptSettings}.
      *
@@ -121,10 +120,10 @@ public interface TypeScriptIntegration
      * @param writer TypeScript writer to write to.
      */
     default void addConfigInterfaceFields(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer
     ) {
         // pass
     }
@@ -222,12 +221,12 @@ public interface TypeScriptIntegration
      * @return Returns a map of config property name and a consumer function with TypeScriptWriter parameter.
      */
     default Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            LanguageTarget target
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        LanguageTarget target
     ) {
-         return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
     /**

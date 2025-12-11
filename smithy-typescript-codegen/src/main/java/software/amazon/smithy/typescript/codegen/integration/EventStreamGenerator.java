@@ -52,6 +52,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public class EventStreamGenerator {
+
     public static boolean isEventStreamShape(Shape shape) {
         return shape instanceof UnionShape && shape.hasTrait(StreamingTrait.class);
     }
@@ -83,14 +84,16 @@ public class EventStreamGenerator {
     }
 
     public static MemberShape getEventStreamMember(GenerationContext context, StructureShape struct) {
-        List<MemberShape> eventStreamMembers = struct.members()
+        List<MemberShape> eventStreamMembers = struct
+            .members()
             .stream()
             .filter(shape -> {
                 Shape target = context.getModel().expectShape(shape.getTarget());
                 boolean targetStreaming = target.hasTrait(StreamingTrait.class);
                 boolean targetUnion = target.isUnionShape();
                 return targetUnion && targetStreaming;
-            }).toList();
+            })
+            .toList();
 
         if (eventStreamMembers.isEmpty()) {
             throw new CodegenException("No event stream member found in " + struct.getId().toString());
@@ -122,20 +125,23 @@ public class EventStreamGenerator {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         TreeSet<UnionShape> eventUnionsToSerialize = new TreeSet<>();
-        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall = new TreeSet<>(
-            (a, b) -> Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo)
+        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall = new TreeSet<>((a, b) ->
+            Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo)
         );
 
         for (OperationShape operation : operations) {
             if (hasEventStreamInput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamInputShape(context, operation);
                 eventUnionsToSerialize.add(eventsUnion);
-                eventsUnion.members()
+                eventsUnion
+                    .members()
                     .forEach(member -> {
-                        eventShapesToMarshall.add(Pair.of(
-                            member.getMemberName(),
-                            model.expectShape(member.getTarget()).asStructureShape().get()
-                        ));
+                        eventShapesToMarshall.add(
+                            Pair.of(
+                                member.getMemberName(),
+                                model.expectShape(member.getTarget()).asStructureShape().get()
+                            )
+                        );
                     });
             }
         }
@@ -188,9 +194,11 @@ public class EventStreamGenerator {
             if (hasEventStreamOutput(context, operation)) {
                 UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
                 eventUnionsToDeserialize.add(eventsUnion);
-                Set<StructureShape> eventShapes = eventsUnion.members().stream()
-                        .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
-                        .collect(Collectors.toSet());
+                Set<StructureShape> eventShapes = eventsUnion
+                    .members()
+                    .stream()
+                    .map(member -> model.expectShape(member.getTarget()).asStructureShape().get())
+                    .collect(Collectors.toSet());
                 eventShapes.forEach(eventShapesToUnmarshall::add);
             }
         }
@@ -213,8 +221,10 @@ public class EventStreamGenerator {
 
     private void generateEventStreamSerializer(GenerationContext context, UnionShape eventsUnion) {
         String methodName = getSerFunctionName(context, eventsUnion);
-        String methodLongName = ProtocolGenerator.getSerFunctionName(getSymbol(context, eventsUnion),
-                context.getProtocolName());
+        String methodLongName = ProtocolGenerator.getSerFunctionName(
+            getSymbol(context, eventsUnion),
+            context.getProtocolName()
+        );
         Symbol eventsUnionSymbol = getSymbol(context, eventsUnion);
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
@@ -222,22 +232,26 @@ public class EventStreamGenerator {
 
         writer.writeDocs(methodLongName);
         writer.openBlock("""
-            const $L = (
-              input: any,
-              context: $L
-            ): any => {""", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
-            Symbol materializedSymbol = eventsUnionSymbol.toBuilder()
-                .putProperty("typeOnly", false)
-                .build();
-            writer.openBlock("const eventMarshallingVisitor = (event: any): __Message => $T.visit(event, {", "});",
-                materializedSymbol, () -> {
-                    eventsUnion.getAllMembers().forEach((memberName, memberShape) -> {
-                        StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
-                        String eventSerMethodName = getEventSerFunctionName(context, target);
-                        writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
-                    });
+        const $L = (
+          input: any,
+          context: $L
+        ): any => {""", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
+            Symbol materializedSymbol = eventsUnionSymbol.toBuilder().putProperty("typeOnly", false).build();
+            writer.openBlock(
+                "const eventMarshallingVisitor = (event: any): __Message => $T.visit(event, {",
+                "});",
+                materializedSymbol,
+                () -> {
+                    eventsUnion
+                        .getAllMembers()
+                        .forEach((memberName, memberShape) -> {
+                            StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
+                            String eventSerMethodName = getEventSerFunctionName(context, target);
+                            writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
+                        });
                     writer.write("_: value => value as any");
-                });
+                }
+            );
             writer.write("return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);");
         });
     }
@@ -256,8 +270,11 @@ public class EventStreamGenerator {
         writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         String contextType = "__SerdeContext";
         if (eventsUnion.hasTrait(StreamingTrait.class)) {
-            writer.addTypeImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
-                    TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport(
+                "EventStreamSerdeContext",
+                "__EventStreamSerdeContext",
+                TypeScriptDependency.SMITHY_TYPES
+            );
             contextType += " & __EventStreamSerdeContext";
         }
         return contextType;
@@ -281,21 +298,29 @@ public class EventStreamGenerator {
         Symbol symbol = getSymbol(context, event);
         TypeScriptWriter writer = context.getWriter();
         writer.addTypeImport("MessageHeaders", "__MessageHeaders", TypeScriptDependency.SMITHY_TYPES);
-        writer.openBlock("const $L = (\n"
-                + "  input: $T,\n"
-                + "  context: __SerdeContext\n"
-                + "): __Message => {", "}", methodName, symbol, () -> {
-            writer.openBlock("const headers: __MessageHeaders = {", "}", () -> {
-                //fix headers required by event stream
-                writer.write("\":event-type\": { type: \"string\", value: $S },", memberName);
-                writer.write("\":message-type\": { type: \"string\", value: \"event\" },");
-                writeEventContentTypeHeader(context, event, documentContentType);
-            });
-            writeEventHeaders(context, event);
-            writeEventBody(context, event, serializeInputEventDocumentPayload,
-                    documentShapesToSerialize, serdeElisionIndex);
-            writer.openBlock("return { headers, body };");
-        });
+        writer.openBlock(
+            "const $L = (\n" + "  input: $T,\n" + "  context: __SerdeContext\n" + "): __Message => {",
+            "}",
+            methodName,
+            symbol,
+            () -> {
+                writer.openBlock("const headers: __MessageHeaders = {", "}", () -> {
+                    //fix headers required by event stream
+                    writer.write("\":event-type\": { type: \"string\", value: $S },", memberName);
+                    writer.write("\":message-type\": { type: \"string\", value: \"event\" },");
+                    writeEventContentTypeHeader(context, event, documentContentType);
+                });
+                writeEventHeaders(context, event);
+                writeEventBody(
+                    context,
+                    event,
+                    serializeInputEventDocumentPayload,
+                    documentShapesToSerialize,
+                    serdeElisionIndex
+                );
+                writer.openBlock("return { headers, body };");
+            }
+        );
     }
 
     private void writeEventContentTypeHeader(
@@ -305,9 +330,11 @@ public class EventStreamGenerator {
     ) {
         TypeScriptWriter writer = context.getWriter();
         Optional<MemberShape> payloadMemberOptional = getEventPayloadMember(event);
-        Shape payloadShape = payloadMemberOptional.map((member) -> {
-            return context.getModel().expectShape(member.getTarget());
-        }).orElse(event);
+        Shape payloadShape = payloadMemberOptional
+            .map(member -> {
+                return context.getModel().expectShape(member.getTarget());
+            })
+            .orElse(event);
         if (payloadShape instanceof BlobShape) {
             writer.write("\":content-type\": { type: \"string\", value: \"application/octet-stream\" },");
         } else if (payloadShape instanceof StringShape) {
@@ -315,38 +342,50 @@ public class EventStreamGenerator {
         } else if (payloadShape instanceof StructureShape || payloadShape instanceof UnionShape) {
             writer.write("\":content-type\": { type: \"string\", value: $S },", documentContentType);
         } else {
-            throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
-                    payloadShape.getType()));
+            throw new CodegenException(
+                String.format("Unexpected shape type bound to event payload: `%s`", payloadShape.getType())
+            );
         }
     }
 
     private Optional<MemberShape> getEventPayloadMember(StructureShape event) {
-        List<MemberShape> payloadMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventPayloadTrait.class))
-                .collect(Collectors.toList());
+        List<MemberShape> payloadMembers = event
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(member -> member.hasTrait(EventPayloadTrait.class))
+            .collect(Collectors.toList());
         return payloadMembers.isEmpty()
-                        ? Optional.empty() // implicit payload
-                        : Optional.of(payloadMembers.get(0));
+            ? Optional.empty() // implicit payload
+            : Optional.of(payloadMembers.get(0));
     }
 
     private void writeEventHeaders(GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
-        List<MemberShape> headerMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventHeaderTrait.class)).collect(Collectors.toList());
+        List<MemberShape> headerMembers = event
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(member -> member.hasTrait(EventHeaderTrait.class))
+            .collect(Collectors.toList());
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
             Shape target = model.expectShape(headerMember.getTarget());
             writer.openBlock("if (input.$L != null) {", "}", memberName, () -> {
                 if (target.isLongShape()) {
                     writer.addImport("Int64", "__Int64", TypeScriptDependency.AWS_SDK_EVENTSTREAM_CODEC);
-                    writer.write("headers[$1S] = { type: $2S, value: __Int64.fromNumber(input.$1L) }",
+                    writer.write(
+                        "headers[$1S] = { type: $2S, value: __Int64.fromNumber(input.$1L) }",
                         memberName,
                         getEventHeaderType(target)
                     );
                 } else {
-                    writer.write("headers[$1S] = { type: $2S, value: input.$1L }", memberName,
-                        getEventHeaderType(target));
+                    writer.write(
+                        "headers[$1S] = { type: $2S, value: input.$1L }",
+                        memberName,
+                        getEventHeaderType(target)
+                    );
                 }
             });
         }
@@ -376,9 +415,13 @@ public class EventStreamGenerator {
      * If the event has a member that has an explicit eventPayload trait, return the member.
      */
     private MemberShape getExplicitEventPayloadMember(StructureShape event) {
-        return event.getAllMembers().values().stream()
-                    .filter(member -> member.hasTrait(EventPayloadTrait.class))
-                    .collect(Collectors.toList()).get(0);
+        return event
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(member -> member.hasTrait(EventPayloadTrait.class))
+            .collect(Collectors.toList())
+            .get(0);
     }
 
     private void writeEventBody(
@@ -412,8 +455,9 @@ public class EventStreamGenerator {
                     }
                     serializeInputEventDocumentPayload.run();
                 } else {
-                    throw new CodegenException(String.format("Unexpected shape type bound to event payload: `%s`",
-                        payloadShape.getType()));
+                    throw new CodegenException(
+                        String.format("Unexpected shape type bound to event payload: `%s`", payloadShape.getType())
+                    );
                 }
             });
         } else {
@@ -439,34 +483,46 @@ public class EventStreamGenerator {
 
     private void generateEventStreamDeserializer(GenerationContext context, UnionShape eventsUnion) {
         String methodName = getDeserFunctionName(context, eventsUnion);
-        String methodLongName = ProtocolGenerator.getDeserFunctionName(getSymbol(context, eventsUnion),
-                context.getProtocolName());
+        String methodLongName = ProtocolGenerator.getDeserFunctionName(
+            getSymbol(context, eventsUnion),
+            context.getProtocolName()
+        );
         Symbol eventsUnionSymbol = getSymbol(context, eventsUnion);
         TypeScriptWriter writer = context.getWriter();
         Model model = context.getModel();
         String contextType = getEventStreamSerdeContextType(context, eventsUnion);
 
         writer.writeDocs(methodLongName);
-        writer.openBlock("const $L = (\n"
-                + "  output: any,\n"
-                + "  context: $L\n"
-                + "): AsyncIterable<$T> => {", "}", methodName, contextType, eventsUnionSymbol, () -> {
-            writer.openBlock("return context.eventStreamMarshaller.deserialize(", ");", () -> {
-                writer.write("output,");
-                writer.openBlock("async event => {", "}", () -> {
-                    eventsUnion.getAllMembers().forEach((name, member) -> {
-                        StructureShape event = model.expectShape(member.getTarget(), StructureShape.class);
-                        writer.openBlock("if (event[$S] != null) {", "}", name, () -> {
-                            writer.openBlock("return {", "};", () -> {
-                                String eventDeserMethodName = getEventDeserFunctionName(context, event);
-                                writer.write("$1L: await $2L(event[$1S], context),", name, eventDeserMethodName);
+        writer.openBlock(
+            "const $L = (\n" + "  output: any,\n" + "  context: $L\n" + "): AsyncIterable<$T> => {",
+            "}",
+            methodName,
+            contextType,
+            eventsUnionSymbol,
+            () -> {
+                writer.openBlock("return context.eventStreamMarshaller.deserialize(", ");", () -> {
+                    writer.write("output,");
+                    writer.openBlock("async event => {", "}", () -> {
+                        eventsUnion
+                            .getAllMembers()
+                            .forEach((name, member) -> {
+                                StructureShape event = model.expectShape(member.getTarget(), StructureShape.class);
+                                writer.openBlock("if (event[$S] != null) {", "}", name, () -> {
+                                    writer.openBlock("return {", "};", () -> {
+                                        String eventDeserMethodName = getEventDeserFunctionName(context, event);
+                                        writer.write(
+                                            "$1L: await $2L(event[$1S], context),",
+                                            name,
+                                            eventDeserMethodName
+                                        );
+                                    });
+                                });
                             });
-                        });
+                        writer.write("return {$$unknown: event as any};");
                     });
-                    writer.write("return {$$unknown: event as any};");
                 });
-            });
-        });
+            }
+        );
     }
 
     private String getDeserFunctionName(GenerationContext context, Shape shape) {
@@ -490,19 +546,22 @@ public class EventStreamGenerator {
         String methodName = getEventDeserFunctionName(context, event);
         Symbol symbol = getSymbol(context, event);
         TypeScriptWriter writer = context.getWriter();
-        writer.openBlock("const $L = async (\n"
-                + "  output: any,\n"
-                + "  context: __SerdeContext\n"
-                + "): Promise<$T> => {", "}", methodName, symbol, () -> {
-            if (event.hasTrait(ErrorTrait.class)) {
-                generateErrorEventUnmarshaller(context, event, errorShapesToDeserialize, isErrorCodeInBody);
-            } else {
-                writer.write("const contents: $L = {} as any;", symbol.getName());
-                readEventHeaders(context, event);
-                readEventBody(context, event, eventShapesToDeserialize, serdeElisionEnabled, serdeElisionIndex);
-                writer.write("return contents;");
+        writer.openBlock(
+            "const $L = async (\n" + "  output: any,\n" + "  context: __SerdeContext\n" + "): Promise<$T> => {",
+            "}",
+            methodName,
+            symbol,
+            () -> {
+                if (event.hasTrait(ErrorTrait.class)) {
+                    generateErrorEventUnmarshaller(context, event, errorShapesToDeserialize, isErrorCodeInBody);
+                } else {
+                    writer.write("const contents: $L = {} as any;", symbol.getName());
+                    readEventHeaders(context, event);
+                    readEventBody(context, event, eventShapesToDeserialize, serdeElisionEnabled, serdeElisionIndex);
+                    writer.write("return contents;");
+                }
             }
-        });
+        );
     }
 
     // Writes function content that unmarshall error event with error deserializer
@@ -519,11 +578,10 @@ public class EventStreamGenerator {
         if (isErrorCodeInBody) {
             // If error code is in body, parseBody() won't be called inside error deser. So we parse body here.
             // It's ok to parse body here because body won't be streaming if 'isErrorCodeInBody' is set.
-            writer.openBlock("const parsedOutput: any = {", "};",
-                    () -> {
-                        writer.write("...output,");
-                        writer.write("body: await parseBody(output.body, context)");
-                    });
+            writer.openBlock("const parsedOutput: any = {", "};", () -> {
+                writer.write("...output,");
+                writer.write("body: await parseBody(output.body, context)");
+            });
             writer.write("return $L(parsedOutput, context);", errorDeserMethodName);
         } else {
             writer.write("return $L(output, context);", errorDeserMethodName);
@@ -533,8 +591,12 @@ public class EventStreamGenerator {
     // Parse members from event headers.
     private void readEventHeaders(GenerationContext context, StructureShape event) {
         TypeScriptWriter writer = context.getWriter();
-        List<MemberShape> headerMembers = event.getAllMembers().values().stream()
-                .filter(member -> member.hasTrait(EventHeaderTrait.class)).toList();
+        List<MemberShape> headerMembers = event
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(member -> member.hasTrait(EventHeaderTrait.class))
+            .toList();
         for (MemberShape headerMember : headerMembers) {
             String memberName = headerMember.getMemberName();
             String varName = context.getStringStore().var(memberName);

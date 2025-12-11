@@ -36,6 +36,7 @@ import software.amazon.smithy.waiters.WaitableTrait;
  */
 @SmithyInternalApi
 public final class ServiceClosure implements KnowledgeIndex {
+
     private static final ShapeId UNIT = ShapeId.from("smithy.api#Unit");
     private final Model model;
     private final ServiceShape service;
@@ -95,10 +96,7 @@ public final class ServiceClosure implements KnowledgeIndex {
      */
     private final Set<ShapeId> scanned = new HashSet<>();
 
-    private ServiceClosure(
-        Model model,
-        ServiceShape service
-    ) {
+    private ServiceClosure(Model model, ServiceShape service) {
         this.model = model;
         this.service = service;
         elision = SchemaReferenceIndex.of(model);
@@ -130,12 +128,16 @@ public final class ServiceClosure implements KnowledgeIndex {
     public TreeSet<String> getWaiterNames() {
         TreeSet<String> waiters = new TreeSet<>();
         for (OperationShape operation : operations) {
-            operation.getTrait(WaitableTrait.class).ifPresent(trait -> {
-                trait.getWaiters().forEach((waiterName, waiter) -> {
-                    waiters.add("waitFor" + waiterName);
-                    waiters.add("waitUntil" + waiterName);
+            operation
+                .getTrait(WaitableTrait.class)
+                .ifPresent(trait -> {
+                    trait
+                        .getWaiters()
+                        .forEach((waiterName, waiter) -> {
+                            waiters.add("waitFor" + waiterName);
+                            waiters.add("waitUntil" + waiterName);
+                        });
                 });
-            });
         }
         return waiters;
     }
@@ -143,9 +145,11 @@ public final class ServiceClosure implements KnowledgeIndex {
     public TreeSet<String> getPaginatorNames() {
         TreeSet<String> paginators = new TreeSet<>();
         for (OperationShape operation : operations) {
-            operation.getTrait(PaginatedTrait.class).ifPresent(trait -> {
-                paginators.add("paginate" + operation.getId().getName());
-            });
+            operation
+                .getTrait(PaginatedTrait.class)
+                .ifPresent(trait -> {
+                    paginators.add("paginate" + operation.getId().getName());
+                });
         }
         return paginators;
     }
@@ -266,21 +270,39 @@ public final class ServiceClosure implements KnowledgeIndex {
                     } else {
                         scan(model.expectShape(UNIT));
                     }
-                    operation.getErrors(service).forEach(error -> {
-                        scan(model.expectShape(error));
-                    });
+                    operation
+                        .getErrors(service)
+                        .forEach(error -> {
+                            scan(model.expectShape(error));
+                        });
                     operations.add(operation);
                     existsAsSchema.add(operation);
                 }
                 case SERVICE -> {
                     ServiceShape serviceShape = (ServiceShape) shape;
-                    serviceShape.getErrorsSet().forEach(errorShapeId -> {
-                        Shape errorShape = model.expectShape(errorShapeId);
-                        scan(errorShape);
-                    });
+                    serviceShape
+                        .getErrorsSet()
+                        .forEach(errorShapeId -> {
+                            Shape errorShape = model.expectShape(errorShapeId);
+                            scan(errorShape);
+                        });
                 }
-                case BYTE, INT_ENUM, SHORT, INTEGER, LONG, FLOAT, DOUBLE, BIG_INTEGER, BIG_DECIMAL, BOOLEAN, STRING,
-                     TIMESTAMP, DOCUMENT, ENUM, BLOB -> {
+                case
+                    BYTE,
+                    INT_ENUM,
+                    SHORT,
+                    INTEGER,
+                    LONG,
+                    FLOAT,
+                    DOUBLE,
+                    BIG_INTEGER,
+                    BIG_DECIMAL,
+                    BOOLEAN,
+                    STRING,
+                    TIMESTAMP,
+                    DOCUMENT,
+                    ENUM,
+                    BLOB -> {
                     if (shape.isEnumShape() || shape.isIntEnumShape() || shape.hasTrait(EnumTrait.class)) {
                         enums.add(shape);
                     }

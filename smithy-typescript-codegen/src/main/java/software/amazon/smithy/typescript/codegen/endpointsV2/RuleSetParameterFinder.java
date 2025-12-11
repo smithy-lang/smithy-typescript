@@ -62,9 +62,9 @@ public class RuleSetParameterFinder {
 
     public RuleSetParameterFinder(ServiceShape service) {
         this.service = service;
-        this.ruleset = service.getTrait(EndpointRuleSetTrait.class).orElseThrow(
-            () -> new RuntimeException("Service does not have EndpointRuleSetTrait.")
-        );
+        this.ruleset = service
+            .getTrait(EndpointRuleSetTrait.class)
+            .orElseThrow(() -> new RuntimeException("Service does not have EndpointRuleSetTrait."));
     }
 
     /**
@@ -78,9 +78,11 @@ public class RuleSetParameterFinder {
         EndpointRuleSet endpointRuleSet = ruleset.getEndpointRuleSet();
         Set<String> initialParams = new HashSet<>();
 
-        endpointRuleSet.getParameters().forEach(parameter -> {
-            initialParams.add(parameter.getName().getName().getValue());
-        });
+        endpointRuleSet
+            .getParameters()
+            .forEach(parameter -> {
+                initialParams.add(parameter.getName().getName().getValue());
+            });
 
         Queue<Rule> ruleQueue = new ArrayDeque<>(endpointRuleSet.getRules());
         Queue<Condition> conditionQueue = new ArrayDeque<>();
@@ -108,9 +110,9 @@ public class RuleSetParameterFinder {
                     }
                 } else if (arg.isStringNode()) {
                     String argString = arg.expectStringNode().getValue();
-                    URL_PARAMETERS
-                        .matcher(argString)
-                        .results().forEach(matchResult -> {
+                    URL_PARAMETERS.matcher(argString)
+                        .results()
+                        .forEach(matchResult -> {
                             if (matchResult.groupCount() >= 1) {
                                 if (initialParams.contains(matchResult.group(1))) {
                                     effectiveParams.add(matchResult.group(1));
@@ -122,9 +124,7 @@ public class RuleSetParameterFinder {
 
             while (!conditionQueue.isEmpty()) {
                 Condition condition = conditionQueue.poll();
-                ArrayNode argv = condition.toNode()
-                    .expectObjectNode()
-                    .expectArrayMember("argv");
+                ArrayNode argv = condition.toNode().expectObjectNode().expectArrayMember("argv");
                 for (Node arg : argv) {
                     argQueue.add(arg);
                 }
@@ -143,9 +143,9 @@ public class RuleSetParameterFinder {
                 Expression url = endpoint.getUrl();
                 String urlString = url.toString();
 
-                URL_PARAMETERS
-                    .matcher(urlString)
-                    .results().forEach(matchResult -> {
+                URL_PARAMETERS.matcher(urlString)
+                    .results()
+                    .forEach(matchResult -> {
                         if (matchResult.groupCount() >= 1) {
                             if (initialParams.contains(matchResult.group(1))) {
                                 effectiveParams.add(matchResult.group(1));
@@ -167,9 +167,11 @@ public class RuleSetParameterFinder {
     public Map<String, String> getBuiltInParams() {
         Map<String, String> map = new HashMap<>();
         ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
-        ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-            parameters.accept(new RuleSetParameterFinderVisitor(map));
-        });
+        ruleSet
+            .getObjectMember("parameters")
+            .ifPresent(parameters -> {
+                parameters.accept(new RuleSetParameterFinderVisitor(map));
+            });
         return map;
     }
 
@@ -181,25 +183,27 @@ public class RuleSetParameterFinder {
         Optional<ClientContextParamsTrait> trait = service.getTrait(ClientContextParamsTrait.class);
         if (trait.isPresent()) {
             ClientContextParamsTrait clientContextParamsTrait = trait.get();
-            clientContextParamsTrait.getParameters().forEach((name, definition) -> {
-                ShapeType shapeType = definition.getType();
-                if (shapeType.isShapeType(ShapeType.STRING) || shapeType.isShapeType(ShapeType.BOOLEAN)) {
-                    map.put(
-                        name,
-                        // "boolean" and "string" are directly usable in TS.
-                        definition.getType().toString().toLowerCase()
-                    );
-                } else if (shapeType.isShapeType(ShapeType.LIST)) {
-                    map.put(
-                        name,
-                        "string[]" // Only string lists are supported.
-                    );
-                } else {
-                    throw new RuntimeException("unexpected type "
-                        + definition.getType().toString()
-                        + " received as clientContextParam.");
-                }
-            });
+            clientContextParamsTrait
+                .getParameters()
+                .forEach((name, definition) -> {
+                    ShapeType shapeType = definition.getType();
+                    if (shapeType.isShapeType(ShapeType.STRING) || shapeType.isShapeType(ShapeType.BOOLEAN)) {
+                        map.put(
+                            name,
+                            // "boolean" and "string" are directly usable in TS.
+                            definition.getType().toString().toLowerCase()
+                        );
+                    } else if (shapeType.isShapeType(ShapeType.LIST)) {
+                        map.put(
+                            name,
+                            "string[]" // Only string lists are supported.
+                        );
+                    } else {
+                        throw new RuntimeException(
+                            "unexpected type " + definition.getType().toString() + " received as clientContextParam."
+                        );
+                    }
+                });
         }
         return map;
     }
@@ -213,27 +217,30 @@ public class RuleSetParameterFinder {
         Optional<StaticContextParamsTrait> trait = operation.getTrait(StaticContextParamsTrait.class);
         if (trait.isPresent()) {
             StaticContextParamsTrait staticContextParamsTrait = trait.get();
-            staticContextParamsTrait.getParameters().forEach((name, definition) -> {
-                String value;
-                if (definition.getValue().isStringNode()) {
-                    value = "`" + definition.getValue().expectStringNode().toString() + "`";
-                } else if (definition.getValue().isBooleanNode()) {
-                    value = definition.getValue().expectBooleanNode().toString();
-                } else if (definition.getValue().isArrayNode()) {
-                    ArrayNode arrayNode = definition.getValue().expectArrayNode();
-                    value = arrayNode.getElements().stream()
-                      .map(element -> element.expectStringNode().getValue())
-                      .collect(Collectors.joining("`, `", "[`", "`]"));
-                } else {
-                    throw new RuntimeException("unexpected type "
-                        + definition.getValue().getType().toString()
-                        + " received as staticContextParam.");
-                }
-                map.put(
-                    name,
-                    value
-                );
-            });
+            staticContextParamsTrait
+                .getParameters()
+                .forEach((name, definition) -> {
+                    String value;
+                    if (definition.getValue().isStringNode()) {
+                        value = "`" + definition.getValue().expectStringNode().toString() + "`";
+                    } else if (definition.getValue().isBooleanNode()) {
+                        value = definition.getValue().expectBooleanNode().toString();
+                    } else if (definition.getValue().isArrayNode()) {
+                        ArrayNode arrayNode = definition.getValue().expectArrayNode();
+                        value = arrayNode
+                            .getElements()
+                            .stream()
+                            .map(element -> element.expectStringNode().getValue())
+                            .collect(Collectors.joining("`, `", "[`", "`]"));
+                    } else {
+                        throw new RuntimeException(
+                            "unexpected type " +
+                                definition.getValue().getType().toString() +
+                                " received as staticContextParam."
+                        );
+                    }
+                    map.put(name, value);
+                });
         }
 
         return map;
@@ -249,17 +256,16 @@ public class RuleSetParameterFinder {
         Map<String, String> map = new HashMap<>();
 
         if (operationInput.isStructureShape()) {
-            operationInput.getAllMembers().forEach((String memberName, MemberShape member) -> {
-                Optional<ContextParamTrait> trait = member.getTrait(ContextParamTrait.class);
-                if (trait.isPresent()) {
-                    ContextParamTrait contextParamTrait = trait.get();
-                    String name = contextParamTrait.getName();
-                    map.put(
-                        name,
-                        member.getMemberName()
-                    );
-                }
-            });
+            operationInput
+                .getAllMembers()
+                .forEach((String memberName, MemberShape member) -> {
+                    Optional<ContextParamTrait> trait = member.getTrait(ContextParamTrait.class);
+                    if (trait.isPresent()) {
+                        ContextParamTrait contextParamTrait = trait.get();
+                        String name = contextParamTrait.getName();
+                        map.put(name, member.getMemberName());
+                    }
+                });
         }
 
         return map;
@@ -273,24 +279,35 @@ public class RuleSetParameterFinder {
 
         Optional<OperationContextParamsTrait> trait = operation.getTrait(OperationContextParamsTrait.class);
         if (trait.isPresent()) {
-            trait.get().getParameters().forEach((name, definition) -> {
-                String separator = "?.";
-                String value = "input";
-                String path = definition.getPath();
-                value = getJmesPathExpression(separator, value, path);
+            trait
+                .get()
+                .getParameters()
+                .forEach((name, definition) -> {
+                    String separator = "?.";
+                    String value = "input";
+                    String path = definition.getPath();
+                    value = getJmesPathExpression(separator, value, path);
 
-                // Remove no-op map, if it exists.
-                final String noOpMap = "map((obj: any) => obj";
-                if (value.endsWith(separator + noOpMap)) {
-                    value = value.substring(0, value.length() - noOpMap.length() - separator.length());
-                }
+                    // Remove no-op map, if it exists.
+                    final String noOpMap = "map((obj: any) => obj";
+                    if (value.endsWith(separator + noOpMap)) {
+                        value = value.substring(0, value.length() - noOpMap.length() - separator.length());
+                    }
 
-                // Close all open brackets.
-                value += ")".repeat((int) (
-                    value.chars().filter(ch -> ch == '(').count() - value.chars().filter(ch -> ch == ')').count()));
+                    // Close all open brackets.
+                    value += ")".repeat(
+                        (int) (value
+                                .chars()
+                                .filter(ch -> ch == '(')
+                                .count() -
+                            value
+                                .chars()
+                                .filter(ch -> ch == ')')
+                                .count())
+                    );
 
-                map.put(name, value);
-            });
+                    map.put(name, value);
+                });
         }
 
         return map;
@@ -302,7 +319,7 @@ public class RuleSetParameterFinder {
             if (path.startsWith("[") && !path.startsWith("[*]")) {
                 // Process MultiSelect List https://jmespath.org/specification.html#multiselect-list
                 if (value.endsWith("obj")) {
-                   value = value.substring(0, value.length() - 3);
+                    value = value.substring(0, value.length() - 3);
                 }
 
                 value += "[";
@@ -386,6 +403,7 @@ public class RuleSetParameterFinder {
     }
 
     private static class RuleSetParameterFinderVisitor extends NodeVisitor.Default<Void> {
+
         private final Map<String, String> map;
 
         RuleSetParameterFinderVisitor(Map<String, String> map) {
@@ -403,10 +421,7 @@ public class RuleSetParameterFinder {
 
                 if (parameterGenerator.isBuiltIn()) {
                     Map.Entry<String, String> nameAndType = parameterGenerator.getNameAndType();
-                    map.put(
-                        nameAndType.getKey(),
-                        nameAndType.getValue()
-                    );
+                    map.put(nameAndType.getKey(), nameAndType.getValue());
                 }
             }
             return null;

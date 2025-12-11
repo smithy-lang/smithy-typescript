@@ -65,7 +65,7 @@ import software.amazon.smithy.waiters.Waiter;
 
 @SmithyUnstableApi
 final class DirectedTypeScriptCodegen
-        implements DirectedCodegen<TypeScriptCodegenContext, TypeScriptSettings, TypeScriptIntegration> {
+    implements DirectedCodegen<TypeScriptCodegenContext, TypeScriptSettings, TypeScriptIntegration> {
 
     private static final Logger LOGGER = Logger.getLogger(DirectedTypeScriptCodegen.class.getName());
 
@@ -73,13 +73,19 @@ final class DirectedTypeScriptCodegen
      * A mapping of static resource files to copy over to a new filename.
      */
     private static final Map<String, String> STATIC_FILE_COPIES = MapUtils.of(
-            "tsconfig.json", "tsconfig.json",
-            "tsconfig.cjs.json", "tsconfig.cjs.json",
-            "tsconfig.es.json", "tsconfig.es.json",
-            "tsconfig.types.json", "tsconfig.types.json"
+        "tsconfig.json",
+        "tsconfig.json",
+        "tsconfig.cjs.json",
+        "tsconfig.cjs.json",
+        "tsconfig.es.json",
+        "tsconfig.es.json",
+        "tsconfig.types.json",
+        "tsconfig.types.json"
     );
-    private static final ShapeId VALIDATION_EXCEPTION_SHAPE =
-            ShapeId.fromParts("smithy.framework", "ValidationException");
+    private static final ShapeId VALIDATION_EXCEPTION_SHAPE = ShapeId.fromParts(
+        "smithy.framework",
+        "ValidationException"
+    );
 
     @Override
     public SymbolProvider createSymbolProvider(CreateSymbolProviderDirective<TypeScriptSettings> directive) {
@@ -87,59 +93,68 @@ final class DirectedTypeScriptCodegen
     }
 
     @Override
-    public TypeScriptCodegenContext createContext(CreateContextDirective<TypeScriptSettings,
-            TypeScriptIntegration> directive) {
-
+    public TypeScriptCodegenContext createContext(
+        CreateContextDirective<TypeScriptSettings, TypeScriptIntegration> directive
+    ) {
         List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
-        directive.integrations().forEach(integration -> {
-            LOGGER.fine(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
-            integration.getClientPlugins().forEach(runtimePlugin -> {
-                if (runtimePlugin.matchesSettings(directive.model(), directive.service(), directive.settings())) {
-                    LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
-                    runtimePlugins.add(runtimePlugin);
-                } else {
-                    LOGGER.fine(() -> "Skipping TypeScript runtime plugin based on settings: " + runtimePlugin);
-                }
+        directive
+            .integrations()
+            .forEach(integration -> {
+                LOGGER.fine(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
+                integration
+                    .getClientPlugins()
+                    .forEach(runtimePlugin -> {
+                        if (
+                            runtimePlugin.matchesSettings(directive.model(), directive.service(), directive.settings())
+                        ) {
+                            LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
+                            runtimePlugins.add(runtimePlugin);
+                        } else {
+                            LOGGER.fine(() -> "Skipping TypeScript runtime plugin based on settings: " + runtimePlugin);
+                        }
+                    });
             });
-        });
 
-        directive.integrations().forEach(integration -> {
-            LOGGER.fine(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
-            integration.mutateClientPlugins(runtimePlugins);
-        });
+        directive
+            .integrations()
+            .forEach(integration -> {
+                LOGGER.fine(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
+                integration.mutateClientPlugins(runtimePlugins);
+            });
 
         ProtocolGenerator protocolGenerator = resolveProtocolGenerator(
-                directive.integrations(),
-                directive.model(),
-                directive.service(),
-                directive.settings());
+            directive.integrations(),
+            directive.model(),
+            directive.service(),
+            directive.settings()
+        );
 
         ApplicationProtocol applicationProtocol = protocolGenerator == null
-                ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
-                : protocolGenerator.getApplicationProtocol();
+            ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
+            : protocolGenerator.getApplicationProtocol();
 
         if (null != protocolGenerator) {
             directive.settings().setProtocol(protocolGenerator.getProtocol());
         }
 
         return TypeScriptCodegenContext.builder()
-                .model(directive.model())
-                .settings(directive.settings())
-                .symbolProvider(directive.symbolProvider())
-                .fileManifest(directive.fileManifest())
-                .integrations(directive.integrations())
-                .runtimePlugins(runtimePlugins)
-                .protocolGenerator(protocolGenerator)
-                .applicationProtocol(applicationProtocol)
-                .writerDelegator(new TypeScriptDelegator(directive.fileManifest(), directive.symbolProvider()))
-                .build();
+            .model(directive.model())
+            .settings(directive.settings())
+            .symbolProvider(directive.symbolProvider())
+            .fileManifest(directive.fileManifest())
+            .integrations(directive.integrations())
+            .runtimePlugins(runtimePlugins)
+            .protocolGenerator(protocolGenerator)
+            .applicationProtocol(applicationProtocol)
+            .writerDelegator(new TypeScriptDelegator(directive.fileManifest(), directive.symbolProvider()))
+            .build();
     }
 
     private ProtocolGenerator resolveProtocolGenerator(
-            Collection<TypeScriptIntegration> integrations,
-            Model model,
-            ServiceShape service,
-            TypeScriptSettings settings
+        Collection<TypeScriptIntegration> integrations,
+        Model model,
+        ServiceShape service,
+        TypeScriptSettings settings
     ) {
         // Collect all the supported protocol generators.
         // Preserve insertion order as default priority order.
@@ -171,13 +186,15 @@ final class DirectedTypeScriptCodegen
         ServiceShape service = directive.shape();
         TypeScriptDelegator delegator = directive.context().writerDelegator();
 
-        if (settings.generateServerSdk())  {
+        if (settings.generateServerSdk()) {
             checkValidationSettings(settings, model, service);
 
             LongValidator validator = new LongValidator(settings);
             List<ValidationEvent> events = validator.validate(model);
-            System.err.println("Model contained SSDK-specific validation events: \n"
-                    + events.stream().map(ValidationEvent::toString).sorted().collect(Collectors.joining("\n")));
+            System.err.println(
+                "Model contained SSDK-specific validation events: \n" +
+                    events.stream().map(ValidationEvent::toString).sorted().collect(Collectors.joining("\n"))
+            );
         }
 
         if (settings.generateClient()) {
@@ -199,8 +216,11 @@ final class DirectedTypeScriptCodegen
                 return;
             }
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + service.getId());
-            String fileName = Paths.get(CodegenUtils.SOURCE_FOLDER, ProtocolGenerator.PROTOCOLS_FOLDER,
-                    ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts").toString();
+            String fileName = Paths.get(
+                CodegenUtils.SOURCE_FOLDER,
+                ProtocolGenerator.PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(protocolGenerator.getName()) + ".ts"
+            ).toString();
             delegator.useFileWriter(fileName, writer -> {
                 ProtocolGenerator.GenerationContext context = new ProtocolGenerator.GenerationContext();
                 context.setProtocolName(protocolGenerator.getName());
@@ -251,8 +271,17 @@ final class DirectedTypeScriptCodegen
         ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
 
         // Generate the bare-bones service client.
-        delegator.useShapeWriter(service, writer -> new ServiceBareBonesClientGenerator(
-                settings, model, symbolProvider, writer, integrations, runtimePlugins, applicationProtocol).run());
+        delegator.useShapeWriter(service, writer ->
+            new ServiceBareBonesClientGenerator(
+                settings,
+                model,
+                symbolProvider,
+                writer,
+                integrations,
+                runtimePlugins,
+                applicationProtocol
+            ).run()
+        );
 
         if (!directive.settings().useLegacyAuth()) {
             new HttpAuthSchemeProviderGenerator(
@@ -268,8 +297,16 @@ final class DirectedTypeScriptCodegen
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
         String aggregatedClientName = ReplaceLast.in(serviceSymbol.getName(), "Client", "");
         String filename = ReplaceLast.in(serviceSymbol.getDefinitionFile(), "Client", "");
-        delegator.useFileWriter(filename, writer -> new ServiceAggregatedClientGenerator(
-                settings, model, symbolProvider, aggregatedClientName, writer, applicationProtocol).run());
+        delegator.useFileWriter(filename, writer ->
+            new ServiceAggregatedClientGenerator(
+                settings,
+                model,
+                symbolProvider,
+                aggregatedClientName,
+                writer,
+                applicationProtocol
+            ).run()
+        );
 
         // Generate each operation for the service.
         Set<OperationShape> containedOperations = directive.operations();
@@ -277,17 +314,33 @@ final class DirectedTypeScriptCodegen
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
                 delegator.useFileWriter(outputFilename, paginationWriter ->
-                        new PaginationGenerator(model, service, operation, symbolProvider, paginationWriter,
-                                aggregatedClientName).run());
+                    new PaginationGenerator(
+                        model,
+                        service,
+                        operation,
+                        symbolProvider,
+                        paginationWriter,
+                        aggregatedClientName
+                    ).run()
+                );
             }
             if (operation.hasTrait(WaitableTrait.ID)) {
                 WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
-                waitableTrait.getWaiters().forEach((String waiterName, Waiter waiter) -> {
-                    String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
-                    delegator.useFileWriter(outputFilename, waiterWriter ->
-                            new WaiterGenerator(waiterName, waiter, service, operation, waiterWriter,
-                                    symbolProvider).run());
-                });
+                waitableTrait
+                    .getWaiters()
+                    .forEach((String waiterName, Waiter waiter) -> {
+                        String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
+                        delegator.useFileWriter(outputFilename, waiterWriter ->
+                            new WaiterGenerator(
+                                waiterName,
+                                waiter,
+                                service,
+                                operation,
+                                waiterWriter,
+                                symbolProvider
+                            ).run()
+                        );
+                    });
             }
         }
 
@@ -296,10 +349,12 @@ final class DirectedTypeScriptCodegen
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
             PaginationGenerator.writeIndex(model, service, fileManifest);
             delegator.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
-                    PaginationGenerator.generateServicePaginationInterfaces(
-                            aggregatedClientName,
-                            serviceSymbol,
-                            paginationWriter));
+                PaginationGenerator.generateServicePaginationInterfaces(
+                    aggregatedClientName,
+                    serviceSymbol,
+                    paginationWriter
+                )
+            );
         }
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
@@ -330,15 +385,32 @@ final class DirectedTypeScriptCodegen
         for (OperationShape operation : directive.operations()) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
-                delegator.useShapeWriter(operation, commandWriter -> new CommandGenerator(
-                        settings, model, operation, symbolProvider, commandWriter,
-                        runtimePlugins, protocolGenerator, applicationProtocol).run());
+                delegator.useShapeWriter(operation, commandWriter ->
+                    new CommandGenerator(
+                        settings,
+                        model,
+                        operation,
+                        symbolProvider,
+                        commandWriter,
+                        runtimePlugins,
+                        protocolGenerator,
+                        applicationProtocol
+                    ).run()
+                );
             }
 
             if (settings.generateServerSdk()) {
-                delegator.useShapeWriter(operation, commandWriter -> new ServerCommandGenerator(
-                        settings, model, operation, symbolProvider, commandWriter,
-                        protocolGenerator, applicationProtocol).run());
+                delegator.useShapeWriter(operation, commandWriter ->
+                    new ServerCommandGenerator(
+                        settings,
+                        model,
+                        operation,
+                        symbolProvider,
+                        commandWriter,
+                        protocolGenerator,
+                        applicationProtocol
+                    ).run()
+                );
             }
         }
     }
@@ -347,102 +419,113 @@ final class DirectedTypeScriptCodegen
         new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
     }
 
-    private void generateServiceInterface(GenerateServiceDirective<TypeScriptCodegenContext,
-            TypeScriptSettings> directive) {
+    private void generateServiceInterface(
+        GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive
+    ) {
         ServiceShape service = directive.shape();
         SymbolProvider symbolProvider = directive.symbolProvider();
         Set<OperationShape> operations = directive.operations();
 
-        directive.context().writerDelegator().useShapeWriter(service, writer -> {
-            ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
-            ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
-            ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
-        });
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(service, writer -> {
+                ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
+                ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
+                ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
+            });
     }
 
     @Override
     public void generateStructure(GenerateStructureDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
-            StructureGenerator generator = new StructureGenerator(
-                directive.model(),
-                directive.symbolProvider(),
-                writer,
-                directive.shape(),
-                directive.settings().generateServerSdk(),
-                directive.settings().getRequiredMemberMode(),
-                SchemaGenerationAllowlist.allows(
-                    directive.settings().getService(),
-                    directive.settings()
-                )
-            );
-            generator.run();
-        });
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(directive.shape(), writer -> {
+                StructureGenerator generator = new StructureGenerator(
+                    directive.model(),
+                    directive.symbolProvider(),
+                    writer,
+                    directive.shape(),
+                    directive.settings().generateServerSdk(),
+                    directive.settings().getRequiredMemberMode(),
+                    SchemaGenerationAllowlist.allows(directive.settings().getService(), directive.settings())
+                );
+                generator.run();
+            });
     }
 
     @Override
     public void generateError(GenerateErrorDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
-            StructureGenerator generator = new StructureGenerator(
-                directive.model(),
-                directive.symbolProvider(),
-                writer,
-                directive.shape(),
-                directive.settings().generateServerSdk(),
-                directive.settings().getRequiredMemberMode(),
-                SchemaGenerationAllowlist.allows(
-                    directive.settings().getService(),
-                    directive.settings()
-                )
-            );
-            generator.run();
-        });
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(directive.shape(), writer -> {
+                StructureGenerator generator = new StructureGenerator(
+                    directive.model(),
+                    directive.symbolProvider(),
+                    writer,
+                    directive.shape(),
+                    directive.settings().generateServerSdk(),
+                    directive.settings().getRequiredMemberMode(),
+                    SchemaGenerationAllowlist.allows(directive.settings().getService(), directive.settings())
+                );
+                generator.run();
+            });
     }
 
     @Override
     public void generateUnion(GenerateUnionDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
-            UnionGenerator generator = new UnionGenerator(
-                directive.model(),
-                directive.symbolProvider(),
-                writer,
-                directive.shape(),
-                directive.settings().generateServerSdk(),
-                SchemaGenerationAllowlist.allows(
-                    directive.settings().getService(),
-                    directive.settings()
-                )
-            );
-            generator.run();
-        });
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(directive.shape(), writer -> {
+                UnionGenerator generator = new UnionGenerator(
+                    directive.model(),
+                    directive.symbolProvider(),
+                    writer,
+                    directive.shape(),
+                    directive.settings().generateServerSdk(),
+                    SchemaGenerationAllowlist.allows(directive.settings().getService(), directive.settings())
+                );
+                generator.run();
+            });
     }
 
     @Override
     public void generateEnumShape(GenerateEnumDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
-            EnumGenerator generator = new EnumGenerator(
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(directive.shape(), writer -> {
+                EnumGenerator generator = new EnumGenerator(
                     directive.shape().asStringShape().get(),
                     directive.symbolProvider().toSymbol(directive.shape()),
                     writer
-            );
-            generator.run();
-        });
+                );
+                generator.run();
+            });
     }
 
     @Override
     public void generateIntEnumShape(GenerateIntEnumDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
-            IntEnumGenerator generator = new IntEnumGenerator(
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(directive.shape(), writer -> {
+                IntEnumGenerator generator = new IntEnumGenerator(
                     directive.shape().asIntEnumShape().get(),
                     directive.symbolProvider().toSymbol(directive.shape()),
                     writer
-            );
-            generator.run();
-        });
+                );
+                generator.run();
+            });
     }
 
     @Override
     public void customizeBeforeIntegrations(
-            CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive
+    ) {
         // Write shared / static content.
         STATIC_FILE_COPIES.forEach((from, to) -> {
             LOGGER.fine(() -> "Writing contents of `" + from + "` to `" + to + "`");
@@ -461,12 +544,13 @@ final class DirectedTypeScriptCodegen
             // For now these are only generated for clients.
             // TODO: generate ssdk config
             RuntimeConfigGenerator configGenerator = new RuntimeConfigGenerator(
-                    directive.settings(),
-                    directive.model(),
-                    directive.symbolProvider(),
-                    directive.context().writerDelegator(),
-                    directive.context().integrations(),
-                    directive.context().applicationProtocol());
+                directive.settings(),
+                directive.model(),
+                directive.symbolProvider(),
+                directive.context().writerDelegator(),
+                directive.context().integrations(),
+                directive.context().applicationProtocol()
+            );
             for (LanguageTarget target : LanguageTarget.values()) {
                 LOGGER.fine("Generating " + target + " runtime configuration");
                 configGenerator.generate(target);
@@ -490,8 +574,9 @@ final class DirectedTypeScriptCodegen
         }
 
         // Generate index for client.
-        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory =
-            directive.context().writerDelegator()::useFileWriter;
+        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory = directive
+            .context()
+            .writerDelegator()::useFileWriter;
 
         writerFactory.accept(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer -> {
             IndexGenerator.writeIndex(
@@ -545,7 +630,6 @@ final class DirectedTypeScriptCodegen
             context.setWriterDelegator(directive.context().writerDelegator());
             protocolGenerator.generateProtocolTests(context);
         }
-
     }
 
     private void checkValidationSettings(TypeScriptSettings settings, Model model, ServiceShape service) {
@@ -556,22 +640,30 @@ final class DirectedTypeScriptCodegen
         final OperationIndex operationIndex = OperationIndex.of(model);
 
         List<String> unvalidatedOperations = TopDownIndex.of(model)
-                .getContainedOperations(service)
-                .stream()
-                .filter(o -> operationIndex.getErrors(o, service).stream()
-                        .noneMatch(e -> e.getId().equals(VALIDATION_EXCEPTION_SHAPE)))
-                .map(s -> s.getId().toString())
-                .sorted()
-                .collect(Collectors.toList());
+            .getContainedOperations(service)
+            .stream()
+            .filter(o ->
+                operationIndex
+                    .getErrors(o, service)
+                    .stream()
+                    .noneMatch(e -> e.getId().equals(VALIDATION_EXCEPTION_SHAPE))
+            )
+            .map(s -> s.getId().toString())
+            .sorted()
+            .collect(Collectors.toList());
 
         if (!unvalidatedOperations.isEmpty()) {
-            throw new CodegenException(String.format("Every operation must have the %s error attached unless %s is set "
-                                                     + "to 'true' in the plugin settings. Operations without %s "
-                                                     + "errors attached: %s",
+            throw new CodegenException(
+                String.format(
+                    "Every operation must have the %s error attached unless %s is set " +
+                        "to 'true' in the plugin settings. Operations without %s " +
+                        "errors attached: %s",
                     VALIDATION_EXCEPTION_SHAPE,
                     TypeScriptSettings.DISABLE_DEFAULT_VALIDATION,
                     VALIDATION_EXCEPTION_SHAPE,
-                    unvalidatedOperations));
+                    unvalidatedOperations
+                )
+            );
         }
     }
 
@@ -579,8 +671,9 @@ final class DirectedTypeScriptCodegen
     public void customizeAfterIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         LOGGER.fine("Generating package.json files");
         PackageJsonGenerator.writePackageJson(
-                directive.settings(),
-                directive.fileManifest(),
-                SymbolDependency.gatherDependencies(directive.context().writerDelegator().getDependencies().stream()));
+            directive.settings(),
+            directive.fileManifest(),
+            SymbolDependency.gatherDependencies(directive.context().writerDelegator().getDependencies().stream())
+        );
     }
 }

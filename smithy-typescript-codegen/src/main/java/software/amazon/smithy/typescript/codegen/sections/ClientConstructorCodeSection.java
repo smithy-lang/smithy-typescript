@@ -15,6 +15,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 public final class ClientConstructorCodeSection implements CodeSection {
+
     private final ServiceShape service;
     private final List<RuntimeClientPlugin> runtimeClientPlugins;
     private final Model model;
@@ -42,6 +43,7 @@ public final class ClientConstructorCodeSection implements CodeSection {
     }
 
     public static class Builder implements SmithyBuilder<ClientConstructorCodeSection> {
+
         private ServiceShape service;
         private List<RuntimeClientPlugin> runtimeClientPlugins;
         private Model model;

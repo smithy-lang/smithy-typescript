@@ -17,6 +17,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class DefaultHttpAuthSchemeParametersProviderFunctionCodeSection implements CodeSection {
+
     private final ServiceShape service;
     private final TypeScriptSettings settings;
     private final Model model;
@@ -28,8 +29,10 @@ public final class DefaultHttpAuthSchemeParametersProviderFunctionCodeSection im
         settings = SmithyBuilder.requiredState("settings", builder.settings);
         model = SmithyBuilder.requiredState("model", builder.model);
         symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
-        httpAuthSchemeParameters =
-            SmithyBuilder.requiredState("httpAuthSchemeParameters", builder.httpAuthSchemeParameters);
+        httpAuthSchemeParameters = SmithyBuilder.requiredState(
+            "httpAuthSchemeParameters",
+            builder.httpAuthSchemeParameters
+        );
     }
 
     public ServiceShape getService() {
@@ -57,6 +60,7 @@ public final class DefaultHttpAuthSchemeParametersProviderFunctionCodeSection im
     }
 
     public static class Builder implements SmithyBuilder<DefaultHttpAuthSchemeParametersProviderFunctionCodeSection> {
+
         private ServiceShape service;
         private TypeScriptSettings settings;
         private Model model;

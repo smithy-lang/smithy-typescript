@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection implements CodeSection {
+
     private final ServiceShape service;
     private final TypeScriptSettings settings;
     private final Model model;
@@ -64,12 +65,13 @@ public final class ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection imp
     }
 
     public static class Builder implements SmithyBuilder<ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection> {
+
         private ServiceShape service;
         private TypeScriptSettings settings;
         private Model model;
         private SymbolProvider symbolProvider;
         private List<TypeScriptIntegration> integrations;
-        private Map<String, ConfigField>  configFields;
+        private Map<String, ConfigField> configFields;
 
         @Override
         public ResolveHttpAuthSchemeConfigFunctionReturnBlockCodeSection build() {

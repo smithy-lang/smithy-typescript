@@ -15,24 +15,20 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 
 public class SensitiveDataFinderTest {
+
     StringShape sensitiveString = StringShape.builder()
         .addTrait(new SensitiveTrait())
         .id("foo.bar#sensitiveString")
         .build();
 
-    StringShape dullString = StringShape.builder()
-        .id("foo.bar#dullString")
-        .build();
+    StringShape dullString = StringShape.builder().id("foo.bar#dullString").build();
 
     MemberShape memberWithSensitiveData = MemberShape.builder()
         .id("foo.bar#sensitive$member")
         .target(sensitiveString.getId())
         .build();
 
-    MemberShape memberWithDullData = MemberShape.builder()
-        .id("foo.bar#dull$member")
-        .target(dullString.getId())
-        .build();
+    MemberShape memberWithDullData = MemberShape.builder().id("foo.bar#dull$member").target(dullString.getId()).build();
 
     MemberShape listMemberWithSensitiveData = MemberShape.builder()
         .id("foo.bar#listSensitive$member")
@@ -56,14 +52,12 @@ public class SensitiveDataFinderTest {
 
     StructureShape structureShapeSensitive = StructureShape.builder()
         .id("foo.bar#sensitive")
-        .members(
-            Collections.singleton(memberWithSensitiveData))
+        .members(Collections.singleton(memberWithSensitiveData))
         .build();
 
     StructureShape structureShapeDull = StructureShape.builder()
         .id("foo.bar#dull")
-        .members(
-            Collections.singleton(memberWithDullData))
+        .members(Collections.singleton(memberWithDullData))
         .build();
 
     CollectionShape collectionSensitive = ListShape.builder()
@@ -79,65 +73,49 @@ public class SensitiveDataFinderTest {
     MapShape mapSensitiveKey = MapShape.builder()
         .id("foo.bar#mapSensitiveKey")
         .key(mapMemberWithSensitiveKeyData)
-        .value(MemberShape.builder()
-            .id("foo.bar#mapSensitiveKey$key")
-            .target(dullString.getId())
-            .build())
+        .value(MemberShape.builder().id("foo.bar#mapSensitiveKey$key").target(dullString.getId()).build())
         .build();
 
     MapShape mapSensitiveValue = MapShape.builder()
         .id("foo.bar#mapSensitiveValue")
-        .key(MemberShape.builder()
-            .id("foo.bar#mapSensitiveValue$key")
-            .target(dullString.getId())
-            .build())
+        .key(MemberShape.builder().id("foo.bar#mapSensitiveValue$key").target(dullString.getId()).build())
         .value(mapMemberWithSensitiveValueData)
         .build();
 
     MapShape mapDull = MapShape.builder()
         .id("foo.bar#mapDull")
-        .key(MemberShape.builder()
-            .id("foo.bar#mapDull$key")
-            .target(dullString.getId())
-            .build())
-        .value(MemberShape.builder()
-            .id("foo.bar#mapDull$value")
-            .target(dullString.getId())
-            .build())
+        .key(MemberShape.builder().id("foo.bar#mapDull$key").target(dullString.getId()).build())
+        .value(MemberShape.builder().id("foo.bar#mapDull$value").target(dullString.getId()).build())
         .build();
 
     MapShape nested2 = MapShape.builder()
         .id("foo.bar#mapNested2")
-        .key(MemberShape.builder()
-            .id("foo.bar#mapNested2$key")
-            .target(dullString.getId())
-            .build())
-        .value(MemberShape.builder()
-            .id("foo.bar#mapNested2$value")
-            .target(mapSensitiveValue)
-            .build())
+        .key(MemberShape.builder().id("foo.bar#mapNested2$key").target(dullString.getId()).build())
+        .value(MemberShape.builder().id("foo.bar#mapNested2$value").target(mapSensitiveValue).build())
         .build();
 
     MapShape nested = MapShape.builder()
         .id("foo.bar#mapNested")
-        .key(MemberShape.builder()
-            .id("foo.bar#mapNested$key")
-            .target(dullString.getId())
-            .build())
-        .value(MemberShape.builder()
-            .id("foo.bar#mapNested$value")
-            .target(nested2)
-            .build())
+        .key(MemberShape.builder().id("foo.bar#mapNested$key").target(dullString.getId()).build())
+        .value(MemberShape.builder().id("foo.bar#mapNested$value").target(nested2).build())
         .build();
 
     private Model model = Model.builder()
         .addShapes(
-            sensitiveString, dullString,
-            memberWithSensitiveData, memberWithDullData,
-            structureShapeSensitive, structureShapeDull,
-            collectionSensitive, collectionDull,
-            mapSensitiveKey, mapSensitiveValue, mapDull,
-            nested, nested2)
+            sensitiveString,
+            dullString,
+            memberWithSensitiveData,
+            memberWithDullData,
+            structureShapeSensitive,
+            structureShapeDull,
+            collectionSensitive,
+            collectionDull,
+            mapSensitiveKey,
+            mapSensitiveValue,
+            mapDull,
+            nested,
+            nested2
+        )
         .build();
 
     private SensitiveDataFinder sensitiveDataFinder = new SensitiveDataFinder(model);

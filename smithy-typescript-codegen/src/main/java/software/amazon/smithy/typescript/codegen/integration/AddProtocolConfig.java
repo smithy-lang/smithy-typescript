@@ -20,7 +20,6 @@ import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlis
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
 /**
  * Adds a protocol implementation to the runtime config.
  */
@@ -44,16 +43,20 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
             .addTypeImport("ClientProtocol", null, TypeScriptDependency.SMITHY_TYPES)
             .addTypeImport("HttpRequest", null, TypeScriptDependency.SMITHY_TYPES)
             .addTypeImport("HttpResponse", null, TypeScriptDependency.SMITHY_TYPES)
-            .writeDocs("""
-            The protocol controlling the message type (e.g. HTTP) and format (e.g. JSON)
-            may be overridden. A default will always be set by the client.
-            Available options depend on the service's supported protocols and will not be validated by
-            the client.
-            @alpha
-            """)
-            .write("""
-            protocol?: ClientProtocol<HttpRequest, HttpResponse>;
-            """);
+            .writeDocs(
+                """
+                The protocol controlling the message type (e.g. HTTP) and format (e.g. JSON)
+                may be overridden. A default will always be set by the client.
+                Available options depend on the service's supported protocols and will not be validated by
+                the client.
+                @alpha
+                """
+            )
+            .write(
+                """
+                protocol?: ClientProtocol<HttpRequest, HttpResponse>;
+                """
+            );
     }
 
     @Override
@@ -72,14 +75,15 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
         switch (target) {
             case SHARED:
                 if (Objects.equals(settings.getProtocol(), Rpcv2CborTrait.ID)) {
-                    return MapUtils.of(
-                        "protocol", writer -> {
-                            writer.addImportSubmodule(
-                                "SmithyRpcV2CborProtocol", null,
-                                TypeScriptDependency.SMITHY_CORE, "/cbor");
-                            writer.write("new SmithyRpcV2CborProtocol({ defaultNamespace: $S })", namespace);
-                        }
-                    );
+                    return MapUtils.of("protocol", writer -> {
+                        writer.addImportSubmodule(
+                            "SmithyRpcV2CborProtocol",
+                            null,
+                            TypeScriptDependency.SMITHY_CORE,
+                            "/cbor"
+                        );
+                        writer.write("new SmithyRpcV2CborProtocol({ defaultNamespace: $S })", namespace);
+                    });
                 }
             case BROWSER:
             case NODE:

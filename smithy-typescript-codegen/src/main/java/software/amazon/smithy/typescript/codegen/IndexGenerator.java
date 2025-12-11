@@ -48,11 +48,11 @@ final class IndexGenerator {
         TypeScriptWriter writer,
         TypeScriptWriter modelIndexer
     ) {
-
         writer.write("/* eslint-disable */");
-        settings.getService(model).getTrait(DocumentationTrait.class).ifPresent(trait ->
-                writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
-
+        settings
+            .getService(model)
+            .getTrait(DocumentationTrait.class)
+            .ifPresent(trait -> writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
 
         if (settings.generateClient()) {
             writeClientExports(settings, model, symbolProvider, writer);
@@ -91,7 +91,8 @@ final class IndexGenerator {
         writer.write("export * from \"./$L\"", symbol.getName());
         fileManifest.writeFile(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts").toString(),
-            writer.toString());
+            writer.toString()
+        );
     }
 
     private static void writeClientExports(

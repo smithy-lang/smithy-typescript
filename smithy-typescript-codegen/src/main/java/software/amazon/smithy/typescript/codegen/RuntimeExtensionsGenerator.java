@@ -54,11 +54,9 @@ public class RuntimeExtensionsGenerator {
 
     void generate() {
         String clientName = ReplaceLast.in(
-            ReplaceLast.in(
-                symbolProvider.toSymbol(service).getName(),
-                "Client", ""
-            ),
-            "client", ""
+            ReplaceLast.in(symbolProvider.toSymbol(service).getName(), "Client", ""),
+            "client",
+            ""
         );
 
         String template1Contents = TypeScriptUtils.loadResourceAsString(TEMPLATE_1)
@@ -72,39 +70,63 @@ public class RuntimeExtensionsGenerator {
 
         delegator.useFileWriter(Paths.get(CodegenUtils.SOURCE_FOLDER, FILENAME).toString(), writer -> {
             for (TypeScriptIntegration integration : integrations) {
-                integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
-                    writer.addDependency(configurationInterface.getExtensionConfigurationFn().right);
-                    writer.addDependency(configurationInterface.resolveRuntimeConfigFn().right);
+                integration
+                    .getExtensionConfigurationInterfaces(model, settings)
+                    .forEach(configurationInterface -> {
+                        writer.addDependency(configurationInterface.getExtensionConfigurationFn().right);
+                        writer.addDependency(configurationInterface.resolveRuntimeConfigFn().right);
 
-                    writer.addImport(configurationInterface.getExtensionConfigurationFn().left, null,
-                            configurationInterface.getExtensionConfigurationFn().right);
-                    writer.addImport(configurationInterface.resolveRuntimeConfigFn().left, null,
-                            configurationInterface.resolveRuntimeConfigFn().right);
-                });
+                        writer.addImport(
+                            configurationInterface.getExtensionConfigurationFn().left,
+                            null,
+                            configurationInterface.getExtensionConfigurationFn().right
+                        );
+                        writer.addImport(
+                            configurationInterface.resolveRuntimeConfigFn().left,
+                            null,
+                            configurationInterface.resolveRuntimeConfigFn().right
+                        );
+                    });
             }
 
-            writer.indent().onSection("getPartialExtensionConfigurations", original -> {
-                for (TypeScriptIntegration integration : integrations) {
-                    integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
-                        writer.indent(2).write("$L(runtimeConfig),",
-                                configurationInterface.getExtensionConfigurationFn().left);
-                        writer.dedent(2);
-                    });
-                }
-                writer.unwrite(",\n").write("");
-            });
+            writer
+                .indent()
+                .onSection("getPartialExtensionConfigurations", original -> {
+                    for (TypeScriptIntegration integration : integrations) {
+                        integration
+                            .getExtensionConfigurationInterfaces(model, settings)
+                            .forEach(configurationInterface -> {
+                                writer
+                                    .indent(2)
+                                    .write(
+                                        "$L(runtimeConfig),",
+                                        configurationInterface.getExtensionConfigurationFn().left
+                                    );
+                                writer.dedent(2);
+                            });
+                    }
+                    writer.unwrite(",\n").write("");
+                });
             writer.dedent().write(template1Contents, "");
 
-            writer.indent().onSection("resolvePartialRuntimeConfigs", original -> {
-                for (TypeScriptIntegration integration : integrations) {
-                    integration.getExtensionConfigurationInterfaces(model, settings).forEach(configurationInterface -> {
-                        writer.indent(2).write("$L(extensionConfiguration),",
-                                configurationInterface.resolveRuntimeConfigFn().left);
-                        writer.dedent(2);
-                    });
-                }
-                writer.unwrite(",\n").write("");
-            });
+            writer
+                .indent()
+                .onSection("resolvePartialRuntimeConfigs", original -> {
+                    for (TypeScriptIntegration integration : integrations) {
+                        integration
+                            .getExtensionConfigurationInterfaces(model, settings)
+                            .forEach(configurationInterface -> {
+                                writer
+                                    .indent(2)
+                                    .write(
+                                        "$L(extensionConfiguration),",
+                                        configurationInterface.resolveRuntimeConfigFn().left
+                                    );
+                                writer.dedent(2);
+                            });
+                    }
+                    writer.unwrite(",\n").write("");
+                });
             writer.dedent().write(template2Contents, "");
         });
     }

@@ -23,6 +23,7 @@ import software.amazon.smithy.model.traits.StreamingTrait;
  * a given shape.
  */
 public class SensitiveDataFinder {
+
     private Map<Shape, Boolean> cache = new HashMap<>();
     private final Model model;
 
@@ -50,14 +51,15 @@ public class SensitiveDataFinder {
             return cache.get(shape);
         }
 
-        if (shape.hasTrait(SensitiveTrait.class)
-                || shape.hasTrait(StreamingTrait.class)) {
+        if (shape.hasTrait(SensitiveTrait.class) || shape.hasTrait(StreamingTrait.class)) {
             cache.put(shape, true);
             return true;
         }
 
-        if (shape.getMemberTrait(model, SensitiveTrait.class).isPresent()
-                || shape.getMemberTrait(model, StreamingTrait.class).isPresent()) {
+        if (
+            shape.getMemberTrait(model, SensitiveTrait.class).isPresent() ||
+            shape.getMemberTrait(model, StreamingTrait.class).isPresent()
+        ) {
             cache.put(shape, true);
             return true;
         }

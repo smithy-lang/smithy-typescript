@@ -24,12 +24,16 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class SupportHttpBearerAuth implements HttpAuthTypeScriptIntegration {
+
     private static final Consumer<TypeScriptWriter> HTTP_BEARER_AUTH_SIGNER = w ->
-        w.write("new $T()", Symbol.builder()
-            .name("HttpBearerAuthSigner")
-            .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
-            .addDependency(TypeScriptDependency.SMITHY_CORE)
-            .build());
+        w.write(
+            "new $T()",
+            Symbol.builder()
+                .name("HttpBearerAuthSigner")
+                .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
+                .addDependency(TypeScriptDependency.SMITHY_CORE)
+                .build()
+        );
     private static final Symbol TOKEN_IDENTITY = Symbol.builder()
         .name("TokenIdentity")
         .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
@@ -51,25 +55,30 @@ public final class SupportHttpBearerAuth implements HttpAuthTypeScriptIntegratio
 
     @Override
     public Optional<HttpAuthScheme> getHttpAuthScheme() {
-        return Optional.of(HttpAuthScheme.builder()
+        return Optional.of(
+            HttpAuthScheme.builder()
                 .schemeId(HttpBearerAuthTrait.ID)
                 .applicationProtocol(ApplicationProtocol.createDefaultHttpApplicationProtocol())
-                .addConfigField(ConfigField.builder()
-                    .name("token")
-                    .type(Type.MAIN)
-                    .docs(w -> w.write("The token used to authenticate requests."))
-                    .inputType(Symbol.builder()
-                        .name("TokenIdentity | TokenIdentityProvider")
-                        .addReference(TOKEN_IDENTITY)
-                        .addReference(TOKEN_IDENTITY_PROVIDER)
-                        .build())
-                    .resolvedType(Symbol.builder()
-                        .name("TokenIdentityProvider")
-                        .addReference(TOKEN_IDENTITY_PROVIDER)
-                        .build())
-                    .configFieldWriter(ConfigField::defaultMainConfigFieldWriter)
-                    .build())
+                .addConfigField(
+                    ConfigField.builder()
+                        .name("token")
+                        .type(Type.MAIN)
+                        .docs(w -> w.write("The token used to authenticate requests."))
+                        .inputType(
+                            Symbol.builder()
+                                .name("TokenIdentity | TokenIdentityProvider")
+                                .addReference(TOKEN_IDENTITY)
+                                .addReference(TOKEN_IDENTITY_PROVIDER)
+                                .build()
+                        )
+                        .resolvedType(
+                            Symbol.builder().name("TokenIdentityProvider").addReference(TOKEN_IDENTITY_PROVIDER).build()
+                        )
+                        .configFieldWriter(ConfigField::defaultMainConfigFieldWriter)
+                        .build()
+                )
                 .putDefaultSigner(LanguageTarget.SHARED, HTTP_BEARER_AUTH_SIGNER)
-                .build());
+                .build()
+        );
     }
 }

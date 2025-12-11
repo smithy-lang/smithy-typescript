@@ -26,9 +26,9 @@ public abstract class ReplaceLast {
     public static String in(String original, String target, String replacement) {
         int lastPosition = original.lastIndexOf(target);
         if (lastPosition >= 0) {
-            return original.substring(0, lastPosition)
-                + replacement
-                + original.substring(lastPosition + target.length());
+            return (
+                original.substring(0, lastPosition) + replacement + original.substring(lastPosition + target.length())
+            );
         }
         return original;
     }

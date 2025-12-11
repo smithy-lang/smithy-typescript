@@ -81,17 +81,18 @@ final class StructureGenerator implements Runnable {
      * to {@link RequiredMemberMode#NULLABLE}.
      */
     StructureGenerator(Model model, SymbolProvider symbolProvider, TypeScriptWriter writer, StructureShape shape) {
-        this(model, symbolProvider, writer, shape, false,
-            RequiredMemberMode.NULLABLE, false);
+        this(model, symbolProvider, writer, shape, false, RequiredMemberMode.NULLABLE, false);
     }
 
-    StructureGenerator(Model model,
-                       SymbolProvider symbolProvider,
-                       TypeScriptWriter writer,
-                       StructureShape shape,
-                       boolean includeValidation,
-                       RequiredMemberMode requiredMemberMode,
-                       boolean schemaMode) {
+    StructureGenerator(
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer,
+        StructureShape shape,
+        boolean includeValidation,
+        RequiredMemberMode requiredMemberMode,
+        boolean schemaMode
+    ) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;
@@ -166,7 +167,9 @@ final class StructureGenerator implements Runnable {
         writer.writeShapeDocs(shape);
 
         // Find symbol references with the "extends" property.
-        String extendsFrom = symbol.getReferences().stream()
+        String extendsFrom = symbol
+            .getReferences()
+            .stream()
             .filter(ref -> ref.getProperty(SymbolVisitor.IMPLEMENTS_INTERFACE_PROPERTY).isPresent())
             .map(SymbolReference::getAlias)
             .collect(Collectors.joining(", "));
@@ -182,7 +185,8 @@ final class StructureGenerator implements Runnable {
             symbolProvider,
             shape.getAllMembers().values(),
             this.requiredMemberMode,
-            sensitiveDataFinder);
+            sensitiveDataFinder
+        );
         config.writeMembers(writer, shape);
         writer.closeBlock("}");
         writer.write("");
@@ -195,13 +199,16 @@ final class StructureGenerator implements Runnable {
 
         if (sensitiveDataFinder.findsSensitiveDataIn(shape) && !schemaMode) {
             writer.writeDocs("@internal");
-            writer.openBlock("export const $LFilterSensitiveLog = ($L: $L): any => ({", "})",
+            writer.openBlock(
+                "export const $LFilterSensitiveLog = ($L: $L): any => ({",
+                "})",
                 symbol.getName(),
                 objectParam,
                 symbol.getName(),
                 () -> {
                     structuredMemberWriter.writeFilterSensitiveLog(writer, objectParam);
-                });
+                }
+            );
         }
 
         if (!includeValidation) {
@@ -285,8 +292,11 @@ final class StructureGenerator implements Runnable {
             HttpProtocolGeneratorUtils.writeRetryableTrait(writer, shape, ";");
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
-            model, symbolProvider,
-            shape.getAllMembers().values(), this.requiredMemberMode, sensitiveDataFinder
+            model,
+            symbolProvider,
+            shape.getAllMembers().values(),
+            this.requiredMemberMode,
+            sensitiveDataFinder
         );
         // since any error interface must extend from JavaScript Error interface,
         // message member is already

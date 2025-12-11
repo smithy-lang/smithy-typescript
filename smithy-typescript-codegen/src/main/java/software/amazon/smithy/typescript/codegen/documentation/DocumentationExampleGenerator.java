@@ -18,6 +18,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class DocumentationExampleGenerator {
+
     private DocumentationExampleGenerator() {}
 
     /**
@@ -47,21 +48,23 @@ public final class DocumentationExampleGenerator {
                 if (objectNode.getMembers().isEmpty()) {
                     return indentation + "{ /* empty */ }";
                 }
-                String membersJoined = objectNode.getMembers()
+                String membersJoined = objectNode
+                    .getMembers()
                     .entrySet()
                     .stream()
                     .sorted(Comparator.comparing(entry -> entry.getKey().getValue()))
-                    .map(entry -> indentation
-                        + "  "
-                        + entry.getKey().getValue()
-                        + ": "
-                        + write(entry.getValue(), indent + 2))
+                    .map(
+                        entry ->
+                            indentation + "  " + entry.getKey().getValue() + ": " + write(entry.getValue(), indent + 2)
+                    )
                     .collect(Collectors.joining(",\n"));
 
                 return buffer
                     .append("{\n")
-                    .append(membersJoined).append("\n")
-                    .append(indentation).append("}")
+                    .append(membersJoined)
+                    .append("\n")
+                    .append(indentation)
+                    .append("}")
                     .toString();
             }
             case ARRAY -> {
@@ -69,17 +72,18 @@ public final class DocumentationExampleGenerator {
                 if (arrayNode.getElements().isEmpty()) {
                     return indentation + "[]";
                 }
-                String membersJoined = arrayNode.getElements()
+                String membersJoined = arrayNode
+                    .getElements()
                     .stream()
-                    .map(elementNode -> indentation
-                        + "  "
-                        + write(elementNode, indent + 2))
+                    .map(elementNode -> indentation + "  " + write(elementNode, indent + 2))
                     .collect(Collectors.joining(",\n"));
 
                 return buffer
                     .append("[\n")
-                    .append(membersJoined).append("\n")
-                    .append(indentation).append("]")
+                    .append(membersJoined)
+                    .append("\n")
+                    .append(indentation)
+                    .append("]")
                     .toString();
             }
             case STRING -> {

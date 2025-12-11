@@ -24,6 +24,7 @@ import java.util.Map;
  * and differ from their EndpointsV2 name.
  */
 public final class EndpointsParamNameMap {
+
     private static final Map<String, String> MAPPING = new HashMap<>();
 
     private EndpointsParamNameMap() {}
@@ -49,8 +50,7 @@ public final class EndpointsParamNameMap {
 
         String suggestedName = endpointsV2ParamName;
         if (isTitleCase) {
-            suggestedName = endpointsV2ParamName.substring(0, 1).toLowerCase()
-                + endpointsV2ParamName.substring(1);
+            suggestedName = endpointsV2ParamName.substring(0, 1).toLowerCase() + endpointsV2ParamName.substring(1);
         }
 
         return MAPPING.getOrDefault(endpointsV2ParamName, suggestedName);

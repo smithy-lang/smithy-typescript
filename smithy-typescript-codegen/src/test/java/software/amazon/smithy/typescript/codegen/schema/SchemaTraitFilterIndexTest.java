@@ -1,5 +1,8 @@
 package software.amazon.smithy.typescript.codegen.schema;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.model.Model;
@@ -34,11 +37,8 @@ import software.amazon.smithy.model.traits.XmlNamespaceTrait;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndexTest;
 import software.amazon.smithy.utils.SetUtils;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class SchemaTraitFilterIndexTest {
+
     private static Model model;
     private static SchemaTraitFilterIndex subject;
 
@@ -51,7 +51,6 @@ class SchemaTraitFilterIndexTest {
         subject = new SchemaTraitFilterIndex(model);
     }
 
-
     @Test
     void hasSchemaTraits() {
         Set<Shape> sparseShapes = model.getShapesWithTrait(SparseTrait.class);
@@ -59,23 +58,15 @@ class SchemaTraitFilterIndexTest {
 
         for (Shape sparseShape : sparseShapes) {
             assertTrue(subject.hasSchemaTraits(sparseShape));
-            assertTrue(
-                subject.includeTrait(
-                    sparseShape.getTrait(SparseTrait.class).get().toShapeId()
-                )
-            );
+            assertTrue(subject.includeTrait(sparseShape.getTrait(SparseTrait.class).get().toShapeId()));
         }
     }
 
     @Test
     void includeTrait() {
-        Set<ShapeId> excludedShapes = SetUtils.of(
-            TimestampFormatTrait.ID
-        );
+        Set<ShapeId> excludedShapes = SetUtils.of(TimestampFormatTrait.ID);
         for (ShapeId excludedShape : excludedShapes) {
-            String presence = subject.includeTrait(excludedShape)
-                ? "should not be included"
-                : excludedShape.getName();
+            String presence = subject.includeTrait(excludedShape) ? "should not be included" : excludedShape.getName();
             assertEquals(excludedShape.getName(), presence);
         }
         Set<ShapeId> includedTraits = SetUtils.of(

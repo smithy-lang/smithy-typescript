@@ -1,9 +1,9 @@
 package software.amazon.smithy.typescript.codegen.util;
 
-import org.junit.jupiter.api.Test;
-import java.util.Objects;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Objects;
+import org.junit.jupiter.api.Test;
 
 class StringStoreTest {
 
@@ -37,30 +37,30 @@ class StringStoreTest {
                 %s
             ];
             """.formatted(
-            subject.var("SomeObject"),
-            subject.var("some_object"),
-            subject.var("SomeObject"),
-            subject.var("some_object"),
-            subject.var("_"),
-            subject.var("__"),
-            subject.var("___"),
-            subject.var("_internal"),
-            subject.var("__internal"),
-            subject.var("___internal"),
-            subject.var("_internal_"),
-            subject.var("__internal__"),
-            subject.var("___internal__"),
-            subject.var("_two--words"),
-            subject.var("__twoWords__"),
-            subject.var("___TwoWords__"),
-            subject.var("$Symbol"),
-            subject.var("%Symbol"),
-            subject.var("   !)(@*#&$^%   "),
-            subject.var("   !)( @  )(@*#&$^* SmithyTypeScript# &)(@*#&$^  $^%   )(@*#&$^"),
-            subject.var("**Ack**Ack**"),
-            subject.var("Spaces Are Cool"),
-            subject.var("__why Would &&& YouName $something this...")
-        );
+                subject.var("SomeObject"),
+                subject.var("some_object"),
+                subject.var("SomeObject"),
+                subject.var("some_object"),
+                subject.var("_"),
+                subject.var("__"),
+                subject.var("___"),
+                subject.var("_internal"),
+                subject.var("__internal"),
+                subject.var("___internal"),
+                subject.var("_internal_"),
+                subject.var("__internal__"),
+                subject.var("___internal__"),
+                subject.var("_two--words"),
+                subject.var("__twoWords__"),
+                subject.var("___TwoWords__"),
+                subject.var("$Symbol"),
+                subject.var("%Symbol"),
+                subject.var("   !)(@*#&$^%   "),
+                subject.var("   !)( @  )(@*#&$^* SmithyTypeScript# &)(@*#&$^  $^%   )(@*#&$^"),
+                subject.var("**Ack**Ack**"),
+                subject.var("Spaces Are Cool"),
+                subject.var("__why Would &&& YouName $something this...")
+            );
 
         String[] expected = """
             const _ = "_";
@@ -84,7 +84,7 @@ class StringStoreTest {
             const _tW = "__twoWords__";
             const _tw = "_two--words";
             const _wWYt = "__why Would &&& YouName $something this...";
-            
+
             const array = [
                 _SO,
                 _so,
@@ -111,8 +111,7 @@ class StringStoreTest {
                 _wWYt
             ];
             """.split("\n");
-        String[] actual = (subject.flushVariableDeclarationCode() + "\n"
-            + sourceCode).split("\n");
+        String[] actual = (subject.flushVariableDeclarationCode() + "\n" + sourceCode).split("\n");
 
         for (int i = 0; i < expected.length; ++i) {
             assertEquals(

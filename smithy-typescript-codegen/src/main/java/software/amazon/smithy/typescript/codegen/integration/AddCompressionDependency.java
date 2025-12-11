@@ -46,10 +46,10 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
 
     @Override
     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            LanguageTarget target
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        LanguageTarget target
     ) {
         if (!hasRequestCompressionTrait(model, settings.getService(model))) {
             return Collections.emptyMap();
@@ -58,37 +58,51 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
         switch (target) {
             case NODE:
                 return MapUtils.of(
-                    "disableRequestCompression", writer -> {
+                    "disableRequestCompression",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.addImport("loadConfig", "loadNodeConfig",
-                                TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                        writer.addImport("NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS", null,
-                                TypeScriptDependency.MIDDLEWARE_COMPRESSION);
+                        writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImport(
+                            "NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS",
+                            null,
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
+                        );
                         writer.write("loadNodeConfig(NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS, config)");
                     },
-                    "requestMinCompressionSizeBytes", writer -> {
+                    "requestMinCompressionSizeBytes",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.addImport("loadConfig", "loadNodeConfig",
-                                TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                        writer.addImport("NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS", null,
-                                TypeScriptDependency.MIDDLEWARE_COMPRESSION);
+                        writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImport(
+                            "NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS",
+                            null,
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
+                        );
                         writer.write("loadNodeConfig(NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS, config)");
                     }
                 );
             case BROWSER:
                 return MapUtils.of(
-                    "disableRequestCompression", writer -> {
+                    "disableRequestCompression",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.addImport("DEFAULT_DISABLE_REQUEST_COMPRESSION", null,
-                            TypeScriptDependency.MIDDLEWARE_COMPRESSION);
+                        writer.addImport(
+                            "DEFAULT_DISABLE_REQUEST_COMPRESSION",
+                            null,
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
+                        );
                         writer.write("DEFAULT_DISABLE_REQUEST_COMPRESSION");
                     },
-                    "requestMinCompressionSizeBytes", writer -> {
+                    "requestMinCompressionSizeBytes",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.addImport("DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES", null,
-                            TypeScriptDependency.MIDDLEWARE_COMPRESSION);
+                        writer.addImport(
+                            "DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES",
+                            null,
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
+                        );
                         writer.write("DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES");
                     }
                 );
@@ -101,13 +115,19 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
             RuntimeClientPlugin.builder()
-                .withConventions(TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
-                    "Compression", RuntimeClientPlugin.Convention.HAS_CONFIG)
+                .withConventions(
+                    TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
+                    "Compression",
+                    RuntimeClientPlugin.Convention.HAS_CONFIG
+                )
                 .servicePredicate((m, s) -> hasRequestCompressionTrait(m, s))
                 .build(),
             RuntimeClientPlugin.builder()
-                .withConventions(TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
-                    "Compression", RuntimeClientPlugin.Convention.HAS_MIDDLEWARE)
+                .withConventions(
+                    TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
+                    "Compression",
+                    RuntimeClientPlugin.Convention.HAS_MIDDLEWARE
+                )
                 .additionalPluginFunctionParamsSupplier((m, s, o) -> getPluginFunctionParams(m, s, o))
                 .operationPredicate((m, s, o) -> hasRequestCompressionTrait(o))
                 .build()
@@ -133,10 +153,7 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
         return operation.hasTrait(RequestCompressionTrait.class);
     }
 
-    private static boolean hasRequestCompressionTrait(
-            Model model,
-            ServiceShape service
-    ) {
+    private static boolean hasRequestCompressionTrait(Model model, ServiceShape service) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         for (OperationShape operation : operations) {

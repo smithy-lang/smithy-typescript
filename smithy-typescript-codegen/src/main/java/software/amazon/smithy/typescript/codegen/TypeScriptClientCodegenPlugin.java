@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class TypeScriptClientCodegenPlugin implements SmithyBuildPlugin {
+
     private static final Logger LOGGER = Logger.getLogger(TypeScriptClientCodegenPlugin.class.getName());
 
     @Override
@@ -28,8 +29,8 @@ public class TypeScriptClientCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
-        CodegenDirector<TypeScriptWriter, TypeScriptIntegration, TypeScriptCodegenContext, TypeScriptSettings> runner
-                = new CodegenDirector<>();
+        CodegenDirector<TypeScriptWriter, TypeScriptIntegration, TypeScriptCodegenContext, TypeScriptSettings> runner =
+            new CodegenDirector<>();
 
         runner.directedCodegen(new DirectedTypeScriptCodegen());
 
@@ -41,25 +42,33 @@ public class TypeScriptClientCodegenPlugin implements SmithyBuildPlugin {
         runner.model(context.getModel());
 
         // Create the TypeScriptSettings object from the plugin settings.
-        TypeScriptSettings settings = TypeScriptSettings.from(context.getModel(), context.getSettings(),
-                TypeScriptSettings.ArtifactType.CLIENT);
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            context.getModel(),
+            context.getSettings(),
+            TypeScriptSettings.ArtifactType.CLIENT
+        );
         runner.settings(settings);
 
         // Only add integrations if the integrations match the settings
         // This uses {@link TypeScriptIntegration#matchesSettings}, which is a
         // Smithy internal API. This may be removed at any point.
-        runner.integrationFinder(() ->
-            () -> ServiceLoader.load(TypeScriptIntegration.class, CodegenDirector.class.getClassLoader())
-                .stream()
-                .map(Provider::get)
-                .filter(integration -> {
-                    boolean matchesSettings = integration.matchesSettings(settings);
-                    if (!matchesSettings) {
-                        LOGGER.fine(() -> "Skipping TypeScript integration based on settings: " + integration.name());
-                    }
-                    return matchesSettings;
-                })
-                .iterator());
+        runner.integrationFinder(
+            () ->
+                () ->
+                    ServiceLoader.load(TypeScriptIntegration.class, CodegenDirector.class.getClassLoader())
+                        .stream()
+                        .map(Provider::get)
+                        .filter(integration -> {
+                            boolean matchesSettings = integration.matchesSettings(settings);
+                            if (!matchesSettings) {
+                                LOGGER.fine(
+                                    () -> "Skipping TypeScript integration based on settings: " + integration.name()
+                                );
+                            }
+                            return matchesSettings;
+                        })
+                        .iterator()
+        );
 
         runner.service(settings.getService());
 

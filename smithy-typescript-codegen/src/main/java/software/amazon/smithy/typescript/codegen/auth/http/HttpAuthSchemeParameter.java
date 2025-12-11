@@ -26,20 +26,17 @@ public record HttpAuthSchemeParameter(
     Consumer<TypeScriptWriter> type,
     Consumer<TypeScriptWriter> source
 ) implements ToSmithyBuilder<HttpAuthSchemeParameter> {
-
     public static Builder builder() {
         return new Builder();
     }
 
     @Override
     public SmithyBuilder<HttpAuthSchemeParameter> toBuilder() {
-        return builder()
-            .name(name)
-            .type(type)
-            .source(source);
+        return builder().name(name).type(type).source(source);
     }
 
     public static final class Builder implements SmithyBuilder<HttpAuthSchemeParameter> {
+
         private String name;
         private Consumer<TypeScriptWriter> type;
         private Consumer<TypeScriptWriter> source;
@@ -49,7 +46,8 @@ public record HttpAuthSchemeParameter(
             return new HttpAuthSchemeParameter(
                 SmithyBuilder.requiredState("name", name),
                 SmithyBuilder.requiredState("type", type),
-                SmithyBuilder.requiredState("source", source));
+                SmithyBuilder.requiredState("source", source)
+            );
         }
 
         public Builder name(String name) {

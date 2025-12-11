@@ -14,6 +14,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class ImportFrom {
+
     public static final Set<String> NODE_NATIVE_DEPENDENCIES = SetUtils.of(
         "buffer",
         "child_process",
@@ -48,8 +49,7 @@ public class ImportFrom {
      */
     public boolean isNodejsNative() {
         String[] packageNameSegments = from.split("/");
-        return from.startsWith("node:")
-            || NODE_NATIVE_DEPENDENCIES.contains(packageNameSegments[0]);
+        return from.startsWith("node:") || NODE_NATIVE_DEPENDENCIES.contains(packageNameSegments[0]);
     }
 
     /**

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 public class TypeScriptUtilsTest {
+
     @Test
     public void sanitizesPropertyNames() {
         assertThat(TypeScriptUtils.sanitizePropertyName("foo"), equalTo("foo"));

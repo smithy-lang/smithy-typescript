@@ -16,6 +16,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class AddBuiltinPlugins implements TypeScriptIntegration {
+
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         // Note that order is significant because configurations might
@@ -25,8 +26,12 @@ public class AddBuiltinPlugins implements TypeScriptIntegration {
                 .withConventions(TypeScriptDependency.MIDDLEWARE_RETRY.dependency, "Retry")
                 .build(),
             RuntimeClientPlugin.builder()
-                .withConventions(TypeScriptDependency.MIDDLEWARE_CONTENT_LENGTH.dependency, "ContentLength",
-                    HAS_MIDDLEWARE)
-                .build());
+                .withConventions(
+                    TypeScriptDependency.MIDDLEWARE_CONTENT_LENGTH.dependency,
+                    "ContentLength",
+                    HAS_MIDDLEWARE
+                )
+                .build()
+        );
     }
 }

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
 public class TypeScriptWriterTest {
+
     @Test
     public void writesDocStrings() {
         TypeScriptWriter writer = new TypeScriptWriter("foo");
@@ -27,13 +28,16 @@ public class TypeScriptWriterTest {
         writer.addRelativeImport("Qux", "__Qux", Paths.get("./qux"));
         String result = writer.toString();
 
-        assertEquals("""
+        assertEquals(
+            """
             %simport { Bar as __Bar } from "@smithy/types";
-            
+
             import { Baz } from "./hello";
             import { Qux as __Qux } from "./qux";
             import { Foo } from "baz";
-            """.formatted(CODEGEN_INDICATOR), result);
+            """.formatted(CODEGEN_INDICATOR),
+            result
+        );
     }
 
     @Test
@@ -75,8 +79,12 @@ public class TypeScriptWriterTest {
         writer.addImportSubmodule("symbol", "__symbol", () -> "@smithy/core", "/submodule");
         String result = writer.toString();
 
-        assertEquals("""
+        assertEquals(
+            """
             %simport { symbol as __symbol } from "@smithy/core/submodule";
-            """.formatted(CODEGEN_INDICATOR).trim(), result.trim());
+            """.formatted(CODEGEN_INDICATOR)
+                .trim(),
+            result.trim()
+        );
     }
 }

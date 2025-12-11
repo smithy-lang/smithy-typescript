@@ -11,14 +11,15 @@ import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 public class SerdeElisionIndexTest {
+
     private static Model model;
 
     @BeforeAll
     public static void before() {
         model = Model.assembler()
-                .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
-                .assemble()
-                .unwrap();
+            .addImport(SerdeElisionIndexTest.class.getResource("serde-elision.smithy"))
+            .assemble()
+            .unwrap();
     }
 
     @AfterAll
@@ -59,7 +60,9 @@ public class SerdeElisionIndexTest {
 
     @Test
     public void cannotElideNestedUnsupportedTypes() {
-        model = model.toBuilder().addShapes(
+        model = model
+            .toBuilder()
+            .addShapes(
                 // Shim set shapes into 2.0 model.
                 SetShape.builder().id("foo.bar#BigDecimalSet").member(ShapeId.from("foo.bar#BigDecimal")).build(),
                 SetShape.builder().id("foo.bar#BigIntegerSet").member(ShapeId.from("foo.bar#BigInteger")).build(),
@@ -68,9 +71,9 @@ public class SerdeElisionIndexTest {
                 SetShape.builder().id("foo.bar#TimestampSet").member(ShapeId.from("foo.bar#Timestamp")).build(),
                 SetShape.builder().id("foo.bar#DoubleSet").member(ShapeId.from("foo.bar#Double")).build(),
                 SetShape.builder().id("foo.bar#FloatSet").member(ShapeId.from("foo.bar#Float")).build()
-        ).build();
+            )
+            .build();
         SerdeElisionIndex index = SerdeElisionIndex.of(model);
-
 
         assertFalse(index.mayElide(model.getShape(ShapeId.from("foo.bar#BigDecimalList")).get()));
         assertFalse(index.mayElide(model.getShape(ShapeId.from("foo.bar#BigIntegerList")).get()));

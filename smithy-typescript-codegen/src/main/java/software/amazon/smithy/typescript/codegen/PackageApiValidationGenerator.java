@@ -26,6 +26,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class PackageApiValidationGenerator {
+
     private final TypeScriptWriter writer;
     private final TypeScriptSettings settings;
     private final Model model;
@@ -50,69 +51,72 @@ public final class PackageApiValidationGenerator {
      */
     public void writeTypeIndexTest() {
         writer.openBlock("""
-            export type {""",
-            """
-            } from "../dist-types/index.d";""",
-            () -> {
-                // exportable types include:
+        export type {""", """
+        } from "../dist-types/index.d";""", () -> {
+            // exportable types include:
 
-                // the barebones client
-                String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-                writer.write("$L", aggregateClientName + "Client,");
+            // the barebones client
+            String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+            writer.write("$L", aggregateClientName + "Client,");
 
-                // the aggregate client
-                writer.write(aggregateClientName + ",");
+            // the aggregate client
+            writer.write(aggregateClientName + ",");
 
-                // all commands
-                Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
-                    settings.getService()
-                );
-                for (OperationShape operation : containedOperations) {
-                    String commandName = symbolProvider.toSymbol(operation).getName();
-                    writer.write("$L,", commandName);
-                    writer.write("$LInput,", commandName);
-                    writer.write("$LOutput,", commandName);
-                }
+            // all commands
+            Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
+                settings.getService()
+            );
+            for (OperationShape operation : containedOperations) {
+                String commandName = symbolProvider.toSymbol(operation).getName();
+                writer.write("$L,", commandName);
+                writer.write("$LInput,", commandName);
+                writer.write("$LOutput,", commandName);
+            }
 
-                // enums
-                TreeSet<Shape> enumShapes = closure.getEnums();
-                for (Shape enumShape : enumShapes) {
-                    writer.write("$L,", symbolProvider.toSymbol(enumShape).getName());
-                }
+            // enums
+            TreeSet<Shape> enumShapes = closure.getEnums();
+            for (Shape enumShape : enumShapes) {
+                writer.write("$L,", symbolProvider.toSymbol(enumShape).getName());
+            }
 
-                // structure & union types & modeled errors
-                TreeSet<Shape> structuralShapes = closure.getStructuralNonErrorShapes();
-                for (Shape structuralShape : structuralShapes) {
-                    writer.write("$L,", symbolProvider.toSymbol(structuralShape).getName());
-                }
+            // structure & union types & modeled errors
+            TreeSet<Shape> structuralShapes = closure.getStructuralNonErrorShapes();
+            for (Shape structuralShape : structuralShapes) {
+                writer.write("$L,", symbolProvider.toSymbol(structuralShape).getName());
+            }
 
-                TreeSet<Shape> errorShapes = closure.getErrorShapes();
-                for (Shape errorShape : errorShapes) {
-                    writer.write("$L,", symbolProvider.toSymbol(errorShape).getName());
-                }
+            TreeSet<Shape> errorShapes = closure.getErrorShapes();
+            for (Shape errorShape : errorShapes) {
+                writer.write("$L,", symbolProvider.toSymbol(errorShape).getName());
+            }
 
-                // synthetic base exception
-                String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
-                writer.write("$L,", baseExceptionName);
+            // synthetic base exception
+            String baseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(aggregateClientName, model);
+            writer.write("$L,", baseExceptionName);
 
-                // waiters
-                closure.getWaiterNames().forEach(waiter -> {
+            // waiters
+            closure
+                .getWaiterNames()
+                .forEach(waiter -> {
                     writer.write("$L,", waiter);
                 });
-                // paginators
-                closure.getPaginatorNames().forEach(paginator -> {
+            // paginators
+            closure
+                .getPaginatorNames()
+                .forEach(paginator -> {
                     writer.write("$L,", paginator);
                 });
-            }
-        );
+        });
     }
 
     /**
      * Code written by this method is pure JavaScript (CJS).
      */
     public void writeRuntimeIndexTest() {
-        writer.write("""
-            import assert from "node:assert";""");
+        writer.write(
+            """
+            import assert from "node:assert";"""
+        );
         // runtime components include:
 
         Path cjsIndex = Paths.get("./dist-cjs/index.js");
@@ -124,24 +128,25 @@ public final class PackageApiValidationGenerator {
 
         // the aggregate client
         writer.write("// clients");
-        writer.write("""
+        writer.write(
+            """
             assert(typeof $L === "function");""",
             aggregateClientName + "Client"
         );
-        writer.write("""
+        writer.write(
+            """
             assert(typeof $L === "function");""",
             aggregateClientName
         );
 
         // all commands
         writer.write("// commands");
-        Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
-            settings.getService()
-        );
+        Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(settings.getService());
         for (OperationShape operation : containedOperations) {
             Symbol operationSymbol = symbolProvider.toSymbol(operation);
             writer.addRelativeImport(operationSymbol.getName(), null, cjsIndex);
-            writer.write("""
+            writer.write(
+                """
                 assert(typeof $L === "function");""",
                 operationSymbol.getName()
             );
@@ -151,11 +156,10 @@ public final class PackageApiValidationGenerator {
 
         // string shapes with enum trait do not generate anything if
         // any enum value does not have a name.
-        TreeSet<Shape> enumShapes = closure.getEnums().stream()
-            .filter(shape -> shape
-                .getTrait(EnumTrait.class)
-                .map(EnumTrait::hasNames)
-                .orElse(true))
+        TreeSet<Shape> enumShapes = closure
+            .getEnums()
+            .stream()
+            .filter(shape -> shape.getTrait(EnumTrait.class).map(EnumTrait::hasNames).orElse(true))
             .collect(TreeSet::new, Set::add, Set::addAll);
 
         if (!enumShapes.isEmpty()) {
@@ -164,7 +168,8 @@ public final class PackageApiValidationGenerator {
         for (Shape enumShape : enumShapes) {
             Symbol enumSymbol = symbolProvider.toSymbol(enumShape);
             writer.addRelativeImport(enumSymbol.getName(), null, cjsIndex);
-            writer.write("""
+            writer.write(
+                """
                 assert(typeof $L === "object");""",
                 enumSymbol.getName()
             );
@@ -178,11 +183,7 @@ public final class PackageApiValidationGenerator {
         for (Shape error : errors) {
             Symbol errorSymbol = symbolProvider.toSymbol(error);
             writer.addRelativeImport(errorSymbol.getName(), null, cjsIndex);
-            writer.write(
-                "assert($L.prototype instanceof $L);",
-                errorSymbol.getName(),
-                baseExceptionName
-            );
+            writer.write("assert($L.prototype instanceof $L);", errorSymbol.getName(), baseExceptionName);
         }
         writer.addRelativeImport(baseExceptionName, null, cjsIndex);
         writer.write("assert($L.prototype instanceof Error);", baseExceptionName);
@@ -194,7 +195,8 @@ public final class PackageApiValidationGenerator {
         }
         waiterNames.forEach(waiter -> {
             writer.addRelativeImport(waiter, null, cjsIndex);
-            writer.write("""
+            writer.write(
+                """
                 assert(typeof $L === "function");""",
                 waiter
             );
@@ -205,7 +207,8 @@ public final class PackageApiValidationGenerator {
         }
         paginatorNames.forEach(paginator -> {
             writer.addRelativeImport(paginator, null, cjsIndex);
-            writer.write("""
+            writer.write(
+                """
                 assert(typeof $L === "function");""",
                 paginator
             );
