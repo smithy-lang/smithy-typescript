@@ -6,11 +6,8 @@
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.Optional;
 import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.codegen.core.ReservedWords;
-import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
@@ -27,7 +24,6 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
-import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -49,10 +45,6 @@ public class SchemaGenerator implements Runnable {
     private final StringStore store = new StringStore();
     private final TypeScriptWriter writer = new TypeScriptWriter("");
     private final ServiceClosure closure;
-
-    private final ReservedWords reservedWords = new ReservedWordsBuilder()
-        .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
-        .build();
 
     public SchemaGenerator(Model model,
                            FileManifest fileManifest,
@@ -101,14 +93,7 @@ public class SchemaGenerator implements Runnable {
      * unqualified name.
      */
     private String getShapeVariableName(Shape shape) {
-        if (shape.getId().equals(ShapeId.from("smithy.api#Unit"))) {
-            return "__Unit";
-        }
-        String symbolName = reservedWords.escape(shape.getId().getName());
-        if (closure.getRequiresNamingDeconfliction().contains(shape)) {
-            symbolName += "_" + store.var(shape.getId().getNamespace(), "n");
-        }
-        return symbolName;
+        return closure.getShapeSchemaVariableName(shape, store);
     }
 
     /**
@@ -119,7 +104,7 @@ public class SchemaGenerator implements Runnable {
         if (elision.traits.hasSchemaTraits(shape)) {
             writer.addTypeImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
-                    export var $L: StaticSimpleSchema = [0, $L, $L,""",
+                    var $L: StaticSimpleSchema = [0, $L, $L,""",
                 "",
                 getShapeVariableName(shape),
                 store.var(shape.getId().getNamespace(), "n"),
@@ -134,7 +119,7 @@ public class SchemaGenerator implements Runnable {
 
     private void writeStructureSchema(StructureShape shape) {
         checkedWriteSchema(shape, () -> {
-            String symbolName = reservedWords.escape(shape.getId().getName());
+            String symbolName = ServiceClosure.RESERVED_WORDS.escape(shape.getId().getName());
             if (shape.hasTrait(ErrorTrait.class)) {
                 String exceptionCtorSymbolName = "__" + symbolName;
                 writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
@@ -256,7 +241,7 @@ public class SchemaGenerator implements Runnable {
         checkedWriteSchema(shape, () -> {
             writer.addTypeImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
-                    export var $L: StaticListSchema = [1, $L, $L,""",
+                    var $L: StaticListSchema = [1, $L, $L,""",
                 "];",
                 getShapeVariableName(shape),
                 store.var(shape.getId().getNamespace(), "n"),
@@ -273,7 +258,7 @@ public class SchemaGenerator implements Runnable {
         checkedWriteSchema(shape, () -> {
             writer.addTypeImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock("""
-                    export var $L: StaticMapSchema = [2, $L, $L,""",
+                    var $L: StaticMapSchema = [2, $L, $L,""",
                 "];",
                 getShapeVariableName(shape),
                 store.var(shape.getId().getNamespace(), "n"),
@@ -372,16 +357,27 @@ public class SchemaGenerator implements Runnable {
             && shape.getId().getName().equals("Unit")) {
             // special signal value for operation input/output.
             writer.write("""
-                export var __Unit = "unit" as const;""");
+                var __Unit = "unit" as const;""");
         } else if (!elision.isReferenceSchema(shape) && !elision.traits.hasSchemaTraits(shape)) {
             String sentinel = this.resolveSchema(model.expectShape(ShapeId.from("smithy.api#Unit")), shape);
 
-            writer.write(
-                """
-                export var $L = $L;""",
-                getShapeVariableName(shape),
-                sentinel
-            );
+            boolean exportable = shape.isStructureShape() || shape.isUnionShape() || shape.isOperationShape();
+
+            if (exportable) {
+                writer.write(
+                    """
+                    export var $L = $L;""",
+                    getShapeVariableName(shape),
+                    sentinel
+                );
+            } else {
+                writer.write(
+                    """
+                    var $L = $L;""",
+                    getShapeVariableName(shape),
+                    sentinel
+                );
+            }
         } else {
             schemaWriteFn.run();
         }

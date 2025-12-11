@@ -41,6 +41,7 @@ assert(typeof RpcV2CborListsCommand === "function");
 assert(typeof RpcV2CborSparseMapsCommand === "function");
 assert(typeof SimpleScalarPropertiesCommand === "function");
 assert(typeof SparseNullsOperationCommand === "function");
+// structural schemas
 // enums
 assert(typeof TestEnum === "object");
 assert(typeof TestIntEnum === "object");
