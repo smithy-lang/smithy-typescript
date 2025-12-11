@@ -76,10 +76,12 @@ final class IntEnumGenerator implements Runnable {
     private void generateIntEnum() {
         writer.openBlock("export enum $L {", "}", symbol.getName(), () -> {
             // Sort by the values to ensure a stable order and sane diffs.
-            shape.getEnumValues().entrySet()
-                    .stream()
-                    .sorted(Comparator.comparing(e -> e.getValue()))
-                    .forEach(this::writeIntEnumEntry);
+            shape
+                .getEnumValues()
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(e -> e.getValue()))
+                .forEach(this::writeIntEnumEntry);
         });
     }
 

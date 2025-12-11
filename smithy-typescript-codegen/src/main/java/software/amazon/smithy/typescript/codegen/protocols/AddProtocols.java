@@ -20,8 +20,6 @@ public class AddProtocols implements TypeScriptIntegration {
 
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
-        return ListUtils.of(
-            new SmithyRpcV2Cbor()
-        );
+        return ListUtils.of(new SmithyRpcV2Cbor());
     }
 }

@@ -100,7 +100,12 @@ final class ImportDeclarations implements ImportContainer {
     @Override
     public void importSymbol(Symbol symbol, String alias) {
         if (!symbol.getNamespace().isEmpty() && !symbol.getNamespace().equals(moduleNameString)) {
-            if (symbol.getProperty("typeOnly").map(o -> (Boolean) o).orElse(false)) {
+            if (
+                symbol
+                    .getProperty("typeOnly")
+                    .map(o -> (Boolean) o)
+                    .orElse(false)
+            ) {
                 addTypeImport(symbol.getName(), alias, symbol.getNamespace());
             } else {
                 addImport(symbol.getName(), alias, symbol.getNamespace());
@@ -118,7 +123,8 @@ final class ImportDeclarations implements ImportContainer {
                 if (ignore) {
                     result.append("// @ts-ignore: ").append(importEntry.getValue().getRight().reason).append("\n");
                 }
-                result.append("import ")
+                result
+                    .append("import ")
                     .append(importEntry.getValue().getLeft())
                     .append(" from \"")
                     .append(importEntry.getKey())
@@ -136,9 +142,11 @@ final class ImportDeclarations implements ImportContainer {
         return result.toString();
     }
 
-    private static void createImports(Map<String, Map<String, String>> namedImports,
-                                      Map<String, Map<String, String>> namedTypeImports,
-                                      StringBuilder buffer) {
+    private static void createImports(
+        Map<String, Map<String, String>> namedImports,
+        Map<String, Map<String, String>> namedTypeImports,
+        StringBuilder buffer
+    ) {
         TreeSet<String> mergedModuleKeys = new TreeSet<>((a, b) -> {
             if (a.startsWith(".") && !b.startsWith(".")) {
                 return 1;
@@ -155,7 +163,8 @@ final class ImportDeclarations implements ImportContainer {
         mergedModuleKeys.addAll(namedTypeImports.keySet());
 
         // separate non-relative and relative imports.
-        long separatorIndex = mergedModuleKeys.stream()
+        long separatorIndex = mergedModuleKeys
+            .stream()
             .filter(k -> !k.startsWith("."))
             .count();
         int i = 0;
@@ -195,8 +204,9 @@ final class ImportDeclarations implements ImportContainer {
 
                 // "*" imports are not supported https://github.com/smithy-lang/smithy-typescript/issues/211
                 if ("*".equals(runtimeSymbol) || "*".equals(typeSymbol)) {
-                    throw new CodegenException("Star imports are not supported, attempted for " + module
-                                               + ". Use default import instead.");
+                    throw new CodegenException(
+                        "Star imports are not supported, attempted for " + module + ". Use default import instead."
+                    );
                 }
 
                 if (runtimeSymbol != null) {
@@ -267,6 +277,7 @@ final class ImportDeclarations implements ImportContainer {
     }
 
     private static final class Ignore {
+
         final boolean ignore;
         final String reason;
 
@@ -282,6 +293,5 @@ final class ImportDeclarations implements ImportContainer {
         static Ignore ignored(String reason) {
             return new Ignore(true, reason);
         }
-
     }
 }

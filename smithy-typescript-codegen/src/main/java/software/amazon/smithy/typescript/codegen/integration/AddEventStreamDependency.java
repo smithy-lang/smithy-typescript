@@ -46,46 +46,50 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
 
     @Override
     public List<String> runAfter() {
-        return List.of(
-            new AddBuiltinPlugins().name()
-        );
+        return List.of(new AddBuiltinPlugins().name());
     }
 
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
-                RuntimeClientPlugin.builder()
-                        .withConventions(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
-                                "EventStreamSerde", RuntimeClientPlugin.Convention.HAS_CONFIG)
-                        .servicePredicate(AddEventStreamDependency::hasEventStream)
-                        .build()
+            RuntimeClientPlugin.builder()
+                .withConventions(
+                    TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
+                    "EventStreamSerde",
+                    RuntimeClientPlugin.Convention.HAS_CONFIG
+                )
+                .servicePredicate(AddEventStreamDependency::hasEventStream)
+                .build()
         );
     }
 
     @Override
     public void addConfigInterfaceFields(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer
     ) {
         if (!hasEventStream(model, settings.getService(model))) {
             return;
         }
 
         writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
-        writer.addTypeImport("EventStreamSerdeProvider", "__EventStreamSerdeProvider",
-                TypeScriptDependency.SMITHY_TYPES);
+        writer.addTypeImport(
+            "EventStreamSerdeProvider",
+            "__EventStreamSerdeProvider",
+            TypeScriptDependency.SMITHY_TYPES
+        );
         writer.writeDocs("The function that provides necessary utilities for generating and parsing event stream");
         writer.write("eventStreamSerdeProvider?: __EventStreamSerdeProvider;\n");
     }
 
     @Override
     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            LanguageTarget target
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        LanguageTarget target
     ) {
         if (!hasEventStream(model, settings.getService(model))) {
             return Collections.emptyMap();
@@ -94,15 +98,21 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
             case NODE:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
-                    writer.addImport("eventStreamSerdeProvider", null,
-                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
+                    writer.addImport(
+                        "eventStreamSerdeProvider",
+                        null,
+                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE
+                    );
                     writer.write("eventStreamSerdeProvider");
                 });
             case BROWSER:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
                     writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
-                    writer.addImport("eventStreamSerdeProvider", null,
-                            TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
+                    writer.addImport(
+                        "eventStreamSerdeProvider",
+                        null,
+                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER
+                    );
                     writer.write("eventStreamSerdeProvider");
                 });
             default:
@@ -114,39 +124,39 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
     public List<? extends CodeInterceptor<? extends CodeSection, TypeScriptWriter>> interceptors(
         TypeScriptCodegenContext codegenContext
     ) {
-        return List.of(CodeInterceptor.appender(SmithyContextCodeSection.class, (w, s) -> {
-            EventStreamIndex eventStreamIndex = EventStreamIndex.of(s.getModel());
-            boolean input = eventStreamIndex.getInputInfo(s.getOperation()).isPresent();
-            boolean output = eventStreamIndex.getOutputInfo(s.getOperation()).isPresent();
-            // If not event streaming for I/O, don't write anything
-            if (!input && !output) {
-                return;
-            }
-            // Otherwise, write present input and output streaming
-            w.write("").indent();
-            w.writeDocs("@internal");
-            w.openBlock("eventStream: {", "},", () -> {
-                if (input) {
-                    w.write("input: true,");
+        return List.of(
+            CodeInterceptor.appender(SmithyContextCodeSection.class, (w, s) -> {
+                EventStreamIndex eventStreamIndex = EventStreamIndex.of(s.getModel());
+                boolean input = eventStreamIndex.getInputInfo(s.getOperation()).isPresent();
+                boolean output = eventStreamIndex.getOutputInfo(s.getOperation()).isPresent();
+                // If not event streaming for I/O, don't write anything
+                if (!input && !output) {
+                    return;
                 }
-                if (output) {
-                    w.write("output: true,");
-                }
-            });
-            w.dedent();
-        }));
+                // Otherwise, write present input and output streaming
+                w.write("").indent();
+                w.writeDocs("@internal");
+                w.openBlock("eventStream: {", "},", () -> {
+                    if (input) {
+                        w.write("input: true,");
+                    }
+                    if (output) {
+                        w.write("output: true,");
+                    }
+                });
+                w.dedent();
+            })
+        );
     }
 
-    private static boolean hasEventStream(
-            Model model,
-            ServiceShape service
-    ) {
+    private static boolean hasEventStream(Model model, ServiceShape service) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         for (OperationShape operation : operations) {
-            if (eventStreamIndex.getInputInfo(operation).isPresent()
-                    || eventStreamIndex.getOutputInfo(operation).isPresent()
+            if (
+                eventStreamIndex.getInputInfo(operation).isPresent() ||
+                eventStreamIndex.getOutputInfo(operation).isPresent()
             ) {
                 return true;
             }

@@ -50,14 +50,24 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
     public void generateSharedComponents(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
 
-        writer.addImportSubmodule("parseCborBody", "parseBody",
-                TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+        writer
+            .addImportSubmodule(
+                "parseCborBody",
+                "parseBody",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CBOR
             )
-            .addImportSubmodule("parseCborErrorBody", "parseErrorBody",
-                TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            .addImportSubmodule(
+                "parseCborErrorBody",
+                "parseErrorBody",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CBOR
             )
-            .addImportSubmodule("loadSmithyRpcV2CborErrorCode", null,
-                TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            .addImportSubmodule(
+                "loadSmithyRpcV2CborErrorCode",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CBOR
             );
 
         ServiceShape service = context.getService();
@@ -67,10 +77,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
             service,
             getDocumentContentType(),
             () -> {
-                writer.addImportSubmodule(
-                    "cbor", null,
-                    TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
-                );
+                writer.addImportSubmodule("cbor", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
                 writer.write("body = cbor.serialize(body);");
             },
             serializingDocumentShapes
@@ -107,15 +114,15 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
         writer.addImportSubmodule(
-            "buildHttpRpcRequest", null,
-            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            "buildHttpRpcRequest",
+            null,
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.CBOR
         );
         writeSharedRequestHeaders(context);
         writer.write("");
 
-        writer.write(
-            context.getStringStore().flushVariableDeclarationCode()
-        );
+        writer.write(context.getStringStore().flushVariableDeclarationCode());
     }
 
     @Override
@@ -125,9 +132,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
 
     @Override
     public void generateProtocolTests(GenerationContext generationContext) {
-        SmithyProtocolUtils.generateProtocolTests(
-            this, generationContext
-        );
+        SmithyProtocolUtils.generateProtocolTests(this, generationContext);
     }
 
     @Override
@@ -140,9 +145,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         SmithyProtocolUtils.generateDocumentBodyShapeSerde(
             generationContext,
             shapes,
-            new CborShapeSerVisitor(
-                generationContext
-            )
+            new CborShapeSerVisitor(generationContext)
         );
     }
 
@@ -151,9 +154,7 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         SmithyProtocolUtils.generateDocumentBodyShapeSerde(
             generationContext,
             shapes,
-            new CborShapeDeserVisitor(
-                generationContext
-            )
+            new CborShapeDeserVisitor(generationContext)
         );
     }
 
@@ -168,46 +169,53 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
         String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, getName());
         String errorMethodName = "de_CommandError";
-        String serdeContextType = CodegenUtils.getOperationDeserializerContextType(context.getSettings(), writer,
-            context.getModel(), operation);
+        String serdeContextType = CodegenUtils.getOperationDeserializerContextType(
+            context.getSettings(),
+            writer,
+            context.getModel(),
+            operation
+        );
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
 
         writer.writeDocs(methodLongName);
         writer.openBlock("""
-            export const $L = async (
-              output: $T,
-              context: $L
-            ): Promise<$T> => {""", "};",
-            methodName, responseType, serdeContextType, outputType,
-            () -> {
-                writer.addImportSubmodule(
-                    "checkCborResponse", "cr",
-                    TypeScriptDependency.SMITHY_CORE,
-                    SmithyCoreSubmodules.CBOR
-                );
-                writer.write("cr(output);");
+        export const $L = async (
+          output: $T,
+          context: $L
+        ): Promise<$T> => {""", "};", methodName, responseType, serdeContextType, outputType, () -> {
+            writer.addImportSubmodule(
+                "checkCborResponse",
+                "cr",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CBOR
+            );
+            writer.write("cr(output);");
 
-                writer.write("""
-                    if (output.statusCode >= 300) {
-                      return $L(output, context);
-                    }
-                    """,
-                    errorMethodName
-                );
+            writer.write(
+                """
+                if (output.statusCode >= 300) {
+                  return $L(output, context);
+                }
+                """,
+                errorMethodName
+            );
 
-                readResponseBody(context, operation);
+            readResponseBody(context, operation);
 
-                writer.write("""
-                    const response: $T = {
-                      $$metadata: deserializeMetadata(output), $L
-                    };
-                    return response;
-                    """,
-                    outputType,
-                    operation.getOutput().map((o) -> "...contents,").orElse("")
-                );
-            }
-        );
+            writer.write(
+                """
+                const response: $T = {
+                  $$metadata: deserializeMetadata(output), $L
+                };
+                return response;
+                """,
+                outputType,
+                operation
+                    .getOutput()
+                    .map(o -> "...contents,")
+                    .orElse("")
+            );
+        });
         writer.write("");
     }
 
@@ -224,17 +232,17 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
     }
 
     @Override
-    protected void serializeInputDocument(GenerationContext generationContext,
-                                          OperationShape operationShape,
-                                          StructureShape inputStructure) {
+    protected void serializeInputDocument(
+        GenerationContext generationContext,
+        OperationShape operationShape,
+        StructureShape inputStructure
+    ) {
         TypeScriptWriter writer = generationContext.getWriter();
 
-        writer.addImportSubmodule(
-            "cbor", null,
-            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
-        );
-        writer.write("body = cbor.serialize($L);", inputStructure.accept(
-            new CborMemberSerVisitor(generationContext, "input"))
+        writer.addImportSubmodule("cbor", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
+        writer.write(
+            "body = cbor.serialize($L);",
+            inputStructure.accept(new CborMemberSerVisitor(generationContext, "input"))
         );
     }
 
@@ -243,24 +251,23 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         TypeScriptWriter writer = generationContext.getWriter();
 
         writer.addImportSubmodule(
-            "loadSmithyRpcV2CborErrorCode", null,
-            TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR
+            "loadSmithyRpcV2CborErrorCode",
+            null,
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.CBOR
         );
         writer.write("const errorCode = loadSmithyRpcV2CborErrorCode(output, parsedOutput.body);");
     }
 
     @Override
-    protected void deserializeOutputDocument(GenerationContext generationContext,
-                                             OperationShape operationShape,
-                                             StructureShape outputStructure) {
+    protected void deserializeOutputDocument(
+        GenerationContext generationContext,
+        OperationShape operationShape,
+        StructureShape outputStructure
+    ) {
         TypeScriptWriter writer = generationContext.getWriter();
 
-        writer.write("contents = $L;", outputStructure.accept(
-            new CborMemberDeserVisitor(
-                generationContext,
-                "data"
-            )
-        ));
+        writer.write("contents = $L;", outputStructure.accept(new CborMemberDeserVisitor(generationContext, "data")));
     }
 
     @Override
@@ -269,10 +276,12 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         writer.addTypeImport("HeaderBag", "__HeaderBag", TypeScriptDependency.SMITHY_TYPES);
         writer.openBlock("const SHARED_HEADERS: __HeaderBag = {", "};", () -> {
             writer.write("'content-type': $S,", getDocumentContentType());
-            writer.write("""
+            writer.write(
+                """
                 "smithy-protocol": "rpc-v2-cbor",
                 "accept": "application/cbor",
-                """);
+                """
+            );
         });
     }
 
@@ -298,19 +307,24 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         }
 
         if (hasEventStreamOutput) {
-            writer.write("""
+            writer.write(
+                """
                 headers.accept = "application/vnd.amazon.eventstream";
-                """);
+                """
+            );
         }
         if (hasEventStreamInput) {
-            writer.write("""
+            writer.write(
+                """
                 headers["content-type"] = "application/vnd.amazon.eventstream";
-                """);
+                """
+            );
         } else if (inputIsEmpty) {
-            writer.write("""
+            writer.write(
+                """
                 delete headers["content-type"];
-                """);
+                """
+            );
         }
     }
-
 }

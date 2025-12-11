@@ -106,21 +106,27 @@ public interface ProtocolGenerator {
      * @return Returns the resolved application protocol object.
      */
     default ApplicationProtocol resolveApplicationProtocol(
-            ServiceShape service,
-            Collection<ProtocolGenerator> protocolGenerators,
-            ApplicationProtocol other
+        ServiceShape service,
+        Collection<ProtocolGenerator> protocolGenerators,
+        ApplicationProtocol other
     ) {
         if (!getApplicationProtocol().equals(other)) {
-            String protocolNames = protocolGenerators.stream()
-                    .map(ProtocolGenerator::getProtocol)
-                    .map(ShapeId::getName)
-                    .sorted()
-                    .collect(Collectors.joining(", "));
-            throw new CodegenException(String.format(
-                    "All of the protocols generated for a service must be runtime compatible, but "
-                    + "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a "
-                    + "set of compatible protocols using the `protocols` option when generating %s.",
-                    getProtocol().getName(), protocolNames, service.getId()));
+            String protocolNames = protocolGenerators
+                .stream()
+                .map(ProtocolGenerator::getProtocol)
+                .map(ShapeId::getName)
+                .sorted()
+                .collect(Collectors.joining(", "));
+            throw new CodegenException(
+                String.format(
+                    "All of the protocols generated for a service must be runtime compatible, but " +
+                        "protocol `%s` is incompatible with other application protocols: [%s]. Please pick a " +
+                        "set of compatible protocols using the `protocols` option when generating %s.",
+                    getProtocol().getName(),
+                    protocolNames,
+                    service.getId()
+                )
+            );
         }
 
         return other;
@@ -131,8 +137,7 @@ public interface ProtocolGenerator {
      *
      * @param context Serde context.
      */
-    default void generateSharedComponents(GenerationContext context) {
-    }
+    default void generateSharedComponents(GenerationContext context) {}
 
     /**
      * Generates the code used to serialize the shapes of a service
@@ -222,8 +227,10 @@ public interface ProtocolGenerator {
         // e.g., se_ES for ExecuteStatement
         String functionName = "se_";
         // Update the function to have a component based on the symbol.
-        functionName += ProtocolGenerator.getSerdeFunctionSymbolComponent(symbol,
-                symbol.expectProperty("shape", Shape.class));
+        functionName += ProtocolGenerator.getSerdeFunctionSymbolComponent(
+            symbol,
+            symbol.expectProperty("shape", Shape.class)
+        );
         return functionName;
     }
 
@@ -264,8 +271,10 @@ public interface ProtocolGenerator {
         // e.g., de_ES for ExecuteStatement
         String functionName = "de_";
         // Update the function to have a component based on the symbol.
-        functionName += ProtocolGenerator.getSerdeFunctionSymbolComponent(symbol,
-                symbol.expectProperty("shape", Shape.class));
+        functionName += ProtocolGenerator.getSerdeFunctionSymbolComponent(
+            symbol,
+            symbol.expectProperty("shape", Shape.class)
+        );
         return functionName;
     }
 
@@ -277,8 +286,7 @@ public interface ProtocolGenerator {
      */
     static String getGenericDeserFunctionName(Symbol symbol) {
         // e.g., deserializeExecuteStatement
-        return "deserialize"
-                + getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
+        return "deserialize" + getSerdeFunctionSymbolComponent(symbol, symbol.expectProperty("shape", Shape.class));
     }
 
     static String getSerdeFunctionSymbolComponent(Symbol symbol, Shape shape) {
@@ -316,9 +324,7 @@ public interface ProtocolGenerator {
     default Map<String, ShapeId> getOperationErrors(GenerationContext context, Collection<OperationShape> operations) {
         Map<String, ShapeId> errors = new LinkedHashMap<>();
         for (OperationShape operation : operations) {
-            errors.putAll(
-                getOperationErrors(context, operation)
-            );
+            errors.putAll(getOperationErrors(context, operation));
         }
         return errors;
     }
@@ -327,7 +333,8 @@ public interface ProtocolGenerator {
      * @return map of fully qualified shape id to aliases and/or short names that should map to the same error.
      */
     default Map<String, TreeSet<String>> getErrorAliases(
-        GenerationContext context, Collection<OperationShape> operations
+        GenerationContext context,
+        Collection<OperationShape> operations
     ) {
         return Collections.emptyMap();
     }
@@ -336,6 +343,7 @@ public interface ProtocolGenerator {
      * Context object used for service serialization and deserialization.
      */
     class GenerationContext {
+
         private TypeScriptSettings settings;
         private Model model;
         private ServiceShape service;

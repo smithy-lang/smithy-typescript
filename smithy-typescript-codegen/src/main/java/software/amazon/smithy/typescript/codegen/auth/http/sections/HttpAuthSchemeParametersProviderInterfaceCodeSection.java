@@ -15,6 +15,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class HttpAuthSchemeParametersProviderInterfaceCodeSection implements CodeSection {
+
     private final ServiceShape service;
     private final TypeScriptSettings settings;
     private final Model model;
@@ -48,6 +49,7 @@ public final class HttpAuthSchemeParametersProviderInterfaceCodeSection implemen
     }
 
     public static class Builder implements SmithyBuilder<HttpAuthSchemeParametersProviderInterfaceCodeSection> {
+
         private ServiceShape service;
         private TypeScriptSettings settings;
         private Model model;

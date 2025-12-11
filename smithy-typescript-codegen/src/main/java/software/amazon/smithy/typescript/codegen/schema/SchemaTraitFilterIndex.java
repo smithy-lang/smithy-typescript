@@ -48,6 +48,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class SchemaTraitFilterIndex implements KnowledgeIndex {
+
     private static final Set<ShapeId> EXCLUDED_TRAITS = SetUtils.of(
         // excluded due to special schema handling.
         TimestampFormatTrait.ID
@@ -73,10 +74,8 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
             EndpointTrait.ID, // HttpProtocol
             ErrorTrait.ID, // set by the ServiceException runtime classes.
             RequiresLengthTrait.ID, // unhandled
-
             EventHeaderTrait.ID, // @smithy/core/event-streams::EventStreamSerde
             EventPayloadTrait.ID, // @smithy/core/event-streams::EventStreamSerde
-
             // afaict, HttpErrorTrait is ignored by the client. The discriminator selects the error structure
             // but the actual HTTP response status code is used with no particular comparison
             // with the trait's error code.
@@ -104,13 +103,17 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
         definitionTraits.addAll(authDefinitionTraits);
 
         for (Shape shape : definitionTraits) {
-            shape.getTrait(ProtocolDefinitionTrait.class).ifPresent(protocolDefinitionTrait -> {
-                protocolDefinitionTrait.getTraits().forEach(traitShapeId -> {
-                    if (!EXCLUDED_TRAITS.contains(traitShapeId)) {
-                        includedTraits.add(traitShapeId);
-                    }
+            shape
+                .getTrait(ProtocolDefinitionTrait.class)
+                .ifPresent(protocolDefinitionTrait -> {
+                    protocolDefinitionTrait
+                        .getTraits()
+                        .forEach(traitShapeId -> {
+                            if (!EXCLUDED_TRAITS.contains(traitShapeId)) {
+                                includedTraits.add(traitShapeId);
+                            }
+                        });
                 });
-            });
         }
 
         this.model = model;
@@ -148,7 +151,8 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
         if (depth > 20) {
             return false;
         }
-        boolean hasSchemaTraits = shape.getAllTraits()
+        boolean hasSchemaTraits = shape
+            .getAllTraits()
             .values()
             .stream()
             .map(Trait::toShapeId)
@@ -159,9 +163,13 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
             return true;
         }
 
-        boolean membersHaveSchemaTraits = shape.getAllMembers().values().stream()
+        boolean membersHaveSchemaTraits = shape
+            .getAllMembers()
+            .values()
+            .stream()
             .anyMatch(ms -> hasSchemaTraits(ms, depth + 1));
-        boolean targetHasSchemaTraits = shape.asMemberShape()
+        boolean targetHasSchemaTraits = shape
+            .asMemberShape()
             .map(ms -> hasSchemaTraits(model.expectShape(ms.getTarget()), depth + 1))
             .orElse(false);
 

@@ -36,7 +36,6 @@ public record ConfigField(
     Optional<BiConsumer<TypeScriptWriter, ConfigField>> configFieldWriter,
     Optional<Consumer<TypeScriptWriter>> docs
 ) implements ToSmithyBuilder<ConfigField> {
-
     /**
      * Defines the type of the config field.
      */
@@ -49,7 +48,7 @@ public record ConfigField(
         /**
          * Specifies the property is auxiliary, e.g. {@code region} for {@code @aws.auth#sigv4}
          */
-        AUXILIARY
+        AUXILIARY,
     }
 
     public static Builder builder() {
@@ -68,6 +67,7 @@ public record ConfigField(
     }
 
     public static final class Builder implements SmithyBuilder<ConfigField> {
+
         private String name;
         private Type type;
         private Symbol inputType;
@@ -83,7 +83,8 @@ public record ConfigField(
                 SmithyBuilder.requiredState("inputType", inputType),
                 SmithyBuilder.requiredState("resolvedType", resolvedType),
                 Optional.ofNullable(configFieldWriter),
-                Optional.ofNullable(docs));
+                Optional.ofNullable(docs)
+            );
         }
 
         public Builder name(String name) {
@@ -118,34 +119,29 @@ public record ConfigField(
     }
 
     @SmithyInternalApi
-    public static void defaultMainConfigFieldWriter(
-        TypeScriptWriter w,
-        ConfigField configField
-    ) {
+    public static void defaultMainConfigFieldWriter(TypeScriptWriter w, ConfigField configField) {
         w.addDependency(TypeScriptDependency.SMITHY_CORE);
-        w.addImport("memoizeIdentityProvider", null,
-            TypeScriptDependency.SMITHY_CORE);
-        w.addImport("isIdentityExpired", null,
-            TypeScriptDependency.SMITHY_CORE);
-        w.addImport("doesIdentityRequireRefresh", null,
-            TypeScriptDependency.SMITHY_CORE);
-        w.write("""
+        w.addImport("memoizeIdentityProvider", null, TypeScriptDependency.SMITHY_CORE);
+        w.addImport("isIdentityExpired", null, TypeScriptDependency.SMITHY_CORE);
+        w.addImport("doesIdentityRequireRefresh", null, TypeScriptDependency.SMITHY_CORE);
+        w.write(
+            """
             const $L = memoizeIdentityProvider(config.$L, isIdentityExpired, \
             doesIdentityRequireRefresh);""",
             configField.name(),
-            configField.name());
+            configField.name()
+        );
     }
 
     @SmithyInternalApi
-    public static void defaultAuxiliaryConfigFieldWriter(
-        TypeScriptWriter w,
-        ConfigField configField
-    ) {
+    public static void defaultAuxiliaryConfigFieldWriter(TypeScriptWriter w, ConfigField configField) {
         w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
         w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
-        w.write("const $L = config.$L ? normalizeProvider(config.$L) : undefined;",
+        w.write(
+            "const $L = config.$L ? normalizeProvider(config.$L) : undefined;",
             configField.name(),
             configField.name(),
-            configField.name());
+            configField.name()
+        );
     }
 }

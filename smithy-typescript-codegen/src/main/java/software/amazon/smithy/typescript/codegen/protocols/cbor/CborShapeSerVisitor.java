@@ -29,8 +29,8 @@ import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGenerat
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.validation.UnaryFunctionCall;
 
-
 public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
+
     /**
      * The service model's timestampFormat is ignored in RPCv2 CBOR protocol.
      */
@@ -68,9 +68,13 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
 
     @Override
     protected void serializeDocument(ProtocolGenerator.GenerationContext context, DocumentShape shape) {
-        context.getWriter().write("""
-            return input; // document.
-            """);
+        context
+            .getWriter()
+            .write(
+                """
+                return input; // document.
+                """
+            );
     }
 
     @Override
@@ -84,10 +88,13 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
             ? "string"
             : symbolProvider.toSymbol(shape.getKey()) + "| string";
 
-        writer.openBlock("return Object.entries(input).reduce((acc: Record<string, any>, "
-                + "[key, value]: [$1L, any]) => {", "}, {});", entryKeyType,
+        writer.openBlock(
+            "return Object.entries(input).reduce((acc: Record<string, any>, " + "[key, value]: [$1L, any]) => {",
+            "}, {});",
+            entryKeyType,
             () -> {
-                writer.write("""
+                writer.write(
+                    """
                     if (value !== null) {
                         acc[key] = $L;
                     }
@@ -96,11 +103,13 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
                 );
 
                 if (shape.hasTrait(SparseTrait.ID)) {
-                    writer.write("""
+                    writer.write(
+                        """
                         else {
                             acc[key] = null as any;
                         }
-                        """);
+                        """
+                    );
                 }
 
                 writer.write("return acc;");
@@ -118,17 +127,14 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
                 Shape target = context.getModel().expectShape(memberShape.getTarget());
 
                 String valueExpression = (memberShape.hasTrait(TimestampFormatTrait.class)
-                    ? HttpProtocolGeneratorUtils.getTimestampInputParam(
-                        context, "_", memberShape, TIMESTAMP_FORMAT
-                    )
+                    ? HttpProtocolGeneratorUtils.getTimestampInputParam(context, "_", memberShape, TIMESTAMP_FORMAT)
                     : target.accept(getMemberVisitor("_")));
 
                 String valueProvider = "_ => " + valueExpression;
                 boolean isUnaryCall = UnaryFunctionCall.check(valueExpression);
 
                 if (memberShape.hasTrait(IdempotencyTokenTrait.class)) {
-                    writer
-                        .addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+                    writer.addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
                     writer.write("'$L': [true, _ => _ ?? generateIdempotencyToken()],", memberName);
                 } else {
                     if (valueProvider.equals("_ => _")) {
@@ -153,8 +159,12 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
             Map<String, MemberShape> members = new TreeMap<>(shape.getAllMembers());
             members.forEach((memberName, memberShape) -> {
                 Shape target = model.expectShape(memberShape.getTarget());
-                writer.write("$L: value => ({ $S: $L }),", memberName, memberName,
-                    target.accept(getMemberVisitor("value")));
+                writer.write(
+                    "$L: value => ({ $S: $L }),",
+                    memberName,
+                    memberName,
+                    target.accept(getMemberVisitor("value"))
+                );
             });
             writer.write("_: (name, value) => ({ [name]: value } as any)");
         });

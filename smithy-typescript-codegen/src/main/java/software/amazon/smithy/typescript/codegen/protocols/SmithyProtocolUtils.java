@@ -20,7 +20,6 @@ import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
 /**
  * Utility methods for generating Smithy protocols.
  */
@@ -53,10 +52,12 @@ public final class SmithyProtocolUtils {
     }
 
     public static void generateProtocolTests(ProtocolGenerator generator, ProtocolGenerator.GenerationContext context) {
-        new HttpProtocolTestGenerator(context,
+        new HttpProtocolTestGenerator(
+            context,
             generator,
             SmithyProtocolUtils::filterProtocolTests,
-            SmithyProtocolUtils::filterMalformedRequestTests).run();
+            SmithyProtocolUtils::filterMalformedRequestTests
+        ).run();
     }
 
     private static boolean filterProtocolTests(
@@ -76,10 +77,12 @@ public final class SmithyProtocolUtils {
         }
 
         // TODO(cbor): enable test when it's working with vitest 3.x
-        if (settings.generateSchemas()
-            && (testCase.getId().equals("RpcV2CborInvalidGreetingError")
-                || testCase.getId().equals("RpcV2CborComplexError")
-                || testCase.getId().equals("RpcV2CborEmptyComplexError"))) {
+        if (
+            settings.generateSchemas() &&
+            (testCase.getId().equals("RpcV2CborInvalidGreetingError") ||
+                testCase.getId().equals("RpcV2CborComplexError") ||
+                testCase.getId().equals("RpcV2CborEmptyComplexError"))
+        ) {
             return true;
         }
 

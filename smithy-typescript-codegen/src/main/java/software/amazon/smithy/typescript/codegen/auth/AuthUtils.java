@@ -35,10 +35,15 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class AuthUtils {
+
     public static final String HTTP_AUTH_FOLDER = "auth";
 
-    public static final String HTTP_AUTH_SCHEME_PROVIDER_MODULE =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthSchemeProvider").toString();
+    public static final String HTTP_AUTH_SCHEME_PROVIDER_MODULE = Paths.get(
+        ".",
+        CodegenUtils.SOURCE_FOLDER,
+        HTTP_AUTH_FOLDER,
+        "httpAuthSchemeProvider"
+    ).toString();
 
     public static final String HTTP_AUTH_SCHEME_PROVIDER_PATH = HTTP_AUTH_SCHEME_PROVIDER_MODULE + ".ts";
 
@@ -54,8 +59,12 @@ public final class AuthUtils {
         }
     };
 
-    public static final String HTTP_AUTH_SCHEME_EXTENSION_MODULE =
-        Paths.get(".", CodegenUtils.SOURCE_FOLDER, HTTP_AUTH_FOLDER, "httpAuthExtensionConfiguration").toString();
+    public static final String HTTP_AUTH_SCHEME_EXTENSION_MODULE = Paths.get(
+        ".",
+        CodegenUtils.SOURCE_FOLDER,
+        HTTP_AUTH_FOLDER,
+        "httpAuthExtensionConfiguration"
+    ).toString();
 
     public static final String HTTP_AUTH_SCHEME_EXTENSION_PATH = HTTP_AUTH_SCHEME_EXTENSION_MODULE + ".ts";
 
@@ -80,14 +89,19 @@ public final class AuthUtils {
         TopDownIndex topDownIndex
     ) {
         Map<ShapeId, HttpAuthScheme> effectiveAuthSchemes = new TreeMap<>();
-        var serviceEffectiveAuthSchemes =
-            serviceIndex.getEffectiveAuthSchemes(serviceShape, AuthSchemeMode.NO_AUTH_AWARE);
+        var serviceEffectiveAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
+            serviceShape,
+            AuthSchemeMode.NO_AUTH_AWARE
+        );
         for (ShapeId shapeId : serviceEffectiveAuthSchemes.keySet()) {
             effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
         }
         for (var operation : topDownIndex.getContainedOperations(serviceShape)) {
-            var operationEffectiveAuthSchemes =
-                serviceIndex.getEffectiveAuthSchemes(serviceShape, operation, AuthSchemeMode.NO_AUTH_AWARE);
+            var operationEffectiveAuthSchemes = serviceIndex.getEffectiveAuthSchemes(
+                serviceShape,
+                operation,
+                AuthSchemeMode.NO_AUTH_AWARE
+            );
             for (ShapeId shapeId : operationEffectiveAuthSchemes.keySet()) {
                 effectiveAuthSchemes.put(shapeId, authIndex.getHttpAuthScheme(shapeId));
             }
@@ -114,12 +128,14 @@ public final class AuthUtils {
                 if (configFields.containsKey(configField.name())) {
                     ConfigField existingConfigField = configFields.get(configField.name());
                     if (!configField.equals(existingConfigField)) {
-                        throw new CodegenException("Contradicting `ConfigField` definitions for `"
-                            + configField.name()
-                            + "`; existing: "
-                            + existingConfigField
-                            + ", conflict: "
-                            + configField);
+                        throw new CodegenException(
+                            "Contradicting `ConfigField` definitions for `" +
+                                configField.name() +
+                                "`; existing: " +
+                                existingConfigField +
+                                ", conflict: " +
+                                configField
+                        );
                     }
                 } else {
                     configFields.put(configField.name(), configField);
@@ -139,15 +155,16 @@ public final class AuthUtils {
             }
             for (ResolveConfigFunction fn : authScheme.getResolveConfigFunctions()) {
                 if (resolveConfigFunctions.containsKey(fn.resolveConfigFunction())) {
-                    ResolveConfigFunction existingFn =
-                        resolveConfigFunctions.get(fn.resolveConfigFunction());
+                    ResolveConfigFunction existingFn = resolveConfigFunctions.get(fn.resolveConfigFunction());
                     if (!fn.equals(existingFn)) {
-                        throw new CodegenException("Contradicting `ResolveConfigFunction` definitions for `"
-                            + fn.resolveConfigFunction()
-                            + "`; existing: "
-                            + existingFn
-                            + ", conflict: "
-                            + fn);
+                        throw new CodegenException(
+                            "Contradicting `ResolveConfigFunction` definitions for `" +
+                                fn.resolveConfigFunction() +
+                                "`; existing: " +
+                                existingFn +
+                                ", conflict: " +
+                                fn
+                        );
                     }
                 } else {
                     resolveConfigFunctions.put(fn.resolveConfigFunction(), fn);
@@ -158,7 +175,8 @@ public final class AuthUtils {
     }
 
     public static Map<String, HttpAuthSchemeParameter> collectHttpAuthSchemeParameters(
-        Collection<HttpAuthScheme> httpAuthSchemes) {
+        Collection<HttpAuthScheme> httpAuthSchemes
+    ) {
         Map<String, HttpAuthSchemeParameter> httpAuthSchemeParameters = new HashMap<>();
         for (HttpAuthScheme authScheme : httpAuthSchemes) {
             if (authScheme == null) {
@@ -168,12 +186,14 @@ public final class AuthUtils {
                 if (httpAuthSchemeParameters.containsKey(param.name())) {
                     HttpAuthSchemeParameter existingParam = httpAuthSchemeParameters.get(param.name());
                     if (!param.equals(existingParam)) {
-                        throw new CodegenException("Contradicting `HttpAuthSchemeParameter` definitions for `"
-                            + param.name()
-                            + "`; existing: "
-                            + existingParam
-                            + ", conflict: "
-                            + param);
+                        throw new CodegenException(
+                            "Contradicting `HttpAuthSchemeParameter` definitions for `" +
+                                param.name() +
+                                "`; existing: " +
+                                existingParam +
+                                ", conflict: " +
+                                param
+                        );
                     }
                 } else {
                     httpAuthSchemeParameters.put(param.name(), param);

@@ -13,6 +13,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 public final class ClientDestroyCodeSection implements CodeSection {
+
     private final List<RuntimeClientPlugin> runtimeClientPlugins;
 
     private ClientDestroyCodeSection(Builder builder) {
@@ -28,6 +29,7 @@ public final class ClientDestroyCodeSection implements CodeSection {
     }
 
     public static class Builder implements SmithyBuilder<ClientDestroyCodeSection> {
+
         private List<RuntimeClientPlugin> runtimeClientPlugins;
 
         @Override

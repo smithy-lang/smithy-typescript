@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class AddHttpSigningPlugin implements TypeScriptIntegration {
+
     /**
      * Integration should be skipped if the `useLegacyAuth` flag is true.
      */
@@ -29,11 +30,10 @@ public class AddHttpSigningPlugin implements TypeScriptIntegration {
 
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
-        return List.of(RuntimeClientPlugin.builder()
-            .withConventions(
-                TypeScriptDependency.SMITHY_CORE.dependency,
-                "HttpSigning",
-                HAS_MIDDLEWARE)
-            .build());
+        return List.of(
+            RuntimeClientPlugin.builder()
+                .withConventions(TypeScriptDependency.SMITHY_CORE.dependency, "HttpSigning", HAS_MIDDLEWARE)
+                .build()
+        );
     }
 }

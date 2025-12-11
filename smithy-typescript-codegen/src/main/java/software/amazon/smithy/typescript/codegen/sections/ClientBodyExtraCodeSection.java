@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 
 @SmithyUnstableApi
 public final class ClientBodyExtraCodeSection implements CodeSection {
+
     private final TypeScriptSettings settings;
     private final Model model;
     private final ServiceShape service;
@@ -70,6 +71,7 @@ public final class ClientBodyExtraCodeSection implements CodeSection {
     }
 
     public static class Builder implements SmithyBuilder<ClientBodyExtraCodeSection> {
+
         private TypeScriptSettings settings;
         private Model model;
         private ServiceShape service;

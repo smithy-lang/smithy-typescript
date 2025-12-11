@@ -55,86 +55,92 @@ final class RuntimeConfigGenerator {
     private final List<TypeScriptIntegration> integrations;
     private final ApplicationProtocol applicationProtocol;
     private final Map<String, Consumer<TypeScriptWriter>> nodeRuntimeConfigDefaults = MapUtils.of(
-        "requestHandler", writer -> {
-            writer.addImport("NodeHttpHandler", "RequestHandler",
-                TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
+        "requestHandler",
+        writer -> {
+            writer.addImport("NodeHttpHandler", "RequestHandler", TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
             writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
         },
-        "sha256", writer -> {
+        "sha256",
+        writer -> {
             writer.addImport("Hash", null, TypeScriptDependency.AWS_SDK_HASH_NODE);
             writer.write("Hash.bind(null, \"sha256\")");
         },
-        "bodyLengthChecker", writer -> {
+        "bodyLengthChecker",
+        writer -> {
             writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
             writer.write("calculateBodyLength");
         },
-        "streamCollector", writer -> {
+        "streamCollector",
+        writer -> {
             writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
             writer.write("streamCollector");
         }
     );
     private final Map<String, Consumer<TypeScriptWriter>> browserRuntimeConfigDefaults = MapUtils.of(
-        "requestHandler", writer -> {
-            writer.addImport("FetchHttpHandler", "RequestHandler",
-                TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
+        "requestHandler",
+        writer -> {
+            writer.addImport("FetchHttpHandler", "RequestHandler", TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
             writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
         },
-        "sha256", writer -> {
+        "sha256",
+        writer -> {
             writer.addImport("Sha256", null, TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
             writer.write("Sha256");
         },
-        "bodyLengthChecker", writer -> {
+        "bodyLengthChecker",
+        writer -> {
             writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
             writer.write("calculateBodyLength");
         },
-        "streamCollector", writer -> {
-            writer.addImport("streamCollector", null,
-                TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
+        "streamCollector",
+        writer -> {
+            writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
             writer.write("streamCollector");
         }
     );
     private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
-        "sha256", writer -> {
+        "sha256",
+        writer -> {
             writer.addImport("Sha256", null, TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
             writer.write("Sha256");
         }
     );
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
-        "base64Decoder", writer -> {
-            writer.addImport("fromBase64", null,
-                TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+        "base64Decoder",
+        writer -> {
+            writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
             writer.write("fromBase64");
         },
-        "base64Encoder", writer -> {
-            writer.addImport("toBase64", null,
-                TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+        "base64Encoder",
+        writer -> {
+            writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
             writer.write("toBase64");
         },
-        "disableHostPrefix", writer -> {
+        "disableHostPrefix",
+        writer -> {
             writer.write("false");
         },
-        "urlParser", writer -> {
-            writer.addImport("parseUrl", null,
-                TypeScriptDependency.AWS_SDK_URL_PARSER);
+        "urlParser",
+        writer -> {
+            writer.addImport("parseUrl", null, TypeScriptDependency.AWS_SDK_URL_PARSER);
             writer.write("parseUrl");
         },
-        "utf8Decoder", writer -> {
-            writer.addImport("fromUtf8", null,
-                TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+        "utf8Decoder",
+        writer -> {
+            writer.addImport("fromUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
             writer.write("fromUtf8");
         },
-        "utf8Encoder", writer -> {
-            writer.addImport("toUtf8", null,
-                TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+        "utf8Encoder",
+        writer -> {
+            writer.addImport("toUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
             writer.write("toUtf8");
         },
-        "extensions", writer -> {
+        "extensions",
+        writer -> {
             writer.write("[]");
         }
     );
-    private final Map<String, String> runtimeConfigDefaultValuePrefixes = MapUtils.of(
-        "requestHandler", ""
-    );
+    private final Map<String, String> runtimeConfigDefaultValuePrefixes = MapUtils.of("requestHandler", "");
 
     RuntimeConfigGenerator(
         TypeScriptSettings settings,
@@ -155,7 +161,9 @@ final class RuntimeConfigGenerator {
 
     void generate(LanguageTarget target) {
         String clientConfigName = symbolProvider.toSymbol(service).getName() + "Config";
-        String clientModuleName = symbolProvider.toSymbol(service).getNamespace()
+        String clientModuleName = symbolProvider
+            .toSymbol(service)
+            .getNamespace()
             .replaceFirst(CodegenUtils.SOURCE_FOLDER + "/", "");
 
         String template = TypeScriptUtils.loadResourceAsString(target.getTemplateFileName());
@@ -175,44 +183,42 @@ final class RuntimeConfigGenerator {
                     integration.prepareCustomizations(writer, target, settings, model);
                 }
             });
-            writer.indent().onSection("customizations", original -> {
-                // Start with defaults, use a TreeMap for keeping entries sorted.
-                Map<String, Consumer<TypeScriptWriter>> configs =
-                    new TreeMap<>(getDefaultRuntimeConfigs(target));
+            writer
+                .indent()
+                .onSection("customizations", original -> {
+                    // Start with defaults, use a TreeMap for keeping entries sorted.
+                    Map<String, Consumer<TypeScriptWriter>> configs = new TreeMap<>(getDefaultRuntimeConfigs(target));
 
-                // Add any integration supplied runtime config writers.
-                for (TypeScriptIntegration integration : integrations) {
-                    configs.putAll(
-                        integration.getRuntimeConfigWriters(settings, model, symbolProvider, target)
-                    );
-                }
-                // Needs a separate integration point since not all the information is accessible in
-                // {@link TypeScriptIntegration#getRuntimeConfigWriters()}
-                if (applicationProtocol.isHttpProtocol() && !settings.useLegacyAuth()) {
-                    generateHttpAuthSchemeConfig(configs, writer, target);
-                }
-                configs.forEach((key, value) -> {
-                    String valuePrefix =
-                        runtimeConfigDefaultValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
-                    if (key.equals("retryMode") && target.equals(LanguageTarget.NODE)) {
-                        valuePrefix = """
-                            \n  config?.retryMode ??
-                            """;
+                    // Add any integration supplied runtime config writers.
+                    for (TypeScriptIntegration integration : integrations) {
+                        configs.putAll(integration.getRuntimeConfigWriters(settings, model, symbolProvider, target));
                     }
-                    writer
-                        .indent(2)
-                        .writeInline("$1L: " + valuePrefix, key);
-                    value.accept(writer);
-                    writer.unwrite("\n");
-                    writer.dedent(2);
-                    writer.write(",");
+                    // Needs a separate integration point since not all the information is accessible in
+                    // {@link TypeScriptIntegration#getRuntimeConfigWriters()}
+                    if (applicationProtocol.isHttpProtocol() && !settings.useLegacyAuth()) {
+                        generateHttpAuthSchemeConfig(configs, writer, target);
+                    }
+                    configs.forEach((key, value) -> {
+                        String valuePrefix = runtimeConfigDefaultValuePrefixes.getOrDefault(key, "config?.$1L ?? ");
+                        if (key.equals("retryMode") && target.equals(LanguageTarget.NODE)) {
+                            valuePrefix = """
+                                \n  config?.retryMode ??
+                                """;
+                        }
+                        writer.indent(2).writeInline("$1L: " + valuePrefix, key);
+                        value.accept(writer);
+                        writer.unwrite("\n");
+                        writer.dedent(2);
+                        writer.write(",");
+                    });
                 });
-            });
             writer.dedent();
 
             writer.addRelativeTypeImport(
-                clientConfigName, null,
-                Paths.get(".", CodegenUtils.SOURCE_FOLDER, clientModuleName));
+                clientConfigName,
+                null,
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, clientModuleName)
+            );
 
             switch (target) {
                 case NODE:
@@ -222,8 +228,7 @@ final class RuntimeConfigGenerator {
                         "getSharedRuntimeConfig",
                         Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig.shared")
                     );
-                    writer.addImport(
-                        "loadConfigsForDefaultMode", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    writer.addImport("loadConfigsForDefaultMode", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                     break;
                 default:
                     break;
@@ -231,16 +236,17 @@ final class RuntimeConfigGenerator {
 
             switch (target) {
                 case NODE -> {
+                    writer.addImport("emitWarningIfUnsupportedVersion", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
                     writer.addImport(
-                        "emitWarningIfUnsupportedVersion", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
-                    writer.addImport(
-                        "resolveDefaultsModeConfig", null,
+                        "resolveDefaultsModeConfig",
+                        null,
                         TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_NODE
                     );
                 }
                 case BROWSER -> {
                     writer.addImport(
-                        "resolveDefaultsModeConfig", null,
+                        "resolveDefaultsModeConfig",
+                        null,
                         TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER
                     );
                 }
@@ -269,19 +275,28 @@ final class RuntimeConfigGenerator {
 
         if (target.equals(LanguageTarget.SHARED)) {
             configs.put("httpAuthSchemeProvider", w -> {
-                w.write("$T", Symbol.builder()
-                    .name("default"
-                          + CodegenUtils.getServiceName(settings, model, symbolProvider)
-                          + "HttpAuthSchemeProvider")
-                    .namespace(AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY.getPackageName(), "/")
-                    .build());
+                w.write(
+                    "$T",
+                    Symbol.builder()
+                        .name(
+                            "default" +
+                                CodegenUtils.getServiceName(settings, model, symbolProvider) +
+                                "HttpAuthSchemeProvider"
+                        )
+                        .namespace(AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY.getPackageName(), "/")
+                        .build()
+                );
             });
         }
 
         ServiceIndex serviceIndex = ServiceIndex.of(model);
         TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Map<ShapeId, HttpAuthScheme> allEffectiveHttpAuthSchemes =
-            AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(service, serviceIndex, authIndex, topDownIndex);
+        Map<ShapeId, HttpAuthScheme> allEffectiveHttpAuthSchemes = AuthUtils.getAllEffectiveNoAuthAwareAuthSchemes(
+            service,
+            serviceIndex,
+            authIndex,
+            topDownIndex
+        );
         List<HttpAuthSchemeTarget> targetAuthSchemes = getHttpAuthSchemeTargets(target, allEffectiveHttpAuthSchemes);
 
         // Generate only if the "inherited" target is different from the current target
@@ -316,7 +331,8 @@ final class RuntimeConfigGenerator {
                 HttpAuthSchemeTarget entry = iter.next();
                 w.indent();
                 if (entry.identityProvider == null) {
-                    w.writeInline("""
+                    w.writeInline(
+                        """
                         {
                           schemeId: $S,
                           identityProvider: (ipc: IdentityProviderConfig) =>
@@ -328,7 +344,8 @@ final class RuntimeConfigGenerator {
                         entry.signer
                     );
                 } else {
-                    w.writeInline("""
+                    w.writeInline(
+                        """
                         {
                           schemeId: $S,
                           identityProvider: (ipc: IdentityProviderConfig) =>
@@ -349,6 +366,7 @@ final class RuntimeConfigGenerator {
     }
 
     private static class HttpAuthSchemeTarget {
+
         public HttpAuthScheme httpAuthScheme;
         public Consumer<TypeScriptWriter> identityProvider;
         public Consumer<TypeScriptWriter> signer;
@@ -369,9 +387,11 @@ final class RuntimeConfigGenerator {
                 return false;
             }
             HttpAuthSchemeTarget o = (HttpAuthSchemeTarget) other;
-            return Objects.equals(httpAuthScheme, o.httpAuthScheme)
-                   && Objects.equals(identityProvider, o.identityProvider)
-                   && Objects.equals(signer, o.signer);
+            return (
+                Objects.equals(httpAuthScheme, o.httpAuthScheme) &&
+                Objects.equals(identityProvider, o.identityProvider) &&
+                Objects.equals(signer, o.signer)
+            );
         }
 
         @Override
@@ -408,10 +428,10 @@ final class RuntimeConfigGenerator {
         }
 
         Map<ShapeId, HttpAuthSchemeTarget> httpAuthSchemeTargets = inherited == null
-            // SHARED inherits no HttpAuthSchemeTargets
-            ? new TreeMap<>()
-            // Otherwise, get inherited HttpAuthSchemeTargets
-            : getPartialHttpAuthSchemeTargets(inherited, httpAuthSchemes);
+            ? // SHARED inherits no HttpAuthSchemeTargets
+              new TreeMap<>()
+            : // Otherwise, get inherited HttpAuthSchemeTargets
+              getPartialHttpAuthSchemeTargets(inherited, httpAuthSchemes);
 
         for (HttpAuthScheme httpAuthScheme : httpAuthSchemes.values()) {
             // If HttpAuthScheme is not registered, skip code generation
@@ -420,18 +440,17 @@ final class RuntimeConfigGenerator {
             }
 
             // Get identity provider and signer for the current target
-            Consumer<TypeScriptWriter> identityProvider =
-                httpAuthScheme.getDefaultIdentityProviders().get(target);
-            Consumer<TypeScriptWriter> signer =
-                httpAuthScheme.getDefaultSigners().get(target);
+            Consumer<TypeScriptWriter> identityProvider = httpAuthScheme.getDefaultIdentityProviders().get(target);
+            Consumer<TypeScriptWriter> signer = httpAuthScheme.getDefaultSigners().get(target);
 
-            HttpAuthSchemeTarget existingEntry =
-                httpAuthSchemeTargets.get(httpAuthScheme.getSchemeId());
+            HttpAuthSchemeTarget existingEntry = httpAuthSchemeTargets.get(httpAuthScheme.getSchemeId());
 
             // If HttpAuthScheme is not added yet, add the entry
             if (existingEntry == null) {
-                httpAuthSchemeTargets.put(httpAuthScheme.getSchemeId(),
-                    new HttpAuthSchemeTarget(httpAuthScheme, identityProvider, signer));
+                httpAuthSchemeTargets.put(
+                    httpAuthScheme.getSchemeId(),
+                    new HttpAuthSchemeTarget(httpAuthScheme, identityProvider, signer)
+                );
                 continue;
             }
 

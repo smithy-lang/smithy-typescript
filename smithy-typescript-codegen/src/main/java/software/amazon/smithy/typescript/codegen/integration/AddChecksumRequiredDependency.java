@@ -44,10 +44,10 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
 
     @Override
     public void addConfigInterfaceFields(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            TypeScriptWriter writer
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer
     ) {
         if (!hasMd5Dependency(model, settings.getService(model))) {
             return;
@@ -55,27 +55,31 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
 
         writer.addImport("Readable", null, "stream");
         writer.addTypeImport("StreamHasher", "__StreamHasher", TypeScriptDependency.SMITHY_TYPES);
-        writer.writeDocs("A function that, given a hash constructor and a stream, calculates the \n"
-                + "hash of the streamed value.\n"
-                + "@internal");
+        writer.writeDocs(
+            "A function that, given a hash constructor and a stream, calculates the \n" +
+                "hash of the streamed value.\n" +
+                "@internal"
+        );
         writer.write("streamHasher?: __StreamHasher<Readable> | __StreamHasher<Blob>;\n");
 
         writer.addTypeImport("HashConstructor", "__HashConstructor", TypeScriptDependency.SMITHY_TYPES);
         writer.addTypeImport("Checksum", "__Checksum", TypeScriptDependency.SMITHY_TYPES);
         writer.addTypeImport("ChecksumConstructor", "__ChecksumConstructor", TypeScriptDependency.SMITHY_TYPES);
-        writer.writeDocs("""
+        writer.writeDocs(
+            """
             A constructor for a class implementing the {@link __Checksum} interface
             that computes MD5 hashes.
-            @internal""");
+            @internal"""
+        );
         writer.write("md5?: __ChecksumConstructor | __HashConstructor;\n");
     }
 
     @Override
     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider,
-            LanguageTarget target
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        LanguageTarget target
     ) {
         if (!hasMd5Dependency(model, settings.getService(model))) {
             return Collections.emptyMap();
@@ -84,30 +88,34 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
         switch (target) {
             case NODE:
                 return MapUtils.of(
-                    "streamHasher", writer -> {
+                    "streamHasher",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.STREAM_HASHER_NODE);
-                        writer.addImport("fileStreamHasher", "streamHasher",
-                                TypeScriptDependency.STREAM_HASHER_NODE);
+                        writer.addImport("fileStreamHasher", "streamHasher", TypeScriptDependency.STREAM_HASHER_NODE);
                         writer.write("streamHasher");
                     },
-                    "md5", writer -> {
-                            writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
-                            writer.addImport("Hash", null, TypeScriptDependency.AWS_SDK_HASH_NODE);
-                            writer.write("Hash.bind(null, \"md5\")");
-                    });
+                    "md5",
+                    writer -> {
+                        writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
+                        writer.addImport("Hash", null, TypeScriptDependency.AWS_SDK_HASH_NODE);
+                        writer.write("Hash.bind(null, \"md5\")");
+                    }
+                );
             case BROWSER:
                 return MapUtils.of(
-                    "streamHasher", writer -> {
+                    "streamHasher",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.STREAM_HASHER_BROWSER);
-                        writer.addImport("blobHasher", "streamHasher",
-                                TypeScriptDependency.STREAM_HASHER_BROWSER);
+                        writer.addImport("blobHasher", "streamHasher", TypeScriptDependency.STREAM_HASHER_BROWSER);
                         writer.write("streamHasher");
                     },
-                    "md5", writer -> {
+                    "md5",
+                    writer -> {
                         writer.addDependency(TypeScriptDependency.MD5_BROWSER);
                         writer.addImport("Md5", null, TypeScriptDependency.MD5_BROWSER);
                         writer.write("Md5");
-                    });
+                    }
+                );
             default:
                 return Collections.emptyMap();
         }
@@ -117,23 +125,18 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
             RuntimeClientPlugin.builder()
-                        .withConventions(TypeScriptDependency.BODY_CHECKSUM.dependency, "ApplyMd5BodyChecksum",
-                                         HAS_MIDDLEWARE)
-                        .operationPredicate((m, s, o) -> hasChecksumRequiredTrait(m, s, o))
-                        .build()
+                .withConventions(TypeScriptDependency.BODY_CHECKSUM.dependency, "ApplyMd5BodyChecksum", HAS_MIDDLEWARE)
+                .operationPredicate((m, s, o) -> hasChecksumRequiredTrait(m, s, o))
+                .build()
         );
     }
-
 
     // return true if operation shape is decorated with `httpChecksumRequired` trait.
     private static boolean hasChecksumRequiredTrait(Model model, ServiceShape service, OperationShape operation) {
         return operation.hasTrait(HttpChecksumRequiredTrait.class);
     }
 
-    private static boolean hasMd5Dependency(
-            Model model,
-            ServiceShape service
-    ) {
+    private static boolean hasMd5Dependency(Model model, ServiceShape service) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         for (OperationShape operation : operations) {

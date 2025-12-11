@@ -28,6 +28,7 @@ import software.amazon.smithy.model.node.StringNode;
  * Owner for a parameter object node in the EndpointRuleSet.
  */
 public class ParameterGenerator {
+
     private final String parameterName;
     private final Node param;
     private boolean required = false;
@@ -47,7 +48,8 @@ public class ParameterGenerator {
         this.param = param;
         this.isInputKey = isInputKey;
 
-        ObjectNode paramNode = param.asObjectNode()
+        ObjectNode paramNode = param
+            .asObjectNode()
             .orElseThrow(() -> new RuntimeException("param node is not object node."));
 
         Optional<BooleanNode> requiredNode = paramNode.getBooleanMember("required");
@@ -69,7 +71,7 @@ public class ParameterGenerator {
                     tsParamType = "string[]";
                     break;
                 default:
-                    // required by linter
+                // required by linter
             }
         }
     }
@@ -107,7 +109,10 @@ public class ParameterGenerator {
                 buffer += paramNode.expectBooleanMember("default").getValue() ? "true" : "false";
                 break;
             case "stringArray":
-                buffer += paramNode.expectArrayMember("default").getElements().stream()
+                buffer += paramNode
+                    .expectArrayMember("default")
+                    .getElements()
+                    .stream()
                     .map(element -> element.expectStringNode().getValue())
                     .collect(Collectors.joining("`, `", "[`", "`]"));
                 break;
@@ -120,10 +125,7 @@ public class ParameterGenerator {
     }
 
     public Map.Entry<String, String> getNameAndType() {
-        return new AbstractMap.SimpleEntry<>(
-            parameterName,
-            tsParamType
-        );
+        return new AbstractMap.SimpleEntry<>(parameterName, tsParamType);
     }
 
     /**

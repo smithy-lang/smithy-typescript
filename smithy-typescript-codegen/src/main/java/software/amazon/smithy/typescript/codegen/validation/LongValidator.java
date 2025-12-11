@@ -36,6 +36,7 @@ import software.amazon.smithy.utils.OptionalUtils;
  * is run explicitly for SSDK generation.
  */
 public final class LongValidator extends AbstractValidator {
+
     private TypeScriptSettings settings;
 
     public LongValidator(TypeScriptSettings settings) {
@@ -45,17 +46,25 @@ public final class LongValidator extends AbstractValidator {
     @Override
     public List<ValidationEvent> validate(Model model) {
         ServiceShape service = model.expectShape(settings.getService(), ServiceShape.class);
-        Set<LongShape> longs = new Walker(model).walkShapes(service).stream()
-                .flatMap(shape -> OptionalUtils.stream(shape.asLongShape()))
-                .collect(Collectors.toSet());
+        Set<LongShape> longs = new Walker(model)
+            .walkShapes(service)
+            .stream()
+            .flatMap(shape -> OptionalUtils.stream(shape.asLongShape()))
+            .collect(Collectors.toSet());
 
-        return longs.stream()
-                .map(shape -> warning(shape, "JavaScript numbers are all IEEE-754 double-precision floats. As a "
-                        + "consequence of this, the maximum safe value for integral numbers is 2^53 - 1. Since a "
-                        + "long shape can have values up to 2^63 - 1, there is a significant range of values that "
-                        + "cannot be safely represented in JavaScript. If possible, use the int shape. If values "
-                        + "outside of the safe range of JavaScript integrals are needed, it is recommended to use a "
-                        + "string shape instead."))
-                .collect(Collectors.toList());
+        return longs
+            .stream()
+            .map(shape ->
+                warning(
+                    shape,
+                    "JavaScript numbers are all IEEE-754 double-precision floats. As a " +
+                        "consequence of this, the maximum safe value for integral numbers is 2^53 - 1. Since a " +
+                        "long shape can have values up to 2^63 - 1, there is a significant range of values that " +
+                        "cannot be safely represented in JavaScript. If possible, use the int shape. If values " +
+                        "outside of the safe range of JavaScript integrals are needed, it is recommended to use a " +
+                        "string shape instead."
+                )
+            )
+            .collect(Collectors.toList());
     }
 }

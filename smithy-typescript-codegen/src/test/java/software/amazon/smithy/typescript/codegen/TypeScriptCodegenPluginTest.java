@@ -14,22 +14,22 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 
 public class TypeScriptCodegenPluginTest {
+
     @Test
     public void generatesRuntimeConfigFiles() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .assemble()
-                .unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
         MockManifest manifest = new MockManifest();
         PluginContext context = PluginContext.builder()
-                .model(model)
-                .fileManifest(manifest)
-                .settings(Node.objectNodeBuilder()
-                                  .withMember("service", Node.from("smithy.example#Example"))
-                                  .withMember("package", Node.from("example"))
-                                  .withMember("packageVersion", Node.from("1.0.0"))
-                                  .build())
-                .build();
+            .model(model)
+            .fileManifest(manifest)
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("service", Node.from("smithy.example#Example"))
+                    .withMember("package", Node.from("example"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .build()
+            )
+            .build();
 
         new TypeScriptCodegenPlugin().execute(context);
 
@@ -43,28 +43,29 @@ public class TypeScriptCodegenPluginTest {
         // Does the package.json file point to the runtime config?
         String packageJsonContents = manifest.getFileString("package.json").get();
         ObjectNode packageJson = Node.parse(packageJsonContents).expectObjectNode();
-        assertThat(packageJson.expectObjectMember("browser").getStringMember("./dist-es/runtimeConfig"),
-                   equalTo(Optional.of(Node.from("./dist-es/runtimeConfig.browser"))));
+        assertThat(
+            packageJson.expectObjectMember("browser").getStringMember("./dist-es/runtimeConfig"),
+            equalTo(Optional.of(Node.from("./dist-es/runtimeConfig.browser")))
+        );
     }
 
     @Test
     public void decoratesSymbolProvider() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .assemble()
-                .unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
         MockManifest manifest = new MockManifest();
         PluginContext context = PluginContext.builder()
-                .model(model)
-                .fileManifest(manifest)
-                .pluginClassLoader(getClass().getClassLoader())
-                .settings(Node.objectNodeBuilder()
-                        .withMember("service", Node.from("smithy.example#Example"))
-                        .withMember("package", Node.from("example"))
-                        .withMember("packageVersion", Node.from("1.0.0"))
-                        .withMember("__customServiceName", "Foo")
-                        .build())
-                .build();
+            .model(model)
+            .fileManifest(manifest)
+            .pluginClassLoader(getClass().getClassLoader())
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("service", Node.from("smithy.example#Example"))
+                    .withMember("package", Node.from("example"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .withMember("__customServiceName", "Foo")
+                    .build()
+            )
+            .build();
 
         new TypeScriptCodegenPlugin().execute(context);
 
@@ -74,28 +75,32 @@ public class TypeScriptCodegenPluginTest {
 
     @Test
     public void generatesServiceClients() {
-        Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .assemble()
-                .unwrap();
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
         MockManifest manifest = new MockManifest();
         PluginContext context = PluginContext.builder()
-                .model(model)
-                .fileManifest(manifest)
-                .pluginClassLoader(getClass().getClassLoader())
-                .settings(Node.objectNodeBuilder()
-                        .withMember("package", Node.from("example"))
-                        .withMember("packageVersion", Node.from("1.0.0"))
-                        .build())
-                .build();
+            .model(model)
+            .fileManifest(manifest)
+            .pluginClassLoader(getClass().getClassLoader())
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("package", Node.from("example"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .build()
+            )
+            .build();
         new TypeScriptCodegenPlugin().execute(context);
 
         assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/Example.ts"));
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Example.ts").get(),
-                   containsString("export class Example extends ExampleClient"));
+        assertThat(
+            manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/Example.ts").get(),
+            containsString("export class Example extends ExampleClient")
+        );
 
         assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts"));
-        assertThat(manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts").get(), containsString("export class ExampleClient"));
+        assertThat(
+            manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts").get(),
+            containsString("export class ExampleClient")
+        );
     }
 
     @Test

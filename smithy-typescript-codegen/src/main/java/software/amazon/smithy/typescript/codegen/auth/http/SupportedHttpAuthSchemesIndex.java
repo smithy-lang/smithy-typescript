@@ -23,6 +23,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class SupportedHttpAuthSchemesIndex {
+
     private final Map<ShapeId, HttpAuthScheme> supportedHttpAuthSchemes = new HashMap<>();
 
     /**

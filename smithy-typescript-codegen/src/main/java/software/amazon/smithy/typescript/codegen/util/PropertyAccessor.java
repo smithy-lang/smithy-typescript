@@ -8,6 +8,7 @@ package software.amazon.smithy.typescript.codegen.util;
 import java.util.regex.Pattern;
 
 public final class PropertyAccessor {
+
     /**
      * Starts with alpha or underscore, and contains only alphanumeric and underscores.
      */

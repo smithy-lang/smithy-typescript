@@ -28,51 +28,55 @@ import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegrati
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
 /**
  * This class normalizes models without endpointRuleSet traits to use the same code paths as those with ruleSet,
  * to make reasoning about models easier and less variable.
  */
 @SmithyInternalApi
 public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
+
     public static final EndpointRuleSetTrait DEFAULT_RULESET = EndpointRuleSetTrait.builder()
-        .ruleSet(Node.parse("""
-            {
-              "version": "1.0",
-              "parameters": {
-                "endpoint": {
-                  "type": "string",
-                  "builtIn": "SDK::Endpoint",
-                  "documentation": "Endpoint used for making requests. Should be formatted as a URI."
-                }
-              },
-              "rules": [
+        .ruleSet(
+            Node.parse(
+                """
                 {
-                  "conditions": [
-                    {
-                      "fn": "isSet",
-                      "argv": [
-                        {
-                          "ref": "endpoint"
-                        }
-                      ]
-                    }
-                  ],
-                  "endpoint": {
-                    "url": {
-                      "ref": "endpoint"
+                  "version": "1.0",
+                  "parameters": {
+                    "endpoint": {
+                      "type": "string",
+                      "builtIn": "SDK::Endpoint",
+                      "documentation": "Endpoint used for making requests. Should be formatted as a URI."
                     }
                   },
-                  "type": "endpoint"
-                },
-                {
-                  "conditions": [],
-                  "error": "(default endpointRuleSet) endpoint is not set - you must configure an endpoint.",
-                  "type": "error"
+                  "rules": [
+                    {
+                      "conditions": [
+                        {
+                          "fn": "isSet",
+                          "argv": [
+                            {
+                              "ref": "endpoint"
+                            }
+                          ]
+                        }
+                      ],
+                      "endpoint": {
+                        "url": {
+                          "ref": "endpoint"
+                        }
+                      },
+                      "type": "endpoint"
+                    },
+                    {
+                      "conditions": [],
+                      "error": "(default endpointRuleSet) endpoint is not set - you must configure an endpoint.",
+                      "type": "error"
+                    }
+                  ]
                 }
-              ]
-            }
-            """))
+                """
+            )
+        )
         .build();
 
     private boolean usesDefaultEndpointRuleset = false;
@@ -85,8 +89,7 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         RuntimeClientPlugin endpointConfigResolver = RuntimeClientPlugin.builder()
-            .withConventions(
-                TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
+            .withConventions(TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
             .build();
 
         if (usesDefaultEndpointRuleset) {
@@ -101,9 +104,7 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
                     .build()
             );
         }
-        return List.of(
-            endpointConfigResolver
-        );
+        return List.of(endpointConfigResolver);
     }
 
     @Override
@@ -114,9 +115,7 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
         if (!serviceShape.hasTrait(EndpointRuleSetTrait.class)) {
             usesDefaultEndpointRuleset = true;
             modelBuilder.removeShape(serviceShape.toShapeId());
-            modelBuilder.addShape(serviceShape.toBuilder()
-                .addTrait(DEFAULT_RULESET)
-                .build());
+            modelBuilder.addShape(serviceShape.toBuilder().addTrait(DEFAULT_RULESET).build());
         }
 
         return modelBuilder.build();
@@ -134,8 +133,11 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
         }
         if (target == LanguageTarget.SHARED) {
             return MapUtils.of("endpointProvider", writer -> {
-                writer.addImport("defaultEndpointResolver", null,
-                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/endpointResolver").toString());
+                writer.addImport(
+                    "defaultEndpointResolver",
+                    null,
+                    Paths.get(".", CodegenUtils.SOURCE_FOLDER, "endpoint/endpointResolver").toString()
+                );
                 writer.write("defaultEndpointResolver");
             });
         }

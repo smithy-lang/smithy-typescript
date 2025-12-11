@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public final class SchemaReferenceIndex implements KnowledgeIndex {
+
     public final SchemaTraitFilterIndex traits;
     private final Model model;
 
@@ -46,12 +47,22 @@ public final class SchemaReferenceIndex implements KnowledgeIndex {
         }
         ShapeType type = targetShape.getType();
         switch (type) {
-            case STRING,
-                 BOOLEAN,
-                 BYTE, DOUBLE, FLOAT, SHORT, INTEGER, LONG,
-                 ENUM, INT_ENUM,
-                 BIG_INTEGER, BIG_DECIMAL,
-                 TIMESTAMP, BLOB, DOCUMENT -> {
+            case
+                STRING,
+                BOOLEAN,
+                BYTE,
+                DOUBLE,
+                FLOAT,
+                SHORT,
+                INTEGER,
+                LONG,
+                ENUM,
+                INT_ENUM,
+                BIG_INTEGER,
+                BIG_DECIMAL,
+                TIMESTAMP,
+                BLOB,
+                DOCUMENT -> {
                 return false;
             }
             case LIST, SET, MAP -> {

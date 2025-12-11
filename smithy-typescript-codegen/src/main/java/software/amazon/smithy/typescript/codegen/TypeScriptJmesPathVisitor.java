@@ -73,7 +73,6 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
     @Override
     public Void visitComparator(ComparatorExpression expression) {
-
         String executionContextInital = executionContext;
         String comparator = expression.getComparator().toString();
 
@@ -125,8 +124,9 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
                     this.executionContext = orginalExecutionContext;
                     break;
                 default:
-                    throw new CodegenException("TypeScriptJmesPath visitor has not implemented function: "
-                            + expression.getName());
+                    throw new CodegenException(
+                        "TypeScriptJmesPath visitor has not implemented function: " + expression.getName()
+                    );
             }
         });
 
@@ -181,11 +181,13 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
         String executionContextInital = executionContext;
 
-        expression.getExpressions().forEach((JmespathExpression exp) -> {
-            exp.accept(this);
-            evaluators.add(executionContext);
-            executionContext = executionContextInital;
-        });
+        expression
+            .getExpressions()
+            .forEach((JmespathExpression exp) -> {
+                exp.accept(this);
+                evaluators.add(executionContext);
+                executionContext = executionContextInital;
+            });
 
         String resultScope = makeNewScope("result_");
         writer.write("let $L = [];", resultScope);
@@ -228,8 +230,13 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         expression.getRight().accept(this);
         String rightContext = executionContext;
 
-        executionContext = String.format("((%s || %s) && (%s || %s)) ", leftContext, rightContext, rightContext,
-                leftContext);
+        executionContext = String.format(
+            "((%s || %s) && (%s || %s)) ",
+            leftContext,
+            rightContext,
+            rightContext,
+            leftContext
+        );
 
         return null;
     }
@@ -247,12 +254,18 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
         String element = makeNewScope("element_");
         String result = makeNewScope("objectProjection_");
-        writer.openBlock("let $L = Object.values($L).map(($L: any) => {", "});", result,
-                executionContext, element, () -> {
-            executionContext = element;
-            expression.getRight().accept(this);
-            writer.write("return $L;", executionContext);
-        });
+        writer.openBlock(
+            "let $L = Object.values($L).map(($L: any) => {",
+            "});",
+            result,
+            executionContext,
+            element,
+            () -> {
+                executionContext = element;
+                expression.getRight().accept(this);
+                writer.write("return $L;", executionContext);
+            }
+        );
         executionContext = result;
         return null;
     }
@@ -264,12 +277,11 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
         if (!(expression.getRight() instanceof CurrentExpression)) {
             String element = makeNewScope("element_");
             String result = makeNewScope("projection_");
-            writer.openBlock("let $L = $L.map(($L: any) => {", "});", result,
-                    executionContext, element, () -> {
-                        executionContext = element;
-                        expression.getRight().accept(this);
-                        writer.write("return $L;", executionContext);
-                    });
+            writer.openBlock("let $L = $L.map(($L: any) => {", "});", result, executionContext, element, () -> {
+                executionContext = element;
+                expression.getRight().accept(this);
+                writer.write("return $L;", executionContext);
+            });
             executionContext = result;
         }
         return null;
@@ -277,19 +289,24 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
 
     @Override
     public Void visitFilterProjection(FilterProjectionExpression expression) {
-
         expression.getLeft().accept(this);
 
         expression.getRight().accept(this);
 
         String elementScope = makeNewScope("element_");
         String resultScope = makeNewScope("filterRes_");
-        writer.openBlock("let $L = $L.filter(($L: any) => {", "});", resultScope,
-                executionContext, elementScope, () -> {
-            executionContext = elementScope;
-            expression.getComparison().accept(this);
-            writer.write("return $L;", executionContext);
-        });
+        writer.openBlock(
+            "let $L = $L.filter(($L: any) => {",
+            "});",
+            resultScope,
+            executionContext,
+            elementScope,
+            () -> {
+                executionContext = elementScope;
+                expression.getComparison().accept(this);
+                writer.write("return $L;", executionContext);
+            }
+        );
 
         executionContext = resultScope;
         return null;
@@ -346,17 +363,19 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     }
 
     private String serializeObject(Map<String, Object> obj) {
-        return "{" + obj.entrySet().stream()
-            .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
-            .collect(Collectors.joining(","))
-            + "}";
+        return (
+            "{" +
+            obj
+                .entrySet()
+                .stream()
+                .map(entry -> "\"" + entry.getKey() + "\":" + serializeValue(entry.getValue()))
+                .collect(Collectors.joining(",")) +
+            "}"
+        );
     }
 
     private String serializeArray(List<Object> array) {
-        return "[" + array.stream()
-            .map(this::serializeValue)
-            .collect(Collectors.joining(","))
-            + "]";
+        return "[" + array.stream().map(this::serializeValue).collect(Collectors.joining(",")) + "]";
     }
 
     @SuppressWarnings("unchecked")

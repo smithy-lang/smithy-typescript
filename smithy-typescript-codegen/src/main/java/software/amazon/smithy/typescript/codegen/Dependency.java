@@ -17,5 +17,4 @@ package software.amazon.smithy.typescript.codegen;
 
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 
-public interface Dependency extends PackageContainer, SymbolDependencyContainer {
-}
+public interface Dependency extends PackageContainer, SymbolDependencyContainer {}

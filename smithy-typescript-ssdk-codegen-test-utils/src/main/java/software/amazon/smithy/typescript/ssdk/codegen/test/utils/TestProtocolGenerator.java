@@ -13,10 +13,9 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.HttpBindingProtocolGenerator;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
- /**
-  * Protocol for SSDK codegen testing.
-  */
+/**
+ * Protocol for SSDK codegen testing.
+ */
 @SmithyInternalApi
 class TestProtocolGenerator extends HttpBindingProtocolGenerator {
 
@@ -56,30 +55,30 @@ class TestProtocolGenerator extends HttpBindingProtocolGenerator {
 
     @Override
     public void deserializeErrorDocumentBody(
-            GenerationContext context,
-            StructureShape error,
-            List<HttpBinding> documentBindings
+        GenerationContext context,
+        StructureShape error,
+        List<HttpBinding> documentBindings
     ) {}
 
     @Override
     public void serializeErrorDocumentBody(
-            GenerationContext context,
-            StructureShape error,
-            List<HttpBinding> documentBindings
+        GenerationContext context,
+        StructureShape error,
+        List<HttpBinding> documentBindings
     ) {}
 
     @Override
     public void deserializeInputDocumentBody(
-            GenerationContext context,
-            OperationShape operation,
-            List<HttpBinding> documentBindings
+        GenerationContext context,
+        OperationShape operation,
+        List<HttpBinding> documentBindings
     ) {}
 
     @Override
     public void serializeInputDocumentBody(
-            GenerationContext context,
-            OperationShape operation,
-            List<HttpBinding> documentBindings
+        GenerationContext context,
+        OperationShape operation,
+        List<HttpBinding> documentBindings
     ) {
         TypeScriptWriter writer = context.getWriter();
         writer.write("body = \"{}\"");
@@ -87,16 +86,16 @@ class TestProtocolGenerator extends HttpBindingProtocolGenerator {
 
     @Override
     public void deserializeOutputDocumentBody(
-            GenerationContext context,
-            OperationShape error,
-            List<HttpBinding> documentBindings
+        GenerationContext context,
+        OperationShape error,
+        List<HttpBinding> documentBindings
     ) {}
 
     @Override
     public void serializeOutputDocumentBody(
-            GenerationContext context,
-            OperationShape error,
-            List<HttpBinding> documentBindings
+        GenerationContext context,
+        OperationShape error,
+        List<HttpBinding> documentBindings
     ) {}
 
     @Override
@@ -125,34 +124,40 @@ class TestProtocolGenerator extends HttpBindingProtocolGenerator {
 
         // Include a JSON body parser used to deserialize documents from HTTP responses.
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
-        writer.openBlock("const parseBody = (streamBody: any, context: __SerdeContext): "
-                + "any => collectBodyString(streamBody, context).then(encoded => {", "});", () -> {
-                    writer.openBlock("if (encoded.length) {", "}", () -> {
-                        writer.write("return JSON.parse(encoded);");
-                    });
-                    writer.write("return {};");
+        writer.openBlock(
+            "const parseBody = (streamBody: any, context: __SerdeContext): " +
+                "any => collectBodyString(streamBody, context).then(encoded => {",
+            "});",
+            () -> {
+                writer.openBlock("if (encoded.length) {", "}", () -> {
+                    writer.write("return JSON.parse(encoded);");
                 });
+                writer.write("return {};");
+            }
+        );
         writer.write("");
 
         // Include a JSON body parser.
         writer.addImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
-        writer.openBlock("const parseErrorBody = async (errorBody: any, context: __SerdeContext) => {",
-                "}", () -> {
-                    writer.write("const value = await parseBody(errorBody, context);");
-                    writer.write("value.message = value.message ?? value.Message;");
-                    writer.write("return value;");
-                });
+        writer.openBlock("const parseErrorBody = async (errorBody: any, context: __SerdeContext) => {", "}", () -> {
+            writer.write("const value = await parseBody(errorBody, context);");
+            writer.write("value.message = value.message ?? value.Message;");
+            writer.write("return value;");
+        });
         writer.write("");
 
         // Include an error code parser.
-        writer.openBlock("const parseErrorCode = (output: __HttpResponse, data: any): string | undefined => {",
-                "}", () -> {
-                    writer.openBlock("if (output.headers[\"x-error\"]) {", "}", () -> {
-                        writer.write("return output.headers[\"x-error\"];");
-                    });
-                    writer.openBlock("if (data.code !== undefined) {", "}", () -> {
-                        writer.write("return data.code;");
-                    });
+        writer.openBlock(
+            "const parseErrorCode = (output: __HttpResponse, data: any): string | undefined => {",
+            "}",
+            () -> {
+                writer.openBlock("if (output.headers[\"x-error\"]) {", "}", () -> {
+                    writer.write("return output.headers[\"x-error\"];");
                 });
+                writer.openBlock("if (data.code !== undefined) {", "}", () -> {
+                    writer.write("return data.code;");
+                });
+            }
+        );
     }
 }

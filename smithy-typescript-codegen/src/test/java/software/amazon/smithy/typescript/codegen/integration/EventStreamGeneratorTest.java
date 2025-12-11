@@ -1,5 +1,8 @@
 package software.amazon.smithy.typescript.codegen.integration;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,11 +17,9 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.HttpPayloadTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class EventStreamGeneratorTest {
+
     @Test
     void getEventStreamMember(
         @Mock ProtocolGenerator.GenerationContext context,
@@ -36,32 +37,20 @@ class EventStreamGeneratorTest {
         when(streamingTarget1.hasTrait(StreamingTrait.class)).thenReturn(true);
         when(streamingTarget1.isUnionShape()).thenReturn(true);
 
-        MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
-            context,
-            struct
-        );
+        MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(context, struct);
 
         assertEquals(eventStreamMember1, eventStreamMember);
     }
 
     @Test
-    void getEventStreamMemberTooFew(
-        @Mock ProtocolGenerator.GenerationContext context,
-        @Mock StructureShape struct
-    ) {
+    void getEventStreamMemberTooFew(@Mock ProtocolGenerator.GenerationContext context, @Mock StructureShape struct) {
         when(struct.members()).thenReturn(List.of());
         when(struct.getId()).thenReturn(ShapeId.from("namespace#Shape"));
 
         try {
-            MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
-                context,
-                struct
-            );
+            MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(context, struct);
         } catch (CodegenException e) {
-            assertEquals(
-                "No event stream member found in " + struct.getId().toString(),
-                e.getMessage()
-            );
+            assertEquals("No event stream member found in " + struct.getId().toString(), e.getMessage());
         }
     }
 
@@ -77,10 +66,7 @@ class EventStreamGeneratorTest {
         @Mock ShapeId streamingMember2ShapeId,
         @Mock UnionShape streamingTarget2
     ) {
-        when(struct.members()).thenReturn(List.of(
-            eventStreamMember1,
-            eventStreamMember2
-        ));
+        when(struct.members()).thenReturn(List.of(eventStreamMember1, eventStreamMember2));
         when(context.getModel()).thenReturn(model);
         when(struct.getId()).thenReturn(ShapeId.from("namespace#Shape"));
 
@@ -95,15 +81,9 @@ class EventStreamGeneratorTest {
         when(streamingTarget2.isUnionShape()).thenReturn(true);
 
         try {
-            MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(
-                context,
-                struct
-            );
+            MemberShape eventStreamMember = EventStreamGenerator.getEventStreamMember(context, struct);
         } catch (CodegenException e) {
-            assertEquals(
-                "More than one event stream member in " + struct.getId().toString(),
-                e.getMessage()
-            );
+            assertEquals("More than one event stream member in " + struct.getId().toString(), e.getMessage());
         }
     }
 }

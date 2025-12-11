@@ -24,6 +24,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 @Deprecated
 public final class TypeScriptCodegenPlugin extends TypeScriptClientCodegenPlugin {
+
     @Override
     public String getName() {
         return "typescript-codegen";

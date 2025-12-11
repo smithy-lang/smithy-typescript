@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Objects;
 import software.amazon.smithy.model.shapes.ShapeId;
 
-
 /**
  * Allows customization of protocol selection for specific services or a global default ordering.
  */
 public final class ProtocolPriorityConfig {
+
     private final Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations;
     private final List<ShapeId> customDefaultPriority;
 
@@ -24,8 +24,10 @@ public final class ProtocolPriorityConfig {
         Map<ShapeId, List<ShapeId>> serviceProtocolPriorityCustomizations,
         List<ShapeId> customDefaultPriority
     ) {
-        this.serviceProtocolPriorityCustomizations =
-            Objects.requireNonNullElseGet(serviceProtocolPriorityCustomizations, HashMap::new);
+        this.serviceProtocolPriorityCustomizations = Objects.requireNonNullElseGet(
+            serviceProtocolPriorityCustomizations,
+            HashMap::new
+        );
         this.customDefaultPriority = customDefaultPriority;
     }
 

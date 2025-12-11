@@ -22,18 +22,22 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 
 public class SymbolProviderTest {
+
     @Test
     public void createsSymbols() {
         Shape shape = StructureShape.builder().id("com.foo.baz#Hello").build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShape(shape)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShape(shape)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
@@ -48,14 +52,17 @@ public class SymbolProviderTest {
         Shape shape1 = StructureShape.builder().id("com.foo#Hello").build();
         Shape shape2 = StructureShape.builder().id("com.foo.baz#Hello").build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(shape1, shape2)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(shape1, shape2)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);
@@ -76,14 +83,17 @@ public class SymbolProviderTest {
     public void escapesReservedWords() {
         Shape shape = StructureShape.builder().id("com.foo.baz#Pick").build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShape(shape)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShape(shape)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol symbol = provider.toSymbol(shape);
 
@@ -93,19 +103,19 @@ public class SymbolProviderTest {
     @Test
     public void doesNotEscapeBuiltins() {
         MemberShape member = MemberShape.builder().id("foo.bar#Object$a").target("smithy.api#String").build();
-        StructureShape struct = StructureShape.builder()
-                .id("foo.bar#Object")
-                .addMember(member)
-                .build();
+        StructureShape struct = StructureShape.builder().id("foo.bar#Object").addMember(member).build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(struct, member)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(struct, member)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
         SymbolProvider provider = new SymbolVisitor(model, settings);
 
         Symbol structSymbol = provider.toSymbol(struct);
@@ -124,19 +134,19 @@ public class SymbolProviderTest {
     public void escapesRecursiveSymbols() {
         StructureShape record = StructureShape.builder().id("foo.bar#Record").build();
         MemberShape listMember = MemberShape.builder().id("foo.bar#Records$member").target(record).build();
-        ListShape list = ListShape.builder()
-                .id("foo.bar#Records")
-                .member(listMember)
-                .build();
+        ListShape list = ListShape.builder().id("foo.bar#Records").member(listMember).build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(list, listMember, record)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(list, listMember, record)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol listSymbol = provider.toSymbol(list);
@@ -147,41 +157,48 @@ public class SymbolProviderTest {
     @Test
     public void createsCommandModules() {
         Model model = Model.assembler()
-                .addImport(getClass().getResource("output-structure.smithy"))
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("output-structure.smithy"))
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
 
         Shape command = model.expectShape(ShapeId.from("smithy.example#GetFoo"));
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol commandSymbol = provider.toSymbol(command);
 
         assertThat(commandSymbol.getName(), equalTo("GetFooCommand"));
-        assertThat(commandSymbol.getNamespace(),
-                equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand"));
+        assertThat(
+            commandSymbol.getNamespace(),
+            equalTo("./" + CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand")
+        );
     }
 
     @Test
     public void usesLazyJsonStringForJsonMediaType() {
-        StringShape jsonString = StringShape.builder().id("foo.bar#jsonString")
-                .addTrait(new MediaTypeTrait("application/json")).build();
+        StringShape jsonString = StringShape.builder()
+            .id("foo.bar#jsonString")
+            .addTrait(new MediaTypeTrait("application/json"))
+            .build();
         MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(jsonString).build();
-        StructureShape struct = StructureShape.builder()
-                .id("foo.bar#test")
-                .addMember(member)
-                .build();
+        StructureShape struct = StructureShape.builder().id("foo.bar#test").addMember(member).build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(struct, member, jsonString)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(struct, member, jsonString)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -192,24 +209,24 @@ public class SymbolProviderTest {
     @Test
     public void omitsUnknownStringEnumVariant() {
         EnumTrait trait = EnumTrait.builder()
-                .addEnum(EnumDefinition.builder().value("FOO").name("FOO").build())
-                .addEnum(EnumDefinition.builder().value("BAR").name("BAR").build())
-                .build();
+            .addEnum(EnumDefinition.builder().value("FOO").name("FOO").build())
+            .addEnum(EnumDefinition.builder().value("BAR").name("BAR").build())
+            .build();
         StringShape stringShape = StringShape.builder().id("foo.bar#enumString").addTrait(trait).build();
         MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(stringShape).build();
-        StructureShape struct = StructureShape.builder()
-                .id("foo.bar#test")
-                .addMember(member)
-                .build();
+        StructureShape struct = StructureShape.builder().id("foo.bar#test").addMember(member).build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(struct, member, stringShape)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(struct, member, stringShape)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -219,25 +236,21 @@ public class SymbolProviderTest {
 
     @Test
     public void omitsUnknownNumberIntEnumVariant() {
-        IntEnumShape shape = IntEnumShape.builder()
-                .id("com.foo#Foo")
-                .addMember("BAR", 2)
-                .addMember("BAZ", 5)
-                .build();
+        IntEnumShape shape = IntEnumShape.builder().id("com.foo#Foo").addMember("BAR", 2).addMember("BAZ", 5).build();
         MemberShape member = MemberShape.builder().id("foo.bar#test$a").target(shape).build();
-        StructureShape struct = StructureShape.builder()
-                .id("foo.bar#test")
-                .addMember(member)
-                .build();
+        StructureShape struct = StructureShape.builder().id("foo.bar#test").addMember(member).build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(struct, member, shape)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(struct, member, shape)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
 
         SymbolProvider provider = new SymbolVisitor(model, settings);
         Symbol memberSymbol = provider.toSymbol(member);
@@ -250,14 +263,17 @@ public class SymbolProviderTest {
         Shape shape1 = StructureShape.builder().id("com.foo#Hello").build();
         Shape shape2 = ResourceShape.builder().id("com.foo.baz#Hello").build();
         Model model = Model.assembler()
-                .addImport(getClass().getResource("simple-service.smithy"))
-                .addShapes(shape1, shape2)
-                .assemble()
-                .unwrap();
-        TypeScriptSettings settings = TypeScriptSettings.from(model, Node.objectNodeBuilder()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(shape1, shape2)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
                 .withMember("package", Node.from("example"))
                 .withMember("packageVersion", Node.from("1.0.0"))
-                .build());
+                .build()
+        );
         SymbolProvider provider = new SymbolVisitor(model, settings, 1);
         Symbol symbol1 = provider.toSymbol(shape1);
         Symbol symbol2 = provider.toSymbol(shape2);

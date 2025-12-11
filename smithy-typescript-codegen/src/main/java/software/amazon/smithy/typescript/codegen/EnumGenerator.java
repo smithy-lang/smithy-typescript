@@ -82,24 +82,29 @@ final class EnumGenerator implements Runnable {
     // Unnamed enums generate a union of string literals.
     private void generateUnnamedEnum() {
         String variants = TypeScriptUtils.getEnumVariants(enumTrait.getEnumDefinitionValues());
-        writer.writeDocs("@public")
-            .write("export type $L = $L", symbol.getName(), variants);
+        writer.writeDocs("@public").write("export type $L = $L", symbol.getName(), variants);
     }
 
     // Named enums generate an actual enum type.
     private void generateNamedEnum() {
-        writer.writeDocs("@public\n@enum")
+        writer
+            .writeDocs("@public\n@enum")
             .openBlock("export const $L = {", "} as const;", symbol.getName(), () -> {
                 // Sort the named values to ensure a stable order and sane diffs.
                 // TODO: Should we just sort these in the trait itself?
-                enumTrait.getValues()
+                enumTrait
+                    .getValues()
                     .stream()
                     .sorted(Comparator.comparing(e -> e.getName().get()))
                     .forEach(this::writeNamedEnumConstant);
             });
-        writer.writeDocs("@public")
-            .write("export type $L = (typeof $L)[keyof typeof $L];",
-                symbol.getName(), symbol.getName(), symbol.getName()
+        writer
+            .writeDocs("@public")
+            .write(
+                "export type $L = (typeof $L)[keyof typeof $L];",
+                symbol.getName(),
+                symbol.getName(),
+                symbol.getName()
             );
     }
 

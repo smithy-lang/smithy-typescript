@@ -1,10 +1,14 @@
 package software.amazon.smithy.typescript.codegen.schema;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -13,11 +17,8 @@ import software.amazon.smithy.model.shapes.SimpleShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndexTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 class SchemaReferenceIndexTest {
+
     private static Model model;
     private static SchemaReferenceIndex subject;
 
@@ -68,7 +69,7 @@ class SchemaReferenceIndexTest {
             if (shape instanceof CollectionShape collection) {
                 isRef = subject.isReferenceSchema(collection.getMember());
             } else if (shape instanceof MapShape map) {
-                isRef =  subject.isReferenceSchema(map.getValue());
+                isRef = subject.isReferenceSchema(map.getValue());
             } else {
                 throw new UnsupportedOperationException("Unexpected shape type");
             }
