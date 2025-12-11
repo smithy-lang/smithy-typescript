@@ -9,7 +9,6 @@ use smithy.rules#endpointRuleSet
 @rpcv2Cbor
 @documentation("xyz interfaces")
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
-@httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @clientContextParams(
     customParam: { type: "string", documentation: "Custom parameter" }
     region: { type: "string", documentation: "Conflicting with built-in region" }
@@ -22,14 +21,14 @@ use smithy.rules#endpointRuleSet
 @endpointRuleSet({
     version: "1.0"
     parameters: {
-        endpoint: { builtIn: "SDK::Endpoint", required: true, documentation: "The endpoint used to send the request.", type: "String" }
-        ApiKey: { required: false, documentation: "ApiKey", type: "String" }
-        region: { type: "String", required: false, documentation: "AWS region" }
-        customParam: { type: "String", required: true, default: "default-custom-value", documentation: "Custom parameter for testing" }
-        enableFeature: { type: "Boolean", required: true, default: true, documentation: "Feature toggle with default" }
-        debugMode: { type: "Boolean", required: true, default: false, documentation: "Debug mode with default" }
-        nonConflictingParam: { type: "String", required: true, default: "non-conflict-default", documentation: "Non-conflicting with default" }
-        logger: { type: "String", required: true, default: "default-logger", documentation: "Conflicting logger with default" }
+        endpoint: { builtIn: "SDK::Endpoint", required: true, documentation: "The endpoint used to send the request.", type: "string" }
+        ApiKey: { required: false, documentation: "ApiKey", type: "string" }
+        region: { type: "string", required: false, documentation: "AWS region" }
+        customParam: { type: "string", required: true, default: "default-custom-value", documentation: "Custom parameter for testing" }
+        enableFeature: { type: "boolean", required: true, default: true, documentation: "Feature toggle with default" }
+        debugMode: { type: "boolean", required: true, default: false, documentation: "Debug mode with default" }
+        nonConflictingParam: { type: "string", required: true, default: "non-conflict-default", documentation: "Non-conflicting with default" }
+        logger: { type: "string", required: true, default: "default-logger", documentation: "Conflicting logger with default" }
     }
     rules: [
         {

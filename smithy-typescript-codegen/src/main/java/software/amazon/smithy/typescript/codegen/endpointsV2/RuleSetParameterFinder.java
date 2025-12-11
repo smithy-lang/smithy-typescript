@@ -182,7 +182,8 @@ public class RuleSetParameterFinder {
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
         Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams);
+            clientContextParams, builtInParams
+        );
         return !customContextParams.isEmpty();
     }
 
@@ -194,7 +195,8 @@ public class RuleSetParameterFinder {
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
         Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams);
+            clientContextParams, builtInParams
+        );
         ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
             parameters.accept(new RuleSetParametersVisitor(writer, customContextParams, true));
@@ -243,7 +245,8 @@ public class RuleSetParameterFinder {
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
         Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams);
+            clientContextParams, builtInParams
+        );
         ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
         boolean hasDefaultsForResolve = false;
         if (ruleSet.getObjectMember("parameters").isPresent()) {
