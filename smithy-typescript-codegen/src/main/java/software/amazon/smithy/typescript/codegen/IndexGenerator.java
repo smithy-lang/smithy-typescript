@@ -124,11 +124,13 @@ final class IndexGenerator {
         );
 
         // Write export statement for commands.
-        writer.write("""
+        writer.write(
+            """
             export * from "./commands";"""
         );
         if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-            writer.write("""
+            writer.write(
+                """
                 export * from "./schemas/schemas_0";"""
             );
         }

@@ -20,14 +20,13 @@ import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlis
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
 /**
  * Adds a protocol implementation to the runtime config.
  */
 @SmithyInternalApi
 public final class AddProtocolConfig implements TypeScriptIntegration {
 
-  @Override
+    @Override
     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
         TypeScriptSettings settings,
         Model model,
@@ -44,18 +43,24 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
             case SHARED:
                 if (Objects.equals(settings.getProtocol(), Rpcv2CborTrait.ID)) {
                     return MapUtils.of(
-                        "protocol", writer -> {
+                        "protocol",
+                        writer -> {
                             writer.addImportSubmodule(
-                                "SmithyRpcV2CborProtocol", null,
-                                TypeScriptDependency.SMITHY_CORE, "/cbor");
+                                "SmithyRpcV2CborProtocol",
+                                null,
+                                TypeScriptDependency.SMITHY_CORE,
+                                "/cbor"
+                            );
                             writer.write("SmithyRpcV2CborProtocol");
                         },
-                       "protocolSettings", writer -> {
-                             writer.write("""
-                                 {
-                                   defaultNamespace: $S,
-                                 }""",
-                                 namespace
+                        "protocolSettings",
+                        writer -> {
+                            writer.write(
+                                """
+                                {
+                                  defaultNamespace: $S,
+                                }""",
+                                namespace
                             );
                         }
                     );
