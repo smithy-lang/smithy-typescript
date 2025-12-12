@@ -28,6 +28,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
  * Writes endpoint ruleset params into a client-specific config resolver step, applying defaults as needed.
  */
 public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
+
     private final TypeScriptWriter writer;
     private final Map<String, String> clientContextParams;
     private boolean useLocalNames = false;
@@ -38,9 +39,11 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
         this.clientContextParams = new HashMap<>();
     }
 
-    public RuleSetParametersVisitor(TypeScriptWriter writer,
-                                    Map<String, String> clientContextParams,
-                                    boolean useLocalNames) {
+    public RuleSetParametersVisitor(
+        TypeScriptWriter writer,
+        Map<String, String> clientContextParams,
+        boolean useLocalNames
+    ) {
         this.writer = writer;
         this.clientContextParams = clientContextParams;
         this.useLocalNames = useLocalNames;

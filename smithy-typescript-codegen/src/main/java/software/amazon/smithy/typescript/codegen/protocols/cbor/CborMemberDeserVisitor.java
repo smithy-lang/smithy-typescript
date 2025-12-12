@@ -17,6 +17,7 @@ import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGenerat
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 
 public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
+
     private final String dataSource;
     private final ProtocolGenerator.GenerationContext context;
 
@@ -27,8 +28,7 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
      * @param dataSource             The in-code location of the data to provide an output of
      *                               ({@code output.foo}, {@code entry}, etc.)
      */
-    public CborMemberDeserVisitor(ProtocolGenerator.GenerationContext context,
-                                  String dataSource) {
+    public CborMemberDeserVisitor(ProtocolGenerator.GenerationContext context, String dataSource) {
         super(context, dataSource, TimestampFormatTrait.Format.EPOCH_SECONDS);
         this.context = context;
         context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);

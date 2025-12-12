@@ -41,6 +41,7 @@ import software.amazon.smithy.waiters.WaitableTrait;
  */
 @SmithyInternalApi
 public final class ServiceClosure implements KnowledgeIndex {
+
     public static final ReservedWords RESERVED_WORDS = new ReservedWordsBuilder()
         .loadWords(Objects.requireNonNull(TypeScriptClientCodegenPlugin.class.getResource("reserved-words.txt")))
         .build();
@@ -103,10 +104,7 @@ public final class ServiceClosure implements KnowledgeIndex {
      */
     private final Set<ShapeId> scanned = new HashSet<>();
 
-    private ServiceClosure(
-        Model model,
-        ServiceShape service
-    ) {
+    private ServiceClosure(Model model, ServiceShape service) {
         this.model = model;
         this.service = service;
         elision = SchemaReferenceIndex.of(model);
@@ -138,12 +136,16 @@ public final class ServiceClosure implements KnowledgeIndex {
     public TreeSet<String> getWaiterNames() {
         TreeSet<String> waiters = new TreeSet<>();
         for (OperationShape operation : operations) {
-            operation.getTrait(WaitableTrait.class).ifPresent(trait -> {
-                trait.getWaiters().forEach((waiterName, waiter) -> {
-                    waiters.add("waitFor" + waiterName);
-                    waiters.add("waitUntil" + waiterName);
+            operation
+                .getTrait(WaitableTrait.class)
+                .ifPresent(trait -> {
+                    trait
+                        .getWaiters()
+                        .forEach((waiterName, waiter) -> {
+                            waiters.add("waitFor" + waiterName);
+                            waiters.add("waitUntil" + waiterName);
+                        });
                 });
-            });
         }
         return waiters;
     }
@@ -151,9 +153,11 @@ public final class ServiceClosure implements KnowledgeIndex {
     public TreeSet<String> getPaginatorNames() {
         TreeSet<String> paginators = new TreeSet<>();
         for (OperationShape operation : operations) {
-            operation.getTrait(PaginatedTrait.class).ifPresent(trait -> {
-                paginators.add("paginate" + operation.getId().getName());
-            });
+            operation
+                .getTrait(PaginatedTrait.class)
+                .ifPresent(trait -> {
+                    paginators.add("paginate" + operation.getId().getName());
+                });
         }
         return paginators;
     }
@@ -198,9 +202,9 @@ public final class ServiceClosure implements KnowledgeIndex {
         if (getRequiresNamingDeconfliction().contains(shape)) {
             if (null == store) {
                 throw new RuntimeException(
-                    "getShapeSchemaVariableName must be called with a StringStore because the shape "
-                    + shape.getId().getName()
-                    + "requires naming deconfliction."
+                    "getShapeSchemaVariableName must be called with a StringStore because the shape " +
+                        shape.getId().getName() +
+                        "requires naming deconfliction."
                 );
             }
             symbolName += "_" + store.var(shape.getId().getNamespace(), "n");
@@ -212,7 +216,6 @@ public final class ServiceClosure implements KnowledgeIndex {
         String schemaSuffix = "$";
         return symbolName + schemaSuffix;
     }
-
 
     /**
      * Since we use the short names for schema objects, in rare cases there may be a
@@ -302,21 +305,39 @@ public final class ServiceClosure implements KnowledgeIndex {
                     } else {
                         scan(model.expectShape(UNIT));
                     }
-                    operation.getErrors(service).forEach(error -> {
-                        scan(model.expectShape(error));
-                    });
+                    operation
+                        .getErrors(service)
+                        .forEach(error -> {
+                            scan(model.expectShape(error));
+                        });
                     operations.add(operation);
                     existsAsSchema.add(operation);
                 }
                 case SERVICE -> {
                     ServiceShape serviceShape = (ServiceShape) shape;
-                    serviceShape.getErrorsSet().forEach(errorShapeId -> {
-                        Shape errorShape = model.expectShape(errorShapeId);
-                        scan(errorShape);
-                    });
+                    serviceShape
+                        .getErrorsSet()
+                        .forEach(errorShapeId -> {
+                            Shape errorShape = model.expectShape(errorShapeId);
+                            scan(errorShape);
+                        });
                 }
-                case BYTE, INT_ENUM, SHORT, INTEGER, LONG, FLOAT, DOUBLE, BIG_INTEGER, BIG_DECIMAL, BOOLEAN, STRING,
-                     TIMESTAMP, DOCUMENT, ENUM, BLOB -> {
+                case
+                    BYTE,
+                    INT_ENUM,
+                    SHORT,
+                    INTEGER,
+                    LONG,
+                    FLOAT,
+                    DOUBLE,
+                    BIG_INTEGER,
+                    BIG_DECIMAL,
+                    BOOLEAN,
+                    STRING,
+                    TIMESTAMP,
+                    DOCUMENT,
+                    ENUM,
+                    BLOB -> {
                     if (shape.isEnumShape() || shape.isIntEnumShape() || shape.hasTrait(EnumTrait.class)) {
                         enums.add(shape);
                     }

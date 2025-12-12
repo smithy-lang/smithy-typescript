@@ -121,9 +121,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         // Get each structure that's used an error.
         OperationIndex operationIndex = OperationIndex.of(model);
-        model.shapes(OperationShape.class).forEach(operationShape -> {
-            errorShapes.addAll(operationIndex.getErrors(operationShape, settings.getService()));
-        });
+        model
+            .shapes(OperationShape.class)
+            .forEach(operationShape -> {
+                errorShapes.addAll(operationIndex.getErrors(operationShape, settings.getService()));
+            });
 
         moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
     }
@@ -136,17 +138,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol toSymbol(Shape shape) {
         boolean typeOnly = schemaMode;
         boolean isError = shape.asStructureShape().isPresent() && shape.hasTrait(ErrorTrait.class);
-        if (shape.isOperationShape()
-            || shape.isResourceShape()
-            || isError
-            || shape.isServiceShape()
-        ) {
+        if (shape.isOperationShape() || shape.isResourceShape() || isError || shape.isServiceShape()) {
             typeOnly = false;
         }
-        Symbol symbol = shape.accept(this)
-            .toBuilder()
-            .putProperty("typeOnly", typeOnly)
-            .build();
+        Symbol symbol = shape.accept(this).toBuilder().putProperty("typeOnly", typeOnly).build();
         LOGGER.fine(() -> "Creating symbol from " + shape + ": " + symbol);
         return escaper.escapeSymbol(shape, symbol);
     }
@@ -317,22 +312,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         String commandName = flattenShapeName(shape) + "Command";
         String moduleName = moduleNameDelegator.formatModuleName(shape, commandName);
         Symbol intermediate = createGeneratedSymbolBuilder(shape, commandName, moduleName).build();
-        Symbol.Builder builder = intermediate.toBuilder()
-            .putProperty("typeOnly", false);
+        Symbol.Builder builder = intermediate.toBuilder().putProperty("typeOnly", false);
         // Add input and output type symbols (XCommandInput / XCommandOutput).
         builder.putProperty(
             "inputType",
-            intermediate.toBuilder()
-                .putProperty("typeOnly", schemaMode)
-                .name(commandName + "Input")
-                .build()
+            intermediate.toBuilder().putProperty("typeOnly", schemaMode).name(commandName + "Input").build()
         );
         builder.putProperty(
             "outputType",
-            intermediate.toBuilder()
-                .putProperty("typeOnly", schemaMode)
-                .name(commandName + "Output")
-                .build()
+            intermediate.toBuilder().putProperty("typeOnly", schemaMode).name(commandName + "Output").build()
         );
         return builder.build();
     }
@@ -366,17 +354,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol enumShape(EnumShape shape) {
-        return stringShape(shape)
-            .toBuilder()
-            .putProperty("typeOnly", true)
-            .build();
+        return stringShape(shape).toBuilder().putProperty("typeOnly", true).build();
     }
 
     @Override
     public Symbol intEnumShape(IntEnumShape shape) {
-        return createObjectSymbolBuilder(shape)
-            .putProperty("typeOnly", true)
-            .build();
+        return createObjectSymbolBuilder(shape).putProperty("typeOnly", true).build();
     }
 
     private Symbol createEnumSymbol(StringShape shape, EnumTrait enumTrait) {
@@ -395,9 +378,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     public Symbol serviceShape(ServiceShape shape) {
         String name = StringUtils.capitalize(shape.getId().getName(shape)) + "Client";
         String moduleName = moduleNameDelegator.formatModuleName(shape, name);
-        return createGeneratedSymbolBuilder(shape, name, moduleName)
-            .putProperty("typeOnly", false)
-            .build();
+        return createGeneratedSymbolBuilder(shape, name, moduleName).putProperty("typeOnly", false).build();
     }
 
     @Override
@@ -406,10 +387,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder addSmithyUseImport(Symbol.Builder builder, String name, String as) {
-        Symbol importSymbol = Symbol.builder()
-            .name(name)
-            .namespace("@smithy/smithy-client", "/")
-            .build();
+        Symbol importSymbol = Symbol.builder().name(name).namespace("@smithy/smithy-client", "/").build();
         SymbolReference reference = SymbolReference.builder()
             .symbol(importSymbol)
             .alias(as)
@@ -425,7 +403,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol memberShape(MemberShape shape) {
-        Shape targetShape = model.getShape(shape.getTarget())
+        Shape targetShape = model
+            .getShape(shape.getTarget())
             .orElseThrow(() -> new CodegenException("Shape not found: " + shape.getTarget()));
         Symbol targetSymbol = toSymbol(targetShape);
 
@@ -449,7 +428,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     // For overrides, users should use available type system overrides such as "as any" or
     // pragma comments.
     private Symbol createMemberSymbolWithEnumTarget(Symbol targetSymbol) {
-        return targetSymbol.toBuilder()
+        return targetSymbol
+            .toBuilder()
             .namespace(null, "/")
             .name(targetSymbol.getName())
             .addReference(targetSymbol)
@@ -457,7 +437,8 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol createMemberSymbolWithEventStream(Symbol targetSymbol) {
-        return targetSymbol.toBuilder()
+        return targetSymbol
+            .toBuilder()
             .putProperty("typeOnly", schemaMode)
             .namespace(null, "/")
             .name(String.format("AsyncIterable<%s>", targetSymbol.getName()))
@@ -486,17 +467,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder createSymbolBuilder(Shape shape, String typeName, String namespace) {
-        return Symbol.builder()
-            .putProperty("shape", shape)
-            .name(typeName)
-            .namespace(namespace, "/");
+        return Symbol.builder().putProperty("shape", shape).name(typeName).namespace(namespace, "/");
     }
 
     private Symbol.Builder createGeneratedSymbolBuilder(Shape shape, String typeName, String namespace) {
         String trimmedNamespace = namespace.startsWith("./") ? namespace.substring(2) : namespace;
         String prefixedNamespace = String.join("/", ".", CodegenUtils.SOURCE_FOLDER, trimmedNamespace);
-        return createSymbolBuilder(shape, typeName, prefixedNamespace)
-            .definitionFile(toFilename(prefixedNamespace));
+        return createSymbolBuilder(shape, typeName, prefixedNamespace).definitionFile(toFilename(prefixedNamespace));
     }
 
     private String toFilename(String namespace) {
@@ -508,6 +485,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
      * It will break the models into multiple files to prevent it getting too big.
      */
     static final class ModuleNameDelegator {
+
         static final int DEFAULT_CHUNK_SIZE = 300;
         static final String SHAPE_NAMESPACE_PREFIX = "models";
 
@@ -551,21 +529,21 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             return path;
         }
 
-        static TypeScriptWriter modelIndexer(
-            Collection<Shape> shapes,
-            SymbolProvider symbolProvider
-        ) {
+        static TypeScriptWriter modelIndexer(Collection<Shape> shapes, SymbolProvider symbolProvider) {
             TypeScriptWriter writer = new TypeScriptWriter("");
             String modelPrefix = String.join("/", ".", CodegenUtils.SOURCE_FOLDER, SHAPE_NAMESPACE_PREFIX);
-            List<String> collectedModelNamespaces = shapes.stream()
+            List<String> collectedModelNamespaces = shapes
+                .stream()
                 .map(shape -> symbolProvider.toSymbol(shape).getNamespace())
                 .filter(namespace -> namespace.startsWith(modelPrefix))
                 .distinct()
                 .sorted(Comparator.naturalOrder())
-                .map(namespace -> namespace.replaceFirst(
-                    Matcher.quoteReplacement(modelPrefix),
-                    String.join("/", ".", SHAPE_NAMESPACE_PREFIX)
-                ))
+                .map(namespace ->
+                    namespace.replaceFirst(
+                        Matcher.quoteReplacement(modelPrefix),
+                        String.join("/", ".", SHAPE_NAMESPACE_PREFIX)
+                    )
+                )
                 .toList();
 
             // Export empty model index if no other files are present.
@@ -586,12 +564,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             for (Shape shape : shapes) {
                 if (shape.isStructureShape() && !shape.hasTrait(ErrorTrait.class)) {
                     Symbol symbol = symbolProvider.toSymbol(shape);
-                    String namespace = symbol.getNamespace()
-                        .replaceFirst(Matcher.quoteReplacement(
-                                String.join("/", ".", CodegenUtils.SOURCE_FOLDER)
-                            ),
-                            "."
-                        );
+                    String namespace = symbol
+                        .getNamespace()
+                        .replaceFirst(Matcher.quoteReplacement(String.join("/", ".", CodegenUtils.SOURCE_FOLDER)), ".");
                     namespaceToShapes.computeIfAbsent(namespace, k -> new TreeSet<>());
                     namespaceToShapes.get(namespace).add(symbol.getName());
                 }
@@ -604,12 +579,14 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
                 // TreeSet<String> types = entry.getValue();
                 // String symbols = String.join(", ", types);
 
-                writer.write("""
-                    export type * from $S;""", namespace);
+                writer.write(
+                    """
+                    export type * from $S;""",
+                    namespace
+                );
             }
 
             return writer;
         }
-
     }
 }

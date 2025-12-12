@@ -12,7 +12,6 @@ import software.amazon.smithy.protocol.traits.Rpcv2CborTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
 /**
  *
  * Controls rollout of schema generation.
@@ -20,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public abstract class SchemaGenerationAllowlist {
+
     private static final Set<ShapeId> ALLOWED = new HashSet<>();
     private static final Set<ShapeId> PROTOCOLS = new HashSet<>();
 

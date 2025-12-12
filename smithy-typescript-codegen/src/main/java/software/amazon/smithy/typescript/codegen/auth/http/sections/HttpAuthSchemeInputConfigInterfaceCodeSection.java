@@ -21,6 +21,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class HttpAuthSchemeInputConfigInterfaceCodeSection implements CodeSection {
+
     private final ServiceShape service;
     private final TypeScriptSettings settings;
     private final Model model;
@@ -72,13 +73,14 @@ public final class HttpAuthSchemeInputConfigInterfaceCodeSection implements Code
     }
 
     public static class Builder implements SmithyBuilder<HttpAuthSchemeInputConfigInterfaceCodeSection> {
+
         private ServiceShape service;
         private TypeScriptSettings settings;
         private Model model;
         private SymbolProvider symbolProvider;
         private List<TypeScriptIntegration> integrations;
-        private Map<String, ConfigField>  configFields;
-        private Map<Symbol, ResolveConfigFunction>  resolveConfigFunctions;
+        private Map<String, ConfigField> configFields;
+        private Map<Symbol, ResolveConfigFunction> resolveConfigFunctions;
 
         @Override
         public HttpAuthSchemeInputConfigInterfaceCodeSection build() {

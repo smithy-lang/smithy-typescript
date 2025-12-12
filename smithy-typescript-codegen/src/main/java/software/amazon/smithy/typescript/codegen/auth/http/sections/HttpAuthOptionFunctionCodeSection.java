@@ -19,6 +19,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 
 @SmithyInternalApi
 public final class HttpAuthOptionFunctionCodeSection implements CodeSection {
+
     private final ServiceShape service;
     private final TypeScriptSettings settings;
     private final Model model;
@@ -32,8 +33,10 @@ public final class HttpAuthOptionFunctionCodeSection implements CodeSection {
         settings = SmithyBuilder.requiredState("settings", builder.settings);
         model = SmithyBuilder.requiredState("model", builder.model);
         symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
-        effectiveHttpAuthSchemes =
-            SmithyBuilder.requiredState("effectiveHttpAuthSchemes", builder.effectiveHttpAuthSchemes);
+        effectiveHttpAuthSchemes = SmithyBuilder.requiredState(
+            "effectiveHttpAuthSchemes",
+            builder.effectiveHttpAuthSchemes
+        );
         schemeId = SmithyBuilder.requiredState("schemeId", builder.schemeId);
         httpAuthScheme = builder.httpAuthScheme;
     }
@@ -71,6 +74,7 @@ public final class HttpAuthOptionFunctionCodeSection implements CodeSection {
     }
 
     public static class Builder implements SmithyBuilder<HttpAuthOptionFunctionCodeSection> {
+
         private ServiceShape service;
         private TypeScriptSettings settings;
         private Model model;

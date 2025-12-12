@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.CodegenException;
 
 public class ImportDeclarationsTest {
+
     @Test
     public void addsSingleNonAliasedImport() {
         ImportDeclarations declarations = new ImportDeclarations("foo/bar");
@@ -115,9 +116,11 @@ public class ImportDeclarationsTest {
         declarations.addIgnoredDefaultImport("foo", "@types/foo", "I want to");
         String result = declarations.toString();
 
-        assertThat(result, containsString("// @ts-ignore: I want to\nimport foo from \"@types/foo\"; // eslint-disable-line"));
+        assertThat(
+            result,
+            containsString("// @ts-ignore: I want to\nimport foo from \"@types/foo\"; // eslint-disable-line")
+        );
     }
-
 
     @Test
     public void canImportDefaultImportWithNamedImport() {
@@ -163,24 +166,32 @@ public class ImportDeclarationsTest {
         declarations.addTypeImport("ServiceInputTypes", null, "../RpcV2ProtocolClient");
 
         // https://projects.haykranen.nl/java/
+        declarations.addTypeImport("DecoratorContainerSchemaListenerTransactionRepository", null, "../../java8");
         declarations.addTypeImport(
-            "DecoratorContainerSchemaListenerTransactionRepository", null, "../../java8");
+            "AuthenticationExpressionDecoratorContainerSchemaListenerTransactionRepository",
+            null,
+            "../../java11"
+        );
         declarations.addTypeImport(
-            "AuthenticationExpressionDecoratorContainerSchemaListenerTransactionRepository", null, "../../java11");
-        declarations.addTypeImport(
-            "ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenerTransactions", null, "../../java15");
+            "ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenerTransactions",
+            null,
+            "../../java15"
+        );
         // uses multiline format as line width 120 is breached.
         declarations.addTypeImport(
-            "ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenersTransactions", null, "../../java18");
-
+            "ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenersTransactions",
+            null,
+            "../../java18"
+        );
 
         String result = declarations.toString();
 
-        assertEquals("""
+        assertEquals(
+            """
             import { getEndpointPlugin } from "@smithy/middleware-endpoint";
             import { Command as $Command } from "@smithy/smithy-client";
             import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
-            
+
             import type { AuthenticationExpressionDecoratorContainerSchemaListenerTransactionRepository } from "../../java11";
             import type { ResolverVisitorAuthenticationExpressionDecoratorContainerSchemaListenerTransactions } from "../../java15";
             import type {

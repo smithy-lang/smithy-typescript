@@ -8,12 +8,12 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 
 public class TypeScriptDependencyTest {
+
     @Test
     public void createsSymbols() {
         Symbol foo = TypeScriptDependency.AWS_SDK_HASH_NODE.createSymbol("Foo");
@@ -25,8 +25,10 @@ public class TypeScriptDependencyTest {
 
     @Test
     public void getsUnconditionalDependencies() {
-        assertThat(TypeScriptDependency.getUnconditionalDependencies(),
-                   hasItem(TypeScriptDependency.SMITHY_TYPES.dependency));
+        assertThat(
+            TypeScriptDependency.getUnconditionalDependencies(),
+            hasItem(TypeScriptDependency.SMITHY_TYPES.dependency)
+        );
     }
 
     @Test

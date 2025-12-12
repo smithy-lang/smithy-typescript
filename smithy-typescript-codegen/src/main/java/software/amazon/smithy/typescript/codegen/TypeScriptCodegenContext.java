@@ -32,7 +32,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public final class TypeScriptCodegenContext
-        implements CodegenContext<TypeScriptSettings, TypeScriptWriter, TypeScriptIntegration> {
+    implements CodegenContext<TypeScriptSettings, TypeScriptWriter, TypeScriptIntegration> {
 
     private final Model model;
     private final TypeScriptSettings settings;
@@ -109,6 +109,7 @@ public final class TypeScriptCodegenContext
      * Builds {@link TypeScriptCodegenContext}s.
      */
     public static final class Builder implements SmithyBuilder<TypeScriptCodegenContext> {
+
         private Model model;
         private TypeScriptSettings settings;
         private SymbolProvider symbolProvider;

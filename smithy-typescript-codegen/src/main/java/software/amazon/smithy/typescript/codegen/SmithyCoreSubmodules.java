@@ -21,6 +21,7 @@ package software.amazon.smithy.typescript.codegen;
  * ```
  */
 public final class SmithyCoreSubmodules {
+
     public static final String CBOR = "/cbor";
 
     private SmithyCoreSubmodules() {}

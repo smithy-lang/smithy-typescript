@@ -63,17 +63,20 @@ public final class CodegenUtils {
      * @return The TypeScript type for the serializer context
      */
     public static String getOperationSerializerContextType(
-            TypeScriptWriter writer,
-            Model model,
-            OperationShape operation
+        TypeScriptWriter writer,
+        Model model,
+        OperationShape operation
     ) {
         // Get default SerdeContext.
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getInputInfo(operation).isPresent()) {
-            writer.addTypeImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
-                TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport(
+                "EventStreamSerdeContext",
+                "__EventStreamSerdeContext",
+                TypeScriptDependency.SMITHY_TYPES
+            );
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
@@ -88,23 +91,25 @@ public final class CodegenUtils {
      * @return The TypeScript type for the deserializer context
      */
     public static String getOperationDeserializerContextType(
-            TypeScriptSettings settings,
-            TypeScriptWriter writer,
-            Model model,
-            OperationShape operation
+        TypeScriptSettings settings,
+        TypeScriptWriter writer,
+        Model model,
+        OperationShape operation
     ) {
         // Get default SerdeContext.
         List<String> contextInterfaceList = getDefaultOperationSerdeContextTypes(writer);
         // If event stream trait exists, add corresponding serde context type to the intersection type.
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
         if (eventStreamIndex.getOutputInfo(operation).isPresent()) {
-            writer.addTypeImport("EventStreamSerdeContext", "__EventStreamSerdeContext",
-                    TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport(
+                "EventStreamSerdeContext",
+                "__EventStreamSerdeContext",
+                TypeScriptDependency.SMITHY_TYPES
+            );
             contextInterfaceList.add("__EventStreamSerdeContext");
         }
         if (AddSdkStreamMixinDependency.hasStreamingBlobDeser(settings, model, operation)) {
-            writer.addTypeImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext",
-                    TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("SdkStreamSerdeContext", "__SdkStreamSerdeContext", TypeScriptDependency.SMITHY_TYPES);
             contextInterfaceList.add("__SdkStreamSerdeContext");
         }
         return String.join(" & ", contextInterfaceList);
@@ -119,14 +124,17 @@ public final class CodegenUtils {
     }
 
     static List<MemberShape> getBlobStreamingMembers(Model model, StructureShape shape) {
-        return shape.getAllMembers().values().stream()
-                .filter(memberShape -> {
-                    // Streaming blobs need to have their types modified
-                    // See `writeClientCommandStreamingInputType`
-                    Shape target = model.expectShape(memberShape.getTarget());
-                    return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
-                })
-                .collect(Collectors.toList());
+        return shape
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(memberShape -> {
+                // Streaming blobs need to have their types modified
+                // See `writeClientCommandStreamingInputType`
+                Shape target = model.expectShape(memberShape.getTarget());
+                return target.isBlobShape() && target.hasTrait(StreamingTrait.class);
+            })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -196,12 +204,17 @@ public final class CodegenUtils {
     }
 
     static List<MemberShape> getBlobPayloadMembers(Model model, StructureShape shape) {
-        return shape.getAllMembers().values().stream()
+        return shape
+            .getAllMembers()
+            .values()
+            .stream()
             .filter(memberShape -> {
                 Shape target = model.expectShape(memberShape.getTarget());
-                return target.isBlobShape()
-                    && memberShape.hasTrait(HttpPayloadTrait.class)
-                    && !target.hasTrait(StreamingTrait.class);
+                return (
+                    target.isBlobShape() &&
+                    memberShape.hasTrait(HttpPayloadTrait.class) &&
+                    !target.hasTrait(StreamingTrait.class)
+                );
             })
             .collect(Collectors.toList());
     }
@@ -262,10 +275,7 @@ public final class CodegenUtils {
         );
 
         writer.writeDocs("@public\n\nThe output of {@link " + commandName + "}.");
-        writer.write(
-            "export interface $1L extends $1LType, __MetadataBearer {}",
-            typeName
-        );
+        writer.write("export interface $1L extends $1LType, __MetadataBearer {}", typeName);
     }
 
     /**
@@ -277,7 +287,9 @@ public final class CodegenUtils {
      */
     static List<String> getFunctionParametersList(Map<String, Object> paramsMap) {
         List<String> functionParametersList = new ArrayList<String>();
-        List<Map.Entry<String, Object>> sortedParamsMap = paramsMap.entrySet().stream()
+        List<Map.Entry<String, Object>> sortedParamsMap = paramsMap
+            .entrySet()
+            .stream()
             .sorted(Map.Entry.comparingByKey())
             .toList();
 
@@ -301,26 +313,39 @@ public final class CodegenUtils {
                     if (!valueList.isEmpty() && !(valueList.get(0) instanceof String)) {
                         throw new CodegenException("Plugin function parameters list must be List<String>");
                     }
-                    List<String> valueStringList = valueList.stream()
+                    List<String> valueStringList = valueList
+                        .stream()
                         .map(item -> String.format("'%s'", item))
                         .collect(Collectors.toList());
-                    functionParametersList.add(String.format("'%s': [%s]",
-                        key, valueStringList.stream().collect(Collectors.joining(", "))));
+                    functionParametersList.add(
+                        String.format("'%s': [%s]", key, valueStringList.stream().collect(Collectors.joining(", ")))
+                    );
                 } else if (value instanceof Map) {
                     Map<?, ?> valueMap = (Map<?, ?>) value;
-                    if (!valueMap.isEmpty() && valueMap.keySet().stream().anyMatch(k -> !(k instanceof String))
-                        && valueMap.values().stream().anyMatch(v -> !(v instanceof String))) {
+                    if (
+                        !valueMap.isEmpty() &&
+                        valueMap
+                            .keySet()
+                            .stream()
+                            .anyMatch(k -> !(k instanceof String)) &&
+                        valueMap
+                            .values()
+                            .stream()
+                            .anyMatch(v -> !(v instanceof String))
+                    ) {
                         throw new CodegenException("Plugin function parameters map must be Map<String, String>");
                     }
-                    List<String> valueStringList = valueMap.entrySet().stream()
+                    List<String> valueStringList = valueMap
+                        .entrySet()
+                        .stream()
                         .map(entry -> String.format("'%s': '%s'", entry.getKey(), entry.getValue()))
                         .collect(Collectors.toList());
-                    functionParametersList.add(String.format("%s: {%s}",
-                        key, valueStringList.stream().collect(Collectors.joining(", "))));
+                    functionParametersList.add(
+                        String.format("%s: {%s}", key, valueStringList.stream().collect(Collectors.joining(", ")))
+                    );
                 } else {
                     // Future support for param type should be added in else if.
-                    throw new CodegenException("Plugin function parameters not supported for type "
-                            + value.getClass());
+                    throw new CodegenException("Plugin function parameters not supported for type " + value.getClass());
                 }
             }
         }
@@ -334,21 +359,21 @@ public final class CodegenUtils {
      * Refer here for more rationales: https://github.com/aws/aws-sdk-js-v3/issues/843
      */
     static void writeInlineStreamingMemberType(
-            TypeScriptWriter writer,
-            Symbol containerSymbol,
-            MemberShape streamingMember
+        TypeScriptWriter writer,
+        Symbol containerSymbol,
+        MemberShape streamingMember
     ) {
         String memberName = streamingMember.getMemberName();
         String optionalSuffix = streamingMember.isRequired() ? "" : "?";
-        writer.writeInline("Omit<$1T, $2S> & { $2L$3L: $1T[$2S]|string|Uint8Array|Buffer }",
-                containerSymbol, memberName, optionalSuffix);
+        writer.writeInline(
+            "Omit<$1T, $2S> & { $2L$3L: $1T[$2S]|string|Uint8Array|Buffer }",
+            containerSymbol,
+            memberName,
+            optionalSuffix
+        );
     }
 
-    public static String getServiceName(
-            TypeScriptSettings settings,
-            Model model,
-            SymbolProvider symbolProvider
-    ) {
+    public static String getServiceName(TypeScriptSettings settings, Model model, SymbolProvider symbolProvider) {
         ServiceShape service = settings.getService(model);
         return symbolProvider.toSymbol(service).getName().replaceAll("(Client)$", "");
     }
@@ -372,13 +397,16 @@ public final class CodegenUtils {
         String serviceExceptionName = getServiceExceptionName(serviceName);
         while (true) {
             String finalServiceExceptionName = serviceExceptionName;
-            boolean namingCollision = model.getStructureShapes()
+            boolean namingCollision = model
+                .getStructureShapes()
                 .stream()
                 .anyMatch(structureShape -> structureShape.getId().getName().equals(finalServiceExceptionName));
 
             if (namingCollision) {
-                serviceExceptionName = serviceExceptionName
-                    .replaceAll("ServiceException$", "SyntheticServiceException");
+                serviceExceptionName = serviceExceptionName.replaceAll(
+                    "ServiceException$",
+                    "SyntheticServiceException"
+                );
             } else {
                 break;
             }

@@ -29,8 +29,7 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      * @param dataSource             The in-code location of the data to provide an input of
      *                               ({@code input.foo}, {@code entry}, etc.)
      */
-    public CborMemberSerVisitor(ProtocolGenerator.GenerationContext context,
-                                String dataSource) {
+    public CborMemberSerVisitor(ProtocolGenerator.GenerationContext context, String dataSource) {
         super(context, dataSource, TimestampFormatTrait.Format.EPOCH_SECONDS);
         this.context = context;
         this.serdeElisionEnabled = true;
@@ -81,9 +80,7 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      */
     @Override
     public String bigDecimalShape(BigDecimalShape shape) {
-        context.getWriter().addImportSubmodule(
-            "nv", "__nv", TypeScriptDependency.SMITHY_CORE, "/serde"
-        );
+        context.getWriter().addImportSubmodule("nv", "__nv", TypeScriptDependency.SMITHY_CORE, "/serde");
         return "__nv(" + dataSource + ")";
     }
 
@@ -92,12 +89,14 @@ public class CborMemberSerVisitor extends DocumentMemberSerVisitor {
      */
     @Override
     public String timestampShape(TimestampShape shape) {
-        context.getWriter().addImportSubmodule(
-            "dateToTag",
-            "__dateToTag",
-            TypeScriptDependency.SMITHY_CORE,
-            SmithyCoreSubmodules.CBOR
-        );
+        context
+            .getWriter()
+            .addImportSubmodule(
+                "dateToTag",
+                "__dateToTag",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CBOR
+            );
         return "__dateToTag(" + dataSource + ")";
     }
 }

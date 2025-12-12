@@ -16,6 +16,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 public class HttpAuthExtensionConfigurationInterface implements ExtensionConfigurationInterface {
+
     @Override
     public Pair<String, Dependency> name() {
         return Pair.of("HttpAuthExtensionConfiguration", AuthUtils.AUTH_HTTP_EXTENSION_DEPENDENCY);

@@ -42,13 +42,13 @@ import software.amazon.smithy.typescript.codegen.util.StringStore;
 import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
-
 /**
  * Creates the string representing a trait's data.
  * For presence-based trait, essentially boolean, a 1 or 2 will be used.
  */
 @SmithyInternalApi
 public class SchemaTraitGenerator {
+
     private static final String ANNOTATION_TRAIT_VALUE = "1";
     private static final Set<ShapeId> ANNOTATION_TRAITS = SetUtils.of(
         XmlAttributeTrait.ID,
@@ -103,40 +103,51 @@ public class SchemaTraitGenerator {
         } else if (DATA_TRAITS.contains(trait.toShapeId())) {
             if (trait instanceof EndpointTrait endpointTrait) {
                 return """
-                    ["%s"]
-                    """.formatted(endpointTrait.getHostPrefix());
+                ["%s"]
+                """.formatted(endpointTrait.getHostPrefix());
             } else if (trait instanceof XmlNamespaceTrait xmlNamespaceTrait) {
                 return """
                 [%s, %s]
                 """.formatted(
-                    stringStore.var(xmlNamespaceTrait.getPrefix().orElse("")),
-                    stringStore.var(xmlNamespaceTrait.getUri())
-                );
+                        stringStore.var(xmlNamespaceTrait.getPrefix().orElse("")),
+                        stringStore.var(xmlNamespaceTrait.getUri())
+                    );
             } else if (trait instanceof HttpErrorTrait httpError) {
                 return Objects.toString(httpError.getCode());
             } else if (trait instanceof HttpTrait httpTrait) {
                 return """
                 ["%s", "%s", %s]
-                """.formatted(
-                    httpTrait.getMethod(),
-                    httpTrait.getUri(),
-                    httpTrait.getCode()
-                );
+                """.formatted(httpTrait.getMethod(), httpTrait.getUri(), httpTrait.getCode());
             }
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {
             return SchemaTraitExtension.INSTANCE.render(trait);
         }
 
         if (trait instanceof StringTrait stringTrait) {
-            return """
-            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */ "
-                + stringStore.var(stringTrait.getValue());
+            return (
+                """
+                /* unhandled trait \s""" +
+                "`" +
+                trait.getClass().getSimpleName() +
+                "` */ " +
+                stringStore.var(stringTrait.getValue())
+            );
         } else if (trait instanceof AnnotationTrait) {
-            return """
-            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */ "
-                + ANNOTATION_TRAIT_VALUE;
+            return (
+                """
+                /* unhandled trait \s""" +
+                "`" +
+                trait.getClass().getSimpleName() +
+                "` */ " +
+                ANNOTATION_TRAIT_VALUE
+            );
         }
-        return """
-            /* unhandled trait \s""" + "`" + trait.getClass().getSimpleName() + "` */ void 0";
+        return (
+            """
+            /* unhandled trait \s""" +
+            "`" +
+            trait.getClass().getSimpleName() +
+            "` */ void 0"
+        );
     }
 }

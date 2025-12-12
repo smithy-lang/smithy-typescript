@@ -49,30 +49,37 @@ public final class DefaultReadmeGenerator implements TypeScriptIntegration {
 
         Model model = codegenContext.model();
 
-        codegenContext.writerDelegator().useFileWriter(README_FILENAME, "", writer -> {
-            ServiceShape service = settings.getService(model);
-            String resource =  IoUtils.readUtf8Resource(getClass(), file);
-            resource = resource.replaceAll(Pattern.quote("${packageName}"), settings.getPackageName());
+        codegenContext
+            .writerDelegator()
+            .useFileWriter(README_FILENAME, "", writer -> {
+                ServiceShape service = settings.getService(model);
+                String resource = IoUtils.readUtf8Resource(getClass(), file);
+                resource = resource.replaceAll(Pattern.quote("${packageName}"), settings.getPackageName());
 
-            String clientName = StringUtils.capitalize(service.getId().getName(service));
+                String clientName = StringUtils.capitalize(service.getId().getName(service));
 
-            resource = resource.replaceAll(Pattern.quote("${serviceId}"), clientName);
+                resource = resource.replaceAll(Pattern.quote("${serviceId}"), clientName);
 
-            String rawDocumentation = service.getTrait(DocumentationTrait.class)
+                String rawDocumentation = service
+                    .getTrait(DocumentationTrait.class)
                     .map(DocumentationTrait::getValue)
                     .orElse("");
-            String documentation = Arrays.asList(rawDocumentation.split("\n")).stream()
+                String documentation = Arrays.asList(rawDocumentation.split("\n"))
+                    .stream()
                     .map(StringUtils::trim)
                     .collect(Collectors.joining("\n"));
-            resource = resource.replaceAll(Pattern.quote("${documentation}"), Matcher.quoteReplacement(documentation));
+                resource = resource.replaceAll(
+                    Pattern.quote("${documentation}"),
+                    Matcher.quoteReplacement(documentation)
+                );
 
-            TopDownIndex topDownIndex = TopDownIndex.of(model);
-            OperationShape firstOperation = topDownIndex.getContainedOperations(service).iterator().next();
-            String operationName = firstOperation.getId().getName(service);
-            resource = resource.replaceAll(Pattern.quote("${commandName}"), operationName);
+                TopDownIndex topDownIndex = TopDownIndex.of(model);
+                OperationShape firstOperation = topDownIndex.getContainedOperations(service).iterator().next();
+                String operationName = firstOperation.getId().getName(service);
+                resource = resource.replaceAll(Pattern.quote("${commandName}"), operationName);
 
-            // The $ character is escaped using $$
-            writer.write(resource.replaceAll(Pattern.quote("$"), Matcher.quoteReplacement("$$")));
-        });
+                // The $ character is escaped using $$
+                writer.write(resource.replaceAll(Pattern.quote("$"), Matcher.quoteReplacement("$$")));
+            });
     }
 }

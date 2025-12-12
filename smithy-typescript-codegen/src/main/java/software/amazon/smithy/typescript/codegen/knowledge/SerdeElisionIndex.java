@@ -28,13 +28,19 @@ import software.amazon.smithy.utils.MapUtils;
  * function may be emitted.
  */
 public class SerdeElisionIndex implements KnowledgeIndex {
+
     private final Map<ShapeId, Boolean> elisionBinding = new HashMap<>();
     private final Map<String, ShapeId> mutatingTraits = MapUtils.of(
-        "jsonName", JsonNameTrait.ID,
-        "streaming", StreamingTrait.ID,
-        "mediaType", MediaTypeTrait.ID,
-        "sparse", SparseTrait.ID,
-        "idempotencyToken", IdempotencyTokenTrait.ID
+        "jsonName",
+        JsonNameTrait.ID,
+        "streaming",
+        StreamingTrait.ID,
+        "mediaType",
+        MediaTypeTrait.ID,
+        "sparse",
+        SparseTrait.ID,
+        "idempotencyToken",
+        IdempotencyTokenTrait.ID
     );
 
     public SerdeElisionIndex(Model model) {
@@ -68,8 +74,7 @@ public class SerdeElisionIndex implements KnowledgeIndex {
                     return true;
                 }
             }
-            Selector selector = Selector.parse(
-                "[id = '" + shape.getId() + "']" + " ~> [trait|" + entry.getKey() + "]");
+            Selector selector = Selector.parse("[id = '" + shape.getId() + "']" + " ~> [trait|" + entry.getKey() + "]");
             if (!selector.select(model).isEmpty()) {
                 return true;
             }
@@ -93,16 +98,27 @@ public class SerdeElisionIndex implements KnowledgeIndex {
             case SET:
                 return hasIncompatibleTypes(target.asSetShape().get().getMember(), model, depth + 1);
             case STRUCTURE:
-                return target.asStructureShape().get().getAllMembers().values().stream().anyMatch(
-                    s -> hasIncompatibleTypes(s, model, depth + 1)
-                );
+                return target
+                    .asStructureShape()
+                    .get()
+                    .getAllMembers()
+                    .values()
+                    .stream()
+                    .anyMatch(s -> hasIncompatibleTypes(s, model, depth + 1));
             case UNION:
-                return target.asUnionShape().get().getAllMembers().values().stream().anyMatch(
-                    s -> hasIncompatibleTypes(s, model, depth + 1)
-                );
+                return target
+                    .asUnionShape()
+                    .get()
+                    .getAllMembers()
+                    .values()
+                    .stream()
+                    .anyMatch(s -> hasIncompatibleTypes(s, model, depth + 1));
             case MAP:
-                return hasIncompatibleTypes(model.getShape(target.asMapShape().get().getValue().getTarget()).get(),
-                    model, depth + 1);
+                return hasIncompatibleTypes(
+                    model.getShape(target.asMapShape().get().getValue().getTarget()).get(),
+                    model,
+                    depth + 1
+                );
             case BIG_DECIMAL:
             case BIG_INTEGER:
             case BLOB:

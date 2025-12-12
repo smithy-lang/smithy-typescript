@@ -38,25 +38,21 @@ public record HttpAuthOptionProperty(
         /**
          * Specifies the property should be included in {@code signingProperties}.
          */
-        SIGNING
+        SIGNING,
     }
 
-    public record Source(
-        HttpAuthScheme httpAuthScheme,
-        Trait trait
-    ) implements ToSmithyBuilder<Source> {
+    public record Source(HttpAuthScheme httpAuthScheme, Trait trait) implements ToSmithyBuilder<Source> {
         public static Builder builder() {
             return new Builder();
         }
 
         @Override
         public Builder toBuilder() {
-            return builder()
-                .httpAuthScheme(httpAuthScheme)
-                .trait(trait);
+            return builder().httpAuthScheme(httpAuthScheme).trait(trait);
         }
 
         public static final class Builder implements SmithyBuilder<Source> {
+
             HttpAuthScheme httpAuthScheme;
             Trait trait;
 
@@ -64,7 +60,8 @@ public record HttpAuthOptionProperty(
             public Source build() {
                 return new Source(
                     SmithyBuilder.requiredState("httpAuthScheme", httpAuthScheme),
-                    SmithyBuilder.requiredState("trait", trait));
+                    SmithyBuilder.requiredState("trait", trait)
+                );
             }
 
             public Builder httpAuthScheme(HttpAuthScheme httpAuthScheme) {
@@ -85,13 +82,11 @@ public record HttpAuthOptionProperty(
 
     @Override
     public Builder toBuilder() {
-        return builder()
-            .name(name)
-            .type(type)
-            .source(source);
+        return builder().name(name).type(type).source(source);
     }
 
     public static final class Builder implements SmithyBuilder<HttpAuthOptionProperty> {
+
         private String name;
         private Type type;
         private Function<Source, Consumer<TypeScriptWriter>> source;
@@ -101,7 +96,8 @@ public record HttpAuthOptionProperty(
             return new HttpAuthOptionProperty(
                 SmithyBuilder.requiredState("name", name),
                 SmithyBuilder.requiredState("type", type),
-                SmithyBuilder.requiredState("source", source));
+                SmithyBuilder.requiredState("source", source)
+            );
         }
 
         public Builder name(String name) {

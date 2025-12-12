@@ -43,9 +43,7 @@ final class TypeScriptUtils {
      * @return Returns the sanitized member name.
      */
     static String sanitizePropertyName(String memberName) {
-        return isValidPropertyName(memberName)
-               ? memberName
-               : StringUtils.escapeJavaString(memberName, "");
+        return isValidPropertyName(memberName) ? memberName : StringUtils.escapeJavaString(memberName, "");
     }
 
     /**
@@ -73,10 +71,11 @@ final class TypeScriptUtils {
      * @return Returns the union of string literals.
      */
     static String getEnumVariants(Collection<String> values) {
-        return values.stream()
-                .sorted()
-                .map(value -> StringUtils.escapeJavaString(value, ""))
-                .collect(Collectors.joining(" | "));
+        return values
+            .stream()
+            .sorted()
+            .map(value -> StringUtils.escapeJavaString(value, ""))
+            .collect(Collectors.joining(" | "));
     }
 
     /**

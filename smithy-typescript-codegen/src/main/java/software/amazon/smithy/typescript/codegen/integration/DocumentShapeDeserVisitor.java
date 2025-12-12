@@ -66,6 +66,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Void> {
+
     protected boolean serdeElisionEnabled;
     private final GenerationContext context;
 
@@ -295,18 +296,14 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
      * @param functionBody An implementation that will generate a function body to
      *                     serialize the shape.
      */
-    protected final void generateDeserFunction(
-            Shape shape,
-            BiConsumer<GenerationContext, Shape> functionBody
-    ) {
+    protected final void generateDeserFunction(Shape shape, BiConsumer<GenerationContext, Shape> functionBody) {
         SymbolProvider symbolProvider = context.getSymbolProvider();
         TypeScriptWriter writer = context.getWriter();
 
         Symbol symbol = symbolProvider.toSymbol(shape);
         // Use the shape name for the function name.
         String methodName = ProtocolGenerator.getDeserFunctionShortName(symbol);
-        String methodLongName =
-                ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
+        String methodLongName = ProtocolGenerator.getDeserFunctionName(symbol, context.getProtocolName());
 
         boolean mayElide = serdeElisionEnabled && SerdeElisionIndex.of(context.getModel()).mayElide(shape);
         if (mayElide) {
@@ -315,10 +312,13 @@ public abstract class DocumentShapeDeserVisitor extends ShapeVisitor.Default<Voi
         } else {
             writer.addImport(symbol, symbol.getName());
             writer.writeDocs(methodLongName);
-            writer.openBlock("const $L = (\n"
-                           + "  output: any,\n"
-                           + "  context: __SerdeContext\n"
-                           + "): $T => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
+            writer.openBlock(
+                "const $L = (\n" + "  output: any,\n" + "  context: __SerdeContext\n" + "): $T => {",
+                "}",
+                methodName,
+                symbol,
+                () -> functionBody.accept(context, shape)
+            );
             writer.write("");
         }
     }

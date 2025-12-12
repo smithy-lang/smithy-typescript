@@ -68,6 +68,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
+
     protected boolean serdeElisionEnabled;
     private final GenerationContext context;
     private final String dataSource;
@@ -83,11 +84,7 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
      * @param defaultTimestampFormat The default timestamp format used in absence
      *                               of a TimestampFormat trait.
      */
-    public DocumentMemberDeserVisitor(
-            GenerationContext context,
-            String dataSource,
-            Format defaultTimestampFormat
-    ) {
+    public DocumentMemberDeserVisitor(GenerationContext context, String dataSource, Format defaultTimestampFormat) {
         this.context = context;
         this.dataSource = dataSource;
         this.defaultTimestampFormat = defaultTimestampFormat;
@@ -175,15 +172,17 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
 
     @Override
     public String floatShape(FloatShape shape) {
-        context.getWriter().addImport("limitedParseFloat32", "__limitedParseFloat32",
-            TypeScriptDependency.AWS_SMITHY_CLIENT);
+        context
+            .getWriter()
+            .addImport("limitedParseFloat32", "__limitedParseFloat32", TypeScriptDependency.AWS_SMITHY_CLIENT);
         return "__limitedParseFloat32(" + dataSource + ")";
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        context.getWriter().addImport("limitedParseDouble", "__limitedParseDouble",
-            TypeScriptDependency.AWS_SMITHY_CLIENT);
+        context
+            .getWriter()
+            .addImport("limitedParseDouble", "__limitedParseDouble", TypeScriptDependency.AWS_SMITHY_CLIENT);
         return "__limitedParseDouble(" + dataSource + ")";
     }
 
@@ -237,20 +236,25 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
         } else {
             if (!shape.getId().equals(getMemberShape().getTarget())) {
                 throw new IllegalArgumentException(
-                        String.format("Encountered timestamp shape %s that was not the target of member shape %s",
-                                shape.getId(), getMemberShape().getId()));
+                    String.format(
+                        "Encountered timestamp shape %s that was not the target of member shape %s",
+                        shape.getId(),
+                        getMemberShape().getId()
+                    )
+                );
             }
             format = httpIndex.determineTimestampFormat(getMemberShape(), Location.DOCUMENT, defaultTimestampFormat);
         }
 
         return HttpProtocolGeneratorUtils.getTimestampOutputParam(
-                context.getWriter(),
-                dataSource,
-                Location.DOCUMENT,
-                shape,
-                format,
-                requiresNumericEpochSecondsInPayload(),
-                context.getSettings().generateClient());
+            context.getWriter(),
+            dataSource,
+            Location.DOCUMENT,
+            shape,
+            format,
+            requiresNumericEpochSecondsInPayload(),
+            context.getSettings().generateClient()
+        );
     }
 
     @Override
@@ -297,7 +301,6 @@ public class DocumentMemberDeserVisitor implements ShapeVisitor<String> {
             return "_json(" + customDataSource + ")";
         }
 
-        return ProtocolGenerator.getDeserFunctionShortName(symbol)
-                + "(" + customDataSource + ", context)";
+        return ProtocolGenerator.getDeserFunctionShortName(symbol) + "(" + customDataSource + ", context)";
     }
 }

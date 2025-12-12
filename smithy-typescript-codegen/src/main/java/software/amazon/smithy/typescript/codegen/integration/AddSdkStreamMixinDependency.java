@@ -54,10 +54,11 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
             return;
         }
 
-        writer.addTypeImport("SdkStreamMixinInjector", "__SdkStreamMixinInjector",
-                TypeScriptDependency.SMITHY_TYPES);
-        writer.writeDocs("The internal function that inject utilities to runtime-specific stream to help users"
-                + " consume the data\n@internal");
+        writer.addTypeImport("SdkStreamMixinInjector", "__SdkStreamMixinInjector", TypeScriptDependency.SMITHY_TYPES);
+        writer.writeDocs(
+            "The internal function that inject utilities to runtime-specific stream to help users" +
+                " consume the data\n@internal"
+        );
         writer.write("sdkStreamMixin?: __SdkStreamMixinInjector;\n");
     }
 
@@ -73,11 +74,11 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
         }
 
         if (target == LanguageTarget.SHARED) {
-           return MapUtils.of("sdkStreamMixin", writer -> {
-               writer.addDependency(TypeScriptDependency.UTIL_STREAM);
-               writer.addImport("sdkStreamMixin", null, TypeScriptDependency.UTIL_STREAM);
-               writer.write("sdkStreamMixin");
-           });
+            return MapUtils.of("sdkStreamMixin", writer -> {
+                writer.addDependency(TypeScriptDependency.UTIL_STREAM);
+                writer.addImport("sdkStreamMixin", null, TypeScriptDependency.UTIL_STREAM);
+                writer.write("sdkStreamMixin");
+            });
         } else {
             return Collections.emptyMap();
         }
@@ -97,8 +98,8 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
 
     public static boolean hasStreamingBlobDeser(TypeScriptSettings settings, Model model, OperationShape operation) {
         StructureShape ioShapeToDeser = (settings.generateServerSdk())
-          ? model.expectShape(operation.getInputShape()).asStructureShape().get()
-          : model.expectShape(operation.getOutputShape()).asStructureShape().get();
+            ? model.expectShape(operation.getInputShape()).asStructureShape().get()
+            : model.expectShape(operation.getOutputShape()).asStructureShape().get();
         for (MemberShape member : ioShapeToDeser.members()) {
             Shape shape = model.expectShape(member.getTarget());
             if (shape instanceof BlobShape && shape.hasTrait(StreamingTrait.class)) {

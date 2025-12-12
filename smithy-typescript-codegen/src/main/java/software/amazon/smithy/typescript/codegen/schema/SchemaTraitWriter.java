@@ -19,8 +19,8 @@ import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.util.StringStore;
 
-
 class SchemaTraitWriter {
+
     private final Shape shape;
     private final SchemaReferenceIndex elision;
     private final StringStore stringStore;
@@ -36,11 +36,7 @@ class SchemaTraitWriter {
     );
     private final SchemaTraitGenerator traitGenerator = new SchemaTraitGenerator();
 
-    SchemaTraitWriter(
-        Shape shape,
-        SchemaReferenceIndex elision,
-        StringStore stringStore
-    ) {
+    SchemaTraitWriter(Shape shape, SchemaReferenceIndex elision, StringStore stringStore) {
         this.shape = shape;
         this.elision = elision;
         this.stringStore = stringStore;
@@ -61,7 +57,8 @@ class SchemaTraitWriter {
     }
 
     private boolean mayUseCompressedTraits() {
-        return shape.getAllTraits()
+        return shape
+            .getAllTraits()
             .values()
             .stream()
             .map(Trait::toShapeId)
@@ -82,17 +79,20 @@ class SchemaTraitWriter {
     private void writeTraitsObject() {
         buffer.append("{ ");
 
-        shape.getAllTraits().forEach((shapeId, trait) -> {
-            if (!elision.traits.includeTrait(trait.toShapeId())) {
-                return;
-            }
-            buffer.append("""
-                [%s]: %s,\s""".formatted(
-                    stringStore.var(shapeId.getName()),
-                    traitGenerator.serializeTraitData(trait, stringStore)
-                )
-            );
-        });
+        shape
+            .getAllTraits()
+            .forEach((shapeId, trait) -> {
+                if (!elision.traits.includeTrait(trait.toShapeId())) {
+                    return;
+                }
+                buffer.append(
+                    """
+                    [%s]: %s,\s""".formatted(
+                            stringStore.var(shapeId.getName()),
+                            traitGenerator.serializeTraitData(trait, stringStore)
+                        )
+                );
+            });
 
         buffer.deleteCharAt(buffer.length() - 1);
         buffer.deleteCharAt(buffer.length() - 1);

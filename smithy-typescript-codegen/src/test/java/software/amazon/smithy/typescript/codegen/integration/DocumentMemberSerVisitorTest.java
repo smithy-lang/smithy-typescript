@@ -42,6 +42,7 @@ import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.G
 import software.amazon.smithy.utils.ListUtils;
 
 public class DocumentMemberSerVisitorTest {
+
     private static final String DATA_SOURCE = "dataSource";
     private static final String PROTOCOL = "TestProtocol";
     private static final Format FORMAT = Format.EPOCH_SECONDS;
@@ -70,29 +71,31 @@ public class DocumentMemberSerVisitorTest {
         MemberShape value = MemberShape.builder().id(id + "$value").target(targetId).build();
         String delegate = "se_Foo(" + DATA_SOURCE + ", context)";
 
-        return ListUtils.of(new Object[][]{
-                {BooleanShape.builder().id(id).build(), DATA_SOURCE},
-                {BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
-                {BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
-                {ByteShape.builder().id(id).build(), DATA_SOURCE},
-                {DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
-                {FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
-                {IntegerShape.builder().id(id).build(), DATA_SOURCE},
-                {LongShape.builder().id(id).build(), DATA_SOURCE},
-                {ShortShape.builder().id(id).build(), DATA_SOURCE},
-                {StringShape.builder().id(id).build(), DATA_SOURCE},
+        return ListUtils.of(
+            new Object[][] {
+                { BooleanShape.builder().id(id).build(), DATA_SOURCE },
+                { BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")" },
+                { BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")" },
+                { ByteShape.builder().id(id).build(), DATA_SOURCE },
+                { DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")" },
+                { FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")" },
+                { IntegerShape.builder().id(id).build(), DATA_SOURCE },
+                { LongShape.builder().id(id).build(), DATA_SOURCE },
+                { ShortShape.builder().id(id).build(), DATA_SOURCE },
+                { StringShape.builder().id(id).build(), DATA_SOURCE },
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
-                    "__LazyJsonString.from(" + DATA_SOURCE + ")"
+                    "__LazyJsonString.from(" + DATA_SOURCE + ")",
                 },
-                {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
-                {DocumentShape.builder().id(id).build(), delegate},
-                {ListShape.builder().id(id).member(member).build(), delegate},
-                {SetShape.builder().id(id).member(member).build(), delegate},
-                {MapShape.builder().id(id).key(key).value(value).build(), delegate},
-                {StructureShape.builder().id(id).build(), delegate},
-                {UnionShape.builder().id(id).addMember(member).build(), delegate},
-        });
+                { BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")" },
+                { DocumentShape.builder().id(id).build(), delegate },
+                { ListShape.builder().id(id).member(member).build(), delegate },
+                { SetShape.builder().id(id).member(member).build(), delegate },
+                { MapShape.builder().id(id).key(key).value(value).build(), delegate },
+                { StructureShape.builder().id(id).build(), delegate },
+                { UnionShape.builder().id(id).addMember(member).build(), delegate },
+            }
+        );
     }
 
     @Test
@@ -115,25 +118,21 @@ public class DocumentMemberSerVisitorTest {
     }
 
     private static final class MockProvider implements SymbolProvider {
+
         private final String id = "com.smithy.example#Foo";
-        private Symbol mock = Symbol.builder()
-                .name("Foo")
-                .namespace("com.smithy.example", "/")
-                .build();
-        private Symbol collectionMock = Symbol.builder()
-                .name("Foo[]")
-                .namespace("com.smithy.example", "/")
-                .build();
+        private Symbol mock = Symbol.builder().name("Foo").namespace("com.smithy.example", "/").build();
+        private Symbol collectionMock = Symbol.builder().name("Foo[]").namespace("com.smithy.example", "/").build();
 
         @Override
         public Symbol toSymbol(Shape shape) {
             if (shape instanceof CollectionShape) {
                 MemberShape member = MemberShape.builder().id(id + "$member").target(id + "Target").build();
-                return collectionMock.toBuilder().putProperty("shape",
-                    ListShape.builder().id(id).member(member).build()).build();
+                return collectionMock
+                    .toBuilder()
+                    .putProperty("shape", ListShape.builder().id(id).member(member).build())
+                    .build();
             }
-            return mock.toBuilder().putProperty("shape",
-                StructureShape.builder().id(id).build()).build();
+            return mock.toBuilder().putProperty("shape", StructureShape.builder().id(id).build()).build();
         }
     }
 }

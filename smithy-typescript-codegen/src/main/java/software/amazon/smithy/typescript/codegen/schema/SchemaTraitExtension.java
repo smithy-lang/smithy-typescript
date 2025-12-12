@@ -11,6 +11,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.Trait;
 
 public final class SchemaTraitExtension {
+
     public static final SchemaTraitExtension INSTANCE = new SchemaTraitExtension();
 
     private final Map<ShapeId, TraitRenderer> customization = new HashMap<>();

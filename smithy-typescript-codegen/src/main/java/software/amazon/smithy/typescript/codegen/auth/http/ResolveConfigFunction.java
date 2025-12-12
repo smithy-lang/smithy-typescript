@@ -24,7 +24,6 @@ public record ResolveConfigFunction(
     List<String> addArgs,
     Optional<Symbol> previouslyResolved
 ) implements ToSmithyBuilder<ResolveConfigFunction> {
-
     public static Builder builder() {
         return new Builder();
     }
@@ -40,6 +39,7 @@ public record ResolveConfigFunction(
     }
 
     public static final class Builder implements SmithyBuilder<ResolveConfigFunction> {
+
         private Symbol resolveConfigFunction;
         private Symbol inputConfig;
         private Symbol resolvedConfig;
@@ -53,7 +53,8 @@ public record ResolveConfigFunction(
                 SmithyBuilder.requiredState("inputConfig", inputConfig),
                 SmithyBuilder.requiredState("resolvedConfig", resolvedConfig),
                 SmithyBuilder.requiredState("addArgs", addArgs),
-                Optional.ofNullable(previouslyResolved));
+                Optional.ofNullable(previouslyResolved)
+            );
         }
 
         public Builder resolveConfigFunction(Symbol resolveConfigFunction) {

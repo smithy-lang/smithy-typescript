@@ -66,6 +66,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void> {
+
     protected boolean serdeElisionEnabled;
     private final GenerationContext context;
 
@@ -291,10 +292,7 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
      * @param functionBody An implementation that will generate a function body to
      *                     serialize the shape.
      */
-    private void generateSerFunction(
-            Shape shape,
-            BiConsumer<GenerationContext, Shape> functionBody
-    ) {
+    private void generateSerFunction(Shape shape, BiConsumer<GenerationContext, Shape> functionBody) {
         SymbolProvider symbolProvider = context.getSymbolProvider();
         TypeScriptWriter writer = context.getWriter();
 
@@ -311,10 +309,13 @@ public abstract class DocumentShapeSerVisitor extends ShapeVisitor.Default<Void>
             writer.write("");
         } else {
             writer.writeDocs(methodLongName);
-            writer.openBlock("const $L = (\n"
-                        + "  input: $T,\n"
-                        + "  context: __SerdeContext\n"
-                        + "): any => {", "}", methodName, symbol, () -> functionBody.accept(context, shape));
+            writer.openBlock(
+                "const $L = (\n" + "  input: $T,\n" + "  context: __SerdeContext\n" + "): any => {",
+                "}",
+                methodName,
+                symbol,
+                () -> functionBody.accept(context, shape)
+            );
             writer.write("");
         }
     }

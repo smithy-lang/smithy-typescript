@@ -67,6 +67,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
+
     protected boolean serdeElisionEnabled;
     private final GenerationContext context;
     private final String dataSource;
@@ -82,11 +83,7 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
      * @param defaultTimestampFormat The default timestamp format used in absence
      *                               of a TimestampFormat trait.
      */
-    public DocumentMemberSerVisitor(
-            GenerationContext context,
-            String dataSource,
-            Format defaultTimestampFormat
-    ) {
+    public DocumentMemberSerVisitor(GenerationContext context, String dataSource, Format defaultTimestampFormat) {
         this.context = context;
         this.dataSource = dataSource;
         this.defaultTimestampFormat = defaultTimestampFormat;
@@ -278,7 +275,6 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
             return "_json(" + dataSource + ")";
         }
 
-        return ProtocolGenerator.getSerFunctionShortName(symbol)
-                + "(" + dataSource + ", context)";
+        return ProtocolGenerator.getSerFunctionShortName(symbol) + "(" + dataSource + ", context)";
     }
 }
