@@ -27,36 +27,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class AddProtocolConfig implements TypeScriptIntegration {
 
-    @Override
-    public void addConfigInterfaceFields(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        TypeScriptWriter writer
-    ) {
-        // the {{ protocol?: Protocol }} type field is provided
-        // by the smithy client config interface.
-        if (!SchemaGenerationAllowlist.allows(settings.getService(), settings)) {
-            return;
-        }
-
-        writer
-            .addTypeImport("ClientProtocol", null, TypeScriptDependency.SMITHY_TYPES)
-            .addTypeImport("HttpRequest", null, TypeScriptDependency.SMITHY_TYPES)
-            .addTypeImport("HttpResponse", null, TypeScriptDependency.SMITHY_TYPES)
-            .writeDocs("""
-            The protocol controlling the message type (e.g. HTTP) and format (e.g. JSON)
-            may be overridden. A default will always be set by the client.
-            Available options depend on the service's supported protocols and will not be validated by
-            the client.
-            @alpha
-            """)
-            .write("""
-            protocol?: ClientProtocol<HttpRequest, HttpResponse>;
-            """);
-    }
-
-    @Override
+  @Override
     public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
         TypeScriptSettings settings,
         Model model,
@@ -77,7 +48,15 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
                             writer.addImportSubmodule(
                                 "SmithyRpcV2CborProtocol", null,
                                 TypeScriptDependency.SMITHY_CORE, "/cbor");
-                            writer.write("new SmithyRpcV2CborProtocol({ defaultNamespace: $S })", namespace);
+                            writer.write("SmithyRpcV2CborProtocol");
+                        },
+                       "protocolSettings", writer -> {
+                             writer.write("""
+                                 {
+                                   defaultNamespace: $S,
+                                 }""",
+                                 namespace
+                            );
                         }
                     );
                 }

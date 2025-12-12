@@ -167,3 +167,11 @@ export interface ClientProtocol<Request, Response> extends ConfigurableSerdeCont
     response: Response
   ): Promise<Output>;
 }
+
+/**
+ * @public
+ * @deprecated use $ClientProtocolCtor.
+ */
+export interface ClientProtocolCtor<Request, Response> {
+  new (args: any): ClientProtocol<Request, Response>;
+}

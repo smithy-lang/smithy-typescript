@@ -278,6 +278,13 @@ export interface $ClientProtocol<Request, Response> extends ConfigurableSerdeCon
 }
 
 /**
+ * @public
+ */
+export interface $ClientProtocolCtor<Request, Response> {
+  new (args: any): $ClientProtocol<Request, Response>;
+}
+
+/**
  * Allows a protocol, codec, or serde utility to accept the serdeContext
  * from a client configuration or request/response handlerExecutionContext.
  *
