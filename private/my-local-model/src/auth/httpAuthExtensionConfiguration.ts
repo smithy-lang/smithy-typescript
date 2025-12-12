@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import type { HttpAuthScheme } from "@smithy/types";
+import type { ApiKeyIdentity, ApiKeyIdentityProvider, HttpAuthScheme } from "@smithy/types";
 
 import type { XYZServiceHttpAuthSchemeProvider } from "./httpAuthSchemeProvider";
 
@@ -11,6 +11,8 @@ export interface HttpAuthExtensionConfiguration {
   httpAuthSchemes(): HttpAuthScheme[];
   setHttpAuthSchemeProvider(httpAuthSchemeProvider: XYZServiceHttpAuthSchemeProvider): void;
   httpAuthSchemeProvider(): XYZServiceHttpAuthSchemeProvider;
+  setApiKey(apiKey: ApiKeyIdentity | ApiKeyIdentityProvider): void;
+  apiKey(): ApiKeyIdentity | ApiKeyIdentityProvider | undefined;
 }
 
 /**
@@ -19,6 +21,7 @@ export interface HttpAuthExtensionConfiguration {
 export type HttpAuthRuntimeConfig = Partial<{
   httpAuthSchemes: HttpAuthScheme[];
   httpAuthSchemeProvider: XYZServiceHttpAuthSchemeProvider;
+  apiKey: ApiKeyIdentity | ApiKeyIdentityProvider;
 }>;
 
 /**
@@ -29,6 +32,7 @@ export const getHttpAuthExtensionConfiguration = (
 ): HttpAuthExtensionConfiguration => {
   const _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;
   let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider!;
+  let _apiKey = runtimeConfig.apiKey;
   return {
     setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void {
       const index = _httpAuthSchemes.findIndex((scheme) => scheme.schemeId === httpAuthScheme.schemeId);
@@ -47,6 +51,12 @@ export const getHttpAuthExtensionConfiguration = (
     httpAuthSchemeProvider(): XYZServiceHttpAuthSchemeProvider {
       return _httpAuthSchemeProvider;
     },
+    setApiKey(apiKey: ApiKeyIdentity | ApiKeyIdentityProvider): void {
+      _apiKey = apiKey;
+    },
+    apiKey(): ApiKeyIdentity | ApiKeyIdentityProvider | undefined {
+      return _apiKey;
+    },
   };
 };
 
@@ -57,5 +67,6 @@ export const resolveHttpAuthRuntimeConfig = (config: HttpAuthExtensionConfigurat
   return {
     httpAuthSchemes: config.httpAuthSchemes(),
     httpAuthSchemeProvider: config.httpAuthSchemeProvider(),
+    apiKey: config.apiKey(),
   };
 };
