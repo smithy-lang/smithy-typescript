@@ -2525,6 +2525,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         Location.PAYLOAD, "data", binding.getMember(), target));
                 }
             );
+        } else if (target instanceof StructureShape) {
+            writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
+                Location.PAYLOAD, "data", binding.getMember(), target));
+            // Handle empty objects for structure shapes - convert to null
+            writer.write("if (contents.$L && Object.keys(contents.$L).length === 0) {",
+                binding.getMemberName(), binding.getMemberName());
+            writer.write("  contents.$L = null;", binding.getMemberName());
+            writer.write("}");
         } else {
             writer.write("contents.$L = $L;", binding.getMemberName(), getOutputValue(context,
                 Location.PAYLOAD, "data", binding.getMember(), target));
