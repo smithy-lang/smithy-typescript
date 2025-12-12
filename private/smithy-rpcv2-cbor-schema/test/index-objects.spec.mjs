@@ -1,64 +1,64 @@
 import {
-  ClientOptionalDefaults$,
   ComplexError,
-  ComplexError$,
-  ComplexNestedErrorData$,
-  Defaults$,
-  EmptyInputOutput$,
   EmptyInputOutputCommand,
-  EmptyStructure$,
-  Float16$,
   Float16Command,
-  Float16Output$,
   FooEnum,
-  FractionalSeconds$,
   FractionalSecondsCommand,
-  FractionalSecondsOutput$,
-  GreetingStruct$,
-  GreetingWithErrors$,
   GreetingWithErrorsCommand,
-  GreetingWithErrorsOutput$,
   IntegerEnum,
   InvalidGreeting,
-  InvalidGreeting$,
-  NoInputOutput$,
   NoInputOutputCommand,
-  OperationWithDefaults$,
   OperationWithDefaultsCommand,
-  OperationWithDefaultsInput$,
-  OperationWithDefaultsOutput$,
-  OptionalInputOutput$,
   OptionalInputOutputCommand,
-  RecursiveShapes$,
   RecursiveShapesCommand,
-  RecursiveShapesInputOutput$,
-  RecursiveShapesInputOutputNested1$,
-  RecursiveShapesInputOutputNested2$,
-  RpcV2CborDenseMaps$,
   RpcV2CborDenseMapsCommand,
-  RpcV2CborDenseMapsInputOutput$,
-  RpcV2CborListInputOutput$,
-  RpcV2CborLists$,
   RpcV2CborListsCommand,
-  RpcV2CborSparseMaps$,
   RpcV2CborSparseMapsCommand,
-  RpcV2CborSparseMapsInputOutput$,
   RpcV2Protocol,
   RpcV2ProtocolClient,
   RpcV2ProtocolServiceException,
-  SimpleScalarProperties$,
   SimpleScalarPropertiesCommand,
-  SimpleScalarStructure$,
-  SimpleStructure$,
-  SparseNullsOperation$,
   SparseNullsOperationCommand,
-  SparseNullsOperationInputOutput$,
-  StructureListMember$,
   TestEnum,
   TestIntEnum,
   ValidationException,
-  ValidationException$,
-  ValidationExceptionField$,
+  clientOptionalDefaults,
+  complexError,
+  complexNestedErrorData,
+  defaults,
+  emptyInputOutput,
+  emptyStructure,
+  float16,
+  float16Output,
+  fractionalSeconds,
+  fractionalSecondsOutput,
+  greetingStruct,
+  greetingWithErrors,
+  greetingWithErrorsOutput,
+  invalidGreeting,
+  noInputOutput,
+  operationWithDefaults,
+  operationWithDefaultsInput,
+  operationWithDefaultsOutput,
+  optionalInputOutput,
+  recursiveShapes,
+  recursiveShapesInputOutput,
+  recursiveShapesInputOutputNested1,
+  recursiveShapesInputOutputNested2,
+  rpcV2CborDenseMaps,
+  rpcV2CborDenseMapsInputOutput,
+  rpcV2CborListInputOutput,
+  rpcV2CborLists,
+  rpcV2CborSparseMaps,
+  rpcV2CborSparseMapsInputOutput,
+  simpleScalarProperties,
+  simpleScalarStructure,
+  simpleStructure,
+  sparseNullsOperation,
+  sparseNullsOperationInputOutput,
+  structureListMember,
+  validationException,
+  validationExceptionField,
 } from "../dist-cjs/index.js";
 import assert from "node:assert";
 // clients
@@ -66,53 +66,53 @@ assert(typeof RpcV2ProtocolClient === "function");
 assert(typeof RpcV2Protocol === "function");
 // commands
 assert(typeof EmptyInputOutputCommand === "function");
-assert(typeof EmptyInputOutput$ === "object");
+assert(typeof emptyInputOutput === "object");
 assert(typeof Float16Command === "function");
-assert(typeof Float16$ === "object");
+assert(typeof float16 === "object");
 assert(typeof FractionalSecondsCommand === "function");
-assert(typeof FractionalSeconds$ === "object");
+assert(typeof fractionalSeconds === "object");
 assert(typeof GreetingWithErrorsCommand === "function");
-assert(typeof GreetingWithErrors$ === "object");
+assert(typeof greetingWithErrors === "object");
 assert(typeof NoInputOutputCommand === "function");
-assert(typeof NoInputOutput$ === "object");
+assert(typeof noInputOutput === "object");
 assert(typeof OperationWithDefaultsCommand === "function");
-assert(typeof OperationWithDefaults$ === "object");
+assert(typeof operationWithDefaults === "object");
 assert(typeof OptionalInputOutputCommand === "function");
-assert(typeof OptionalInputOutput$ === "object");
+assert(typeof optionalInputOutput === "object");
 assert(typeof RecursiveShapesCommand === "function");
-assert(typeof RecursiveShapes$ === "object");
+assert(typeof recursiveShapes === "object");
 assert(typeof RpcV2CborDenseMapsCommand === "function");
-assert(typeof RpcV2CborDenseMaps$ === "object");
+assert(typeof rpcV2CborDenseMaps === "object");
 assert(typeof RpcV2CborListsCommand === "function");
-assert(typeof RpcV2CborLists$ === "object");
+assert(typeof rpcV2CborLists === "object");
 assert(typeof RpcV2CborSparseMapsCommand === "function");
-assert(typeof RpcV2CborSparseMaps$ === "object");
+assert(typeof rpcV2CborSparseMaps === "object");
 assert(typeof SimpleScalarPropertiesCommand === "function");
-assert(typeof SimpleScalarProperties$ === "object");
+assert(typeof simpleScalarProperties === "object");
 assert(typeof SparseNullsOperationCommand === "function");
-assert(typeof SparseNullsOperation$ === "object");
+assert(typeof sparseNullsOperation === "object");
 // structural schemas
-assert(typeof ValidationExceptionField$ === "object");
-assert(typeof ClientOptionalDefaults$ === "object");
-assert(typeof ComplexNestedErrorData$ === "object");
-assert(typeof Defaults$ === "object");
-assert(typeof EmptyStructure$ === "object");
-assert(typeof Float16Output$ === "object");
-assert(typeof FractionalSecondsOutput$ === "object");
-assert(typeof GreetingWithErrorsOutput$ === "object");
-assert(typeof OperationWithDefaultsInput$ === "object");
-assert(typeof OperationWithDefaultsOutput$ === "object");
-assert(typeof RecursiveShapesInputOutput$ === "object");
-assert(typeof RecursiveShapesInputOutputNested1$ === "object");
-assert(typeof RecursiveShapesInputOutputNested2$ === "object");
-assert(typeof RpcV2CborDenseMapsInputOutput$ === "object");
-assert(typeof RpcV2CborListInputOutput$ === "object");
-assert(typeof RpcV2CborSparseMapsInputOutput$ === "object");
-assert(typeof SimpleScalarStructure$ === "object");
-assert(typeof SimpleStructure$ === "object");
-assert(typeof SparseNullsOperationInputOutput$ === "object");
-assert(typeof StructureListMember$ === "object");
-assert(typeof GreetingStruct$ === "object");
+assert(typeof validationExceptionField === "object");
+assert(typeof clientOptionalDefaults === "object");
+assert(typeof complexNestedErrorData === "object");
+assert(typeof defaults === "object");
+assert(typeof emptyStructure === "object");
+assert(typeof float16Output === "object");
+assert(typeof fractionalSecondsOutput === "object");
+assert(typeof greetingWithErrorsOutput === "object");
+assert(typeof operationWithDefaultsInput === "object");
+assert(typeof operationWithDefaultsOutput === "object");
+assert(typeof recursiveShapesInputOutput === "object");
+assert(typeof recursiveShapesInputOutputNested1 === "object");
+assert(typeof recursiveShapesInputOutputNested2 === "object");
+assert(typeof rpcV2CborDenseMapsInputOutput === "object");
+assert(typeof rpcV2CborListInputOutput === "object");
+assert(typeof rpcV2CborSparseMapsInputOutput === "object");
+assert(typeof simpleScalarStructure === "object");
+assert(typeof simpleStructure === "object");
+assert(typeof sparseNullsOperationInputOutput === "object");
+assert(typeof structureListMember === "object");
+assert(typeof greetingStruct === "object");
 // enums
 assert(typeof TestEnum === "object");
 assert(typeof TestIntEnum === "object");
@@ -120,10 +120,10 @@ assert(typeof FooEnum === "object");
 assert(typeof IntegerEnum === "object");
 // errors
 assert(ValidationException.prototype instanceof RpcV2ProtocolServiceException);
-assert(typeof ValidationException$ === "object");
+assert(typeof validationException === "object");
 assert(ComplexError.prototype instanceof RpcV2ProtocolServiceException);
-assert(typeof ComplexError$ === "object");
+assert(typeof complexError === "object");
 assert(InvalidGreeting.prototype instanceof RpcV2ProtocolServiceException);
-assert(typeof InvalidGreeting$ === "object");
+assert(typeof invalidGreeting === "object");
 assert(RpcV2ProtocolServiceException.prototype instanceof Error);
 console.log(`RpcV2Protocol index test passed.`);

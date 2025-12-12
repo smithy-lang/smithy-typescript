@@ -167,15 +167,17 @@ public class SchemaGenerator implements Runnable {
      */
     private void writeBaseError() {
         String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
+        String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(
+            serviceName, model
+        );
+        String schemaSymbolName = serviceExceptionName + "$";
 
         String namespace = settings.getService(model).getId().getNamespace();
 
-        String exceptionCtorSymbolName = "__" + serviceExceptionName;
         writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport(
             serviceExceptionName,
-            exceptionCtorSymbolName,
+            null,
             Paths.get("..", "models", serviceExceptionName)
         );
 
@@ -192,8 +194,8 @@ public class SchemaGenerator implements Runnable {
             """
             TypeRegistry.for($L).registerError($L, $L);""",
             syntheticNamespace,
-            serviceExceptionName,
-            exceptionCtorSymbolName
+          schemaSymbolName,
+          serviceExceptionName
         );
     }
 
