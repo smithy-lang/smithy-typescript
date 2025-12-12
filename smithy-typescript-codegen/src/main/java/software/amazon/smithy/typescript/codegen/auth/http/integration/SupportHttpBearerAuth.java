@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
@@ -25,15 +24,14 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public final class SupportHttpBearerAuth implements HttpAuthTypeScriptIntegration {
 
-    private static final Consumer<TypeScriptWriter> HTTP_BEARER_AUTH_SIGNER = w ->
-        w.write(
-            "new $T()",
-            Symbol.builder()
-                .name("HttpBearerAuthSigner")
-                .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
-                .addDependency(TypeScriptDependency.SMITHY_CORE)
-                .build()
-        );
+    private static final Consumer<TypeScriptWriter> HTTP_BEARER_AUTH_SIGNER = w -> w.write(
+        "new $T()",
+        Symbol.builder()
+            .name("HttpBearerAuthSigner")
+            .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
+            .addDependency(TypeScriptDependency.SMITHY_CORE)
+            .build()
+    );
     private static final Symbol TOKEN_IDENTITY = Symbol.builder()
         .name("TokenIdentity")
         .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
@@ -72,7 +70,10 @@ public final class SupportHttpBearerAuth implements HttpAuthTypeScriptIntegratio
                                 .build()
                         )
                         .resolvedType(
-                            Symbol.builder().name("TokenIdentityProvider").addReference(TOKEN_IDENTITY_PROVIDER).build()
+                            Symbol.builder()
+                                .name("TokenIdentityProvider")
+                                .addReference(TOKEN_IDENTITY_PROVIDER)
+                                .build()
                         )
                         .configFieldWriter(ConfigField::defaultMainConfigFieldWriter)
                         .build()

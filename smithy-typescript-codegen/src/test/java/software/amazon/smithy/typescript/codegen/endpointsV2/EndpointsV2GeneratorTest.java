@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -183,7 +187,13 @@ public class EndpointsV2GeneratorTest {
         MockManifest manifest = new MockManifest();
         PluginContext context = PluginContext.builder()
             .pluginClassLoader(getClass().getClassLoader())
-            .model(Model.assembler().addImport(getClass().getResource(filename)).discoverModels().assemble().unwrap())
+            .model(
+                Model.assembler()
+                    .addImport(getClass().getResource(filename))
+                    .discoverModels()
+                    .assemble()
+                    .unwrap()
+            )
             .fileManifest(manifest)
             .settings(
                 Node.objectNodeBuilder()

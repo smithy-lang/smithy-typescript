@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.util.Objects;
@@ -103,51 +102,45 @@ public class SchemaTraitGenerator {
         } else if (DATA_TRAITS.contains(trait.toShapeId())) {
             if (trait instanceof EndpointTrait endpointTrait) {
                 return """
-                ["%s"]
-                """.formatted(endpointTrait.getHostPrefix());
+                       ["%s"]
+                       """.formatted(endpointTrait.getHostPrefix());
             } else if (trait instanceof XmlNamespaceTrait xmlNamespaceTrait) {
                 return """
-                [%s, %s]
-                """.formatted(
-                        stringStore.var(xmlNamespaceTrait.getPrefix().orElse("")),
-                        stringStore.var(xmlNamespaceTrait.getUri())
-                    );
+                       [%s, %s]
+                       """.formatted(
+                    stringStore.var(xmlNamespaceTrait.getPrefix().orElse("")),
+                    stringStore.var(xmlNamespaceTrait.getUri())
+                );
             } else if (trait instanceof HttpErrorTrait httpError) {
                 return Objects.toString(httpError.getCode());
             } else if (trait instanceof HttpTrait httpTrait) {
                 return """
-                ["%s", "%s", %s]
-                """.formatted(httpTrait.getMethod(), httpTrait.getUri(), httpTrait.getCode());
+                       ["%s", "%s", %s]
+                       """.formatted(httpTrait.getMethod(), httpTrait.getUri(), httpTrait.getCode());
             }
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {
             return SchemaTraitExtension.INSTANCE.render(trait);
         }
 
         if (trait instanceof StringTrait stringTrait) {
-            return (
-                """
-                /* unhandled trait \s""" +
+            return ("""
+                    /* unhandled trait \s""" +
                 "`" +
                 trait.getClass().getSimpleName() +
                 "` */ " +
-                stringStore.var(stringTrait.getValue())
-            );
+                stringStore.var(stringTrait.getValue()));
         } else if (trait instanceof AnnotationTrait) {
-            return (
-                """
-                /* unhandled trait \s""" +
+            return ("""
+                    /* unhandled trait \s""" +
                 "`" +
                 trait.getClass().getSimpleName() +
                 "` */ " +
-                ANNOTATION_TRAIT_VALUE
-            );
+                ANNOTATION_TRAIT_VALUE);
         }
-        return (
-            """
-            /* unhandled trait \s""" +
+        return ("""
+                /* unhandled trait \s""" +
             "`" +
             trait.getClass().getSimpleName() +
-            "` */ void 0"
-        );
+            "` */ void 0");
     }
 }

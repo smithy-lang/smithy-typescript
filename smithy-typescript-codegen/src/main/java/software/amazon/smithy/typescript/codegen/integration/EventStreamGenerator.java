@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.List;
@@ -125,9 +114,8 @@ public class EventStreamGenerator {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         TreeSet<UnionShape> eventUnionsToSerialize = new TreeSet<>();
-        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall = new TreeSet<>((a, b) ->
-            Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo)
-        );
+        TreeSet<Pair<String, StructureShape>> eventShapesToMarshall =
+            new TreeSet<>((a, b) -> Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo));
 
         for (OperationShape operation : operations) {
             if (hasEventStreamInput(context, operation)) {
@@ -232,10 +220,10 @@ public class EventStreamGenerator {
 
         writer.writeDocs(methodLongName);
         writer.openBlock("""
-        const $L = (
-          input: any,
-          context: $L
-        ): any => {""", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
+                         const $L = (
+                           input: any,
+                           context: $L
+                         ): any => {""", "}", methodName, getEventStreamSerdeContextType(context, eventsUnion), () -> {
             Symbol materializedSymbol = eventsUnionSymbol.toBuilder().putProperty("typeOnly", false).build();
             writer.openBlock(
                 "const eventMarshallingVisitor = (event: any): __Message => $T.visit(event, {",
@@ -245,7 +233,8 @@ public class EventStreamGenerator {
                     eventsUnion
                         .getAllMembers()
                         .forEach((memberName, memberShape) -> {
-                            StructureShape target = model.expectShape(memberShape.getTarget(), StructureShape.class);
+                            StructureShape target =
+                                model.expectShape(memberShape.getTarget(), StructureShape.class);
                             String eventSerMethodName = getEventSerFunctionName(context, target);
                             writer.write("$L: value => $L(value, context),", memberName, eventSerMethodName);
                         });
@@ -456,7 +445,10 @@ public class EventStreamGenerator {
                     serializeInputEventDocumentPayload.run();
                 } else {
                     throw new CodegenException(
-                        String.format("Unexpected shape type bound to event payload: `%s`", payloadShape.getType())
+                        String.format(
+                            "Unexpected shape type bound to event payload: `%s`",
+                            payloadShape.getType()
+                        )
                     );
                 }
             });
@@ -506,7 +498,8 @@ public class EventStreamGenerator {
                         eventsUnion
                             .getAllMembers()
                             .forEach((name, member) -> {
-                                StructureShape event = model.expectShape(member.getTarget(), StructureShape.class);
+                                StructureShape event =
+                                    model.expectShape(member.getTarget(), StructureShape.class);
                                 writer.openBlock("if (event[$S] != null) {", "}", name, () -> {
                                     writer.openBlock("return {", "};", () -> {
                                         String eventDeserMethodName = getEventDeserFunctionName(context, event);

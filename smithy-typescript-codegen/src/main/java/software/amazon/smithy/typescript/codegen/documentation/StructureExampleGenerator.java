@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.documentation;
 
 import java.util.Arrays;
@@ -106,7 +105,9 @@ public abstract class StructureExampleGenerator {
             indentation,
             buffer,
             "{" +
-                (shapeTracker.getOccurrenceCount(unionShape) == 1 ? " // " + unionShape.getId().getName() : "// ") +
+                (shapeTracker.getOccurrenceCount(unionShape) == 1 ? " // " + unionShape.getId().getName()
+                    : "// ")
+                +
                 " Union: only one key present"
         );
         checkRequired(indentation, buffer, unionShape);
@@ -210,7 +211,8 @@ public abstract class StructureExampleGenerator {
                     append(
                         indentation,
                         buffer,
-                        "[" + (shapeTracker.getOccurrenceCount(target) == 1 ? " // " + target.getId().getName() : "")
+                        "[" + (shapeTracker.getOccurrenceCount(target) == 1 ? " // " + target.getId().getName()
+                            : "")
                     );
                     checkRequired(indentation, buffer, shape);
                     ListShape list = (ListShape) target;
@@ -221,7 +223,8 @@ public abstract class StructureExampleGenerator {
                     append(
                         indentation,
                         buffer,
-                        "{" + (shapeTracker.getOccurrenceCount(target) == 1 ? " // " + target.getId().getName() : "")
+                        "{" + (shapeTracker.getOccurrenceCount(target) == 1 ? " // " + target.getId().getName()
+                            : "")
                     );
                     checkRequired(indentation, buffer, shape);
                     append(indentation + 2, buffer, "\"<keys>\": ");
@@ -346,14 +349,15 @@ public abstract class StructureExampleGenerator {
          * @return whether the shape should be truncated.
          */
         public boolean shouldTruncate(Shape shape) {
-            return (
-                (shape instanceof MapShape ||
-                    shape instanceof UnionShape ||
-                    shape instanceof StructureShape ||
-                    shape instanceof ListShape ||
-                    shape instanceof SetShape) &&
-                (getOccurrenceCount(shape) > 5 || getOccurrenceDepths(shape) > 2)
-            );
+            return ((shape instanceof MapShape ||
+                shape instanceof UnionShape
+                ||
+                shape instanceof StructureShape
+                ||
+                shape instanceof ListShape
+                ||
+                shape instanceof SetShape) &&
+                (getOccurrenceCount(shape) > 5 || getOccurrenceDepths(shape) > 2));
         }
 
         /**

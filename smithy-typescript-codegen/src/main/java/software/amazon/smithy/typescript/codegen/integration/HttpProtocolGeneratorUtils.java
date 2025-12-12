@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
@@ -158,7 +147,7 @@ public final class HttpProtocolGeneratorUtils {
                 String modifiedDataSource = dataSource;
                 if (
                     requireNumericEpochSecondsInPayload &&
-                    (bindingType == Location.DOCUMENT || bindingType == Location.PAYLOAD)
+                        (bindingType == Location.DOCUMENT || bindingType == Location.PAYLOAD)
                 ) {
                     writer.addImport("expectNumber", "__expectNumber", TypeScriptDependency.AWS_SMITHY_CLIENT);
                     modifiedDataSource = String.format("__expectNumber(%s)", dataSource);
@@ -514,7 +503,9 @@ public final class HttpProtocolGeneratorUtils {
                     Function.identity(),
                     (x, y) -> {
                         if (!x.equals(y)) {
-                            throw new CodegenException(String.format("conflicting error shape ids: %s, %s", x, y));
+                            throw new CodegenException(
+                                String.format("conflicting error shape ids: %s, %s", x, y)
+                            );
                         }
                         return x;
                     },

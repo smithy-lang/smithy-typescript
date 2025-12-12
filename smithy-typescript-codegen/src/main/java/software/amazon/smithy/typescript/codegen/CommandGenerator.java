@@ -1,18 +1,7 @@
 /*
- * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import static software.amazon.smithy.typescript.codegen.CodegenUtils.getBlobPayloadMembers;
@@ -147,7 +136,14 @@ final class CommandGenerator implements Runnable {
         StringBuilder additionalDocs = new StringBuilder()
             .append("\n")
             .append(
-                getCommandExample(serviceSymbol.getName(), configType, name, inputType.getName(), outputType.getName())
+                getCommandExample(
+                    serviceSymbol
+                        .getName(),
+                    configType,
+                    name,
+                    inputType.getName(),
+                    outputType.getName()
+                )
             )
             .append("\n")
             .append(getThrownExceptions())
@@ -181,14 +177,14 @@ final class CommandGenerator implements Runnable {
                 .build()
         );
         writer.openBlock("""
-        export class $L extends $$Command
-          .classBuilder<
-            $T,
-            $T,
-            $L,
-            ServiceInputTypes,
-            ServiceOutputTypes
-          >()""", "  .build() {", name, inputType, outputType, configType, () -> { // class open bracket.
+                         export class $L extends $$Command
+                           .classBuilder<
+                             $T,
+                             $T,
+                             $L,
+                             ServiceInputTypes,
+                             ServiceOutputTypes
+                           >()""", "  .build() {", name, inputType, outputType, configType, () -> { // class open bracket.
             generateEndpointParameterInstructionProvider();
             generateCommandMiddlewareResolver(configType);
             writeSerde();
@@ -290,52 +286,56 @@ final class CommandGenerator implements Runnable {
         String packageName = settings.getPackageName();
         String exampleDoc =
             "@example\n" +
-            "Use a bare-bones client and the command you need to make an API call.\n" +
-            "```javascript\n" +
-            String.format(
-                "import { %s, %s } from \"%s\"; // ES Modules import%n",
-                serviceName,
-                commandName,
-                packageName
-            ) +
-            String.format(
-                "// const { %s, %s } = require(\"%s\"); // CommonJS import%n",
-                serviceName,
-                commandName,
-                packageName
-            ) +
-            String.format("// import type { %sConfig } from \"%s\";%n", serviceName, packageName) +
-            String.format("const config = {}; // type is %sConfig%n", serviceName) +
-            String.format("const client = new %s(config);%n", serviceName) +
-            String.format(
-                "const input = %s%n",
-                StructureExampleGenerator.generateStructuralHintDocumentation(
-                    model.getShape(operation.getInputShape()).get(),
-                    model,
-                    false,
-                    true
+                "Use a bare-bones client and the command you need to make an API call.\n" +
+                "```javascript\n" +
+                String.format(
+                    "import { %s, %s } from \"%s\"; // ES Modules import%n",
+                    serviceName,
+                    commandName,
+                    packageName
                 )
-            ) +
-            String.format("const command = new %s(input);%n", commandName) +
-            "const response = await client.send(command);" +
-            getStreamingBlobOutputAddendum() +
-            "\n" +
-            String.format(
-                "%s%n",
-                StructureExampleGenerator.generateStructuralHintDocumentation(
-                    model.getShape(operation.getOutputShape()).get(),
-                    model,
-                    true,
-                    false
+                +
+                String.format(
+                    "// const { %s, %s } = require(\"%s\"); // CommonJS import%n",
+                    serviceName,
+                    commandName,
+                    packageName
                 )
-            ) +
-            "\n```\n" +
-            "\n" +
-            String.format("@param %s - {@link %s}%n", commandInput, commandInput) +
-            String.format("@returns {@link %s}%n", commandOutput) +
-            String.format("@see {@link %s} for command's `input` shape.%n", commandInput) +
-            String.format("@see {@link %s} for command's `response` shape.%n", commandOutput) +
-            String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
+                +
+                String.format("// import type { %sConfig } from \"%s\";%n", serviceName, packageName) +
+                String.format("const config = {}; // type is %sConfig%n", serviceName) +
+                String.format("const client = new %s(config);%n", serviceName) +
+                String.format(
+                    "const input = %s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                        model.getShape(operation.getInputShape()).get(),
+                        model,
+                        false,
+                        true
+                    )
+                )
+                +
+                String.format("const command = new %s(input);%n", commandName) +
+                "const response = await client.send(command);" +
+                getStreamingBlobOutputAddendum() +
+                "\n" +
+                String.format(
+                    "%s%n",
+                    StructureExampleGenerator.generateStructuralHintDocumentation(
+                        model.getShape(operation.getOutputShape()).get(),
+                        model,
+                        true,
+                        false
+                    )
+                )
+                +
+                "\n```\n" +
+                "\n" +
+                String.format("@param %s - {@link %s}%n", commandInput, commandInput) +
+                String.format("@returns {@link %s}%n", commandOutput) +
+                String.format("@see {@link %s} for command's `input` shape.%n", commandInput) +
+                String.format("@see {@link %s} for command's `response` shape.%n", commandOutput) +
+                String.format("@see {@link %s | config} for %s's `config` shape.%n", configName, serviceName);
 
         return exampleDoc;
     }
@@ -366,11 +366,11 @@ final class CommandGenerator implements Runnable {
                         %s
                         */
                         """.formatted(
-                                DocumentationExampleGenerator.inputToJavaScriptObject(input),
-                                commandName,
-                                getStreamingBlobOutputAddendum(),
-                                DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
-                            )
+                            DocumentationExampleGenerator.inputToJavaScriptObject(input),
+                            commandName,
+                            getStreamingBlobOutputAddendum(),
+                            DocumentationExampleGenerator.outputToJavaScriptObject(output.orElse(null))
+                        )
                     )
                     .append("```")
                     .append("\n");
@@ -391,10 +391,8 @@ final class CommandGenerator implements Runnable {
             .stream()
             .filter(memberShape -> {
                 Shape target = model.expectShape(memberShape.getTarget());
-                return (
-                    target.isBlobShape() &&
-                    (target.hasTrait(StreamingTrait.class) || memberShape.hasTrait(StreamingTrait.class))
-                );
+                return (target.isBlobShape() &&
+                    (target.hasTrait(StreamingTrait.class) || memberShape.hasTrait(StreamingTrait.class)));
             })
             .map(MemberShape::getMemberName)
             .findFirst()
@@ -410,11 +408,11 @@ final class CommandGenerator implements Runnable {
         if (!streamingBlobMemberName.isEmpty()) {
             String propAccess = PropertyAccessor.getFrom("response", streamingBlobMemberName);
             streamingBlobAddendum = """
-                \n// consume or destroy the stream to free the socket.
-                const bytes = await %s.transformToByteArray();
-                // const str = await %s.transformToString();
-                // %s.destroy(); // only applicable to Node.js Readable streams.
-                """.formatted(propAccess, propAccess, propAccess);
+                                    \n// consume or destroy the stream to free the socket.
+                                    const bytes = await %s.transformToByteArray();
+                                    // const str = await %s.transformToString();
+                                    // %s.destroy(); // only applicable to Node.js Readable streams.
+                                    """.formatted(propAccess, propAccess, propAccess);
         }
         return streamingBlobAddendum;
     }
@@ -536,7 +534,9 @@ final class CommandGenerator implements Runnable {
         {
             boolean multiplePlugins =
                 !schemaMode ||
-                runtimePlugins.stream().map(RuntimeClientPlugin::getPluginFunction).anyMatch(Optional::isPresent);
+                    runtimePlugins.stream()
+                        .map(RuntimeClientPlugin::getPluginFunction)
+                        .anyMatch(Optional::isPresent);
 
             writer.addImport("getEndpointPlugin", null, TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
 

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
@@ -111,7 +110,9 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                     writer -> {
                         writer.addDependency(TypeScriptDependency.UTIL_RETRY);
                         writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
-                        writer.write("(async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE)");
+                        writer.write(
+                            "(async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE)"
+                        );
                     }
                 );
             case NODE:
@@ -132,7 +133,11 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                         writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
                         writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_RETRY);
-                        writer.addImport("NODE_RETRY_MODE_CONFIG_OPTIONS", null, TypeScriptDependency.MIDDLEWARE_RETRY);
+                        writer.addImport(
+                            "NODE_RETRY_MODE_CONFIG_OPTIONS",
+                            null,
+                            TypeScriptDependency.MIDDLEWARE_RETRY
+                        );
                         writer.addImport("DEFAULT_RETRY_MODE", null, TypeScriptDependency.UTIL_RETRY);
                         writer.indent();
                         writer.writeInline(

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http;
 
 import java.nio.file.Paths;
@@ -117,9 +116,9 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
     /*
     import { HttpAuthSchemeParameters } from "@smithy/types";
-
+    
     // ...
-
+    
     export interface WeatherHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
     }
     */
@@ -136,15 +135,21 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
             );
             w.addTypeImport("HttpAuthSchemeParameters", null, TypeScriptDependency.SMITHY_TYPES);
 
-            w.openCollapsibleBlock("""
-            /**
-             * @internal
-             */
-            export interface $LHttpAuthSchemeParameters extends HttpAuthSchemeParameters {""", "}", !httpAuthSchemeParameters.isEmpty(), serviceName, () -> {
-                for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
-                    w.write("$L?: $C;", parameter.name(), parameter.type());
+            w.openCollapsibleBlock(
+                """
+                /**
+                 * @internal
+                 */
+                export interface $LHttpAuthSchemeParameters extends HttpAuthSchemeParameters {""",
+                "}",
+                !httpAuthSchemeParameters.isEmpty(),
+                serviceName,
+                () -> {
+                    for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
+                        w.write("$L?: $C;", parameter.name(), parameter.type());
+                    }
                 }
-            });
+            );
             w.popState();
         });
     }
@@ -152,9 +157,9 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
     /*
     import { HttpAuthSchemeParametersProvider } from "@smithy/types";
     import { WeatherClientResolvedConfig } from "../WeatherClient";
-
+    
     // ...
-
+    
     export interface WeatherHttpAuthSchemeParametersProvider extends HttpAuthSchemeParametersProvider<
       WeatherClientResolvedConfig,
       HandlerExecutionContext,
@@ -227,22 +232,29 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
             w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
             w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
             w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
-            w.openBlock("""
-            /**
-             * @internal
-             */
-            export const default$LHttpAuthSchemeParametersProvider = async (
-              config: $LResolvedConfig,
-              context: HandlerExecutionContext,
-              input: object
-            ): Promise<$LHttpAuthSchemeParameters> => {""", "};", serviceName, serviceSymbol.getName(), serviceName, () -> {
-                w.openBlock("return {", "};", () -> {
-                    w.write("operation: getSmithyContext(context).operation as string,");
-                    for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
-                        w.write("$L: $C,", parameter.name(), parameter.source());
-                    }
-                });
-            });
+            w.openBlock(
+                """
+                /**
+                 * @internal
+                 */
+                export const default$LHttpAuthSchemeParametersProvider = async (
+                  config: $LResolvedConfig,
+                  context: HandlerExecutionContext,
+                  input: object
+                ): Promise<$LHttpAuthSchemeParameters> => {""",
+                "};",
+                serviceName,
+                serviceSymbol.getName(),
+                serviceName,
+                () -> {
+                    w.openBlock("return {", "};", () -> {
+                        w.write("operation: getSmithyContext(context).operation as string,");
+                        for (HttpAuthSchemeParameter parameter : httpAuthSchemeParameters.values()) {
+                            w.write("$L: $C,", parameter.name(), parameter.source());
+                        }
+                    });
+                }
+            );
             w.popState();
         });
     }
@@ -278,9 +290,9 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
     /*
     import { HttpAuthOption } from "@smithy/types";
-
+    
     // ...
-
+    
     function createSmithyApiHttpApiKeyAuthHttpAuthOption(authParameters: WeatherHttpAuthSchemeParameters):
     HttpAuthOption[] {
         return {
@@ -300,8 +312,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
         Optional<HttpAuthScheme> authSchemeOptional = s.getHttpAuthScheme();
         w.addTypeImport("HttpAuthOption", null, TypeScriptDependency.SMITHY_TYPES);
         w.openBlock("""
-        function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
-        HttpAuthOption {""", "}\n", normalizedAuthSchemeName, serviceName, () -> {
+                    function create$LHttpAuthOption(authParameters: $LHttpAuthSchemeParameters): \
+                    HttpAuthOption {""", "}\n", normalizedAuthSchemeName, serviceName, () -> {
             w.openBlock("return {", "};", () -> {
                 w.write("schemeId: $S,", schemeId.toString());
                 // If no HttpAuthScheme is registered, there are no HttpAuthOptionProperties available.
@@ -354,8 +366,8 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 }
                 authScheme
                     .getPropertiesExtractor()
-                    .ifPresent(extractor ->
-                        w.write(
+                    .ifPresent(
+                        extractor -> w.write(
                             "propertiesExtractor: $C",
                             extractor.apply(
                                 serviceSymbol
@@ -379,9 +391,9 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
     /*
     import { HttpAuthSchemeProvider } from "@smithy/types";
-
+    
     // ...
-
+    
     export interface WeatherHttpAuthSchemeProvider extends HttpAuthSchemeProvider<WeatherHttpAuthSchemeParameters> {}
     */
     private void generateHttpAuthSchemeProviderInterface() {
@@ -399,7 +411,7 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
 
             String candidate =
                 "export interface %sHttpAuthSchemeProvider extends".formatted(serviceName) +
-                " HttpAuthSchemeProvider<%sHttpAuthSchemeParameters> {}".formatted(serviceName);
+                    " HttpAuthSchemeProvider<%sHttpAuthSchemeParameters> {}".formatted(serviceName);
 
             if (candidate.length() <= TypeScriptWriter.LINE_WIDTH) {
                 w.write(candidate);
@@ -440,11 +452,11 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                     .build()
             );
             w.openBlock("""
-            /**
-             * @internal
-             */
-            export const default$LHttpAuthSchemeProvider: $LHttpAuthSchemeProvider = \
-            (authParameters) => {""", "};", serviceName, serviceName, () -> {
+                        /**
+                         * @internal
+                         */
+                        export const default$LHttpAuthSchemeProvider: $LHttpAuthSchemeProvider = \
+                        (authParameters) => {""", "};", serviceName, serviceName, () -> {
                 w.write("const options: HttpAuthOption[] = [];");
                 w.openBlock("switch (authParameters.operation) {", "}", () -> {
                     var serviceAuthSchemes = serviceIndex.getEffectiveAuthSchemes(

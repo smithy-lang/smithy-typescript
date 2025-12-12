@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.util.Collections;
@@ -402,8 +391,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
 
     @Override
     public String toString() {
-        return (
-            "RuntimeClientPlugin{" +
+        return ("RuntimeClientPlugin{" +
             "inputConfig=" +
             inputConfig +
             ", resolvedConfig=" +
@@ -414,8 +402,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             pluginFunction +
             ", destroyFunction=" +
             destroyFunction +
-            '}'
-        );
+            '}');
     }
 
     @Override
@@ -427,17 +414,22 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
         }
 
         RuntimeClientPlugin that = (RuntimeClientPlugin) o;
-        return (
-            Objects.equals(inputConfig, that.inputConfig) &&
-            Objects.equals(resolvedConfig, that.resolvedConfig) &&
-            Objects.equals(resolveFunction, that.resolveFunction) &&
-            Objects.equals(additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier) &&
-            Objects.equals(pluginFunction, that.pluginFunction) &&
-            Objects.equals(additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier) &&
-            Objects.equals(destroyFunction, that.destroyFunction) &&
-            servicePredicate.equals(that.servicePredicate) &&
-            operationPredicate.equals(that.operationPredicate)
-        );
+        return (Objects.equals(inputConfig, that.inputConfig) &&
+            Objects.equals(resolvedConfig, that.resolvedConfig)
+            &&
+            Objects.equals(resolveFunction, that.resolveFunction)
+            &&
+            Objects.equals(additionalResolveFunctionParamsSupplier, that.additionalResolveFunctionParamsSupplier)
+            &&
+            Objects.equals(pluginFunction, that.pluginFunction)
+            &&
+            Objects.equals(additionalPluginFunctionParamsSupplier, that.additionalPluginFunctionParamsSupplier)
+            &&
+            Objects.equals(destroyFunction, that.destroyFunction)
+            &&
+            servicePredicate.equals(that.servicePredicate)
+            &&
+            operationPredicate.equals(that.operationPredicate));
     }
 
     @Override
@@ -952,7 +944,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
          */
         HAS_DESTROY;
 
-        private static final Convention[] DEFAULT = { HAS_CONFIG, HAS_MIDDLEWARE };
+        private static final Convention[] DEFAULT = {HAS_CONFIG, HAS_MIDDLEWARE};
 
         private static Symbol createSymbol(String packageName, String version, String name) {
             return Symbol.builder()

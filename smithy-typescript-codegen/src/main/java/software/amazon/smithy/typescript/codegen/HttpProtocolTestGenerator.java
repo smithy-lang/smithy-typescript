@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import static java.lang.String.format;
@@ -171,8 +160,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         .getTrait(HttpResponseTestsTrait.class)
                         .ifPresent(trait -> {
                             for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
-                                onlyIfProtocolMatches(testCase, () ->
-                                    generateErrorResponseTest(operation, error, testCase)
+                                onlyIfProtocolMatches(
+                                    testCase,
+                                    () -> generateErrorResponseTest(operation, error, testCase)
                                 );
                             }
                         });
@@ -214,8 +204,9 @@ public final class HttpProtocolTestGenerator implements Runnable {
                         .getTrait(HttpResponseTestsTrait.class)
                         .ifPresent(trait -> {
                             for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.SERVER)) {
-                                onlyIfProtocolMatches(testCase, () ->
-                                    generateServerErrorResponseTest(operation, error, testCase)
+                                onlyIfProtocolMatches(
+                                    testCase,
+                                    () -> generateServerErrorResponseTest(operation, error, testCase)
                                 );
                             }
                         });
@@ -236,8 +227,12 @@ public final class HttpProtocolTestGenerator implements Runnable {
     // Only generate test cases when its protocol matches the target protocol.
     private void onlyIfProtocolMatches(HttpMalformedRequestTestCase testCase, Runnable runnable) {
         if (testCase.getProtocol().equals(protocol)) {
-            LOGGER.fine(() ->
-                format("Generating malformed request test case for %s.%s", service.getId(), testCase.getId())
+            LOGGER.fine(
+                () -> format(
+                    "Generating malformed request test case for %s.%s",
+                    service.getId(),
+                    testCase.getId()
+                )
             );
             initializeWriterIfNeeded();
             runnable.run();
@@ -537,8 +532,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private void writeHttpQueryAssertions(HttpRequestTestCase testCase) {
         testCase
             .getRequireQueryParams()
-            .forEach(requiredQueryParam ->
-                writer.write(
+            .forEach(
+                requiredQueryParam -> writer.write(
                     """
                     expect(
                       r.query[$1S],
@@ -551,8 +546,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         testCase
             .getForbidQueryParams()
-            .forEach(forbidQueryParam ->
-                writer.write(
+            .forEach(
+                forbidQueryParam -> writer.write(
                     """
                     expect(
                       r.query[$1S],
@@ -570,8 +565,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
             writer.addImport("buildQueryString", null, TypeScriptDependency.AWS_SDK_QUERYSTRING_BUILDER);
 
             writer.write("const queryString = buildQueryString(r.query);");
-            explicitQueryValues.forEach(explicitQueryValue ->
-                writer.write("expect(queryString).toContain($S);", explicitQueryValue)
+            explicitQueryValues.forEach(
+                explicitQueryValue -> writer.write("expect(queryString).toContain($S);", explicitQueryValue)
             );
         }
         writer.write("");
@@ -594,8 +589,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
         testCase
             .getForbidHeaders()
-            .forEach(forbidHeader ->
-                writer.write(
+            .forEach(
+                forbidHeader -> writer.write(
                     """
                     expect(
                       r.headers[$1S],
@@ -736,7 +731,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     () -> {
                         Optional<ShapeId> outputOptional = operation.getOutput();
                         if (outputOptional.isPresent()) {
-                            StructureShape outputShape = model.expectShape(outputOptional.get(), StructureShape.class);
+                            StructureShape outputShape =
+                                model.expectShape(outputOptional.get(), StructureShape.class);
                             writer.writeInline("let response = ");
                             testCase.getParams().accept(new CommandInputNodeVisitor(outputShape, true));
                             writer.write("return Promise.resolve({ ...response, '$$metadata': {} });");
@@ -1047,7 +1043,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 .asOperationShape()
                 .map(operationShape -> {
                     HttpBindingIndex index = HttpBindingIndex.of(model);
-                    List<HttpBinding> payloadBindings = index.getResponseBindings(operationOrError, Location.PAYLOAD);
+                    List<HttpBinding> payloadBindings =
+                        index.getResponseBindings(operationOrError, Location.PAYLOAD);
                     if (!payloadBindings.isEmpty()) {
                         return payloadBindings.get(0);
                     }
@@ -1071,8 +1068,8 @@ public final class HttpProtocolTestGenerator implements Runnable {
         // If we have a streaming payload blob, we need to collect it to something that
         // can be compared with the test contents. This emulates the customer experience.
         boolean hasStreamingPayloadBlob = payloadBinding
-            .map(binding ->
-                model
+            .map(
+                binding -> model
                     .getShape(binding.getMember().getTarget())
                     .filter(Shape::isBlobShape)
                     .filter(s -> s.hasTrait(StreamingTrait.ID))
@@ -1094,8 +1091,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 ).toBeDefined();"""
             );
             if (hasStreamingPayloadBlob) {
-                writer.openBlock("if (param === $S) {", "} else {", payloadBinding.get().getMemberName(), () ->
-                    writer.write(
+                writer.openBlock(
+                    "if (param === $S) {",
+                    "} else {",
+                    payloadBinding.get().getMemberName(),
+                    () -> writer.write(
                         """
                         expect(equivalentContents(paramsToValidate[param], \
                         comparableBlob)).toBe(true);

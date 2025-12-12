@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Path;
@@ -52,8 +51,8 @@ public final class PackageApiValidationGenerator {
      */
     public void writeTypeIndexTest() {
         writer.openBlock("""
-        export type {""", """
-        } from "../dist-types/index.d";""", () -> {
+                         export type {""", """
+                                           } from "../dist-types/index.d";""", () -> {
             // exportable types include:
 
             // the barebones client
@@ -64,9 +63,10 @@ public final class PackageApiValidationGenerator {
             writer.write(aggregateClientName + ",");
 
             // all commands
-            Set<OperationShape> containedOperations = TopDownIndex.of(model).getContainedOperations(
-                settings.getService()
-            );
+            Set<OperationShape> containedOperations = TopDownIndex.of(model)
+                .getContainedOperations(
+                    settings.getService()
+                );
             for (OperationShape operation : containedOperations) {
                 String commandName = symbolProvider.toSymbol(operation).getName();
                 writer.write("$L,", commandName);

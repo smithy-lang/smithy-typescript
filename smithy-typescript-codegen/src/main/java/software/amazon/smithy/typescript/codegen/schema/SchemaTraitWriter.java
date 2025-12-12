@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.util.List;
@@ -88,9 +87,9 @@ class SchemaTraitWriter {
                 buffer.append(
                     """
                     [%s]: %s,\s""".formatted(
-                            stringStore.var(shapeId.getName()),
-                            traitGenerator.serializeTraitData(trait, stringStore)
-                        )
+                        stringStore.var(shapeId.getName()),
+                        traitGenerator.serializeTraitData(trait, stringStore)
+                    )
                 );
             });
 

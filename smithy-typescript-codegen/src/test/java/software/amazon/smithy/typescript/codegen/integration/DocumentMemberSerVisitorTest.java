@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -73,27 +77,27 @@ public class DocumentMemberSerVisitorTest {
 
         return ListUtils.of(
             new Object[][] {
-                { BooleanShape.builder().id(id).build(), DATA_SOURCE },
-                { BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")" },
-                { BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")" },
-                { ByteShape.builder().id(id).build(), DATA_SOURCE },
-                { DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")" },
-                { FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")" },
-                { IntegerShape.builder().id(id).build(), DATA_SOURCE },
-                { LongShape.builder().id(id).build(), DATA_SOURCE },
-                { ShortShape.builder().id(id).build(), DATA_SOURCE },
-                { StringShape.builder().id(id).build(), DATA_SOURCE },
+                {BooleanShape.builder().id(id).build(), DATA_SOURCE},
+                {BigDecimalShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
+                {BigIntegerShape.builder().id(id).build(), "String(" + DATA_SOURCE + ")"},
+                {ByteShape.builder().id(id).build(), DATA_SOURCE},
+                {DoubleShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
+                {FloatShape.builder().id(id).build(), "__serializeFloat(" + DATA_SOURCE + ")"},
+                {IntegerShape.builder().id(id).build(), DATA_SOURCE},
+                {LongShape.builder().id(id).build(), DATA_SOURCE},
+                {ShortShape.builder().id(id).build(), DATA_SOURCE},
+                {StringShape.builder().id(id).build(), DATA_SOURCE},
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
                     "__LazyJsonString.from(" + DATA_SOURCE + ")",
                 },
-                { BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")" },
-                { DocumentShape.builder().id(id).build(), delegate },
-                { ListShape.builder().id(id).member(member).build(), delegate },
-                { SetShape.builder().id(id).member(member).build(), delegate },
-                { MapShape.builder().id(id).key(key).value(value).build(), delegate },
-                { StructureShape.builder().id(id).build(), delegate },
-                { UnionShape.builder().id(id).addMember(member).build(), delegate },
+                {BlobShape.builder().id(id).build(), "context.base64Encoder(" + DATA_SOURCE + ")"},
+                {DocumentShape.builder().id(id).build(), delegate},
+                {ListShape.builder().id(id).member(member).build(), delegate},
+                {SetShape.builder().id(id).member(member).build(), delegate},
+                {MapShape.builder().id(id).key(key).value(value).build(), delegate},
+                {StructureShape.builder().id(id).build(), delegate},
+                {UnionShape.builder().id(id).addMember(member).build(), delegate},
             }
         );
     }

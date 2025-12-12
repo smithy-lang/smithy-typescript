@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
@@ -64,19 +63,28 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
             RuntimeClientPlugin.builder()
                 .inputConfig(
                     Symbol.builder()
-                        .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                        .namespace(
+                            "./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME,
+                            "/"
+                        )
                         .name("HttpApiKeyAuthInputConfig")
                         .build()
                 )
                 .resolvedConfig(
                     Symbol.builder()
-                        .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                        .namespace(
+                            "./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME,
+                            "/"
+                        )
                         .name("HttpApiKeyAuthResolvedConfig")
                         .build()
                 )
                 .resolveFunction(
                     Symbol.builder()
-                        .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                        .namespace(
+                            "./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME,
+                            "/"
+                        )
                         .name("resolveHttpApiKeyAuthConfig")
                         .build()
                 )
@@ -86,24 +94,25 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
             RuntimeClientPlugin.builder()
                 .pluginFunction(
                     Symbol.builder()
-                        .namespace("./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME, "/")
+                        .namespace(
+                            "./" + CodegenUtils.SOURCE_FOLDER + "/middleware/" + INTEGRATION_NAME,
+                            "/"
+                        )
                         .name("getHttpApiKeyAuthPlugin")
                         .build()
                 )
-                .additionalPluginFunctionParamsSupplier((m, s, o) ->
-                    new HashMap<String, Object>() {
-                        {
-                            // It's safe to do expectTrait() because the operation predicate ensures that the trait
-                            // exists `in` and `name` are required attributes of the trait, `scheme` is optional.
-                            put("in", s.expectTrait(HttpApiKeyAuthTrait.class).getIn().toString());
-                            put("name", s.expectTrait(HttpApiKeyAuthTrait.class).getName());
-                            s
-                                .expectTrait(HttpApiKeyAuthTrait.class)
-                                .getScheme()
-                                .ifPresent(scheme -> put("scheme", scheme));
-                        }
+                .additionalPluginFunctionParamsSupplier((m, s, o) -> new HashMap<String, Object>() {
+                    {
+                        // It's safe to do expectTrait() because the operation predicate ensures that the trait
+                        // exists `in` and `name` are required attributes of the trait, `scheme` is optional.
+                        put("in", s.expectTrait(HttpApiKeyAuthTrait.class).getIn().toString());
+                        put("name", s.expectTrait(HttpApiKeyAuthTrait.class).getName());
+                        s
+                            .expectTrait(HttpApiKeyAuthTrait.class)
+                            .getScheme()
+                            .ifPresent(scheme -> put("scheme", scheme));
                     }
-                )
+                })
                 .operationPredicate((m, s, o) -> hasEffectiveHttpApiKeyAuthTrait(m, s, o))
                 .build()
         );
@@ -137,8 +146,8 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
 
         String noTouchNoticePrefix =
             "// Please do not touch this file. It's generated from a template in:\n" +
-            "// https://github.com/smithy-lang/smithy-typescript/blob/main/smithy-typescript-codegen/" +
-            "src/main/resources/software/amazon/smithy/aws/typescript/codegen/integration/";
+                "// https://github.com/smithy-lang/smithy-typescript/blob/main/smithy-typescript-codegen/" +
+                "src/main/resources/software/amazon/smithy/aws/typescript/codegen/integration/";
 
         // Write the middleware source.
         writerFactory.accept(

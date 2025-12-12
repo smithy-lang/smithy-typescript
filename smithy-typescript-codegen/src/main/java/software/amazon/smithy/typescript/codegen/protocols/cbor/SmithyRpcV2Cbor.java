@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.protocols.cbor;
 
 import java.util.Set;
@@ -77,7 +76,12 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
             service,
             getDocumentContentType(),
             () -> {
-                writer.addImportSubmodule("cbor", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CBOR);
+                writer.addImportSubmodule(
+                    "cbor",
+                    null,
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.CBOR
+                );
                 writer.write("body = cbor.serialize(body);");
             },
             serializingDocumentShapes
@@ -179,10 +183,10 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
 
         writer.writeDocs(methodLongName);
         writer.openBlock("""
-        export const $L = async (
-          output: $T,
-          context: $L
-        ): Promise<$T> => {""", "};", methodName, responseType, serdeContextType, outputType, () -> {
+                         export const $L = async (
+                           output: $T,
+                           context: $L
+                         ): Promise<$T> => {""", "};", methodName, responseType, serdeContextType, outputType, () -> {
             writer.addImportSubmodule(
                 "checkCborResponse",
                 "cr",

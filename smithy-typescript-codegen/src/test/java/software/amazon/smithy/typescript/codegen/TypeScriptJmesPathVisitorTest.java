@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +45,8 @@ public class TypeScriptJmesPathVisitorTest {
         assertThat(
             result,
             equalTo(
-                CODEGEN_INDICATOR + "let returnComparator = () => {\n  return result.foo.bar.car.gar.foo.bar.car;\n}\n"
+                CODEGEN_INDICATOR
+                    + "let returnComparator = () => {\n  return result.foo.bar.car.gar.foo.bar.car;\n}\n"
             )
         );
     }
@@ -63,7 +68,10 @@ public class TypeScriptJmesPathVisitorTest {
         String result = generateTypescriptInterpretation("length(items) == `0`");
         assertThat(
             result,
-            equalTo(CODEGEN_INDICATOR + "let returnComparator = () => {\n  return (result.items.length == 0.0);\n}\n")
+            equalTo(
+                CODEGEN_INDICATOR
+                    + "let returnComparator = () => {\n  return (result.items.length == 0.0);\n}\n"
+            )
         );
     }
 
@@ -72,7 +80,10 @@ public class TypeScriptJmesPathVisitorTest {
         String result = generateTypescriptInterpretation("length(items) < `0`");
         assertThat(
             result,
-            equalTo(CODEGEN_INDICATOR + "let returnComparator = () => {\n  return (result.items.length < 0.0);\n}\n")
+            equalTo(
+                CODEGEN_INDICATOR
+                    + "let returnComparator = () => {\n  return (result.items.length < 0.0);\n}\n"
+            )
         );
     }
 
@@ -81,7 +92,10 @@ public class TypeScriptJmesPathVisitorTest {
         String result = generateTypescriptInterpretation("length(items) > `0`");
         assertThat(
             result,
-            equalTo(CODEGEN_INDICATOR + "let returnComparator = () => {\n  return (result.items.length > 0.0);\n}\n")
+            equalTo(
+                CODEGEN_INDICATOR
+                    + "let returnComparator = () => {\n  return (result.items.length > 0.0);\n}\n"
+            )
         );
     }
 
@@ -205,7 +219,8 @@ public class TypeScriptJmesPathVisitorTest {
         assertThat(
             result,
             equalTo(
-                CODEGEN_INDICATOR + "let returnComparator = () => {\n  return (!(result.items.length == 0.0));\n}\n"
+                CODEGEN_INDICATOR
+                    + "let returnComparator = () => {\n  return (!(result.items.length == 0.0));\n}\n"
             )
         );
     }

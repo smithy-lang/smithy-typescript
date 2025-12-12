@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin.Convention.HAS_MIDDLEWARE;
@@ -91,7 +80,11 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                     "streamHasher",
                     writer -> {
                         writer.addDependency(TypeScriptDependency.STREAM_HASHER_NODE);
-                        writer.addImport("fileStreamHasher", "streamHasher", TypeScriptDependency.STREAM_HASHER_NODE);
+                        writer.addImport(
+                            "fileStreamHasher",
+                            "streamHasher",
+                            TypeScriptDependency.STREAM_HASHER_NODE
+                        );
                         writer.write("streamHasher");
                     },
                     "md5",
@@ -125,7 +118,11 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
     public List<RuntimeClientPlugin> getClientPlugins() {
         return ListUtils.of(
             RuntimeClientPlugin.builder()
-                .withConventions(TypeScriptDependency.BODY_CHECKSUM.dependency, "ApplyMd5BodyChecksum", HAS_MIDDLEWARE)
+                .withConventions(
+                    TypeScriptDependency.BODY_CHECKSUM.dependency,
+                    "ApplyMd5BodyChecksum",
+                    HAS_MIDDLEWARE
+                )
                 .operationPredicate((m, s, o) -> hasChecksumRequiredTrait(m, s, o))
                 .build()
         );

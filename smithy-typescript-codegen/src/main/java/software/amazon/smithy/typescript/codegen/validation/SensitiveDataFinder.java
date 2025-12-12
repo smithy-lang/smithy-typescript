@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.validation;
 
 import java.util.HashMap;
@@ -58,7 +57,7 @@ public class SensitiveDataFinder {
 
         if (
             shape.getMemberTrait(model, SensitiveTrait.class).isPresent() ||
-            shape.getMemberTrait(model, StreamingTrait.class).isPresent()
+                shape.getMemberTrait(model, StreamingTrait.class).isPresent()
         ) {
             cache.put(shape, true);
             return true;

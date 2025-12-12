@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -228,7 +232,10 @@ public class TypeScriptSettingsTest {
         );
         subject.setProtocolPriority(
             new ProtocolPriorityConfig(
-                MapUtils.of(serviceShapeId, List.of(serviceQuery, rpcv2Cbor, json1_1, restJson1, restXml, query)),
+                MapUtils.of(
+                    serviceShapeId,
+                    List.of(serviceQuery, rpcv2Cbor, json1_1, restJson1, restXml, query)
+                ),
                 null
             )
         );
