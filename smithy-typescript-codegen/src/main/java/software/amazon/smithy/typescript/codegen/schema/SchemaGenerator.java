@@ -129,10 +129,15 @@ public class SchemaGenerator implements Runnable {
             if (shape.hasTrait(ErrorTrait.class)) {
                 writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addRelativeImport(exceptionCtorSymbolName, null, Paths.get("..", "models", "errors"));
-                writer.openBlock("""
-                export var $L: StaticErrorSchema = [-3, $L, $L,""", "];",
+                writer.openBlock(
+                    """
+                    export var $L: StaticErrorSchema = [-3, $L, $L,""",
+                    "];",
                     getShapeVariableName(shape),
-                    store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> doWithMembers(shape));
+                    store.var(shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getName()),
+                    () -> doWithMembers(shape)
+                );
                 writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
                 writer.write(
                     """
