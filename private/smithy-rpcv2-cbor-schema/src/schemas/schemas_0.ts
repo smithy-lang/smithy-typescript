@@ -140,224 +140,218 @@ import type {
   StaticStructureSchema,
 } from "@smithy/types";
 
-import {
-  ComplexError as __ComplexError,
-  InvalidGreeting as __InvalidGreeting,
-  ValidationException as __ValidationException,
-} from "../models/errors";
-import {
-  RpcV2ProtocolServiceException as __RpcV2ProtocolServiceException,
-} from "../models/RpcV2ProtocolServiceException";
+import { ComplexError, InvalidGreeting, ValidationException } from "../models/errors";
+import { RpcV2ProtocolServiceException } from "../models/RpcV2ProtocolServiceException";
 
 /* eslint no-var: 0 */
 var __Unit = "unit" as const;
-export var validationException: StaticErrorSchema = [-3, n0, _VE,
+export var ValidationExceptionSchema: StaticErrorSchema = [-3, n0, _VE,
   { [_e]: _c },
   [_m, _fL],
-  [0, () => validationExceptionFieldList]
+  [0, () => ValidationExceptionFieldList]
 ];
-TypeRegistry.for(n0).registerError(validationException, __ValidationException);
-export var validationExceptionField: StaticStructureSchema = [3, n0, _VEF,
+TypeRegistry.for(n0).registerError(ValidationExceptionSchema, ValidationException);
+export var ValidationExceptionFieldSchema: StaticStructureSchema = [3, n0, _VEF,
   0,
   [_p, _m],
   [0, 0]
 ];
-export var clientOptionalDefaults: StaticStructureSchema = [3, n1, _COD,
+export var ClientOptionalDefaultsSchema: StaticStructureSchema = [3, n1, _COD,
   0,
   [_me],
   [1]
 ];
-export var complexError: StaticErrorSchema = [-3, n1, _CE,
+export var ComplexErrorSchema: StaticErrorSchema = [-3, n1, _CE,
   { [_e]: _c },
   [_TL, _N],
-  [0, () => complexNestedErrorData]
+  [0, () => ComplexNestedErrorDataSchema]
 ];
-TypeRegistry.for(n1).registerError(complexError, __ComplexError);
-export var complexNestedErrorData: StaticStructureSchema = [3, n1, _CNED,
+TypeRegistry.for(n1).registerError(ComplexErrorSchema, ComplexError);
+export var ComplexNestedErrorDataSchema: StaticStructureSchema = [3, n1, _CNED,
   0,
   [_F],
   [0]
 ];
-export var defaults: StaticStructureSchema = [3, n1, _D,
+export var DefaultsSchema: StaticStructureSchema = [3, n1, _D,
   0,
   [_dS, _dB, _dL, _dT, _dBe, _dBef, _dSe, _dI, _dLe, _dF, _dD, _dM, _dE, _dIE, _eS, _fB, _eB, _zB, _zS, _zI, _zL, _zF, _zD],
   [0, 2, 64 | 0, 4, 21, 1, 1, 1, 1, 1, 1, 128 | 0, 0, 1, 0, 2, 21, 1, 1, 1, 1, 1, 1]
 ];
-export var emptyStructure: StaticStructureSchema = [3, n1, _ES,
+export var EmptyStructureSchema: StaticStructureSchema = [3, n1, _ES,
   0,
   [],
   []
 ];
-export var float16Output: StaticStructureSchema = [3, n1, _FO,
+export var Float16OutputSchema: StaticStructureSchema = [3, n1, _FO,
   0,
   [_v],
   [1]
 ];
-export var fractionalSecondsOutput: StaticStructureSchema = [3, n1, _FSO,
+export var FractionalSecondsOutputSchema: StaticStructureSchema = [3, n1, _FSO,
   0,
   [_d],
   [5]
 ];
-export var greetingWithErrorsOutput: StaticStructureSchema = [3, n1, _GWEO,
+export var GreetingWithErrorsOutputSchema: StaticStructureSchema = [3, n1, _GWEO,
   0,
   [_g],
   [0]
 ];
-export var invalidGreeting: StaticErrorSchema = [-3, n1, _IG,
+export var InvalidGreetingSchema: StaticErrorSchema = [-3, n1, _IG,
   { [_e]: _c },
   [_M],
   [0]
 ];
-TypeRegistry.for(n1).registerError(invalidGreeting, __InvalidGreeting);
-export var operationWithDefaultsInput: StaticStructureSchema = [3, n1, _OWDI,
+TypeRegistry.for(n1).registerError(InvalidGreetingSchema, InvalidGreeting);
+export var OperationWithDefaultsInputSchema: StaticStructureSchema = [3, n1, _OWDI,
   0,
   [_de, _cOD, _tLD, _oTLD],
-  [() => defaults, () => clientOptionalDefaults, 0, 1]
+  [() => DefaultsSchema, () => ClientOptionalDefaultsSchema, 0, 1]
 ];
-export var operationWithDefaultsOutput: StaticStructureSchema = [3, n1, _OWDO,
+export var OperationWithDefaultsOutputSchema: StaticStructureSchema = [3, n1, _OWDO,
   0,
   [_dS, _dB, _dL, _dT, _dBe, _dBef, _dSe, _dI, _dLe, _dF, _dD, _dM, _dE, _dIE, _eS, _fB, _eB, _zB, _zS, _zI, _zL, _zF, _zD],
   [0, 2, 64 | 0, 4, 21, 1, 1, 1, 1, 1, 1, 128 | 0, 0, 1, 0, 2, 21, 1, 1, 1, 1, 1, 1]
 ];
-export var recursiveShapesInputOutput: StaticStructureSchema = [3, n1, _RSIO,
+export var RecursiveShapesInputOutputSchema: StaticStructureSchema = [3, n1, _RSIO,
   0,
   [_n],
-  [() => recursiveShapesInputOutputNested1]
+  [() => RecursiveShapesInputOutputNested1Schema]
 ];
-export var recursiveShapesInputOutputNested1: StaticStructureSchema = [3, n1, _RSION,
+export var RecursiveShapesInputOutputNested1Schema: StaticStructureSchema = [3, n1, _RSION,
   0,
   [_f, _n],
-  [0, () => recursiveShapesInputOutputNested2]
+  [0, () => RecursiveShapesInputOutputNested2Schema]
 ];
-export var recursiveShapesInputOutputNested2: StaticStructureSchema = [3, n1, _RSIONe,
+export var RecursiveShapesInputOutputNested2Schema: StaticStructureSchema = [3, n1, _RSIONe,
   0,
   [_b, _rM],
-  [0, () => recursiveShapesInputOutputNested1]
+  [0, () => RecursiveShapesInputOutputNested1Schema]
 ];
-export var rpcV2CborDenseMapsInputOutput: StaticStructureSchema = [3, n1, _RVCDMIO,
+export var RpcV2CborDenseMapsInputOutputSchema: StaticStructureSchema = [3, n1, _RVCDMIO,
   0,
   [_dSM, _dNM, _dBM, _dSMe, _dSMen],
-  [() => denseStructMap, 128 | 1, 128 | 2, 128 | 0, [2, n1, _DSM, 0, 0, 64 | 0]]
+  [() => DenseStructMap, 128 | 1, 128 | 2, 128 | 0, [2, n1, _DSM, 0, 0, 64 | 0]]
 ];
-export var rpcV2CborListInputOutput: StaticStructureSchema = [3, n1, _RVCLIO,
+export var RpcV2CborListInputOutputSchema: StaticStructureSchema = [3, n1, _RVCLIO,
   0,
   [_sL, _sS, _iL, _bL, _tL, _eL, _iEL, _nSL, _sLt, _bLl],
-  [64 | 0, 64 | 0, 64 | 1, 64 | 2, 64 | 4, 64 | 0, 64 | 1, [1, n2, _NSL, 0, 64 | 0], () => structureList, 64 | 21]
+  [64 | 0, 64 | 0, 64 | 1, 64 | 2, 64 | 4, 64 | 0, 64 | 1, [1, n2, _NSL, 0, 64 | 0], () => StructureList, 64 | 21]
 ];
-export var rpcV2CborSparseMapsInputOutput: StaticStructureSchema = [3, n1, _RVCSMIO,
+export var RpcV2CborSparseMapsInputOutputSchema: StaticStructureSchema = [3, n1, _RVCSMIO,
   0,
   [_sSM, _sNM, _sBM, _sSMp, _sSMpa],
-  [[() => sparseStructMap, 0], [() => sparseNumberMap, 0], [() => sparseBooleanMap, 0], [() => sparseStringMap, 0], [() => sparseSetMap, 0]]
+  [[() => SparseStructMap, 0], [() => SparseNumberMap, 0], [() => SparseBooleanMap, 0], [() => SparseStringMap, 0], [() => SparseSetMap, 0]]
 ];
-export var simpleScalarStructure: StaticStructureSchema = [3, n1, _SSS,
+export var SimpleScalarStructureSchema: StaticStructureSchema = [3, n1, _SSS,
   0,
   [_tBV, _fBV, _bV, _dV, _fV, _iV, _lV, _sV, _sVt, _bVl],
   [2, 2, 1, 1, 1, 1, 1, 1, 0, 21]
 ];
-export var simpleStructure: StaticStructureSchema = [3, n1, _SS,
+export var SimpleStructureSchema: StaticStructureSchema = [3, n1, _SS,
   0,
   [_v],
   [0]
 ];
-export var sparseNullsOperationInputOutput: StaticStructureSchema = [3, n1, _SNOIO,
+export var SparseNullsOperationInputOutputSchema: StaticStructureSchema = [3, n1, _SNOIO,
   0,
   [_sSL, _sSMp],
-  [[() => sparseStringList, 0], [() => sparseStringMap, 0]]
+  [[() => SparseStringList, 0], [() => SparseStringMap, 0]]
 ];
-export var structureListMember: StaticStructureSchema = [3, n1, _SLM,
+export var StructureListMemberSchema: StaticStructureSchema = [3, n1, _SLM,
   0,
   [_a, _b_],
   [0, 0]
 ];
-export var greetingStruct: StaticStructureSchema = [3, n2, _GS,
+export var GreetingStructSchema: StaticStructureSchema = [3, n2, _GS,
   0,
   [_h],
   [0]
 ];
-export var RpcV2ProtocolServiceException: StaticErrorSchema = [-3, _sC, "RpcV2ProtocolServiceException", 0, [], []];
-TypeRegistry.for(_sC).registerError(RpcV2ProtocolServiceException, __RpcV2ProtocolServiceException);
-var validationExceptionFieldList: StaticListSchema = [1, n0, _VEFL,
-  0, () => validationExceptionField
+export var RpcV2ProtocolServiceException$: StaticErrorSchema = [-3, _sC, "RpcV2ProtocolServiceException", 0, [], []];
+TypeRegistry.for(_sC).registerError(RpcV2ProtocolServiceException$, RpcV2ProtocolServiceException);
+var ValidationExceptionFieldList: StaticListSchema = [1, n0, _VEFL,
+  0, () => ValidationExceptionFieldSchema
 ];
-var structureList: StaticListSchema = [1, n1, _SL,
-  0, () => structureListMember
+var StructureList: StaticListSchema = [1, n1, _SL,
+  0, () => StructureListMemberSchema
 ];
-var testStringList = 64 | 0;
-var blobList = 64 | 21;
-var booleanList = 64 | 2;
-var fooEnumList = 64 | 0;
-var integerEnumList = 64 | 1;
-var integerList = 64 | 1;
-var nestedStringList: StaticListSchema = [1, n2, _NSL,
+var TestStringList = 64 | 0;
+var BlobList = 64 | 21;
+var BooleanList = 64 | 2;
+var FooEnumList = 64 | 0;
+var IntegerEnumList = 64 | 1;
+var IntegerList = 64 | 1;
+var NestedStringList: StaticListSchema = [1, n2, _NSL,
   0, 64 | 0
 ];
-var sparseStringList: StaticListSchema = [1, n2, _SSL,
+var SparseStringList: StaticListSchema = [1, n2, _SSL,
   { [_s]: 1 }, 0
 ];
-var stringList = 64 | 0;
-var stringSet = 64 | 0;
-var timestampList = 64 | 4;
-var denseBooleanMap = 128 | 2;
-var denseNumberMap = 128 | 1;
-var denseSetMap: StaticMapSchema = [2, n1, _DSM,
+var StringList = 64 | 0;
+var StringSet = 64 | 0;
+var TimestampList = 64 | 4;
+var DenseBooleanMap = 128 | 2;
+var DenseNumberMap = 128 | 1;
+var DenseSetMap: StaticMapSchema = [2, n1, _DSM,
   0, 0, 64 | 0
 ];
-var denseStringMap = 128 | 0;
-var denseStructMap: StaticMapSchema = [2, n1, _DSMe,
-  0, 0, () => greetingStruct
+var DenseStringMap = 128 | 0;
+var DenseStructMap: StaticMapSchema = [2, n1, _DSMe,
+  0, 0, () => GreetingStructSchema
 ];
-var sparseBooleanMap: StaticMapSchema = [2, n1, _SBM,
+var SparseBooleanMap: StaticMapSchema = [2, n1, _SBM,
   { [_s]: 1 }, 0, 2
 ];
-var sparseNumberMap: StaticMapSchema = [2, n1, _SNM,
+var SparseNumberMap: StaticMapSchema = [2, n1, _SNM,
   { [_s]: 1 }, 0, 1
 ];
-var sparseSetMap: StaticMapSchema = [2, n1, _SSM,
+var SparseSetMap: StaticMapSchema = [2, n1, _SSM,
   { [_s]: 1 }, 0, 64 | 0
 ];
-var sparseStructMap: StaticMapSchema = [2, n1, _SSMp,
-  { [_s]: 1 }, 0, () => greetingStruct
+var SparseStructMap: StaticMapSchema = [2, n1, _SSMp,
+  { [_s]: 1 }, 0, () => GreetingStructSchema
 ];
-var testStringMap = 128 | 0;
-var sparseStringMap: StaticMapSchema = [2, n2, _SSMpa,
+var TestStringMap = 128 | 0;
+var SparseStringMap: StaticMapSchema = [2, n2, _SSMpa,
   { [_s]: 1 }, 0, 0
 ];
-export var emptyInputOutput: StaticOperationSchema = [9, n1, _EIO,
-  0, () => emptyStructure, () => emptyStructure
+export var EmptyInputOutputSchema: StaticOperationSchema = [9, n1, _EIO,
+  0, () => EmptyStructureSchema, () => EmptyStructureSchema
 ];
-export var float16: StaticOperationSchema = [9, n1, _Fl,
-  0, () => __Unit, () => float16Output
+export var Float16Schema: StaticOperationSchema = [9, n1, _Fl,
+  0, () => __Unit, () => Float16OutputSchema
 ];
-export var fractionalSeconds: StaticOperationSchema = [9, n1, _FS,
-  0, () => __Unit, () => fractionalSecondsOutput
+export var FractionalSecondsSchema: StaticOperationSchema = [9, n1, _FS,
+  0, () => __Unit, () => FractionalSecondsOutputSchema
 ];
-export var greetingWithErrors: StaticOperationSchema = [9, n1, _GWE,
-  2, () => __Unit, () => greetingWithErrorsOutput
+export var GreetingWithErrorsSchema: StaticOperationSchema = [9, n1, _GWE,
+  2, () => __Unit, () => GreetingWithErrorsOutputSchema
 ];
-export var noInputOutput: StaticOperationSchema = [9, n1, _NIO,
+export var NoInputOutputSchema: StaticOperationSchema = [9, n1, _NIO,
   0, () => __Unit, () => __Unit
 ];
-export var operationWithDefaults: StaticOperationSchema = [9, n1, _OWD,
-  0, () => operationWithDefaultsInput, () => operationWithDefaultsOutput
+export var OperationWithDefaultsSchema: StaticOperationSchema = [9, n1, _OWD,
+  0, () => OperationWithDefaultsInputSchema, () => OperationWithDefaultsOutputSchema
 ];
-export var optionalInputOutput: StaticOperationSchema = [9, n1, _OIO,
-  0, () => simpleStructure, () => simpleStructure
+export var OptionalInputOutputSchema: StaticOperationSchema = [9, n1, _OIO,
+  0, () => SimpleStructureSchema, () => SimpleStructureSchema
 ];
-export var recursiveShapes: StaticOperationSchema = [9, n1, _RS,
-  0, () => recursiveShapesInputOutput, () => recursiveShapesInputOutput
+export var RecursiveShapesSchema: StaticOperationSchema = [9, n1, _RS,
+  0, () => RecursiveShapesInputOutputSchema, () => RecursiveShapesInputOutputSchema
 ];
-export var rpcV2CborDenseMaps: StaticOperationSchema = [9, n1, _RVCDM,
-  0, () => rpcV2CborDenseMapsInputOutput, () => rpcV2CborDenseMapsInputOutput
+export var RpcV2CborDenseMapsSchema: StaticOperationSchema = [9, n1, _RVCDM,
+  0, () => RpcV2CborDenseMapsInputOutputSchema, () => RpcV2CborDenseMapsInputOutputSchema
 ];
-export var rpcV2CborLists: StaticOperationSchema = [9, n1, _RVCL,
-  2, () => rpcV2CborListInputOutput, () => rpcV2CborListInputOutput
+export var RpcV2CborListsSchema: StaticOperationSchema = [9, n1, _RVCL,
+  2, () => RpcV2CborListInputOutputSchema, () => RpcV2CborListInputOutputSchema
 ];
-export var rpcV2CborSparseMaps: StaticOperationSchema = [9, n1, _RVCSM,
-  0, () => rpcV2CborSparseMapsInputOutput, () => rpcV2CborSparseMapsInputOutput
+export var RpcV2CborSparseMapsSchema: StaticOperationSchema = [9, n1, _RVCSM,
+  0, () => RpcV2CborSparseMapsInputOutputSchema, () => RpcV2CborSparseMapsInputOutputSchema
 ];
-export var simpleScalarProperties: StaticOperationSchema = [9, n1, _SSP,
-  0, () => simpleScalarStructure, () => simpleScalarStructure
+export var SimpleScalarPropertiesSchema: StaticOperationSchema = [9, n1, _SSP,
+  0, () => SimpleScalarStructureSchema, () => SimpleScalarStructureSchema
 ];
-export var sparseNullsOperation: StaticOperationSchema = [9, n1, _SNO,
-  0, () => sparseNullsOperationInputOutput, () => sparseNullsOperationInputOutput
+export var SparseNullsOperationSchema: StaticOperationSchema = [9, n1, _SNO,
+  0, () => SparseNullsOperationInputOutputSchema, () => SparseNullsOperationInputOutputSchema
 ];

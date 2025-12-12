@@ -6,7 +6,7 @@ import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 import { commonParams } from "../endpoint/EndpointParameters";
 import type { RpcV2CborListInputOutput } from "../models/models_0";
 import type { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
-import { rpcV2CborLists } from "../schemas/schemas_0";
+import { RpcV2CborListsSchema } from "../schemas/schemas_0";
 
 /**
  * @public
@@ -152,7 +152,7 @@ export class RpcV2CborListsCommand extends $Command
   })
   .s("RpcV2Protocol", "RpcV2CborLists", {})
   .n("RpcV2ProtocolClient", "RpcV2CborListsCommand")
-  .sc(rpcV2CborLists)
+  .sc(RpcV2CborListsSchema)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {

@@ -216,11 +216,11 @@ public final class ServiceClosure implements KnowledgeIndex {
          * The name transform deconflicts the interface and structure variable names.
          * for export at the top level of the same package.
          */
-        if (Character.isUpperCase(symbolName.charAt(0)) && !Character.isUpperCase(symbolName.charAt(1))) {
-          return Character.toLowerCase(symbolName.charAt(0)) + symbolName.substring(1);
+        String suffix = "";
+        if (shape.isStructureShape() || shape.isUnionShape() || shape.isOperationShape()) {
+            suffix = "Schema";
         }
-        String conflictingSchemaSuffix = "$";
-        return symbolName + conflictingSchemaSuffix;
+        return symbolName + suffix;
     }
 
     /**

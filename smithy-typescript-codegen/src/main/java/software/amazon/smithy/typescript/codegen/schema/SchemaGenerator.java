@@ -125,20 +125,14 @@ public class SchemaGenerator implements Runnable {
 
     private void writeStructureSchema(StructureShape shape) {
         checkedWriteSchema(shape, () -> {
-            String symbolName = ServiceClosure.RESERVED_WORDS.escape(shape.getId().getName());
+            String exceptionCtorSymbolName = ServiceClosure.RESERVED_WORDS.escape(shape.getId().getName());
             if (shape.hasTrait(ErrorTrait.class)) {
-                String exceptionCtorSymbolName = "__" + symbolName;
                 writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.addRelativeImport(symbolName, exceptionCtorSymbolName, Paths.get("..", "models", "errors"));
-                writer.openBlock(
-                    """
-                    export var $L: StaticErrorSchema = [-3, $L, $L,""",
-                    "];",
+                writer.addRelativeImport(exceptionCtorSymbolName, null, Paths.get("..", "models", "errors"));
+                writer.openBlock("""
+                export var $L: StaticErrorSchema = [-3, $L, $L,""", "];",
                     getShapeVariableName(shape),
-                    store.var(shape.getId().getNamespace(), "n"),
-                    store.var(shape.getId().getName()),
-                    () -> doWithMembers(shape)
-                );
+                    store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> doWithMembers(shape));
                 writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
                 writer.write(
                     """
@@ -167,35 +161,33 @@ public class SchemaGenerator implements Runnable {
      */
     private void writeBaseError() {
         String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-        String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(
-            serviceName, model
-        );
-        String schemaSymbolName = serviceExceptionName + "$";
+        String syntheticBaseExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
+        String schemaSymbolName = syntheticBaseExceptionName + "$";
 
         String namespace = settings.getService(model).getId().getNamespace();
 
         writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
         writer.addRelativeImport(
-            serviceExceptionName,
+            syntheticBaseExceptionName,
             null,
-            Paths.get("..", "models", serviceExceptionName)
+            Paths.get("..", "models", syntheticBaseExceptionName)
         );
 
         String syntheticNamespace = store.var("smithy.ts.sdk.synthetic." + namespace);
         writer.write(
             """
             export var $L: StaticErrorSchema = [-3, $L, $S, 0, [], []];""",
-            serviceExceptionName,
+            schemaSymbolName,
             syntheticNamespace,
-            serviceExceptionName
+            syntheticBaseExceptionName
         );
         writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
         writer.write(
             """
             TypeRegistry.for($L).registerError($L, $L);""",
             syntheticNamespace,
-          schemaSymbolName,
-          serviceExceptionName
+            schemaSymbolName,
+            syntheticBaseExceptionName
         );
     }
 
