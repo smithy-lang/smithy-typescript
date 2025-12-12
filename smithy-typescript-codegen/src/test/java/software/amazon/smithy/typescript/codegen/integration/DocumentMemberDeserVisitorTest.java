@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,25 +92,25 @@ public class DocumentMemberDeserVisitorTest {
 
         return ListUtils.of(
             new Object[][] {
-                { BooleanShape.builder().id(id).build(), "__expectBoolean(" + DATA_SOURCE + ")", source },
-                { ByteShape.builder().id(id).build(), "__expectByte(" + DATA_SOURCE + ")", source },
-                { DoubleShape.builder().id(id).build(), "__limitedParseDouble(" + DATA_SOURCE + ")", source },
-                { FloatShape.builder().id(id).build(), "__limitedParseFloat32(" + DATA_SOURCE + ")", source },
-                { IntegerShape.builder().id(id).build(), "__expectInt32(" + DATA_SOURCE + ")", source },
-                { LongShape.builder().id(id).build(), "__expectLong(" + DATA_SOURCE + ")", source },
-                { ShortShape.builder().id(id).build(), "__expectShort(" + DATA_SOURCE + ")", source },
-                { StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")", source },
+                {BooleanShape.builder().id(id).build(), "__expectBoolean(" + DATA_SOURCE + ")", source},
+                {ByteShape.builder().id(id).build(), "__expectByte(" + DATA_SOURCE + ")", source},
+                {DoubleShape.builder().id(id).build(), "__limitedParseDouble(" + DATA_SOURCE + ")", source},
+                {FloatShape.builder().id(id).build(), "__limitedParseFloat32(" + DATA_SOURCE + ")", source},
+                {IntegerShape.builder().id(id).build(), "__expectInt32(" + DATA_SOURCE + ")", source},
+                {LongShape.builder().id(id).build(), "__expectLong(" + DATA_SOURCE + ")", source},
+                {ShortShape.builder().id(id).build(), "__expectShort(" + DATA_SOURCE + ")", source},
+                {StringShape.builder().id(id).build(), "__expectString(" + DATA_SOURCE + ")", source},
                 {
                     StringShape.builder().id(id).addTrait(new MediaTypeTrait("foo+json")).build(),
                     "__LazyJsonString.from(" + DATA_SOURCE + ")",
                     source,
                 },
-                { BlobShape.builder().id(id).build(), "context.base64Decoder(" + DATA_SOURCE + ")", source },
-                { DocumentShape.builder().id(id).build(), delegate, source },
-                { ListShape.builder().id(id).member(member).build(), delegate, source },
-                { SetShape.builder().id(id).member(member).build(), delegate, source },
-                { MapShape.builder().id(id).key(key).value(value).build(), delegate, source },
-                { StructureShape.builder().id(id).build(), delegate, source },
+                {BlobShape.builder().id(id).build(), "context.base64Decoder(" + DATA_SOURCE + ")", source},
+                {DocumentShape.builder().id(id).build(), delegate, source},
+                {ListShape.builder().id(id).member(member).build(), delegate, source},
+                {SetShape.builder().id(id).member(member).build(), delegate, source},
+                {MapShape.builder().id(id).key(key).value(value).build(), delegate, source},
+                {StructureShape.builder().id(id).build(), delegate, source},
                 {
                     TimestampShape.builder().id(id).build(),
                     "__expectNonNull(__parseEpochTimestamp(" + DATA_SOURCE + "))",
@@ -115,12 +119,16 @@ public class DocumentMemberDeserVisitorTest {
                 {
                     TimestampShape.builder().id(id).build(),
                     "__expectNonNull(__parseRfc3339DateTime(" + DATA_SOURCE + "))",
-                    source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.DATE_TIME)).build(),
+                    source.toBuilder()
+                        .addTrait(new TimestampFormatTrait(TimestampFormatTrait.DATE_TIME))
+                        .build(),
                 },
                 {
                     TimestampShape.builder().id(id).build(),
                     "__expectNonNull(__parseRfc7231DateTime(" + DATA_SOURCE + "))",
-                    source.toBuilder().addTrait(new TimestampFormatTrait(TimestampFormatTrait.HTTP_DATE)).build(),
+                    source.toBuilder()
+                        .addTrait(new TimestampFormatTrait(TimestampFormatTrait.HTTP_DATE))
+                        .build(),
                 },
                 {
                     UnionShape.builder().id(id).addMember(member).build(),

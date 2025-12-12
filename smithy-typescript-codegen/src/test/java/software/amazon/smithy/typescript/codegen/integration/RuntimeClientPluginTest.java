@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -150,8 +154,9 @@ public class RuntimeClientPluginTest {
 
     @Test
     public void allConfigSymbolsMustBeSetIfAnyAreSet() {
-        Assertions.assertThrows(IllegalStateException.class, () ->
-            RuntimeClientPlugin.builder()
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> RuntimeClientPlugin.builder()
                 .inputConfig(Symbol.builder().namespace("foo", "/").name("abc").build())
                 .build()
         );
@@ -159,8 +164,9 @@ public class RuntimeClientPluginTest {
 
     @Test
     public void destroyFunctionRequiresResolvedConfig() {
-        Assertions.assertThrows(IllegalStateException.class, () ->
-            RuntimeClientPlugin.builder()
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> RuntimeClientPlugin.builder()
                 .withConventions("foo/baz", "1.0.0", "Foo", RuntimeClientPlugin.Convention.HAS_DESTROY)
                 .build()
         );

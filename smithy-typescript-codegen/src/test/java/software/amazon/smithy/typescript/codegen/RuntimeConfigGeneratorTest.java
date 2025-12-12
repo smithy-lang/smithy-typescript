@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -142,7 +146,9 @@ public class RuntimeConfigGeneratorTest {
         );
         assertThat(
             runtimeConfigNativeContents,
-            containsString("import { getRuntimeConfig as getBrowserRuntimeConfig } from \"./runtimeConfig.browser\";")
+            containsString(
+                "import { getRuntimeConfig as getBrowserRuntimeConfig } from \"./runtimeConfig.browser\";"
+            )
         );
         assertThat(
             runtimeConfigSharedContents,

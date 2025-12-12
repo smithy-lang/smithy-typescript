@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.integration;
 
 import java.nio.file.Paths;
@@ -232,15 +221,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OptionalUtils.ifPresentOrElse(
                 operation.getTrait(HttpTrait.class),
                 httpTrait -> generateOperationRequestSerializer(context, operation, httpTrait),
-                () ->
-                    LOGGER.warning(
-                        String.format(
-                            "Unable to generate %s protocol request bindings for %s because it does not have an " +
-                                "http binding trait",
-                            getName(),
-                            operation.getId()
-                        )
+                () -> LOGGER.warning(
+                    String.format(
+                        "Unable to generate %s protocol request bindings for %s because it does not have an "
+                            +
+                            "http binding trait",
+                        getName(),
+                        operation.getId()
                     )
+                )
             );
         }
     }
@@ -256,15 +245,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OptionalUtils.ifPresentOrElse(
                 operation.getTrait(HttpTrait.class),
                 httpTrait -> generateOperationRequestDeserializer(context, operation, httpTrait),
-                () ->
-                    LOGGER.warning(
-                        String.format(
-                            "Unable to generate %s protocol request bindings for %s because it does not have an " +
-                                "http binding trait",
-                            getName(),
-                            operation.getId()
-                        )
+                () -> LOGGER.warning(
+                    String.format(
+                        "Unable to generate %s protocol request bindings for %s because it does not have an "
+                            +
+                            "http binding trait",
+                        getName(),
+                        operation.getId()
                     )
+                )
             );
         }
     }
@@ -280,15 +269,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OptionalUtils.ifPresentOrElse(
                 operation.getTrait(HttpTrait.class),
                 httpTrait -> generateOperationResponseSerializer(context, operation, httpTrait),
-                () ->
-                    LOGGER.warning(
-                        String.format(
-                            "Unable to generate %s protocol response bindings for %s because it does not have an " +
-                                "http binding trait",
-                            getName(),
-                            operation.getId()
-                        )
+                () -> LOGGER.warning(
+                    String.format(
+                        "Unable to generate %s protocol response bindings for %s because it does not have an "
+                            +
+                            "http binding trait",
+                        getName(),
+                        operation.getId()
                     )
+                )
             );
         }
     }
@@ -317,12 +306,20 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 writeEmptyEndpoint(context);
 
                 writer.openBlock("switch (input.name) {", "}", () -> {
-                    for (final Shape shape : new TreeSet<>(
-                        context.getModel().getShapesWithTrait(HttpErrorTrait.class)
-                    )) {
-                        StructureShape errorShape = shape.asStructureShape().orElseThrow(IllegalArgumentException::new);
+                    for (
+                        final Shape shape : new TreeSet<>(
+                            context.getModel().getShapesWithTrait(HttpErrorTrait.class)
+                        )
+                    ) {
+                        StructureShape errorShape =
+                            shape.asStructureShape().orElseThrow(IllegalArgumentException::new);
                         writer.openBlock("case $S: {", "}", errorShape.getId().getName(), () -> {
-                            generateErrorSerializationImplementation(context, errorShape, responseType, bindingIndex);
+                            generateErrorSerializationImplementation(
+                                context,
+                                errorShape,
+                                responseType,
+                                bindingIndex
+                            );
                         });
                     }
                 });
@@ -349,15 +346,14 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     OptionalUtils.ifPresentOrElse(
                         operation.getTrait(HttpTrait.class),
                         httpTrait -> generateUriSpec(context, operation, httpTrait),
-                        () ->
-                            LOGGER.warning(
-                                String.format(
-                                    "Unable to generate %s uri spec for %s because it does not have an " +
-                                        "http binding trait",
-                                    getName(),
-                                    operation.getId()
-                                )
+                        () -> LOGGER.warning(
+                            String.format(
+                                "Unable to generate %s uri spec for %s because it does not have an " +
+                                    "http binding trait",
+                                getName(),
+                                operation.getId()
                             )
+                        )
                     );
                 }
             }
@@ -434,7 +430,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addRelativeImport(
             "serializeFrameworkException",
             null,
-            Paths.get(".", CodegenUtils.SOURCE_FOLDER, PROTOCOLS_FOLDER, ProtocolGenerator.getSanitizedName(getName()))
+            Paths.get(
+                ".",
+                CodegenUtils.SOURCE_FOLDER,
+                PROTOCOLS_FOLDER,
+                ProtocolGenerator.getSanitizedName(getName())
+            )
         );
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
@@ -466,7 +467,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         generateServiceMux(context);
         writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.SERVER_COMMON);
         writer.openBlock(
-            "const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __ServiceException> = " + "(op) => {",
+            "const serFn: (op: $1T) => __OperationSerializer<$2T<Context>, $1T, __ServiceException> = "
+                + "(op) => {",
             "};",
             operationsSymbol,
             serviceSymbol,
@@ -618,15 +620,15 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             OptionalUtils.ifPresentOrElse(
                 operation.getTrait(HttpTrait.class),
                 httpTrait -> generateOperationResponseDeserializer(context, operation, httpTrait),
-                () ->
-                    LOGGER.warning(
-                        String.format(
-                            "Unable to generate %s protocol response bindings for %s because it does not have an " +
-                                "http binding trait",
-                            getName(),
-                            operation.getId()
-                        )
+                () -> LOGGER.warning(
+                    String.format(
+                        "Unable to generate %s protocol response bindings for %s because it does not have an "
+                            +
+                            "http binding trait",
+                        getName(),
+                        operation.getId()
                     )
+                )
             );
         }
 
@@ -661,7 +663,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
 
         writer.openBlock(
-            "export const $L = async (\n" + "  input: $T,\n" + "  ctx: ServerSerdeContext\n" + "): Promise<$T> => {",
+            "export const $L = async (\n" + "  input: $T,\n" + "  ctx: ServerSerdeContext\n"
+                + "): Promise<$T> => {",
             "};",
             methodName,
             outputType,
@@ -669,8 +672,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             () -> {
                 writeEmptyEndpoint(context, operation);
                 writeOperationStatusCode(context, operation, bindingIndex, trait);
-                writeResponseHeaders(context, operation, bindingIndex, () ->
-                    writeDefaultOutputHeaders(context, operation)
+                writeResponseHeaders(
+                    context,
+                    operation,
+                    bindingIndex,
+                    () -> writeDefaultOutputHeaders(context, operation)
                 );
 
                 List<HttpBinding> bodyBindings = writeResponseBody(context, operation, bindingIndex);
@@ -702,7 +708,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
         writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
         writer.openBlock(
-            "if (body && Object.keys(headers).map((str) => str.toLowerCase())" + ".indexOf('content-length') === -1) {",
+            "if (body && Object.keys(headers).map((str) => str.toLowerCase())"
+                + ".indexOf('content-length') === -1) {",
             "}",
             () -> {
                 writer.write("const length = calculateBodyLength(body);");
@@ -725,7 +732,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
 
         writer.openBlock(
-            "export const $L = async (\n" + "  input: $T,\n" + "  ctx: ServerSerdeContext\n" + "): Promise<$T> => {",
+            "export const $L = async (\n" + "  input: $T,\n" + "  ctx: ServerSerdeContext\n"
+                + "): Promise<$T> => {",
             "};",
             methodName,
             symbol,
@@ -941,7 +949,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         // do not want to include it in the operation URI to be resolved.
                         // We use this logic plus a temporary control-list, since it is not yet known
                         // how many services and param names will have this issue.
-                        return !(isContextParam && contextParamDeduplicationParamControlSet.contains(content));
+                        return !(isContextParam
+                            && contextParamDeduplicationParamControlSet.contains(content));
                     })
                     .map(Segment::toString)
                     .collect(Collectors.joining("/"))
@@ -959,13 +968,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
                 String labelValueProvider =
                     "() => " +
-                    getInputValue(
-                        context,
-                        binding.getLocation(),
-                        "input." + memberName + "!",
-                        binding.getMember(),
-                        target
-                    );
+                        getInputValue(
+                            context,
+                            binding.getLocation(),
+                            "input." + memberName + "!",
+                            binding.getMember(),
+                            target
+                        );
 
                 // Get the correct label to use.
                 Segment uriLabel = uriLabels
@@ -1155,8 +1164,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
     private void writeNormalHeader(GenerationContext context, HttpBinding binding) {
         String memberLocation =
             "input[" +
-            context.getStringStore().var(context.getSymbolProvider().toMemberName(binding.getMember())) +
-            "]";
+                context.getStringStore().var(context.getSymbolProvider().toMemberName(binding.getMember())) +
+                "]";
         Shape target = context.getModel().expectShape(binding.getMember().getTarget());
 
         String headerKey = binding.getLocationName().toLowerCase(Locale.US);
@@ -1587,7 +1596,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
                 boolean mayElideInput =
                     SerdeElisionIndex.of(context.getModel()).mayElide(target) &&
-                    (enableSerdeElision() && !context.getSettings().generateServerSdk());
+                        (enableSerdeElision() && !context.getSettings().generateServerSdk());
 
                 if (mayElideInput) {
                     context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
@@ -1628,8 +1637,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             mapMember,
             model.expectShape(mapMember.getTarget())
         );
-        return (
-            "Object.entries(" +
+        return ("Object.entries(" +
             dataSource +
             " || {}).reduce(" +
             "(acc: any, [key, value]: [string, " +
@@ -1639,8 +1647,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             valueString +
             ";" +
             "return acc;" +
-            "}, {})"
-        );
+            "}, {})");
     }
 
     /**
@@ -1935,14 +1942,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             // Because documents can be set to a null value, handle setting that as the body
             // instead of using toString, as `null.toString()` will fail.
             if (target.isDocumentShape()) {
-                writer.openBlock("if (input.$L === null) {", "} else {", memberName, () ->
-                    writer.write("body = \"null\";")
+                writer.openBlock(
+                    "if (input.$L === null) {",
+                    "} else {",
+                    memberName,
+                    () -> writer.write("body = \"null\";")
                 );
                 writer.indent();
             }
             writer.write(
                 "body = $L;",
-                getInputValue(context, Location.PAYLOAD, "input." + memberName, payloadBinding.getMember(), target)
+                getInputValue(
+                    context,
+                    Location.PAYLOAD,
+                    "input." + memberName,
+                    payloadBinding.getMember(),
+                    target
+                )
             );
             if (target.isDocumentShape()) {
                 writer.dedent();
@@ -2097,8 +2113,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             String contentType = optionalContentType.orElse(getDocumentContentType());
             // Validate that the content type matches the protocol default, or what's modeled if there's
             // a modeled type.
-            writer.openBlock("if (!__acceptMatches(accept, $S)) {", "};", contentType, () ->
-                writer.write("throw new __NotAcceptableException();")
+            writer.openBlock(
+                "if (!__acceptMatches(accept, $S)) {",
+                "};",
+                contentType,
+                () -> writer.write("throw new __NotAcceptableException();")
             );
         });
     }
@@ -2429,10 +2448,16 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     : "";
 
                 Symbol materializedErrorSymbol = errorSymbol.toBuilder().putProperty("typeOnly", false).build();
-                writer.openBlock("const exception$L = new $T({", "});", serverSdkInfix, materializedErrorSymbol, () -> {
-                    writer.write("$$metadata: deserializeMetadata($L),", outputName);
-                    writer.write("...contents");
-                });
+                writer.openBlock(
+                    "const exception$L = new $T({",
+                    "});",
+                    serverSdkInfix,
+                    materializedErrorSymbol,
+                    () -> {
+                        writer.write("$$metadata: deserializeMetadata($L),", outputName);
+                        writer.write("...contents");
+                    }
+                );
                 String errorLocation = this.getErrorBodyLocation(context, outputName + ".body");
                 writer.addImport(
                     "decorateServiceException",
@@ -3046,7 +3071,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
                 boolean mayElideOutput =
                     SerdeElisionIndex.of(context.getModel()).mayElide(target) &&
-                    (enableSerdeElision() && !context.getSettings().generateServerSdk());
+                        (enableSerdeElision() && !context.getSettings().generateServerSdk());
 
                 if (mayElideOutput) {
                     context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
@@ -3102,7 +3127,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     case LONG:
                         context
                             .getWriter()
-                            .addImport("strictParseLong", "__strictParseLong", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                            .addImport(
+                                "strictParseLong",
+                                "__strictParseLong",
+                                TypeScriptDependency.AWS_SMITHY_CLIENT
+                            );
                         return "__strictParseLong(" + dataSource + ")";
                     case INT_ENUM:
                     case INTEGER:
@@ -3126,7 +3155,11 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                     case BYTE:
                         context
                             .getWriter()
-                            .addImport("strictParseByte", "__strictParseByte", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                            .addImport(
+                                "strictParseByte",
+                                "__strictParseByte",
+                                TypeScriptDependency.AWS_SMITHY_CLIENT
+                            );
                         return "__strictParseByte(" + dataSource + ")";
                     default:
                         throw new CodegenException("Unexpected number shape `" + target.getType() + "`");

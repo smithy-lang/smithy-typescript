@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.documentation;
 
 import java.util.Comparator;
@@ -54,8 +53,8 @@ public final class DocumentationExampleGenerator {
                     .stream()
                     .sorted(Comparator.comparing(entry -> entry.getKey().getValue()))
                     .map(
-                        entry ->
-                            indentation + "  " + entry.getKey().getValue() + ": " + write(entry.getValue(), indent + 2)
+                        entry -> indentation + "  " + entry.getKey().getValue() + ": "
+                            + write(entry.getValue(), indent + 2)
                     )
                     .collect(Collectors.joining(",\n"));
 

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Iterator;
@@ -96,8 +95,9 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     public void customize(TypeScriptCodegenContext codegenContext) {
         if (
             !codegenContext.settings().generateClient() ||
-            codegenContext.settings().useLegacyAuth() ||
-            !codegenContext.applicationProtocol().isHttpProtocol()
+                codegenContext.settings().useLegacyAuth()
+                ||
+                !codegenContext.applicationProtocol().isHttpProtocol()
         ) {
             return;
         }
@@ -176,12 +176,13 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     ) {
         String httpAuthSchemeParametersProviderName =
             "default" +
-            CodegenUtils.getServiceName(
-                clientBodySection.getSettings(),
-                clientBodySection.getModel(),
-                clientBodySection.getSymbolProvider()
-            ) +
-            "HttpAuthSchemeParametersProvider";
+                CodegenUtils.getServiceName(
+                    clientBodySection.getSettings(),
+                    clientBodySection.getModel(),
+                    clientBodySection.getSymbolProvider()
+                )
+                +
+                "HttpAuthSchemeParametersProvider";
         w.addImport(httpAuthSchemeParametersProviderName, null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
         w.writeInline(httpAuthSchemeParametersProviderName);
     }
@@ -220,28 +221,33 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             async (config: $LResolvedConfig) =>""",
             s.getSymbolProvider().toSymbol(s.getService()).getName()
         );
-        w.openCollapsibleBlock("""
-        new DefaultIdentityProviderConfig({""", "})", httpAuthSchemes
-            .values()
-            .stream()
-            .filter(Objects::nonNull)
-            .anyMatch(scheme ->
-                scheme
-                    .getConfigFields()
-                    .stream()
-                    .anyMatch(field -> field.type().equals(ConfigField.Type.MAIN))
-            ), () -> {
-            for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
-                if (scheme == null) {
-                    continue;
-                }
-                for (ConfigField configField : scheme.getConfigFields()) {
-                    if (configField.type().equals(ConfigField.Type.MAIN)) {
-                        w.writeInline("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
+        w.openCollapsibleBlock(
+            """
+            new DefaultIdentityProviderConfig({""",
+            "})",
+            httpAuthSchemes
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .anyMatch(
+                    scheme -> scheme
+                        .getConfigFields()
+                        .stream()
+                        .anyMatch(field -> field.type().equals(ConfigField.Type.MAIN))
+                ),
+            () -> {
+                for (HttpAuthScheme scheme : httpAuthSchemes.values()) {
+                    if (scheme == null) {
+                        continue;
+                    }
+                    for (ConfigField configField : scheme.getConfigFields()) {
+                        if (configField.type().equals(ConfigField.Type.MAIN)) {
+                            w.writeInline("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
+                        }
                     }
                 }
             }
-        });
+        );
         // no closeBlock needed here, the caller will write the comma
         // inline with the close of `new DefaultIdentityProviderConfig({})`
         w.dedent();
@@ -250,15 +256,15 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     /*
     export interface HttpAuthSchemeInputConfig {
       httpAuthSchemes?: HttpAuthScheme[];
-
+    
       httpAuthSchemeProvider?: WeatherHttpAuthSchemeProvider;
-
+    
       apiKey?: ApiKeyIdentity | ApiKeyIdentityProvider;
-
+    
       token?: TokenIdentity | TokenIdentityProvider;
-
+    
       region?: string | __Provider<string>;
-
+    
       credentials?: AwsCredentialIdentity | AwsCredentialIdentityProvider;
     }
     */
@@ -331,15 +337,15 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
     /*
     export interface HttpAuthSchemeResolvedConfig {
       readonly httpAuthSchemes: HttpAuthScheme[];
-
+    
       readonly httpAuthSchemeProvider: WeatherHttpAuthSchemeProvider;
-
+    
       readonly apiKey?: ApiKeyIdentityProvider;
-
+    
       readonly token?: TokenIdentityProvider;
-
+    
       readonly region?: __Provider<string>;
-
+    
       readonly credentials?: AwsCredentialIdentityProvider;
     }
     */

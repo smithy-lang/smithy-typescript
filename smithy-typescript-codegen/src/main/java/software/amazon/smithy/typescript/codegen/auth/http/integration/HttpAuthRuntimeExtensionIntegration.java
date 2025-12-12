@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.List;
@@ -91,28 +90,28 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
       TokenIdentity,
       TokenIdentityProvider
     } from "@smithy/types";
-
+    
     import {
       WeatherHttpAuthSchemeProvider
     } from "./httpAuthSchemeProvider";
-
+    
     // ...
-
+    
     export interface HttpAuthExtensionConfiguration {
       setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void;
       httpAuthSchemes(): HttpAuthScheme[];
-
+    
       setHttpAuthSchemeProvider(httpAuthSchemeProvider: WeatherHttpAuthSchemeProvider): void;
       httpAuthSchemeProvider(): WeatherHttpAuthSchemeProvider;
-
+    
       // @aws.auth#sigv4
       setCredentials(credentials: AwsCredentialsIdentity | AwsCredentialIdentityProvider): void;
       credentials(): AwsCredentialsIdentity | AwsCredentialIdentityProvider | undefined;
-
+    
       // @httpApiKeyAuth
       setApiKey(apiKey: ApiKeyIdentity | ApiKeyIdentityProvider): void;
       apiKey(): ApiKeyIdentity | ApiKeyIdentityProvider | undefined;
-
+    
       // @httpBearerAuth
       setToken(token: TokenIdentity| TokenIdentityProvider): void;
       token(): TokenIdentity | TokenIdentityProvider | undefined;
@@ -125,10 +124,10 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
             w.openBlock("""
-            /**
-             * @internal
-             */
-            export interface HttpAuthExtensionConfiguration {""", "}", () -> {
+                        /**
+                         * @internal
+                         */
+                        export interface HttpAuthExtensionConfiguration {""", "}", () -> {
                 w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.write("setHttpAuthScheme(httpAuthScheme: HttpAuthScheme): void;");
                 w.write("httpAuthSchemes(): HttpAuthScheme[];");
@@ -164,13 +163,13 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
       TokenIdentity,
       TokenIdentityProvider
     } from "@smithy/types";
-
+    
     import {
       WeatherHttpAuthSchemeProvider
     } from "./httpAuthSchemeProvider";
-
+    
     // ...
-
+    
     export type HttpAuthRuntimeConfig = Partial<{
       httpAuthSchemes: HttpAuthScheme[];
       httpAuthSchemeProvider: WeatherHttpAuthSchemeProvider;
@@ -189,10 +188,10 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
             w.openBlock("""
-            /**
-             * @internal
-             */
-            export type HttpAuthRuntimeConfig = Partial<{""", "}>;", () -> {
+                        /**
+                         * @internal
+                         */
+                        export type HttpAuthRuntimeConfig = Partial<{""", "}>;", () -> {
                 w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.write("httpAuthSchemes: HttpAuthScheme[];");
                 w.addTypeImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
@@ -219,13 +218,13 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
       TokenIdentity,
       TokenIdentityProvider
     } from "@smithy/types";
-
+    
     import {
       WeatherHttpAuthSchemeProvider
     } from "./httpAuthSchemeProvider";
-
+    
     // ...
-
+    
     export const getHttpAuthExtensionConfiguration =
       (runtimeConfig: HttpAuthRuntimeConfig): HttpAuthExtensionConfiguration => {
       let _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;
@@ -280,12 +279,12 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
             w.openBlock("""
-            /**
-             * @internal
-             */
-            export const getHttpAuthExtensionConfiguration = (
-              runtimeConfig: HttpAuthRuntimeConfig
-            ): HttpAuthExtensionConfiguration => {""", "};", () -> {
+                        /**
+                         * @internal
+                         */
+                        export const getHttpAuthExtensionConfiguration = (
+                          runtimeConfig: HttpAuthRuntimeConfig
+                        ): HttpAuthExtensionConfiguration => {""", "};", () -> {
                 w.addTypeImport("HttpAuthScheme", null, TypeScriptDependency.SMITHY_TYPES);
                 w.write("const _httpAuthSchemes = runtimeConfig.httpAuthSchemes!;");
                 w.addTypeImport(serviceName + "HttpAuthSchemeProvider", null, AuthUtils.AUTH_HTTP_PROVIDER_DEPENDENCY);
@@ -371,11 +370,11 @@ public class HttpAuthRuntimeExtensionIntegration implements TypeScriptIntegratio
     ) {
         delegator.useFileWriter(AuthUtils.HTTP_AUTH_SCHEME_EXTENSION_PATH, w -> {
             w.openBlock("""
-            /**
-             * @internal
-             */
-            export const resolveHttpAuthRuntimeConfig = (config: HttpAuthExtensionConfiguration): \
-            HttpAuthRuntimeConfig => {""", "};", () -> {
+                        /**
+                         * @internal
+                         */
+                        export const resolveHttpAuthRuntimeConfig = (config: HttpAuthExtensionConfiguration): \
+                        HttpAuthRuntimeConfig => {""", "};", () -> {
                 w.openBlock("return {", "};", () -> {
                     w.write("httpAuthSchemes: config.httpAuthSchemes(),");
                     w.write("httpAuthSchemeProvider: config.httpAuthSchemeProvider(),");

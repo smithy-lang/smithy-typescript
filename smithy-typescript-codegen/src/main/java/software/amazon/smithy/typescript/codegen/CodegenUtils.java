@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.util.ArrayList;
@@ -210,11 +199,10 @@ public final class CodegenUtils {
             .stream()
             .filter(memberShape -> {
                 Shape target = model.expectShape(memberShape.getTarget());
-                return (
-                    target.isBlobShape() &&
-                    memberShape.hasTrait(HttpPayloadTrait.class) &&
-                    !target.hasTrait(StreamingTrait.class)
-                );
+                return (target.isBlobShape() &&
+                    memberShape.hasTrait(HttpPayloadTrait.class)
+                    &&
+                    !target.hasTrait(StreamingTrait.class));
             })
             .collect(Collectors.toList());
     }
@@ -318,20 +306,25 @@ public final class CodegenUtils {
                         .map(item -> String.format("'%s'", item))
                         .collect(Collectors.toList());
                     functionParametersList.add(
-                        String.format("'%s': [%s]", key, valueStringList.stream().collect(Collectors.joining(", ")))
+                        String.format(
+                            "'%s': [%s]",
+                            key,
+                            valueStringList.stream().collect(Collectors.joining(", "))
+                        )
                     );
                 } else if (value instanceof Map) {
                     Map<?, ?> valueMap = (Map<?, ?>) value;
                     if (
                         !valueMap.isEmpty() &&
-                        valueMap
-                            .keySet()
-                            .stream()
-                            .anyMatch(k -> !(k instanceof String)) &&
-                        valueMap
-                            .values()
-                            .stream()
-                            .anyMatch(v -> !(v instanceof String))
+                            valueMap
+                                .keySet()
+                                .stream()
+                                .anyMatch(k -> !(k instanceof String))
+                            &&
+                            valueMap
+                                .values()
+                                .stream()
+                                .anyMatch(v -> !(v instanceof String))
                     ) {
                         throw new CodegenException("Plugin function parameters map must be Map<String, String>");
                     }

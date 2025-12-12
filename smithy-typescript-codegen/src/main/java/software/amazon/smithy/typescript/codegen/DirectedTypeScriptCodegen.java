@@ -1,18 +1,7 @@
 /*
- * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
@@ -105,12 +94,19 @@ final class DirectedTypeScriptCodegen
                     .getClientPlugins()
                     .forEach(runtimePlugin -> {
                         if (
-                            runtimePlugin.matchesSettings(directive.model(), directive.service(), directive.settings())
+                            runtimePlugin.matchesSettings(
+                                directive.model(),
+                                directive.service(),
+                                directive.settings()
+                            )
                         ) {
                             LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
                             runtimePlugins.add(runtimePlugin);
                         } else {
-                            LOGGER.fine(() -> "Skipping TypeScript runtime plugin based on settings: " + runtimePlugin);
+                            LOGGER.fine(
+                                () -> "Skipping TypeScript runtime plugin based on settings: "
+                                    + runtimePlugin
+                            );
                         }
                     });
             });
@@ -271,8 +267,9 @@ final class DirectedTypeScriptCodegen
         ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
 
         // Generate the bare-bones service client.
-        delegator.useShapeWriter(service, writer ->
-            new ServiceBareBonesClientGenerator(
+        delegator.useShapeWriter(
+            service,
+            writer -> new ServiceBareBonesClientGenerator(
                 settings,
                 model,
                 symbolProvider,
@@ -297,8 +294,9 @@ final class DirectedTypeScriptCodegen
         Symbol serviceSymbol = symbolProvider.toSymbol(service);
         String aggregatedClientName = ReplaceLast.in(serviceSymbol.getName(), "Client", "");
         String filename = ReplaceLast.in(serviceSymbol.getDefinitionFile(), "Client", "");
-        delegator.useFileWriter(filename, writer ->
-            new ServiceAggregatedClientGenerator(
+        delegator.useFileWriter(
+            filename,
+            writer -> new ServiceAggregatedClientGenerator(
                 settings,
                 model,
                 symbolProvider,
@@ -313,8 +311,9 @@ final class DirectedTypeScriptCodegen
         for (OperationShape operation : containedOperations) {
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
-                delegator.useFileWriter(outputFilename, paginationWriter ->
-                    new PaginationGenerator(
+                delegator.useFileWriter(
+                    outputFilename,
+                    paginationWriter -> new PaginationGenerator(
                         model,
                         service,
                         operation,
@@ -330,8 +329,9 @@ final class DirectedTypeScriptCodegen
                     .getWaiters()
                     .forEach((String waiterName, Waiter waiter) -> {
                         String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
-                        delegator.useFileWriter(outputFilename, waiterWriter ->
-                            new WaiterGenerator(
+                        delegator.useFileWriter(
+                            outputFilename,
+                            waiterWriter -> new WaiterGenerator(
                                 waiterName,
                                 waiter,
                                 service,
@@ -348,8 +348,9 @@ final class DirectedTypeScriptCodegen
 
         if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
             PaginationGenerator.writeIndex(model, service, fileManifest);
-            delegator.useFileWriter(PaginationGenerator.PAGINATION_INTERFACE_FILE, paginationWriter ->
-                PaginationGenerator.generateServicePaginationInterfaces(
+            delegator.useFileWriter(
+                PaginationGenerator.PAGINATION_INTERFACE_FILE,
+                paginationWriter -> PaginationGenerator.generateServicePaginationInterfaces(
                     aggregatedClientName,
                     serviceSymbol,
                     paginationWriter
@@ -385,8 +386,9 @@ final class DirectedTypeScriptCodegen
         for (OperationShape operation : directive.operations()) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
-                delegator.useShapeWriter(operation, commandWriter ->
-                    new CommandGenerator(
+                delegator.useShapeWriter(
+                    operation,
+                    commandWriter -> new CommandGenerator(
                         settings,
                         model,
                         operation,
@@ -400,8 +402,9 @@ final class DirectedTypeScriptCodegen
             }
 
             if (settings.generateServerSdk()) {
-                delegator.useShapeWriter(operation, commandWriter ->
-                    new ServerCommandGenerator(
+                delegator.useShapeWriter(
+                    operation,
+                    commandWriter -> new ServerCommandGenerator(
                         settings,
                         model,
                         operation,
@@ -642,8 +645,8 @@ final class DirectedTypeScriptCodegen
         List<String> unvalidatedOperations = TopDownIndex.of(model)
             .getContainedOperations(service)
             .stream()
-            .filter(o ->
-                operationIndex
+            .filter(
+                o -> operationIndex
                     .getErrors(o, service)
                     .stream()
                     .noneMatch(e -> e.getId().equals(VALIDATION_EXCEPTION_SHAPE))

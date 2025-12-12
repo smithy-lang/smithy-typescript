@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.integration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,19 +36,22 @@ public class HttpProtocolGeneratorUtilsTest {
         assertThat(
             "__serializeDateTime(" + DATA_SOURCE + ")",
             equalTo(
-                HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.DATE_TIME)
+                HttpProtocolGeneratorUtils
+                    .getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.DATE_TIME)
             )
         );
         assertThat(
             "(" + DATA_SOURCE + ".getTime() / 1_000)",
             equalTo(
-                HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.EPOCH_SECONDS)
+                HttpProtocolGeneratorUtils
+                    .getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.EPOCH_SECONDS)
             )
         );
         assertThat(
             "__dateToUtcString(" + DATA_SOURCE + ")",
             equalTo(
-                HttpProtocolGeneratorUtils.getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.HTTP_DATE)
+                HttpProtocolGeneratorUtils
+                    .getTimestampInputParam(mockContext, DATA_SOURCE, shape, Format.HTTP_DATE)
             )
         );
     }

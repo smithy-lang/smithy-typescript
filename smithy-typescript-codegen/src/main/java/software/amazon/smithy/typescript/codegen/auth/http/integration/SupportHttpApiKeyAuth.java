@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
@@ -27,15 +26,14 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public class SupportHttpApiKeyAuth implements HttpAuthTypeScriptIntegration {
 
-    private static final Consumer<TypeScriptWriter> HTTP_API_KEY_AUTH_SIGNER = w ->
-        w.write(
-            "new $T()",
-            Symbol.builder()
-                .name("HttpApiKeyAuthSigner")
-                .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
-                .addDependency(TypeScriptDependency.SMITHY_CORE)
-                .build()
-        );
+    private static final Consumer<TypeScriptWriter> HTTP_API_KEY_AUTH_SIGNER = w -> w.write(
+        "new $T()",
+        Symbol.builder()
+            .name("HttpApiKeyAuthSigner")
+            .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName(), "/")
+            .addDependency(TypeScriptDependency.SMITHY_CORE)
+            .build()
+    );
     private static final Symbol API_KEY_IDENTITY = Symbol.builder()
         .name("ApiKeyIdentity")
         .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
@@ -99,25 +97,25 @@ public class SupportHttpApiKeyAuth implements HttpAuthTypeScriptIntegration {
                         .name("in")
                         .type(HttpAuthOptionProperty.Type.SIGNING)
                         .source(
-                            s ->
-                                w -> {
-                                    Location in = ((HttpApiKeyAuthTrait) s.trait()).getIn();
-                                    switch (in) {
-                                        case HEADER: {
-                                            w.write("$T.HEADER", HTTP_API_KEY_LOCATION);
-                                            break;
-                                        }
-                                        case QUERY: {
-                                            w.write("$T.QUERY", HTTP_API_KEY_LOCATION);
-                                            break;
-                                        }
-                                        default: {
-                                            throw new CodegenException(
-                                                "Encountered unsupported `in` property on " + "`@httpApiKeyAuth`: " + in
-                                            );
-                                        }
+                            s -> w -> {
+                                Location in = ((HttpApiKeyAuthTrait) s.trait()).getIn();
+                                switch (in) {
+                                    case HEADER: {
+                                        w.write("$T.HEADER", HTTP_API_KEY_LOCATION);
+                                        break;
+                                    }
+                                    case QUERY: {
+                                        w.write("$T.QUERY", HTTP_API_KEY_LOCATION);
+                                        break;
+                                    }
+                                    default: {
+                                        throw new CodegenException(
+                                            "Encountered unsupported `in` property on "
+                                                + "`@httpApiKeyAuth`: " + in
+                                        );
                                     }
                                 }
+                            }
                         )
                         .build()
                 )
@@ -126,12 +124,11 @@ public class SupportHttpApiKeyAuth implements HttpAuthTypeScriptIntegration {
                         .name("scheme")
                         .type(HttpAuthOptionProperty.Type.SIGNING)
                         .source(
-                            s ->
-                                w ->
-                                    ((HttpApiKeyAuthTrait) s.trait()).getScheme().ifPresentOrElse(
-                                        scheme -> w.write("$S", scheme),
-                                        () -> w.write("undefined")
-                                    )
+                            s -> w -> ((HttpApiKeyAuthTrait) s.trait()).getScheme()
+                                .ifPresentOrElse(
+                                    scheme -> w.write("$S", scheme),
+                                    () -> w.write("undefined")
+                                )
                         )
                         .build()
                 )

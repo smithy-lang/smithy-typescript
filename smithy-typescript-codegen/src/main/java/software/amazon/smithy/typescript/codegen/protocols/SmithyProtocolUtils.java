@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.protocols;
 
 import java.util.Set;
@@ -79,9 +78,10 @@ public final class SmithyProtocolUtils {
         // TODO(cbor): enable test when it's working with vitest 3.x
         if (
             settings.generateSchemas() &&
-            (testCase.getId().equals("RpcV2CborInvalidGreetingError") ||
-                testCase.getId().equals("RpcV2CborComplexError") ||
-                testCase.getId().equals("RpcV2CborEmptyComplexError"))
+                (testCase.getId().equals("RpcV2CborInvalidGreetingError") ||
+                    testCase.getId().equals("RpcV2CborComplexError")
+                    ||
+                    testCase.getId().equals("RpcV2CborEmptyComplexError"))
         ) {
             return true;
         }

@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.nio.file.Paths;
@@ -109,11 +108,18 @@ public class SchemaGenerator implements Runnable {
     private void writeSimpleSchema(Shape shape) {
         if (elision.traits.hasSchemaTraits(shape)) {
             writer.addTypeImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
-            writer.openBlock("""
-            var $L: StaticSimpleSchema = [0, $L, $L,""", "", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> {
-                writeTraits(shape);
-                writer.writeInline(", $L];", resolveSimpleSchema(shape, shape));
-            });
+            writer.openBlock(
+                """
+                var $L: StaticSimpleSchema = [0, $L, $L,""",
+                "",
+                getShapeVariableName(shape),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
+                () -> {
+                    writeTraits(shape);
+                    writer.writeInline(", $L];", resolveSimpleSchema(shape, shape));
+                }
+            );
         }
     }
 
@@ -124,8 +130,15 @@ public class SchemaGenerator implements Runnable {
                 String exceptionCtorSymbolName = "__" + symbolName;
                 writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addRelativeImport(symbolName, exceptionCtorSymbolName, Paths.get("..", "models", "errors"));
-                writer.openBlock("""
-                export var $L: StaticErrorSchema = [-3, $L, $L,""", "];", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> doWithMembers(shape));
+                writer.openBlock(
+                    """
+                    export var $L: StaticErrorSchema = [-3, $L, $L,""",
+                    "];",
+                    getShapeVariableName(shape),
+                    store.var(shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getName()),
+                    () -> doWithMembers(shape)
+                );
                 writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
                 writer.write(
                     """
@@ -136,8 +149,15 @@ public class SchemaGenerator implements Runnable {
                 );
             } else {
                 writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.openBlock("""
-                export var $L: StaticStructureSchema = [3, $L, $L,""", "];", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> doWithMembers(shape));
+                writer.openBlock(
+                    """
+                    export var $L: StaticStructureSchema = [3, $L, $L,""",
+                    "];",
+                    getShapeVariableName(shape),
+                    store.var(shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getName()),
+                    () -> doWithMembers(shape)
+                );
             }
         });
     }
@@ -180,8 +200,15 @@ public class SchemaGenerator implements Runnable {
     private void writeUnionSchema(UnionShape shape) {
         checkedWriteSchema(shape, () -> {
             writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
-            writer.openBlock("""
-            export var $L: StaticStructureSchema = [3, $L, $L,""", "];", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> doWithMembers(shape));
+            writer.openBlock(
+                """
+                export var $L: StaticStructureSchema = [3, $L, $L,""",
+                "];",
+                getShapeVariableName(shape),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
+                () -> doWithMembers(shape)
+            );
         });
     }
 
@@ -223,16 +250,30 @@ public class SchemaGenerator implements Runnable {
     private void writeListSchema(CollectionShape shape) {
         checkedWriteSchema(shape, () -> {
             writer.addTypeImport("StaticListSchema", null, TypeScriptDependency.SMITHY_TYPES);
-            writer.openBlock("""
-            var $L: StaticListSchema = [1, $L, $L,""", "];", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> this.doWithMember(shape, shape.getMember()));
+            writer.openBlock(
+                """
+                var $L: StaticListSchema = [1, $L, $L,""",
+                "];",
+                getShapeVariableName(shape),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
+                () -> this.doWithMember(shape, shape.getMember())
+            );
         });
     }
 
     private void writeMapSchema(MapShape shape) {
         checkedWriteSchema(shape, () -> {
             writer.addTypeImport("StaticMapSchema", null, TypeScriptDependency.SMITHY_TYPES);
-            writer.openBlock("""
-            var $L: StaticMapSchema = [2, $L, $L,""", "];", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> this.doWithMember(shape, shape.getKey(), shape.getValue()));
+            writer.openBlock(
+                """
+                var $L: StaticMapSchema = [2, $L, $L,""",
+                "];",
+                getShapeVariableName(shape),
+                store.var(shape.getId().getNamespace(), "n"),
+                store.var(shape.getId().getName()),
+                () -> this.doWithMember(shape, shape.getKey(), shape.getValue())
+            );
         });
     }
 
@@ -272,16 +313,23 @@ public class SchemaGenerator implements Runnable {
 
     private void writeOperationSchema(OperationShape shape) {
         writer.addTypeImport("StaticOperationSchema", null, TypeScriptDependency.SMITHY_TYPES);
-        writer.openBlock("""
-        export var $L: StaticOperationSchema = [9, $L, $L,""", "];", getShapeVariableName(shape), store.var(shape.getId().getNamespace(), "n"), store.var(shape.getId().getName()), () -> {
-            writeTraits(shape);
-            writer.write(
-                """
-                , () => $L, () => $L""",
-                getShapeVariableName(model.expectShape(shape.getInputShape())),
-                getShapeVariableName(model.expectShape(shape.getOutputShape()))
-            );
-        });
+        writer.openBlock(
+            """
+            export var $L: StaticOperationSchema = [9, $L, $L,""",
+            "];",
+            getShapeVariableName(shape),
+            store.var(shape.getId().getNamespace(), "n"),
+            store.var(shape.getId().getName()),
+            () -> {
+                writeTraits(shape);
+                writer.write(
+                    """
+                    , () => $L, () => $L""",
+                    getShapeVariableName(model.expectShape(shape.getInputShape())),
+                    getShapeVariableName(model.expectShape(shape.getOutputShape()))
+                );
+            }
+        );
     }
 
     private void writeTraits(Shape shape) {
@@ -376,14 +424,12 @@ public class SchemaGenerator implements Runnable {
                     trait = memberShape.getTrait(TimestampFormatTrait.class);
                 }
                 return trait
-                    .map(timestampFormatTrait ->
-                        switch (timestampFormatTrait.getValue()) {
-                            case "date-time" -> "5";
-                            case "http-date" -> "6";
-                            case "epoch-seconds" -> "7";
-                            default -> "4";
-                        }
-                    )
+                    .map(timestampFormatTrait -> switch (timestampFormatTrait.getValue()) {
+                        case "date-time" -> "5";
+                        case "http-date" -> "6";
+                        case "epoch-seconds" -> "7";
+                        default -> "4";
+                    })
                     .orElse("4");
             }
             case BLOB -> {
@@ -453,16 +499,14 @@ public class SchemaGenerator implements Runnable {
 
         if (contained.isListShape() || contained.isMapShape()) {
             String schemaVarName = store.var(shape.getId().getName());
-            return (
-                staticTypePrefix +
+            return (staticTypePrefix +
                 store.var(shape.getId().getNamespace(), "n") +
                 ", " +
                 schemaVarName +
                 ", 0, " +
                 keySchema +
                 this.resolveSimpleSchema(context, contained) +
-                "]"
-            );
+                "]");
         } else {
             return sentinel + " | " + this.resolveSimpleSchema(context, contained);
         }

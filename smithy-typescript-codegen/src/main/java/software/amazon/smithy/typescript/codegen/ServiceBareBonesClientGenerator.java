@@ -1,18 +1,7 @@
 /*
- * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
@@ -339,12 +328,14 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             writer.addTypeImport("Decoder", "__Decoder", TypeScriptDependency.SMITHY_TYPES);
 
             writer.writeDocs(
-                "The function that will be used to convert a base64-encoded string to a byte array.\n" + "@internal"
+                "The function that will be used to convert a base64-encoded string to a byte array.\n"
+                    + "@internal"
             );
             writer.write("base64Decoder?: __Decoder;\n");
 
             writer.writeDocs(
-                "The function that will be used to convert binary data to a base64-encoded string.\n" + "@internal"
+                "The function that will be used to convert binary data to a base64-encoded string.\n"
+                    + "@internal"
             );
             writer.write("base64Encoder?: __Encoder;\n");
 
@@ -385,30 +376,31 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
     private void generateService() {
         // Write out the service.
         writer.writeShapeDocs(service);
-        writer.openBlock("""
-        export class $L extends __Client<
-          $T,
-          ServiceInputTypes,
-          ServiceOutputTypes,
-          $L
-        > {""", "}", symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
-            generateClientProperties();
-            generateConstructor();
-            writer.write("");
-            generateDestroyMethod();
-            // Hook for adding more methods to the client.
-            writer.injectSection(
-                ClientBodyExtraCodeSection.builder()
-                    .settings(settings)
-                    .model(model)
-                    .service(service)
-                    .symbolProvider(symbolProvider)
-                    .integrations(integrations)
-                    .runtimeClientPlugins(runtimePlugins)
-                    .applicationProtocol(applicationProtocol)
-                    .build()
-            );
-        });
+        writer
+            .openBlock("""
+                       export class $L extends __Client<
+                         $T,
+                         ServiceInputTypes,
+                         ServiceOutputTypes,
+                         $L
+                       > {""", "}", symbol.getName(), applicationProtocol.getOptionsType(), resolvedConfigType, () -> {
+                generateClientProperties();
+                generateConstructor();
+                writer.write("");
+                generateDestroyMethod();
+                // Hook for adding more methods to the client.
+                writer.injectSection(
+                    ClientBodyExtraCodeSection.builder()
+                        .settings(settings)
+                        .model(model)
+                        .service(service)
+                        .symbolProvider(symbolProvider)
+                        .integrations(integrations)
+                        .runtimeClientPlugins(runtimePlugins)
+                        .applicationProtocol(applicationProtocol)
+                        .build()
+                );
+            });
     }
 
     private void generateClientProperties() {
@@ -629,8 +621,10 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         if (applicationProtocol.isHttpProtocol()) {
             writer.writeDocs(
                 "Destroy underlying resources, like sockets. It's usually not necessary to do this.\n" +
-                    "However in Node.js, it's best to explicitly shut down the client's agent when it is no longer " +
-                    "needed.\nOtherwise, sockets might stay open for quite a long time before the server terminates " +
+                    "However in Node.js, it's best to explicitly shut down the client's agent when it is no longer "
+                    +
+                    "needed.\nOtherwise, sockets might stay open for quite a long time before the server terminates "
+                    +
                     "them."
             );
         }

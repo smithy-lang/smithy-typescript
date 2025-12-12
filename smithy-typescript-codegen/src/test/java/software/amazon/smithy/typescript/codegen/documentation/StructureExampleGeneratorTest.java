@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package software.amazon.smithy.typescript.codegen.documentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,7 +63,10 @@ public class StructureExampleGeneratorTest {
                 MemberShape.builder().id("foo.bar#structure$list5").target(list.getId()).build(),
                 MemberShape.builder().id("foo.bar#structure$list6").target(list.getId()).build(),
                 MemberShape.builder().id("foo.bar#structure$list7").target(list.getId()).build(),
-                MemberShape.builder().id("foo.bar#structure$structure").target("foo.bar#structure").build()
+                MemberShape.builder()
+                    .id("foo.bar#structure$structure")
+                    .target("foo.bar#structure")
+                    .build()
             )
         )
         .build();
