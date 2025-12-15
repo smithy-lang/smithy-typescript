@@ -167,6 +167,7 @@ public class EndpointsV2GeneratorTest {
                   return Object.assign(options, {
                     stage: options.stage ?? "production",
                     defaultSigningName: "",
+                    clientContextParams: Object.assign(clientContextParamDefaults, options.clientContextParams),
                   });
                 """
             )
@@ -176,9 +177,13 @@ public class EndpointsV2GeneratorTest {
             containsString(
                 """
                 export interface ClientInputEndpointParameters {
-                  region?: string | undefined | Provider<string | undefined>;
+                  clientContextParams?: {
+                    region?: string | undefined | Provider<string | undefined>;
+                    stage?: string | undefined | Provider<string | undefined>;
+                  };
                   stage?: string | undefined | Provider<string | undefined>;
-                  endpoint?:"""
+                  endpoint?: string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;
+                }"""
             )
         );
     }

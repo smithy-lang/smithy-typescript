@@ -38,11 +38,13 @@ public class SupportHttpApiKeyAuth implements HttpAuthTypeScriptIntegration {
         .name("ApiKeyIdentity")
         .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
         .addDependency(TypeScriptDependency.SMITHY_TYPES)
+        .putProperty("typeOnly", true)
         .build();
     private static final Symbol API_KEY_IDENTITY_PROVIDER = Symbol.builder()
         .name("ApiKeyIdentityProvider")
         .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
         .addDependency(TypeScriptDependency.SMITHY_TYPES)
+        .putProperty("typeOnly", true)
         .build();
     private static final Symbol HTTP_API_KEY_LOCATION = Symbol.builder()
         .name("HttpApiKeyAuthLocation")

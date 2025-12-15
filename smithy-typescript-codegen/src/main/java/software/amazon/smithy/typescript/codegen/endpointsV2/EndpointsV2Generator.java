@@ -6,6 +6,7 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -101,28 +102,63 @@ public final class EndpointsV2Generator implements Runnable {
         this.delegator.useFileWriter(
             Paths.get(CodegenUtils.SOURCE_FOLDER, ENDPOINT_FOLDER, ENDPOINT_PARAMETERS_FILE).toString(),
             writer -> {
-                writer.addTypeImport(
-                    "EndpointParameters",
-                    "__EndpointParameters",
-                    TypeScriptDependency.SMITHY_TYPES
-                );
+                writer.addTypeImport("EndpointParameters", "__EndpointParameters", TypeScriptDependency.SMITHY_TYPES);
                 writer.addTypeImport("Provider", null, TypeScriptDependency.SMITHY_TYPES);
+                Map<String, String> clientContextParams =
+                    ruleSetParameterFinder.getClientContextParams();
+                Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
+                builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
+                Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
+                    clientContextParams,
+                    builtInParams
+                );
 
                 writer.writeDocs("@public");
-                writer.openBlock("export interface ClientInputEndpointParameters {", "}", () -> {
-                    Map<String, String> clientInputParams = ruleSetParameterFinder.getClientContextParams();
-                    //Omit Endpoint params that should not be a part of the ClientInputEndpointParameters interface
-                    Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
-                    builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
-                    clientInputParams.putAll(builtInParams);
-
-                    ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
-                    ruleSet
-                        .getObjectMember("parameters")
-                        .ifPresent(parameters -> {
-                            parameters.accept(new RuleSetParametersVisitor(writer, clientInputParams, true));
+                writer.openBlock(
+                    "export interface ClientInputEndpointParameters {",
+                    "}",
+                    () -> {
+                        // Only include client context params that are NOT built-ins
+                        Map<String, String> clientContextParamsExcludingBuiltIns = new HashMap<>(clientContextParams);
+                        clientContextParamsExcludingBuiltIns.keySet().removeAll(builtInParams.keySet());
+                        if (!clientContextParamsExcludingBuiltIns.isEmpty()) {
+                            writer.write("clientContextParams?: {");
+                            writer.indent();
+                            ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                            ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                                parameters.accept(
+                                    new RuleSetParametersVisitor(
+                                        writer,
+                                        clientContextParamsExcludingBuiltIns,
+                                        true
+                                    )
+                                );
+                            });
+                            writer.dedent();
+                            writer.write("};");
+                        }
+                        // Add direct params (built-ins + custom context params, excluding conflicting)
+                        Map<String, String> directParams = new HashMap<>();
+                        // Add all built-ins (they should always be at root level, even if conflicting)
+                        directParams.putAll(builtInParams);
+                        // Add custom context params excluding conflicting ones
+                        customContextParams.entrySet().forEach(entry -> {
+                            String paramName = entry.getKey();
+                            String localName = EndpointsParamNameMap
+                                .getLocalName(paramName);
+                            if (
+                                !ClientConfigKeys.isKnownConfigKey(paramName)
+                                    && !ClientConfigKeys.isKnownConfigKey(localName)
+                            ) {
+                                directParams.put(paramName, entry.getValue());
+                            }
                         });
-                });
+                        ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                        ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                            parameters.accept(new RuleSetParametersVisitor(writer, directParams, true));
+                        });
+                    }
+                );
 
                 writer.write("");
                 writer.writeDocs("@public");
@@ -132,6 +168,9 @@ public final class EndpointsV2Generator implements Runnable {
                       defaultSigningName: string;
                     };"""
                 );
+                if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                    ruleSetParameterFinder.writeNestedClientContextParamDefaults(writer);
+                }
                 writer.write("");
 
                 writer.writeDocs("@internal");
@@ -146,9 +185,16 @@ public final class EndpointsV2Generator implements Runnable {
                             .ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
                             });
-                        writer.write("defaultSigningName: \"$L\",", settings.getDefaultSigningName());
+                        writer.write(
+                            "defaultSigningName: \"$L\",",
+                            settings.getDefaultSigningName()
+                        );
+                        if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                            ruleSetParameterFinder.writeConfigResolverNestedClientContextParams(writer);
+                        }
                     });
-                });
+                }
+                );
 
                 writer.write("");
 

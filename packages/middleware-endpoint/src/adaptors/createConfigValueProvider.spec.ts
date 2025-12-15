@@ -58,4 +58,31 @@ describe(createConfigValueProvider.name, () => {
     expect(await createConfigValueProvider("v1", "endpoint", config)()).toEqual(sampleUrl);
     expect(await createConfigValueProvider("v2", "endpoint", config)()).toEqual(sampleUrl);
   });
+
+  it("should prioritize clientContextParams over direct properties", async () => {
+    const config = {
+      stage: "prod",
+      clientContextParams: {
+        stage: "beta",
+      },
+    };
+    expect(await createConfigValueProvider("stage", "stage", config, true)()).toEqual("beta");
+  });
+
+  it("should fall back to direct property when clientContextParams is not provided", async () => {
+    const config = {
+      customParam: "direct-value",
+    };
+    expect(await createConfigValueProvider("customParam", "customParam", config)()).toEqual("direct-value");
+  });
+
+  it("should fall back to direct property when clientContextParams exists but param is not in it", async () => {
+    const config = {
+      customParam: "direct-value",
+      clientContextParams: {
+        otherParam: "other-value",
+      },
+    };
+    expect(await createConfigValueProvider("customParam", "customParam", config)()).toEqual("direct-value");
+  });
 });

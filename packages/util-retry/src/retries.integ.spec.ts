@@ -20,6 +20,7 @@ describe("retries", () => {
   it("should retry throttling and transient-error status codes", async () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
+      apiKey: { apiKey: "test-api-key" },
     });
 
     requireRequestsFrom(client)
@@ -50,6 +51,7 @@ describe("retries", () => {
   it("should retry when a retryable trait is modeled", async () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
+      apiKey: { apiKey: "test-api-key" },
     });
 
     requireRequestsFrom(client)
@@ -80,6 +82,7 @@ describe("retries", () => {
   it("should retry retryable trait with throttling", async () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
+      apiKey: { apiKey: "test-api-key" },
     });
 
     requireRequestsFrom(client)
@@ -110,6 +113,7 @@ describe("retries", () => {
   it("should not retry if the error is not modeled with retryable trait and is not otherwise retryable", async () => {
     const client = new XYZService({
       endpoint: "https://localhost/nowhere",
+      apiKey: { apiKey: "test-api-key" },
     });
 
     requireRequestsFrom(client)
