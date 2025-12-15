@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.10.1
+
+### Patch Changes
+
+- f3a51c2: set protocol to optional on resolved config type
+- Updated dependencies [76d7994]
+  - @smithy/middleware-endpoint@4.4.0
+
 ## 4.10.0
 
 ### Minor Changes

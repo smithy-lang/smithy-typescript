@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.0
+
+### Minor Changes
+
+- 76d7994: handle clientContextParam collisions with builtin config keys
+
 ## 4.3.15
 
 ### Patch Changes

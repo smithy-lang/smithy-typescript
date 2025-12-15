@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.3.15
+
+### Patch Changes
+
+- Updated dependencies [f3a51c2]
+  - @smithy/smithy-client@4.10.1
+
 ## 4.3.14
 
 ### Patch Changes
