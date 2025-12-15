@@ -2,7 +2,6 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.util.Map;
@@ -103,13 +102,15 @@ public final class ClientConfigKeys {
      * @return filtered custom context parameters
      */
     public static Map<String, String> getCustomContextParams(
-            Map<String, String> clientContextParams,
-            Map<String, String> builtInParams
-        ) {
+        Map<String, String> clientContextParams,
+        Map<String, String> builtInParams
+    ) {
         Map<String, String> customContextParams = new java.util.HashMap<>();
         for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
-            if (!builtInParams.containsKey(entry.getKey())
-                    && !KNOWN_CONFIG_KEYS.contains(entry.getKey())) {
+            if (
+                !builtInParams.containsKey(entry.getKey())
+                    && !KNOWN_CONFIG_KEYS.contains(entry.getKey())
+            ) {
                 customContextParams.put(entry.getKey(), entry.getValue());
             }
         }

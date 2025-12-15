@@ -109,7 +109,8 @@ public final class EndpointsV2Generator implements Runnable {
                 Map<String, String> builtInParams = ruleSetParameterFinder.getBuiltInParams();
                 builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
                 Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-                    clientContextParams, builtInParams
+                    clientContextParams,
+                    builtInParams
                 );
 
                 writer.writeDocs("@public");
@@ -125,8 +126,13 @@ public final class EndpointsV2Generator implements Runnable {
                             writer.indent();
                             ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
                             ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
-                                parameters.accept(new RuleSetParametersVisitor(writer,
-                                    clientContextParamsExcludingBuiltIns, true));
+                                parameters.accept(
+                                    new RuleSetParametersVisitor(
+                                        writer,
+                                        clientContextParamsExcludingBuiltIns,
+                                        true
+                                    )
+                                );
                             });
                             writer.dedent();
                             writer.write("};");
@@ -140,8 +146,10 @@ public final class EndpointsV2Generator implements Runnable {
                             String paramName = entry.getKey();
                             String localName = EndpointsParamNameMap
                                 .getLocalName(paramName);
-                            if (!ClientConfigKeys.isKnownConfigKey(paramName)
-                                && !ClientConfigKeys.isKnownConfigKey(localName)) {
+                            if (
+                                !ClientConfigKeys.isKnownConfigKey(paramName)
+                                    && !ClientConfigKeys.isKnownConfigKey(localName)
+                            ) {
                                 directParams.put(paramName, entry.getValue());
                             }
                         });
@@ -149,7 +157,8 @@ public final class EndpointsV2Generator implements Runnable {
                         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
                             parameters.accept(new RuleSetParametersVisitor(writer, directParams, true));
                         });
-                });
+                    }
+                );
 
                 writer.write("");
                 writer.writeDocs("@public");
@@ -176,15 +185,15 @@ public final class EndpointsV2Generator implements Runnable {
                             .ifPresent(parameters -> {
                                 parameters.accept(new RuleSetParametersVisitor(writer, true));
                             });
-                            writer.write(
-                                "defaultSigningName: \"$L\",",
-                                settings.getDefaultSigningName()
-                            );
-                            if (ruleSetParameterFinder.hasCustomClientContextParams()) {
-                                ruleSetParameterFinder.writeConfigResolverNestedClientContextParams(writer);
-                            }
-                        });
-                    }
+                        writer.write(
+                            "defaultSigningName: \"$L\",",
+                            settings.getDefaultSigningName()
+                        );
+                        if (ruleSetParameterFinder.hasCustomClientContextParams()) {
+                            ruleSetParameterFinder.writeConfigResolverNestedClientContextParams(writer);
+                        }
+                    });
+                }
                 );
 
                 writer.write("");

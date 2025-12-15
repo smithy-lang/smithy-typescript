@@ -173,7 +173,8 @@ public class RuleSetParameterFinder {
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
         Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams
+            clientContextParams,
+            builtInParams
         );
         return !customContextParams.isEmpty();
     }
@@ -186,7 +187,8 @@ public class RuleSetParameterFinder {
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
         Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams
+            clientContextParams,
+            builtInParams
         );
         ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
         ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
@@ -236,13 +238,15 @@ public class RuleSetParameterFinder {
         Map<String, String> builtInParams = getBuiltInParams();
         builtInParams.keySet().removeIf(OmitEndpointParams::isOmitted);
         Map<String, String> customContextParams = ClientConfigKeys.getCustomContextParams(
-            clientContextParams, builtInParams
+            clientContextParams,
+            builtInParams
         );
         ObjectNode ruleSet = ruleset.getRuleSet().expectObjectNode();
         boolean hasDefaultsForResolve = false;
         if (ruleSet.getObjectMember("parameters").isPresent()) {
             ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
-            hasDefaultsForResolve = customContextParams.entrySet().stream()
+            hasDefaultsForResolve = customContextParams.entrySet()
+                .stream()
                 .anyMatch(entry -> {
                     ObjectNode paramNode = parameters.getObjectMember(entry.getKey()).orElse(null);
                     return paramNode != null && paramNode.containsMember("default");
@@ -251,7 +255,7 @@ public class RuleSetParameterFinder {
         if (hasDefaultsForResolve) {
             writer.write(
                 "clientContextParams: Object.assign(clientContextParamDefaults, "
-                + "options.clientContextParams),"
+                    + "options.clientContextParams),"
             );
         } else {
             writer.write(

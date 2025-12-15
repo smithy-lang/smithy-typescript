@@ -183,7 +183,9 @@ public class EndpointsV2GeneratorTest {
                   };
                   stage?: string | undefined | Provider<string | undefined>;
                   endpoint?: string | Provider<string> | Endpoint | Provider<Endpoint> | EndpointV2 | Provider<EndpointV2>;
-                }"""));
+                }"""
+            )
+        );
     }
 
     private MockManifest testEndpoints(String filename) {
