@@ -209,11 +209,18 @@ public final class ServiceClosure implements KnowledgeIndex {
             symbolName += "_" + store.var(shape.getId().getNamespace(), "n");
         }
         /*
-         * The schema suffix allows what would otherwise conflict with the
-         * shape's interface symbol name to be exported at the top level of the same package.
+         * Although exporting a type and value with the same name is allowed by TS, we
+         * do not want to do this because the structure's interface is not that
+         * of the schema object.
+         *
+         * The name transform deconflicts the interface and structure variable names.
+         * for export at the top level of the same package.
          */
-        String schemaSuffix = "$";
-        return symbolName + schemaSuffix;
+        String suffix = "";
+        if (shape.isStructureShape() || shape.isUnionShape() || shape.isOperationShape()) {
+            suffix = "$";
+        }
+        return symbolName + suffix;
     }
 
     /**

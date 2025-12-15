@@ -34,16 +34,14 @@ import { TypeRegistry } from "@smithy/core/schema";
 import type { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema } from "@smithy/types";
 
 import {
-  CodedThrottlingError as __CodedThrottlingError,
-  HaltError as __HaltError,
-  MainServiceLinkedError as __MainServiceLinkedError,
-  MysteryThrottlingError as __MysteryThrottlingError,
-  RetryableError as __RetryableError,
-  XYZServiceServiceException as __XYZServiceServiceException,
+  CodedThrottlingError,
+  HaltError,
+  MainServiceLinkedError,
+  MysteryThrottlingError,
+  RetryableError,
+  XYZServiceServiceException,
 } from "../models/errors";
-import {
-  XYZServiceSyntheticServiceException as __XYZServiceSyntheticServiceException,
-} from "../models/XYZServiceSyntheticServiceException";
+import { XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
 
 /* eslint no-var: 0 */
 export var Alpha$: StaticStructureSchema = [3, n0, _A,
@@ -56,7 +54,7 @@ export var CodedThrottlingError$: StaticErrorSchema = [-3, n0, _CTE,
   [],
   []
 ];
-TypeRegistry.for(n0).registerError(CodedThrottlingError$, __CodedThrottlingError);
+TypeRegistry.for(n0).registerError(CodedThrottlingError$, CodedThrottlingError);
 export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
   0,
   [_bD, _bI, _fWM, _fWMi],
@@ -72,25 +70,25 @@ export var HaltError$: StaticErrorSchema = [-3, n0, _HE,
   [],
   []
 ];
-TypeRegistry.for(n0).registerError(HaltError$, __HaltError);
+TypeRegistry.for(n0).registerError(HaltError$, HaltError);
 export var MainServiceLinkedError$: StaticErrorSchema = [-3, n0, _MSLE,
   { [_e]: _c, [_hE]: 400 },
   [],
   []
 ];
-TypeRegistry.for(n0).registerError(MainServiceLinkedError$, __MainServiceLinkedError);
+TypeRegistry.for(n0).registerError(MainServiceLinkedError$, MainServiceLinkedError);
 export var MysteryThrottlingError$: StaticErrorSchema = [-3, n0, _MTE,
   { [_e]: _c },
   [],
   []
 ];
-TypeRegistry.for(n0).registerError(MysteryThrottlingError$, __MysteryThrottlingError);
+TypeRegistry.for(n0).registerError(MysteryThrottlingError$, MysteryThrottlingError);
 export var RetryableError$: StaticErrorSchema = [-3, n0, _RE,
   { [_e]: _c },
   [],
   []
 ];
-TypeRegistry.for(n0).registerError(RetryableError$, __RetryableError);
+TypeRegistry.for(n0).registerError(RetryableError$, RetryableError);
 export var TradeEventStreamRequest$: StaticStructureSchema = [3, n0, _TESR,
   0,
   [_eS],
@@ -106,10 +104,10 @@ export var XYZServiceServiceException$: StaticErrorSchema = [-3, n0, _XYZSSE,
   [],
   []
 ];
-TypeRegistry.for(n0).registerError(XYZServiceServiceException$, __XYZServiceServiceException);
+TypeRegistry.for(n0).registerError(XYZServiceServiceException$, XYZServiceServiceException);
 var __Unit = "unit" as const;
-export var XYZServiceSyntheticServiceException: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
-TypeRegistry.for(_s).registerError(XYZServiceSyntheticServiceException, __XYZServiceSyntheticServiceException);
+export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
+TypeRegistry.for(_s).registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
 export var TradeEvents$: StaticStructureSchema = [3, n0, _TE,
   { [_st]: 1 },
   [_a, _b, _g],

@@ -140,23 +140,17 @@ import type {
   StaticStructureSchema,
 } from "@smithy/types";
 
-import {
-  ComplexError as __ComplexError,
-  InvalidGreeting as __InvalidGreeting,
-  ValidationException as __ValidationException,
-} from "../models/errors";
-import {
-  RpcV2ProtocolServiceException as __RpcV2ProtocolServiceException,
-} from "../models/RpcV2ProtocolServiceException";
+import { ComplexError, InvalidGreeting, ValidationException } from "../models/errors";
+import { RpcV2ProtocolServiceException } from "../models/RpcV2ProtocolServiceException";
 
 /* eslint no-var: 0 */
 var __Unit = "unit" as const;
 export var ValidationException$: StaticErrorSchema = [-3, n0, _VE,
   { [_e]: _c },
   [_m, _fL],
-  [0, () => ValidationExceptionFieldList$]
+  [0, () => ValidationExceptionFieldList]
 ];
-TypeRegistry.for(n0).registerError(ValidationException$, __ValidationException);
+TypeRegistry.for(n0).registerError(ValidationException$, ValidationException);
 export var ValidationExceptionField$: StaticStructureSchema = [3, n0, _VEF,
   0,
   [_p, _m],
@@ -172,7 +166,7 @@ export var ComplexError$: StaticErrorSchema = [-3, n1, _CE,
   [_TL, _N],
   [0, () => ComplexNestedErrorData$]
 ];
-TypeRegistry.for(n1).registerError(ComplexError$, __ComplexError);
+TypeRegistry.for(n1).registerError(ComplexError$, ComplexError);
 export var ComplexNestedErrorData$: StaticStructureSchema = [3, n1, _CNED,
   0,
   [_F],
@@ -208,7 +202,7 @@ export var InvalidGreeting$: StaticErrorSchema = [-3, n1, _IG,
   [_M],
   [0]
 ];
-TypeRegistry.for(n1).registerError(InvalidGreeting$, __InvalidGreeting);
+TypeRegistry.for(n1).registerError(InvalidGreeting$, InvalidGreeting);
 export var OperationWithDefaultsInput$: StaticStructureSchema = [3, n1, _OWDI,
   0,
   [_de, _cOD, _tLD, _oTLD],
@@ -237,17 +231,17 @@ export var RecursiveShapesInputOutputNested2$: StaticStructureSchema = [3, n1, _
 export var RpcV2CborDenseMapsInputOutput$: StaticStructureSchema = [3, n1, _RVCDMIO,
   0,
   [_dSM, _dNM, _dBM, _dSMe, _dSMen],
-  [() => DenseStructMap$, 128 | 1, 128 | 2, 128 | 0, [2, n1, _DSM, 0, 0, 64 | 0]]
+  [() => DenseStructMap, 128 | 1, 128 | 2, 128 | 0, [2, n1, _DSM, 0, 0, 64 | 0]]
 ];
 export var RpcV2CborListInputOutput$: StaticStructureSchema = [3, n1, _RVCLIO,
   0,
   [_sL, _sS, _iL, _bL, _tL, _eL, _iEL, _nSL, _sLt, _bLl],
-  [64 | 0, 64 | 0, 64 | 1, 64 | 2, 64 | 4, 64 | 0, 64 | 1, [1, n2, _NSL, 0, 64 | 0], () => StructureList$, 64 | 21]
+  [64 | 0, 64 | 0, 64 | 1, 64 | 2, 64 | 4, 64 | 0, 64 | 1, [1, n2, _NSL, 0, 64 | 0], () => StructureList, 64 | 21]
 ];
 export var RpcV2CborSparseMapsInputOutput$: StaticStructureSchema = [3, n1, _RVCSMIO,
   0,
   [_sSM, _sNM, _sBM, _sSMp, _sSMpa],
-  [[() => SparseStructMap$, 0], [() => SparseNumberMap$, 0], [() => SparseBooleanMap$, 0], [() => SparseStringMap$, 0], [() => SparseSetMap$, 0]]
+  [[() => SparseStructMap, 0], [() => SparseNumberMap, 0], [() => SparseBooleanMap, 0], [() => SparseStringMap, 0], [() => SparseSetMap, 0]]
 ];
 export var SimpleScalarStructure$: StaticStructureSchema = [3, n1, _SSS,
   0,
@@ -262,7 +256,7 @@ export var SimpleStructure$: StaticStructureSchema = [3, n1, _SS,
 export var SparseNullsOperationInputOutput$: StaticStructureSchema = [3, n1, _SNOIO,
   0,
   [_sSL, _sSMp],
-  [[() => SparseStringList$, 0], [() => SparseStringMap$, 0]]
+  [[() => SparseStringList, 0], [() => SparseStringMap, 0]]
 ];
 export var StructureListMember$: StaticStructureSchema = [3, n1, _SLM,
   0,
@@ -274,52 +268,52 @@ export var GreetingStruct$: StaticStructureSchema = [3, n2, _GS,
   [_h],
   [0]
 ];
-export var RpcV2ProtocolServiceException: StaticErrorSchema = [-3, _sC, "RpcV2ProtocolServiceException", 0, [], []];
-TypeRegistry.for(_sC).registerError(RpcV2ProtocolServiceException, __RpcV2ProtocolServiceException);
-var ValidationExceptionFieldList$: StaticListSchema = [1, n0, _VEFL,
+export var RpcV2ProtocolServiceException$: StaticErrorSchema = [-3, _sC, "RpcV2ProtocolServiceException", 0, [], []];
+TypeRegistry.for(_sC).registerError(RpcV2ProtocolServiceException$, RpcV2ProtocolServiceException);
+var ValidationExceptionFieldList: StaticListSchema = [1, n0, _VEFL,
   0, () => ValidationExceptionField$
 ];
-var StructureList$: StaticListSchema = [1, n1, _SL,
+var StructureList: StaticListSchema = [1, n1, _SL,
   0, () => StructureListMember$
 ];
-var TestStringList$ = 64 | 0;
-var BlobList$ = 64 | 21;
-var BooleanList$ = 64 | 2;
-var FooEnumList$ = 64 | 0;
-var IntegerEnumList$ = 64 | 1;
-var IntegerList$ = 64 | 1;
-var NestedStringList$: StaticListSchema = [1, n2, _NSL,
+var TestStringList = 64 | 0;
+var BlobList = 64 | 21;
+var BooleanList = 64 | 2;
+var FooEnumList = 64 | 0;
+var IntegerEnumList = 64 | 1;
+var IntegerList = 64 | 1;
+var NestedStringList: StaticListSchema = [1, n2, _NSL,
   0, 64 | 0
 ];
-var SparseStringList$: StaticListSchema = [1, n2, _SSL,
+var SparseStringList: StaticListSchema = [1, n2, _SSL,
   { [_s]: 1 }, 0
 ];
-var StringList$ = 64 | 0;
-var StringSet$ = 64 | 0;
-var TimestampList$ = 64 | 4;
-var DenseBooleanMap$ = 128 | 2;
-var DenseNumberMap$ = 128 | 1;
-var DenseSetMap$: StaticMapSchema = [2, n1, _DSM,
+var StringList = 64 | 0;
+var StringSet = 64 | 0;
+var TimestampList = 64 | 4;
+var DenseBooleanMap = 128 | 2;
+var DenseNumberMap = 128 | 1;
+var DenseSetMap: StaticMapSchema = [2, n1, _DSM,
   0, 0, 64 | 0
 ];
-var DenseStringMap$ = 128 | 0;
-var DenseStructMap$: StaticMapSchema = [2, n1, _DSMe,
+var DenseStringMap = 128 | 0;
+var DenseStructMap: StaticMapSchema = [2, n1, _DSMe,
   0, 0, () => GreetingStruct$
 ];
-var SparseBooleanMap$: StaticMapSchema = [2, n1, _SBM,
+var SparseBooleanMap: StaticMapSchema = [2, n1, _SBM,
   { [_s]: 1 }, 0, 2
 ];
-var SparseNumberMap$: StaticMapSchema = [2, n1, _SNM,
+var SparseNumberMap: StaticMapSchema = [2, n1, _SNM,
   { [_s]: 1 }, 0, 1
 ];
-var SparseSetMap$: StaticMapSchema = [2, n1, _SSM,
+var SparseSetMap: StaticMapSchema = [2, n1, _SSM,
   { [_s]: 1 }, 0, 64 | 0
 ];
-var SparseStructMap$: StaticMapSchema = [2, n1, _SSMp,
+var SparseStructMap: StaticMapSchema = [2, n1, _SSMp,
   { [_s]: 1 }, 0, () => GreetingStruct$
 ];
-var TestStringMap$ = 128 | 0;
-var SparseStringMap$: StaticMapSchema = [2, n2, _SSMpa,
+var TestStringMap = 128 | 0;
+var SparseStringMap: StaticMapSchema = [2, n2, _SSMpa,
   { [_s]: 1 }, 0, 0
 ];
 export var EmptyInputOutput$: StaticOperationSchema = [9, n1, _EIO,
