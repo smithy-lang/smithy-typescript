@@ -1,5 +1,20 @@
 # Change Log
 
+## 3.19.0
+
+### Minor Changes
+
+- 5a56762: make protocol selection easier
+
+### Patch Changes
+
+- Updated dependencies [5a56762]
+  - @smithy/types@4.10.0
+  - @smithy/middleware-serde@4.2.7
+  - @smithy/protocol-http@5.3.6
+  - @smithy/util-middleware@4.2.6
+  - @smithy/util-stream@4.5.7
+
 ## 3.18.7
 
 ### Patch Changes

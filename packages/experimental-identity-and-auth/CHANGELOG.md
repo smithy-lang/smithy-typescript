@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.5.15
+
+### Patch Changes
+
+- Updated dependencies [5a56762]
+  - @smithy/types@4.10.0
+  - @smithy/middleware-retry@4.4.15
+  - @smithy/middleware-endpoint@4.3.15
+  - @smithy/middleware-serde@4.2.7
+  - @smithy/protocol-http@5.3.6
+  - @smithy/signature-v4@5.3.6
+  - @smithy/util-middleware@4.2.6
+
 ## 0.5.14
 
 ### Patch Changes

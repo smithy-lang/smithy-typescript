@@ -1,5 +1,21 @@
 # Change Log
 
+## 4.10.0
+
+### Minor Changes
+
+- 5a56762: make protocol selection easier
+
+### Patch Changes
+
+- Updated dependencies [5a56762]
+  - @smithy/types@4.10.0
+  - @smithy/core@3.19.0
+  - @smithy/middleware-endpoint@4.3.15
+  - @smithy/middleware-stack@4.2.6
+  - @smithy/protocol-http@5.3.6
+  - @smithy/util-stream@4.5.7
+
 ## 4.9.10
 
 ### Patch Changes

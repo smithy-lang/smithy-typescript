@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.10.0
+
+### Minor Changes
+
+- 5a56762: make protocol selection easier
+
 ## 4.9.0
 
 ### Minor Changes
