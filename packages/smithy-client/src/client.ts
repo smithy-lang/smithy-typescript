@@ -83,7 +83,7 @@ export interface SmithyConfiguration<HandlerOptions> {
 export type SmithyResolvedConfiguration<HandlerOptions> = {
   requestHandler: RequestHandler<any, any, HandlerOptions>;
   cacheMiddleware?: boolean;
-  protocol: ClientProtocol<any, any> | $ClientProtocol<any, any>;
+  protocol?: ClientProtocol<any, any> | $ClientProtocol<any, any>;
   protocolSettings?: {
     defaultNamespace?: string;
     [setting: string]: unknown;
