@@ -218,7 +218,7 @@ public final class ServiceClosure implements KnowledgeIndex {
          */
         String suffix = "";
         if (shape.isStructureShape() || shape.isUnionShape() || shape.isOperationShape()) {
-            suffix = "Schema";
+            suffix = "$";
         }
         return symbolName + suffix;
     }

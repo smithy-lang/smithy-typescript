@@ -1,28 +1,28 @@
 import {
-  AlphaSchema,
+  Alpha$,
   CodedThrottlingError,
-  CodedThrottlingErrorSchema,
+  CodedThrottlingError$,
+  GetNumbers$,
   GetNumbersCommand,
-  GetNumbersRequestSchema,
-  GetNumbersResponseSchema,
-  GetNumbersSchema,
+  GetNumbersRequest$,
+  GetNumbersResponse$,
   HaltError,
-  HaltErrorSchema,
+  HaltError$,
   MainServiceLinkedError,
-  MainServiceLinkedErrorSchema,
+  MainServiceLinkedError$,
   MysteryThrottlingError,
-  MysteryThrottlingErrorSchema,
+  MysteryThrottlingError$,
   RetryableError,
-  RetryableErrorSchema,
+  RetryableError$,
+  TradeEventStream$,
   TradeEventStreamCommand,
-  TradeEventStreamRequestSchema,
-  TradeEventStreamResponseSchema,
-  TradeEventStreamSchema,
-  TradeEventsSchema,
+  TradeEventStreamRequest$,
+  TradeEventStreamResponse$,
+  TradeEvents$,
   XYZService,
   XYZServiceClient,
   XYZServiceServiceException,
-  XYZServiceServiceExceptionSchema,
+  XYZServiceServiceException$,
   XYZServiceSyntheticServiceException,
 } from "../dist-cjs/index.js";
 import assert from "node:assert";
@@ -31,28 +31,28 @@ assert(typeof XYZServiceClient === "function");
 assert(typeof XYZService === "function");
 // commands
 assert(typeof GetNumbersCommand === "function");
-assert(typeof GetNumbersSchema === "object");
+assert(typeof GetNumbers$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
-assert(typeof TradeEventStreamSchema === "object");
+assert(typeof TradeEventStream$ === "object");
 // structural schemas
-assert(typeof AlphaSchema === "object");
-assert(typeof GetNumbersRequestSchema === "object");
-assert(typeof GetNumbersResponseSchema === "object");
-assert(typeof TradeEventsSchema === "object");
-assert(typeof TradeEventStreamRequestSchema === "object");
-assert(typeof TradeEventStreamResponseSchema === "object");
+assert(typeof Alpha$ === "object");
+assert(typeof GetNumbersRequest$ === "object");
+assert(typeof GetNumbersResponse$ === "object");
+assert(typeof TradeEvents$ === "object");
+assert(typeof TradeEventStreamRequest$ === "object");
+assert(typeof TradeEventStreamResponse$ === "object");
 // errors
 assert(CodedThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
-assert(typeof CodedThrottlingErrorSchema === "object");
+assert(typeof CodedThrottlingError$ === "object");
 assert(HaltError.prototype instanceof XYZServiceSyntheticServiceException);
-assert(typeof HaltErrorSchema === "object");
+assert(typeof HaltError$ === "object");
 assert(MainServiceLinkedError.prototype instanceof XYZServiceSyntheticServiceException);
-assert(typeof MainServiceLinkedErrorSchema === "object");
+assert(typeof MainServiceLinkedError$ === "object");
 assert(MysteryThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
-assert(typeof MysteryThrottlingErrorSchema === "object");
+assert(typeof MysteryThrottlingError$ === "object");
 assert(RetryableError.prototype instanceof XYZServiceSyntheticServiceException);
-assert(typeof RetryableErrorSchema === "object");
+assert(typeof RetryableError$ === "object");
 assert(XYZServiceServiceException.prototype instanceof XYZServiceSyntheticServiceException);
-assert(typeof XYZServiceServiceExceptionSchema === "object");
+assert(typeof XYZServiceServiceException$ === "object");
 assert(XYZServiceSyntheticServiceException.prototype instanceof Error);
 console.log(`XYZService index test passed.`);

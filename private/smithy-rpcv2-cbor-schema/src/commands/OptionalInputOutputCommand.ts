@@ -6,7 +6,7 @@ import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 import { commonParams } from "../endpoint/EndpointParameters";
 import type { SimpleStructure } from "../models/models_0";
 import type { RpcV2ProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes } from "../RpcV2ProtocolClient";
-import { OptionalInputOutputSchema } from "../schemas/schemas_0";
+import { OptionalInputOutput$ } from "../schemas/schemas_0";
 
 /**
  * @public
@@ -73,7 +73,7 @@ export class OptionalInputOutputCommand extends $Command
   })
   .s("RpcV2Protocol", "OptionalInputOutput", {})
   .n("RpcV2ProtocolClient", "OptionalInputOutputCommand")
-  .sc(OptionalInputOutputSchema)
+  .sc(OptionalInputOutput$)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {

@@ -5,7 +5,7 @@ import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
 import { commonParams } from "../endpoint/EndpointParameters";
 import type { TradeEventStreamRequest, TradeEventStreamResponse } from "../models/models_0";
-import { TradeEventStreamSchema } from "../schemas/schemas_0";
+import { TradeEventStream$ } from "../schemas/schemas_0";
 import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
 /**
@@ -97,7 +97,7 @@ export class TradeEventStreamCommand extends $Command
     },
   })
   .n("XYZServiceClient", "TradeEventStreamCommand")
-  .sc(TradeEventStreamSchema)
+  .sc(TradeEventStream$)
   .build() {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {

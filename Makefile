@@ -26,6 +26,10 @@ test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals && yarn test:index)
 	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals && yarn test:index)
 
+# "build generate test"
+bgt:
+	make build generate-protocol-tests test-protocols
+
 test-unit:
 	yarn g:vitest run -c vitest.config.mts
 
