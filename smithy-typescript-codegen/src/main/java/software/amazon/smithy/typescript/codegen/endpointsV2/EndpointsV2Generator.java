@@ -288,7 +288,7 @@ public final class EndpointsV2Generator implements Runnable {
                     ruleSetParameterFinder
                         .getEffectiveParams()
                         .stream()
-                        .collect(Collectors.joining("\",\n \"", "\"", "\""))
+                        .collect(Collectors.joining("\", \"", "\"", "\""))
                 );
 
                 writer.writeDocs("@internal");

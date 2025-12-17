@@ -13,6 +13,6 @@ export type { XYZServiceExtensionConfiguration } from "./extensionConfiguration"
 export * from "./commands";
 
 export * from "./models/errors";
-export type * from "./models/models_0";
+export * from "./models/models_0";
 
 export { XYZServiceSyntheticServiceException } from "./models/XYZServiceSyntheticServiceException";

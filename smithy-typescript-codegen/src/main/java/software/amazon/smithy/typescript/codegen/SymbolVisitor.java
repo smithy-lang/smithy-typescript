@@ -566,14 +566,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
             for (Map.Entry<String, TreeSet<String>> entry : namespaceToShapes.entrySet()) {
                 String namespace = entry.getKey();
-                // todo: export symbols instead of * if switching
-                // todo: to type+schema overload exports in the future.
-                // TreeSet<String> types = entry.getValue();
-                // String symbols = String.join(", ", types);
-
+                // server models have runtime components and should therefore be
+                // exported as is, rather than types-only.
                 writer.write(
                     """
-                    export type * from $S;""",
+                    export * from $S;""",
                     namespace
                 );
             }
