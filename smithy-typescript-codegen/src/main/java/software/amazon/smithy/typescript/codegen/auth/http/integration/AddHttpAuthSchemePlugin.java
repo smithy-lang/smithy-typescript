@@ -242,7 +242,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
                     }
                     for (ConfigField configField : scheme.getConfigFields()) {
                         if (configField.type().equals(ConfigField.Type.MAIN)) {
-                            w.writeInline("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
+                            w.write("$S: config.$L,", scheme.getSchemeId().toString(), configField.name());
                         }
                     }
                 }
