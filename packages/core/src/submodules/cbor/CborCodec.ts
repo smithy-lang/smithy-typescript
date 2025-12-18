@@ -96,6 +96,11 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
             newObject[key] = value;
           }
         }
+        const isUnion = ns.isUnionSchema();
+        if (isUnion && Array.isArray(sourceObject.$unknown)) {
+          const [k, v] = sourceObject.$unknown;
+          newObject[k] = v;
+        }
       } else if (ns.isDocumentSchema()) {
         for (const key of Object.keys(sourceObject)) {
           newObject[key] = this.serialize(ns.getValueSchema(), sourceObject[key]);
@@ -199,11 +204,22 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
           }
         }
       } else if (ns.isStructSchema()) {
+        const isUnion = ns.isUnionSchema();
+        let keys: Set<string> | undefined;
+        if (isUnion) {
+          keys = new Set(Object.keys(value).filter((k) => k !== "__type"));
+        }
         for (const [key, memberSchema] of ns.structIterator()) {
-          const v = this.readValue(memberSchema, value[key]);
-          if (v != null) {
-            newObject[key] = v;
+          if (isUnion) {
+            keys!.delete(key);
           }
+          if (value[key] != null) {
+            newObject[key] = this.readValue(memberSchema, value[key]);
+          }
+        }
+        if (isUnion && keys?.size === 1 && Object.keys(newObject).length === 0) {
+          const k = keys!.values().next().value as string;
+          newObject.$unknown = [k, value[k]];
         }
       }
       return newObject;

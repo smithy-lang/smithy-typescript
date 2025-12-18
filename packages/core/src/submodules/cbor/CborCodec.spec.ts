@@ -1,5 +1,11 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import type { StaticSimpleSchema, StaticStructureSchema, StringSchema, TimestampDefaultSchema } from "@smithy/types";
+import type {
+  StaticSimpleSchema,
+  StaticStructureSchema,
+  StaticUnionSchema,
+  StringSchema,
+  TimestampDefaultSchema,
+} from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
 import { cbor } from "./cbor";
@@ -94,6 +100,32 @@ describe(CborShapeSerializer.name, () => {
         },
       });
     });
+
+    it("can serialize the $unknown union convention", async () => {
+      const schema = [
+        3,
+        "ns",
+        "Struct",
+        0,
+        ["union"],
+        [[4, "ns", "Union", 0, ["a", "b", "c"], [0, 0, 0]] satisfies StaticUnionSchema],
+      ] satisfies StaticStructureSchema;
+
+      const ns = NormalizedSchema.of(schema);
+      const input = {
+        union: {
+          $unknown: ["d", {}],
+        },
+      };
+      serializer.write(ns, input);
+      const serialization = serializer.flush();
+      const objectEquivalent = cbor.deserialize(serialization);
+      expect(objectEquivalent).toEqual({
+        union: {
+          d: {},
+        },
+      });
+    });
   });
 
   describe("deserialization", () => {
@@ -127,6 +159,31 @@ describe(CborShapeSerializer.name, () => {
       expect(deserialized).toEqual({
         timestamp: new Date(1),
       });
+    });
+
+    it("deserializes unknown union members to the $unknown conventional property", async () => {
+      const schema = [
+        3,
+        "ns",
+        "Struct",
+        0,
+        ["union"],
+        [[4, "ns", "Union", 0, ["a", "b", "c"], [0, 0, 0]] satisfies StaticUnionSchema],
+      ] satisfies StaticStructureSchema;
+      const ns = NormalizedSchema.of(schema);
+      const receivedData = {
+        union: {
+          __type: "ns.Union",
+          d: {},
+        },
+      };
+      const serialization = cbor.serialize(receivedData);
+      const deserialized = await deserializer.read(ns, serialization);
+      expect(deserialized).toEqual({
+        union: {
+          $unknown: ["d", {}],
+        },
+      } satisfies Record<string, unknown>);
     });
   });
 });
