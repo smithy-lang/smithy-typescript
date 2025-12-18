@@ -28,6 +28,11 @@ export type StaticSchemaIdStruct = 3;
 /**
  * @public
  */
+export type StaticSchemaIdUnion = 4;
+
+/**
+ * @public
+ */
 export type StaticSchemaIdError = -3;
 
 /**
@@ -43,6 +48,7 @@ export type StaticSchema =
   | StaticListSchema
   | StaticMapSchema
   | StaticStructureSchema
+  | StaticUnionSchema
   | StaticErrorSchema
   | StaticOperationSchema;
 
@@ -76,6 +82,18 @@ export type StaticMapSchema = [StaticSchemaIdMap, ShapeNamespace, ShapeName, Sch
  */
 export type StaticStructureSchema = [
   StaticSchemaIdStruct,
+  ShapeNamespace,
+  ShapeName,
+  SchemaTraits,
+  string[], // member name list
+  $SchemaRef[], // member schema list
+];
+
+/**
+ * @public
+ */
+export type StaticUnionSchema = [
+  StaticSchemaIdUnion,
   ShapeNamespace,
   ShapeName,
   SchemaTraits,

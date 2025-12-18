@@ -12,6 +12,7 @@ import type {
   StaticMapSchema,
   StaticSimpleSchema,
   StaticStructureSchema,
+  StaticUnionSchema,
   StreamingBlobSchema,
   StringSchema,
   TimestampDefaultSchema,
@@ -22,12 +23,25 @@ import { NormalizedSchema } from "./NormalizedSchema";
 import { translateTraits } from "./translateTraits";
 
 describe(NormalizedSchema.name, () => {
-  const [List, Map, Struct]: [StaticListSchema, StaticMapSchema, () => StaticStructureSchema] = [
+  const [List, Map, Struct, Union]: [
+    StaticListSchema,
+    StaticMapSchema,
+    () => StaticStructureSchema,
+    StaticUnionSchema,
+  ] = [
     [1, "ack", "List", { sparse: 1 }, 0] satisfies StaticListSchema,
     [2, "ack", "Map", 0, 0, 1] satisfies StaticMapSchema,
     () => schema,
+    [4, "ack", "Union", 0, ["a", "b", "c"], ["unit", 0, 128]],
   ];
-  const schema: StaticStructureSchema = [3, "ack", "Structure", {}, ["list", "map", "struct"], [List, Map, Struct]];
+  const schema: StaticStructureSchema = [
+    3,
+    "ack",
+    "Structure",
+    {},
+    ["list", "map", "struct", "union"],
+    [List, Map, Struct, Union],
+  ];
 
   const ns = NormalizedSchema.of(schema);
   const nsFromIndirect = NormalizedSchema.of(() => ns);
@@ -198,6 +212,22 @@ describe(NormalizedSchema.name, () => {
         expect(ns.getMemberSchema("struct").getMemberSchema("struct").getMemberSchema("list").getName(true)).toBe(
           ns.getMemberSchema("list").getName(true)
         );
+      });
+    });
+    describe("union member", () => {
+      it("is a union and a struct", () => {
+        const member = ns.getMemberSchema("union");
+        expect(member.getName(true)).toBe("ack#Union");
+        expect(member.isMemberSchema()).toBe(true);
+        expect(member.isListSchema()).toBe(false);
+        expect(member.isMapSchema()).toBe(false);
+        expect(member.isStructSchema()).toBe(true);
+        expect(member.isUnionSchema()).toBe(true);
+        expect(member.getMemberName()).toBe("union");
+
+        expect(member.getMemberSchema("a").isUnitSchema()).toBe(true);
+        expect(member.getMemberSchema("b").isStringSchema()).toBe(true);
+        expect(member.getMemberSchema("c").isMapSchema()).toBe(true);
       });
     });
   });

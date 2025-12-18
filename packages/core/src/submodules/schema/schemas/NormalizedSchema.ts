@@ -22,6 +22,7 @@ import type {
   StaticSchemaIdList,
   StaticSchemaIdMap,
   StaticSchemaIdStruct,
+  StaticSchemaIdUnion,
   StaticSimpleSchema,
   StaticStructureSchema,
   StreamingBlobSchema,
@@ -194,12 +195,24 @@ export class NormalizedSchema implements INormalizedSchema {
       : (sc as StaticSchema)[0] === (2 satisfies StaticSchemaIdMap);
   }
 
+  /**
+   * To simplify serialization logic, static union schemas are considered a specialization
+   * of structs in the TypeScript typings and JS runtime, as well as static error schemas
+   * which have a different identifier.
+   */
   public isStructSchema(): boolean {
     const sc = this.getSchema();
+    const id = (sc as StaticSchema)[0];
     return (
-      (sc as StaticSchema)[0] === (3 satisfies StaticSchemaIdStruct) ||
-      (sc as StaticSchema)[0] === (-3 satisfies StaticSchemaIdError)
+      id === (3 satisfies StaticSchemaIdStruct) ||
+      id === (-3 satisfies StaticSchemaIdError) ||
+      id === (4 satisfies StaticSchemaIdUnion)
     );
+  }
+
+  public isUnionSchema(): boolean {
+    const sc = this.getSchema();
+    return (sc as StaticSchema)[0] === (4 satisfies StaticSchemaIdUnion);
   }
 
   public isBlobSchema(): boolean {
