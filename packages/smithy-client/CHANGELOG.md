@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.10.2
+
+### Patch Changes
+
+- Updated dependencies [9ccb841]
+  - @smithy/types@4.11.0
+  - @smithy/core@3.20.0
+  - @smithy/middleware-endpoint@4.4.1
+  - @smithy/middleware-stack@4.2.7
+  - @smithy/protocol-http@5.3.7
+  - @smithy/util-stream@4.5.8
+
 ## 4.10.1
 
 ### Patch Changes

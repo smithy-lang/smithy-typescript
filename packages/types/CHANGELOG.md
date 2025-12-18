@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.11.0
+
+### Minor Changes
+
+- 9ccb841: add static union schema as a new type
+
 ## 4.10.0
 
 ### Minor Changes

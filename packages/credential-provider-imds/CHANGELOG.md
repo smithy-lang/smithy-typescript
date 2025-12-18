@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.2.7
+
+### Patch Changes
+
+- Updated dependencies [9ccb841]
+  - @smithy/types@4.11.0
+  - @smithy/node-config-provider@4.3.7
+  - @smithy/property-provider@4.2.7
+  - @smithy/url-parser@4.2.7
+
 ## 4.2.6
 
 ### Patch Changes

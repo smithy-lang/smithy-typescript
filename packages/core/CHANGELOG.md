@@ -1,5 +1,20 @@
 # Change Log
 
+## 3.20.0
+
+### Minor Changes
+
+- 9ccb841: add static union schema as a new type
+
+### Patch Changes
+
+- Updated dependencies [9ccb841]
+  - @smithy/types@4.11.0
+  - @smithy/middleware-serde@4.2.8
+  - @smithy/protocol-http@5.3.7
+  - @smithy/util-middleware@4.2.7
+  - @smithy/util-stream@4.5.8
+
 ## 3.19.0
 
 ### Minor Changes
