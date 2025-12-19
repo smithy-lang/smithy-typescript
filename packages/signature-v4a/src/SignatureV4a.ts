@@ -1,3 +1,4 @@
+import { Ec } from "@smithy/external-dependencies";
 import type { SignatureV4CryptoInit, SignatureV4Init } from "@smithy/signature-v4";
 import {
   ALGORITHM_IDENTIFIER_V4A,
@@ -17,8 +18,6 @@ import { toUint8Array } from "@smithy/util-utf8";
 
 import { REGION_HEADER } from "./constants";
 import { createSigV4aScope, getSigV4aSigningKey } from "./credentialDerivation";
-// @ts-ignore
-import { Ec } from "./elliptic/Ec";
 
 /**
  * @public
@@ -123,7 +122,7 @@ export class SignatureV4a extends SignatureV4Base implements RequestSigner {
    */
   private async getSignature(privateKey: Uint8Array, stringToSign: string): Promise<string> {
     // Create ECDSA and get key pair
-    const ecdsa = new Ec("p256");
+    const ecdsa = new (Ec as any)("p256");
     const key = ecdsa.keyFromPrivate(privateKey);
 
     // Format request using SHA256

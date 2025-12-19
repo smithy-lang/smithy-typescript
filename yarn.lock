@@ -2660,6 +2660,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/external-dependencies@workspace:^, @smithy/external-dependencies@workspace:packages/external-dependencies":
+  version: 0.0.0-use.local
+  resolution: "@smithy/external-dependencies@workspace:packages/external-dependencies"
+  dependencies:
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    elliptic: "npm:6.5.5"
+    esbuild: "npm:^0.25.9"
+    rimraf: "npm:3.0.2"
+    tslib: "npm:^2.6.2"
+  languageName: unknown
+  linkType: soft
+
 "@smithy/fetch-http-handler@workspace:^, @smithy/fetch-http-handler@workspace:packages/fetch-http-handler":
   version: 0.0.0-use.local
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
@@ -3049,6 +3062,7 @@ __metadata:
   resolution: "@smithy/signature-v4a@workspace:packages/signature-v4a"
   dependencies:
     "@aws-crypto/sha256-js": "npm:5.2.0"
+    "@smithy/external-dependencies": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -3056,7 +3070,6 @@ __metadata:
     "@smithy/util-utf8": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
-    elliptic: "npm:6.5.5"
     rimraf: "npm:3.0.2"
     tslib: "npm:^2.6.2"
   languageName: unknown
