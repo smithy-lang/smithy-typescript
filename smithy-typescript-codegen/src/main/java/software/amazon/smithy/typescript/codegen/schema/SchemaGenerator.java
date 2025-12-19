@@ -198,10 +198,10 @@ public class SchemaGenerator implements Runnable {
 
     private void writeUnionSchema(UnionShape shape) {
         checkedWriteSchema(shape, () -> {
-            writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
+            writer.addTypeImport("StaticUnionSchema", null, TypeScriptDependency.SMITHY_TYPES);
             writer.openBlock(
                 """
-                export var $L: StaticStructureSchema = [3, $L, $L,""",
+                export var $L: StaticUnionSchema = [4, $L, $L,""",
                 "];",
                 getShapeVariableName(shape),
                 store.var(shape.getId().getNamespace(), "n"),

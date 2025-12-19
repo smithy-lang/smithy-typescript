@@ -6,6 +6,7 @@ package software.amazon.smithy.typescript.codegen.schema;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeMap;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.HttpLabelTrait;
@@ -78,8 +79,7 @@ class SchemaTraitWriter {
     private void writeTraitsObject() {
         buffer.append("{ ");
 
-        shape
-            .getAllTraits()
+        new TreeMap<>(shape.getAllTraits())
             .forEach((shapeId, trait) -> {
                 if (!elision.traits.includeTrait(trait.toShapeId())) {
                     return;

@@ -31,7 +31,7 @@ const n0 = "org.xyz.v1";
 
 // smithy-typescript generated code
 import { TypeRegistry } from "@smithy/core/schema";
-import type { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema } from "@smithy/types";
+import type { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema, StaticUnionSchema } from "@smithy/types";
 
 import {
   CodedThrottlingError,
@@ -108,7 +108,7 @@ TypeRegistry.for(n0).registerError(XYZServiceServiceException$, XYZServiceServic
 var __Unit = "unit" as const;
 export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
 TypeRegistry.for(_s).registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
-export var TradeEvents$: StaticStructureSchema = [3, n0, _TE,
+export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_st]: 1 },
   [_a, _b, _g],
   [() => Alpha$, () => __Unit, () => __Unit]
