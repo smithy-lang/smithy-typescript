@@ -4,7 +4,7 @@
 
 ### Features
 
-- Upgraded to smithy version 1.65.0 ([#1819](https://github.com/smithy-lang/smithy-typescript/pull/1819))
+- Upgraded smithy version to 1.65.0 ([#1819](https://github.com/smithy-lang/smithy-typescript/pull/1819))
 
 ### Bug Fixes
 
