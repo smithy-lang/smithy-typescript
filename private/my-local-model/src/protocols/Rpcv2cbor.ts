@@ -24,8 +24,8 @@ import type {
   Endpoint as __Endpoint,
   EventStreamSerdeContext as __EventStreamSerdeContext,
   HeaderBag as __HeaderBag,
-  MessageHeaders as __MessageHeaders,
   Message as __Message,
+  MessageHeaders as __MessageHeaders,
   ResponseMetadata as __ResponseMetadata,
   SerdeContext as __SerdeContext,
 } from "@smithy/types";

@@ -139,14 +139,14 @@ final class PaginationGenerator implements Runnable {
 
     static void writeIndex(Model model, ServiceShape service, FileManifest fileManifest) {
         TypeScriptWriter writer = new TypeScriptWriter("");
-        writer.write("export * from \"./$L\"", getModulePath(PAGINATION_INTERFACE_FILE));
+        writer.write("export * from \"./$L\";", getModulePath(PAGINATION_INTERFACE_FILE));
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         for (OperationShape operation : containedOperations) {
             if (operation.hasTrait(PaginatedTrait.ID)) {
                 String outputFilepath = PaginationGenerator.getOutputFilelocation(operation);
-                writer.write("export * from \"./$L\"", getModulePath(outputFilepath));
+                writer.write("export * from \"./$L\";", getModulePath(outputFilepath));
             }
         }
 
@@ -190,14 +190,11 @@ final class PaginationGenerator implements Runnable {
                   config: ${aggClient:L}PaginationConfiguration,
                   input: ${inputType:L},
                   ...rest: any[]
-                ) => Paginator<${outputType:L}> =
-                  createPaginator<${paginationType:L}, ${inputType:L}, ${outputType:L}>(
-                    ${serviceTypeName:L},
-                    ${operationName:L},
-                    ${inputToken:S},
-                    ${outputToken:S},
-                    ${pageSizeMember:S}
-                  );
+                ) => Paginator<${outputType:L}> = createPaginator<
+                  ${paginationType:L},
+                  ${inputType:L},
+                  ${outputType:L}
+                >(${serviceTypeName:L}, ${operationName:L}, ${inputToken:S}, ${outputToken:S}, ${pageSizeMember:S});
                 """
             )
             .popState();

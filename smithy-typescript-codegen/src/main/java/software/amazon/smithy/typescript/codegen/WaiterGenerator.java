@@ -85,9 +85,12 @@ class WaiterGenerator implements Runnable {
                 " does not throw error in non-success cases."
         );
         writer.openBlock(
-            "export const waitFor$L = async (params: WaiterConfiguration<$T>, input: $T): " +
-                "Promise<WaiterResult> => {",
-            "}",
+            """
+            export const waitFor$L = async (
+              params: WaiterConfiguration<$T>,
+              input: $T
+            ): Promise<WaiterResult> => {""",
+            "};",
             waiterName,
             serviceSymbol,
             inputSymbol,
@@ -97,7 +100,7 @@ class WaiterGenerator implements Runnable {
                     waiter.getMinDelay(),
                     waiter.getMaxDelay()
                 );
-                writer.write("return createWaiter({...serviceDefaults, ...params}, input, checkState);");
+                writer.write("return createWaiter({ ...serviceDefaults, ...params }, input, checkState);");
             }
         );
 
@@ -111,9 +114,12 @@ class WaiterGenerator implements Runnable {
                 " for polling."
         );
         writer.openBlock(
-            "export const waitUntil$L = async (params: WaiterConfiguration<$T>, input: $T): " +
-                "Promise<WaiterResult> => {",
-            "}",
+            """
+            export const waitUntil$L = async (
+              params: WaiterConfiguration<$T>,
+              input: $T
+            ): Promise<WaiterResult> => {""",
+            "};",
             waiterName,
             serviceSymbol,
             inputSymbol,
@@ -124,7 +130,7 @@ class WaiterGenerator implements Runnable {
                     waiter.getMaxDelay()
                 );
                 writer.write(
-                    "const result = await createWaiter({...serviceDefaults, ...params}, input, checkState);"
+                    "const result = await createWaiter({ ...serviceDefaults, ...params }, input, checkState);"
                 );
                 writer.write("return checkExceptions(result);");
             }
@@ -134,20 +140,25 @@ class WaiterGenerator implements Runnable {
     private void generateAcceptors() {
         writer.openBlock(
             "const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {",
-            "}",
+            "};",
             serviceSymbol,
             inputSymbol,
             () -> {
                 writer.write("let reason;");
-                writer.openBlock("try {", "}", () -> {
-                    writer.write("let result: any = await client.send(new $T(input))", operationSymbol);
+
+                writer.write("try {").indent();
+                {
+                    writer.write("const result: any = await client.send(new $T(input));", operationSymbol);
                     writer.write("reason = result;");
                     writeAcceptors("result", false);
-                });
-                writer.openBlock("catch (exception) {", "}", () -> {
+                }
+                writer.dedent().write("} catch (exception) {").indent();
+                {
                     writer.write("reason = exception;");
                     writeAcceptors("exception", true);
-                });
+                }
+                writer.dedent().write("}");
+
                 writer.write("return $L;", makeWaiterResult(AcceptorState.RETRY));
             }
         );
@@ -190,12 +201,12 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateSuccessMatcher(Matcher.SuccessMember member, AcceptorState state) {
-        writer.write("return $L", makeWaiterResult(state));
+        writer.write("return $L;", makeWaiterResult(state));
     }
 
     private void generateErrorMatcher(String accessor, Matcher.ErrorTypeMember member, AcceptorState state) {
         writer.openBlock("if ($L.name && $L.name == $S) {", "}", accessor, accessor, member.getValue(), () -> {
-            writer.write("return $L", makeWaiterResult(state));
+            writer.write("return $L;", makeWaiterResult(state));
         });
     }
 
@@ -252,7 +263,7 @@ class WaiterGenerator implements Runnable {
                     .getWaiters()
                     .forEach((String waiterName, Waiter waiter) -> {
                         String outputFilepath = WaiterGenerator.getOutputFileLocation(waiterName);
-                        writer.write("export * from \"./$L\"", getModulePath(outputFilepath));
+                        writer.write("export * from \"./$L\";", getModulePath(outputFilepath));
                     });
             }
         }

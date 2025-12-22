@@ -108,18 +108,16 @@ public class SchemaGenerator implements Runnable {
     private void writeSimpleSchema(Shape shape) {
         if (elision.traits.hasSchemaTraits(shape)) {
             writer.addTypeImport("StaticSimpleSchema", null, TypeScriptDependency.SMITHY_TYPES);
-            writer.openBlock(
+            writer.writeInline(
                 """
-                var $L: StaticSimpleSchema = [0, $L, $L,""",
-                "",
+                var $L: StaticSimpleSchema = [0, $L, $L,\s""",
                 getShapeVariableName(shape),
                 store.var(shape.getId().getNamespace(), "n"),
-                store.var(shape.getId().getName()),
-                () -> {
-                    writeTraits(shape);
-                    writer.writeInline(", $L];", resolveSimpleSchema(shape, shape));
-                }
+                store.var(shape.getId().getName())
             );
+            writeTraits(shape);
+            writer.writeInline(", $L];", resolveSimpleSchema(shape, shape));
+            writer.ensureNewline();
         }
     }
 

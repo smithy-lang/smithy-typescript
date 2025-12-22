@@ -278,19 +278,34 @@ public final class EndpointsV2Generator implements Runnable {
                 );
 
                 writer.addImport("EndpointCache", null, TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.write(
-                    """
-                    const cache = new EndpointCache({
-                      size: 50,
-                      params: [$L],
-                    });
-                    """,
-                    ruleSetParameterFinder
-                        .getEffectiveParams()
-                        .stream()
-                        .collect(Collectors.joining("\", \"", "\"", "\""))
-                );
 
+                List<String> effectiveParams = ruleSetParameterFinder.getEffectiveParams();
+                boolean longList = effectiveParams.size() >= 8;
+
+                if (longList) {
+                    writer.openBlock("const cache = new EndpointCache({", "});", () -> {
+                        writer.write("size: 50,");
+                        writer.openBlock("params: [", "],", () -> {
+                            effectiveParams
+                                .forEach(param -> {
+                                    writer.write("$S,", param);
+                                });
+                        });
+                    });
+                    writer.write("");
+                } else {
+                    writer.write(
+                        """
+                        const cache = new EndpointCache({
+                          size: 50,
+                          params: [$L],
+                        });
+                        """,
+                        effectiveParams
+                            .stream()
+                            .collect(Collectors.joining("\", \"", "\"", "\""))
+                    );
+                }
                 writer.writeDocs("@internal");
                 writer.write(
                     """
