@@ -1,22 +1,33 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.40.0 (2025-12-22)
+
+### Features
+
+- Upgraded to smithy version 1.65.0 ([#1819](https://github.com/smithy-lang/smithy-typescript/pull/1819))
+
+### Bug Fixes
+
+- Fixed TypeScript client codegen conflict between known config keys and clientContextParams ([#1788](https://github.com/smithy-lang/smithy-typescript/pull/1788))
+- Exported star from models_N ([#1817](https://github.com/smithy-lang/smithy-typescript/pull/1817))
+
 ## 0.39.1 (2025-12-10)
 
 ### Bug Fixes
 
-- fixed an NPE related to auth schemes ([#1804](https://github.com/smithy-lang/smithy-typescript/pull/1804))
+- Fixed an NPE related to auth schemes ([#1804](https://github.com/smithy-lang/smithy-typescript/pull/1804))
 
 ## 0.39.0 (2025-12-05)
 
 ### Features
 
-- added type import API for TypeScriptWriter ([#1786](https://github.com/smithy-lang/smithy-typescript/pull/1786))
-- added `generateIndexTests` setting for generation of optional API surface tests ([#1789](https://github.com/smithy-lang/smithy-typescript/pull/1789))
-- generate well-formatted TypeScript source code ([#1780](https://github.com/smithy-lang/smithy-typescript/pull/1780))
+- Added type import API for TypeScriptWriter ([#1786](https://github.com/smithy-lang/smithy-typescript/pull/1786))
+- Added `generateIndexTests` setting for generation of optional API surface tests ([#1789](https://github.com/smithy-lang/smithy-typescript/pull/1789))
+- Generated well-formatted TypeScript source code ([#1780](https://github.com/smithy-lang/smithy-typescript/pull/1780))
 
 ### Chores
 
-- reduced `info` level logging output.
+- Reduced `info` level logging output.
   To restore previous logging output, use the `fine` logging level. ([#1796](https://github.com/smithy-lang/smithy-typescript/pull/1796))
 
 ## 0.38.0 (2025-11-20)
