@@ -87,13 +87,19 @@ final class EnumGenerator implements Runnable {
                     .sorted(Comparator.comparing(e -> e.getName().get()))
                     .forEach(this::writeNamedEnumConstant);
             });
+
+        String inline = """
+                        export type %s = (typeof %s)[keyof typeof %s];""".formatted(
+            symbol.getName(),
+            symbol.getName(),
+            symbol.getName()
+        );
+        String breakline = inline.replace("= ", "=\n  ");
+
         writer
             .writeDocs("@public")
             .write(
-                "export type $L = (typeof $L)[keyof typeof $L];",
-                symbol.getName(),
-                symbol.getName(),
-                symbol.getName()
+                inline.length() <= TypeScriptWriter.LINE_WIDTH ? inline : breakline
             );
     }
 

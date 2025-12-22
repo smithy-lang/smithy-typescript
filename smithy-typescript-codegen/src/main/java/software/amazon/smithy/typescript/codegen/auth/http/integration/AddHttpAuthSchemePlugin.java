@@ -489,9 +489,10 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
         Integer i = 0;
         String configName = "config";
         for (ResolveConfigFunction resolveConfigFunction : resolveConfigFunctions.values()) {
-            w.openBlock(
+            w.openCollapsibleBlock(
                 "const config_$L = $T($L",
                 ");",
+                !resolveConfigFunction.addArgs().isEmpty(),
                 i,
                 resolveConfigFunction.resolveConfigFunction(),
                 configName,

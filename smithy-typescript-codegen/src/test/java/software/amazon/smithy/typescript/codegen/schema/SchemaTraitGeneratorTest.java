@@ -37,11 +37,11 @@ class SchemaTraitGeneratorTest {
         // annotations
         new TestPair("1", new XmlAttributeTrait()),
         // data traits
-        new TestPair("[\"prefix\"]\n", EndpointTrait.builder().hostPrefix("prefix").build()),
-        new TestPair("[_p, _h]\n", XmlNamespaceTrait.builder().prefix("prefix").uri("https://localhost").build()),
+        new TestPair("[\"prefix\"]", EndpointTrait.builder().hostPrefix("prefix").build()),
+        new TestPair("[_p, _h]", XmlNamespaceTrait.builder().prefix("prefix").uri("https://localhost").build()),
         new TestPair("404", new HttpErrorTrait(404)),
         new TestPair(
-            "[\"GET\", \"/uri-pattern\", 200]\n",
+            "[\"GET\", \"/uri-pattern\", 200]",
             HttpTrait.builder().method("GET").uri(UriPattern.parse("/uri-pattern")).code(200).build()
         )
     );

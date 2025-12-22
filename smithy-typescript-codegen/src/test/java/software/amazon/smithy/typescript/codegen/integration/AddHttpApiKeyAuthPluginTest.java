@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
+import java.util.Collection;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.build.MockManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -21,14 +23,20 @@ public class AddHttpApiKeyAuthPluginTest {
 
     @Test
     public void httpApiKeyAuthClientOnService() {
-        testInjects("http-api-key-auth-trait.smithy", "in: 'header', name: 'Authorization', scheme: 'ApiKey'");
+        testInjects("http-api-key-auth-trait.smithy", """
+                                                      in: 'header',
+                                                      name: 'Authorization',
+                                                      scheme: 'ApiKey'""");
     }
 
     @Test
     public void httpApiKeyAuthClientOnOperation() {
         testInjects(
             "http-api-key-auth-trait-on-operation.smithy",
-            "in: 'header', name: 'Authorization', scheme: 'ApiKey'"
+            """
+            in: 'header',
+            name: 'Authorization',
+            scheme: 'ApiKey'"""
         );
     }
 
@@ -36,7 +44,9 @@ public class AddHttpApiKeyAuthPluginTest {
     // to the middleware.
     @Test
     public void httpApiKeyAuthClientNoScheme() {
-        testInjects("http-api-key-auth-trait-no-scheme.smithy", "in: 'header', name: 'Authorization'");
+        testInjects("http-api-key-auth-trait-no-scheme.smithy", """
+                                                                in: 'header',
+                                                                name: 'Authorization'""");
     }
 
     private void testInjects(String filename, String extra) {
@@ -62,7 +72,11 @@ public class AddHttpApiKeyAuthPluginTest {
             .getFileString(CodegenUtils.SOURCE_FOLDER + "/commands/GetFooCommand.ts")
             .get();
         assertThat(generatedGetFooCommand, containsString("getHttpApiKeyAuthPlugin(config"));
-        assertThat(generatedGetFooCommand, containsString(extra));
+
+        Collection<String> lines = List.of(extra.split("\n"));
+        for (String line : lines) {
+            assertThat(generatedGetFooCommand, containsString(line));
+        }
 
         // Ensure that the GetBar operation does not import the middleware or use it.
         assertThat(

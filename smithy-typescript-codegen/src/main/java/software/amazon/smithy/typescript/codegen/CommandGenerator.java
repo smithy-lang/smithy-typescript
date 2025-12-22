@@ -13,6 +13,7 @@ import static software.amazon.smithy.typescript.codegen.CodegenUtils.writeClient
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -493,7 +494,7 @@ final class CommandGenerator implements Runnable {
                 );
             });
         }
-        writer.write("})").dedent();
+        writer.dedent().write("})");
     }
 
     private void generateCommandMiddlewareResolver(String configType) {
@@ -710,21 +711,24 @@ final class CommandGenerator implements Runnable {
                     }
                     writer.pushState();
                     writer.putContext(symbolMap);
-                    writer.openBlock("$pluginFn:T(config", "),", () -> {
-                        List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
-                        Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
-                            plugin.getOperationAddParamsWriterConsumers();
-                        if (additionalParameters.isEmpty() && clientAddParamsWriterConsumers.isEmpty()) {
-                            return;
-                        }
-                        writer.openBlock(", { ", " }", () -> {
-                            // caution: using String.join instead of templating
-                            // because additionalParameters may contain Smithy syntax.
+
+                    List<String> additionalParameters = CodegenUtils.getFunctionParametersList(paramsMap);
+                    Map<String, CommandWriterConsumer> clientAddParamsWriterConsumers =
+                        plugin.getOperationAddParamsWriterConsumers();
+                    boolean hasAddParams =
+                        !additionalParameters.isEmpty() || !clientAddParamsWriterConsumers.isEmpty();
+
+                    if (!hasAddParams) {
+                        writer.write("$pluginFn:T(config),");
+                    } else {
+                        writer.openBlock("$pluginFn:T(config, {", "}),", () -> {
                             if (!additionalParameters.isEmpty()) {
-                                writer.writeInline(String.join(", ", additionalParameters) + ", ");
+                                // caution: using String.join instead of templating
+                                // because additionalParameters may contain Smithy syntax.
+                                writer.write(String.join(",\n", additionalParameters) + ",");
                             }
                             clientAddParamsWriterConsumers.forEach((key, consumer) -> {
-                                writer.writeInline(
+                                writer.write(
                                     "$L: $C,",
                                     key,
                                     (Consumer<TypeScriptWriter>) (w -> {
@@ -743,7 +747,7 @@ final class CommandGenerator implements Runnable {
                                 );
                             });
                         });
-                    });
+                    }
                     writer.popState();
                 });
         }
@@ -801,7 +805,13 @@ final class CommandGenerator implements Runnable {
         TypeScriptWriter writer = new TypeScriptWriter("");
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
-        Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
+        Set<OperationShape> containedOperations = new TreeSet<>(
+            Comparator.comparing(opShape -> symbolProvider.toSymbol(opShape).getName())
+        );
+        containedOperations.addAll(
+            topDownIndex.getContainedOperations(service)
+        );
+
         if (containedOperations.isEmpty()) {
             writer.write("export {};");
         } else {

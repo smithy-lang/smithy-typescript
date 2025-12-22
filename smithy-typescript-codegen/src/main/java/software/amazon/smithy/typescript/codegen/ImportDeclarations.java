@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -23,6 +24,42 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  */
 @SmithyInternalApi
 final class ImportDeclarations implements ImportContainer {
+
+    /**
+     * External package first, relative last, otherwise by case-insensitive alphabetical ordering.
+     */
+    private static final Comparator<String> MODULES_ORDERING = (a, b) -> {
+        if (a.startsWith(".") && !b.startsWith(".")) {
+            return 1;
+        }
+        if (!a.startsWith(".") && b.startsWith(".")) {
+            return -1;
+        }
+        if (a.equalsIgnoreCase(b)) {
+            return a.compareTo(b);
+        }
+        return a.toLowerCase().compareTo(b.toLowerCase());
+    };
+
+    /**
+     * Type imports first, otherwise by symbol name, case-insensitively, ignoring alias.
+     */
+    private static final Comparator<String> IMPORTS_ORDERING = (a, b) -> {
+        boolean aType = a.startsWith("type ");
+        boolean bType = b.startsWith("type ");
+        if (aType && !bType) {
+            return -1;
+        }
+        if (!aType && bType) {
+            return 1;
+        }
+        String normalA = a.replaceAll("(^type )|( as (.*?)$)", "").toLowerCase();
+        String normalB = b.replaceAll("(^type )|( as (.*?)$)", "").toLowerCase();
+        if (normalA.equals(normalB)) {
+            return a.compareTo(b);
+        }
+        return normalA.compareTo(normalB);
+    };
 
     private final String moduleNameString;
     private final String relativize;
@@ -136,18 +173,7 @@ final class ImportDeclarations implements ImportContainer {
         Map<String, Map<String, String>> namedTypeImports,
         StringBuilder buffer
     ) {
-        TreeSet<String> mergedModuleKeys = new TreeSet<>((a, b) -> {
-            if (a.startsWith(".") && !b.startsWith(".")) {
-                return 1;
-            }
-            if (!a.startsWith(".") && b.startsWith(".")) {
-                return -1;
-            }
-            if (a.equalsIgnoreCase(b)) {
-                return a.compareTo(b);
-            }
-            return a.toLowerCase().compareTo(b.toLowerCase());
-        });
+        TreeSet<String> mergedModuleKeys = new TreeSet<>(MODULES_ORDERING);
         mergedModuleKeys.addAll(namedImports.keySet());
         mergedModuleKeys.addAll(namedTypeImports.keySet());
 
@@ -170,22 +196,7 @@ final class ImportDeclarations implements ImportContainer {
             mergedSymbolKeys.addAll(moduleImports.keySet());
             mergedSymbolKeys.addAll(typeImports.keySet());
 
-            Set<String> imports = new TreeSet<>((a, b) -> {
-                boolean aType = a.startsWith("type ");
-                boolean bType = b.startsWith("type ");
-                if (aType && !bType) {
-                    return -1;
-                }
-                if (!aType && bType) {
-                    return 1;
-                }
-                String normalA = a.replaceAll("(type )|( as (.*?))", "");
-                String normalB = b.replaceAll("(type )|( as (.*?))", "");
-                if (normalA.equals(normalB)) {
-                    return a.compareTo(b);
-                }
-                return normalA.compareTo(normalB);
-            });
+            Set<String> imports = new TreeSet<>(IMPORTS_ORDERING);
 
             for (String alias : mergedSymbolKeys) {
                 String runtimeSymbol = moduleImports.get(alias);

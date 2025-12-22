@@ -163,12 +163,6 @@ final class StructureGenerator implements Runnable {
             .map(SymbolReference::getAlias)
             .collect(Collectors.joining(", "));
 
-        if (extendsFrom.isEmpty()) {
-            writer.openBlock("export interface $L {", symbol.getName());
-        } else {
-            writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
-        }
-
         StructuredMemberWriter config = new StructuredMemberWriter(
             model,
             symbolProvider,
@@ -176,8 +170,19 @@ final class StructureGenerator implements Runnable {
             this.requiredMemberMode,
             sensitiveDataFinder
         );
-        config.writeMembers(writer, shape);
-        writer.closeBlock("}");
+
+        if (config.members.isEmpty()) {
+            writer.write("export interface $L {}", symbol.getName());
+        } else {
+            if (extendsFrom.isEmpty()) {
+                writer.openBlock("export interface $L {", symbol.getName());
+            } else {
+                writer.openBlock("export interface $L extends $L {", symbol.getName(), extendsFrom);
+            }
+            config.writeMembers(writer, shape);
+            writer.closeBlock("}");
+        }
+
         writer.write("");
         renderStructureNamespace(config, includeValidation);
     }

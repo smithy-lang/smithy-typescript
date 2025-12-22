@@ -243,6 +243,29 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return openCollapsibleBlock(open, close, condition, new Object[] {arg1}, runnable);
     }
 
+    public TypeScriptWriter openCollapsibleBlock(
+        String open,
+        String close,
+        boolean condition,
+        Object arg1,
+        Object arg2,
+        Runnable runnable
+    ) {
+        return openCollapsibleBlock(open, close, condition, new Object[] {arg1, arg2}, runnable);
+    }
+
+    public TypeScriptWriter openCollapsibleBlock(
+        String open,
+        String close,
+        boolean condition,
+        Object arg1,
+        Object arg2,
+        Object arg3,
+        Runnable runnable
+    ) {
+        return openCollapsibleBlock(open, close, condition, new Object[] {arg1, arg2, arg3}, runnable);
+    }
+
     /**
      * Modifies and writes shape documentation comments if docs are present.
      *

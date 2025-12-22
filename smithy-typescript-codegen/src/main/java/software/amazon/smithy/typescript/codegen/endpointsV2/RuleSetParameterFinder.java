@@ -209,24 +209,34 @@ public class RuleSetParameterFinder {
             ObjectNode parameters = ruleSet.getObjectMember("parameters").get().expectObjectNode();
             writer.write("");
             writer.writeDocs("@internal");
-            writer.openBlock("const clientContextParamDefaults = {", "} as const;", () -> {
-                // Write defaults only for conflicting parameters
-                for (Map.Entry<String, String> entry : clientContextParams.entrySet()) {
-                    String paramName = entry.getKey();
-                    // Check if this is a conflicting parameter (exists in both clientContextParams and knownConfigKeys)
-                    if (ClientConfigKeys.isKnownConfigKey(paramName) && !builtInParams.containsKey(paramName)) {
-                        ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
-                        if (paramNode != null && paramNode.containsMember("default")) {
-                            software.amazon.smithy.model.node.Node defaultValue = paramNode.getMember("default").get();
-                            if (defaultValue.isStringNode()) {
-                                writer.write("$L: \"$L\",", paramName, defaultValue.expectStringNode().getValue());
-                            } else if (defaultValue.isBooleanNode()) {
-                                writer.write("$L: $L,", paramName, defaultValue.expectBooleanNode().getValue());
+            writer.openCollapsibleBlock(
+                "const clientContextParamDefaults = {",
+                "} as const;",
+                clientContextParams.keySet()
+                    .stream()
+                    .anyMatch(k -> {
+                        return ClientConfigKeys.isKnownConfigKey(k) && !builtInParams.containsKey(k)
+                            &&
+                            parameters.getObjectMember(k).stream().anyMatch(n -> n.containsMember("default"));
+                    }),
+                () -> {
+                    // Write defaults only for conflicting parameters
+                    for (String paramName : clientContextParams.keySet()) {
+                        // Check if this is a conflicting parameter (exists in both clientContextParams and knownConfigKeys)
+                        if (ClientConfigKeys.isKnownConfigKey(paramName) && !builtInParams.containsKey(paramName)) {
+                            ObjectNode paramNode = parameters.getObjectMember(paramName).orElse(null);
+                            if (paramNode != null && paramNode.containsMember("default")) {
+                                Node defaultValue = paramNode.getMember("default").get();
+                                if (defaultValue.isStringNode()) {
+                                    writer.write("$L: \"$L\",", paramName, defaultValue.expectStringNode().getValue());
+                                } else if (defaultValue.isBooleanNode()) {
+                                    writer.write("$L: $L,", paramName, defaultValue.expectBooleanNode().getValue());
+                                }
                             }
                         }
                     }
                 }
-            });
+            );
         }
     }
 
