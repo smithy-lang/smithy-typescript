@@ -37,7 +37,7 @@
     "@smithy/protocol-http": "workspace:^",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
-    "elliptic": "6.5.5",
+    "elliptic": "6.6.1",
     "rimraf": "3.0.2"
   },
   "engines": {
