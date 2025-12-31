@@ -1,5 +1,11 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.41.0 (2025-12-31)
+
+### Features
+
+- generate schema-based serialization/deserialization for clients ([#1600](https://github.com/smithy-lang/smithy-typescript/issues/1600))
+
 ## 0.40.0 (2025-12-22)
 
 ### Features
