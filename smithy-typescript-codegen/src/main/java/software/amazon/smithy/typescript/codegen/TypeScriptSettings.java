@@ -80,7 +80,7 @@ public final class TypeScriptSettings {
     private boolean generateTypeDoc = false;
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
     private String bigNumberMode = "native";
-    private boolean generateSchemas = false;
+    private boolean generateSchemas = true;
     private boolean generateIndexTests = false;
 
     @Deprecated
@@ -145,7 +145,7 @@ public final class TypeScriptSettings {
 
         // Internal undocumented configuration used to control rollout of schemas.
         // `true` will eventually be the only available option, and this should not be set by users.
-        settings.setGenerateSchemas(config.getBooleanMemberOrDefault("generateSchemas", false));
+        settings.setGenerateSchemas(config.getBooleanMemberOrDefault("generateSchemas", true));
 
         settings.setGenerateIndexTests(config.getBooleanMemberOrDefault("generateIndexTests", false));
 

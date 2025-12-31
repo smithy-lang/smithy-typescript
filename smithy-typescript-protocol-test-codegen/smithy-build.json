@@ -25,6 +25,7 @@
             "license": "Apache-2.0"
           },
           "private": true,
+          "generateSchemas": false,
           "generateIndexTests": true
         }
       }
@@ -47,8 +48,7 @@
               "name": "Smithy team",
               "url": "https://smithy.io/"
             },
-            "scripts": {
-            },
+            "scripts": {},
             "license": "Apache-2.0"
           },
           "private": true,
@@ -74,7 +74,8 @@
           "packageJson": {
             "private": true
           },
-          "bigNumberMode": "native"
+          "bigNumberMode": "native",
+          "generateSchemas": false
         }
       }
     },
