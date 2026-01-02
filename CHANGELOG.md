@@ -1,10 +1,14 @@
 # Smithy Typescript Codegen Changelog
 
-## 0.41.0 (2025-12-31)
+## 0.41.0 (2026-01-02)
 
 ### Features
 
-- generate schema-based serialization/deserialization for clients ([#1600](https://github.com/smithy-lang/smithy-typescript/issues/1600))
+- Changed default serialization/deserialization for clients to schema-based ([#1600](https://github.com/smithy-lang/smithy-typescript/issues/1600))
+
+### Bug Fixes
+
+- Fixed const/let generation in waiters ([#1826](https://github.com/smithy-lang/smithy-typescript/pull/1826))
 
 ## 0.40.0 (2025-12-22)
 
