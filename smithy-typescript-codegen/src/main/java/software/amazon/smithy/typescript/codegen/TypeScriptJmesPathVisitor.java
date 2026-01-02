@@ -52,7 +52,7 @@ class TypeScriptJmesPathVisitor implements ExpressionVisitor<Void> {
     }
 
     public void run() {
-        writer.openBlock("let returnComparator = () => {", "}", () -> {
+        writer.openBlock("const returnComparator = () => {", "}", () -> {
             executionContext = accessor;
             jmesExpression.accept(this);
             writer.write("return $L;", executionContext);

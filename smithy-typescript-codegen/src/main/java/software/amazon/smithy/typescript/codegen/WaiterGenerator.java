@@ -148,7 +148,7 @@ class WaiterGenerator implements Runnable {
 
                 writer.write("try {").indent();
                 {
-                    writer.write("const result: any = await client.send(new $T(input));", operationSymbol);
+                    writer.write("let result: any = await client.send(new $T(input));", operationSymbol);
                     writer.write("reason = result;");
                     writeAcceptors("result", false);
                 }
