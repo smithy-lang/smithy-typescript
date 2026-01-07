@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.20.1
+
+### Patch Changes
+
+- aa954bc: fix for CBOR shape deserialization of BigDecimals
+
 ## 3.20.0
 
 ### Minor Changes
