@@ -441,10 +441,10 @@ public class SchemaGenerator implements Runnable {
             case DOCUMENT -> {
                 return "15";
             }
-            case BIG_DECIMAL -> {
+            case BIG_INTEGER -> {
                 return "17";
             }
-            case BIG_INTEGER -> {
+            case BIG_DECIMAL -> {
                 return "19";
             }
             case LIST, SET, MAP -> {

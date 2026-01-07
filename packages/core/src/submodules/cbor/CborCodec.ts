@@ -1,6 +1,7 @@
 import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { _parseEpochTimestamp, generateIdempotencyToken } from "@smithy/core/serde";
+import { NumericValue } from "@smithy/core/serde";
 import type { Codec, Schema, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
@@ -221,6 +222,8 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
           const k = keys!.values().next().value as string;
           newObject.$unknown = [k, value[k]];
         }
+      } else if (value instanceof NumericValue) {
+        return value;
       }
       return newObject;
     } else {
