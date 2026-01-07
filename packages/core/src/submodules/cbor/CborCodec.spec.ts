@@ -1,5 +1,7 @@
 import { NormalizedSchema } from "@smithy/core/schema";
+import { nv } from "@smithy/core/serde";
 import type {
+  BigDecimalSchema,
   StaticSimpleSchema,
   StaticStructureSchema,
   StaticUnionSchema,
@@ -158,6 +160,24 @@ describe(CborShapeSerializer.name, () => {
 
       expect(deserialized).toEqual({
         timestamp: new Date(1),
+      });
+    });
+
+    it("should pass through NumericValue types if the schema is BigDecimal", async () => {
+      const schema = [
+        3,
+        "ns",
+        "Currency",
+        0,
+        ["price"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+      const data = cbor.serialize({
+        price: nv("0.99"),
+      });
+      const deserialized = await deserializer.read(NormalizedSchema.of(schema), data);
+      expect(deserialized).toEqual({
+        price: nv("0.99"),
       });
     });
 

@@ -58,12 +58,12 @@ TypeRegistry.for(n0).registerError(CodedThrottlingError$, CodedThrottlingError);
 export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
   0,
   [_bD, _bI, _fWM, _fWMi],
-  [17, 19, 0, 0]
+  [19, 17, 0, 0]
 ];
 export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   0,
   [_bD, _bI],
-  [17, 19]
+  [19, 17]
 ];
 export var HaltError$: StaticErrorSchema = [-3, n0, _HE,
   { [_e]: _c },
