@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.41.1 (2026-01-08)
+
+### Bug Fixes
+
+- Fixed deserialization bug in CBOR BigDecimal values ([#1830](https://github.com/smithy-lang/smithy-typescript/pull/1830))
+
+### Chores
+
+- Upgraded generated clients to use rimraf v5 ([#1829](https://github.com/smithy-lang/smithy-typescript/pull/1829))
+
 ## 0.41.0 (2026-01-02)
 
 ### Features
