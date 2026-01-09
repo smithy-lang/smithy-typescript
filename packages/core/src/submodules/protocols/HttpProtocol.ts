@@ -109,6 +109,9 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
     operationSchema: OperationSchema,
     input: Input
   ): void {
+    if (this.serdeContext?.disableHostPrefix) {
+      return;
+    }
     const inputNs = NormalizedSchema.of(operationSchema.input);
     const opTraits = translateTraits(operationSchema.traits ?? {});
 
