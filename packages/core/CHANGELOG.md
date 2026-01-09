@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.20.2
+
+### Patch Changes
+
+- dd55f1f: fix to conditionally set host prefix
+
 ## 3.20.1
 
 ### Patch Changes
