@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.20.3
+
+### Patch Changes
+
+- 681d6c4: fix cbor bigDecimal serialization
+
 ## 3.20.2
 
 ### Patch Changes
