@@ -85,8 +85,9 @@ export type StaticStructureSchema = [
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
-  string[], // member name list
-  $SchemaRef[], // member schema list
+  string[], // member name list.
+  $SchemaRef[], // member schema list.
+  number?, // required member count, front-loaded in the lists.
 ];
 
 /**
@@ -97,8 +98,8 @@ export type StaticUnionSchema = [
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
-  string[], // member name list
-  $SchemaRef[], // member schema list
+  string[], // member name list.
+  $SchemaRef[], // member schema list.
 ];
 
 /**
@@ -109,8 +110,9 @@ export type StaticErrorSchema = [
   ShapeNamespace,
   ShapeName,
   SchemaTraits,
-  string[], // member name list
-  $SchemaRef[], // member schema list
+  string[], // member name list.
+  $SchemaRef[], // member schema list.
+  number?, // required member count, front-loaded in the lists.
 ];
 
 /**

@@ -278,7 +278,7 @@ public class StructureGeneratorTest {
         );
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, new SymbolVisitor(model, settings), writer, struct).run();
+        new StructureGenerator(model, settings, new SymbolVisitor(model, settings), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));
@@ -311,7 +311,7 @@ public class StructureGeneratorTest {
         );
 
         TypeScriptWriter writer = new TypeScriptWriter("./foo");
-        new StructureGenerator(model, new SymbolVisitor(model, settings), writer, struct).run();
+        new StructureGenerator(model, settings, new SymbolVisitor(model, settings), writer, struct).run();
         String output = writer.toString();
 
         assertThat(output, containsString("export interface Bar {"));

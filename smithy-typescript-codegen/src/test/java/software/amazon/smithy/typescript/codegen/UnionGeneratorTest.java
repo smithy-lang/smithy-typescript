@@ -40,7 +40,7 @@ public class UnionGeneratorTest {
         );
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptWriter writer = new TypeScriptWriter("./Example");
-        new UnionGenerator(model, symbolProvider, writer, unionShape).run();
+        new UnionGenerator(model, settings, symbolProvider, writer, unionShape).run();
         String output = writer.toString();
 
         assertEquals(
