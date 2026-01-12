@@ -128,6 +128,25 @@ describe(CborShapeSerializer.name, () => {
         },
       });
     });
+
+    it("should pass through NumericValue types if the schema is BigDecimal", async () => {
+      const schema = [
+        3,
+        "ns",
+        "Currency",
+        0,
+        ["price"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+      const data = {
+        price: nv("0.99"),
+      };
+      serializer.write(NormalizedSchema.of(schema), data);
+      const serialized = serializer.flush();
+      expect(cbor.deserialize(serialized)).toEqual({
+        price: nv("0.99"),
+      });
+    });
   });
 
   describe("deserialization", () => {

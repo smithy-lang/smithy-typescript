@@ -106,6 +106,8 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
         for (const key of Object.keys(sourceObject)) {
           newObject[key] = this.serialize(ns.getValueSchema(), sourceObject[key]);
         }
+      } else if (ns.isBigDecimalSchema()) {
+        return sourceObject;
       }
       return newObject;
     }
