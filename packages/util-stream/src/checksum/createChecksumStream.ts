@@ -7,13 +7,18 @@ import type { ReadableStreamType } from "./createChecksumStream.browser";
 import { createChecksumStream as createChecksumStreamWeb } from "./createChecksumStream.browser";
 
 /**
- * @internal
- *
  * Creates a stream mirroring the input stream's interface, but
  * performs checksumming when reading to the end of the stream.
+ * @internal
  */
 export function createChecksumStream(init: ChecksumStreamInit<ReadableStreamType>): ReadableStreamType;
+/**
+ * @internal
+ */
 export function createChecksumStream(init: ChecksumStreamInit<Readable>): Readable;
+/**
+ * @internal
+ */
 export function createChecksumStream(
   init: ChecksumStreamInit<Readable | ReadableStreamType>
 ): Readable | ReadableStreamType {

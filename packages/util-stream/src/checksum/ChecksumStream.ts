@@ -31,11 +31,10 @@ export interface ChecksumStreamInit<T extends Readable | ReadableStream> {
 }
 
 /**
- * @internal
- *
  * Wrapper for throwing checksum errors for streams without
  * buffering the stream.
  *
+ * @internal
  */
 export class ChecksumStream extends Duplex {
   private expectedChecksum: string;
@@ -70,7 +69,8 @@ export class ChecksumStream extends Duplex {
   }
 
   /**
-   * @internal do not call this directly.
+   * Do not call this directly.
+   * @internal
    */
   public _read(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -78,10 +78,10 @@ export class ChecksumStream extends Duplex {
   ): void {}
 
   /**
-   * @internal do not call this directly.
-   *
    * When the upstream source flows data to this stream,
    * calculate a step update of the checksum.
+   * Do not call this directly.
+   * @internal
    */
   public _write(chunk: Buffer, encoding: string, callback: (err?: Error) => void): void {
     try {
@@ -94,9 +94,9 @@ export class ChecksumStream extends Duplex {
   }
 
   /**
-   * @internal do not call this directly.
-   *
    * When the upstream source finishes, perform the checksum comparison.
+   * Do not call this directly.
+   * @internal
    */
   public async _final(callback: (err?: Error) => void): Promise<void> {
     try {

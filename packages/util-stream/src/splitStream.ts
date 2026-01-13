@@ -10,7 +10,13 @@ import { isBlob, isReadableStream } from "./stream-type-check";
  * @returns stream split into two identical streams.
  */
 export async function splitStream(stream: Readable): Promise<[Readable, Readable]>;
+/**
+ * @internal
+ */
 export async function splitStream(stream: ReadableStream): Promise<[ReadableStream, ReadableStream]>;
+/**
+ * @internal
+ */
 export async function splitStream(
   stream: Readable | ReadableStream
 ): Promise<[Readable | ReadableStream, Readable | ReadableStream]> {

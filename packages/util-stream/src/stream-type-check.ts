@@ -1,8 +1,9 @@
 /**
- * @internal
  * Alias prevents compiler from turning
  * ReadableStream into ReadableStream<any>, which is incompatible
  * with the NodeJS.ReadableStream global type.
+ *
+ * @internal
  */
 type ReadableStreamType = ReadableStream;
 
