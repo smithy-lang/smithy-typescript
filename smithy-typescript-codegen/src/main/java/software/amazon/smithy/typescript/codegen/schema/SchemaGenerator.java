@@ -5,6 +5,9 @@
 package software.amazon.smithy.typescript.codegen.schema;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -215,12 +218,32 @@ public class SchemaGenerator implements Runnable {
     private void doWithMembers(Shape shape) {
         writeTraits(shape);
 
+        long requiredMemberCount = 0;
+        List<String> orderedNames = new ArrayList<>();
+        List<MemberShape> orderedMembers = new ArrayList<>();
+
+        for (MemberShape m : shape.getAllMembers().values()) {
+            if (closure.isMemberRequiredInClient(m)) {
+                requiredMemberCount += 1;
+                orderedNames.add(m.getMemberName());
+                orderedMembers.add(m);
+            }
+        }
+        for (MemberShape m : shape.getAllMembers().values()) {
+            if (!closure.isMemberRequiredInClient(m)) {
+                orderedNames.add(m.getMemberName());
+                orderedMembers.add(m);
+            }
+        }
+
+        assert orderedNames.size() == orderedMembers.size();
+        assert orderedNames.size() == shape.getAllMembers().size();
+
         // member names.
         writer.write(",");
         writer.writeInline("[");
-        shape
-            .getAllMembers()
-            .forEach((memberName, member) -> {
+        orderedNames
+            .forEach((memberName) -> {
                 writer.writeInline("$L, ", store.var(memberName));
             });
         writer.unwrite(", ");
@@ -228,9 +251,8 @@ public class SchemaGenerator implements Runnable {
 
         // member schemas.
         writer.writeInline("[");
-        shape
-            .getAllMembers()
-            .forEach((memberName, member) -> {
+        orderedMembers
+            .forEach((member) -> {
                 String ref = resolveSchema(shape, member);
                 if (elision.traits.hasSchemaTraits(member)) {
                     writer.writeInline("[$L, ", ref);
@@ -241,7 +263,11 @@ public class SchemaGenerator implements Runnable {
                 }
             });
         writer.unwrite(", ");
-        writer.write("]");
+        if (requiredMemberCount > 0 && shape.isStructureShape()) {
+            writer.write("], $L", Objects.toString(requiredMemberCount));
+        } else {
+            writer.write("]");
+        }
     }
 
     private void writeListSchema(CollectionShape shape) {

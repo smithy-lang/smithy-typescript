@@ -447,6 +447,7 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(directive.shape(), writer -> {
                 StructureGenerator generator = new StructureGenerator(
                     directive.model(),
+                    directive.settings(),
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
@@ -466,6 +467,7 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(directive.shape(), writer -> {
                 StructureGenerator generator = new StructureGenerator(
                     directive.model(),
+                    directive.settings(),
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
@@ -485,6 +487,7 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(directive.shape(), writer -> {
                 UnionGenerator generator = new UnionGenerator(
                     directive.model(),
+                    directive.settings(),
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),

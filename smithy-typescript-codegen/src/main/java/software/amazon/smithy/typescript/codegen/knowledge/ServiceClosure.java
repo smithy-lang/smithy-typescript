@@ -28,6 +28,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
 import software.amazon.smithy.typescript.codegen.schema.SchemaReferenceIndex;
@@ -221,6 +222,20 @@ public final class ServiceClosure implements KnowledgeIndex {
             suffix = "$";
         }
         return symbolName + suffix;
+    }
+
+    /**
+     * This is the existing definition migrated from StructuredMemberWriter, which
+     * writes e.g. `member?: Type | undefined` vs. `member: Type | undefined`, the canonical
+     * client-side modeled optionality.
+     * This differs from the structure member optionality specification in
+     * <a href="https://smithy.io/2.0/spec/aggregate-types.html#structure-member-optionality">spec point 3.3.3</a>
+     */
+    public boolean isMemberRequiredInClient(MemberShape member) {
+        // Currently the client only generates a default for idempotency tokens.
+        // No default is generated for values with a default value trait.
+        boolean clientGeneratesValue = member.hasTrait(IdempotencyTokenTrait.class);
+        return member.isRequired() && !clientGeneratesValue;
     }
 
     /**

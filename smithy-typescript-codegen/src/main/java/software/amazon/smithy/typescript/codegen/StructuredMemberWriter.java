@@ -28,7 +28,6 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.EnumValueTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
@@ -40,13 +39,12 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.UniqueItemsTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
+import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
  * Generates objects, interfaces, enums, etc.
- *
- * TODO: Replace this with a builder for generating classes and interfaces.
  */
 @SmithyInternalApi
 final class StructuredMemberWriter {
@@ -59,22 +57,30 @@ final class StructuredMemberWriter {
     RequiredMemberMode requiredMemberMode;
     final Set<String> skipMembers = new HashSet<>();
     private final SensitiveDataFinder sensitiveDataFinder;
+    private final ServiceClosure closure;
 
-    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
-        this(model, symbolProvider, members, RequiredMemberMode.NULLABLE);
+    StructuredMemberWriter(
+        Model model,
+        ServiceClosure closure,
+        SymbolProvider symbolProvider,
+        Collection<MemberShape> members
+    ) {
+        this(model, closure, symbolProvider, members, RequiredMemberMode.NULLABLE);
     }
 
     StructuredMemberWriter(
         Model model,
+        ServiceClosure closure,
         SymbolProvider symbolProvider,
         Collection<MemberShape> members,
         RequiredMemberMode requiredMemberMode
     ) {
-        this(model, symbolProvider, members, requiredMemberMode, new SensitiveDataFinder(model));
+        this(model, closure, symbolProvider, members, requiredMemberMode, new SensitiveDataFinder(model));
     }
 
     StructuredMemberWriter(
         Model model,
+        ServiceClosure closure,
         SymbolProvider symbolProvider,
         Collection<MemberShape> members,
         RequiredMemberMode requiredMemberMode,
@@ -85,6 +91,7 @@ final class StructuredMemberWriter {
         this.members = new LinkedHashSet<>(members);
         this.requiredMemberMode = requiredMemberMode;
         this.sensitiveDataFinder = sensitiveDataFinder;
+        this.closure = closure;
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
@@ -97,10 +104,11 @@ final class StructuredMemberWriter {
             position++;
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = getSanitizedMemberName(member);
-            String optionalSuffix = shape.isUnionShape() || !isRequiredMember(member) ? "?" : "";
-            String typeSuffix = requiredMemberMode == RequiredMemberMode.NULLABLE && isRequiredMember(member)
-                ? " | undefined"
-                : "";
+            String optionalSuffix = shape.isUnionShape() || !closure.isMemberRequiredInClient(member) ? "?" : "";
+            String typeSuffix =
+                requiredMemberMode == RequiredMemberMode.NULLABLE && closure.isMemberRequiredInClient(member)
+                    ? " | undefined"
+                    : "";
             if (optionalSuffix.equals("?")) {
                 typeSuffix = " | undefined"; // support exactOptionalPropertyTypes.
             }
@@ -320,26 +328,6 @@ final class StructuredMemberWriter {
      */
     private String getSanitizedMemberName(MemberShape member) {
         return TypeScriptUtils.sanitizePropertyName(symbolProvider.toMemberName(member));
-    }
-
-    /**
-     * Identifies if a member should be required on the generated interface.
-     *
-     * Members that are idempotency tokens should have their required state
-     * relaxed so the token can be auto-filled for end users. From docs:
-     *
-     * "Client implementations MAY automatically provide a value for a request
-     * token member if and only if the member is not explicitly provided."
-     *
-     * @param member The member being generated for.
-     * @return If the interface member should be treated as required.
-     *
-     * @see <a href=
-     *      "https://smithy.io/2.0/spec/behavior-traits.html#idempotencytoken-trait">Smithy
-     *      idempotencyToken trait.</a>
-     */
-    private boolean isRequiredMember(MemberShape member) {
-        return member.isRequired() && !member.hasTrait(IdempotencyTokenTrait.class);
     }
 
     /**
