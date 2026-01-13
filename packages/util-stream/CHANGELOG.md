@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.5.9
+
+### Patch Changes
+
+- 87a5f20: correct chunked encoding output for 0-length streams
+
 ## 4.5.8
 
 ### Patch Changes
