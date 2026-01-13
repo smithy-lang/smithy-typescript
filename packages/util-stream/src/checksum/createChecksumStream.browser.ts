@@ -5,10 +5,10 @@ import type { ChecksumStreamInit } from "./ChecksumStream.browser";
 import { ChecksumStream } from "./ChecksumStream.browser";
 
 /**
- * @internal
  * Alias prevents compiler from turning
  * ReadableStream into ReadableStream<any>, which is incompatible
  * with the NodeJS.ReadableStream global type.
+ * @internal
  */
 export type ReadableStreamType = ReadableStream;
 
@@ -24,10 +24,9 @@ interface TransformStreamDefaultController {
 }
 
 /**
- * @internal
- *
  * Creates a stream adapter for throwing checksum errors for streams without
  * buffering the stream.
+ * @internal
  */
 export const createChecksumStream = ({
   expectedChecksum,

@@ -6,4 +6,8 @@ export * from "./getAwsChunkedEncodingStream";
 export * from "./headStream";
 export * from "./sdk-stream-mixin";
 export * from "./splitStream";
-export * from "./stream-type-check";
+
+/**
+ * @internal
+ */
+export { isReadableStream, isBlob } from "./stream-type-check";

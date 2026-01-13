@@ -1,5 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
+import { getAwsChunkedEncodingStream as getAwsChunkedEncodingStreamRs } from "./getAwsChunkedEncodingStream";
 import { getAwsChunkedEncodingStream } from "./getAwsChunkedEncodingStream.browser";
 
 describe(getAwsChunkedEncodingStream.name, () => {
@@ -78,6 +79,20 @@ World\r
   it("computes checksum and adds it to the end event", async () => {
     const readableStream = getMockReadableStream();
     const awsChunkedBody = getAwsChunkedEncodingStream(readableStream, mockOptions);
+    const expectedBuffer = `5\r
+Hello\r
+5\r
+World\r
+0\r
+${mockChecksumLocationName}:${mockChecksum}\r
+\r
+`;
+    await validateStream(awsChunkedBody, expectedBuffer);
+  });
+
+  it("redirects from Readable to ReadableStream implementation", async () => {
+    const readableStream = getMockReadableStream();
+    const awsChunkedBody = getAwsChunkedEncodingStreamRs(readableStream, mockOptions);
     const expectedBuffer = `5\r
 Hello\r
 5\r
