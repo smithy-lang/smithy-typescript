@@ -1,6 +1,6 @@
 {
   "name": "@smithy/querystring-parser",
-  "version": "4.2.7",
+  "version": "4.2.8",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types && yarn build:types:downlevel'",
     "build:cjs": "node ../../scripts/inline querystring-parser",

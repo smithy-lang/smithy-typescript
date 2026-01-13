@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.12.0
+
+### Minor Changes
+
+- 745867a: encode required member count in structure schemas
+
 ## 4.11.0
 
 ### Minor Changes

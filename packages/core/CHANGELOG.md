@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.20.5
+
+### Patch Changes
+
+- Updated dependencies [745867a]
+  - @smithy/types@4.12.0
+  - @smithy/middleware-serde@4.2.9
+  - @smithy/protocol-http@5.3.8
+  - @smithy/util-middleware@4.2.8
+  - @smithy/util-stream@4.5.10
+
 ## 3.20.4
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-compression",
-  "version": "4.3.20",
+  "version": "4.3.21",
   "description": "Middleware and Plugin for request compression.",
   "scripts": {
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",

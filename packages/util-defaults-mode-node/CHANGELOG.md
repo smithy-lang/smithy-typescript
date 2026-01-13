@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.2.24
+
+### Patch Changes
+
+- Updated dependencies [745867a]
+  - @smithy/types@4.12.0
+  - @smithy/config-resolver@4.4.6
+  - @smithy/credential-provider-imds@4.2.8
+  - @smithy/node-config-provider@4.3.8
+  - @smithy/property-provider@4.2.8
+  - @smithy/smithy-client@4.10.7
+
 ## 4.2.23
 
 ### Patch Changes
