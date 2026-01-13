@@ -3134,8 +3134,8 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@tsconfig/node18": "npm:18.2.4"
-    "@types/node": "npm:^18.19.69"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:5.0.10"
@@ -3177,8 +3177,8 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@tsconfig/node18": "npm:18.2.4"
-    "@types/node": "npm:^18.19.69"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:5.0.10"
@@ -3529,10 +3529,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node18@npm:18.2.4":
-  version: 18.2.4
-  resolution: "@tsconfig/node18@npm:18.2.4"
-  checksum: 10c0/cdfd17f212660374eb2765cd5907b2252e43cfa2623cd52307a49f004327ef49bbe7d53c78b0aca57f33e9a5cb0d7d2eb5ded9be1235e6212f65c9f0699322b6
+"@tsconfig/node20@npm:20.1.8":
+  version: 20.1.8
+  resolution: "@tsconfig/node20@npm:20.1.8"
+  checksum: 10c0/5a9fcc0234e639c26f36f01d5912a59c47964361e9b9a8981a10806553799441f929474aed71cdec0ce5464ad1d757698df1651ac94cd55bb6bc01601a6003ea
   languageName: node
   linkType: hard
 
@@ -3745,7 +3745,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.9, @types/node@npm:^18.19.69":
+"@types/node@npm:^18.11.9":
   version: 18.19.70
   resolution: "@types/node@npm:18.19.70"
   dependencies:
@@ -3760,6 +3760,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/a5bedcc71b363abfa425c01e69696820736614dfba03d2363df6d306d2ee6f7619b370c72b4ec75d992e5d76eaccdcdeb362276cac1cd01756db6dec2eb8227c
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.14.8":
+  version: 20.19.28
+  resolution: "@types/node@npm:20.19.28"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/aaa2de8570bfafdb9c160c1dbe3ecd7d9b2ccdc496ab6b0f24ccd5023aabe6f8c7fd02d7090185c2912052174f7cffef4ace80edd7d2a433200429c7a0a4869d
   languageName: node
   linkType: hard
 
@@ -11851,8 +11860,8 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@tsconfig/node18": "npm:18.2.4"
-    "@types/node": "npm:^18.19.69"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:5.0.10"
@@ -11896,8 +11905,8 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@tsconfig/node18": "npm:18.2.4"
-    "@types/node": "npm:^18.19.69"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     rimraf: "npm:5.0.10"
