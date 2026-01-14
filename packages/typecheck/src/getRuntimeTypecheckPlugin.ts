@@ -40,7 +40,7 @@ const rttcMiddlewareOptions: InitializeHandlerOptions = {
 /**
  * @internal
  */
-const rttcMiddleware =
+const runtimeTypecheckMiddleware =
   (options: RuntimeTypecheckOptions) => (next: InitializeHandler<any, any>, context: HandlerExecutionContext) => {
     const n = options;
 
