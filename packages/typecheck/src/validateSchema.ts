@@ -60,7 +60,7 @@ export function validateSchema(schema: $SchemaRef, data: unknown, path = "{}"): 
           }
         } else {
           errors.push(...validateSchema(map$, value, path + `["${key}"]`));
-         }
+        }
       }
     }
   } else if ($.isListSchema()) {
@@ -78,7 +78,7 @@ export function validateSchema(schema: $SchemaRef, data: unknown, path = "{}"): 
           }
         } else {
           errors.push(...validateSchema(list$, value, path + `[${i}]`));
-         }
+        }
       }
     }
   } else if ($.isStructSchema()) {

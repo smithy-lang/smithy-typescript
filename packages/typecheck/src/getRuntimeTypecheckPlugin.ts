@@ -22,7 +22,7 @@ export function getRuntimeTypecheckPlugin<InputType extends object = any, Output
 ): Pluggable<InputType, OutputType> {
   return {
     applyToStack: (commandStack: MiddlewareStack<InputType, OutputType>) => {
-      commandStack.add(rttcMiddleware(options), rttcMiddlewareOptions);
+      commandStack.add(runtimeTypecheckMiddleware(options), runtimeTypecheckOptions);
     },
   };
 }
@@ -30,7 +30,7 @@ export function getRuntimeTypecheckPlugin<InputType extends object = any, Output
 /**
  * @internal
  */
-const rttcMiddlewareOptions: InitializeHandlerOptions = {
+const runtimeTypecheckOptions: InitializeHandlerOptions = {
   name: "runtimeTypecheckMiddleware",
   step: "initialize",
   tags: ["RUNTIME_TYPECHECK"],
