@@ -3188,6 +3188,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/typecheck@workspace:packages/typecheck":
+  version: 0.0.0-use.local
+  resolution: "@smithy/typecheck@workspace:packages/typecheck"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@smithy/util-middleware": "workspace:^"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    rimraf: "npm:5.0.10"
+    tslib: "npm:^2.6.2"
+  languageName: unknown
+  linkType: soft
+
 "@smithy/types@npm:^3.1.0":
   version: 3.7.2
   resolution: "@smithy/types@npm:3.7.2"
