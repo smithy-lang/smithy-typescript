@@ -76,9 +76,9 @@ export function validateSchema(schema: $SchemaRef, data: unknown, path = "{}"): 
           if (!sparse) {
             errors.push(`${path}[${i}]: should be non-null.`);
           }
-          continue;
-        }
-        errors.push(...validateSchema(list$, value, path + `[${i}]`));
+        } else {
+          errors.push(...validateSchema(list$, value, path + `[${i}]`));
+         }
       }
     }
   } else if ($.isStructSchema()) {
