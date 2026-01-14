@@ -89,11 +89,12 @@ export function validateSchema(schema: $SchemaRef, data: unknown, path = "{}"): 
       let required = ($.getSchema() as StaticStructureSchema)?.[6] ?? 0;
       for (const [member, member$] of $.structIterator()) {
         keys.delete(member);
+        const value = (data as any)[member];
         const isRequired = required-- > 0;
-        if (isRequired && (data as any)[member] == null) {
+        if (isRequired && value == null) {
           errors.push(`${path}.${member}: is required.`);
         } else {
-          errors.push(...validateSchema(member$, (data as any)[member], path + `.${member}`));
+          errors.push(...validateSchema(member$, value, path + `.${member}`));
         }
       }
       if (keys.size > 0) {
