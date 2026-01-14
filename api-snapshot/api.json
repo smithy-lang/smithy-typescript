@@ -485,7 +485,7 @@
     "v4": "function, since <=1.1.0"
   },
   "@smithy/typecheck": {
-    "getRuntimeTypecheckPlugin": "function, since <=4.0.0",
-    "validateSchema": "function, since <=4.0.0"
+    "getRuntimeTypecheckPlugin": "function, since <=0.0.0",
+    "validateSchema": "function, since <=0.0.0"
   }
 }

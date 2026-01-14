@@ -1,5 +1,5 @@
 ---
-"@smithy/typecheck": minor
+"@smithy/typecheck": major
 ---
 
 add runtime typecheck pkg
