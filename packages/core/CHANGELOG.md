@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.20.6
+
+### Patch Changes
+
+- 862c942: custom handling for \_\_type in structures
+
 ## 3.20.5
 
 ### Patch Changes
