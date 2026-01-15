@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.42.0 (2026-01-15)
+
+### Features
+
+- Updated schema codegen to include required member information for optional use by `@smithy/typecheck` ([#1835](https://github.com/smithy-lang/smithy-typescript/pull/1835))
+
+### Chores
+
+- Set the minimum required Node.js version to v20 for generated clients ([#1837](https://github.com/smithy-lang/smithy-typescript/pull/1837))
+
 ## 0.41.1 (2026-01-08)
 
 ### Bug Fixes
