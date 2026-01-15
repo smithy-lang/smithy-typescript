@@ -41,6 +41,7 @@ describe(CborShapeSerializer.name, () => {
     ["timestamp"],
     [4 satisfies TimestampDefaultSchema],
   ] satisfies StaticStructureSchema;
+  const AB$ = [3, "ns", "AB", 0, ["a", "b"], [0, 19 satisfies BigDecimalSchema]] satisfies StaticStructureSchema;
 
   describe("serialization", () => {
     it("should generate an idempotency token when the input for such a member is undefined", () => {
@@ -147,6 +148,25 @@ describe(CborShapeSerializer.name, () => {
         price: nv("0.99"),
       });
     });
+
+    it("serializes extra document members when encountering __type", async () => {
+      const data = {
+        __type: "ns#PlateOfFood",
+        pasta: "Macaroni",
+        cheese: "cheddar",
+        a: "a",
+        b: nv("-.99"),
+      };
+      serializer.write(AB$, data);
+      const serialization = serializer.flush();
+      expect(cbor.deserialize(serialization)).toEqual({
+        __type: "ns#PlateOfFood",
+        pasta: "Macaroni",
+        cheese: "cheddar",
+        a: "a",
+        b: nv("-0.99"),
+      });
+    });
   });
 
   describe("deserialization", () => {
@@ -223,6 +243,29 @@ describe(CborShapeSerializer.name, () => {
           $unknown: ["d", {}],
         },
       } satisfies Record<string, unknown>);
+    });
+
+    it("deserializes extra document members when encountering __type", async () => {
+      expect(
+        await deserializer.read(
+          AB$,
+          cbor.serialize({
+            __type: "ns#Other",
+            __field__: "xyz",
+            blob: "AAAA",
+            nested: {},
+            a: "a",
+            b: nv("-0.99"),
+          })
+        )
+      ).toEqual({
+        __type: "ns#Other",
+        __field__: "xyz",
+        blob: "AAAA",
+        nested: {},
+        a: "a",
+        b: nv("-0.99"),
+      });
     });
   });
 });
