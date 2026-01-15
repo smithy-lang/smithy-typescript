@@ -2,7 +2,7 @@ import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { _parseEpochTimestamp, generateIdempotencyToken } from "@smithy/core/serde";
 import { NumericValue } from "@smithy/core/serde";
-import type { Codec, Schema, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
+import type { Codec, DocumentSchema, Schema, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 import { fromBase64 } from "@smithy/util-base64";
 
 import { cbor } from "./cbor";
@@ -101,6 +101,15 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
         if (isUnion && Array.isArray(sourceObject.$unknown)) {
           const [k, v] = sourceObject.$unknown;
           newObject[k] = v;
+        } else if (typeof sourceObject.__type === "string") {
+          // This if-block is for backwards compatibility support and should not be copied
+          // to other implementations.
+          for (const [k, v] of Object.entries(sourceObject)) {
+            if (!(k in newObject)) {
+              // we have no type information, so serialize with Document rules.
+              newObject[k] = this.serialize(15 satisfies DocumentSchema, v);
+            }
+          }
         }
       } else if (ns.isDocumentSchema()) {
         for (const key of Object.keys(sourceObject)) {
@@ -223,6 +232,15 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         if (isUnion && keys?.size === 1 && Object.keys(newObject).length === 0) {
           const k = keys!.values().next().value as string;
           newObject.$unknown = [k, value[k]];
+        } else if (typeof value.__type === "string") {
+          // This if-block is for backwards compatibility support and should not be copied
+          // to other implementations.
+          for (const [k, v] of Object.entries(value)) {
+            if (!(k in newObject)) {
+              // we have no type information, so copy as-is from CBOR-derived object.
+              newObject[k] = v;
+            }
+          }
         }
       } else if (value instanceof NumericValue) {
         return value;
