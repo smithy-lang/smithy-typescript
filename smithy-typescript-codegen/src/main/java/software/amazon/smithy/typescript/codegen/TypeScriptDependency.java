@@ -128,7 +128,7 @@ public enum TypeScriptDependency implements Dependency {
     EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
 
     // Conditionally added when specs have been generated.
-    VITEST("devDependencies", "vitest", "^3.2.4", false),
+    VITEST("devDependencies", "vitest", "^4.0.17", false),
 
     // Conditionally added when `generateTypeDoc` is true.
     TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
