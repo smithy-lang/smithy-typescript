@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.20.7
+
+### Patch Changes
+
+- ae6ef2e: client side httpLabel validation
+
 ## 3.20.6
 
 ### Patch Changes
