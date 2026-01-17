@@ -284,4 +284,25 @@ describe(HttpBindingProtocol.name, () => {
 
     expect(streamProgress).toBe(100);
   });
+
+  it("should throw an error if an httpLabel is missing", async () => {
+    const protocol = new StringRestProtocol();
+    await expect(
+      protocol.serializeRequest(
+        op(
+          "ns",
+          "operation",
+          {
+            http: ["GET", "/path/{labelGoesHere}/operation?arg=1", 200],
+          },
+          [3, "ns", "Struct", 0, ["labelGoesHere"], [[0, { httpLabel: 1 }]]] satisfies StaticStructureSchema,
+          "unit"
+        ),
+        {},
+        {
+          endpoint: async () => parseUrl("https://localhost"),
+        } as any
+      )
+    ).rejects.toThrow("No value provided for input HTTP label: labelGoesHere.");
+  });
 });
