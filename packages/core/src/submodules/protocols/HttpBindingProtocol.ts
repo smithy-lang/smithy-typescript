@@ -79,6 +79,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       const inputMemberValue = input[memberName];
 
       if (inputMemberValue == null && !memberNs.isIdempotencyToken()) {
+        if (memberTraits.httpLabel) {
+          throw new Error(`No value provided for input HTTP label: ${memberName}.`);
+        }
         continue;
       }
 
