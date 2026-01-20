@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.21.0
+
+### Minor Changes
+
+- c2a6f46: improve schema struct iterator performance
+
 ## 3.20.8
 
 ### Patch Changes
