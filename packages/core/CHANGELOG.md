@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.20.8
+
+### Patch Changes
+
+- 96cc077: limit scope of http label validation
+
 ## 3.20.7
 
 ### Patch Changes
