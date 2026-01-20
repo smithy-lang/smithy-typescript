@@ -80,7 +80,13 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
 
       if (inputMemberValue == null && !memberNs.isIdempotencyToken()) {
         if (memberTraits.httpLabel) {
-          throw new Error(`No value provided for input HTTP label: ${memberName}.`);
+          // at this point, we have a modeled httpLabel which has no input value.
+          // We only throw if the request URI has a corresponding unfulfilled label.
+          // It would be unusual for the request path not to contain the label, perhaps a modeling
+          // error, but best to be conservative about throwing.
+          if (request.path.includes(`{${memberName}+}`) || request.path.includes(`{${memberName}}`)) {
+            throw new Error(`No value provided for input HTTP label: ${memberName}.`);
+          }
         }
         continue;
       }
