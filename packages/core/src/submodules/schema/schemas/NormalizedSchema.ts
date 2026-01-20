@@ -31,10 +31,18 @@ import type {
   TimestampEpochSecondsSchema,
   UnitSchema,
 } from "@smithy/types";
-import type { IdempotencyTokenBitMask, TraitBitVector } from "@smithy/types";
 
 import { deref } from "../deref";
 import { translateTraits } from "./translateTraits";
+
+/**
+ * Annotations for cacheable schema-derived data.
+ * @internal
+ */
+const anno = {
+  // reference to structure's member iterator.
+  it: Symbol.for("@smithy/nor-struct-it"),
+};
 
 /**
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
@@ -263,18 +271,14 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   /**
-   * This is a shortcut to avoid calling `getMergedTraits().idempotencyToken` on every string.
    * @returns whether the schema has the idempotencyToken trait.
    */
   public isIdempotencyToken(): boolean {
-    // it is ok to perform the & operation on a trait object,
-    // since its int32 representation is 0.
-    const match = (traits?: SchemaTraits) =>
-      ((traits as TraitBitVector) & (0b0100 satisfies IdempotencyTokenBitMask)) === 0b0100 ||
-      !!(traits as SchemaTraitsObject)?.idempotencyToken;
-
-    const { normalizedTraits, traits, memberTraits } = this;
-    return match(normalizedTraits) || match(traits) || match(memberTraits);
+    /*
+    It's faster to create the normalized trait object than to
+    attempt to match against multiple value types.
+     */
+    return !!this.getMergedTraits().idempotencyToken;
   }
 
   /**
@@ -415,10 +419,31 @@ export class NormalizedSchema implements INormalizedSchema {
     if (!this.isStructSchema()) {
       throw new Error("@smithy/core/schema - cannot iterate non-struct schema.");
     }
-    const struct = this.getSchema() as StaticStructureSchema;
-    for (let i = 0; i < struct[4].length; ++i) {
-      yield [struct[4][i], member([struct[5][i], 0], struct[4][i])];
+    const struct = this.getSchema() as StaticStructureSchema & {
+      // the static structure may have a cached iterator list of
+      // its members.
+      [anno.it]?: Array<[string, NormalizedSchema]>;
+    };
+
+    const z = struct[4].length;
+    let it = struct[anno.it];
+
+    // to yield the cached iterator, it must exist and be
+    // the same length as the current member list.
+    if (it && z === it.length) {
+      yield* it;
+      return;
     }
+
+    it = Array(z);
+    for (let i = 0; i < z; ++i) {
+      const k = struct[4][i];
+      const v = member([struct[5][i], 0], k);
+      yield (it[i] = [k, v]);
+    }
+
+    // cache the iterator only if all uncached items were iterated successfully.
+    struct[anno.it] = it;
   }
 }
 
