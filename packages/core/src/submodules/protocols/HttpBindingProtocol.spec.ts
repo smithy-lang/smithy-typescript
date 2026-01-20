@@ -20,7 +20,7 @@ import type {
   TimestampDefaultSchema,
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
-import { parseUrl } from "@smithy/url-parser/src";
+import { parseUrl } from "@smithy/url-parser";
 import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 
