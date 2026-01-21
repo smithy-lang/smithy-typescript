@@ -70,7 +70,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR
-                    + "const returnComparator = () => {\n  return (result.items.length == 0.0);\n}\n"
+                    + "const returnComparator = () => {\n  return (result.items.length == 0);\n}\n"
             )
         );
     }
@@ -82,7 +82,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR
-                    + "const returnComparator = () => {\n  return (result.items.length < 0.0);\n}\n"
+                    + "const returnComparator = () => {\n  return (result.items.length < 0);\n}\n"
             )
         );
     }
@@ -94,7 +94,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR
-                    + "const returnComparator = () => {\n  return (result.items.length > 0.0);\n}\n"
+                    + "const returnComparator = () => {\n  return (result.items.length > 0);\n}\n"
             )
         );
     }
@@ -106,7 +106,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR +
-                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items.foo.deep);\n  return (flat_1.length == 0.0);\n}\n"
+                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items.foo.deep);\n  return (flat_1.length == 0);\n}\n"
             )
         );
     }
@@ -132,7 +132,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR +
-                    "const returnComparator = () => {\n  return (result.items[result.items.length - 1].length == 0.0);\n}\n"
+                    "const returnComparator = () => {\n  return (result.items[result.items.length - 1].length == 0);\n}\n"
             )
         );
     }
@@ -180,7 +180,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR +
-                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  let projection_3 = flat_1.map((element_2: any) => {\n    let result_4 = [];\n    result_4.push((4.0 > 0.0));\n    result_4.push((1.0 == 0.0));\n    element_2 = result_4;\n    return element_2;\n  });\n  let flat_5: any[] = [].concat(...projection_3);\n  return flat_5;\n}\n"
+                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  let projection_3 = flat_1.map((element_2: any) => {\n    let result_4 = [];\n    result_4.push((4 > 0));\n    result_4.push((1 == 0));\n    element_2 = result_4;\n    return element_2;\n  });\n  let flat_5: any[] = [].concat(...projection_3);\n  return flat_5;\n}\n"
             )
         );
     }
@@ -220,7 +220,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR
-                    + "const returnComparator = () => {\n  return (!(result.items.length == 0.0));\n}\n"
+                    + "const returnComparator = () => {\n  return (!(result.items.length == 0));\n}\n"
             )
         );
     }
@@ -232,7 +232,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR +
-                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  return (((flat_1.length == 0.0) || (result.foo.length > 0.0)) && ((result.foo.length > 0.0) || (flat_1.length == 0.0))) ;\n}\n"
+                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  return (((flat_1.length == 0) || (result.foo.length > 0)) && ((result.foo.length > 0) || (flat_1.length == 0))) ;\n}\n"
             )
         );
     }
@@ -244,7 +244,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR +
-                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  return ((flat_1.length == 0.0) && (result.foo.length > 0.0));\n}\n"
+                    "const returnComparator = () => {\n  let flat_1: any[] = [].concat(...result.items);\n  return ((flat_1.length == 0) && (result.foo.length > 0));\n}\n"
             )
         );
     }
@@ -258,7 +258,7 @@ public class TypeScriptJmesPathVisitorTest {
             result,
             equalTo(
                 CODEGEN_INDICATOR +
-                    "const returnComparator = () => {\n  let filterRes_2 = result.services.filter((element_1: any) => {\n    return (!((element_1.deployments.length == 1.0) && (element_1.runningCount == element_1.desiredCount)));\n  });\n  return (filterRes_2.length == 0.0);\n}\n"
+                    "const returnComparator = () => {\n  let filterRes_2 = result.services.filter((element_1: any) => {\n    return (!((element_1.deployments.length == 1) && (element_1.runningCount == element_1.desiredCount)));\n  });\n  return (filterRes_2.length == 0);\n}\n"
             )
         );
     }
