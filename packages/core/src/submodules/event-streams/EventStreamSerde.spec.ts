@@ -52,7 +52,7 @@ describe(EventStreamSerde.name, () => {
       "ns",
       "EventStreamStructure",
       { streaming: 1 },
-      ["A", "B", "C", "Payload", "TextPayload", "CustomHeaders"],
+      ["A", "B", "C", "Payload", "TextPayload", "CustomHeaders", "NoOp"],
       // D is omitted to represent an unknown event.
       [
         [3, "ns", "A", 0, ["name"], [0]] satisfies StaticStructureSchema,
@@ -97,6 +97,7 @@ describe(EventStreamSerde.name, () => {
             [0, "ns", "EventHeader", { eventHeader: 1 }, 21 satisfies BlobSchema] satisfies StaticSimpleSchema,
           ],
         ],
+        [3, "ns", "NoOp", 0, [], []] satisfies StaticStructureSchema,
       ],
     ] satisfies StaticStructureSchema;
 
@@ -330,6 +331,16 @@ describe(EventStreamSerde.name, () => {
           };
         }
 
+        if (eventType === "NoOp") {
+          return {
+            headers,
+            // simulate omitted structure body.
+            // not technically correct for the content-type, but pre-existing
+            // edge case.
+            body: new Uint8Array(),
+          };
+        }
+
         return {
           headers,
           body: cbor.serialize(data),
@@ -356,6 +367,9 @@ describe(EventStreamSerde.name, () => {
               "header-boolean": false,
               "header-blob": new Uint8Array([0, 1, 2, 3]),
             },
+          };
+          yield {
+            NoOp: {},
           };
         },
       };
@@ -412,6 +426,9 @@ describe(EventStreamSerde.name, () => {
               "header-blob": new Uint8Array([0, 1, 2, 3]),
             },
           },
+          {
+            NoOp: {},
+          },
         ]);
       });
 
@@ -459,6 +476,9 @@ describe(EventStreamSerde.name, () => {
               "header-number": -2,
               "header-blob": new Uint8Array([0, 1, 2, 3]),
             },
+          },
+          {
+            NoOp: {},
           },
         ]);
 
