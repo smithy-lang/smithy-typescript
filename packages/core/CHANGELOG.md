@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.21.1
+
+### Patch Changes
+
+- fa0e0c4: accept 0-byte event stream payloads as structure shapes
+
 ## 3.21.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.3.26
+
+### Patch Changes
+
+- Updated dependencies [fa0e0c4]
+  - @smithy/core@3.21.1
+
 ## 4.3.25
 
 ### Patch Changes
