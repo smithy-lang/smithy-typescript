@@ -211,6 +211,14 @@ export class EventStreamSerde {
               [unionMember]: out,
             };
           }
+          if (body.byteLength === 0) {
+            // This isn't correct w.r.t. the content-type,
+            // since 0-length data is neither valid JSON nor CBOR,
+            // but handles an existing compatibility issue in server-side implementations.
+            return {
+              [unionMember]: {},
+            };
+          }
         }
 
         return {
