@@ -3677,7 +3677,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-waiter@workspace:packages/util-waiter":
+"@smithy/util-waiter@workspace:^, @smithy/util-waiter@workspace:packages/util-waiter":
   version: 0.0.0-use.local
   resolution: "@smithy/util-waiter@workspace:packages/util-waiter"
   dependencies:
@@ -12234,6 +12234,7 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
+    "@smithy/util-waiter": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
@@ -12279,6 +12280,7 @@ __metadata:
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
+    "@smithy/util-waiter": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"

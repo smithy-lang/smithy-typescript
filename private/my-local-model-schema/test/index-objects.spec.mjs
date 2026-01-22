@@ -19,6 +19,8 @@ import {
   TradeEventStreamCommand,
   TradeEventStreamRequest$,
   TradeEventStreamResponse$,
+  waitForNumbersAligned,
+  waitUntilNumbersAligned,
   XYZService,
   XYZServiceClient,
   XYZServiceServiceException,
@@ -55,4 +57,7 @@ assert(typeof RetryableError$ === "object");
 assert(XYZServiceServiceException.prototype instanceof XYZServiceSyntheticServiceException);
 assert(typeof XYZServiceServiceException$ === "object");
 assert(XYZServiceSyntheticServiceException.prototype instanceof Error);
+// waiters
+assert(typeof waitForNumbersAligned === "function");
+assert(typeof waitUntilNumbersAligned === "function");
 console.log(`XYZService index test passed.`);

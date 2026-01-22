@@ -37,6 +37,8 @@ class WaiterGenerator implements Runnable {
     private final Symbol serviceSymbol;
     private final Symbol operationSymbol;
     private final Symbol inputSymbol;
+    private final Symbol outputSymbol;
+    private final String waiterResultType;
 
     WaiterGenerator(
         String waiterName,
@@ -53,6 +55,8 @@ class WaiterGenerator implements Runnable {
         this.operationSymbol = symbolProvider.toSymbol(operation);
         this.serviceSymbol = symbolProvider.toSymbol(service);
         this.inputSymbol = operationSymbol.expectProperty("inputType", Symbol.class);
+        this.outputSymbol = operationSymbol.expectProperty("outputType", Symbol.class);
+        waiterResultType = outputSymbol.getName() + " | Error";
     }
 
     @Override
@@ -89,11 +93,12 @@ class WaiterGenerator implements Runnable {
             export const waitFor$L = async (
               params: WaiterConfiguration<$T>,
               input: $T
-            ): Promise<WaiterResult> => {""",
+            ): Promise<WaiterResult<$L>> => {""",
             "};",
             waiterName,
             serviceSymbol,
             inputSymbol,
+            waiterResultType,
             () -> {
                 writer.write(
                     "const serviceDefaults = { minDelay: $L, maxDelay: $L };",
@@ -118,11 +123,12 @@ class WaiterGenerator implements Runnable {
             export const waitUntil$L = async (
               params: WaiterConfiguration<$T>,
               input: $T
-            ): Promise<WaiterResult> => {""",
+            ): Promise<WaiterResult<$L>> => {""",
             "};",
             waiterName,
             serviceSymbol,
             inputSymbol,
+            waiterResultType,
             () -> {
                 writer.write(
                     "const serviceDefaults = { minDelay: $L, maxDelay: $L };",
@@ -139,16 +145,21 @@ class WaiterGenerator implements Runnable {
 
     private void generateAcceptors() {
         writer.openBlock(
-            "const checkState = async (client: $T, input: $T): Promise<WaiterResult> => {",
+            "const checkState = async (client: $T, input: $T): Promise<WaiterResult<$L>> => {",
             "};",
             serviceSymbol,
             inputSymbol,
+            waiterResultType,
             () -> {
                 writer.write("let reason;");
 
                 writer.write("try {").indent();
                 {
-                    writer.write("let result: any = await client.send(new $T(input));", operationSymbol);
+                    writer.write(
+                        "let result: $T & any = await client.send(new $T(input));",
+                        outputSymbol,
+                        operationSymbol
+                    );
                     writer.write("reason = result;");
                     writeAcceptors("result", false);
                 }
@@ -205,7 +216,7 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateErrorMatcher(String accessor, Matcher.ErrorTypeMember member, AcceptorState state) {
-        writer.openBlock("if ($L.name && $L.name == $S) {", "}", accessor, accessor, member.getValue(), () -> {
+        writer.openBlock("if ($L.name === $S) {", "}", accessor, member.getValue(), () -> {
             writer.write("return $L;", makeWaiterResult(state));
         });
     }

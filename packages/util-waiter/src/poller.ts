@@ -4,9 +4,8 @@ import type { WaiterOptions, WaiterResult } from "./waiter";
 import { WaiterState } from "./waiter";
 
 /**
- * @internal
- *
  * Reference: https://smithy.io/2.0/additional-specs/waiters.html#waiter-retries
+ * @internal
  */
 const exponentialBackoffWithJitter = (minDelay: number, maxDelay: number, attemptCeiling: number, attempt: number) => {
   if (attempt > attemptCeiling) return maxDelay;
@@ -24,11 +23,11 @@ const randomInRange = (min: number, max: number) => min + Math.random() * (max -
  * @param input - client input
  * @param acceptorChecks - function that checks the acceptor states on each poll.
  */
-export const runPolling = async <Client, Input>(
+export const runPolling = async <Client, Input, Reason = any>(
   { minDelay, maxDelay, maxWaitTime, abortController, client, abortSignal }: WaiterOptions<Client>,
   input: Input,
-  acceptorChecks: (client: Client, input: Input) => Promise<WaiterResult>
-): Promise<WaiterResult> => {
+  acceptorChecks: (client: Client, input: Input) => Promise<WaiterResult<Reason>>
+): Promise<WaiterResult<Reason>> => {
   const observedResponses: Record<string, number> = {};
 
   const { state, reason } = await acceptorChecks(client, input);
@@ -78,9 +77,10 @@ export const runPolling = async <Client, Input>(
 };
 
 /**
- * @internal
- * convert the result of an SDK operation, either an error or response object, to a
+ * Convert the result of an SDK operation, either an error or response object, to a
  * readable string.
+ *
+ * @internal
  */
 const createMessageFromResponse = (reason: any): string => {
   if (reason?.$responseBodyText) {
