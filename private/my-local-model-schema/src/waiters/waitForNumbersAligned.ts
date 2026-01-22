@@ -7,21 +7,26 @@ import {
   WaiterState,
 } from "@smithy/util-waiter";
 
-import { type GetNumbersCommandInput, GetNumbersCommand } from "../commands/GetNumbersCommand";
+import {
+  type GetNumbersCommandInput,
+  type GetNumbersCommandOutput,
+  GetNumbersCommand,
+} from "../commands/GetNumbersCommand";
+import type { XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
 import type { XYZServiceClient } from "../XYZServiceClient";
 
-const checkState = async (client: XYZServiceClient, input: GetNumbersCommandInput): Promise<WaiterResult> => {
+const checkState = async (client: XYZServiceClient, input: GetNumbersCommandInput): Promise<WaiterResult<GetNumbersCommandOutput | XYZServiceSyntheticServiceException>> => {
   let reason;
   try {
-    let result: any = await client.send(new GetNumbersCommand(input));
+    let result: GetNumbersCommandOutput & any = await client.send(new GetNumbersCommand(input));
     reason = result;
     return { state: WaiterState.SUCCESS, reason };
   } catch (exception) {
     reason = exception;
-    if (exception.name && exception.name == "MysteryThrottlingError") {
+    if (exception.name === "MysteryThrottlingError") {
       return { state: WaiterState.RETRY, reason };
     }
-    if (exception.name && exception.name == "HaltError") {
+    if (exception.name === "HaltError") {
       return { state: WaiterState.FAILURE, reason };
     }
   }
@@ -34,7 +39,7 @@ const checkState = async (client: XYZServiceClient, input: GetNumbersCommandInpu
 export const waitForNumbersAligned = async (
   params: WaiterConfiguration<XYZServiceClient>,
   input: GetNumbersCommandInput
-): Promise<WaiterResult> => {
+): Promise<WaiterResult<GetNumbersCommandOutput | XYZServiceSyntheticServiceException>> => {
   const serviceDefaults = { minDelay: 2, maxDelay: 120 };
   return createWaiter({ ...serviceDefaults, ...params }, input, checkState);
 };
@@ -46,7 +51,7 @@ export const waitForNumbersAligned = async (
 export const waitUntilNumbersAligned = async (
   params: WaiterConfiguration<XYZServiceClient>,
   input: GetNumbersCommandInput
-): Promise<WaiterResult> => {
+): Promise<WaiterResult<GetNumbersCommandOutput | XYZServiceSyntheticServiceException>> => {
   const serviceDefaults = { minDelay: 2, maxDelay: 120 };
   const result = await createWaiter({ ...serviceDefaults, ...params }, input, checkState);
   return checkExceptions(result);

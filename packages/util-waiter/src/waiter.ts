@@ -1,11 +1,8 @@
-import type { WaiterConfiguration as WaiterConfiguration__ } from "@smithy/types";
+import type { WaiterConfiguration } from "@smithy/types";
 
 import { getCircularReplacer } from "./circularReplacer";
 
-/**
- * @internal
- */
-export interface WaiterConfiguration<T> extends WaiterConfiguration__<T> {}
+export { WaiterConfiguration };
 
 /**
  * @internal
@@ -22,7 +19,7 @@ export type WaiterOptions<Client> = WaiterConfiguration<Client> &
   Required<Pick<WaiterConfiguration<Client>, "minDelay" | "maxDelay">>;
 
 /**
- * @internal
+ * @public
  */
 export enum WaiterState {
   ABORTED = "ABORTED",
@@ -33,15 +30,21 @@ export enum WaiterState {
 }
 
 /**
- * @internal
+ * @public
  */
-export type WaiterResult = {
+export type WaiterResult<R = any> = {
   state: WaiterState;
+
+  /**
+   * @deprecated because this was untyped as `any`, new code should use the field 'final',
+   * which is the same value, but typed.
+   */
+  reason?: any;
 
   /**
    * (optional) Indicates a reason for why a waiter has reached its state.
    */
-  reason?: any;
+  final?: R;
 
   /**
    * Responses observed by the waiter during its polling, where the value
@@ -51,12 +54,11 @@ export type WaiterResult = {
 };
 
 /**
- * @internal
- *
  * Handles and throws exceptions resulting from the waiterResult
+ * @internal
  * @param result - WaiterResult
  */
-export const checkExceptions = (result: WaiterResult): WaiterResult => {
+export const checkExceptions = <R>(result: WaiterResult<R>): WaiterResult<R> => {
   if (result.state === WaiterState.ABORTED) {
     const abortError = new Error(
       `${JSON.stringify(
