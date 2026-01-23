@@ -5,6 +5,7 @@ namespace org.xyz.v1
 use smithy.protocols#rpcv2Cbor
 use smithy.rules#clientContextParams
 use smithy.rules#endpointRuleSet
+use smithy.waiters#waitable
 
 @rpcv2Cbor
 @documentation("xyz interfaces")
@@ -77,6 +78,25 @@ service XYZService {
 @httpError(400)
 structure MainServiceLinkedError {}
 
+@waitable(
+    NumbersAligned: {
+        documentation: "wait until the numbers align"
+        acceptors: [
+            {
+                state: "success"
+                matcher: { success: true }
+            }
+            {
+                state: "retry"
+                matcher: { errorType: "MysteryThrottlingError" }
+            }
+            {
+                state: "failure"
+                matcher: { errorType: "HaltError" }
+            }
+        ]
+    }
+)
 @readonly
 operation GetNumbers {
     input: GetNumbersRequest
