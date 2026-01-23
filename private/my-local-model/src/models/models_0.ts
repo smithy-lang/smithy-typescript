@@ -30,6 +30,9 @@ export interface GetNumbersRequest {
    * @public
    */
   fieldWithMessage?: string | undefined;
+
+  startToken?: string | undefined;
+  maxResults?: number | undefined;
 }
 
 /**
@@ -38,6 +41,8 @@ export interface GetNumbersRequest {
 export interface GetNumbersResponse {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;
+  numbers?: number[] | undefined;
+  nextToken?: string | undefined;
 }
 
 /**

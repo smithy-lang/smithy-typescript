@@ -21,4 +21,7 @@ export type {
   RetryableError,
   XYZServiceServiceException,
   XYZServiceSyntheticServiceException,
+  waitForNumbersAligned,
+  waitUntilNumbersAligned,
+  paginateGetNumbers,
 } from "../dist-types/index.d";

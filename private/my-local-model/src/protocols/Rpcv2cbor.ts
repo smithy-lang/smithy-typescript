@@ -367,6 +367,8 @@ const se_Alpha_event = (
         'bigInteger': [],
         'fieldWithMessage': [],
         'fieldWithoutMessage': [],
+        'maxResults': [],
+        'startToken': [],
       });
     }
 
@@ -397,10 +399,14 @@ const se_Alpha_event = (
       return take(output, {
         'bigDecimal': [],
         'bigInteger': [],
+        'nextToken': __expectString,
+        'numbers': _json,
       }) as any;
     }
 
     // de_HaltError omitted.
+
+    // de_IntegerList omitted.
 
     // de_MainServiceLinkedError omitted.
 

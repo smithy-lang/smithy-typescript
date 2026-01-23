@@ -7,6 +7,7 @@ use smithy.rules#clientContextParams
 use smithy.rules#endpointRuleSet
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
+use smithy.waiters#waitable
 
 @rpcv2Cbor
 @documentation("xyz interfaces")
@@ -79,6 +80,26 @@ service XYZService {
 @httpError(400)
 structure MainServiceLinkedError {}
 
+@waitable(
+    NumbersAligned: {
+        documentation: "wait until the numbers align"
+        acceptors: [
+            {
+                state: "success"
+                matcher: { success: true }
+            }
+            {
+                state: "retry"
+                matcher: { errorType: "MysteryThrottlingError" }
+            }
+            {
+                state: "failure"
+                matcher: { errorType: "HaltError" }
+            }
+        ]
+    }
+)
+@paginated(inputToken: "startToken", outputToken: "nextToken", pageSize: "maxResults", items: "numbers")
 @readonly
 @httpRequestTests([
     {
@@ -124,12 +145,22 @@ structure GetNumbersRequest {
     @documentation("This is deprecated documentation annotation")
     @deprecated(message: "This field has been deprecated", since: "3.0")
     fieldWithMessage: String
+
+    startToken: String
+
+    maxResults: Integer
 }
 
 @output
 structure GetNumbersResponse {
     bigDecimal: BigDecimal
     bigInteger: BigInteger
+    numbers: IntegerList
+    nextToken: String
+}
+
+list IntegerList {
+    member: Integer
 }
 
 @error("client")

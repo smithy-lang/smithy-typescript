@@ -127,9 +127,10 @@ final class CommandGenerator implements Runnable {
         String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
 
         // Add required imports.
-        writer.addRelativeTypeImport(configType, null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addRelativeTypeImport("ServiceInputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
-        writer.addRelativeTypeImport("ServiceOutputTypes", null, Paths.get(".", serviceSymbol.getNamespace()));
+        Path servicePath = Paths.get(".", serviceSymbol.getNamespace());
+        writer.addRelativeTypeImport(configType, null, servicePath);
+        writer.addRelativeTypeImport("ServiceInputTypes", null, servicePath);
+        writer.addRelativeTypeImport("ServiceOutputTypes", null, servicePath);
         writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
 
         String name = symbol.getName();

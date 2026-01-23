@@ -106,7 +106,7 @@ final class PaginationGenerator implements Runnable {
         writePager();
     }
 
-    static String getOutputFilelocation(OperationShape operation) {
+    static String getOutputFileLocation(OperationShape operation) {
         return Paths.get(
             CodegenUtils.SOURCE_FOLDER,
             PAGINATION_FOLDER,
@@ -145,7 +145,7 @@ final class PaginationGenerator implements Runnable {
         Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
         for (OperationShape operation : containedOperations) {
             if (operation.hasTrait(PaginatedTrait.ID)) {
-                String outputFilepath = PaginationGenerator.getOutputFilelocation(operation);
+                String outputFilepath = PaginationGenerator.getOutputFileLocation(operation);
                 writer.write("export * from \"./$L\";", getModulePath(outputFilepath));
             }
         }

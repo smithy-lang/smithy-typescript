@@ -310,7 +310,7 @@ final class DirectedTypeScriptCodegen
         Set<OperationShape> containedOperations = directive.operations();
         for (OperationShape operation : containedOperations) {
             if (operation.hasTrait(PaginatedTrait.ID)) {
-                String outputFilename = PaginationGenerator.getOutputFilelocation(operation);
+                String outputFilename = PaginationGenerator.getOutputFileLocation(operation);
                 delegator.useFileWriter(
                     outputFilename,
                     paginationWriter -> new PaginationGenerator(

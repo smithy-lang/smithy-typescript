@@ -1,6 +1,12 @@
 // smithy-typescript generated code
 import { createAggregatedClient } from "@smithy/smithy-client";
-import type { HttpHandlerOptions as __HttpHandlerOptions } from "@smithy/types";
+import type {
+  HttpHandlerOptions as __HttpHandlerOptions,
+  PaginationConfiguration,
+  Paginator,
+  WaiterConfiguration,
+} from "@smithy/types";
+import type { WaiterResult } from "@smithy/util-waiter";
 
 import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
 import {
@@ -8,11 +14,19 @@ import {
   TradeEventStreamCommandInput,
   TradeEventStreamCommandOutput,
 } from "./commands/TradeEventStreamCommand";
+import { paginateGetNumbers } from "./pagination/GetNumbersPaginator";
+import { waitUntilNumbersAligned } from "./waiters/waitForNumbersAligned";
 import { XYZServiceClient } from "./XYZServiceClient";
 
 const commands = {
   GetNumbersCommand,
   TradeEventStreamCommand,
+};
+const paginators = {
+  paginateGetNumbers,
+};
+const waiters = {
+  waitUntilNumbersAligned,
 };
 
 export interface XYZService {
@@ -51,6 +65,27 @@ export interface XYZService {
     options: __HttpHandlerOptions,
     cb: (err: any, data?: TradeEventStreamCommandOutput) => void
   ): void;
+
+  /**
+   * @see {@link GetNumbersCommand}
+   * @param args - command input.
+   * @param paginationConfig - optional pagination config.
+   * @returns AsyncIterable of {@link GetNumbersCommandOutput}.
+   */
+  paginateGetNumbers(
+    args?: GetNumbersCommandInput,
+    paginationConfig?: Omit<PaginationConfiguration, "client">
+  ): Paginator<GetNumbersCommandOutput>;
+
+  /**
+   * @see {@link GetNumbersCommand}
+   * @param args - command input.
+   * @param waiterConfig - `maxWaitTime` in seconds or waiter config object.
+   */
+  waitUntilNumbersAligned(
+    args: GetNumbersCommandInput,
+    waiterConfig: number | Omit<WaiterConfiguration<XYZService>, "client">
+  ): Promise<WaiterResult>;
 }
 
 /**
@@ -58,4 +93,4 @@ export interface XYZService {
  * @public
  */
 export class XYZService extends XYZServiceClient implements XYZService {}
-createAggregatedClient(commands, XYZService);
+createAggregatedClient(commands, XYZService, { paginators, waiters });
