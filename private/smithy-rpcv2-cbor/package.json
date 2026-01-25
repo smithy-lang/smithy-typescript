@@ -12,7 +12,7 @@
     "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
     "prepack": "yarn run clean && yarn run build",
     "merged": "echo \"this is merged from user configuration.\"",
-    "test": "yarn g:vitest run --passWithNoTests"
+    "test": "yarn vitest run --passWithNoTests"
   },
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",

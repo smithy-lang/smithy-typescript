@@ -56,7 +56,8 @@ final class PackageJsonGenerator {
         ObjectNode devDeps = node.getObjectMember("devDependencies").orElse(Node.objectNode());
         if (devDeps.containsMember(TypeScriptDependency.VITEST.packageName)) {
             ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
-            scripts = scripts.withMember("test", "yarn g:vitest run --passWithNoTests");
+            String pkgManagerExec = settings.getPackageManager().getCommand().replaceFirst("^npm$", "npx");
+            scripts = scripts.withMember("test", "%s vitest run --passWithNoTests".formatted(pkgManagerExec));
             node = node.withMember("scripts", scripts);
 
             manifest.writeFile(

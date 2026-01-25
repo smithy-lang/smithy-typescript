@@ -1,3 +1,8 @@
+// smithy-typescript generated code
+import { expect, test as it } from "vitest";
+
+import { GetNumbersCommand } from "../../src/commands/GetNumbersCommand";
+import { XYZServiceClient } from "../../src/XYZServiceClient";
 import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
 import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { Readable } from "node:stream";
@@ -98,7 +103,7 @@ const compareParts = (expectedParts: comparableParts, generatedParts: comparable
 
 /**
  * Compares all types for equivalent contents, doing nested
- * equality checks based on non-`$$metadata`
+ * equality checks based on non-`$metadata`
  * properties that have defined values.
  */
 const equivalentContents = (expected: any, generated: any): boolean => {
@@ -121,8 +126,8 @@ const equivalentContents = (expected: any, generated: any): boolean => {
   // If a test fails with an issue in the below 6 lines, it's likely
   // due to an issue in the nestedness or existence of the property
   // being compared.
-  delete localExpected["$$metadata"];
-  delete generated["$$metadata"];
+  delete localExpected["$metadata"];
+  delete generated["$metadata"];
   Object.keys(localExpected).forEach((key) => localExpected[key] === undefined && delete localExpected[key]);
   Object.keys(generated).forEach((key) => generated[key] === undefined && delete generated[key]);
 
@@ -197,3 +202,192 @@ function normalizeByteArrayType(data: any) {
   }
   return output;
 }
+
+const WARMUP_ITERATIONS = 10_000;
+const BENCHMARK_ITERATIONS = 10_000;
+const BENCHMARK_TIMEOUT = 60_000;
+
+it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
+  const client = new XYZServiceClient({
+    ...clientParams,
+    requestHandler: new RequestSerializationTestHandler(),
+  });
+
+  const command = new GetNumbersCommand(
+    {
+    } as any,
+  );
+  const timings = [] as number[];
+  const testStart = performance.now();
+  const numeric = (a: number, b: number) => a - b;
+  let i = 0;
+
+  while (++i) {
+    const preSerialize = performance.now();
+    try {
+      await client.send(command);
+      fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
+      return;
+    } catch (err) {
+      if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {
+        fail(err);
+        return;
+      }
+      const r = err.request;
+    };
+    const postSerialize = performance.now();
+    if (i >= WARMUP_ITERATIONS) {
+      // allow warmup
+      timings.push(postSerialize * 1_000_000 - preSerialize  * 1_000_000);
+    }
+
+    if (timings.length >= BENCHMARK_ITERATIONS) {
+      timings.length = BENCHMARK_ITERATIONS;
+      break;
+    } else if (testStart + 30_000 < preSerialize) {
+      break;
+    }
+  }
+
+  timings.sort(numeric);
+
+  const n = timings.length;
+  const p50 = timings[(n - 1) * 0.50 | 0] | 0;
+  const p90 = timings[(n - 1) * 0.90 | 0] | 0;
+  const p95 = timings[(n - 1) * 0.95 | 0] | 0;
+  const p99 = timings[(n - 1) * 0.99 | 0] | 0;
+  const mean = timings.reduce((a, b) => a + b, 0) / timings.length | 0;
+  const stdDev = Math.sqrt(timings.reduce((a, b) => a + (b - mean) ** 2, 0) / timings.length) | 0;
+
+  console.info("GetNumbersRequestExample:SerdeBenchmark:Request");
+  const fmt = (n: number) => String(n.toLocaleString()).padStart(10, ' ');
+  console.table({
+    n: fmt(n),
+    p50: fmt(p50),
+    p90: fmt(p90),
+    p95: fmt(p95),
+    p99: fmt(p99),
+    mean: fmt(mean),
+    stdDev: fmt(stdDev),
+  });
+
+  const decile = p95 / 10;
+  let d = 1;
+  const centIndex = (n / 100) | 0;
+  let line = "";
+
+  console.info("=".repeat(31), "Distribution Viz", "=".repeat(31));
+  for (let i = 0; i < n; i += centIndex) {
+    const t = timings[i];
+    if (t < decile * d) {
+      line += ".";
+    } else {
+      line += ` <= ${(decile * d) | 0}`;
+      console.info(line);
+      d += 1;
+      line = ".";
+    }
+  }
+  console.info(line + ` > ${(decile * (d - 1)) | 0}`);
+  console.info("=".repeat(80));
+
+}, BENCHMARK_TIMEOUT);
+
+it("GetNumbersResponseExample:SerdeBenchmark:Response", async () => {
+  const client = new XYZServiceClient({
+    ...clientParams,
+    requestHandler: new ResponseDeserializationTestHandler(
+      true,
+      200,
+      {
+        "smithy-protocol": "rpc-v2-cbor",
+      }
+    ),
+  });
+
+  const params: any = {};
+  const command = new GetNumbersCommand(params);
+
+  const timings = [] as number[];
+  const numeric = (a: number, b: number) => a - b;
+  let i = 0;
+
+  client.middlewareStack.addRelativeTo(
+      (next: any) => async (args: any) => {
+        const preDeserialize = performance.now();
+        const r = await next(args);
+        const postDeserialize = performance.now();
+        if (i >= WARMUP_ITERATIONS) {
+          timings.push(postDeserialize * 1_000_000 - preDeserialize * 1_000_000);
+        }
+        return r;
+      },
+      {
+        name: "deserializerBenchmarkMiddleware",
+        toMiddleware: "deserializerMiddleware",
+        relation: "before",
+        override: true,
+      }
+  );
+
+  const benchmarkStart = performance.now();
+
+  while (++i) {
+    let r: any;
+    try {
+      r = await client.send(command);
+    } catch (err) {
+      fail("Expected a valid response to be returned, got " + err);
+      return;
+    }
+    if (i >= WARMUP_ITERATIONS + BENCHMARK_ITERATIONS) {
+      break;
+    } else if (benchmarkStart + 30_000 < performance.now()) {
+      break;
+    }
+  }
+
+  timings.sort(numeric);
+  timings.length = Math.min(timings.length, BENCHMARK_ITERATIONS);
+
+  const n = timings.length;
+  const p50 = timings[(n - 1) * 0.50 | 0] | 0;
+  const p90 = timings[(n - 1) * 0.90 | 0] | 0;
+  const p95 = timings[(n - 1) * 0.95 | 0] | 0;
+  const p99 = timings[(n - 1) * 0.99 | 0] | 0;
+  const mean = timings.reduce((a, b) => a + b, 0) / timings.length | 0;
+  const stdDev = Math.sqrt(timings.reduce((a, b) => a + (b - mean) ** 2, 0) / timings.length) | 0;
+
+  console.info("GetNumbersResponseExample:SerdeBenchmark:Response");
+  const fmt = (n: number) => String(n.toLocaleString()).padStart(10, ' ');
+  console.table({
+    n: fmt(n),
+    p50: fmt(p50),
+    p90: fmt(p90),
+    p95: fmt(p95),
+    p99: fmt(p99),
+    mean: fmt(mean),
+    stdDev: fmt(stdDev),
+  });
+
+  const decile = p95 / 10;
+  let d = 1;
+  const centIndex = (n / 100) | 0;
+  let line = "";
+
+  console.info("=".repeat(31), "Distribution Viz", "=".repeat(31));
+  for (let i = 0; i < n; i += centIndex) {
+    const t = timings[i];
+    if (t < decile * d) {
+      line += ".";
+    } else {
+      line += ` <= ${(decile * d) | 0}`;
+      console.info(line);
+      d += 1;
+      line = ".";
+    }
+  }
+  console.info(line + ` > ${(decile * (d - 1)) | 0}`);
+  console.info("=".repeat(80));
+
+}, BENCHMARK_TIMEOUT);

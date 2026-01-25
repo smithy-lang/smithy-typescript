@@ -9,7 +9,8 @@
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
-    "prepack": "yarn run clean && yarn run build"
+    "prepack": "yarn run clean && yarn run build",
+    "test": "yarn vitest run --passWithNoTests"
   },
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",
@@ -55,7 +56,8 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vitest": "^4.0.17"
   },
   "engines": {
     "node": ">=20.0.0"

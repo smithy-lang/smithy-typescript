@@ -57,6 +57,7 @@ import software.amazon.smithy.protocoltests.traits.HttpResponseTestCase;
 import software.amazon.smithy.protocoltests.traits.HttpResponseTestsTrait;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
+import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
@@ -81,6 +82,10 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(HttpProtocolTestGenerator.class.getName());
     private static final String TEST_CASE_FILE_TEMPLATE = "test/functional/%s.spec.ts";
+    private static final String SERDE_BENCHMARK_TAG = "serde-benchmark";
+    private static final String WARMUP_ITERATIONS = "10_000";
+    private static final String BENCHMARK_ITERATIONS = "10_000";
+    private static final String BENCHMARK_TIMEOUT = "60_000";
 
     private final TypeScriptSettings settings;
     private final Model model;
@@ -93,6 +98,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
     private final TestFilter testFilter;
     private final MalformedRequestTestFilter malformedRequestTestFilter;
     private final GenerationContext context;
+    private final ServiceClosure closure;
 
     private TypeScriptWriter writer;
 
@@ -112,12 +118,44 @@ public final class HttpProtocolTestGenerator implements Runnable {
         this.testFilter = testFilter;
         this.malformedRequestTestFilter = malformedRequestTestFilter;
         this.context = context;
+        this.closure = ServiceClosure.of(model, settings.getService(model));
     }
 
     @Override
     public void run() {
         OperationIndex operationIndex = OperationIndex.of(model);
         TopDownIndex topDownIndex = TopDownIndex.of(model);
+
+        boolean hasSerdeBenchmarks = closure.getOperationShapes()
+            .stream()
+            .anyMatch(o -> {
+                if (o.hasTag("server-only")) {
+                    return false;
+                }
+                return o.getTrait(HttpRequestTestsTrait.class)
+                    .map(
+                        r -> r.getTestCases()
+                            .stream()
+                            .anyMatch(c -> c.hasTag(SERDE_BENCHMARK_TAG))
+                    )
+                    .orElse(false)
+                    || o.getTrait(HttpRequestTestsTrait.class)
+                        .map(r -> r.getTestCases().stream().anyMatch(c -> c.hasTag(SERDE_BENCHMARK_TAG)))
+                        .orElse(false);
+            });
+        if (hasSerdeBenchmarks) {
+            initializeWriterIfNeeded();
+            writer.write(
+                """
+                const WARMUP_ITERATIONS = $L;
+                const BENCHMARK_ITERATIONS = $L;
+                const BENCHMARK_TIMEOUT = $L;
+                """,
+                WARMUP_ITERATIONS,
+                BENCHMARK_ITERATIONS,
+                BENCHMARK_TIMEOUT
+            );
+        }
 
         // Use a TreeSet to have a fixed ordering of tests.
         for (OperationShape operation : new TreeSet<>(topDownIndex.getContainedOperations(service))) {
@@ -142,7 +180,13 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 .getTrait(HttpRequestTestsTrait.class)
                 .ifPresent(trait -> {
                     for (HttpRequestTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
-                        onlyIfProtocolMatches(testCase, () -> generateClientRequestTest(operation, testCase));
+                        onlyIfProtocolMatches(testCase, () -> {
+                            if (testCase.hasTag(SERDE_BENCHMARK_TAG)) {
+                                generateClientRequestBenchmark(operation, testCase);
+                            } else {
+                                generateClientRequestTest(operation, testCase);
+                            }
+                        });
                     }
                 });
             // 2. Generate test cases for each response.
@@ -150,7 +194,13 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 .getTrait(HttpResponseTestsTrait.class)
                 .ifPresent(trait -> {
                     for (HttpResponseTestCase testCase : trait.getTestCasesFor(AppliesTo.CLIENT)) {
-                        onlyIfProtocolMatches(testCase, () -> generateResponseTest(operation, testCase));
+                        onlyIfProtocolMatches(testCase, () -> {
+                            if (testCase.hasTag(SERDE_BENCHMARK_TAG)) {
+                                generateResponseBenchmark(operation, testCase);
+                            } else {
+                                generateResponseTest(operation, testCase);
+                            }
+                        });
                     }
                 });
             // 3. Generate test cases for each error on each operation.
@@ -767,6 +817,185 @@ public final class HttpProtocolTestGenerator implements Runnable {
         });
     }
 
+    private void generateClientRequestBenchmark(OperationShape operation, HttpRequestTestCase testCase) {
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
+
+        String testName = testCase.getId() + ":SerdeBenchmark:Request";
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+
+        openTestBlock(operation, testCase, testName, () -> {
+            writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
+                writer.write("...clientParams,");
+                testCase
+                    .getHost()
+                    .ifPresent(host -> {
+                        writer.write("endpoint: \"https://$L\",", host);
+                    });
+                writer.write("requestHandler: new RequestSerializationTestHandler(),");
+            });
+
+            ObjectNode params = testCase.getParams();
+            Optional<ShapeId> inputOptional = operation.getInput();
+            if (inputOptional.isPresent()) {
+                StructureShape inputShape = model.expectShape(inputOptional.get(), StructureShape.class);
+                writer
+                    .write("const command = new $T(", operationSymbol)
+                    .indent()
+                    .call(() -> params.accept(new CommandInputNodeVisitor(inputShape)))
+                    .dedent()
+                    .write(");");
+            } else {
+                writer.write("const command = new $T({});", operationSymbol);
+            }
+
+            // Send the request and look for the expected exception to then perform assertions.
+            writer
+                .write(
+                    """
+                    const timings = [] as number[];
+                    const testStart = performance.now();
+                    const numeric = (a: number, b: number) => a - b;
+                    let i = 0;
+
+                    while (++i) {
+                      const preSerialize = performance.now();
+                      try {
+                        await client.send(command);
+                        fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
+                        return;
+                      } catch (err) {
+                        if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {
+                          fail(err);
+                          return;
+                        }
+                        const r = err.request;
+                      };
+                      const postSerialize = performance.now();
+                      if (i >= WARMUP_ITERATIONS) {
+                        // allow warmup
+                        timings.push(postSerialize * 1_000_000 - preSerialize  * 1_000_000);
+                      }
+
+                      if (timings.length >= BENCHMARK_ITERATIONS) {
+                        timings.length = BENCHMARK_ITERATIONS;
+                        break;
+                      } else if (testStart + 30_000 < preSerialize) {
+                        break;
+                      }
+                    }
+
+                    timings.sort(numeric);
+
+                    %s
+                    """.formatted(logVisualize()),
+                    testName
+                );
+        });
+    }
+
+    private void generateResponseBenchmark(OperationShape operation, HttpResponseTestCase testCase) {
+        testCase.getDocumentation().ifPresent(writer::writeDocs);
+
+        String testName = testCase.getId() + ":SerdeBenchmark:Response";
+
+        openTestBlock(operation, testCase, testName, () -> {
+            writeResponseTestSetup(operation, testCase, true);
+
+            writer.write(
+                """
+                const timings = [] as number[];
+                const numeric = (a: number, b: number) => a - b;
+                let i = 0;
+
+                client.middlewareStack.addRelativeTo(
+                    (next: any) => async (args: any) => {
+                      const preDeserialize = performance.now();
+                      const r = await next(args);
+                      const postDeserialize = performance.now();
+                      if (i >= WARMUP_ITERATIONS) {
+                        timings.push(postDeserialize * 1_000_000 - preDeserialize * 1_000_000);
+                      }
+                      return r;
+                    },
+                    {
+                      name: "deserializerBenchmarkMiddleware",
+                      toMiddleware: "deserializerMiddleware",
+                      relation: "before",
+                      override: true,
+                    }
+                );
+
+                const benchmarkStart = performance.now();
+
+                while (++i) {
+                  let r: any;
+                  try {
+                    r = await client.send(command);
+                  } catch (err) {
+                    fail("Expected a valid response to be returned, got " + err);
+                    return;
+                  }
+                  if (i >= WARMUP_ITERATIONS + BENCHMARK_ITERATIONS) {
+                    break;
+                  } else if (benchmarkStart + 30_000 < performance.now()) {
+                    break;
+                  }
+                }
+
+                timings.sort(numeric);
+                timings.length = Math.min(timings.length, BENCHMARK_ITERATIONS);
+
+                %s
+                """.formatted(logVisualize()),
+                testName
+            );
+        });
+    }
+
+    private String logVisualize() {
+        return """
+               const n = timings.length;
+               const p50 = timings[(n - 1) * 0.50 | 0] | 0;
+               const p90 = timings[(n - 1) * 0.90 | 0] | 0;
+               const p95 = timings[(n - 1) * 0.95 | 0] | 0;
+               const p99 = timings[(n - 1) * 0.99 | 0] | 0;
+               const mean = timings.reduce((a, b) => a + b, 0) / timings.length | 0;
+               const stdDev = Math.sqrt(timings.reduce((a, b) => a + (b - mean) ** 2, 0) / timings.length) | 0;
+
+               console.info($1S);
+               const fmt = (n: number) => String(n.toLocaleString()).padStart(10, ' ');
+               console.table({
+                 n: fmt(n),
+                 p50: fmt(p50),
+                 p90: fmt(p90),
+                 p95: fmt(p95),
+                 p99: fmt(p99),
+                 mean: fmt(mean),
+                 stdDev: fmt(stdDev),
+               });
+
+               const decile = p95 / 10;
+               let d = 1;
+               const centIndex = (n / 100) | 0;
+               let line = "";
+
+               console.info("=".repeat(31), "Distribution Viz", "=".repeat(31));
+               for (let i = 0; i < n; i += centIndex) {
+                 const t = timings[i];
+                 if (t < decile * d) {
+                   line += ".";
+                 } else {
+                   line += ` <= $${(decile * d) | 0}`;
+                   console.info(line);
+                   d += 1;
+                   line = ".";
+                 }
+               }
+               console.info(line + ` > $${(decile * (d - 1)) | 0}`);
+               console.info("=".repeat(80));
+               """;
+    }
+
     private void generateServerErrorResponseTest(
         OperationShape operation,
         StructureShape error,
@@ -1115,12 +1344,16 @@ public final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void openTestBlock(OperationShape operation, HttpMessageTestCase testCase, String testName, Runnable f) {
+        String timeout = testCase.hasTag(SERDE_BENCHMARK_TAG) ? ", BENCHMARK_TIMEOUT" : "";
+
         // Skipped tests are still generated, just not run.
         if (testFilter.skip(service, operation, testCase, settings)) {
-            writer.openBlock("it.skip($S, async () => {", "});\n", testName, f);
+            writer.openBlock("it.skip($S, async () => {", testName);
         } else {
-            writer.openBlock("it($S, async () => {", "});\n", testName, f);
+            writer.openBlock("it($S, async () => {", testName);
         }
+        f.run();
+        writer.closeBlock("}$L);\n", timeout);
     }
 
     private void openTestBlock(
@@ -1129,12 +1362,16 @@ public final class HttpProtocolTestGenerator implements Runnable {
         String testName,
         Runnable f
     ) {
+        String timeout = testCase.hasTag(SERDE_BENCHMARK_TAG) ? ", BENCHMARK_TIMEOUT" : "";
+
         // Skipped tests are still generated, just not run.
         if (malformedRequestTestFilter.skip(service, operation, testCase, settings)) {
-            writer.openBlock("it.skip($S, async () => {", "});\n", testName, f);
+            writer.openBlock("it.skip($S, async () => {", testName);
         } else {
-            writer.openBlock("it($S, async () => {", "});\n", testName, f);
+            writer.openBlock("it($S, async () => {", testName);
         }
+        f.run();
+        writer.closeBlock("}$L);\n", timeout);
     }
 
     /**
