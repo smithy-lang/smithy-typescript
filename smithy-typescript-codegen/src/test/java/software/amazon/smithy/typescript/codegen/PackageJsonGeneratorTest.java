@@ -117,6 +117,7 @@ class PackageJsonGeneratorTest {
             .withMember("package", Node.from("example"))
             .withMember("packageVersion", Node.from("1.0.0"))
             .withMember("packageDescription", Node.from("example description"))
+            .withMember("packageManager", Node.from("npm"))
             .build();
 
         final TypeScriptSettings typeScriptSettings = TypeScriptSettings.from(
@@ -139,7 +140,7 @@ class PackageJsonGeneratorTest {
         String packageJson = manifest.getFileString(PackageJsonGenerator.PACKAGE_JSON_FILENAME).get();
         String configString = manifest.getFileString(PackageJsonGenerator.VITEST_CONFIG_FILENAME).get();
 
-        assertThat(packageJson, containsString("\"test\": \"yarn g:vitest run --passWithNoTests\""));
+        assertThat(packageJson, containsString("\"test\": \"npx vitest run --passWithNoTests\""));
         assertThat(configString, containsString("include: [\"**/*.spec.ts\"]"));
     }
 

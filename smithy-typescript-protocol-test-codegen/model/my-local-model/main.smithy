@@ -5,6 +5,8 @@ namespace org.xyz.v1
 use smithy.protocols#rpcv2Cbor
 use smithy.rules#clientContextParams
 use smithy.rules#endpointRuleSet
+use smithy.test#httpRequestTests
+use smithy.test#httpResponseTests
 
 @rpcv2Cbor
 @documentation("xyz interfaces")
@@ -78,6 +80,25 @@ service XYZService {
 structure MainServiceLinkedError {}
 
 @readonly
+@httpRequestTests([
+    {
+        id: "GetNumbersRequestExample"
+        protocol: "smithy.protocols#rpcv2Cbor"
+        method: "POST"
+        uri: "/service/XYZService/operation/GetNumbers"
+        params: {}
+        tags: ["serde-benchmark"]
+    }
+])
+@httpResponseTests([
+    {
+        id: "GetNumbersResponseExample"
+        protocol: "smithy.protocols#rpcv2Cbor"
+        code: 200
+        headers: { "smithy-protocol": "rpc-v2-cbor" }
+        tags: ["serde-benchmark"]
+    }
+])
 operation GetNumbers {
     input: GetNumbersRequest
     output: GetNumbersResponse
