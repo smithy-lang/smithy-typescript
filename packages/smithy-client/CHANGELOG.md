@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.11.0
+
+### Minor Changes
+
+- 75145e5: add paginators/waiters to aggregate clients
+
 ## 4.10.12
 
 ### Patch Changes
