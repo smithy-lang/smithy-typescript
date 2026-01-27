@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { expect, test as it } from "vitest";
+import { afterAll, expect, test as it } from "vitest";
 
 import { GetNumbersCommand } from "../../src/commands/GetNumbersCommand";
 import { XYZServiceClient } from "../../src/XYZServiceClient";
@@ -207,6 +207,73 @@ const WARMUP_ITERATIONS = 10_000;
 const BENCHMARK_ITERATIONS = 10_000;
 const BENCHMARK_TIMEOUT = 60_000;
 
+/**
+ * Test name to benchmark data.
+ */
+const benchmarks = {} as Record<
+  string,
+  {
+    n: string;
+    p50: string;
+    p90: string;
+    p95: string;
+    p99: string;
+    mean: string;
+    stdDev: string;
+  }
+>;
+
+function logBenchmarks() {
+  console.table(benchmarks);
+}
+
+function logBenchmark(name: string, timings: number[]) {
+  const n = timings.length;
+  const p50 = timings[(n - 1) * 0.50 | 0] | 0;
+  const p90 = timings[(n - 1) * 0.90 | 0] | 0;
+  const p95 = timings[(n - 1) * 0.95 | 0] | 0;
+  const p99 = timings[(n - 1) * 0.99 | 0] | 0;
+  const mean = timings.reduce((a, b) => a + b, 0) / timings.length | 0;
+  const stdDev = Math.sqrt(timings.reduce((a, b) => a + (b - mean) ** 2, 0) / timings.length) | 0;
+
+  const fmt = (n: number) => String(n.toLocaleString()).padStart(10, ' ');
+  benchmarks[name] = {
+    n: fmt(n),
+    p50: fmt(p50),
+    p90: fmt(p90),
+    p95: fmt(p95),
+    p99: fmt(p99),
+    mean: fmt(mean),
+    stdDev: fmt(stdDev),
+  };
+  return {
+    name, p95, n, timings
+  };
+}
+
+function vizBenchmark({ name, p95, n, timings }: { name: string, p95: number, n: number, timings: number[] }) {
+  const decile = p95 / 10;
+  let d = 1;
+  const centIndex = (n / 100) | 0;
+  let line = "";
+
+  console.info(name);
+  console.info("=".repeat(31), "Distribution Viz", "=".repeat(31));
+  for (let i = 0; i < n; i += centIndex) {
+    const t = timings[i];
+    if (t < decile * d) {
+      line += ".";
+    } else {
+      line += ` <= ${(decile * d) | 0}`;
+      console.info(line);
+      d += 1;
+      line = ".";
+    }
+  }
+  console.info(line + ` > ${(decile * (d - 1)) | 0}`);
+  console.info("=".repeat(80));
+}
+
 it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
   const client = new XYZServiceClient({
     ...clientParams,
@@ -217,6 +284,7 @@ it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
     {
     } as any,
   );
+  const name = "GetNumbersRequestExample:SerdeBenchmark:Request";
   const timings = [] as number[];
   const testStart = performance.now();
   const numeric = (a: number, b: number) => a - b;
@@ -251,45 +319,7 @@ it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
 
   timings.sort(numeric);
 
-  const n = timings.length;
-  const p50 = timings[(n - 1) * 0.50 | 0] | 0;
-  const p90 = timings[(n - 1) * 0.90 | 0] | 0;
-  const p95 = timings[(n - 1) * 0.95 | 0] | 0;
-  const p99 = timings[(n - 1) * 0.99 | 0] | 0;
-  const mean = timings.reduce((a, b) => a + b, 0) / timings.length | 0;
-  const stdDev = Math.sqrt(timings.reduce((a, b) => a + (b - mean) ** 2, 0) / timings.length) | 0;
-
-  console.info("GetNumbersRequestExample:SerdeBenchmark:Request");
-  const fmt = (n: number) => String(n.toLocaleString()).padStart(10, ' ');
-  console.table({
-    n: fmt(n),
-    p50: fmt(p50),
-    p90: fmt(p90),
-    p95: fmt(p95),
-    p99: fmt(p99),
-    mean: fmt(mean),
-    stdDev: fmt(stdDev),
-  });
-
-  const decile = p95 / 10;
-  let d = 1;
-  const centIndex = (n / 100) | 0;
-  let line = "";
-
-  console.info("=".repeat(31), "Distribution Viz", "=".repeat(31));
-  for (let i = 0; i < n; i += centIndex) {
-    const t = timings[i];
-    if (t < decile * d) {
-      line += ".";
-    } else {
-      line += ` <= ${(decile * d) | 0}`;
-      console.info(line);
-      d += 1;
-      line = ".";
-    }
-  }
-  console.info(line + ` > ${(decile * (d - 1)) | 0}`);
-  console.info("=".repeat(80));
+  vizBenchmark(logBenchmark(name, timings));
 
 }, BENCHMARK_TIMEOUT);
 
@@ -308,6 +338,7 @@ it("GetNumbersResponseExample:SerdeBenchmark:Response", async () => {
   const params: any = {};
   const command = new GetNumbersCommand(params);
 
+  const name = "GetNumbersResponseExample:SerdeBenchmark:Response";
   const timings = [] as number[];
   const numeric = (a: number, b: number) => a - b;
   let i = 0;
@@ -350,44 +381,10 @@ it("GetNumbersResponseExample:SerdeBenchmark:Response", async () => {
   timings.sort(numeric);
   timings.length = Math.min(timings.length, BENCHMARK_ITERATIONS);
 
-  const n = timings.length;
-  const p50 = timings[(n - 1) * 0.50 | 0] | 0;
-  const p90 = timings[(n - 1) * 0.90 | 0] | 0;
-  const p95 = timings[(n - 1) * 0.95 | 0] | 0;
-  const p99 = timings[(n - 1) * 0.99 | 0] | 0;
-  const mean = timings.reduce((a, b) => a + b, 0) / timings.length | 0;
-  const stdDev = Math.sqrt(timings.reduce((a, b) => a + (b - mean) ** 2, 0) / timings.length) | 0;
-
-  console.info("GetNumbersResponseExample:SerdeBenchmark:Response");
-  const fmt = (n: number) => String(n.toLocaleString()).padStart(10, ' ');
-  console.table({
-    n: fmt(n),
-    p50: fmt(p50),
-    p90: fmt(p90),
-    p95: fmt(p95),
-    p99: fmt(p99),
-    mean: fmt(mean),
-    stdDev: fmt(stdDev),
-  });
-
-  const decile = p95 / 10;
-  let d = 1;
-  const centIndex = (n / 100) | 0;
-  let line = "";
-
-  console.info("=".repeat(31), "Distribution Viz", "=".repeat(31));
-  for (let i = 0; i < n; i += centIndex) {
-    const t = timings[i];
-    if (t < decile * d) {
-      line += ".";
-    } else {
-      line += ` <= ${(decile * d) | 0}`;
-      console.info(line);
-      d += 1;
-      line = ".";
-    }
-  }
-  console.info(line + ` > ${(decile * (d - 1)) | 0}`);
-  console.info("=".repeat(80));
+  vizBenchmark(logBenchmark(name, timings));
 
 }, BENCHMARK_TIMEOUT);
+
+afterAll(() => {
+  logBenchmarks();
+});
