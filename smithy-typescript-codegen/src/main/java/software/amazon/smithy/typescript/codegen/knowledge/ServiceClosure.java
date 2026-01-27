@@ -55,6 +55,9 @@ public final class ServiceClosure implements KnowledgeIndex {
      * For API testing & schemas.
      */
     private final TreeSet<OperationShape> operations = new TreeSet<>();
+    private final TreeSet<OperationShape> paginatedOperations = new TreeSet<>();
+    private final TreeSet<OperationShape> waitableOperations = new TreeSet<>();
+
     /**
      * Note: also contains unions.
      * For API testing.
@@ -135,7 +138,7 @@ public final class ServiceClosure implements KnowledgeIndex {
 
     public TreeSet<String> getWaiterNames() {
         TreeSet<String> waiters = new TreeSet<>();
-        for (OperationShape operation : operations) {
+        for (OperationShape operation : getWaitableOperationShapes()) {
             operation
                 .getTrait(WaitableTrait.class)
                 .ifPresent(trait -> {
@@ -152,7 +155,7 @@ public final class ServiceClosure implements KnowledgeIndex {
 
     public TreeSet<String> getPaginatorNames() {
         TreeSet<String> paginators = new TreeSet<>();
-        for (OperationShape operation : operations) {
+        for (OperationShape operation : getPaginatedOperationShapes()) {
             operation
                 .getTrait(PaginatedTrait.class)
                 .ifPresent(trait -> {
@@ -188,6 +191,14 @@ public final class ServiceClosure implements KnowledgeIndex {
 
     public TreeSet<OperationShape> getOperationShapes() {
         return operations;
+    }
+
+    public TreeSet<OperationShape> getPaginatedOperationShapes() {
+        return paginatedOperations;
+    }
+
+    public TreeSet<OperationShape> getWaitableOperationShapes() {
+        return waitableOperations;
     }
 
     /**
@@ -316,6 +327,12 @@ public final class ServiceClosure implements KnowledgeIndex {
                 }
                 case OPERATION -> {
                     OperationShape operation = (OperationShape) shape;
+                    if (operation.hasTrait(WaitableTrait.ID)) {
+                        waitableOperations.add(operation);
+                    }
+                    if (operation.hasTrait(PaginatedTrait.ID)) {
+                        paginatedOperations.add(operation);
+                    }
                     if (operation.getInput().isPresent()) {
                         scan(model.expectShape(operation.getInputShape()));
                     } else {

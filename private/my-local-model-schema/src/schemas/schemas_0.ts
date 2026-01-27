@@ -24,14 +24,24 @@ const _fWMi = "fieldWithMessage";
 const _g = "gamma";
 const _hE = "httpError";
 const _i = "id";
+const _mR = "maxResults";
+const _n = "numbers";
+const _nT = "nextToken";
 const _s = "smithy.ts.sdk.synthetic.org.xyz.v1";
+const _sT = "startToken";
 const _st = "streaming";
 const _t = "timestamp";
 const n0 = "org.xyz.v1";
 
 // smithy-typescript generated code
 import { TypeRegistry } from "@smithy/core/schema";
-import type { StaticErrorSchema, StaticOperationSchema, StaticStructureSchema, StaticUnionSchema } from "@smithy/types";
+import type {
+  StaticErrorSchema,
+  StaticListSchema,
+  StaticOperationSchema,
+  StaticStructureSchema,
+  StaticUnionSchema,
+} from "@smithy/types";
 
 import {
   CodedThrottlingError,
@@ -57,13 +67,13 @@ export var CodedThrottlingError$: StaticErrorSchema = [-3, n0, _CTE,
 TypeRegistry.for(n0).registerError(CodedThrottlingError$, CodedThrottlingError);
 export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
   0,
-  [_bD, _bI, _fWM, _fWMi],
-  [19, 17, 0, 0]
+  [_bD, _bI, _fWM, _fWMi, _sT, _mR],
+  [19, 17, 0, 0, 0, 1]
 ];
 export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   0,
-  [_bD, _bI],
-  [19, 17]
+  [_bD, _bI, _n, _nT],
+  [19, 17, 64 | 1, 0]
 ];
 export var HaltError$: StaticErrorSchema = [-3, n0, _HE,
   { [_e]: _c },
@@ -108,6 +118,7 @@ TypeRegistry.for(n0).registerError(XYZServiceServiceException$, XYZServiceServic
 var __Unit = "unit" as const;
 export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
 TypeRegistry.for(_s).registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
+var IntegerList = 64 | 1;
 export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_st]: 1 },
   [_a, _b, _g],

@@ -43,12 +43,18 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  *   bigInteger: Number("bigint"),
  *   fieldWithoutMessage: "STRING_VALUE",
  *   fieldWithMessage: "STRING_VALUE",
+ *   startToken: "STRING_VALUE",
+ *   maxResults: Number("int"),
  * };
  * const command = new GetNumbersCommand(input);
  * const response = await client.send(command);
  * // { // GetNumbersResponse
  * //   bigDecimal: Number("bigdecimal"),
  * //   bigInteger: Number("bigint"),
+ * //   numbers: [ // IntegerList
+ * //     Number("int"),
+ * //   ],
+ * //   nextToken: "STRING_VALUE",
  * // };
  *
  * ```
