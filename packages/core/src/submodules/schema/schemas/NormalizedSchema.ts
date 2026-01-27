@@ -158,7 +158,8 @@ export class NormalizedSchema implements INormalizedSchema {
    */
   public getSchema(): Exclude<$Schema, $MemberSchema | INormalizedSchema> {
     const sc = this.schema;
-    if ((sc as StaticSimpleSchema)[0] === 0) {
+    // array check is to prevent autoboxing or something like that.
+    if (Array.isArray(sc) && (sc as StaticSimpleSchema)[0] === 0) {
       return (sc as StaticSimpleSchema)[4] as SimpleSchema;
     }
     return sc as Exclude<$Schema, $MemberSchema | INormalizedSchema>;
@@ -210,7 +211,10 @@ export class NormalizedSchema implements INormalizedSchema {
    */
   public isStructSchema(): boolean {
     const sc = this.getSchema();
-    const id = (sc as StaticSchema)[0];
+    if (typeof sc !== "object") {
+      return false;
+    }
+    const id = (sc satisfies StaticSchema)[0];
     return (
       id === (3 satisfies StaticSchemaIdStruct) ||
       id === (-3 satisfies StaticSchemaIdError) ||
@@ -220,7 +224,10 @@ export class NormalizedSchema implements INormalizedSchema {
 
   public isUnionSchema(): boolean {
     const sc = this.getSchema();
-    return (sc as StaticSchema)[0] === (4 satisfies StaticSchemaIdUnion);
+    if (typeof sc !== "object") {
+      return false;
+    }
+    return (sc satisfies StaticSchema)[0] === (4 satisfies StaticSchemaIdUnion);
   }
 
   public isBlobSchema(): boolean {
