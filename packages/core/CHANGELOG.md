@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.22.0
+
+### Minor Changes
+
+- 472bf01: avoid autoboxing in NormalizedSchema::getSchema()
+
 ## 3.21.1
 
 ### Patch Changes
