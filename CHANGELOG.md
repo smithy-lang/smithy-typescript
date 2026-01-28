@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.43.0 (2026-01-28)
+
+### Features
+
+- Generated workspace clean commands replaced `rimraf` with `premove` ([#1834](https://github.com/smithy-lang/smithy-typescript/pull/1834))
+- Generated aggregate clients now contain paginators and waiters ([#1853](https://github.com/smithy-lang/smithy-typescript/pull/1853))
+
+### Chores
+
+- Updated to smithy v1.66.0 ([#1850](https://github.com/smithy-lang/smithy-typescript/pull/1850))
+
 ## 0.42.0 (2026-01-15)
 
 ### Features
