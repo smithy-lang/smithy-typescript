@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import software.amazon.smithy.build.FileManifest;
@@ -55,6 +56,14 @@ import software.amazon.smithy.waiters.Waiter;
 @SmithyUnstableApi
 final class DirectedTypeScriptCodegen
     implements DirectedCodegen<TypeScriptCodegenContext, TypeScriptSettings, TypeScriptIntegration> {
+    static {
+        // too many redundant logs like dozens of lines of
+        // "Reserved word: Error is a reserved word for a name. Converting to _Error"
+        Logger.getLogger("software.amazon.smithy.codegen.core.ReservedWordSymbolProvider").setLevel(Level.SEVERE);
+
+        // TypeScriptIntegration::matchesSettings causes too many logs from toposort.
+        Logger.getLogger("software.amazon.smithy.codegen.core.IntegrationTopologicalSort").setLevel(Level.SEVERE);
+    }
 
     private static final Logger LOGGER = Logger.getLogger(DirectedTypeScriptCodegen.class.getName());
 
