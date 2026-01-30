@@ -1,5 +1,11 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.43.1 (2026-01-30)
+
+### Bug Fixes
+
+- Fixed paginator capitalization issue when generating from a model with non-TitleCase operation shapes ([#1860](https://github.com/smithy-lang/smithy-typescript/pull/1860))
+
 ## 0.43.0 (2026-01-28)
 
 ### Features
