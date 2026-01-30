@@ -1,5 +1,9 @@
 import {
   Alpha$,
+  camelCaseOperation$,
+  CamelCaseOperationCommand,
+  camelCaseOperationInput$,
+  camelCaseOperationOutput$,
   CodedThrottlingError,
   CodedThrottlingError$,
   GetNumbers$,
@@ -12,6 +16,7 @@ import {
   MainServiceLinkedError$,
   MysteryThrottlingError,
   MysteryThrottlingError$,
+  paginatecamelCaseOperation,
   paginateGetNumbers,
   RetryableError,
   RetryableError$,
@@ -33,12 +38,16 @@ import assert from "node:assert";
 assert(typeof XYZServiceClient === "function");
 assert(typeof XYZService === "function");
 // commands
+assert(typeof CamelCaseOperationCommand === "function");
+assert(typeof camelCaseOperation$ === "object");
 assert(typeof GetNumbersCommand === "function");
 assert(typeof GetNumbers$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
 assert(typeof TradeEventStream$ === "object");
 // structural schemas
 assert(typeof Alpha$ === "object");
+assert(typeof camelCaseOperationInput$ === "object");
+assert(typeof camelCaseOperationOutput$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
 assert(typeof GetNumbersResponse$ === "object");
 assert(typeof TradeEvents$ === "object");
@@ -63,4 +72,5 @@ assert(typeof waitForNumbersAligned === "function");
 assert(typeof waitUntilNumbersAligned === "function");
 // paginators
 assert(typeof paginateGetNumbers === "function");
+assert(typeof paginatecamelCaseOperation === "function");
 console.log(`XYZService index test passed.`);

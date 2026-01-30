@@ -6,6 +6,25 @@ import { XYZServiceSyntheticServiceException as __BaseException } from "./XYZSer
 /**
  * @public
  */
+export class MainServiceLinkedError extends __BaseException {
+  readonly name = "MainServiceLinkedError" as const;
+  readonly $fault = "client" as const;
+  /**
+   * @internal
+   */
+  constructor(opts: __ExceptionOptionType<MainServiceLinkedError, __BaseException>) {
+    super({
+      name: "MainServiceLinkedError",
+      $fault: "client",
+      ...opts,
+    });
+    Object.setPrototypeOf(this, MainServiceLinkedError.prototype);
+  }
+}
+
+/**
+ * @public
+ */
 export class CodedThrottlingError extends __BaseException {
   readonly name = "CodedThrottlingError" as const;
   readonly $fault = "client" as const;
@@ -41,25 +60,6 @@ export class HaltError extends __BaseException {
       ...opts,
     });
     Object.setPrototypeOf(this, HaltError.prototype);
-  }
-}
-
-/**
- * @public
- */
-export class MainServiceLinkedError extends __BaseException {
-  readonly name = "MainServiceLinkedError" as const;
-  readonly $fault = "client" as const;
-  /**
-   * @internal
-   */
-  constructor(opts: __ExceptionOptionType<MainServiceLinkedError, __BaseException>) {
-    super({
-      name: "MainServiceLinkedError",
-      $fault: "client",
-      ...opts,
-    });
-    Object.setPrototypeOf(this, MainServiceLinkedError.prototype);
   }
 }
 

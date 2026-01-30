@@ -17,6 +17,9 @@ const _b = "beta";
 const _bD = "bigDecimal";
 const _bI = "bigInteger";
 const _c = "client";
+const _cCO = "camelCaseOperation";
+const _cCOI = "camelCaseOperationInput";
+const _cCOO = "camelCaseOperationOutput";
 const _e = "error";
 const _eS = "eventStream";
 const _fWM = "fieldWithoutMessage";
@@ -27,10 +30,12 @@ const _i = "id";
 const _mR = "maxResults";
 const _n = "numbers";
 const _nT = "nextToken";
+const _r = "results";
 const _s = "smithy.ts.sdk.synthetic.org.xyz.v1";
 const _sT = "startToken";
 const _st = "streaming";
 const _t = "timestamp";
+const _to = "token";
 const n0 = "org.xyz.v1";
 
 // smithy-typescript generated code
@@ -58,6 +63,16 @@ export var Alpha$: StaticStructureSchema = [3, n0, _A,
   0,
   [_i, _t],
   [0, 4]
+];
+export var camelCaseOperationInput$: StaticStructureSchema = [3, n0, _cCOI,
+  0,
+  [_to],
+  [0]
+];
+export var camelCaseOperationOutput$: StaticStructureSchema = [3, n0, _cCOO,
+  0,
+  [_to, _r],
+  [0, 64 | 21]
 ];
 export var CodedThrottlingError$: StaticErrorSchema = [-3, n0, _CTE,
   { [_e]: _c, [_hE]: 429 },
@@ -118,11 +133,15 @@ TypeRegistry.for(n0).registerError(XYZServiceServiceException$, XYZServiceServic
 var __Unit = "unit" as const;
 export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
 TypeRegistry.for(_s).registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
+var Blobs = 64 | 21;
 var IntegerList = 64 | 1;
 export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_st]: 1 },
   [_a, _b, _g],
   [() => Alpha$, () => __Unit, () => __Unit]
+];
+export var camelCaseOperation$: StaticOperationSchema = [9, n0, _cCO,
+  0, () => camelCaseOperationInput$, () => camelCaseOperationOutput$
 ];
 export var GetNumbers$: StaticOperationSchema = [9, n0, _GN,
   0, () => GetNumbersRequest$, () => GetNumbersResponse$
