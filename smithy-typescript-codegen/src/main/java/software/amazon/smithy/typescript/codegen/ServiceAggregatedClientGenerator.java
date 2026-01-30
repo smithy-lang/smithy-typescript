@@ -89,10 +89,11 @@ final class ServiceAggregatedClientGenerator implements Runnable {
         if (hasPaginators) {
             writer.openBlock("const paginators = {");
             for (OperationShape operation : closure.getPaginatedOperationShapes()) {
-                String paginatorFnName = "paginate" + StringUtils.capitalize(operation.getId().getName());
+                String paginatorFnName = "paginate" + operation.getId().getName();
+                String paginatorLocalName = "paginate" + StringUtils.capitalize(operation.getId().getName());
                 writer.addRelativeImport(
                     paginatorFnName,
-                    null,
+                    paginatorLocalName,
                     Paths.get(
                         ".",
                         CodegenUtils.SOURCE_FOLDER,
@@ -100,7 +101,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                             .replaceFirst("(.*?)pagination(.*?)\\.ts$", "pagination$2")
                     )
                 );
-                writer.write("$L,", paginatorFnName);
+                writer.write("$L,", paginatorLocalName);
             }
             writer.closeBlock("};");
         }
@@ -112,10 +113,13 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                 waitableTrait
                     .getWaiters()
                     .forEach((String waiterName, Waiter waiter) -> {
-                        String waiterFnName = "waitUntil" + StringUtils.capitalize(waiterName);
+                        String waiterFnName = "waitUntil" + waiterName;
+                        // note: this should never differ since smithy validation requires TitleCase waiter names.
+                        String waiterLocalName = "waitUntil" + StringUtils.capitalize(waiterName);
+
                         writer.addRelativeImport(
                             waiterFnName,
-                            null,
+                            waiterLocalName,
                             Paths.get(
                                 ".",
                                 CodegenUtils.SOURCE_FOLDER,
@@ -123,7 +127,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                                     .replaceFirst("(.*?)waiters(.*?)\\.ts$", "waiters$2")
                             )
                         );
-                        writer.write("$L,", waiterFnName);
+                        writer.write("$L,", waiterLocalName);
                     });
             }
             writer.closeBlock("};");
@@ -174,7 +178,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
             for (OperationShape operation : closure.getPaginatedOperationShapes()) {
                 if (operation.hasTrait(PaginatedTrait.ID)) {
-                    String paginatorFnName = "paginate" + StringUtils.capitalize(operation.getId().getName());
+                    String paginatorLocalName = "paginate" + StringUtils.capitalize(operation.getId().getName());
 
                     Symbol operationSymbol = symbolProvider.toSymbol(operation);
                     Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
@@ -204,7 +208,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                           paginationConfig?: Omit<$3L, "client">
                         ): Paginator<$4T>;
                         """,
-                        paginatorFnName,
+                        paginatorLocalName,
                         input,
                         "PaginationConfiguration",
                         output,
@@ -226,7 +230,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                     waitableTrait
                         .getWaiters()
                         .forEach((String waiterName, Waiter waiter) -> {
-                            String waiterFnName = "waitUntil" + StringUtils.capitalize(waiterName);
+                            String waiterLocalName = "waitUntil" + StringUtils.capitalize(waiterName);
 
                             writer.addTypeImport("WaiterConfiguration", null, TypeScriptDependency.SMITHY_TYPES);
                             writer.addTypeImport("WaiterResult", null, TypeScriptDependency.AWS_SDK_UTIL_WAITERS);
@@ -245,7 +249,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                                   waiterConfig: number | Omit<$3L, "client">
                                 ): Promise<WaiterResult>;
                                 """,
-                                waiterFnName,
+                                waiterLocalName,
                                 input,
                                 "WaiterConfiguration<" + aggregateClientName + ">"
                             );

@@ -70,6 +70,7 @@ service XYZService {
     operations: [
         GetNumbers
         TradeEventStream
+        camelCaseOperation
     ]
     errors: [
         MainServiceLinkedError
@@ -238,3 +239,19 @@ structure UnusedServiceLinkedError {}
 @error("client")
 @httpError(400)
 structure CompletelyUnlinkedError {}
+
+@paginated(inputToken: "token", outputToken: "token", items: "results")
+@readonly
+operation camelCaseOperation {
+    input := {
+        token: String
+    }
+    output := {
+        token: String
+        results: Blobs
+    }
+}
+
+list Blobs {
+    member: Blob
+}

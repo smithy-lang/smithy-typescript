@@ -30,6 +30,7 @@ import type {
   SerdeContext as __SerdeContext,
 } from "@smithy/types";
 
+import { CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput } from "../commands/CamelCaseOperationCommand";
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import {
@@ -40,8 +41,29 @@ import {
   RetryableError,
   XYZServiceServiceException,
 } from "../models/errors";
-import { Alpha, GetNumbersRequest, GetNumbersResponse, TradeEvents, Unit } from "../models/models_0";
+import {
+  Alpha,
+  CamelCaseOperationInput,
+  CamelCaseOperationOutput,
+  GetNumbersRequest,
+  GetNumbersResponse,
+  TradeEvents,
+  Unit,
+} from "../models/models_0";
 import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
+
+/**
+ * serializeRpcv2cborCamelCaseOperationCommand
+ */
+export const se_CamelCaseOperationCommand = async (
+  input: CamelCaseOperationCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = SHARED_HEADERS;
+  let body: any;
+  body = cbor.serialize(_json(input));
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/camelCaseOperation", undefined, body);
+};
 
 /**
  * serializeRpcv2cborGetNumbersCommand
@@ -71,6 +93,28 @@ export const se_TradeEventStreamCommand = async (
   let body: any;
   body = se_TradeEvents(input.eventStream, context);
   return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/TradeEventStream", undefined, body);
+};
+
+/**
+ * deserializeRpcv2cborCamelCaseOperationCommand
+ */
+export const de_CamelCaseOperationCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<CamelCaseOperationCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const data: any = await parseBody(output.body, context)
+  let contents: any = {};
+  contents = de_CamelCaseOperationOutput(data, context);
+  const response: CamelCaseOperationCommandOutput = {
+    $metadata: deserializeMetadata(output), ...contents,
+  };
+  return response;
+
 };
 
 /**
@@ -128,15 +172,15 @@ const de_CommandError = async (
   };
   const errorCode = loadSmithyRpcV2CborErrorCode(output, parsedOutput.body);
   switch (errorCode) {
+    case "MainServiceLinkedError":
+    case "org.xyz.v1#MainServiceLinkedError":
+      throw await de_MainServiceLinkedErrorRes(parsedOutput, context);
     case "CodedThrottlingError":
     case "org.xyz.v1#CodedThrottlingError":
       throw await de_CodedThrottlingErrorRes(parsedOutput, context);
     case "HaltError":
     case "org.xyz.v1#HaltError":
       throw await de_HaltErrorRes(parsedOutput, context);
-    case "MainServiceLinkedError":
-    case "org.xyz.v1#MainServiceLinkedError":
-      throw await de_MainServiceLinkedErrorRes(parsedOutput, context);
     case "MysteryThrottlingError":
     case "org.xyz.v1#MysteryThrottlingError":
       throw await de_MysteryThrottlingErrorRes(parsedOutput, context);
@@ -355,6 +399,8 @@ const se_Alpha_event = (
       });
     }
 
+    // se_CamelCaseOperationInput omitted.
+
     /**
      * serializeRpcv2cborGetNumbersRequest
      */
@@ -384,6 +430,30 @@ const se_Alpha_event = (
       return take(output, {
         'id': __expectString,
         'timestamp': (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
+      }) as any;
+    }
+
+    /**
+     * deserializeRpcv2cborBlobs
+     */
+    const de_Blobs = (
+      output: any,
+      context: __SerdeContext
+    ): Uint8Array[] => {
+      const collection = (output || []).filter((e: any) => e != null)
+      return collection;
+    }
+
+    /**
+     * deserializeRpcv2cborCamelCaseOperationOutput
+     */
+    const de_CamelCaseOperationOutput = (
+      output: any,
+      context: __SerdeContext
+    ): CamelCaseOperationOutput => {
+      return take(output, {
+        'results': (_: any) => de_Blobs(_, context),
+        'token': __expectString,
       }) as any;
     }
 

@@ -49,6 +49,7 @@ import {
   defaultXYZServiceHttpAuthSchemeParametersProvider,
   resolveHttpAuthSchemeConfig,
 } from "./auth/httpAuthSchemeProvider";
+import { CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput } from "./commands/CamelCaseOperationCommand";
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import {
@@ -66,6 +67,7 @@ export { __Client };
  * @public
  */
 export type ServiceInputTypes =
+  | CamelCaseOperationCommandInput
   | GetNumbersCommandInput
   | TradeEventStreamCommandInput;
 
@@ -73,6 +75,7 @@ export type ServiceInputTypes =
  * @public
  */
 export type ServiceOutputTypes =
+  | CamelCaseOperationCommandOutput
   | GetNumbersCommandOutput
   | TradeEventStreamCommandOutput;
 

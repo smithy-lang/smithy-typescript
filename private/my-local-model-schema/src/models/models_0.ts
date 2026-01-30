@@ -12,6 +12,21 @@ export interface Alpha {
 /**
  * @public
  */
+export interface CamelCaseOperationInput {
+  token?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface CamelCaseOperationOutput {
+  token?: string | undefined;
+  results?: Uint8Array[] | undefined;
+}
+
+/**
+ * @public
+ */
 export interface GetNumbersRequest {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;

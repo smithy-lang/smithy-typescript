@@ -8,21 +8,29 @@ import type {
 } from "@smithy/types";
 import type { WaiterResult } from "@smithy/util-waiter";
 
+import {
+  CamelCaseOperationCommand,
+  CamelCaseOperationCommandInput,
+  CamelCaseOperationCommandOutput,
+} from "./commands/CamelCaseOperationCommand";
 import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
 import {
   TradeEventStreamCommand,
   TradeEventStreamCommandInput,
   TradeEventStreamCommandOutput,
 } from "./commands/TradeEventStreamCommand";
+import { paginatecamelCaseOperation as paginateCamelCaseOperation } from "./pagination/camelCaseOperationPaginator";
 import { paginateGetNumbers } from "./pagination/GetNumbersPaginator";
 import { waitUntilNumbersAligned } from "./waiters/waitForNumbersAligned";
 import { XYZServiceClient } from "./XYZServiceClient";
 
 const commands = {
+  CamelCaseOperationCommand,
   GetNumbersCommand,
   TradeEventStreamCommand,
 };
 const paginators = {
+  paginateCamelCaseOperation,
   paginateGetNumbers,
 };
 const waiters = {
@@ -30,6 +38,24 @@ const waiters = {
 };
 
 export interface XYZService {
+  /**
+   * @see {@link CamelCaseOperationCommand}
+   */
+  camelCaseOperation(): Promise<CamelCaseOperationCommandOutput>;
+  camelCaseOperation(
+    args: CamelCaseOperationCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<CamelCaseOperationCommandOutput>;
+  camelCaseOperation(
+    args: CamelCaseOperationCommandInput,
+    cb: (err: any, data?: CamelCaseOperationCommandOutput) => void
+  ): void;
+  camelCaseOperation(
+    args: CamelCaseOperationCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: CamelCaseOperationCommandOutput) => void
+  ): void;
+
   /**
    * @see {@link GetNumbersCommand}
    */
@@ -65,6 +91,17 @@ export interface XYZService {
     options: __HttpHandlerOptions,
     cb: (err: any, data?: TradeEventStreamCommandOutput) => void
   ): void;
+
+  /**
+   * @see {@link CamelCaseOperationCommand}
+   * @param args - command input.
+   * @param paginationConfig - optional pagination config.
+   * @returns AsyncIterable of {@link CamelCaseOperationCommandOutput}.
+   */
+  paginateCamelCaseOperation(
+    args?: CamelCaseOperationCommandInput,
+    paginationConfig?: Omit<PaginationConfiguration, "client">
+  ): Paginator<CamelCaseOperationCommandOutput>;
 
   /**
    * @see {@link GetNumbersCommand}

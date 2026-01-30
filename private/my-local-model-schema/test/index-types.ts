@@ -2,6 +2,9 @@
 export type {
   XYZServiceClient,
   XYZService,
+  CamelCaseOperationCommand,
+  CamelCaseOperationCommandInput,
+  CamelCaseOperationCommandOutput,
   GetNumbersCommand,
   GetNumbersCommandInput,
   GetNumbersCommandOutput,
@@ -9,6 +12,8 @@ export type {
   TradeEventStreamCommandInput,
   TradeEventStreamCommandOutput,
   Alpha,
+  CamelCaseOperationInput,
+  CamelCaseOperationOutput,
   GetNumbersRequest,
   GetNumbersResponse,
   TradeEvents,
@@ -24,4 +29,5 @@ export type {
   waitForNumbersAligned,
   waitUntilNumbersAligned,
   paginateGetNumbers,
+  paginatecamelCaseOperation,
 } from "../dist-types/index.d";
