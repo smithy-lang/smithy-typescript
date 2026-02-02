@@ -9,7 +9,7 @@
     "build": "turbo run build",
     "test": "make test-unit",
     "test:integration": "yarn build-test-packages && make test-integration",
-    "test:protocols": "make generate-protocol-tests test-protocols",
+    "test:protocols": "make generate-protocol-tests test-protocols benchmark",
     "lint": "turbo run lint",
     "lint-fix": "turbo run lint -- --fix",
     "lint:pkgJson": "yarn lint:dependencies",

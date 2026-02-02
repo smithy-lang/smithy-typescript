@@ -2,6 +2,7 @@
 import { afterAll, expect, test as it } from "vitest";
 
 import { GetNumbersCommand } from "../../src/commands/GetNumbersCommand";
+import { HttpLabelCommandCommand } from "../../src/commands/HttpLabelCommandCommand";
 import { XYZServiceClient } from "../../src/XYZServiceClient";
 import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
 import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
@@ -273,6 +274,33 @@ function vizBenchmark({ name, p95, n, timings }: { name: string, p95: number, n:
   console.info(line + ` > ${(decile * (d - 1)) | 0}`);
   console.info("=".repeat(80));
 }
+
+it("HttpLabelCommandExample:Response", async () => {
+  const client = new XYZServiceClient({
+    ...clientParams,
+    requestHandler: new ResponseDeserializationTestHandler(
+      true,
+      200,
+      {
+        "smithy-protocol": "rpc-v2-cbor",
+      }
+    ),
+  });
+
+  const params: any = {
+    LabelDoesNotApplyToRpcProtocol: "placeholder",
+  };
+  const command = new HttpLabelCommandCommand(params);
+
+  let r: any;
+  try {
+    r = await client.send(command);
+  } catch (err) {
+    fail("Expected a valid response to be returned, got " + err);
+    return;
+  }
+  expect(r.$metadata.httpStatusCode).toBe(200);
+});
 
 it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
   const client = new XYZServiceClient({

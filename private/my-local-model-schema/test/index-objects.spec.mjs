@@ -12,6 +12,10 @@ import {
   GetNumbersResponse$,
   HaltError,
   HaltError$,
+  HttpLabelCommand$,
+  HttpLabelCommandCommand,
+  HttpLabelCommandInput$,
+  HttpLabelCommandOutput$,
   MainServiceLinkedError,
   MainServiceLinkedError$,
   MysteryThrottlingError,
@@ -38,6 +42,8 @@ import assert from "node:assert";
 assert(typeof XYZServiceClient === "function");
 assert(typeof XYZService === "function");
 // commands
+assert(typeof HttpLabelCommandCommand === "function");
+assert(typeof HttpLabelCommand$ === "object");
 assert(typeof CamelCaseOperationCommand === "function");
 assert(typeof camelCaseOperation$ === "object");
 assert(typeof GetNumbersCommand === "function");
@@ -45,6 +51,8 @@ assert(typeof GetNumbers$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
 assert(typeof TradeEventStream$ === "object");
 // structural schemas
+assert(typeof HttpLabelCommandInput$ === "object");
+assert(typeof HttpLabelCommandOutput$ === "object");
 assert(typeof Alpha$ === "object");
 assert(typeof camelCaseOperationInput$ === "object");
 assert(typeof camelCaseOperationOutput$ === "object");

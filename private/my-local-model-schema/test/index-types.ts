@@ -2,6 +2,9 @@
 export type {
   XYZServiceClient,
   XYZService,
+  HttpLabelCommandCommand,
+  HttpLabelCommandCommandInput,
+  HttpLabelCommandCommandOutput,
   CamelCaseOperationCommand,
   CamelCaseOperationCommandInput,
   CamelCaseOperationCommandOutput,
@@ -11,6 +14,8 @@ export type {
   TradeEventStreamCommand,
   TradeEventStreamCommandInput,
   TradeEventStreamCommandOutput,
+  HttpLabelCommandInput,
+  HttpLabelCommandOutput,
   Alpha,
   CamelCaseOperationInput,
   CamelCaseOperationOutput,

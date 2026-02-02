@@ -32,6 +32,7 @@ import type {
 
 import { CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput } from "../commands/CamelCaseOperationCommand";
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
+import { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "../commands/HttpLabelCommandCommand";
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import {
   CodedThrottlingError,
@@ -47,10 +48,24 @@ import {
   CamelCaseOperationOutput,
   GetNumbersRequest,
   GetNumbersResponse,
+  HttpLabelCommandInput,
   TradeEvents,
   Unit,
 } from "../models/models_0";
 import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
+
+/**
+ * serializeRpcv2cborHttpLabelCommandCommand
+ */
+export const se_HttpLabelCommandCommand = async (
+  input: HttpLabelCommandCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = SHARED_HEADERS;
+  let body: any;
+  body = cbor.serialize(_json(input));
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/HttpLabelCommand", undefined, body);
+};
 
 /**
  * serializeRpcv2cborCamelCaseOperationCommand
@@ -93,6 +108,28 @@ export const se_TradeEventStreamCommand = async (
   let body: any;
   body = se_TradeEvents(input.eventStream, context);
   return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/TradeEventStream", undefined, body);
+};
+
+/**
+ * deserializeRpcv2cborHttpLabelCommandCommand
+ */
+export const de_HttpLabelCommandCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<HttpLabelCommandCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const data: any = await parseBody(output.body, context)
+  let contents: any = {};
+  contents = _json(data);
+  const response: HttpLabelCommandCommandOutput = {
+    $metadata: deserializeMetadata(output), ...contents,
+  };
+  return response;
+
 };
 
 /**
@@ -386,6 +423,8 @@ const se_Alpha_event = (
       Object.assign(contents, _json(data));
       return contents;
     }
+    // se_HttpLabelCommandInput omitted.
+
     /**
      * serializeRpcv2cborAlpha
      */
@@ -419,6 +458,8 @@ const se_Alpha_event = (
     }
 
     // se_Unit omitted.
+
+    // de_HttpLabelCommandOutput omitted.
 
     /**
      * deserializeRpcv2cborAlpha

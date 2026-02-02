@@ -15,6 +15,11 @@ import {
 } from "./commands/CamelCaseOperationCommand";
 import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
 import {
+  HttpLabelCommandCommand,
+  HttpLabelCommandCommandInput,
+  HttpLabelCommandCommandOutput,
+} from "./commands/HttpLabelCommandCommand";
+import {
   TradeEventStreamCommand,
   TradeEventStreamCommandInput,
   TradeEventStreamCommandOutput,
@@ -25,6 +30,7 @@ import { waitUntilNumbersAligned } from "./waiters/waitForNumbersAligned";
 import { XYZServiceClient } from "./XYZServiceClient";
 
 const commands = {
+  HttpLabelCommandCommand,
   CamelCaseOperationCommand,
   GetNumbersCommand,
   TradeEventStreamCommand,
@@ -38,6 +44,23 @@ const waiters = {
 };
 
 export interface XYZService {
+  /**
+   * @see {@link HttpLabelCommandCommand}
+   */
+  httpLabelCommand(
+    args: HttpLabelCommandCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<HttpLabelCommandCommandOutput>;
+  httpLabelCommand(
+    args: HttpLabelCommandCommandInput,
+    cb: (err: any, data?: HttpLabelCommandCommandOutput) => void
+  ): void;
+  httpLabelCommand(
+    args: HttpLabelCommandCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: HttpLabelCommandCommandOutput) => void
+  ): void;
+
   /**
    * @see {@link CamelCaseOperationCommand}
    */

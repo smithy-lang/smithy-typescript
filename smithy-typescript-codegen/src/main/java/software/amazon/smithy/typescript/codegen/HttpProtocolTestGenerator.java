@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,6 +44,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.HttpLabelTrait;
 import software.amazon.smithy.model.traits.HttpPrefixHeadersTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -1223,9 +1225,25 @@ public final class HttpProtocolTestGenerator implements Runnable {
             });
         });
 
-        // Set the command's parameters to empty, using the any type to
-        // trick TS in to letting us send this command through.
-        writer.write("const params: any = {};");
+        Collection<MemberShape> httpLabelMembers = model.expectShape(operation.getInputShape())
+            .getAllMembers()
+            .values()
+            .stream()
+            .filter(m -> m.hasTrait(HttpLabelTrait.ID))
+            .toList();
+
+        // HTTP bindings are validated client-side in HttpBindingProtocol, but not RpcProtocol.
+        // They do not apply for non-http binding protocols, but it doesn't harm
+        // anything to generate the placeholder.
+        writer.openCollapsibleBlock("const params: any = {", "};", !httpLabelMembers.isEmpty(), () -> {
+            for (MemberShape httpLabelMember : httpLabelMembers) {
+                writer.write(
+                    """
+                    $L: "placeholder",""",
+                    PropertyAccessor.inlineKey(httpLabelMember.getMemberName())
+                );
+            }
+        });
         writer.write("const command = new $T(params);\n", operationSymbol);
     }
 
