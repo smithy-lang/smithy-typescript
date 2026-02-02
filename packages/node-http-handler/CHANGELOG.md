@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.9
+
+### Patch Changes
+
+- 3ee4e66: Use configured logger when provided.
+
 ## 4.4.8
 
 ### Patch Changes

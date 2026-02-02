@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.11.2
+
+### Patch Changes
+
+- @smithy/util-stream@4.5.11
+- @smithy/core@3.22.1
+- @smithy/middleware-endpoint@4.4.13
+
 ## 4.11.1
 
 ### Patch Changes
