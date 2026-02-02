@@ -133,6 +133,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       httpAgent,
       httpsAgent,
       throwOnRequestTimeout,
+      logger,
     } = options || {};
     const keepAlive = true;
     const maxSockets = 50;
@@ -157,7 +158,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         }
         return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
-      logger: console,
+      logger,
     };
   }
 
