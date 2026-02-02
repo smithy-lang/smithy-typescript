@@ -4,6 +4,18 @@ import { NumericValue } from "@smithy/core/serde";
 /**
  * @public
  */
+export interface HttpLabelCommandInput {
+  LabelDoesNotApplyToRpcProtocol: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface HttpLabelCommandOutput {}
+
+/**
+ * @public
+ */
 export interface Alpha {
   id?: string | undefined;
   timestamp?: Date | undefined;

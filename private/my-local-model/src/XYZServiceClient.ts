@@ -51,6 +51,7 @@ import {
 } from "./auth/httpAuthSchemeProvider";
 import { CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput } from "./commands/CamelCaseOperationCommand";
 import { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
+import { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "./commands/HttpLabelCommandCommand";
 import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import {
   type ClientInputEndpointParameters,
@@ -69,6 +70,7 @@ export { __Client };
 export type ServiceInputTypes =
   | CamelCaseOperationCommandInput
   | GetNumbersCommandInput
+  | HttpLabelCommandCommandInput
   | TradeEventStreamCommandInput;
 
 /**
@@ -77,6 +79,7 @@ export type ServiceInputTypes =
 export type ServiceOutputTypes =
   | CamelCaseOperationCommandOutput
   | GetNumbersCommandOutput
+  | HttpLabelCommandCommandOutput
   | TradeEventStreamCommandOutput;
 
 /**

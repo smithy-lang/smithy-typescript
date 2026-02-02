@@ -2,6 +2,7 @@ $version: "2.0"
 
 namespace org.xyz.v1
 
+use org.xyz.secondary#HttpLabelCommand
 use smithy.protocols#rpcv2Cbor
 use smithy.rules#clientContextParams
 use smithy.rules#endpointRuleSet
@@ -71,6 +72,7 @@ service XYZService {
         GetNumbers
         TradeEventStream
         camelCaseOperation
+        HttpLabelCommand
     ]
     errors: [
         MainServiceLinkedError
@@ -108,7 +110,6 @@ structure MainServiceLinkedError {}
         protocol: "smithy.protocols#rpcv2Cbor"
         method: "POST"
         uri: "/service/XYZService/operation/GetNumbers"
-        params: {}
         tags: ["serde-benchmark"]
     }
 ])
@@ -121,6 +122,7 @@ structure MainServiceLinkedError {}
         tags: ["serde-benchmark"]
     }
 ])
+@http(method: "POST", uri: "/get-numbers", code: 200)
 operation GetNumbers {
     input: GetNumbersRequest
     output: GetNumbersResponse
@@ -183,6 +185,7 @@ structure HaltError {}
 @error("client")
 structure XYZServiceServiceException {}
 
+@http(method: "POST", uri: "/trade-event-stream", code: 200)
 operation TradeEventStream {
     input: TradeEventStreamRequest
     output: TradeEventStreamResponse
@@ -220,6 +223,7 @@ service UnusedService {
     ]
 }
 
+@http(method: "POST", uri: "/unused", code: 200)
 operation UnusedOperation {
     input: Unit
     output: Unit
@@ -242,6 +246,7 @@ structure CompletelyUnlinkedError {}
 
 @paginated(inputToken: "token", outputToken: "token", items: "results")
 @readonly
+@http(method: "POST", uri: "/camel-case", code: 200)
 operation camelCaseOperation {
     input := {
         token: String
