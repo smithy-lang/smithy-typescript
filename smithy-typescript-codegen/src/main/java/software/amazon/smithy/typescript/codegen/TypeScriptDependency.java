@@ -28,7 +28,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public enum TypeScriptDependency implements Dependency {
     SMITHY_CORE("dependencies", "@smithy/core", false),
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
-    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", true),
+    @Deprecated
+    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", false),
     SMITHY_TYPES("dependencies", "@smithy/types", true),
     AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", true),
@@ -154,9 +155,12 @@ public enum TypeScriptDependency implements Dependency {
             version = DependencyVersion.getVersion(name);
         }
 
-        if (name.startsWith("@smithy/")) {
-            version = "^" + version;
+        if (name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) {
+            if (!version.startsWith("^") && version.matches("^\\d+\\.\\d+\\.\\d+$")) {
+                version = "^" + version;
+            }
         }
+
         this.dependency = SymbolDependency.builder()
             .dependencyType(type)
             .packageName(name)
