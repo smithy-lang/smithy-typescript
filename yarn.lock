@@ -81,16 +81,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/types@npm:latest":
-  version: 3.598.0
-  resolution: "@aws-sdk/types@npm:3.598.0"
-  dependencies:
-    "@smithy/types": "npm:^3.1.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/83abd25e07ffc071e24f36b4fb4dae6e552d662ab55f832f9918ccff251ae80155e30a86d2bd0b98bb8b94adaa2a13f05e1bb071edf491e4f36755084ac63d4f
-  languageName: node
-  linkType: hard
-
 "@aws-sdk/util-locate-window@npm:^3.0.0":
   version: 3.568.0
   resolution: "@aws-sdk/util-locate-window@npm:3.568.0"
@@ -3276,7 +3266,6 @@ __metadata:
   dependencies:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@aws-sdk/types": "npm:latest"
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
@@ -3319,7 +3308,6 @@ __metadata:
   dependencies:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@aws-sdk/types": "npm:latest"
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
@@ -3369,15 +3357,6 @@ __metadata:
     tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
-
-"@smithy/types@npm:^3.1.0":
-  version: 3.7.2
-  resolution: "@smithy/types@npm:3.7.2"
-  dependencies:
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/4bf4674c922c092f9c92b482b074163ceea199e82466ccd4414c4cd9651f67757456414f969e9997371250e112778b636115727b5af53324334300f328069293
-  languageName: node
-  linkType: hard
 
 "@smithy/types@workspace:^, @smithy/types@workspace:packages/types":
   version: 0.0.0-use.local
@@ -12205,7 +12184,6 @@ __metadata:
   dependencies:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@aws-sdk/types": "npm:latest"
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/eventstream-serde-browser": "workspace:^"
@@ -12252,7 +12230,6 @@ __metadata:
   dependencies:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@aws-sdk/types": "npm:latest"
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/eventstream-serde-browser": "workspace:^"
