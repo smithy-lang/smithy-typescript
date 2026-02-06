@@ -1,5 +1,13 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.44.0 (2026-02-06)
+
+### Chores
+
+- Synchronized version bump for 0.44.0 in smithy-typescript-aws-codegen.
+- Deprecated use of `@aws-sdk/types` in this codegen library (continues to be available in the AWS library) ([#1863](https://github.com/smithy-lang/smithy-typescript/pull/1863))
+
+
 ## 0.43.1 (2026-01-30)
 
 ### Bug Fixes
