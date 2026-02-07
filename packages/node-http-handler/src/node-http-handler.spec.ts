@@ -1,6 +1,6 @@
 import { HttpRequest } from "@smithy/protocol-http";
-import http, { request as hRequest } from "http";
-import https, { request as hsRequest } from "https";
+import http, { request as hRequest } from "node:http";
+import https, { request as hsRequest } from "node:https";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
@@ -9,8 +9,8 @@ import * as setRequestTimeoutModule from "./set-request-timeout";
 import * as setSocketTimeoutModule from "./set-socket-timeout";
 import { timing } from "./timing";
 
-vi.mock("http", async () => {
-  const actual = (await vi.importActual("http")) as any;
+vi.mock("node:http", async () => {
+  const actual = (await vi.importActual("node:http")) as any;
   const pkg = {
     ...actual,
     request: vi.fn().mockImplementation((_options, cb) => {
@@ -29,9 +29,9 @@ vi.mock("http", async () => {
   };
 });
 
-vi.mock("https", async () => {
-  const actual = (await vi.importActual("https")) as any;
-  const http = (await vi.importActual("http")) as any;
+vi.mock("node:https", async () => {
+  const actual = (await vi.importActual("node:https")) as any;
+  const http = (await vi.importActual("node:http")) as any;
   const pkg = {
     ...actual,
     request: vi.fn().mockImplementation((_options, cb) => {
@@ -210,7 +210,14 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(slowConfigProvider);
 
         const promises = Promise.all(
-          Array.from({ length: 20 }).map(() => nodeHttpHandler.handle({} as unknown as HttpRequest))
+          Array.from({ length: 10 }).map(() =>
+            nodeHttpHandler.handle({
+              protocol: "https:",
+              hostname: "localhost",
+              port: 54321,
+              path: "/",
+            } as unknown as HttpRequest)
+          )
         );
 
         expect(providerInvokedCount).toBe(1);
@@ -257,6 +264,37 @@ describe("NodeHttpHandler", () => {
         };
         await nodeHttpHandler.handle(httpRequest as any);
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.host).toEqual("host");
+      });
+
+      describe("per-request requestTimeout", () => {
+        it("should use per-request timeout over handler config timeout", async () => {
+          const testTimeout = async (handlerTimeout: number, requestTimeout?: number) => {
+            const handler = new NodeHttpHandler({ requestTimeout: handlerTimeout });
+            await handler.handle(
+              new HttpRequest({
+                protocol: "http:",
+                username: "username",
+                password: "password",
+                hostname: "host",
+                port: 1234,
+                path: "/some/path",
+                query: {
+                  some: "query",
+                },
+                fragment: "fragment",
+              }),
+              {
+                requestTimeout,
+              }
+            );
+            expect(timing.setTimeout).toHaveBeenCalledWith(expect.any(Function), requestTimeout ?? handlerTimeout);
+          };
+
+          await testTimeout(5123.1, 125.1);
+          await testTimeout(264.1, undefined);
+          await testTimeout(234.1);
+          expect.assertions(3);
+        });
       });
 
       describe("expect 100-continue", () => {
@@ -410,53 +448,6 @@ describe("NodeHttpHandler", () => {
 See https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/node-configuring-maxsockets.html
 or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler config.`
       );
-    });
-  });
-
-  describe("per-request requestTimeout", () => {
-    it("should use per-request timeout over handler config timeout", () => {
-      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 5000 });
-      const mockHandle = vi.spyOn(nodeHttpHandler, "handle");
-      const testTimeout = (handlerTimeout: number, requestTimeout?: number) => {
-        const handler = new NodeHttpHandler({ requestTimeout: handlerTimeout });
-        const options = requestTimeout !== undefined ? { requestTimeout } : {};
-        const expectedTimeout = requestTimeout ?? handlerTimeout;
-        return expectedTimeout;
-      };
-
-      // per-request timeout takes precedence
-      expect(testTimeout(5000, 100)).toBe(100);
-
-      // fallback to handler config
-      expect(testTimeout(200, undefined)).toBe(200);
-      expect(testTimeout(200)).toBe(200);
-    });
-
-    it("should pass correct timeout values to internal functions", async () => {
-      const nodeHttpHandler = new NodeHttpHandler({ requestTimeout: 5000 });
-      (nodeHttpHandler as any).config = {
-        requestTimeout: 5000,
-        httpAgent: new http.Agent(),
-        httpsAgent: new https.Agent(),
-        logger: console,
-      };
-
-      const httpRequest = new HttpRequest({
-        hostname: "example.com",
-        method: "GET",
-        protocol: "http:",
-        path: "/",
-        headers: {},
-      });
-
-      const options1 = { requestTimeout: 100 };
-      const options2: { requestTimeout?: number } = {};
-
-      const effectiveTimeout1 = options1.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
-      const effectiveTimeout2 = options2.requestTimeout ?? (nodeHttpHandler as any).config.requestTimeout;
-
-      expect(effectiveTimeout1).toBe(100); // per-request timeout
-      expect(effectiveTimeout2).toBe(5000); // handler config timeout
     });
   });
 });

@@ -80,8 +80,16 @@ function writeBody(
   }
 
   if (body) {
-    if (Buffer.isBuffer(body) || typeof body === "string") {
-      httpRequest.end(body);
+    const isBuffer = Buffer.isBuffer(body);
+    const isString = typeof body === "string";
+    if (isBuffer || isString) {
+      // https://github.com/aws/aws-sdk-js-v3/issues/6426
+      // describes why we don't send an empty Buffer.
+      if (isBuffer && body.byteLength === 0) {
+        httpRequest.end();
+      } else {
+        httpRequest.end(body);
+      }
       return;
     }
 
