@@ -80,7 +80,13 @@ function writeBody(
   }
 
   if (body) {
-    if (Buffer.isBuffer(body) || typeof body === "string") {
+    const isBuffer = Buffer.isBuffer(body);
+    const isString = typeof body === "string";
+    if (isBuffer || isString) {
+      if (isBuffer ? body.byteLength === 0 : body.length === 0) {
+        httpRequest.end();
+        return;
+      }
       httpRequest.end(body);
       return;
     }
