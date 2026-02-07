@@ -2,9 +2,8 @@ import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
 import { HttpResponse } from "@smithy/protocol-http";
 import { buildQueryString } from "@smithy/querystring-builder";
 import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
-import { Agent as hAgent, request as hRequest } from "http";
-import type { RequestOptions } from "https";
-import { Agent as hsAgent, request as hsRequest } from "https";
+import type { Agent as HttpAgentType, AgentOptions as HttpAgentOptions, request as hRequestType } from "node:http";
+import { type RequestOptions, Agent as HttpsAgent, request as hsRequest } from "node:https";
 
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";
@@ -18,9 +17,23 @@ import { writeRequestBody } from "./write-request-body";
 export { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
-  httpAgent: hAgent;
-  httpsAgent: hsAgent;
+  loadHttpAgent(): Promise<HttpAgentType>;
+  httpAgent: HttpAgentType | undefined;
+  httpsAgent: HttpsAgent;
 }
+
+/**
+ * @internal
+ */
+let HttpAgent:
+  | {
+      new (options?: HttpAgentOptions | undefined): HttpAgentType;
+    }
+  | undefined = undefined;
+/**
+ * @internal
+ */
+let hRequest: typeof hRequestType | undefined = undefined;
 
 /**
  * @public
@@ -65,7 +78,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
    * @returns timestamp of last emitted warning.
    */
   public static checkSocketUsage(
-    agent: hAgent | hsAgent,
+    agent: HttpAgentType | HttpsAgent,
     socketWarningTimestamp: number,
     logger: Logger = console
   ): number {
@@ -110,7 +123,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     return socketWarningTimestamp;
   }
 
-  constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>) {
+  public constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>) {
     this.configProvider = new Promise((resolve, reject) => {
       if (typeof options === "function") {
         options()
@@ -145,39 +158,50 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       socketAcquisitionWarningTimeout,
       throwOnRequestTimeout,
       httpAgent: (() => {
-        if (httpAgent instanceof hAgent || typeof (httpAgent as hAgent)?.destroy === "function") {
+        if (typeof (httpAgent as HttpAgentType)?.destroy === "function") {
           this.externalAgent = true;
-          return httpAgent as hAgent;
+          return httpAgent as HttpAgentType;
         }
-        return new hAgent({ keepAlive, maxSockets, ...httpAgent });
       })(),
-      httpsAgent: (() => {
-        if (httpsAgent instanceof hsAgent || typeof (httpsAgent as hsAgent)?.destroy === "function") {
+      loadHttpAgent: async () => {
+        await NodeHttpHandler.loadHttp();
+        if (httpAgent instanceof HttpAgent! || typeof (httpAgent as HttpAgentType)?.destroy === "function") {
           this.externalAgent = true;
-          return httpsAgent as hsAgent;
+          return httpAgent as HttpAgentType;
         }
-        return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
+        return new HttpAgent!({ keepAlive, maxSockets, ...httpAgent });
+      },
+      httpsAgent: (() => {
+        if (httpsAgent instanceof HttpsAgent || typeof (httpsAgent as HttpsAgent)?.destroy === "function") {
+          this.externalAgent = true;
+          return httpsAgent as HttpsAgent;
+        }
+        return new HttpsAgent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
       logger,
     };
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.config?.httpAgent?.destroy();
     this.config?.httpsAgent?.destroy();
   }
 
-  async handle(
+  public async handle(
     request: HttpRequest,
     { abortSignal, requestTimeout }: HttpHandlerOptions = {}
   ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
     }
+    const config = this.config!;
+    const isSSL = request.protocol === "https:";
+
+    if (!isSSL && !config.httpAgent) {
+      config.httpAgent = await config.loadHttpAgent();
+    }
 
     return new Promise((_resolve, _reject) => {
-      const config = this.config!;
-
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
 
       // Timeouts related to this request to clear upon completion.
@@ -202,18 +226,15 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         return;
       }
 
-      // determine which http(s) client to use
-      const isSSL = request.protocol === "https:";
-
       const headers = request.headers ?? {};
       const expectContinue = (headers.Expect ?? headers.expect) === "100-continue";
 
-      let agent = isSSL ? config.httpsAgent : config.httpAgent;
+      let agent = isSSL ? config.httpsAgent : config.httpAgent!;
       if (expectContinue && !this.externalAgent) {
         // Because awaiting 100-continue desynchronizes the request and request body transmission,
         // such requests must be offloaded to a separate Agent instance.
         // Additional logic will exist on the client using this handler to determine whether to add the header at all.
-        agent = new (isSSL ? hsAgent : hAgent)({
+        agent = new (isSSL ? HttpsAgent : HttpAgent!)({
           keepAlive: false,
           // This is an explicit value matching the default (Infinity).
           // This should allow the connection to close cleanly after making the single request.
@@ -269,7 +290,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       };
 
       // create the http request
-      const requestFunc = isSSL ? hsRequest : hRequest;
+      const requestFunc = isSSL ? hsRequest : hRequest!;
 
       const req = requestFunc(nodeHttpsOptions, (res) => {
         const httpResponse = new HttpResponse({
@@ -319,14 +340,14 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       timeouts.push(setSocketTimeout(req, reject, config.socketTimeout));
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
-      const httpAgent = nodeHttpsOptions.agent;
-      if (typeof httpAgent === "object" && "keepAlive" in httpAgent) {
+      const transferAgent = nodeHttpsOptions.agent;
+      if (typeof transferAgent === "object" && "keepAlive" in transferAgent) {
         timeouts.push(
           setSocketKeepAlive(req, {
             // @ts-expect-error keepAlive is not public on httpAgent.
-            keepAlive: (httpAgent as hAgent).keepAlive,
+            keepAlive: (transferAgent as HttpAgent).keepAlive,
             // @ts-expect-error keepAliveMsecs is not public on httpAgent.
-            keepAliveMsecs: (httpAgent as hAgent).keepAliveMsecs,
+            keepAliveMsecs: (transferAgent as HttpAgent).keepAliveMsecs,
           })
         );
       }
@@ -340,7 +361,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     });
   }
 
-  updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
+  public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
       return {
@@ -350,7 +371,13 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     });
   }
 
-  httpHandlerConfigs(): NodeHttpHandlerOptions {
+  public httpHandlerConfigs(): NodeHttpHandlerOptions {
     return this.config ?? {};
+  }
+
+  private static async loadHttp() {
+    const { Agent, request } = await import("node:http");
+    HttpAgent = Agent;
+    hRequest = request;
   }
 }
