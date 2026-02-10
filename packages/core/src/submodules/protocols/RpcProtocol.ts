@@ -1,4 +1,4 @@
-import { NormalizedSchema } from "@smithy/core/schema";
+import { type TypeRegistry, NormalizedSchema } from "@smithy/core/schema";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
   DocumentSchema,
@@ -21,6 +21,11 @@ import { HttpProtocol } from "./HttpProtocol";
  * @public
  */
 export abstract class RpcProtocol extends HttpProtocol {
+  /**
+   * @override
+   */
+  protected declare compositeErrorRegistry: TypeRegistry;
+
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,
     input: Input,

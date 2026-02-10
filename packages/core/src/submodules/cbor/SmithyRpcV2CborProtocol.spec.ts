@@ -1,4 +1,5 @@
-import { op, TypeRegistry } from "@smithy/core/schema";
+import type { TypeRegistry } from "@smithy/core/schema";
+import { op } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
   $SchemaRef,
@@ -345,12 +346,11 @@ describe(SmithyRpcV2CborProtocol.name, () => {
       public modeledProperty: string = "";
     }
 
-    const ns = TypeRegistry.for("ns");
-    const synthetic = TypeRegistry.for("smithy.ts.sdk.synthetic.ns");
+    // protected access.
+    const registry = (protocol as any as { compositeErrorRegistry: TypeRegistry }).compositeErrorRegistry;
 
     beforeEach(() => {
-      ns.clear();
-      synthetic.clear();
+      registry.clear();
     });
 
     const modeledExceptionSchema = [
@@ -372,10 +372,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
 
     it("should throw the schema error ctor if one exists", async () => {
       // this is for modeled exceptions.
-
-      ns.registerError(modeledExceptionSchema, ModeledExceptionCtor);
-
-      synthetic.registerError(baseServiceExceptionSchema, ServiceBaseException);
+      registry.registerError(modeledExceptionSchema, ModeledExceptionCtor);
+      registry.registerError(baseServiceExceptionSchema, ServiceBaseException);
 
       try {
         await protocol.deserializeResponse(operation, serdeContext as any, errorResponse);
@@ -389,8 +387,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
 
     it("should throw a base error if available in the namespace, when no error schema is modeled", async () => {
       // this is the expected fallback case for all generated clients.
-
-      synthetic.registerError(baseServiceExceptionSchema, ServiceBaseException);
+      registry.registerError(baseServiceExceptionSchema, ServiceBaseException);
 
       try {
         await protocol.deserializeResponse(operation, serdeContext as any, errorResponseNoDiscriminator);

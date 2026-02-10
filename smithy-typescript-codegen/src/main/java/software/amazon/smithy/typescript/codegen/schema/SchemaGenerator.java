@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -48,6 +50,7 @@ public class SchemaGenerator implements Runnable {
     private final StringStore store = new StringStore();
     private final TypeScriptWriter writer = new TypeScriptWriter("");
     private final ServiceClosure closure;
+    private final Set<String> errorRegistries = new TreeSet<>();
 
     public SchemaGenerator(
         Model model,
@@ -77,9 +80,11 @@ public class SchemaGenerator implements Runnable {
                 return;
             }
         }
+
+        writeBaseError();
+        writeErrors();
         closure.getSimpleShapes().forEach(this::writeSimpleSchema);
         closure.getStructureShapes().forEach(this::writeStructureSchema);
-        writeBaseError();
         closure.getCollectionShapes().forEach(this::writeListSchema);
         closure.getMapShapes().forEach(this::writeMapSchema);
         closure.getUnionShapes().forEach(this::writeUnionSchema);
@@ -126,8 +131,45 @@ public class SchemaGenerator implements Runnable {
 
     private void writeStructureSchema(StructureShape shape) {
         checkedWriteSchema(shape, () -> {
-            String exceptionCtorSymbolName = ServiceClosure.RESERVED_WORDS.escape(shape.getId().getName());
-            if (shape.hasTrait(ErrorTrait.class)) {
+            if (!shape.hasTrait(ErrorTrait.class)) {
+                writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
+                writer.openBlock(
+                    """
+                    export var $L: StaticStructureSchema = [3, $L, $L,""",
+                    "];",
+                    getShapeVariableName(shape),
+                    store.var(shape.getId().getNamespace(), "n"),
+                    store.var(shape.getId().getName()),
+                    () -> doWithMembers(shape)
+                );
+            }
+        });
+    }
+
+    private void writeErrors() {
+        for (Shape shape : closure.getErrorShapes()) {
+            String ns = store.var(shape.getId().getNamespace(), "n");
+            String errorRegistryVarName = ns + "_registry";
+
+            if (!errorRegistries.contains(errorRegistryVarName)) {
+                writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
+                writer.write(
+                    """
+                    const $L = TypeRegistry.for($L);""",
+                    errorRegistryVarName,
+                    ns
+                );
+                errorRegistries.add(errorRegistryVarName);
+            }
+        }
+
+        for (Shape shape : closure.getErrorShapes()) {
+            Optional<StructureShape> errorShapeOpt = shape.asStructureShape();
+            if (errorShapeOpt.isPresent()) {
+                String ns = store.var(shape.getId().getNamespace(), "n");
+                String errorRegistryVarName = ns + "_registry";
+                String exceptionCtorSymbolName = ServiceClosure.RESERVED_WORDS.escape(shape.getId().getName());
+
                 writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addRelativeImport(exceptionCtorSymbolName, null, Paths.get("..", "models", "errors"));
                 writer.openBlock(
@@ -139,25 +181,26 @@ public class SchemaGenerator implements Runnable {
                     store.var(shape.getId().getName()),
                     () -> doWithMembers(shape)
                 );
-                writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
+
+                StructureShape errorShape = errorShapeOpt.get();
+                errorShape.expectTrait(ErrorTrait.class);
                 writer.write(
                     """
-                    TypeRegistry.for($L).registerError($L, $L);""",
-                    store.var(shape.getId().getNamespace(), "n"),
+                    $L.registerError($L, $L);""",
+                    errorRegistryVarName,
                     getShapeVariableName(shape),
                     exceptionCtorSymbolName
                 );
-            } else {
-                writer.addTypeImport("StaticStructureSchema", null, TypeScriptDependency.SMITHY_TYPES);
-                writer.openBlock(
-                    """
-                    export var $L: StaticStructureSchema = [3, $L, $L,""",
-                    "];",
-                    getShapeVariableName(shape),
-                    store.var(shape.getId().getNamespace(), "n"),
-                    store.var(shape.getId().getName()),
-                    () -> doWithMembers(shape)
-                );
+            }
+        }
+
+        writer.writeDocs("""
+                         TypeRegistry instances containing modeled errors.
+                         @internal
+                         """);
+        writer.openBlock("export const errorTypeRegistries = [", "]", () -> {
+            for (String errorRegistry : errorRegistries) {
+                writer.write("$L,", errorRegistry);
             }
         });
     }
@@ -180,6 +223,16 @@ public class SchemaGenerator implements Runnable {
         );
 
         String syntheticNamespace = store.var("smithy.ts.sdk.synthetic." + namespace);
+        String syntheticNamespaceTypeRegistry = syntheticNamespace + "_registry";
+        writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
+
+        writer.write(
+            """
+            const $L = TypeRegistry.for($L);""",
+            syntheticNamespaceTypeRegistry,
+            syntheticNamespace
+        );
+        errorRegistries.add(syntheticNamespaceTypeRegistry);
         writer.write(
             """
             export var $L: StaticErrorSchema = [-3, $L, $S, 0, [], []];""",
@@ -187,11 +240,10 @@ public class SchemaGenerator implements Runnable {
             syntheticNamespace,
             syntheticBaseExceptionName
         );
-        writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
         writer.write(
             """
-            TypeRegistry.for($L).registerError($L, $L);""",
-            syntheticNamespace,
+            $L.registerError($L, $L);""",
+            syntheticNamespaceTypeRegistry,
             schemaSymbolName,
             syntheticBaseExceptionName
         );

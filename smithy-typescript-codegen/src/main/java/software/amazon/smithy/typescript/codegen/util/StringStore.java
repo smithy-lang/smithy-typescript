@@ -4,7 +4,6 @@
  */
 package software.amazon.smithy.typescript.codegen.util;
 
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +15,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -171,35 +169,5 @@ public class StringStore {
             }
         }
         return true;
-    }
-
-    public WithSchemaWriter useSchemaWriter(TypeScriptWriter writer) {
-        return new WithSchemaWriter(writer, this);
-    }
-
-    @SmithyInternalApi
-    public static final class WithSchemaWriter extends StringStore {
-
-        private final TypeScriptWriter writer;
-        private final StringStore store;
-
-        private WithSchemaWriter(TypeScriptWriter writer, StringStore store) {
-            this.writer = writer;
-            this.store = store;
-        }
-
-        @Override
-        public String var(String literal) {
-            String var = store.var(literal);
-            writer.addRelativeImport(var, null, Path.of("./schemas_0"));
-            return var;
-        }
-
-        @Override
-        public String var(String literal, String preferredPrefix) {
-            String var = store.var(literal, preferredPrefix);
-            writer.addRelativeImport(var, null, Path.of("./schemas_0"));
-            return var;
-        }
     }
 }

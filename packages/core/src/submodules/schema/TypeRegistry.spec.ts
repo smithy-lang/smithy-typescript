@@ -45,4 +45,47 @@ describe(TypeRegistry.name, () => {
     tr.registerError(err, Error);
     expect(tr.getBaseException()).toBe(err);
   });
+
+  describe("composition", () => {
+    it("can be composed", () => {
+      const tr1 = TypeRegistry.for("namespace");
+      const tr2 = TypeRegistry.for("other");
+
+      tr1.register("namespace#List", List);
+      tr2.register("other#List", List);
+
+      tr1.copyFrom(tr2);
+      tr2.copyFrom(tr1);
+
+      expect(tr1.getSchema("other#List")).toBe(List);
+      expect(tr2.getSchema("namespace#List")).toBe(List);
+
+      expect(() => tr1.getSchema("List")).not.toThrow();
+      expect(() => tr2.getSchema("List")).not.toThrow();
+    });
+
+    it("does not overwrite during composition", () => {
+      const nsRegistry = TypeRegistry.for("namespace");
+      const otherRegistry = TypeRegistry.for("other");
+
+      // non-canonical
+      otherRegistry.register("namespace#Value", 1);
+      // canonical
+      nsRegistry.register("namespace#Value", 0);
+
+      // non-canonical
+      nsRegistry.register("other#Value", 1);
+      // canonical
+      otherRegistry.register("other#Value", 0);
+
+      nsRegistry.copyFrom(otherRegistry);
+      otherRegistry.copyFrom(nsRegistry);
+
+      expect(nsRegistry.getSchema("namespace#Value")).toBe(0);
+      expect(nsRegistry.getSchema("other#Value")).toBe(1);
+
+      expect(otherRegistry.getSchema("namespace#Value")).toBe(1);
+      expect(otherRegistry.getSchema("other#Value")).toBe(0);
+    });
+  });
 });
