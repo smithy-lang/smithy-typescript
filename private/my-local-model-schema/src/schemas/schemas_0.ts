@@ -41,8 +41,8 @@ const _sT = "startToken";
 const _st = "streaming";
 const _t = "timestamp";
 const _to = "token";
-const n0 = "org.xyz.secondary";
-const n1 = "org.xyz.v1";
+const n0 = "org.xyz.v1";
+const n1 = "org.xyz.secondary";
 
 // smithy-typescript generated code
 import { TypeRegistry } from "@smithy/core/schema";
@@ -65,106 +65,117 @@ import {
 import { XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
 
 /* eslint no-var: 0 */
-export var HttpLabelCommandInput$: StaticStructureSchema = [3, n0, _HLCI,
-  0,
-  [_LDNATRP],
-  [[0, 1]], 1
-];
-export var HttpLabelCommandOutput$: StaticStructureSchema = [3, n0, _HLCO,
-  0,
-  [],
-  []
-];
-export var Alpha$: StaticStructureSchema = [3, n1, _A,
-  0,
-  [_i, _t],
-  [0, 4]
-];
-export var camelCaseOperationInput$: StaticStructureSchema = [3, n1, _cCOI,
-  0,
-  [_to],
-  [0]
-];
-export var camelCaseOperationOutput$: StaticStructureSchema = [3, n1, _cCOO,
-  0,
-  [_to, _r],
-  [0, 64 | 21]
-];
-export var CodedThrottlingError$: StaticErrorSchema = [-3, n1, _CTE,
+const _s_registry = TypeRegistry.for(_s);
+export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
+_s_registry.registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
+const n0_registry = TypeRegistry.for(n0);
+export var CodedThrottlingError$: StaticErrorSchema = [-3, n0, _CTE,
   { [_e]: _c, [_hE]: 429 },
   [],
   []
 ];
-TypeRegistry.for(n1).registerError(CodedThrottlingError$, CodedThrottlingError);
-export var GetNumbersRequest$: StaticStructureSchema = [3, n1, _GNR,
-  0,
-  [_bD, _bI, _fWM, _fWMi, _sT, _mR],
-  [19, 17, 0, 0, 0, 1]
-];
-export var GetNumbersResponse$: StaticStructureSchema = [3, n1, _GNRe,
-  0,
-  [_bD, _bI, _n, _nT],
-  [19, 17, 64 | 1, 0]
-];
-export var HaltError$: StaticErrorSchema = [-3, n1, _HE,
+n0_registry.registerError(CodedThrottlingError$, CodedThrottlingError);
+export var HaltError$: StaticErrorSchema = [-3, n0, _HE,
   { [_e]: _c },
   [],
   []
 ];
-TypeRegistry.for(n1).registerError(HaltError$, HaltError);
-export var MainServiceLinkedError$: StaticErrorSchema = [-3, n1, _MSLE,
+n0_registry.registerError(HaltError$, HaltError);
+export var MainServiceLinkedError$: StaticErrorSchema = [-3, n0, _MSLE,
   { [_e]: _c, [_hE]: 400 },
   [],
   []
 ];
-TypeRegistry.for(n1).registerError(MainServiceLinkedError$, MainServiceLinkedError);
-export var MysteryThrottlingError$: StaticErrorSchema = [-3, n1, _MTE,
+n0_registry.registerError(MainServiceLinkedError$, MainServiceLinkedError);
+export var MysteryThrottlingError$: StaticErrorSchema = [-3, n0, _MTE,
   { [_e]: _c },
   [],
   []
 ];
-TypeRegistry.for(n1).registerError(MysteryThrottlingError$, MysteryThrottlingError);
-export var RetryableError$: StaticErrorSchema = [-3, n1, _RE,
+n0_registry.registerError(MysteryThrottlingError$, MysteryThrottlingError);
+export var RetryableError$: StaticErrorSchema = [-3, n0, _RE,
   { [_e]: _c },
   [],
   []
 ];
-TypeRegistry.for(n1).registerError(RetryableError$, RetryableError);
-export var TradeEventStreamRequest$: StaticStructureSchema = [3, n1, _TESR,
+n0_registry.registerError(RetryableError$, RetryableError);
+export var XYZServiceServiceException$: StaticErrorSchema = [-3, n0, _XYZSSE,
+  { [_e]: _c },
+  [],
+  []
+];
+n0_registry.registerError(XYZServiceServiceException$, XYZServiceServiceException);
+/**
+ * TypeRegistry instances containing modeled errors.
+ * @internal
+ *
+ */
+export const errorTypeRegistries = [
+  _s_registry,
+  n0_registry,
+]
+export var HttpLabelCommandInput$: StaticStructureSchema = [3, n1, _HLCI,
+  0,
+  [_LDNATRP],
+  [[0, 1]], 1
+];
+export var HttpLabelCommandOutput$: StaticStructureSchema = [3, n1, _HLCO,
+  0,
+  [],
+  []
+];
+export var Alpha$: StaticStructureSchema = [3, n0, _A,
+  0,
+  [_i, _t],
+  [0, 4]
+];
+export var camelCaseOperationInput$: StaticStructureSchema = [3, n0, _cCOI,
+  0,
+  [_to],
+  [0]
+];
+export var camelCaseOperationOutput$: StaticStructureSchema = [3, n0, _cCOO,
+  0,
+  [_to, _r],
+  [0, 64 | 21]
+];
+export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
+  0,
+  [_bD, _bI, _fWM, _fWMi, _sT, _mR],
+  [19, 17, 0, 0, 0, 1]
+];
+export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
+  0,
+  [_bD, _bI, _n, _nT],
+  [19, 17, 64 | 1, 0]
+];
+export var TradeEventStreamRequest$: StaticStructureSchema = [3, n0, _TESR,
   0,
   [_eS],
   [[() => TradeEvents$, 0]]
 ];
-export var TradeEventStreamResponse$: StaticStructureSchema = [3, n1, _TESRr,
+export var TradeEventStreamResponse$: StaticStructureSchema = [3, n0, _TESRr,
   0,
   [_eS],
   [[() => TradeEvents$, 0]]
 ];
-export var XYZServiceServiceException$: StaticErrorSchema = [-3, n1, _XYZSSE,
-  { [_e]: _c },
-  [],
-  []
-];
-TypeRegistry.for(n1).registerError(XYZServiceServiceException$, XYZServiceServiceException);
 var __Unit = "unit" as const;
-export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
-TypeRegistry.for(_s).registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
 var Blobs = 64 | 21;
 var IntegerList = 64 | 1;
-export var TradeEvents$: StaticUnionSchema = [4, n1, _TE,
+export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_st]: 1 },
   [_a, _b, _g],
   [() => Alpha$, () => __Unit, () => __Unit]
 ];
-export var HttpLabelCommand$: StaticOperationSchema = [9, n0, _HLC,
+export var HttpLabelCommand$: StaticOperationSchema = [9, n1, _HLC,
   { [_h]: ["POST", "/{LabelDoesNotApplyToRpcProtocol}", 200] }, () => HttpLabelCommandInput$, () => HttpLabelCommandOutput$
 ];
-export var camelCaseOperation$: StaticOperationSchema = [9, n1, _cCO,
+export var camelCaseOperation$: StaticOperationSchema = [9, n0, _cCO,
   { [_h]: ["POST", "/camel-case", 200] }, () => camelCaseOperationInput$, () => camelCaseOperationOutput$
 ];
-export var GetNumbers$: StaticOperationSchema = [9, n1, _GN,
+export var GetNumbers$: StaticOperationSchema = [9, n0, _GN,
   { [_h]: ["POST", "/get-numbers", 200] }, () => GetNumbersRequest$, () => GetNumbersResponse$
 ];
-export var TradeEventStream$: StaticOperationSchema = [9, n1, _TES,
+export var TradeEventStream$: StaticOperationSchema = [9, n0, _TES,
   { [_h]: ["POST", "/trade-event-stream", 200] }, () => TradeEventStreamRequest$, () => TradeEventStreamResponse$
 ];

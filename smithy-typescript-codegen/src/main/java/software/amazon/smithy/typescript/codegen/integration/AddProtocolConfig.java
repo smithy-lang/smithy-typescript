@@ -4,6 +4,9 @@
  */
 package software.amazon.smithy.typescript.codegen.integration;
 
+import static software.amazon.smithy.typescript.codegen.schema.SchemaGenerator.SCHEMAS_FOLDER;
+
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -11,6 +14,7 @@ import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.protocol.traits.Rpcv2CborTrait;
+import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -54,10 +58,16 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
                         },
                         "protocolSettings",
                         writer -> {
+                            writer.addRelativeImport(
+                                "errorTypeRegistries",
+                                null,
+                                Paths.get(".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0")
+                            );
                             writer.write(
                                 """
                                 {
                                   defaultNamespace: $S,
+                                  errorTypeRegistries,
                                 }""",
                                 namespace
                             );

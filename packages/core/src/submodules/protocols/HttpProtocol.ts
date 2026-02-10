@@ -1,5 +1,5 @@
 import type { EventStreamSerde } from "@smithy/core/event-streams";
-import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
+import { NormalizedSchema, translateTraits, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
   ClientProtocol,
@@ -29,15 +29,31 @@ import { SerdeContext } from "./SerdeContext";
  * @public
  */
 export abstract class HttpProtocol extends SerdeContext implements ClientProtocol<IHttpRequest, IHttpResponse> {
+  /**
+   * An error registry having the namespace of the modeled service,
+   * but combining all error schemas found within the service closure.
+   *
+   * Used to look up error schema during deserialization.
+   */
+  protected compositeErrorRegistry: TypeRegistry;
   protected abstract serializer: ShapeSerializer<string | Uint8Array>;
   protected abstract deserializer: ShapeDeserializer<string | Uint8Array>;
 
+  /**
+   * @param options.defaultNamespace - used by various implementing classes.
+   * @param options.errorTypeRegistries - registry instances that contribute to error deserialization.
+   */
   protected constructor(
     public readonly options: {
       defaultNamespace: string;
+      errorTypeRegistries?: TypeRegistry[];
     }
   ) {
     super();
+    this.compositeErrorRegistry = TypeRegistry.for(options.defaultNamespace);
+    for (const etr of options.errorTypeRegistries ?? []) {
+      this.compositeErrorRegistry.copyFrom(etr);
+    }
   }
 
   public abstract getShapeId(): string;

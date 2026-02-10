@@ -10,6 +10,7 @@ import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { defaultRpcV2ProtocolHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";
 import type { RpcV2ProtocolClientConfig } from "./RpcV2ProtocolClient";
+import { errorTypeRegistries } from "./schemas/schemas_0";
 
 /**
  * @internal
@@ -35,6 +36,7 @@ export const getRuntimeConfig = (config: RpcV2ProtocolClientConfig) => {
     protocol: config?.protocol ?? SmithyRpcV2CborProtocol,
     protocolSettings: config?.protocolSettings ?? {
       defaultNamespace: "smithy.protocoltests.rpcv2Cbor",
+      errorTypeRegistries,
     },
     urlParser: config?.urlParser ?? parseUrl,
     utf8Decoder: config?.utf8Decoder ?? fromUtf8,

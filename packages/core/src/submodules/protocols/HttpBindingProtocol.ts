@@ -1,4 +1,4 @@
-import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
+import { NormalizedSchema, translateTraits, type TypeRegistry } from "@smithy/core/schema";
 import { splitEvery, splitHeader } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
@@ -27,6 +27,11 @@ import { HttpProtocol } from "./HttpProtocol";
  * @public
  */
 export abstract class HttpBindingProtocol extends HttpProtocol {
+  /**
+   * @override
+   */
+  protected declare compositeErrorRegistry: TypeRegistry;
+
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,
     _input: Input,

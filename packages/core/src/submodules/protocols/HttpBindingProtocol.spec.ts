@@ -1,4 +1,5 @@
 import { op } from "@smithy/core/schema";
+import { type TypeRegistry } from "@smithy/core/schema";
 import { streamCollector } from "@smithy/node-http-handler";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
@@ -33,9 +34,21 @@ describe(HttpBindingProtocol.name, () => {
     protected serializer: ShapeSerializer<string | Uint8Array>;
     protected deserializer: ShapeDeserializer<string | Uint8Array>;
 
-    public constructor() {
-      super({
+    public constructor(
+      {
+        defaultNamespace = "",
+        errorTypeRegistries = [],
+      }: {
+        defaultNamespace: string;
+        errorTypeRegistries?: TypeRegistry[];
+      } = {
         defaultNamespace: "",
+        errorTypeRegistries: [],
+      }
+    ) {
+      super({
+        defaultNamespace,
+        errorTypeRegistries,
       });
       const settings: CodecSettings = {
         timestampFormat: {

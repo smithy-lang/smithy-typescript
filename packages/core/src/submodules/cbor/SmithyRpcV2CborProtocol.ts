@@ -1,6 +1,6 @@
 import { RpcProtocol } from "@smithy/core/protocols";
-import type { ErrorSchema } from "@smithy/core/schema";
-import { deref, NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
+import { TypeRegistry } from "@smithy/core/schema";
+import { deref, NormalizedSchema } from "@smithy/core/schema";
 import type {
   EndpointBearer,
   HandlerExecutionContext,
@@ -23,12 +23,22 @@ import { loadSmithyRpcV2CborErrorCode } from "./parseCborBody";
  * @public
  */
 export class SmithyRpcV2CborProtocol extends RpcProtocol {
+  /**
+   * @override
+   */
+  protected declare compositeErrorRegistry: TypeRegistry;
   private codec = new CborCodec();
   protected serializer = this.codec.createSerializer();
   protected deserializer = this.codec.createDeserializer();
 
-  public constructor({ defaultNamespace }: { defaultNamespace: string }) {
-    super({ defaultNamespace });
+  public constructor({
+    defaultNamespace,
+    errorTypeRegistries,
+  }: {
+    defaultNamespace: string;
+    errorTypeRegistries?: TypeRegistry[];
+  }) {
+    super({ defaultNamespace, errorTypeRegistries });
   }
 
   public getShapeId(): string {
@@ -92,17 +102,22 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
   ): Promise<never> {
     const errorName = loadSmithyRpcV2CborErrorCode(response, dataObject) ?? "Unknown";
 
-    let namespace = this.options.defaultNamespace;
-    if (errorName.includes("#")) {
-      [namespace] = errorName.split("#");
-    }
-
     const errorMetadata = {
       $metadata: metadata,
       $fault: response.statusCode <= 500 ? ("client" as const) : ("server" as const),
     };
 
-    const registry = TypeRegistry.for(namespace);
+    let namespace = this.options.defaultNamespace;
+    if (errorName.includes("#")) {
+      [namespace] = errorName.split("#");
+    }
+
+    const registry = this.compositeErrorRegistry;
+
+    const nsRegistry = TypeRegistry.for(namespace);
+    // Composition required for backwards compatibility.
+    // Previous generated clients did not export errorTypeRegistries.
+    registry.copyFrom(nsRegistry);
 
     let errorSchema: StaticErrorSchema;
     try {
@@ -111,10 +126,14 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
       if (dataObject.Message) {
         dataObject.message = dataObject.Message;
       }
-      const synthetic = TypeRegistry.for("smithy.ts.sdk.synthetic." + namespace);
-      const baseExceptionSchema = synthetic.getBaseException();
+      const syntheticRegistry = TypeRegistry.for("smithy.ts.sdk.synthetic." + namespace);
+      // Composition required for backwards compatibility.
+      // Previous generated clients did not export errorTypeRegistries.
+      registry.copyFrom(syntheticRegistry);
+
+      const baseExceptionSchema = registry.getBaseException();
       if (baseExceptionSchema) {
-        const ErrorCtor = synthetic.getErrorCtor(baseExceptionSchema);
+        const ErrorCtor = registry.getErrorCtor(baseExceptionSchema);
         throw Object.assign(new ErrorCtor({ name: errorName }), errorMetadata, dataObject);
       }
       throw Object.assign(new Error(errorName), errorMetadata, dataObject);

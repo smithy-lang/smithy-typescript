@@ -9,6 +9,7 @@ import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 import { defaultXYZServiceHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";
+import { errorTypeRegistries } from "./schemas/schemas_0";
 import type { XYZServiceClientConfig } from "./XYZServiceClient";
 
 /**
@@ -35,6 +36,7 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     protocol: config?.protocol ?? SmithyRpcV2CborProtocol,
     protocolSettings: config?.protocolSettings ?? {
       defaultNamespace: "org.xyz.v1",
+      errorTypeRegistries,
     },
     urlParser: config?.urlParser ?? parseUrl,
     utf8Decoder: config?.utf8Decoder ?? fromUtf8,

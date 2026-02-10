@@ -28,15 +28,36 @@ export class TypeRegistry {
   }
 
   /**
-   * Adds the given schema to a type registry with the same namespace.
+   * Copies entries from another instance without changing the namespace of self.
+   * The composition is additive but non-destructive and will not overwrite existing entries.
+   *
+   * @param other - another TypeRegistry.
+   */
+  public copyFrom(other: TypeRegistry) {
+    const { schemas, exceptions } = this;
+    for (const [k, v] of other.schemas) {
+      if (!schemas.has(k)) {
+        schemas.set(k, v);
+      }
+    }
+    for (const [k, v] of other.exceptions) {
+      if (!exceptions.has(k)) {
+        exceptions.set(k, v);
+      }
+    }
+  }
+
+  /**
+   * Adds the given schema to a type registry with the same namespace, and this registry.
    *
    * @param shapeId - to be registered.
    * @param schema - to be registered.
    */
   public register(shapeId: string, schema: ISchema) {
     const qualifiedName = this.normalizeShapeId(shapeId);
-    const registry = TypeRegistry.for(qualifiedName.split("#")[0]);
-    registry.schemas.set(qualifiedName, schema);
+    for (const r of [this, TypeRegistry.for(qualifiedName.split("#")[0])]) {
+      r.schemas.set(qualifiedName, schema);
+    }
   }
 
   /**
@@ -56,9 +77,11 @@ export class TypeRegistry {
    */
   public registerError(es: ErrorSchema | StaticErrorSchema, ctor: any) {
     const $error = es as StaticErrorSchema;
-    const registry = TypeRegistry.for($error[1]);
-    registry.schemas.set($error[1] + "#" + $error[2], $error);
-    registry.exceptions.set($error, ctor);
+    const ns = $error[1];
+    for (const r of [this, TypeRegistry.for(ns)]) {
+      r.schemas.set(ns + "#" + $error[2], $error);
+      r.exceptions.set($error, ctor);
+    }
   }
 
   /**
@@ -67,6 +90,9 @@ export class TypeRegistry {
    */
   public getErrorCtor(es: ErrorSchema | StaticErrorSchema): any {
     const $error = es as StaticErrorSchema;
+    if (this.exceptions.has($error)) {
+      return this.exceptions.get($error);
+    }
     const registry = TypeRegistry.for($error[1]);
     return registry.exceptions.get($error);
   }
