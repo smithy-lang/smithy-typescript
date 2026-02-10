@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.11.3
+
+### Patch Changes
+
+- Updated dependencies [4f05c6a]
+  - @smithy/core@3.23.0
+  - @smithy/util-stream@4.5.12
+  - @smithy/middleware-endpoint@4.4.14
+
 ## 4.11.2
 
 ### Patch Changes

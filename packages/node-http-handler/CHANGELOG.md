@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.10
+
+### Patch Changes
+
+- f6f0de9: write request.end() with no arg if empty buffer
+
 ## 4.4.9
 
 ### Patch Changes

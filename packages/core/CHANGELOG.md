@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.23.0
+
+### Minor Changes
+
+- 4f05c6a: compose error TypeRegistry on protocol
+
+### Patch Changes
+
+- @smithy/util-stream@4.5.12
+
 ## 3.22.1
 
 ### Patch Changes
