@@ -42,6 +42,7 @@ export class ChecksumStream extends Duplex {
   private checksum: Checksum;
   private source?: Readable;
   private base64Encoder: Encoder;
+  private pendingCallback: (err?: Error) => void | null = null;
 
   public constructor({
     expectedChecksum,
@@ -75,7 +76,13 @@ export class ChecksumStream extends Duplex {
   public _read(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     size: number
-  ): void {}
+  ): void {
+    if (this.pendingCallback) {
+      const callback = this.pendingCallback;
+      this.pendingCallback = null;
+      callback();
+    }
+  }
 
   /**
    * When the upstream source flows data to this stream,
@@ -86,7 +93,11 @@ export class ChecksumStream extends Duplex {
   public _write(chunk: Buffer, encoding: string, callback: (err?: Error) => void): void {
     try {
       this.checksum.update(chunk);
-      this.push(chunk);
+      const canPushMore = this.push(chunk);
+      if (!canPushMore) {
+        this.pendingCallback = callback;
+        return;
+      }
     } catch (e: unknown) {
       return callback(e as Error);
     }
