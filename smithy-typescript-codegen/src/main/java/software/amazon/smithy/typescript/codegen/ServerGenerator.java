@@ -290,6 +290,7 @@ final class ServerGenerator {
         );
         writer.indent();
         writer.write("let input;");
+        writer.write("serdeContextBase.operationName = operationName;");
         writer.openBlock("try {", "} catch (error: unknown) {", () -> {
             writer.openBlock("input = await serializer.deserialize(request, {", "});", () -> {
                 writer.write("endpoint: () => Promise.resolve(request), ...serdeContextBase");
@@ -341,7 +342,8 @@ final class ServerGenerator {
             writer.write("utf8Decoder: fromUtf8,");
             writer.write("streamCollector: streamCollector,");
             writer.write("requestHandler: new NodeHttpHandler(),");
-            writer.write("disableHostPrefix: true");
+            writer.write("disableHostPrefix: true,");
+            writer.write("operationName: \"\",");
         });
     }
 
