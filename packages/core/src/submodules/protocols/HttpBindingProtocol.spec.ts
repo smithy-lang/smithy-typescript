@@ -11,6 +11,7 @@ import type {
   ListSchemaModifier,
   MapSchemaModifier,
   MetadataBearer,
+  NumericSchema,
   OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
@@ -197,7 +198,6 @@ describe(HttpBindingProtocol.name, () => {
         "my-header": "header-value",
       },
     };
-
     const dataObject = {};
     await deserializeHttpMessage(
       [
@@ -296,6 +296,31 @@ describe(HttpBindingProtocol.name, () => {
     });
 
     expect(streamProgress).toBe(100);
+  });
+
+  it("should not create undefined fields when deserializing non-http-binding members of an output shape", async () => {
+    const protocol = new StringRestProtocol();
+    const response = new HttpResponse({
+      statusCode: 200,
+      headers: {},
+      body: Readable.from(JSON.stringify({})),
+    });
+
+    const output = (await protocol.deserializeResponse(
+      op("", "", 0, "unit", [3, "", "", 0, ["prop", "num"], [0 satisfies StringSchema, 1 satisfies NumericSchema]]),
+      {
+        streamCollector: streamCollector,
+      } as any,
+      response
+    )) as Partial<MetadataBearer>;
+
+    // Fields not present in response should not exist in output
+    expect("prop" in output).toBe(false);
+    expect("num" in output).toBe(false);
+
+    // Only $metadata should be present
+    const keys = Object.keys(output);
+    expect(keys).toEqual(["$metadata"]);
   });
 
   describe("httpLabel", () => {
