@@ -135,7 +135,10 @@ public enum TypeScriptDependency implements Dependency {
     TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
 
     // Server dependency for SSDKs
-    SERVER_COMMON("dependencies", "@aws-smithy/server-common", false);
+    SERVER_COMMON("dependencies", "@aws-smithy/server-common", false),
+
+    // for snapshot testing.
+    SNAPSHOTS("devDependencies", "@smithy/snapshot-testing", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

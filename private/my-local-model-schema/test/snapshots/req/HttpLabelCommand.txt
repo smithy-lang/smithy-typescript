@@ -1,0 +1,20 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/HttpLabelCommand
+
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+content-length: 69
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[Uint8Array (cbor object view)]
+{
+  "LabelDoesNotApplyToRpcProtocol": "__LabelDoesNotApplyToRpcProtocol__"
+}
+
+[actual bytes]
+161, 120, 30, 76, 97, 98, 101, 108, 68, 111, 101, 115, 78, 111, 116, 65, 112, 112, 108, 121, 84, 111, 82, 112,
+99, 80, 114, 111, 116, 111, 99, 111, 108, 120, 34, 95, 95, 76, 97, 98, 101, 108, 68, 111, 101, 115, 78, 111,
+116, 65, 112, 112, 108, 121, 84, 111, 82, 112, 99, 80, 114, 111, 116, 111, 99, 111, 108, 95, 95

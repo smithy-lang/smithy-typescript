@@ -623,6 +623,25 @@ final class DirectedTypeScriptCodegen
             });
         }
 
+        // snapshot tests require schema mode and client codegen.
+        if (
+            directive.settings().generateClient()
+                && directive.settings().generateSnapshotTests()
+                && SchemaGenerationAllowlist.allows(
+                    directive.settings().getService(),
+                    directive.settings()
+                )
+        ) {
+            writerFactory.accept(Paths.get(CodegenUtils.TEST_FOLDER, "snapshots.integ.spec.ts").toString(), writer -> {
+                new PackageApiValidationGenerator(
+                    writer,
+                    directive.settings(),
+                    directive.model(),
+                    directive.symbolProvider()
+                ).writeSnapshotTest();
+            });
+        }
+
         if (directive.settings().generateServerSdk()) {
             // Generate index for server
             IndexGenerator.writeServerIndex(

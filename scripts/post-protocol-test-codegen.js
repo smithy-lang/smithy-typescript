@@ -25,7 +25,7 @@ for (const dir of privatePackages) {
     }
     for (const dep in pkgJson.devDependencies ?? {}) {
       if (dep.startsWith("@smithy/")) {
-        pkgJson.dependencies[dep] = "workspace:^";
+        pkgJson.devDependencies[dep] = "workspace:^";
       }
     }
     fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + "\n");

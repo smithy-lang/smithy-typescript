@@ -1,0 +1,32 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/GetNumbers
+
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+content-length: 162
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[Uint8Array (cbor object view)]
+{
+  "bigDecimal": {
+    "string": "9876543210.0123456789",
+    "type": "bigDecimal"
+  },
+  "bigInteger": 1000001,
+  "fieldWithoutMessage": "__fieldWithoutMessage__",
+  "fieldWithMessage": "__fieldWithMessage__",
+  "startToken": "__startToken__",
+  "maxResults": 0
+}
+
+[actual bytes]
+166, 106, 98, 105, 103, 68, 101, 99, 105, 109, 97, 108, 196, 130, 41, 194, 73, 5, 90, 165, 77, 54, 159, 210,
+53, 21, 106, 98, 105, 103, 73, 110, 116, 101, 103, 101, 114, 26, 0, 15, 66, 65, 115, 102, 105, 101, 108, 100,
+87, 105, 116, 104, 111, 117, 116, 77, 101, 115, 115, 97, 103, 101, 119, 95, 95, 102, 105, 101, 108, 100, 87, 105,
+116, 104, 111, 117, 116, 77, 101, 115, 115, 97, 103, 101, 95, 95, 112, 102, 105, 101, 108, 100, 87, 105, 116, 104,
+77, 101, 115, 115, 97, 103, 101, 116, 95, 95, 102, 105, 101, 108, 100, 87, 105, 116, 104, 77, 101, 115, 115, 97,
+103, 101, 95, 95, 106, 115, 116, 97, 114, 116, 84, 111, 107, 101, 110, 110, 95, 95, 115, 116, 97, 114, 116, 84,
+111, 107, 101, 110, 95, 95, 106, 109, 97, 120, 82, 101, 115, 117, 108, 116, 115, 0

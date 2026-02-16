@@ -3280,6 +3280,7 @@ __metadata:
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
+    "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
@@ -3341,6 +3342,23 @@ __metadata:
     tslib: "npm:^2.6.2"
     typescript: "npm:~5.8.3"
     vitest: "npm:^4.0.17"
+  languageName: unknown
+  linkType: soft
+
+"@smithy/snapshot-testing@workspace:^, @smithy/snapshot-testing@workspace:packages/snapshot-testing":
+  version: 0.0.0-use.local
+  resolution: "@smithy/snapshot-testing@workspace:packages/snapshot-testing"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/eventstream-codec": "workspace:^"
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@smithy/util-base64": "workspace:^"
+    "@smithy/util-utf8": "workspace:^"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    premove: "npm:4.0.0"
+    tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
 
@@ -12201,6 +12219,7 @@ __metadata:
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
+    "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"

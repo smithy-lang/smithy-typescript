@@ -18,6 +18,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.utils.SmithyInternalApi;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * This class generates a runnable pair of test files
@@ -251,5 +252,92 @@ public final class PackageApiValidationGenerator {
         });
 
         writer.write("console.log(`$L index test passed.`);", aggregateClientName);
+    }
+
+    /**
+     * Creates a vitest framework snapshot test for an SDK client.
+     */
+    @SmithyInternalApi
+    public void writeSnapshotTest() {
+        writer.addImport("SnapshotRunner", null, TypeScriptDependency.SNAPSHOTS);
+        writer.addImport("describe", null, TypeScriptDependency.VITEST);
+        writer.addImport("test", "it", TypeScriptDependency.VITEST);
+        writer.addImport("expect", null, TypeScriptDependency.VITEST);
+        writer.addImport("join", null, "node:path");
+
+        String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+        String clientName = aggregateClientName + "Client";
+
+        Path srcIndex = Paths.get(".");
+        writer.addRelativeImport(
+            clientName,
+            null,
+            srcIndex
+        );
+
+        writer.write("""
+                     const Client = $L;
+                     """, clientName);
+
+        writer.openBlock(
+            """
+            const mode = (process.env.SNAPSHOT_MODE as "write" | "compare") ?? "write";
+
+            describe($S + ` ($${mode})`, () => {
+              const runner = new SnapshotRunner({
+                snapshotDirPath: join(__dirname, "snapshots"),
+                Client,
+                mode,
+                testCase(caseName: string, run: () => Promise<void>) {
+                  it(caseName, run);
+                },
+                assertions(caseName: string, expected: string, actual: string): Promise<void> {
+                  expect(actual).toEqual(expected);
+                  return Promise.resolve();
+                },
+                schemas:""",
+            """
+              });
+
+              runner.run();
+            }, 30_000);
+            """,
+            clientName,
+            () -> {
+                writer.indent(2);
+                writer.openBlock(
+                    """
+                    new Map<any, any>([""",
+                    """
+                    ]),
+                    """,
+                    () -> {
+                        for (OperationShape operationShape : closure.getOperationShapes()) {
+                            String operationSchema = closure.getShapeSchemaVariableName(operationShape, null);
+                            writer.addRelativeImport(
+                                operationSchema,
+                                null,
+                                srcIndex
+                            );
+                            String commandName =
+                                StringUtils.capitalize(operationShape.toShapeId().getName(settings.getService(model)))
+                                    + "Command";
+                            writer.addRelativeImport(
+                                commandName,
+                                null,
+                                srcIndex
+                            );
+                            writer.write(
+                                """
+                                [$L, $L],""",
+                                operationSchema,
+                                commandName
+                            );
+                        }
+                    }
+                );
+                writer.dedent(2);
+            }
+        );
     }
 }

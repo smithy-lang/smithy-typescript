@@ -57,6 +57,7 @@ public final class TypeScriptSettings {
     private static final String USE_LEGACY_AUTH = "useLegacyAuth";
     private static final String GENERATE_TYPEDOC = "generateTypeDoc";
     private static final String GENERATE_INDEX_TESTS = "generateIndexTests";
+    private static final String GENERATE_SNAPSHOT_TESTS = "generateSnapshotTests";
     private static final String SERVICE_PROTOCOL_PRIORITY = "serviceProtocolPriority";
     private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
     private static final String BIG_NUMBER_MODE = "bigNumberMode";
@@ -82,6 +83,7 @@ public final class TypeScriptSettings {
     private String bigNumberMode = "native";
     private boolean generateSchemas = true;
     private boolean generateIndexTests = false;
+    private boolean generateSnapshotTests = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -141,13 +143,14 @@ public final class TypeScriptSettings {
 
         settings.setPluginSettings(config);
         settings.readProtocolPriorityConfiguration(config);
-        settings.setBigNumberMode(config.getStringMemberOrDefault("bigNumberMode", "native"));
+        settings.setBigNumberMode(config.getStringMemberOrDefault(BIG_NUMBER_MODE, "native"));
 
         // Internal undocumented configuration used to control rollout of schemas.
         // `true` will eventually be the only available option, and this should not be set by users.
-        settings.setGenerateSchemas(config.getBooleanMemberOrDefault("generateSchemas", true));
+        settings.setGenerateSchemas(config.getBooleanMemberOrDefault(GENERATE_SCHEMAS, true));
 
-        settings.setGenerateIndexTests(config.getBooleanMemberOrDefault("generateIndexTests", false));
+        settings.setGenerateIndexTests(config.getBooleanMemberOrDefault(GENERATE_INDEX_TESTS, false));
+        settings.setGenerateSnapshotTests(config.getBooleanMemberOrDefault(GENERATE_SNAPSHOT_TESTS, false));
 
         return settings;
     }
@@ -271,6 +274,14 @@ public final class TypeScriptSettings {
 
     public boolean generateIndexTests() {
         return generateIndexTests;
+    }
+
+    public void setGenerateSnapshotTests(boolean generateSnapshotTests) {
+        this.generateSnapshotTests = generateSnapshotTests;
+    }
+
+    public boolean generateSnapshotTests() {
+        return generateSnapshotTests;
     }
 
     /**
@@ -602,6 +613,7 @@ public final class TypeScriptSettings {
                 USE_LEGACY_AUTH,
                 GENERATE_TYPEDOC,
                 GENERATE_INDEX_TESTS,
+                GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
                 GENERATE_SCHEMAS
             )
@@ -622,6 +634,7 @@ public final class TypeScriptSettings {
                 CREATE_DEFAULT_README,
                 GENERATE_TYPEDOC,
                 GENERATE_INDEX_TESTS,
+                GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
                 GENERATE_SCHEMAS
             )
@@ -697,18 +710,24 @@ public final class TypeScriptSettings {
     }
 
     public enum PackageManager {
-        YARN("yarn"),
-        NPM("npm"),
-        PNPM("pnpm");
+        YARN("yarn", "yarn dlx"),
+        NPM("npm", "npx"),
+        PNPM("pnpm", "pnpm dlx");
 
         private final String command;
+        private final String execCommand;
 
-        PackageManager(String command) {
+        PackageManager(String command, String execCommand) {
             this.command = command;
+            this.execCommand = execCommand;
         }
 
         public String getCommand() {
             return command;
+        }
+
+        public String getExecCommand() {
+            return execCommand;
         }
 
         public static PackageManager fromString(String s) {

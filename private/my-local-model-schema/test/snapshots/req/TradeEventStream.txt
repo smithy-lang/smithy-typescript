@@ -1,0 +1,71 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/TradeEventStream
+
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+content-length: undefined
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+:event-type: initial-request
+:message-type: event
+:content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{}
+
+[actual bytes]
+160
+============================================================
+
+[chunk (event-stream object view)]
+:event-type: alpha
+:message-type: event
+:content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "id": "__id__",
+  "timestamp": {
+    "tag": 1,
+    "value": 946702799.999
+  }
+}
+
+[actual bytes]
+162, 98, 105, 100, 102, 95, 95, 105, 100, 95, 95, 105, 116, 105, 109, 101, 115, 116, 97, 109, 112, 193, 251, 65,
+204, 54, 196, 231, 255, 223, 59
+============================================================
+
+[chunk (event-stream object view)]
+:event-type: beta
+:message-type: event
+:content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{}
+
+[actual bytes]
+160
+============================================================
+
+[chunk (event-stream object view)]
+:event-type: gamma
+:message-type: event
+:content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{}
+
+[actual bytes]
+160
+============================================================
+
+[chunk (b64)]
+Cg==
+

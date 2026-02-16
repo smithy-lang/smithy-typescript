@@ -53,7 +53,8 @@
           },
           "private": true,
           "generateSchemas": true,
-          "generateIndexTests": true
+          "generateIndexTests": true,
+          "generateSnapshotTests": true
         }
       }
     },
@@ -98,7 +99,8 @@
           },
           "bigNumberMode": "native",
           "generateSchemas": true,
-          "generateIndexTests": true
+          "generateIndexTests": true,
+          "generateSnapshotTests": true
         }
       }
     }

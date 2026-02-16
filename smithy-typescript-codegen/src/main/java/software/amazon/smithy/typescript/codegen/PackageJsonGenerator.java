@@ -22,6 +22,7 @@ final class PackageJsonGenerator {
     public static final String PACKAGE_JSON_FILENAME = "package.json";
     public static final String TYPEDOC_FILE_NAME = "typedoc.json";
     public static final String VITEST_CONFIG_FILENAME = "vitest.config.mts";
+    public static final String VITEST_CONFIG_INTEG_FILENAME = "vitest.config.integ.mts";
 
     private PackageJsonGenerator() {}
 
@@ -56,13 +57,27 @@ final class PackageJsonGenerator {
         ObjectNode devDeps = node.getObjectMember("devDependencies").orElse(Node.objectNode());
         if (devDeps.containsMember(TypeScriptDependency.VITEST.packageName)) {
             ObjectNode scripts = node.getObjectMember("scripts").orElse(Node.objectNode());
-            String pkgManagerExec = settings.getPackageManager().getCommand().replaceFirst("^npm$", "npx");
-            scripts = scripts.withMember("test", "%s vitest run --passWithNoTests".formatted(pkgManagerExec));
+            String pkgManagerExec = settings.getPackageManager().getExecCommand();
+            scripts = scripts
+                .withMember("test", "%s vitest run --passWithNoTests".formatted(pkgManagerExec))
+                .withMember("test:watch", "%s vitest watch --passWithNoTests".formatted(pkgManagerExec))
+                .withMember(
+                    "test:integration",
+                    "%s vitest run --passWithNoTests -c vitest.config.integ.mts".formatted(pkgManagerExec)
+                )
+                .withMember(
+                    "test:integration:watch",
+                    "%s vitest run --passWithNoTests -c vitest.config.integ.mts".formatted(pkgManagerExec)
+                );
             node = node.withMember("scripts", scripts);
 
             manifest.writeFile(
                 VITEST_CONFIG_FILENAME,
                 IoUtils.toUtf8String(PackageJsonGenerator.class.getResourceAsStream(VITEST_CONFIG_FILENAME))
+            );
+            manifest.writeFile(
+                VITEST_CONFIG_INTEG_FILENAME,
+                IoUtils.toUtf8String(PackageJsonGenerator.class.getResourceAsStream(VITEST_CONFIG_INTEG_FILENAME))
             );
         }
 
