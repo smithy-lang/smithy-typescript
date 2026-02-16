@@ -1,4 +1,4 @@
-import { NormalizedSchema, translateTraits, type TypeRegistry } from "@smithy/core/schema";
+import { type TypeRegistry, NormalizedSchema, translateTraits } from "@smithy/core/schema";
 import { splitEvery, splitHeader } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
@@ -238,7 +238,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       if (bytes.byteLength > 0) {
         const dataFromBody = await deserializer.read(ns, bytes);
         for (const member of nonHttpBindingMembers) {
-          dataObject[member] = dataFromBody[member];
+          if (dataFromBody[member] != null) {
+            dataObject[member] = dataFromBody[member];
+          }
         }
       }
       // Due to Smithy validation, we can assume that the members with no HTTP
