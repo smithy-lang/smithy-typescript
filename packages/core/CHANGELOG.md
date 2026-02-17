@@ -1,11 +1,5 @@
 # Change Log
 
-## 3.23.1
-
-### Patch Changes
-
-- 3c18df8: omit absent resposne fields instead of assigning undefined
-
 ## 3.23.0
 
 ### Minor Changes
