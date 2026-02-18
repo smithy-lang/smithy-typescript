@@ -3354,6 +3354,7 @@ __metadata:
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-base64": "workspace:^"
+    "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"

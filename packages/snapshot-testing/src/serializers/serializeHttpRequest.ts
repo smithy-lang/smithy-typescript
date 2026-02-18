@@ -1,6 +1,6 @@
 import type { HttpRequest as IHttpRequest } from "@smithy/types";
 
-import { PayloadSnapshotSerializer } from "./PayloadSnapshotSerializer";
+import { SnapshotPayloadSerializer } from "./SnapshotPayloadSerializer";
 
 /**
  * Serialize an http request to string for snapshotting.
@@ -56,7 +56,7 @@ export async function serializeHttpRequest(request: IHttpRequest): Promise<strin
     }
   }
 
-  const [bodyAnnotation, bodySnapshot] = await new PayloadSnapshotSerializer(request).toStringAsync();
+  const [bodyAnnotation, bodySnapshot] = await new SnapshotPayloadSerializer(request).toStringAsync();
 
   return derandomize(`${method} ${protocol}//${hostname}${port && port !== defaultPort ? `:${port}` : ""} 
 ${slug}

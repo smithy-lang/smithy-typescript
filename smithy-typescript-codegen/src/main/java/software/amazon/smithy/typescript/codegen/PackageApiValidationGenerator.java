@@ -261,6 +261,7 @@ public final class PackageApiValidationGenerator {
     public void writeSnapshotTest() {
         writer.addImport("SnapshotRunner", null, TypeScriptDependency.SNAPSHOTS);
         writer.addImport("describe", null, TypeScriptDependency.VITEST);
+        writer.addImport("vi", null, TypeScriptDependency.VITEST);
         writer.addImport("test", "it", TypeScriptDependency.VITEST);
         writer.addImport("expect", null, TypeScriptDependency.VITEST);
         writer.addImport("join", null, "node:path");
@@ -268,7 +269,7 @@ public final class PackageApiValidationGenerator {
         String aggregateClientName = CodegenUtils.getServiceName(settings, model, symbolProvider);
         String clientName = aggregateClientName + "Client";
 
-        Path srcIndex = Paths.get(".");
+        Path srcIndex = Paths.get(".", CodegenUtils.SOURCE_FOLDER);
         writer.addRelativeImport(
             clientName,
             null,
@@ -276,6 +277,7 @@ public final class PackageApiValidationGenerator {
         );
 
         writer.write("""
+                     vi.setSystemTime(new Date(946702799999));
                      const Client = $L;
                      """, clientName);
 

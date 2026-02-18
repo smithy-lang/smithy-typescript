@@ -23,10 +23,7 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
     if ($.isIdempotencyToken()) {
       return "00000000-0000-4000-8000-000000000000";
     }
-    if (memberName === "ChecksumAlgorithm") {
-      return "CRC64NVME";
-    }
-    return "__" + memberName + "__";
+    return customFields[memberName] ?? "__" + memberName + "__";
   } else if ($.isNumericSchema()) {
     return 0;
   } else if ($.isBigIntegerSchema()) {
@@ -98,7 +95,19 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
     return struct;
   } else if ($.isUnitSchema()) {
     return {};
+  } else if ($.isDocumentSchema()) {
+    return {
+      doc_note: "this is a document",
+      doc_date: new Date(946702799999),
+      doc_blob: new Uint8Array([1, 0, 0, 1]),
+      doc_list: [-7, -3, 0, 1, 5],
+    };
   }
-  console.warn("Unsupported schema type in snapshot test", $);
+  console.warn("WARN: Unsupported schema type in snapshot test", $);
   return "UNSUPPORTED_SCHEMA_TYPE";
 }
+
+const customFields: Record<string, string> = {
+  PredictEndpoint: "https://localhost",
+  ChecksumAlgorithm: "CRC64NVME",
+};

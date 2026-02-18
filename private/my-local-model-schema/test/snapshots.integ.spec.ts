@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import { SnapshotRunner } from "@smithy/snapshot-testing";
 import { join } from "node:path";
-import { describe, expect, test as it } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import {
   camelCaseOperation$,
@@ -13,8 +13,9 @@ import {
   TradeEventStream$,
   TradeEventStreamCommand,
   XYZServiceClient,
-} from "..";
+} from "../src";
 
+vi.setSystemTime(new Date(946702799999));
 const Client = XYZServiceClient;
 
 const mode = (process.env.SNAPSHOT_MODE as "write" | "compare") ?? "write";

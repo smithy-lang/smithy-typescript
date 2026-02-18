@@ -1,4 +1,13 @@
-import type { Client, Command, Logger, StaticOperationSchema } from "@smithy/types";
+import { NormalizedSchema } from "@smithy/core/schema";
+import { HttpRequest } from "@smithy/protocol-http";
+import type {
+  BuildMiddleware,
+  Client,
+  Command,
+  FinalizeRequestMiddleware,
+  Logger,
+  StaticOperationSchema,
+} from "@smithy/types";
 import { readFileSync } from "fs";
 import { accessSync, constants, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -179,6 +188,16 @@ export class SnapshotRunner {
     });
     const [, namespace, name, traits, input, output] = schema;
     const command = new CommandCtor(createFromSchema(input));
+
+    const $ = NormalizedSchema.of(input);
+    if ($.getEventStreamMember()) {
+      client.middlewareStack.add(this.getEventStreamStaticSignatureMiddleware, {
+        tags: ["EVENT_STREAM", "SIGNATURE"],
+        name: "eventStreamStaticSignatureMiddleware",
+        step: "build" as const,
+        override: true,
+      });
+    }
     const snapshotMetadata = {
       [Symbol.for("$schema")]: schema,
       [Symbol.for("$client")]: client,
@@ -199,4 +218,9 @@ export class SnapshotRunner {
       }
     });
   }
+
+  private getEventStreamStaticSignatureMiddleware = (next: any, context: any) => async (args: any) => {
+    context.__staticSignature = true;
+    return next(args);
+  };
 }

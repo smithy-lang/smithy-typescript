@@ -12,23 +12,27 @@ X-Api-Key: MOCK_api_key
 [async_iterable (Readable)]
 
 [chunk (event-stream object view)]
+  [total-size] 102 [header-size] 85 [prelude-crc] 1750202623
 :event-type: initial-request
 :message-type: event
 :content-type: application/cbor
 
-[Uint8Array (cbor object view)]
+[cbor object view]
 {}
 
 [actual bytes]
 160
+
+[message-crc] 802441068
 ============================================================
 
 [chunk (event-stream object view)]
+  [total-size] 122 [header-size] 75 [prelude-crc] 927907615
 :event-type: alpha
 :message-type: event
 :content-type: application/cbor
 
-[Uint8Array (cbor object view)]
+[cbor object view]
 {
   "id": "__id__",
   "timestamp": {
@@ -40,30 +44,38 @@ X-Api-Key: MOCK_api_key
 [actual bytes]
 162, 98, 105, 100, 102, 95, 95, 105, 100, 95, 95, 105, 116, 105, 109, 101, 115, 116, 97, 109, 112, 193, 251, 65,
 204, 54, 196, 231, 255, 223, 59
+
+[message-crc] 2274737008
 ============================================================
 
 [chunk (event-stream object view)]
+  [total-size] 91 [header-size] 74 [prelude-crc] 3169356093
 :event-type: beta
 :message-type: event
 :content-type: application/cbor
 
-[Uint8Array (cbor object view)]
+[cbor object view]
 {}
 
 [actual bytes]
 160
+
+[message-crc] 3285270063
 ============================================================
 
 [chunk (event-stream object view)]
+  [total-size] 92 [header-size] 75 [prelude-crc] 2043635131
 :event-type: gamma
 :message-type: event
 :content-type: application/cbor
 
-[Uint8Array (cbor object view)]
+[cbor object view]
 {}
 
 [actual bytes]
 160
+
+[message-crc] 2477278713
 ============================================================
 
 [chunk (b64)]
