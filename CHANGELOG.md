@@ -1,5 +1,15 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.45.0 (2026-02-19)
+
+### Features
+
+- Upgraded smithy version to 1.67.0 ([#1868](https://github.com/smithy-lang/smithy-typescript/pull/1868))
+
+### Bug Fixes
+
+- Created composite type registry on protocol instances ([#1867](https://github.com/smithy-lang/smithy-typescript/pull/1867))
+
 ## 0.44.0 (2026-02-06)
 
 ### Chores
