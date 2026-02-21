@@ -282,8 +282,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 docs = docs.replace("{", "\\{").replace("}", "\\}");
                 if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                     DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
-                    String deprecationMessage = deprecatedTrait.getMessage().orElse("deprecated");
-                    String deprecationAnnotation = "@deprecated " + deprecationMessage;
+                    String deprecationAnnotation = buildDeprecationAnnotation(deprecatedTrait);
                     docs = docs + "\n\n" + deprecationAnnotation;
                 }
                 docs = preprocessor.apply(docs);
@@ -327,8 +326,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                         .getTrait(DeprecatedTrait.class)
                         .or(() -> model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class))
                         .orElseThrow();
-                    String deprecationMessage = deprecatedTrait.getMessage().orElse("deprecated");
-                    String deprecationAnnotation = "@deprecated " + deprecationMessage;
+                    String deprecationAnnotation = buildDeprecationAnnotation(deprecatedTrait);
                     docs = docs + "\n\n" + deprecationAnnotation;
                 }
                 docs = addReleaseTag(member, docs);
@@ -342,6 +340,31 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         return (model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class).isPresent() &&
         // don't consider deprecated prelude shapes (like PrimitiveBoolean)
             !Prelude.isPreludeShape(member.getTarget()));
+    }
+
+    /**
+     * Builds a JSDoc {@code @deprecated} annotation from a {@link DeprecatedTrait},
+     * synthesizing the {@code message} and {@code since} fields into the deprecation text.
+     */
+    static String buildDeprecationAnnotation(DeprecatedTrait trait) {
+        StringBuilder annotation = new StringBuilder("@deprecated");
+        String message = trait.getMessage().orElse(null);
+        String since = trait.getSince().orElse(null);
+
+        if (message != null && since != null) {
+            annotation.append(" ").append(message).append(" (since ").append(since).append(")");
+        } else if (message != null) {
+            annotation.append(" ").append(message);
+        } else if (since != null) {
+            annotation.append(" since ").append(since);
+        } else {
+            annotation.append(" deprecated");
+        }
+
+        if (!annotation.toString().endsWith(".")) {
+            annotation.append(".");
+        }
+        return annotation.toString();
     }
 
     private String addReleaseTag(Shape shape, String docs) {
