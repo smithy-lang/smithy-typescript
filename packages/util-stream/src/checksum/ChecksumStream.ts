@@ -42,7 +42,7 @@ export class ChecksumStream extends Duplex {
   private checksum: Checksum;
   private source?: Readable;
   private base64Encoder: Encoder;
-  private pendingCallback: (err?: Error) => void | null = null;
+  private pendingCallback: ((err?: Error) => void) | null = null;
 
   public constructor({
     expectedChecksum,

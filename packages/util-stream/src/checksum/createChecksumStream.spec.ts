@@ -74,6 +74,72 @@ describe("Checksum streams", () => {
         );
       }
     });
+
+    it("should handle backpressure", async () => {
+      // for Node.js 22+ increased default highwater mark.
+      Readable.setDefaultHighWaterMark(false, 16_384);
+      let originalStreamBuffered = 0;
+      const stream = Readable.from(
+        {
+          async *[Symbol.asyncIterator]() {
+            for (let i = 0; i < 100; ++i) {
+              const chunk = new Uint8Array(16_384);
+              originalStreamBuffered += chunk.byteLength;
+              yield chunk;
+            }
+          },
+        },
+        {
+          highWaterMark: 1,
+        }
+      );
+      const checksumStream = createChecksumStream({
+        expectedChecksum: toBase64(new Uint8Array()),
+        checksum: {
+          async digest() {
+            return new Uint8Array();
+          },
+          update: () => {},
+          reset: () => {},
+        },
+        checksumSourceLocation: "my-header",
+        source: stream,
+      });
+
+      const ait = checksumStream[Symbol.asyncIterator]();
+
+      const c1 = await ait.next();
+      expect(c1.done).toBe(false);
+      expect(c1.value.byteLength).toEqual(16_384);
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 2);
+
+      await new Promise((r) => setTimeout(r, 200));
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 3);
+
+      const c2 = await ait.next();
+      expect(c2.done).toBe(false);
+      expect(c2.value.byteLength).toEqual(16_384);
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
+
+      await new Promise((r) => setTimeout(r, 200));
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
+
+      await new Promise((r) => setTimeout(r, 200));
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
+
+      // the stream yields at the rate at which we read it.
+      let i = 5;
+      while (true) {
+        const { done } = await ait.next();
+        await new Promise((r) => setTimeout(r, 5));
+        expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * i++);
+        if (done) {
+          break;
+        }
+      }
+
+      expect(originalStreamBuffered).toEqual(16_384 * 100);
+    });
   });
 
   describe(createChecksumStream.name + " webstreams API", () => {
