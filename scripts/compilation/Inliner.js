@@ -222,6 +222,7 @@ module.exports = class Inliner {
       format: "cjs",
       exports: "named",
       preserveModules: false,
+      externalLiveBindings: false,
     };
 
     const bundle = await rollup.rollup(inputOptions);
