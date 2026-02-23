@@ -414,6 +414,43 @@ export class NormalizedSchema implements INormalizedSchema {
   }
 
   /**
+   * Returns a view of this schema whose structIterator only yields members
+   * matching the given predicate.
+   *
+   * The returned object delegates all other NormalizedSchema methods to this instance.
+   * This is useful when a caller needs to pass a subset of struct members to a
+   * generic serializer without copying the underlying schema arrays.
+   *
+   * Results are cached on the underlying struct schema keyed by the provided symbol,
+   * so the predicate only runs once per schema regardless of how many requests use it.
+   */
+  public filterMembers(
+    cacheKey: symbol,
+    predicate: (name: string, memberNs: NormalizedSchema) => boolean
+  ): NormalizedSchema {
+    const struct = this.getSchema() as StaticStructureSchema & {
+      [key: symbol]: NormalizedSchema;
+    };
+    if (struct[cacheKey]) {
+      return struct[cacheKey];
+    }
+
+    const entries: Array<[string, NormalizedSchema]> = [];
+    for (const [name, memberNs] of this.structIterator()) {
+      if (predicate(name, memberNs)) {
+        entries.push([name, memberNs]);
+      }
+    }
+
+    const view = Object.create(this) as NormalizedSchema;
+    (view as any).structIterator = function* (): Generator<[string, NormalizedSchema], undefined, undefined> {
+      yield* entries;
+    };
+    struct[cacheKey] = view;
+    return view;
+  }
+
+  /**
    * Allows iteration over members of a structure schema.
    * Each yield is a pair of the member name and member schema.
    *

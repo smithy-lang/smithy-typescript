@@ -180,6 +180,7 @@ export interface NormalizedSchema {
    */
   getMemberSchema(member: string): NormalizedSchema | undefined;
   structIterator(): Generator<[string, NormalizedSchema], undefined, undefined>;
+  filterMembers(cacheKey: symbol, predicate: (name: string, memberNs: NormalizedSchema) => boolean): NormalizedSchema;
 }
 
 /**

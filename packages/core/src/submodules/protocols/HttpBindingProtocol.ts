@@ -21,6 +21,12 @@ import { extendedEncodeURIComponent } from "./extended-encode-uri-component";
 import { HttpProtocol } from "./HttpProtocol";
 
 /**
+ * Cache key for the body-only schema view that excludes HTTP-bound members.
+ * @internal
+ */
+const HTTP_BODY_MEMBERS = Symbol.for("@smithy/http-body-members");
+
+/**
  * Base for HTTP-binding protocols. Downstream examples
  * include AWS REST JSON and AWS REST XML.
  *
@@ -152,7 +158,17 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     }
 
     if (hasNonHttpBindingMember && input) {
-      serializer.write(schema, input);
+      const bodyNs = ns.filterMembers(HTTP_BODY_MEMBERS, (_name, memberNs) => {
+        const traits = memberNs.getMergedTraits();
+        return !(
+          traits.httpHeader ||
+          traits.httpLabel ||
+          traits.httpQuery ||
+          traits.httpPayload ||
+          traits.httpPrefixHeaders
+        );
+      });
+      serializer.write(bodyNs, input);
       payload = serializer.flush() as Uint8Array;
 
       // Due to Smithy validation, we can assume that the members with no HTTP
