@@ -50,6 +50,7 @@ export async function serializeHttpRequest(request: IHttpRequest): Promise<strin
       headerLines += `${k}: ${v
         .replace(/aws-sdk-js\/\d\.\d+\.\d+/, "aws-sdk-js/3.___._")
         .replace(/os\/(.*?)\s/g, "")
+        .replace(/exec-env\/([\w._-]+)\s?/g, "")
         .replace(/#(.*?)\s/g, "#_.__ ")}\n`;
     } else {
       headerLines += `${k}: ${v}\n`;
