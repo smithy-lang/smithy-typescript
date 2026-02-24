@@ -12,6 +12,7 @@ import type {
   OperationSchema,
   Schema,
   SerdeFunctions,
+  StaticStructureSchema,
   TimestampDefaultSchema,
 } from "@smithy/types";
 import { sdkStreamMixin } from "@smithy/util-stream";
@@ -46,7 +47,8 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     const endpoint: Endpoint = await context.endpoint();
 
     const ns = NormalizedSchema.of(operationSchema?.input);
-    const schema = ns.getSchema();
+    const payloadMemberNames: StaticStructureSchema[4] = [];
+    const payloadMemberSchemas: StaticStructureSchema[5] = [];
 
     let hasNonHttpBindingMember = false;
     let payload: any;
@@ -148,11 +150,30 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         delete input[memberName];
       } else {
         hasNonHttpBindingMember = true;
+        payloadMemberNames.push(memberName);
+        payloadMemberSchemas.push(memberNs);
       }
     }
 
     if (hasNonHttpBindingMember && input) {
-      serializer.write(schema, input);
+      const [namespace, name] = (ns.getName(true) ?? "#Unknown").split("#");
+      const requiredMembers = (ns.getSchema() as StaticStructureSchema)[6];
+      const payloadSchema = [
+        3,
+        namespace,
+        name,
+        ns.getMergedTraits(),
+        payloadMemberNames,
+        payloadMemberSchemas,
+        undefined as number | undefined,
+      ] satisfies StaticStructureSchema;
+      if (requiredMembers) {
+        payloadSchema[6] = requiredMembers;
+      } else {
+        payloadSchema.pop();
+      }
+
+      serializer.write(payloadSchema, input);
       payload = serializer.flush() as Uint8Array;
 
       // Due to Smithy validation, we can assume that the members with no HTTP

@@ -1,9 +1,10 @@
-import { op } from "@smithy/core/schema";
-import { type TypeRegistry } from "@smithy/core/schema";
+import { type TypeRegistry, NormalizedSchema, op } from "@smithy/core/schema";
+import { dateToUtcString, generateIdempotencyToken, LazyJsonString, quoteHeader } from "@smithy/core/serde";
 import { streamCollector } from "@smithy/node-http-handler";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
   $Schema,
+  $ShapeSerializer,
   Codec,
   CodecSettings,
   HandlerExecutionContext,
@@ -19,18 +20,130 @@ import type {
   ShapeSerializer,
   StaticStructureSchema,
   StringSchema,
+  TimestampDateTimeSchema,
   TimestampDefaultSchema,
   TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
+import { toBase64 } from "@smithy/util-base64";
 import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 
 import { HttpBindingProtocol } from "./HttpBindingProtocol";
+import { determineTimestampFormat } from "./serde/determineTimestampFormat";
 import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
-import { ToStringShapeSerializer } from "./serde/ToStringShapeSerializer";
+import { SerdeContext } from "./SerdeContext";
 
 describe(HttpBindingProtocol.name, () => {
+  class ToStringTestShapeSerializer extends SerdeContext implements $ShapeSerializer<string> {
+    private stringBuffer = "";
+
+    public constructor(private settings: CodecSettings) {
+      super();
+    }
+
+    public write(schema: $Schema, value: unknown): void {
+      const ns = NormalizedSchema.of(schema);
+      switch (typeof value) {
+        case "object":
+          if (value === null) {
+            this.stringBuffer = "null";
+            return;
+          }
+          if (ns.isTimestampSchema()) {
+            if (!(value instanceof Date)) {
+              throw new Error(
+                `@smithy/core/protocols - received non-Date value ${value} when schema expected Date in ${ns.getName(
+                  true
+                )}`
+              );
+            }
+            const format = determineTimestampFormat(ns, this.settings);
+            switch (format) {
+              case 5 satisfies TimestampDateTimeSchema:
+                this.stringBuffer = value.toISOString().replace(".000Z", "Z");
+                break;
+              case 6 satisfies TimestampHttpDateSchema:
+                this.stringBuffer = dateToUtcString(value);
+                break;
+              case 7 satisfies TimestampEpochSecondsSchema:
+                this.stringBuffer = String(value.getTime() / 1000);
+                break;
+              default:
+                console.warn("Missing timestamp format, using epoch seconds", value);
+                this.stringBuffer = String(value.getTime() / 1000);
+            }
+            return;
+          }
+          if (ns.isBlobSchema() && "byteLength" in (value as Uint8Array)) {
+            this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(value as Uint8Array);
+            return;
+          }
+          if (ns.isListSchema() && Array.isArray(value)) {
+            let buffer = "";
+            for (const item of value) {
+              this.write([ns.getValueSchema(), ns.getMergedTraits()], item);
+              const headerItem = this.flush();
+              const serialized = ns.getValueSchema().isTimestampSchema() ? headerItem : quoteHeader(headerItem);
+              if (buffer !== "") {
+                buffer += ", ";
+              }
+              buffer += serialized;
+            }
+            this.stringBuffer = buffer;
+            return;
+          }
+          let b = "";
+          b += "{";
+          const keyValues = [];
+          for (const [k, $] of ns.structIterator()) {
+            let row = "";
+            const v = (value as any)[k];
+            if (v != null || $.isIdempotencyToken()) {
+              row += `"${k}":"`;
+              this.write($, v);
+              row += this.stringBuffer;
+              this.stringBuffer = "";
+              row += `"`;
+              keyValues.push(row);
+            }
+          }
+          b += keyValues.join(",");
+          b += "}";
+          this.stringBuffer = b;
+          break;
+        case "string":
+          const mediaType = ns.getMergedTraits().mediaType;
+          let intermediateValue: string | LazyJsonString = value;
+          if (mediaType) {
+            const isJson = mediaType === "application/json" || mediaType.endsWith("+json");
+            if (isJson) {
+              intermediateValue = LazyJsonString.from(intermediateValue);
+            }
+            if (ns.getMergedTraits().httpHeader) {
+              this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(intermediateValue.toString());
+              return;
+            }
+          }
+          this.stringBuffer = value;
+          break;
+        default:
+          if (ns.isIdempotencyToken()) {
+            this.stringBuffer = generateIdempotencyToken();
+          } else {
+            this.stringBuffer = String(value);
+          }
+      }
+    }
+
+    public flush(): string {
+      const buffer = this.stringBuffer;
+      this.stringBuffer = "";
+      return buffer;
+    }
+  }
+
   class StringRestProtocol extends HttpBindingProtocol {
     protected serializer: ShapeSerializer<string | Uint8Array>;
     protected deserializer: ShapeDeserializer<string | Uint8Array>;
@@ -58,7 +171,7 @@ describe(HttpBindingProtocol.name, () => {
         },
         httpBindings: true,
       };
-      this.serializer = new ToStringShapeSerializer(settings);
+      this.serializer = new ToStringTestShapeSerializer(settings);
       this.deserializer = new FromStringShapeDeserializer(settings);
     }
 
@@ -258,6 +371,53 @@ describe(HttpBindingProtocol.name, () => {
     expect(request.query?.token).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     expect(request.path).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
     expect(request.headers?.["header-token"]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  it("should not serialize http-location-bound idempotency tokens into the body", async () => {
+    const protocol = new StringRestProtocol();
+    const request = await protocol.serializeRequest(
+      op(
+        "",
+        "",
+        {
+          http: ["GET", "/Operation", 200],
+        },
+        [
+          3,
+          "ns",
+          "Struct",
+          0,
+          ["headerToken", "queryToken", "body1", "body2", "bodyToken"],
+          [
+            [0, { idempotencyToken: 1, httpQuery: "query-token" }],
+            [0, { idempotencyToken: 1, httpHeader: "header-token" }],
+            0,
+            0,
+            [0, 0b0000_0100],
+          ],
+        ] satisfies StaticStructureSchema,
+        "unit"
+      ),
+      {
+        headerToken: undefined,
+        body1: "text",
+        body2: "more text",
+        bodyToken: undefined,
+      },
+      {
+        endpoint: async () => parseUrl("https://localhost/custom"),
+      } as any
+    );
+
+    expect(request.headers["header-token"]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(request.query?.["query-token"]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    const body = JSON.parse(request.body);
+    expect(body).toMatchObject({
+      body1: "text",
+      body2: "more text",
+      bodyToken: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    });
+    expect(body.headerToken).toBeUndefined();
   });
 
   it("should discard response bodies for Unit operation outputs, making no attempt to parse them", async () => {
