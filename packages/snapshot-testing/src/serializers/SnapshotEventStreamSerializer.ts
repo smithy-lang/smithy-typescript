@@ -174,6 +174,19 @@ function serializeEventHeaders(headers: Message["headers"]): string {
   for (const [k, { type, value }] of Object.entries(headers ?? {})) {
     if (type === "string") {
       b += `${k}: ${value}\n`;
+    } else if (value instanceof Date) {
+      b += `${k}: ${value.toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles",
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "long",
+        hour12: false,
+      })} (${type})\n`;
     } else {
       b += `${k}: ${value} (${type})\n`;
     }

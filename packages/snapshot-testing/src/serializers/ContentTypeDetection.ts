@@ -1,5 +1,6 @@
 import type { HeaderBag } from "@smithy/types";
-import { toUtf8 } from "@smithy/util-utf8";
+import { toBase64 } from "@smithy/util-base64";
+import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 import { serializeBytes } from "./serializeBytes";
 
@@ -40,6 +41,15 @@ export class ContentTypeDetection {
       } else if (this.isQuery()) {
         return ["query", formatQuery(s)];
       }
+    } catch (e) {}
+    if (s.length === 0) {
+      return ["empty", s];
+    }
+    if (isAscii(s)) {
+      return ["text", s];
+    }
+    try {
+      return ["unrecognized format as base64", toBase64(fromUtf8(s))];
     } catch (e) {}
     return ["??", s];
   }
@@ -92,4 +102,8 @@ function simpleFormatXml(xml: string): string {
  */
 function formatQuery(q: string): string {
   return q.replace(/(&)/g, "&\n");
+}
+
+function isAscii(str: string) {
+  return /^[\x00-\x7F]*$/.test(str);
 }
