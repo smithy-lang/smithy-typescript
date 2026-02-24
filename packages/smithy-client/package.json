@@ -13,7 +13,9 @@
     "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
     "extract:docs": "node ./scripts/fix-api-extractor && api-extractor run --local && node ./scripts/fix-api-extractor --unset",
     "test": "yarn g:vitest run",
-    "test:watch": "yarn g:vitest watch"
+    "test:watch": "yarn g:vitest watch",
+    "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
+    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

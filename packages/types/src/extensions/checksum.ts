@@ -16,7 +16,7 @@ export enum AlgorithmId {
  * @internal
  */
 export interface ChecksumAlgorithm {
-  algorithmId(): AlgorithmId;
+  algorithmId(): AlgorithmId | string;
   checksumConstructor(): ChecksumConstructor | HashConstructor;
 }
 
