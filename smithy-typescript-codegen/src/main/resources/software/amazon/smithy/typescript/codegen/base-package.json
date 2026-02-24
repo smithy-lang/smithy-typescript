@@ -3,7 +3,7 @@
   "description": "${packageDescription}",
   "version": "${packageVersion}",
   "scripts": {
-    "build": "concurrently '${packageManager}:build:cjs' '${packageManager}:build:es' '${packageManager}:build:types'",
+    "build": "concurrently '${packageManager}:build:types' '${packageManager}:build:es' && ${packageManager}:build:cjs",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
