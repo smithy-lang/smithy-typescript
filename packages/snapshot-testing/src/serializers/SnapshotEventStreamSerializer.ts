@@ -3,7 +3,11 @@ import { toHex } from "@smithy/util-hex-encoding";
 import { toUtf8 } from "@smithy/util-utf8";
 
 import { ContentTypeDetection } from "./ContentTypeDetection";
+import { serializeDate } from "./serializeDate";
 
+/**
+ * @internal
+ */
 export class SnapshotEventStreamSerializer extends ContentTypeDetection {
   private headers: Message["headers"] = {};
 
@@ -175,18 +179,7 @@ function serializeEventHeaders(headers: Message["headers"]): string {
     if (type === "string") {
       b += `${k}: ${value}\n`;
     } else if (value instanceof Date) {
-      b += `${k}: ${value.toLocaleString("en-US", {
-        timeZone: "America/Los_Angeles",
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-        timeZoneName: "long",
-        hour12: false,
-      })} (${type})\n`;
+      b += `${k}: ${serializeDate(value)} (${type})\n`;
     } else {
       b += `${k}: ${value} (${type})\n`;
     }

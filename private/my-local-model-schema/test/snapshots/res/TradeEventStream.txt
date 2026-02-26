@@ -1,0 +1,115 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[async_iterable (Object)]
+
+
+
+
+--- [output object] ---
+{
+  eventStream: async_it[<empty>],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 122 [header-size] 75 [prelude-crc] 927907615
+:event-type: alpha
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "id": "__id__",
+  "timestamp": {
+    "tag": 1,
+    "value": 946702799.999
+  }
+}
+
+[actual bytes]
+162, 98, 105, 100, 102, 95, 95, 105, 100, 95, 95, 105, 116, 105, 109, 101, 115, 116, 97, 109, 112, 193, 251, 65,
+204, 54, 196, 231, 255, 223, 59
+
+[message-crc] 2274737008
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 91 [header-size] 74 [prelude-crc] 3169356093
+:event-type: beta
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{}
+
+[actual bytes]
+160
+
+[message-crc] 3285270063
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 92 [header-size] 75 [prelude-crc] 2043635131
+:event-type: gamma
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{}
+
+[actual bytes]
+160
+
+[message-crc] 2477278713
+============================================================
+
+[chunk (b64)]
+Cg==
+
+
+
+--- [output object] ---
+{
+  eventStream: async_it[
+    {
+      alpha: {
+        id: "__id__",
+        timestamp: (Date) Fri, Dec 31, 1999, 20:59:59 Pacific Standard Time
+      }
+    },
+    {
+      beta: {}
+    },
+    {
+      gamma: {}
+    }
+  ],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

@@ -19,6 +19,11 @@ export interface SnapshotRequestHandlerOptions {
    * The serialized request will be pushed to the logger's trace method.
    */
   logger?: Logger;
+
+  /**
+   * Optional response to use.
+   */
+  response?: IHttpResponse;
 }
 
 /**
@@ -43,7 +48,11 @@ export class SnapshotRequestHandler implements HttpHandler<SnapshotRequestHandle
     request: IHttpRequest,
     handlerOptions: (HttpHandlerOptions & any) | undefined = {}
   ): Promise<RequestHandlerOutput<IHttpResponse>> {
-    const { logger } = this.config;
+    const { logger, response } = this.config;
+
+    if (response) {
+      return { response };
+    }
 
     const [client, [, namespace, name, traits, input, output], command] = [
       handlerOptions[Symbol.for("$client")],
@@ -65,9 +74,9 @@ export class SnapshotRequestHandler implements HttpHandler<SnapshotRequestHandle
     throw new RequestSnapshotCompleted();
   }
 
-  public updateHttpClientConfig(
-    key: keyof SnapshotRequestHandlerOptions,
-    value: SnapshotRequestHandlerOptions[typeof key]
+  public updateHttpClientConfig<K extends keyof SnapshotRequestHandlerOptions>(
+    key: K,
+    value: SnapshotRequestHandlerOptions[K]
   ): void {
     this.config[key] = value;
   }

@@ -490,6 +490,8 @@
   },
   "@smithy/snapshot-testing": {
     "SnapshotRunner": "function, since <=0.0.1",
-    "customFields": "object, since 1.0.7"
+    "customFields": "object, since 1.0.7",
+    "snapshotTestingProtocolResponseSerializers": "object, since 1.0.7",
+    "SnapshotProtocol": "function, since 1.0.7"
   }
 }

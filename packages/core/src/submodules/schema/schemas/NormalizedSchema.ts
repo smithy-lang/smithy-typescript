@@ -375,7 +375,7 @@ export class NormalizedSchema implements INormalizedSchema {
     if (this.isDocumentSchema()) {
       return member([15 satisfies DocumentSchema, 0], memberName);
     }
-    throw new Error(`@smithy/core/schema - ${this.getName(true)} has no no member=${memberName}.`);
+    throw new Error(`@smithy/core/schema - ${this.getName(true)} has no member=${memberName}.`);
   }
 
   /**

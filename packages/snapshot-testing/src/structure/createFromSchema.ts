@@ -1,6 +1,7 @@
 import { NormalizedSchema } from "@smithy/core/schema";
 import { NumericValue } from "@smithy/core/serde";
-import type { $SchemaRef } from "@smithy/types";
+import type { $SchemaRef, StaticStructureSchema } from "@smithy/types";
+import { Readable } from "node:stream";
 
 /**
  * Creates a static value for a given schema.
@@ -9,8 +10,11 @@ import type { $SchemaRef } from "@smithy/types";
  *
  * @param schema - for which to generate an object.
  * @param path - to cut off recursive schema at a certain depth.
+ * @param options
+ * @param options.mode - 'min' or 'max' for generating optional members.
  */
-export function createFromSchema(schema: $SchemaRef, path = ""): any {
+export function createFromSchema(schema: $SchemaRef, path = "", options: { mode?: "min" | "max" } = {}): any {
+  const { mode = "max" } = options;
   const $ = NormalizedSchema.of(schema);
 
   const memberName = $.isMemberSchema() ? $.getMemberName() : "____";
@@ -37,6 +41,9 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
   } else if ($.isBooleanSchema()) {
     return false;
   } else if ($.isBlobSchema()) {
+    if ($.isStreaming()) {
+      return Readable.from(new Uint8Array([1, 0, 0, 1]));
+    }
     return new Uint8Array([1, 0, 0, 1]);
   } else if ($.isTimestampSchema()) {
     return new Date(946702799999);
@@ -46,9 +53,9 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
       return map;
     }
     const $v = $.getValueSchema();
-    map.key1 = createFromSchema($v, path + "$k1");
-    map.key2 = createFromSchema($v, path + "$k2");
-    map.key2 = createFromSchema($v, path + "$k3");
+    map.key1 = createFromSchema($v, path + "$k1", options);
+    map.key2 = createFromSchema($v, path + "$k2", options);
+    map.key2 = createFromSchema($v, path + "$k3", options);
     return map;
   } else if ($.isListSchema()) {
     const list = [] as any;
@@ -57,13 +64,14 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
     }
     const $v = $.getValueSchema();
     list.push(
-      createFromSchema($v, path + "$l1"),
-      createFromSchema($v, path + "$l2"),
-      createFromSchema($v, path + "$l3")
+      createFromSchema($v, path + "$l1", options),
+      createFromSchema($v, path + "$l2", options),
+      createFromSchema($v, path + "$l3", options)
     );
     return list;
   } else if ($.isStructSchema()) {
     const isUnion = $.isUnionSchema();
+    const requiredMembers = ($.getSchema() as StaticStructureSchema)[6] ?? 0;
     const isEventStream = isUnion && $.isStreaming();
     const struct = {} as any;
     if (isEventStream) {
@@ -71,7 +79,7 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
         async *[Symbol.asyncIterator]() {
           for (const [memberName, $member] of $.structIterator()) {
             yield {
-              [memberName]: createFromSchema($member, path),
+              [memberName]: createFromSchema($member, path, options),
             };
           }
         },
@@ -88,8 +96,11 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
       let i = 0;
 
       for (const [memberName, $member] of $.structIterator()) {
+        if (i >= requiredMembers && mode === "min") {
+          break;
+        }
         if (!isUnion || i++ === unionMemberSelector) {
-          struct[memberName] = createFromSchema($member, path);
+          struct[memberName] = createFromSchema($member, path, options);
           if (isUnion) {
             break;
           }
