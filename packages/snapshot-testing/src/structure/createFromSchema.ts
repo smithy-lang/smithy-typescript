@@ -14,6 +14,10 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
   const $ = NormalizedSchema.of(schema);
 
   const memberName = $.isMemberSchema() ? $.getMemberName() : "____";
+  if (customFields[memberName]) {
+    return customFields[memberName];
+  }
+
   const qualifiedName = $.getName(true) ?? "UnknownSchema!";
   path += " -> " + qualifiedName + "$" + memberName;
 
@@ -23,7 +27,7 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
     if ($.isIdempotencyToken()) {
       return "00000000-0000-4000-8000-000000000000";
     }
-    return customFields[memberName] ?? "__" + memberName + "__";
+    return "__" + memberName + "__";
   } else if ($.isNumericSchema()) {
     return 0;
   } else if ($.isBigIntegerSchema()) {
@@ -107,7 +111,13 @@ export function createFromSchema(schema: $SchemaRef, path = ""): any {
   return "UNSUPPORTED_SCHEMA_TYPE";
 }
 
-const customFields: Record<string, string> = {
+/**
+ * Overrides the generated values for members with matching names.
+ * @internal
+ */
+export const customFields: Record<string, string> = {
   PredictEndpoint: "https://localhost",
   ChecksumAlgorithm: "CRC64NVME",
+  AccountId: "123456789012",
+  OutpostId: "OutpostId",
 };
