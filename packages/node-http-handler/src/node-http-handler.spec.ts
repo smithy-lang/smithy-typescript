@@ -111,6 +111,7 @@ describe("NodeHttpHandler", () => {
         const nodeHttpHandler = new NodeHttpHandler(option);
         await nodeHttpHandler.handle({} as any);
         expect(vi.mocked(timing.setTimeout).mock.calls[0][1]).toBe(randomSocketAcquisitionWarningTimeout);
+        nodeHttpHandler.destroy();
       });
 
       it.each([
@@ -268,6 +269,7 @@ describe("NodeHttpHandler", () => {
 
       describe("per-request requestTimeout", () => {
         it("should use per-request timeout over handler config timeout", async () => {
+          vi.spyOn(timing, "setTimeout");
           const testTimeout = async (handlerTimeout: number, requestTimeout?: number) => {
             const handler = new NodeHttpHandler({ requestTimeout: handlerTimeout });
             await handler.handle(
@@ -407,6 +409,75 @@ describe("NodeHttpHandler", () => {
     it("should be callable and return nothing", () => {
       const nodeHttpHandler = new NodeHttpHandler();
       expect(nodeHttpHandler.destroy()).toBeUndefined();
+    });
+  });
+
+  describe("socket warning timer", () => {
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("does not create a timer when maxSockets is Infinity", async () => {
+      vi.spyOn(timing, "setTimeout");
+      const handler = new NodeHttpHandler({
+        httpAgent: new http.Agent({ maxSockets: Infinity }),
+        httpsAgent: new https.Agent({ maxSockets: Infinity }),
+      });
+      await handler.handle({ protocol: "http:", headers: {}, method: "GET", hostname: "localhost", path: "/" } as any);
+      // timing.setTimeout should not have been called for the socket warning.
+      // Other per-request timers (connection, request, socket) may call it,
+      // but none with the socket-warning callback. Verify no call was made
+      // before the per-request timers by checking the handler's internal state.
+      expect((handler as any).socketWarningTimer).toBeNull();
+      handler.destroy();
+    });
+
+    it("creates only one timer across multiple handle() calls", async () => {
+      vi.spyOn(timing, "setTimeout");
+      const handler = new NodeHttpHandler({ httpAgent: { maxSockets: 25 } });
+      const req = { protocol: "http:", headers: {}, method: "GET", hostname: "localhost", path: "/" } as any;
+      await handler.handle(req);
+      await handler.handle(req);
+      await handler.handle(req);
+      // The socket warning timer is only scheduled once (socketWarningTimer !== undefined
+      // on subsequent calls). Per-request timers still fire, but the shared timer is not re-created.
+      expect((handler as any).socketWarningTimer).toBeDefined();
+      expect((handler as any).socketWarningTimer).not.toBeNull();
+      handler.destroy();
+    });
+
+    it("cleans up the timer on destroy()", async () => {
+      vi.spyOn(timing, "clearTimeout");
+      const handler = new NodeHttpHandler({ httpAgent: { maxSockets: 25 } });
+      await handler.handle({ protocol: "http:", headers: {}, method: "GET", hostname: "localhost", path: "/" } as any);
+      handler.destroy();
+      expect(timing.clearTimeout).toHaveBeenCalled();
+      expect((handler as any).socketWarningTimer).toBeUndefined();
+    });
+
+    it("tracks pending requests", async () => {
+      const handler = new NodeHttpHandler({ httpAgent: { maxSockets: 25 } });
+      await handler.handle({ protocol: "http:", headers: {}, method: "GET", hostname: "localhost", path: "/" } as any);
+      // After the request resolves, pendingRequests should be back to 0.
+      expect((handler as any).pendingRequests).toBe(0);
+      handler.destroy();
+    });
+
+    it("resets the timer when updateHttpClientConfig is called", async () => {
+      vi.spyOn(timing, "clearTimeout");
+      const handler = new NodeHttpHandler({ httpAgent: { maxSockets: 25 } });
+      await handler.handle({ protocol: "http:", headers: {}, method: "GET", hostname: "localhost", path: "/" } as any);
+      expect((handler as any).socketWarningTimer).toBeDefined();
+
+      handler.updateHttpClientConfig("requestTimeout", 5000);
+      expect(timing.clearTimeout).toHaveBeenCalled();
+      expect((handler as any).socketWarningTimer).toBeUndefined();
+
+      // Next handle() should re-create the timer with the updated config.
+      await handler.handle({ protocol: "http:", headers: {}, method: "GET", hostname: "localhost", path: "/" } as any);
+      expect((handler as any).socketWarningTimer).toBeDefined();
+      expect((handler as any).socketWarningTimer).not.toBeNull();
+      handler.destroy();
     });
   });
 

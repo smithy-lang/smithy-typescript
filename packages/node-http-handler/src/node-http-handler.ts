@@ -38,6 +38,23 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private socketWarningTimestamp = 0;
   private externalAgent = false;
 
+  /**
+   * @internal
+   * Single shared timer for socket usage warnings, replacing per-request timers.
+   * Lazily created on first handle() call. Re-arms itself while requests are in flight.
+   * - undefined: not yet initialized
+   * - null: initialized, but not needed (maxSockets is Infinity)
+   * - NodeJS.Timeout: active timer
+   */
+  private socketWarningTimer?: NodeJS.Timeout | null;
+
+  /**
+   * @internal
+   * Number of in-flight requests. The socket warning timer only re-arms
+   * while this is greater than zero.
+   */
+  private pendingRequests = 0;
+
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
 
@@ -88,13 +105,12 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
         /**
          * Running at maximum socket usage can be intentional and normal.
-         * That is why this warning emits at a delay which can be seen
-         * at the call site's setTimeout wrapper. The warning will be cancelled
-         * if the request finishes in a reasonable amount of time regardless
-         * of socket saturation.
+         * That is why this warning emits from a shared timer that only
+         * fires while requests are in flight, giving transient spikes
+         * time to resolve before the check runs.
          *
-         * Additionally, when the warning is emitted, there is an interval
-         * lockout.
+         * Additionally, when the warning is emitted, there is a 15-second
+         * lockout to avoid log spam.
          */
         if (socketsInUse >= maxSockets && requestsEnqueued >= 2 * maxSockets) {
           logger?.warn?.(
@@ -162,7 +178,60 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     };
   }
 
+  /**
+   * Schedules a single shared timer for socket usage warnings.
+   * Replaces the per-request timer that was previously created in handle().
+   * The timer re-arms itself while requests are in flight, and stops
+   * when all requests have completed. Skipped entirely when
+   * maxSockets === Infinity on both agents.
+   */
+  private scheduleSocketWarningCheck(config: ResolvedNodeHttpHandlerConfig): void {
+    if (this.socketWarningTimer !== undefined) {
+      return;
+    }
+
+    const httpMax = config.httpAgent.maxSockets;
+    const httpsMax = config.httpsAgent.maxSockets;
+
+    if (
+      (httpMax === Infinity || httpMax === undefined) &&
+      (httpsMax === Infinity || httpsMax === undefined)
+    ) {
+      this.socketWarningTimer = null;
+      return;
+    }
+
+    const warningTimeout =
+      config.socketAcquisitionWarningTimeout ??
+      (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000);
+
+    this.socketWarningTimer = timing.setTimeout(() => {
+      this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
+        config.httpsAgent,
+        this.socketWarningTimestamp,
+        config.logger
+      );
+      this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
+        config.httpAgent,
+        this.socketWarningTimestamp,
+        config.logger
+      );
+
+      // Reset so the timer can be re-armed if requests are still in flight.
+      this.socketWarningTimer = undefined;
+      if (this.pendingRequests > 0) {
+        this.scheduleSocketWarningCheck(config);
+      }
+    }, warningTimeout);
+
+    (this.socketWarningTimer as any)?.unref?.();
+  }
+
   destroy(): void {
+    if (this.socketWarningTimer) {
+      timing.clearTimeout(this.socketWarningTimer);
+      this.socketWarningTimer = undefined;
+    }
     this.config?.httpAgent?.destroy();
     this.config?.httpsAgent?.destroy();
   }
@@ -174,6 +243,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     if (!this.config) {
       this.config = await this.configProvider;
     }
+
+    this.scheduleSocketWarningCheck(this.config);
+    this.pendingRequests++;
 
     return new Promise((_resolve, _reject) => {
       const config = this.config!;
@@ -220,21 +292,6 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
           maxSockets: Infinity,
         });
       }
-
-      // If the request is taking a long time, check socket usage and potentially warn.
-      // This warning will be cancelled if the request resolves.
-      timeouts.push(
-        timing.setTimeout(
-          () => {
-            this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
-              agent,
-              this.socketWarningTimestamp,
-              config.logger
-            );
-          },
-          config.socketAcquisitionWarningTimeout ?? (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000)
-        )
-      );
 
       const queryString = buildQueryString(request.query || {});
       let auth = undefined;
@@ -337,11 +394,17 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
           return _reject(e);
         }
       );
+    }).finally(() => {
+      this.pendingRequests--;
     });
   }
 
   updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
+    if (this.socketWarningTimer) {
+      timing.clearTimeout(this.socketWarningTimer);
+    }
+    this.socketWarningTimer = undefined;
     this.configProvider = this.configProvider.then((config) => {
       return {
         ...config,
