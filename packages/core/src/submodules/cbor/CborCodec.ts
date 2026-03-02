@@ -192,13 +192,10 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
       if (ns.isListSchema()) {
         const newArray = [] as any[];
         const memberSchema = ns.getValueSchema();
-        const sparse = !!ns.getMergedTraits().sparse;
 
         for (const item of value) {
           const itemValue = this.readValue(memberSchema, item);
-          if (itemValue != null || sparse) {
-            newArray.push(itemValue);
-          }
+          newArray.push(itemValue);
         }
         return newArray;
       }
@@ -206,14 +203,11 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
       const newObject = {} as any;
 
       if (ns.isMapSchema()) {
-        const sparse = !!ns.getMergedTraits().sparse;
         const targetSchema = ns.getValueSchema();
 
         for (const key of Object.keys(value)) {
           const itemValue = this.readValue(targetSchema, value[key]);
-          if (itemValue != null || sparse) {
-            newObject[key] = itemValue;
-          }
+          newObject[key] = itemValue;
         }
       } else if (ns.isStructSchema()) {
         const isUnion = ns.isUnionSchema();
