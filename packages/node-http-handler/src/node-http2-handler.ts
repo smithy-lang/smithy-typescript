@@ -5,6 +5,7 @@ import type { ConnectConfiguration, HttpHandlerOptions, Provider, RequestContext
 import type { ClientHttp2Session } from "http2";
 import { constants } from "http2";
 
+import { buildAbortError } from "./build-abort-error";
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
 import { writeRequestBody } from "./write-request-body";
@@ -120,8 +121,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       // if the request was already aborted, prevent doing extra work
       if (abortSignal?.aborted) {
         fulfilled = true;
-        const abortError = new Error("Request aborted");
-        abortError.name = "AbortError";
+        const abortError = buildAbortError(abortSignal);
         reject(abortError);
         return;
       }
@@ -194,8 +194,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       if (abortSignal) {
         const onAbort = () => {
           req.close();
-          const abortError = new Error("Request aborted");
-          abortError.name = "AbortError";
+          const abortError = buildAbortError(abortSignal);
           rejectWithDestroy(abortError);
         };
         if (typeof (abortSignal as AbortSignal).addEventListener === "function") {

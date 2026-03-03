@@ -1,0 +1,25 @@
+/**
+ * Builds an abort error, using the AbortSignal's reason if available.
+ *
+ * @param abortSignal - Optional AbortSignal that may contain a reason.
+ * @returns An Error with name "AbortError". If the signal has a reason that's
+ *          already an Error, returns it directly. Otherwise creates a new Error
+ *          with the reason as the message, or "Request aborted" if no reason.
+ */
+export function buildAbortError(abortSignal?: unknown): Error {
+  const reason =
+    abortSignal && typeof abortSignal === "object" && "reason" in abortSignal
+      ? (abortSignal as { reason?: unknown }).reason
+      : undefined;
+  if (reason) {
+    if (reason instanceof Error) {
+      return reason;
+    }
+    const abortError = new Error(String(reason));
+    abortError.name = "AbortError";
+    return abortError;
+  }
+  const abortError = new Error("Request aborted");
+  abortError.name = "AbortError";
+  return abortError;
+}
