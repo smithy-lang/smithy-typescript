@@ -45,7 +45,7 @@
     "node": ">=18.0.0"
   },
   "typesVersions": {
-    "<4.0": {
+    "<4.5": {
       "types/*": [
         "types/ts3.4/*"
       ]
