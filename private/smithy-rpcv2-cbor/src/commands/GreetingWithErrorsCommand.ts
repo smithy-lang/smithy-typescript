@@ -36,6 +36,39 @@ export interface GreetingWithErrorsCommandOutput extends GreetingWithErrorsOutpu
  *
  * Implementations must be able to successfully take a response and
  * properly deserialize successful and error responses.
+ * @example
+ * Use a bare-bones client and the command you need to make an API call.
+ * ```javascript
+ * import { RpcV2ProtocolClient, GreetingWithErrorsCommand } from "@smithy/smithy-rpcv2-cbor"; // ES Modules import
+ * // const { RpcV2ProtocolClient, GreetingWithErrorsCommand } = require("@smithy/smithy-rpcv2-cbor"); // CommonJS import
+ * // import type { RpcV2ProtocolClientConfig } from "@smithy/smithy-rpcv2-cbor";
+ * const config = {}; // type is RpcV2ProtocolClientConfig
+ * const client = new RpcV2ProtocolClient(config);
+ * const input = {};
+ * const command = new GreetingWithErrorsCommand(input);
+ * const response = await client.send(command);
+ * // { // GreetingWithErrorsOutput
+ * //   greeting: "STRING_VALUE",
+ * // };
+ *
+ * ```
+ *
+ * @param GreetingWithErrorsCommandInput - {@link GreetingWithErrorsCommandInput}
+ * @returns {@link GreetingWithErrorsCommandOutput}
+ * @see {@link GreetingWithErrorsCommandInput} for command's `input` shape.
+ * @see {@link GreetingWithErrorsCommandOutput} for command's `response` shape.
+ * @see {@link RpcV2ProtocolClientResolvedConfig | config} for RpcV2ProtocolClient's `config` shape.
+ *
+ * @throws {@link InvalidGreeting} (client fault)
+ *  This error is thrown when an invalid greeting value is provided.
+ *
+ * @throws {@link ComplexError} (client fault)
+ *  This error is thrown when a request is invalid.
+ *
+ * @throws {@link RpcV2ProtocolServiceException}
+ * <p>Base exception class for all service exceptions from RpcV2Protocol service.</p>
+ *
+ *
  * @public
  */
 export class GreetingWithErrorsCommand extends $Command

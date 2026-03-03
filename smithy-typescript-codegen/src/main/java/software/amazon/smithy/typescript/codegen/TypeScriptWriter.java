@@ -292,6 +292,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                 }
             }
 
+            docs = preprocessor.apply(docs);
             docs = addReleaseTag(shape, docs);
             writeDocs(docs);
             return true;
