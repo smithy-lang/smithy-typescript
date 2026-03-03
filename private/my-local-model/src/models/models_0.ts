@@ -43,17 +43,17 @@ export interface GetNumbersRequest {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;
   /**
-   * This is deprecated documentation annotation
+   * This is deprecated documentation annotation.
    *
-   * @deprecated deprecated
+   * @deprecated deprecated.
    * @public
    */
   fieldWithoutMessage?: string | undefined;
 
   /**
-   * This is deprecated documentation annotation
+   * This is deprecated documentation annotation.
    *
-   * @deprecated This field has been deprecated
+   * @deprecated (since 3.0) This field has been deprecated.
    * @public
    */
   fieldWithMessage?: string | undefined;
@@ -70,6 +70,33 @@ export interface GetNumbersResponse {
   bigInteger?: bigint | undefined;
   numbers?: number[] | undefined;
   nextToken?: string | undefined;
+  /**
+   * This is deprecated documentation annotation.
+   *
+   * @deprecated (since 1685-12-31) these numbers are not used anymore.
+   * @public
+   */
+  deprecatedNumbers?: number[] | undefined;
+
+  /**
+   * This is deprecated documentation annotation.
+   *
+   * @deprecated since 1685-12-31.
+   * @public
+   */
+  deprecatedNumbersWithoutExplanation?: number[] | undefined;
+
+  /**
+   * @deprecated these numbers are not used anymore??
+   * @public
+   */
+  deprecatedNumbersWithoutChronology?: number[] | undefined;
+
+  /**
+   * @deprecated deprecated.
+   * @public
+   */
+  inexplicablyDeprecatedNumbers?: number[] | undefined;
 }
 
 /**

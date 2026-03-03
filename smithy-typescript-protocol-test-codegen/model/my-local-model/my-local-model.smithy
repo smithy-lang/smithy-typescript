@@ -157,9 +157,26 @@ structure GetNumbersRequest {
 @output
 structure GetNumbersResponse {
     bigDecimal: BigDecimal
+
     bigInteger: BigInteger
+
     numbers: IntegerList
+
     nextToken: String
+
+    @documentation("This is deprecated documentation annotation")
+    @deprecated(message: "these numbers are not used anymore", since: "1685-12-31")
+    deprecatedNumbers: IntegerList
+
+    @documentation("This is deprecated documentation annotation")
+    @deprecated(since: "1685-12-31")
+    deprecatedNumbersWithoutExplanation: IntegerList
+
+    @deprecated(message: "these numbers are not used anymore??")
+    deprecatedNumbersWithoutChronology: IntegerList
+
+    @deprecated
+    inexplicablyDeprecatedNumbers: IntegerList
 }
 
 list IntegerList {

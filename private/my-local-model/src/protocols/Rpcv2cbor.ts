@@ -510,6 +510,10 @@ const se_Alpha_event = (
       return take(output, {
         'bigDecimal': [],
         'bigInteger': [],
+        'deprecatedNumbers': _json,
+        'deprecatedNumbersWithoutChronology': _json,
+        'deprecatedNumbersWithoutExplanation': _json,
+        'inexplicablyDeprecatedNumbers': _json,
         'nextToken': __expectString,
         'numbers': _json,
       }) as any;

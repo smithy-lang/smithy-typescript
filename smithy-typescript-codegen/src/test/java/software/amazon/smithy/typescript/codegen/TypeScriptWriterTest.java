@@ -103,17 +103,19 @@ public class TypeScriptWriterTest {
         StringShape shape = StringShape.builder()
             .id(ShapeId.from("com.example#MyString"))
             .addTrait(new DocumentationTrait("Some docs."))
-            .addTrait(DeprecatedTrait.builder()
-                .message("Use MyStringV2 instead")
-                .since("2024-01-01")
-                .build())
+            .addTrait(
+                DeprecatedTrait.builder()
+                    .message("Use MyStringV2 instead")
+                    .since("2024-01-01")
+                    .build()
+            )
             .build();
 
         TypeScriptWriter writer = new TypeScriptWriter("foo");
         writer.writeShapeDocs(shape);
         String result = writer.toString();
 
-        assertThat(result, containsString("@deprecated Use MyStringV2 instead (since 2024-01-01)."));
+        assertThat(result, containsString("@deprecated (since 2024-01-01) Use MyStringV2 instead."));
     }
 
     @Test
@@ -121,9 +123,11 @@ public class TypeScriptWriterTest {
         StringShape shape = StringShape.builder()
             .id(ShapeId.from("com.example#MyString"))
             .addTrait(new DocumentationTrait("Some docs."))
-            .addTrait(DeprecatedTrait.builder()
-                .message("Use MyStringV2 instead")
-                .build())
+            .addTrait(
+                DeprecatedTrait.builder()
+                    .message("Use MyStringV2 instead")
+                    .build()
+            )
             .build();
 
         TypeScriptWriter writer = new TypeScriptWriter("foo");
@@ -159,7 +163,7 @@ public class TypeScriptWriterTest {
             .since("2024-01-01")
             .build();
         String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
-        assertEquals("@deprecated Use FooV2 instead (since 2024-01-01).", result);
+        assertEquals("@deprecated (since 2024-01-01) Use FooV2 instead.", result);
     }
 
     @Test
@@ -167,5 +171,23 @@ public class TypeScriptWriterTest {
         DeprecatedTrait trait = DeprecatedTrait.builder().build();
         String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
         assertEquals("@deprecated deprecated.", result);
+    }
+
+    @Test
+    public void buildIncredulousDeprecationAnnotation() {
+        DeprecatedTrait trait = DeprecatedTrait.builder()
+            .message("what??")
+            .build();
+        String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
+        assertEquals("@deprecated what??", result);
+    }
+
+    @Test
+    public void buildDramaticDeprecationAnnotation() {
+        DeprecatedTrait trait = DeprecatedTrait.builder()
+            .message("Noo!!!")
+            .build();
+        String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
+        assertEquals("@deprecated Noo!!!", result);
     }
 }
