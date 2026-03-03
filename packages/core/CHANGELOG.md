@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.23.7
+
+### Patch Changes
+
+- 11569eb: preserve null values for non-sparse collections in cbor deserializing
+  - @smithy/util-stream@4.5.16
+
 ## 3.23.6
 
 ### Patch Changes

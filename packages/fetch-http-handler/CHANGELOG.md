@@ -1,5 +1,11 @@
 # Change Log
 
+## 5.3.12
+
+### Patch Changes
+
+- 9bf9ae2: fix: reject aborted requests with AbortSignal.reason instead of a generic Error
+
 ## 5.3.11
 
 ### Patch Changes
