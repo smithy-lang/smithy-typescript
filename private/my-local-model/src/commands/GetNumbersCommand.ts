@@ -55,6 +55,18 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  * //     Number("int"),
  * //   ],
  * //   nextToken: "STRING_VALUE",
+ * //   deprecatedNumbers: [
+ * //     Number("int"),
+ * //   ],
+ * //   deprecatedNumbersWithoutExplanation: [
+ * //     Number("int"),
+ * //   ],
+ * //   deprecatedNumbersWithoutChronology: [
+ * //     Number("int"),
+ * //   ],
+ * //   inexplicablyDeprecatedNumbers: [
+ * //     Number("int"),
+ * //   ],
  * // };
  *
  * ```

@@ -24,6 +24,9 @@ const _c = "client";
 const _cCO = "camelCaseOperation";
 const _cCOI = "camelCaseOperationInput";
 const _cCOO = "camelCaseOperationOutput";
+const _dN = "deprecatedNumbers";
+const _dNWC = "deprecatedNumbersWithoutChronology";
+const _dNWE = "deprecatedNumbersWithoutExplanation";
 const _e = "error";
 const _eS = "eventStream";
 const _fWM = "fieldWithoutMessage";
@@ -32,6 +35,7 @@ const _g = "gamma";
 const _h = "http";
 const _hE = "httpError";
 const _i = "id";
+const _iDN = "inexplicablyDeprecatedNumbers";
 const _mR = "maxResults";
 const _n = "numbers";
 const _nT = "nextToken";
@@ -146,8 +150,8 @@ export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
 ];
 export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   0,
-  [_bD, _bI, _n, _nT],
-  [19, 17, 64 | 1, 0]
+  [_bD, _bI, _n, _nT, _dN, _dNWE, _dNWC, _iDN],
+  [19, 17, 64 | 1, 0, 64 | 1, 64 | 1, 64 | 1, 64 | 1]
 ];
 export var TradeEventStreamRequest$: StaticStructureSchema = [3, n0, _TESR,
   0,

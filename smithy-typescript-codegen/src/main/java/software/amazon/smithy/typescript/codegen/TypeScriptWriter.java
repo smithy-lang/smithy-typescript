@@ -274,24 +274,31 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @return Returns true if docs were written.
      */
     boolean writeShapeDocs(Shape shape, UnaryOperator<String> preprocessor) {
-        return shape
-            .getTrait(DocumentationTrait.class)
-            .map(DocumentationTrait::getValue)
-            .map(docs -> {
-                // Escape valid '{' and '}'
-                docs = docs.replace("{", "\\{").replace("}", "\\}");
-                if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
-                    DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
-                    String deprecationMessage = deprecatedTrait.getMessage().orElse("deprecated");
-                    String deprecationAnnotation = "@deprecated " + deprecationMessage;
-                    docs = docs + "\n\n" + deprecationAnnotation;
+        boolean hasDocumentation = shape.getTrait(DocumentationTrait.class).isPresent();
+        boolean hasDeprecation = shape.getTrait(DeprecatedTrait.class).isPresent();
+
+        if (hasDocumentation || hasDeprecation) {
+            String docs =
+                hasDocumentation ? shape.getTrait(DocumentationTrait.class).get().getValue() : "";
+            docs = docs.replace("{", "\\{").replace("}", "\\}");
+
+            if (hasDeprecation) {
+                DeprecatedTrait deprecatedTrait = shape.expectTrait(DeprecatedTrait.class);
+                String deprecationAnnotation = buildDeprecationAnnotation(deprecatedTrait);
+                if (hasDocumentation) {
+                    docs = punctuate(docs) + "\n\n" + deprecationAnnotation;
+                } else {
+                    docs = deprecationAnnotation;
                 }
-                docs = preprocessor.apply(docs);
-                docs = addReleaseTag(shape, docs);
-                writeDocs(docs);
-                return true;
-            })
-            .orElse(false);
+            }
+
+            docs = preprocessor.apply(docs);
+            docs = addReleaseTag(shape, docs);
+            writeDocs(docs);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -316,32 +323,77 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @return Returns true if docs were written.
      */
     boolean writeMemberDocs(Model model, MemberShape member) {
-        return member
-            .getMemberTrait(model, DocumentationTrait.class)
-            .map(DocumentationTrait::getValue)
-            .map(docs -> {
-                // Escape valid '{' and '}'
-                docs = docs.replace("{", "\\{").replace("}", "\\}");
-                if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
-                    DeprecatedTrait deprecatedTrait = member
-                        .getTrait(DeprecatedTrait.class)
-                        .or(() -> model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class))
-                        .orElseThrow();
-                    String deprecationMessage = deprecatedTrait.getMessage().orElse("deprecated");
-                    String deprecationAnnotation = "@deprecated " + deprecationMessage;
-                    docs = docs + "\n\n" + deprecationAnnotation;
+        boolean hasDocumentation = member.getMemberTrait(model, DocumentationTrait.class).isPresent();
+        boolean hasDeprecation =
+            member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member);
+
+        if (hasDocumentation || hasDeprecation) {
+            String docs =
+                hasDocumentation ? member.getMemberTrait(model, DocumentationTrait.class).get().getValue() : "";
+            docs = docs.replace("{", "\\{").replace("}", "\\}");
+
+            if (hasDeprecation) {
+                DeprecatedTrait deprecatedTrait = member
+                    .getTrait(DeprecatedTrait.class)
+                    .or(() -> model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class))
+                    .orElseThrow();
+                String deprecationAnnotation = buildDeprecationAnnotation(deprecatedTrait);
+                if (hasDocumentation) {
+                    docs = punctuate(docs) + "\n\n" + deprecationAnnotation;
+                } else {
+                    docs = deprecationAnnotation;
                 }
-                docs = addReleaseTag(member, docs);
-                writeDocs(docs);
-                return true;
-            })
-            .orElse(false);
+            }
+
+            docs = addReleaseTag(member, docs);
+            writeDocs(docs);
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isTargetDeprecated(Model model, MemberShape member) {
         return (model.expectShape(member.getTarget()).getTrait(DeprecatedTrait.class).isPresent() &&
         // don't consider deprecated prelude shapes (like PrimitiveBoolean)
             !Prelude.isPreludeShape(member.getTarget()));
+    }
+
+    /**
+     * Builds a JSDoc {@code @deprecated} annotation from a {@link DeprecatedTrait},
+     * synthesizing the {@code message} and {@code since} fields into the deprecation text.
+     */
+    static String buildDeprecationAnnotation(DeprecatedTrait trait) {
+        StringBuilder annotation = new StringBuilder("@deprecated");
+        String message = trait.getMessage().orElse(null);
+        String since = trait.getSince().orElse(null);
+
+        if (message != null && since != null) {
+            annotation
+                .append(" (since %s) ".formatted(since))
+                .append(message);
+        } else if (message != null) {
+            annotation.append(" ").append(message);
+        } else if (since != null) {
+            annotation.append(" since %s".formatted(since));
+        } else {
+            annotation.append(" deprecated");
+        }
+
+        return punctuate(annotation.toString());
+    }
+
+    /**
+     * Adds a period to the end of the string if no punctuation is present.
+     * It doesn't matter if it's not a grammatical sentence, since the period
+     * serves as a visual separator in code comments.
+     */
+    static String punctuate(String s) {
+        String state = s.trim();
+        if (!state.endsWith(".") && !state.endsWith("?") && !state.endsWith("!")) {
+            return state + ".";
+        }
+        return s;
     }
 
     private String addReleaseTag(Shape shape, String docs) {

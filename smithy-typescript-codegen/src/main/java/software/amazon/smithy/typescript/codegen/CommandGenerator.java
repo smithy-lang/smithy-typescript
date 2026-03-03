@@ -160,8 +160,14 @@ final class CommandGenerator implements Runnable {
             boolean isPublic = !operation.hasTrait(InternalTrait.class);
             boolean isDeprecated = operation.hasTrait(DeprecatedTrait.class);
 
+            String deprecatedTag = "";
+            if (isDeprecated) {
+                DeprecatedTrait deprecatedTrait = operation.expectTrait(DeprecatedTrait.class);
+                deprecatedTag = TypeScriptWriter.buildDeprecationAnnotation(deprecatedTrait) + "\n";
+            }
+
             writer.writeDocs(
-                (isPublic ? "@public\n" : "@internal\n") + (isDeprecated ? "@deprecated\n" : "") + additionalDocs
+                (isPublic ? "@public\n" : "@internal\n") + deprecatedTag + additionalDocs
             );
         }
 
