@@ -6,6 +6,7 @@ import { Agent as hAgent, request as hRequest } from "http";
 import type { RequestOptions } from "https";
 import { Agent as hsAgent, request as hsRequest } from "https";
 
+import { buildAbortError } from "./build-abort-error";
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { setConnectionTimeout } from "./set-connection-timeout";
@@ -196,8 +197,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // if the request was already aborted, prevent doing extra work
       if (abortSignal?.aborted) {
-        const abortError = new Error("Request aborted");
-        abortError.name = "AbortError";
+        const abortError = buildAbortError(abortSignal);
         reject(abortError);
         return;
       }
@@ -294,8 +294,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         const onAbort = () => {
           // ensure request is destroyed
           req.destroy();
-          const abortError = new Error("Request aborted");
-          abortError.name = "AbortError";
+          const abortError = buildAbortError(abortSignal);
           reject(abortError);
         };
         if (typeof (abortSignal as AbortSignal).addEventListener === "function") {

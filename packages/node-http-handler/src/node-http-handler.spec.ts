@@ -410,6 +410,52 @@ describe("NodeHttpHandler", () => {
     });
   });
 
+  describe("abort signal handling", () => {
+    it("rejects with AbortSignal.reason when signal is already aborted with a custom reason", async () => {
+      const nodeHttpHandler = new NodeHttpHandler();
+      const customReason = new Error("custom abort reason");
+      customReason.name = "CustomAbortError";
+      const abortController = new AbortController();
+      abortController.abort(customReason);
+
+      await expect(
+        nodeHttpHandler.handle({ protocol: "http:", hostname: "host", path: "/", headers: {} } as any, {
+          abortSignal: abortController.signal as any,
+        })
+      ).rejects.toBe(customReason);
+    });
+
+    it("rejects with default AbortError when signal has no reason", async () => {
+      const nodeHttpHandler = new NodeHttpHandler();
+      const signal = {
+        aborted: true,
+        onabort: null,
+      };
+
+      await expect(
+        nodeHttpHandler.handle({ protocol: "http:", hostname: "host", path: "/", headers: {} } as any, {
+          abortSignal: signal as any,
+        })
+      ).rejects.toThrow("Request aborted");
+    });
+
+    it("rejects with string reason wrapped in an Error", async () => {
+      const nodeHttpHandler = new NodeHttpHandler();
+      const abortController = new AbortController();
+      abortController.abort("string reason");
+
+      try {
+        await nodeHttpHandler.handle({ protocol: "http:", hostname: "host", path: "/", headers: {} } as any, {
+          abortSignal: abortController.signal as any,
+        });
+        expect.unreachable("should have thrown");
+      } catch (e: any) {
+        expect(e.message).toBe("string reason");
+        expect(e.name).toBe("AbortError");
+      }
+    });
+  });
+
   describe("checkSocketUsage", () => {
     beforeEach(() => {
       vi.spyOn(console, "warn").mockImplementation(vi.fn() as any);
