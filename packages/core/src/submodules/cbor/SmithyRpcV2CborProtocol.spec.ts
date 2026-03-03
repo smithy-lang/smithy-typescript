@@ -216,7 +216,8 @@ describe(SmithyRpcV2CborProtocol.name, () => {
   describe("deserialization", () => {
     const testCases = [
       {
-        name: "sparse list and map",
+        // Sparseness is not checked on deserialization, also see this smithy change: https://github.com/smithy-lang/smithy/pull/2972
+        name: "sparseness is not checked on deserialization",
         schema: [
           3,
           "",
@@ -251,7 +252,7 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         expected: {
           output: {
             mySparseList: [null, 1, null, 2, null],
-            myRegularList: [1, 2],
+            myRegularList: [null, 1, null, 2, null],
             mySparseMap: {
               0: null,
               1: 1,
@@ -260,8 +261,11 @@ describe(SmithyRpcV2CborProtocol.name, () => {
               4: null,
             },
             myRegularMap: {
+              0: null,
               1: 1,
+              2: null,
               3: 3,
+              4: null,
             },
           },
         },
