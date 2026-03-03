@@ -489,6 +489,7 @@
     "validateSchema": "function, since <=0.0.0"
   },
   "@smithy/snapshot-testing": {
-    "SnapshotRunner": "function, since <=0.0.1"
+    "SnapshotRunner": "function, since <=0.0.1",
+    "customFields": "object, since 1.0.7"
   }
 }

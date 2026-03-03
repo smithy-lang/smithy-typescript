@@ -69,12 +69,6 @@ public final class SmithyProtocolUtils {
             return true;
         }
 
-        // TODO(cbor): enable this test when upgrading to a Smithy version
-        // TODO(cbor): in which it is fixed.
-        if (testCase.getId().equals("RpcV2CborDeserializesDenseSetMapAndSkipsNull")) {
-            return true;
-        }
-
         // TODO(cbor): enable test when it's working with vitest 3.x
         if (
             settings.generateSchemas() &&
