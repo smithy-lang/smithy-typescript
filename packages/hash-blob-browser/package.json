@@ -43,7 +43,7 @@
     "@smithy/chunked-blob-reader": "@smithy/chunked-blob-reader"
   },
   "typesVersions": {
-    "<4.0": {
+    "<4.5": {
       "dist-types/*": [
         "dist-types/ts3.4/*"
       ]
