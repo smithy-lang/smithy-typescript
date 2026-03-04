@@ -390,7 +390,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      */
     static String punctuate(String s) {
         String state = s.trim();
-        if (!state.endsWith(".") && !state.endsWith("?") && !state.endsWith("!")) {
+        if (state.matches("(.*?)\\w$")) {
             return state + ".";
         }
         return s;

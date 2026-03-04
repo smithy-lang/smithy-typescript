@@ -190,4 +190,13 @@ public class TypeScriptWriterTest {
         String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
         assertEquals("@deprecated Noo!!!", result);
     }
+
+    @Test
+    public void buildHtmlDeprecationAnnotation() {
+        DeprecatedTrait trait = DeprecatedTrait.builder()
+            .message("<p>Hello</p>")
+            .build();
+        String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
+        assertEquals("@deprecated <p>Hello</p>", result);
+    }
 }
