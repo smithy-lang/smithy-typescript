@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.6
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+
 ## 4.4.5
 
 ### Patch Changes

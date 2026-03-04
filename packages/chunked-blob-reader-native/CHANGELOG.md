@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.2.3
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/util-base64@4.3.2
+
 ## 4.2.2
 
 ### Patch Changes

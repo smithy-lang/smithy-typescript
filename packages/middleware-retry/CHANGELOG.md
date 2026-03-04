@@ -1,5 +1,19 @@
 # Change Log
 
+## 4.4.39
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/service-error-classification@4.2.11
+  - @smithy/node-config-provider@4.3.11
+  - @smithy/util-middleware@4.2.11
+  - @smithy/protocol-http@5.3.11
+  - @smithy/smithy-client@4.12.2
+  - @smithy/util-retry@4.2.11
+  - @smithy/uuid@1.1.2
+
 ## 4.4.38
 
 ### Patch Changes

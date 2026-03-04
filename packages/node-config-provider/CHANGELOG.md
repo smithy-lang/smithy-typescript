@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.3.11
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/shared-ini-file-loader@4.4.6
+  - @smithy/property-provider@4.2.11
+
 ## 4.3.10
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [a4d95e6]
+  - @smithy/eventstream-codec@4.2.11
+  - @smithy/util-hex-encoding@4.2.2
+  - @smithy/protocol-http@5.3.11
+  - @smithy/util-base64@4.3.2
+  - @smithy/util-utf8@4.2.2
+  - @smithy/core@3.23.8
+
 ## 1.0.8
 
 ### Patch Changes

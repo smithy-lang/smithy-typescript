@@ -1,5 +1,15 @@
 # @smithy/signature-v4a
 
+## 3.1.11
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/util-hex-encoding@4.2.2
+  - @smithy/signature-v4@5.3.11
+  - @smithy/util-utf8@4.2.2
+
 ## 3.1.10
 
 ### Patch Changes

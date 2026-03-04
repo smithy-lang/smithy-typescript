@@ -1,5 +1,19 @@
 # Change Log
 
+## 4.3.37
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/node-config-provider@4.3.11
+  - @smithy/util-config-provider@4.2.2
+  - @smithy/is-array-buffer@4.2.2
+  - @smithy/util-middleware@4.2.11
+  - @smithy/protocol-http@5.3.11
+  - @smithy/util-utf8@4.2.2
+  - @smithy/core@3.23.8
+
 ## 4.3.36
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.2.11
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/querystring-parser@4.2.11
+
 ## 4.2.10
 
 ### Patch Changes

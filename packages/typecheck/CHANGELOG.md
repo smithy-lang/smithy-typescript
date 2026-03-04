@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.16
+
+### Patch Changes
+
+- Updated dependencies [a4d95e6]
+  - @smithy/util-middleware@4.2.11
+  - @smithy/core@3.23.8
+
 ## 1.0.15
 
 ### Patch Changes

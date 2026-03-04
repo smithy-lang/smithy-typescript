@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.5.39
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/middleware-endpoint@4.4.22
+  - @smithy/middleware-retry@4.4.39
+  - @smithy/middleware-serde@4.2.12
+  - @smithy/util-middleware@4.2.11
+  - @smithy/protocol-http@5.3.11
+  - @smithy/signature-v4@5.3.11
+
 ## 0.5.38
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.3.2
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/node-config-provider@4.3.11
+
 ## 3.3.1
 
 ### Patch Changes

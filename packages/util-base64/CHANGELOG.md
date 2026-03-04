@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.3.2
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/util-buffer-from@4.2.2
+  - @smithy/util-utf8@4.2.2
+
 ## 4.3.1
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.3.11
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/is-array-buffer@4.2.2
+  - @smithy/protocol-http@5.3.11
+
 ## 4.3.10
 
 ### Patch Changes

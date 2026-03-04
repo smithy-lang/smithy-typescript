@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.3.38
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/property-provider@4.2.11
+  - @smithy/smithy-client@4.12.2
+
 ## 4.3.37
 
 ### Patch Changes

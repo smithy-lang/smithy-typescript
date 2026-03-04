@@ -1,5 +1,20 @@
 # Change Log
 
+## 3.23.8
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/util-body-length-browser@4.2.2
+  - @smithy/middleware-serde@4.2.12
+  - @smithy/util-middleware@4.2.11
+  - @smithy/protocol-http@5.3.11
+  - @smithy/util-base64@4.3.2
+  - @smithy/util-stream@4.5.17
+  - @smithy/util-utf8@4.2.2
+  - @smithy/uuid@1.1.2
+
 ## 3.23.7
 
 ### Patch Changes

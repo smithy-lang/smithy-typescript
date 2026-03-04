@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.2.13
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/fetch-http-handler@5.3.13
+  - @smithy/util-hex-encoding@4.2.2
+  - @smithy/util-base64@4.3.2
+  - @smithy/util-utf8@4.2.2
+
 ## 3.2.12
 
 ### Patch Changes

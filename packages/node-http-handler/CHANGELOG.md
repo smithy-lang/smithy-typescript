@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.4.14
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/querystring-builder@4.2.11
+  - @smithy/abort-controller@4.2.11
+  - @smithy/protocol-http@5.3.11
+
 ## 4.4.13
 
 ### Patch Changes
