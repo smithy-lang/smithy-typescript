@@ -190,4 +190,22 @@ public class TypeScriptWriterTest {
         String result = TypeScriptWriter.buildDeprecationAnnotation(trait);
         assertEquals("@deprecated Noo!!!", result);
     }
+
+    @Test
+    public void writeShapeDocsStripsHtmlTags() {
+        StringShape shape = StringShape.builder()
+            .id(ShapeId.from("com.example#MyString"))
+            .addTrait(new DocumentationTrait(
+                "<p>Use the <code>FooClient</code> to call <a href=\"https://example.com\">the API</a>.</p>"))
+            .build();
+
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeShapeDocs(shape);
+        String result = writer.toString();
+
+        assertThat(result, containsString("Use the `FooClient` to call the API."));
+        assertThat(result, not(containsString("<p>")));
+        assertThat(result, not(containsString("<code>")));
+        assertThat(result, not(containsString("<a ")));
+    }
 }

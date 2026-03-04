@@ -280,6 +280,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         if (hasDocumentation || hasDeprecation) {
             String docs =
                 hasDocumentation ? shape.getTrait(DocumentationTrait.class).get().getValue() : "";
+            docs = DocumentationConverter.htmlToPlainText(docs);
             docs = docs.replace("{", "\\{").replace("}", "\\}");
 
             if (hasDeprecation) {
@@ -330,6 +331,7 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
         if (hasDocumentation || hasDeprecation) {
             String docs =
                 hasDocumentation ? member.getMemberTrait(model, DocumentationTrait.class).get().getValue() : "";
+            docs = DocumentationConverter.htmlToPlainText(docs);
             docs = docs.replace("{", "\\{").replace("}", "\\}");
 
             if (hasDeprecation) {
