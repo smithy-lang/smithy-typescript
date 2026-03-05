@@ -40,6 +40,11 @@ export const constructStack = <Input extends object, Output extends object>(): M
   let relativeEntries: RelativeMiddlewareEntry<Input, Output>[] = [];
   let identifyOnResolve = false;
   const entriesNameSet: Set<string> = new Set();
+  let cachedMiddlewareList: Array<MiddlewareEntry<Input, Output>> | null = null;
+
+  const invalidateCache = () => {
+    cachedMiddlewareList = null;
+  };
 
   const sort = <T extends AbsoluteMiddlewareEntry<Input, Output>>(entries: T[]): T[] =>
     entries.sort(
@@ -63,6 +68,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
     };
     absoluteEntries = absoluteEntries.filter(filterCb);
     relativeEntries = relativeEntries.filter(filterCb);
+    if (isRemoved) invalidateCache();
     return isRemoved;
   };
 
@@ -80,20 +86,27 @@ export const constructStack = <Input extends object, Output extends object>(): M
     };
     absoluteEntries = absoluteEntries.filter(filterCb);
     relativeEntries = relativeEntries.filter(filterCb);
+    if (isRemoved) invalidateCache();
     return isRemoved;
   };
 
   const cloneTo = <InputType extends Input, OutputType extends Output>(
     toStack: MiddlewareStack<InputType, OutputType>
   ): MiddlewareStack<InputType, OutputType> => {
-    absoluteEntries.forEach((entry) => {
-      //@ts-ignore
-      toStack.add(entry.middleware, { ...entry });
-    });
-    relativeEntries.forEach((entry) => {
-      //@ts-ignore
-      toStack.addRelativeTo(entry.middleware, { ...entry });
-    });
+    // Use internal bulk-add if available (same implementation), otherwise fall back
+    // to public API for cross-version compatibility.
+    if ("_addBulk" in toStack) {
+      (toStack as any)._addBulk(absoluteEntries, relativeEntries);
+    } else {
+      absoluteEntries.forEach((entry) => {
+        //@ts-ignore
+        toStack.add(entry.middleware, { ...entry });
+      });
+      relativeEntries.forEach((entry) => {
+        //@ts-ignore
+        toStack.addRelativeTo(entry.middleware, { ...entry });
+      });
+    }
     toStack.identifyOnResolve?.(stack.identifyOnResolve());
     return toStack;
   };
@@ -110,13 +123,14 @@ export const constructStack = <Input extends object, Output extends object>(): M
       }
     });
     expandedMiddlewareList.push(from);
-    from.after.reverse().forEach((entry) => {
+    for (let i = from.after.length - 1; i >= 0; i--) {
+      const entry = from.after[i];
       if (entry.before.length === 0 && entry.after.length === 0) {
         expandedMiddlewareList.push(entry);
       } else {
         expandedMiddlewareList.push(...expandRelativeMiddlewareList(entry));
       }
-    });
+    }
     return expandedMiddlewareList;
   };
 
@@ -125,6 +139,10 @@ export const constructStack = <Input extends object, Output extends object>(): M
    * @param debug - don't throw, getting info only.
    */
   const getMiddlewareList = (debug = false): Array<MiddlewareEntry<Input, Output>> => {
+    if (!debug && cachedMiddlewareList) {
+      return [...cachedMiddlewareList];
+    }
+
     const normalizedAbsoluteEntries: Normalized<AbsoluteMiddlewareEntry<Input, Output>, Input, Output>[] = [];
     const normalizedRelativeEntries: Normalized<RelativeMiddlewareEntry<Input, Output>, Input, Output>[] = [];
     const normalizedEntriesNameMap: Record<string, Normalized<MiddlewareEntry<Input, Output>, Input, Output>> = {};
@@ -175,20 +193,53 @@ export const constructStack = <Input extends object, Output extends object>(): M
       }
     });
 
-    const mainChain = sort(normalizedAbsoluteEntries)
-      .map(expandRelativeMiddlewareList)
-      .reduce(
-        (wholeList, expandedMiddlewareList) => {
-          // TODO: Replace it with Array.flat();
-          wholeList.push(...expandedMiddlewareList);
-          return wholeList;
-        },
-        [] as MiddlewareEntry<Input, Output>[]
-      );
+    const mainChain = sort(normalizedAbsoluteEntries).flatMap(expandRelativeMiddlewareList);
+
+    if (!debug) {
+      cachedMiddlewareList = mainChain;
+    }
     return mainChain;
   };
 
   const stack: MiddlewareStack<Input, Output> = {
+    /**
+     * @internal - Bulk-add entries from another stack. Used by cloneTo for performance.
+     * Skips override logic but still checks for duplicate names to preserve correctness
+     * when the target stack is non-empty (e.g. applyToStack on a populated stack).
+     */
+    _addBulk: (
+      absEntries: AbsoluteMiddlewareEntry<Input, Output>[],
+      relEntries: RelativeMiddlewareEntry<Input, Output>[]
+    ) => {
+      for (const entry of absEntries) {
+        const aliases = getAllAliases(entry.name, entry.aliases);
+        if (aliases.length > 0 && aliases.some((alias) => entriesNameSet.has(alias))) {
+          // Fall back to the full add() path which handles override and error reporting.
+          //@ts-ignore
+          stack.add(entry.middleware, { ...entry });
+          continue;
+        }
+        // Shallow copy to prevent mutation of source stack's entries.
+        absoluteEntries.push({ ...entry });
+        for (const alias of aliases) {
+          entriesNameSet.add(alias);
+        }
+      }
+      for (const entry of relEntries) {
+        const aliases = getAllAliases(entry.name, entry.aliases);
+        if (aliases.length > 0 && aliases.some((alias) => entriesNameSet.has(alias))) {
+          //@ts-ignore
+          stack.addRelativeTo(entry.middleware, { ...entry });
+          continue;
+        }
+        relativeEntries.push({ ...entry });
+        for (const alias of aliases) {
+          entriesNameSet.add(alias);
+        }
+      }
+      invalidateCache();
+    },
+
     add: (middleware: MiddlewareType<Input, Output>, options: HandlerOptions & AbsoluteLocation = {}) => {
       const { name, override, aliases: _aliases } = options;
       const entry: AbsoluteMiddlewareEntry<Input, Output> = {
@@ -225,6 +276,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
         }
       }
       absoluteEntries.push(entry);
+      invalidateCache();
     },
 
     addRelativeTo: (middleware: MiddlewareType<Input, Output>, options: HandlerOptions & RelativeLocation) => {
@@ -261,6 +313,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
         }
       }
       relativeEntries.push(entry);
+      invalidateCache();
     },
 
     clone: () => cloneTo(constructStack<Input, Output>()),
@@ -290,6 +343,7 @@ export const constructStack = <Input extends object, Output extends object>(): M
       };
       absoluteEntries = absoluteEntries.filter(filterCb);
       relativeEntries = relativeEntries.filter(filterCb);
+      if (isRemoved) invalidateCache();
       return isRemoved;
     },
 
@@ -326,10 +380,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
       handler: DeserializeHandler<InputType, OutputType>,
       context: HandlerExecutionContext
     ): Handler<InputType, OutputType> => {
-      for (const middleware of getMiddlewareList()
-        .map((entry) => entry.middleware)
-        .reverse()) {
-        handler = middleware(handler as Handler<Input, OutputType>, context) as any;
+      const middlewareList = getMiddlewareList();
+      for (let i = middlewareList.length - 1; i >= 0; i--) {
+        handler = middlewareList[i].middleware(handler as Handler<Input, OutputType>, context) as any;
       }
       if (identifyOnResolve) {
         console.log(stack.identify());

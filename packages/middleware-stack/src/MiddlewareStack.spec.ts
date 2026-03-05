@@ -614,4 +614,194 @@ describe("MiddlewareStack", () => {
       expect(inner.mock.calls.length).toBe(1);
     });
   });
+
+  describe("_addBulk (internal fast path)", () => {
+    it("should bulk-add absolute entries without validation", async () => {
+      const stack = constructStack<input, output>();
+      (stack as any)._addBulk(
+        [
+          { middleware: getConcatMiddleware("A"), name: "A", step: "initialize", priority: "normal" },
+          { middleware: getConcatMiddleware("B"), name: "B", step: "initialize", priority: "low" },
+        ],
+        []
+      );
+      const inner = vi.fn();
+      await stack.resolve(inner, {} as any)({ input: [] });
+      expect(inner).toBeCalledWith({ input: ["A", "B"] });
+    });
+
+    it("should bulk-add relative entries", async () => {
+      const stack = constructStack<input, output>();
+      (stack as any)._addBulk(
+        [{ middleware: getConcatMiddleware("A"), name: "A", step: "initialize", priority: "normal" }],
+        [{ middleware: getConcatMiddleware("B"), name: "B", relation: "after", toMiddleware: "A" }]
+      );
+      const inner = vi.fn();
+      await stack.resolve(inner, {} as any)({ input: [] });
+      expect(inner).toBeCalledWith({ input: ["A", "B"] });
+    });
+
+    it("should not affect source stack when bulk-added entries are modified", async () => {
+      const stack1 = constructStack<input, output>();
+      stack1.add(getConcatMiddleware("A"), { name: "A" });
+
+      const stack2 = constructStack<input, output>();
+      stack1.applyToStack(stack2); // uses cloneTo internally
+
+      // Modify stack2
+      stack2.add(getConcatMiddleware("B"), { name: "B" });
+
+      // stack1 should be unaffected
+      const inner = vi.fn();
+      await stack1.resolve(inner, {} as any)({ input: [] });
+      expect(inner).toBeCalledWith({ input: ["A"] });
+    });
+
+    it("should register names so duplicate detection still works after bulk add", () => {
+      const stack = constructStack<input, output>();
+      (stack as any)._addBulk(
+        [{ middleware: getConcatMiddleware("A"), name: "A", step: "initialize", priority: "normal" }],
+        []
+      );
+      expect(() => stack.add(getConcatMiddleware("A2"), { name: "A" })).toThrow("Duplicate middleware name 'A'");
+    });
+
+    it("should throw on duplicate names when bulk-adding to a non-empty stack", () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+      expect(() =>
+        (stack as any)._addBulk(
+          [{ middleware: getConcatMiddleware("A2"), name: "A", step: "initialize", priority: "normal" }],
+          []
+        )
+      ).toThrow("Duplicate middleware name 'A'");
+    });
+
+    it("should allow override when bulk-adding to a non-empty stack with override flag", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+      (stack as any)._addBulk(
+        [{ middleware: getConcatMiddleware("A-replaced"), name: "A", step: "initialize", priority: "normal", override: true }],
+        []
+      );
+      const inner = vi.fn();
+      await stack.resolve(inner, {} as any)({ input: [] });
+      expect(inner).toBeCalledWith({ input: ["A-replaced"] });
+    });
+  });
+
+  describe("middleware list caching", () => {
+    it("should return consistent results across multiple resolve calls", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+      stack.add(getConcatMiddleware("B"), { name: "B", priority: "low" });
+
+      const inner1 = vi.fn();
+      const inner2 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A", "B"] });
+      expect(inner2).toBeCalledWith({ input: ["A", "B"] });
+    });
+
+    it("should invalidate cache when entries are added after resolve", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+
+      const inner1 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A"] });
+
+      stack.add(getConcatMiddleware("B"), { name: "B" });
+
+      const inner2 = vi.fn();
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner2).toBeCalledWith({ input: ["A", "B"] });
+    });
+
+    it("should invalidate cache when relative entries are added after resolve", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+
+      const inner1 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A"] });
+
+      stack.addRelativeTo(getConcatMiddleware("B"), { name: "B", relation: "after", toMiddleware: "A" });
+
+      const inner2 = vi.fn();
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner2).toBeCalledWith({ input: ["A", "B"] });
+    });
+
+    it("should invalidate cache when entries are removed by name", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+      stack.add(getConcatMiddleware("B"), { name: "B" });
+
+      const inner1 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A", "B"] });
+
+      stack.remove("B");
+
+      const inner2 = vi.fn();
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner2).toBeCalledWith({ input: ["A"] });
+    });
+
+    it("should invalidate cache when entries are removed by tag", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A", tags: ["keep"] });
+      stack.add(getConcatMiddleware("B"), { name: "B", tags: ["remove"] });
+
+      const inner1 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A", "B"] });
+
+      stack.removeByTag("remove");
+
+      const inner2 = vi.fn();
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner2).toBeCalledWith({ input: ["A"] });
+    });
+
+    it("should invalidate cache when entries are removed by reference", async () => {
+      const stack = constructStack<input, output>();
+      const mwB = getConcatMiddleware("B");
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+      stack.add(mwB, { name: "B" });
+
+      const inner1 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A", "B"] });
+
+      stack.remove(mwB);
+
+      const inner2 = vi.fn();
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner2).toBeCalledWith({ input: ["A"] });
+    });
+  });
+
+  describe("expandRelativeMiddlewareList stability", () => {
+    it("should produce consistent results when getMiddlewareList is called multiple times", async () => {
+      const stack = constructStack<input, output>();
+      stack.add(getConcatMiddleware("A"), { name: "A" });
+      stack.addRelativeTo(getConcatMiddleware("B"), { name: "B", relation: "after", toMiddleware: "A" });
+      stack.addRelativeTo(getConcatMiddleware("C"), { name: "C", relation: "after", toMiddleware: "A" });
+
+      // Resolve twice — previously .reverse() would mutate the after array,
+      // causing different ordering on the second call.
+      const inner1 = vi.fn();
+      const inner2 = vi.fn();
+      await stack.resolve(inner1, {} as any)({ input: [] });
+      // Invalidate cache to force re-computation and verify no mutation occurred.
+      stack.add(getConcatMiddleware("_noop"), { name: "_noop", step: "deserialize", priority: "low" });
+      stack.remove("_noop");
+      await stack.resolve(inner2, {} as any)({ input: [] });
+      expect(inner1).toBeCalledWith({ input: ["A", "C", "B"] });
+      expect(inner2).toBeCalledWith({ input: ["A", "C", "B"] });
+    });
+  });
 });
