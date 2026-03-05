@@ -93,6 +93,9 @@ export abstract class Command<
       },
       ...additionalContext,
     };
+    if (options?.abortSignal) {
+      handlerExecutionContext.abortSignal = options.abortSignal;
+    }
     const { requestHandler } = configuration;
     return stack.resolve(
       (request: FinalizeHandlerArguments<any>) => requestHandler.handle(request.request as HttpRequest, options || {}),
