@@ -46,6 +46,13 @@ export function createBufferedReadable(
     if (mode !== chunkMode) {
       if (mode >= 0) {
         downstream.push(flush(buffers, mode));
+        if ((mode === 1 && chunkMode === 2) || (mode === 2 && chunkMode === 1)) {
+          logger?.warn(
+            "@smithy/util-stream - stream chunks are mixing Uint8Array and Buffer types," +
+              " which causes premature buffer flushing and may result in undersized chunks." +
+              " Normalize your stream to use a consistent chunk type."
+          );
+        }
       }
       mode = chunkMode;
     }
