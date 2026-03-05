@@ -1,5 +1,16 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.46.0 (2026-03-05)
+
+### Features
+
+- Upgraded smithy version to 1.68.0 ([#1902](https://github.com/smithy-lang/smithy-typescript/pull/1902))
+- Generated shape member tsdoc now includes deprecated-since when the `@deprecated` trait provides this information ([#1903](https://github.com/smithy-lang/smithy-typescript/pull/1903))
+
+### Bug Fixes
+
+- Downleveled types now cover TypeScript versions <4.5 ([#1906](https://github.com/smithy-lang/smithy-typescript/pull/1906))
+
 ## 0.45.0 (2026-02-19)
 
 ### Features
