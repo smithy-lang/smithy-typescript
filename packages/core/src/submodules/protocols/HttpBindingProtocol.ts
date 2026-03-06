@@ -335,7 +335,11 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
           const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
           if (bytes.byteLength > 0) {
             dataObject[memberName] = await deserializer.read(memberSchema, bytes);
+          } else {
+            dataObject[memberName] = resolveEmptyPayload(response.headers["content-type"], memberSchema);
           }
+        } else {
+          dataObject[memberName] = null;
         }
       } else if (memberTraits.httpHeader) {
         const key = String(memberTraits.httpHeader).toLowerCase();
@@ -384,3 +388,31 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     return nonHttpBindingMembers;
   }
 }
+
+/**
+ * Determines the value for an httpPayload member when the response body is
+ * empty (0 bytes). The decision is based on the content-type header and the
+ * target schema type, per the Smithy spec for REST protocol bindings.
+ */
+const STRUCTURED_CONTENT_RE = /\b(json|xml|cbor|yaml)\b/i;
+
+function resolveEmptyPayload(contentType: string | undefined, memberSchema: NormalizedSchema): null | Uint8Array | string {
+  if (!contentType) {
+    return null;
+  }
+
+  if (STRUCTURED_CONTENT_RE.test(contentType)) {
+    return null;
+  }
+
+  // Unstructured content-type — return an empty container matching the schema.
+  if (memberSchema.isBlobSchema()) {
+    return new Uint8Array(0);
+  }
+  if (memberSchema.isStringSchema()) {
+    return "";
+  }
+
+  return null;
+}
+

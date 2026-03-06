@@ -5,6 +5,7 @@ import { HttpResponse } from "@smithy/protocol-http";
 import type {
   $Schema,
   $ShapeSerializer,
+  BlobSchema,
   Codec,
   CodecSettings,
   HandlerExecutionContext,
@@ -481,6 +482,97 @@ describe(HttpBindingProtocol.name, () => {
     // Only $metadata should be present
     const keys = Object.keys(output);
     expect(keys).toEqual(["$metadata"]);
+  });
+
+  describe("empty httpPayload resolution", () => {
+    const protocol = new StringRestProtocol();
+
+    const makeOutputSchema = (payloadSchemaType: number): StaticStructureSchema => [
+      3,
+      "",
+      "",
+      0,
+      ["payload"],
+      [[payloadSchemaType, { httpPayload: 1 }]],
+    ];
+
+    const deserialize = async (
+      payloadSchemaType: number,
+      headers: Record<string, string>,
+      body?: Readable
+    ) => {
+      const response = new HttpResponse({
+        statusCode: 200,
+        headers,
+        body: body ?? Readable.from(Buffer.alloc(0)),
+      });
+      const output = (await protocol.deserializeResponse(
+        op("", "", 0, "unit", makeOutputSchema(payloadSchemaType)),
+        { streamCollector } as any,
+        response
+      )) as any;
+      return output.payload;
+    };
+
+    it("should return null for empty body with no content-type (blob)", async () => {
+      const result = await deserialize(21 satisfies BlobSchema, {});
+      expect(result).toBeNull();
+    });
+
+    it("should return null for empty body with no content-type (string)", async () => {
+      const result = await deserialize(0 satisfies StringSchema, {});
+      expect(result).toBeNull();
+    });
+
+    it("should return null for empty body with structured content-type (application/json)", async () => {
+      const result = await deserialize(21 satisfies BlobSchema, { "content-type": "application/json" });
+      expect(result).toBeNull();
+    });
+
+    it("should return null for empty body with structured content-type (application/xml)", async () => {
+      const result = await deserialize(21 satisfies BlobSchema, { "content-type": "application/xml" });
+      expect(result).toBeNull();
+    });
+
+    it("should return Uint8Array(0) for empty body with application/octet-stream on blob schema", async () => {
+      const result = await deserialize(21 satisfies BlobSchema, { "content-type": "application/octet-stream" });
+      expect(result).toBeInstanceOf(Uint8Array);
+      expect(result.byteLength).toBe(0);
+    });
+
+    it("should return empty string for empty body with text/plain on string schema", async () => {
+      const result = await deserialize(0 satisfies StringSchema, { "content-type": "text/plain" });
+      expect(result).toBe("");
+    });
+
+    it("should return null when response.body is absent", async () => {
+      const response = new HttpResponse({
+        statusCode: 200,
+        headers: {},
+      });
+      const output = (await protocol.deserializeResponse(
+        op("", "", 0, "unit", makeOutputSchema(21 satisfies BlobSchema)),
+        { streamCollector } as any,
+        response
+      )) as any;
+      expect(output.payload).toBeNull();
+    });
+
+    it("should return empty string for content-type with parameters (text/plain; charset=utf-8)", async () => {
+      const result = await deserialize(0 satisfies StringSchema, { "content-type": "text/plain; charset=utf-8" });
+      expect(result).toBe("");
+    });
+
+    it("should return empty string for application/octet-stream on a string schema (schema type determines container)", async () => {
+      const result = await deserialize(0 satisfies StringSchema, { "content-type": "application/octet-stream" });
+      expect(result).toBe("");
+    });
+
+    it("should return Uint8Array(0) for text/plain on a blob schema (schema type determines container)", async () => {
+      const result = await deserialize(21 satisfies BlobSchema, { "content-type": "text/plain" });
+      expect(result).toBeInstanceOf(Uint8Array);
+      expect(result.byteLength).toBe(0);
+    });
   });
 
   describe("httpLabel", () => {
