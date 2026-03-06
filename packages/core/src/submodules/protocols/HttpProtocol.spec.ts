@@ -29,7 +29,7 @@ describe(HttpProtocol.name, () => {
       HttpProtocol.prototype.updateServiceEndpoint(request, endpoint);
 
       expect(request.headers["x-api-key"]).toBe("my-api-key");
-      expect(request.headers["x-custom-header"]).toBe("value1,value2");
+      expect(request.headers["x-custom-header"]).toBe("value1, value2");
       expect(request.headers["content-type"]).toBe("application/json");
     });
 

@@ -104,7 +104,7 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       // Apply resolved endpoint headers per Smithy endpoint rules spec
       if (endpoint.headers) {
         for (const [name, values] of Object.entries(endpoint.headers)) {
-          request.headers[name] = values.join(",");
+          request.headers[name] = values.join(", ");
         }
       }
       return request;

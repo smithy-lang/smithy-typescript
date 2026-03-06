@@ -12,7 +12,7 @@ export interface Endpoint {
   port?: number;
   path: string;
   query?: QueryParameterBag;
-  headers?: HeaderBag
+  headers?: HeaderBag;
 }
 
 /**
