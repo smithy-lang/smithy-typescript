@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.0.10
+
+### Patch Changes
+
+- 6ef5430: add response snapshot generation
+- Updated dependencies [6ef5430]
+- Updated dependencies [6ef5430]
+  - @smithy/core@3.23.9
+
 ## 1.0.9
 
 ### Patch Changes

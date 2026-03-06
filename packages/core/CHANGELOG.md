@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.23.9
+
+### Patch Changes
+
+- 6ef5430: fix typo in thrown error message
+- 6ef5430: default event stream body to empty byte array
+
 ## 3.23.8
 
 ### Patch Changes
