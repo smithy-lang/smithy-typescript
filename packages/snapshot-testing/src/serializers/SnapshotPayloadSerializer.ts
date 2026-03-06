@@ -5,6 +5,9 @@ import type { PayloadWithHeaders } from "../snapshot-testing-types";
 import { ContentTypeDetection } from "./ContentTypeDetection";
 import { SnapshotEventStreamSerializer } from "./SnapshotEventStreamSerializer";
 
+/**
+ * @internal
+ */
 export class SnapshotPayloadSerializer extends ContentTypeDetection {
   public constructor(protected r: PayloadWithHeaders) {
     super();

@@ -1,0 +1,121 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{}
+
+[actual bytes]
+160
+
+
+--- [output object] ---
+{
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "bigDecimal": {
+    "string": "9876543210.0123456789",
+    "type": "bigDecimal"
+  },
+  "bigInteger": 1000001,
+  "numbers": [
+    0,
+    0,
+    0
+  ],
+  "nextToken": "__nextToken__",
+  "deprecatedNumbers": [
+    0,
+    0,
+    0
+  ],
+  "deprecatedNumbersWithoutExplanation": [
+    0,
+    0,
+    0
+  ],
+  "deprecatedNumbersWithoutChronology": [
+    0,
+    0,
+    0
+  ],
+  "inexplicablyDeprecatedNumbers": [
+    0,
+    0,
+    0
+  ]
+}
+
+[actual bytes]
+168, 106, 98, 105, 103, 68, 101, 99, 105, 109, 97, 108, 196, 130, 41, 194, 73, 5, 90, 165, 77, 54, 159, 210,
+53, 21, 106, 98, 105, 103, 73, 110, 116, 101, 103, 101, 114, 26, 0, 15, 66, 65, 103, 110, 117, 109, 98, 101,
+114, 115, 131, 0, 0, 0, 105, 110, 101, 120, 116, 84, 111, 107, 101, 110, 109, 95, 95, 110, 101, 120, 116, 84,
+111, 107, 101, 110, 95, 95, 113, 100, 101, 112, 114, 101, 99, 97, 116, 101, 100, 78, 117, 109, 98, 101, 114, 115,
+131, 0, 0, 0, 120, 35, 100, 101, 112, 114, 101, 99, 97, 116, 101, 100, 78, 117, 109, 98, 101, 114, 115, 87,
+105, 116, 104, 111, 117, 116, 69, 120, 112, 108, 97, 110, 97, 116, 105, 111, 110, 131, 0, 0, 0, 120, 34, 100,
+101, 112, 114, 101, 99, 97, 116, 101, 100, 78, 117, 109, 98, 101, 114, 115, 87, 105, 116, 104, 111, 117, 116, 67,
+104, 114, 111, 110, 111, 108, 111, 103, 121, 131, 0, 0, 0, 120, 29, 105, 110, 101, 120, 112, 108, 105, 99, 97,
+98, 108, 121, 68, 101, 112, 114, 101, 99, 97, 116, 101, 100, 78, 117, 109, 98, 101, 114, 115, 131, 0, 0, 0
+
+
+--- [output object] ---
+{
+  bigDecimal: {
+    string: "9876543210.0123456789",
+    type: "bigDecimal"
+  },
+  bigInteger: (number) 1000001,
+  numbers: [
+    (number) 0,
+    (number) 0,
+    (number) 0
+  ],
+  nextToken: "__nextToken__",
+  deprecatedNumbers: [
+    (number) 0,
+    (number) 0,
+    (number) 0
+  ],
+  deprecatedNumbersWithoutExplanation: [
+    (number) 0,
+    (number) 0,
+    (number) 0
+  ],
+  deprecatedNumbersWithoutChronology: [
+    (number) 0,
+    (number) 0,
+    (number) 0
+  ],
+  inexplicablyDeprecatedNumbers: [
+    (number) 0,
+    (number) 0,
+    (number) 0
+  ],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

@@ -350,7 +350,7 @@ export class EventStreamSerde {
       }
     }
 
-    const messageSerialization: string | Uint8Array = serializer.flush();
+    const messageSerialization: string | Uint8Array = serializer.flush() ?? new Uint8Array();
 
     const body =
       typeof messageSerialization === "string"

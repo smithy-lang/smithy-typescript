@@ -5,6 +5,8 @@ import { SnapshotPayloadSerializer } from "./SnapshotPayloadSerializer";
 /**
  * Serialize an http request to string for snapshotting.
  * @param request
+ *
+ * @internal
  */
 export async function serializeHttpRequest(request: IHttpRequest): Promise<string> {
   const { method, protocol, hostname, port, path, query, headers, username, password, fragment, body } = request;

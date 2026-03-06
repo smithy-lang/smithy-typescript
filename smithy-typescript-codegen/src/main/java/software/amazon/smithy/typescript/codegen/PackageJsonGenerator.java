@@ -67,7 +67,7 @@ final class PackageJsonGenerator {
                 )
                 .withMember(
                     "test:integration:watch",
-                    "%s vitest run --passWithNoTests -c vitest.config.integ.mts".formatted(pkgManagerExec)
+                    "%s vitest watch --passWithNoTests -c vitest.config.integ.mts".formatted(pkgManagerExec)
                 );
             node = node.withMember("scripts", scripts);
 

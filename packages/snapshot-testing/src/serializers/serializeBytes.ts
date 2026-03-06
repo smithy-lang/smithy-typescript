@@ -11,6 +11,9 @@ export function serializeBytes(bytes: Uint8Array): string {
   return `${objectString}\n\n[actual bytes]\n${byteList}`;
 }
 
+/**
+ * @internal
+ */
 export function bytesToString(bytes: Uint8Array) {
   const items = Array.from(bytes).map((b) => String(b));
   const lines = [];
@@ -20,6 +23,9 @@ export function bytesToString(bytes: Uint8Array) {
   return lines.join(",\n");
 }
 
+/**
+ * @internal
+ */
 export function debugBytes(bytes: Uint8Array): string {
   const object = cbor.deserialize(bytes);
 

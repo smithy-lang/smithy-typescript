@@ -1,9 +1,13 @@
+import { cbor } from "@smithy/core/cbor";
 import type { HeaderBag } from "@smithy/types";
 import { toBase64 } from "@smithy/util-base64";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 import { serializeBytes } from "./serializeBytes";
 
+/**
+ * @internal
+ */
 export class ContentTypeDetection {
   protected r!: {
     headers: HeaderBag;
@@ -56,10 +60,12 @@ export class ContentTypeDetection {
 
   public formatBody(bytes: Uint8Array): [string, string] {
     if (this.isCbor()) {
-      return ["cbor object view", serializeBytes(bytes)];
-    } else {
-      return this.formatStringBody(toUtf8(bytes));
+      try {
+        cbor.deserialize(bytes);
+        return ["cbor object view", serializeBytes(bytes)];
+      } catch (e) {}
     }
+    return this.formatStringBody(toUtf8(bytes));
   }
 }
 
