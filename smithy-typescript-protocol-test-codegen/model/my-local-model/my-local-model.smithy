@@ -112,6 +112,13 @@ structure MainServiceLinkedError {}
         uri: "/service/XYZService/operation/GetNumbers"
         tags: ["serde-benchmark"]
     }
+    {
+        id: "EndpointResolvedHeadersApplied"
+        protocol: "smithy.protocols#rpcv2Cbor"
+        method: "POST"
+        uri: "/service/XYZService/operation/GetNumbers"
+        headers: { "x-default-header": "default-header-value" }
+    }
 ])
 @httpResponseTests([
     {

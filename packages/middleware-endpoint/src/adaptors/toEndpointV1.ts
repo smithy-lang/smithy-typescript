@@ -8,7 +8,14 @@ export const toEndpointV1 = (endpoint: string | Endpoint | EndpointV2): Endpoint
   if (typeof endpoint === "object") {
     if ("url" in endpoint) {
       // v2
-      return parseUrl(endpoint.url);
+      const parsed = parseUrl(endpoint.url);
+      if (endpoint.headers) {
+        parsed.headers = {};
+        for (const [name, values] of Object.entries(endpoint.headers)) {
+          parsed.headers[name.toLowerCase()] = values.join(", ");
+        }
+      }
+      return parsed;
     }
     // v1
     return endpoint;

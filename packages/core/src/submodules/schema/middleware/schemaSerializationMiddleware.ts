@@ -26,7 +26,16 @@ export const schemaSerializationMiddleware =
 
     const endpoint: Provider<Endpoint> =
       context.endpointV2?.url && config.urlParser
-        ? async () => config.urlParser!(context.endpointV2!.url as URL)
+        ? async () => {
+            const parsed = config.urlParser!(context.endpointV2!.url as URL);
+            if (context.endpointV2!.headers) {
+              parsed.headers = {};
+              for (const [name, values] of Object.entries(context.endpointV2!.headers)) {
+                parsed.headers[name] = values.join(", ");
+              }
+            }
+            return parsed;
+          }
         : (config as unknown as EndpointBearer).endpoint!;
 
     const request = await config.protocol.serializeRequest(operation(ns, n, t, i, o), args.input, {

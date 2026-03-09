@@ -86,7 +86,10 @@ export abstract class RpcProtocol extends HttpProtocol {
       }
     }
 
-    request.headers = headers;
+    request.headers = {
+      ...request.headers,
+      ...headers,
+    };
     request.query = query;
     request.body = payload;
     request.method = "POST";

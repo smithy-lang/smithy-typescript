@@ -28,7 +28,16 @@ export const serializerMiddleware =
 
     const endpoint: Provider<Endpoint> =
       context.endpointV2?.url && endpointConfig.urlParser
-        ? async () => endpointConfig.urlParser!(context.endpointV2!.url as URL)
+        ? async () => {
+            const ep = endpointConfig.urlParser!(context.endpointV2!.url as URL);
+            if (context.endpointV2!.headers) {
+              ep.headers = {};
+              for (const [name, values] of Object.entries(context.endpointV2!.headers)) {
+                ep.headers[name] = values.join(", ");
+              }
+            }
+            return ep;
+          }
         : endpointConfig.endpoint!;
 
     if (!endpoint) {

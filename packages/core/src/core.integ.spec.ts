@@ -48,17 +48,19 @@ describe("@smithy/core", () => {
 describe("endpoint headers", () => {
   it("should apply endpoint-resolved headers to the outgoing request", async () => {
     const xyz = new XYZService({
-      endpoint: "https://localhost",
-      apiKey: async () => ({ apiKey: "my-api-key" }),
-      clientContextParams: {
-        apiKey: "my-api-key",
+      endpoint: {
+        url: new URL("https://localhost"),
+        headers: {
+          "x-custom-header": ["value1", "value2"],
+        },
       },
+      apiKey: async () => ({ apiKey: "my-api-key" }),
     });
 
     requireRequestsFrom(xyz).toMatch({
       hostname: "localhost",
       headers: {
-        "x-api-key": "my-api-key",
+        "x-custom-header": "value1, value2",
       },
     });
 

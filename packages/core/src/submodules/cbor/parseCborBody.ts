@@ -100,7 +100,8 @@ export const buildHttpRpcRequest = async (
   resolvedHostname: string | undefined,
   body: any
 ): Promise<__HttpRequest> => {
-  const { hostname, protocol = "https", port, path: basePath } = await context.endpoint();
+  const endpoint = await context.endpoint();
+  const { hostname, protocol = "https", port, path: basePath } = endpoint;
   const contents: any = {
     protocol,
     hostname,
@@ -114,6 +115,11 @@ export const buildHttpRpcRequest = async (
   };
   if (resolvedHostname !== undefined) {
     contents.hostname = resolvedHostname;
+  }
+  if (endpoint.headers) {
+    for (const [name, value] of Object.entries(endpoint.headers)) {
+      contents.headers[name] = value;
+    }
   }
   if (body !== undefined) {
     contents.body = body;
