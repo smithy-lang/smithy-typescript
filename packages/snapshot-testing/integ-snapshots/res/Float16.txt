@@ -11,7 +11,7 @@ content-type: application/cbor
 160
 
 
-[output]
+--- [output object] ---
 {
   $metadata: {
     httpStatusCode: (number) 200,
@@ -38,7 +38,7 @@ content-type: application/cbor
 161, 101, 118, 97, 108, 117, 101, 0
 
 
-[output]
+--- [output object] ---
 {
   value: (number) 0,
   $metadata: {

@@ -6,13 +6,19 @@ import { describe, expect, test as it, vi } from "vitest";
 import {
   camelCaseOperation$,
   CamelCaseOperationCommand,
+  CodedThrottlingError$,
   GetNumbers$,
   GetNumbersCommand,
+  HaltError$,
   HttpLabelCommand$,
   HttpLabelCommandCommand,
+  MainServiceLinkedError$,
+  MysteryThrottlingError$,
+  RetryableError$,
   TradeEventStream$,
   TradeEventStreamCommand,
   XYZServiceClient,
+  XYZServiceServiceException$,
 } from "../src";
 
 vi.setSystemTime(new Date(946702799999));
@@ -32,15 +38,20 @@ describe("XYZServiceClient" + ` (${mode})`, () => {
       expect(actual).toEqual(expected);
       return Promise.resolve();
     },
-    schemas:
-      new Map<any, any>([
-        [HttpLabelCommand$, HttpLabelCommandCommand],
-        [camelCaseOperation$, CamelCaseOperationCommand],
-        [GetNumbers$, GetNumbersCommand],
-        [TradeEventStream$, TradeEventStreamCommand],
-      ]),
-
+    schemas: new Map<any, any>([
+      [HttpLabelCommand$, HttpLabelCommandCommand],
+      [camelCaseOperation$, CamelCaseOperationCommand],
+      [GetNumbers$, GetNumbersCommand],
+      [TradeEventStream$, TradeEventStreamCommand],
+    ]),
+    errors: [
+      CodedThrottlingError$,
+      HaltError$,
+      MainServiceLinkedError$,
+      MysteryThrottlingError$,
+      RetryableError$,
+      XYZServiceServiceException$,
+    ],
   });
-
   runner.run();
 }, 30_000);

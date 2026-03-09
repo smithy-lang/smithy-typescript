@@ -1,5 +1,12 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import type { Client, Command, HttpResponse as IHttpResponse, Logger, StaticOperationSchema } from "@smithy/types";
+import type {
+  Client,
+  Command,
+  HttpResponse as IHttpResponse,
+  Logger,
+  StaticErrorSchema,
+  StaticOperationSchema,
+} from "@smithy/types";
 import { readFileSync } from "fs";
 import { accessSync, constants, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -49,6 +56,11 @@ export interface SnapshotRunnerOptions {
   schemas: Map<StaticOperationSchema, $CommandCtor>;
 
   /**
+   * Errors for which to generate response-error snapshots.
+   */
+  errors?: StaticErrorSchema[];
+
+  /**
    * write - write the data without comparing.
    * compare - throw if comparison to existing files in the same folder contain mismatches.
    *
@@ -96,6 +108,7 @@ export class SnapshotRunner {
           throw new Error(`Serialization for ${caseName} does not match snapshot on disk.`);
         }
       },
+      errors = [],
     } = this.options;
 
     if (mode === "write") {
@@ -156,6 +169,7 @@ export class SnapshotRunner {
 
     // responses
     for (const [schema, CommandCtor] of schemas) {
+      const [, namespace, name, traits, input, output] = schema;
       const operationName = CommandCtor.name.replace(/Command$/, "");
 
       const testCaseExec = testCase(operationName + " (response)", async () => {
@@ -186,14 +200,11 @@ export class SnapshotRunner {
 
           // copies to allow two types of serializers to read the response stream.
           const [r1, r2] = [
-            await snapshotProtocol.serializeResponse(
-              schema,
-              createFromSchema(schema[5 /*output*/], undefined, options)
-            ),
-            await snapshotProtocol.serializeResponse(schema, createFromSchema(schema[5], undefined, options)),
+            await snapshotProtocol.serializeResponse(schema, createFromSchema(output, undefined, options)),
+            await snapshotProtocol.serializeResponse(schema, createFromSchema(output, undefined, options)),
           ];
 
-          const ns = NormalizedSchema.of(schema[5]);
+          const ns = NormalizedSchema.of(output);
           const mayBufferResponseBody =
             !ns.getEventStreamMember() &&
             !Object.values(ns.getMemberSchemas()).some(($) => $.isBlobSchema() && $.isStreaming());
@@ -201,7 +212,7 @@ export class SnapshotRunner {
           const serialization = await serializeHttpResponse(r1, mayBufferResponseBody);
           logger.trace(serialization);
 
-          const command = new CommandCtor(createFromSchema(schema[4 /*input*/]));
+          const command = new CommandCtor(createFromSchema(input));
           client.config.requestHandler = new SnapshotRequestHandler({
             response: r2,
           });
@@ -232,6 +243,109 @@ export class SnapshotRunner {
           } else {
             if (canonical !== buf) {
               throw new Error(`Deserialization for ${CommandCtor.name} does not match snapshot on disk.`);
+            }
+          }
+        } else {
+          writeFileSync(snapshotPath, buf, "utf-8");
+        }
+      });
+
+      promises.push(Promise.resolve(testCaseExec));
+    }
+
+    // errors
+    const [$operation, CommandCtor] = schemas[Symbol.iterator]().next().value!;
+    const [, ns] = $operation;
+
+    for (const $error of [
+      [-3, ns, "UnmodeledServiceException", { error: "server" }, ["Message"], [0]] satisfies StaticErrorSchema,
+      ...errors,
+    ]) {
+      const [, namespace, name, traits, memberNames, members, requiredMemberCount] = $error;
+      const $errorNormalized = NormalizedSchema.of($error);
+      const qualifiedName = $errorNormalized.getName(true);
+
+      const testCaseExec = testCase(qualifiedName + " (error)", async () => {
+        let buf = ``;
+        const logger = {
+          ...console,
+          trace(msg: string) {
+            buf += msg;
+          },
+        };
+
+        const client = this.initClient(Client, { endpoint: "https://localhost", logger, maxAttempts: 1 });
+        const protocolId = client.config.protocol.getShapeId();
+
+        for (const options of [{ mode: "min" }, { mode: "max" }, { mode: "frontend" }] as const) {
+          if (options.mode === "frontend") {
+            logger.trace("=".repeat(24) + ` frontend error ` + "=".repeat(24));
+          } else if (options.mode === "min") {
+            logger.trace("=".repeat(24) + ` minimal response ` + "=".repeat(24));
+          } else if (options.mode === "max") {
+            logger.trace("=".repeat(24) + ` w/ optional fields ` + "=".repeat(24));
+          }
+          logger.trace("\n");
+
+          const snapshotProtocol = snapshotTestingProtocolResponseSerializers[protocolId];
+          if (!snapshotProtocol) {
+            throw new Error(`No response serializer found for protocol: ${protocolId}`);
+          }
+          snapshotProtocol.setSerdeContext(client.config);
+
+          // copies to allow two types of serializers to read the response stream.
+          const [r1, r2] =
+            options.mode === "frontend"
+              ? [
+                  await snapshotProtocol.serializeGenericFrontendErrorResponse(),
+                  await snapshotProtocol.serializeGenericFrontendErrorResponse(),
+                ]
+              : [
+                  await snapshotProtocol.serializeErrorResponse($error, createFromSchema($error, undefined, options)),
+                  await snapshotProtocol.serializeErrorResponse($error, createFromSchema($error, undefined, options)),
+                ];
+
+          const ns = NormalizedSchema.of($operation[5]);
+          const mayBufferResponseBody =
+            !ns.getEventStreamMember() &&
+            !Object.values(ns.getMemberSchemas()).some(($) => $.isBlobSchema() && $.isStreaming());
+
+          const serialization = await serializeHttpResponse(r1, mayBufferResponseBody);
+          logger.trace(serialization);
+
+          const command = new CommandCtor(createFromSchema($operation[4 /*input*/]));
+          client.config.requestHandler = new SnapshotRequestHandler({
+            response: r2,
+          });
+          try {
+            const output = await client.send(command).catch((e: any) => e);
+            const outputSerialization = await serializeDocument(output);
+
+            logger.trace("\n\n--- [error name & message] ---\n");
+            logger.trace(`${output.name}: ${output.message}`);
+            logger.trace("\n\n--- [error object] ---\n");
+            logger.trace(outputSerialization);
+          } catch (e) {
+            logger.trace(`\n\n[CommandError]\n`);
+            logger.trace(e.stack);
+            logger.error(`${e.name}: ${e.message}`);
+          }
+          logger.trace("\n\n");
+        }
+
+        const snapshotPath = join(snapshotDirPath, "res-err", name + ".txt");
+        const containerFolder = dirname(snapshotPath);
+        if (!existsSync(containerFolder)) {
+          mkdirSync(containerFolder, { recursive: true });
+        }
+
+        if (mode === "compare") {
+          const canonical = readFileSync(snapshotPath, "utf-8");
+          if (assertions) {
+            assertions(name, canonical, buf);
+          } else {
+            if (canonical !== buf) {
+              throw new Error(`Error deserialization for ${name} does not match snapshot on disk.`);
             }
           }
         } else {
@@ -294,7 +408,12 @@ export class SnapshotRunner {
 
   private initClient(
     Client: any,
-    { endpoint, logger, response }: { endpoint?: string; logger?: Logger; response?: IHttpResponse }
+    {
+      endpoint,
+      logger,
+      response,
+      maxAttempts,
+    }: { endpoint?: string; logger?: Logger; response?: IHttpResponse; maxAttempts?: number }
   ): any {
     return new Client({
       region: "us-east-1",
@@ -308,6 +427,7 @@ export class SnapshotRunner {
         logger,
         response,
       }),
+      maxAttempts,
     });
   }
 

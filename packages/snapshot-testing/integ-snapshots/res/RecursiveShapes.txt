@@ -11,7 +11,7 @@ content-type: application/cbor
 160
 
 
-[output]
+--- [output object] ---
 {
   $metadata: {
     httpStatusCode: (number) 200,
@@ -54,7 +54,7 @@ content-type: application/cbor
 115, 105, 118, 101, 77, 101, 109, 98, 101, 114, 160
 
 
-[output]
+--- [output object] ---
 {
   nested: {
     foo: "__foo__",
