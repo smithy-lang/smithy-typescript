@@ -91,7 +91,7 @@ const createMessageFromResponse = (reason: any): string => {
     // has a status code.
     if (reason.$response || reason.message) {
       // is an error object.
-      return `${reason.$response.statusCode ?? reason.$metadata.httpStatusCode ?? "Unknown"}: ${reason.message}`;
+      return `${reason.$response?.statusCode ?? reason.$metadata.httpStatusCode ?? "Unknown"}: ${reason.message}`;
     }
     // is an output object.
     return `${reason.$metadata.httpStatusCode}: OK`;
