@@ -142,6 +142,14 @@ final class PackageJsonGenerator {
         String template = Node.prettyPrintJson(node);
         template = template.replace("${package}", settings.getPackageName());
         template = template.replace("${packageDescription}", settings.getPackageDescription());
+
+        if (settings.getVersioningScheme().equals("@smithy/core")) {
+            settings.setPackageVersion(TypeScriptDependency.getSmithyCoreVersion());
+        }
+        if (settings.getVersioningScheme().equals("@aws-sdk/client")) {
+            settings.setPackageVersion(TypeScriptDependency.getAwsSdkLeadingClientVersion());
+        }
+
         template = template.replace("${packageVersion}", settings.getPackageVersion());
         template = template.replace("${packageManager}", settings.getPackageManager().getCommand());
         manifest.writeFile(PACKAGE_JSON_FILENAME, template);

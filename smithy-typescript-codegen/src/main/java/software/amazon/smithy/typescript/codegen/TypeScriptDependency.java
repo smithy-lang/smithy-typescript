@@ -203,8 +203,20 @@ public enum TypeScriptDependency implements Dependency {
         return resolved;
     }
 
-    private boolean isUnconditional() {
-        return dependency.expectProperty("unconditional", Boolean.class);
+    /**
+     * @return the smithy core version, used in @smithy/core versioning scheme.
+     */
+    public static String getSmithyCoreVersion() {
+        return DependencyVersion.VERSIONS.get("@smithy/core");
+    }
+
+    /**
+     * Note: if AWS SDK codegen is not loaded, then this will not work correctly.
+     *
+     * @return the leading AWS SDK client version, used in @aws-sdk/ckient versioning scheme.
+     */
+    public static String getAwsSdkLeadingClientVersion() {
+        return SdkVersion.getLeadingAwsSdkClientVersion();
     }
 
     @Override
@@ -233,6 +245,10 @@ public enum TypeScriptDependency implements Dependency {
             .name(name)
             .addDependency(dependency)
             .build();
+    }
+
+    private boolean isUnconditional() {
+        return dependency.expectProperty("unconditional", Boolean.class);
     }
 
     /**
@@ -276,6 +292,32 @@ public enum TypeScriptDependency implements Dependency {
                 tmpVersions = Collections.emptyMap();
             }
             VERSIONS = tmpVersions;
+        }
+
+        /**
+         * @return highest client version in the sdkVersions.properties file.
+         */
+        public static String getLeadingAwsSdkClientVersion() {
+            int major = 0;
+            int minor = 0;
+            int patch = 0;
+
+            for (Map.Entry<String, String> entry : VERSIONS.entrySet()) {
+                String packageName = entry.getKey();
+                String version = entry.getValue();
+
+                boolean isClient = packageName.startsWith("@aws-sdk/client-");
+                if (isClient) {
+                    boolean isSemverTrinumeric = version.matches("^\\d+\\.\\d+\\.\\d+$");
+                    if (isSemverTrinumeric) {
+                        String[] semver = version.split("\\.");
+                        major = Math.max(Integer.parseInt(semver[0]), major);
+                        minor = Math.max(Integer.parseInt(semver[1]), minor);
+                        patch = Math.max(Integer.parseInt(semver[2]), patch);
+                    }
+                }
+            }
+            return "%s.%s.%s".formatted(major, minor, patch);
         }
 
         private static String getVersion(String packageName) {
