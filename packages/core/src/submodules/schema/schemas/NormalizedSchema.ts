@@ -45,6 +45,20 @@ const anno = {
 };
 
 /**
+ * Module-level cache for NormalizedSchema.of().
+ * Uses WeakMap keyed on object-type schemas (arrays, objects) so entries
+ * are garbage-collected when the schema is no longer referenced.
+ */
+const schemaCache = new WeakMap<object, NormalizedSchema>();
+
+/**
+ * Module-level cache for primitive (number/string) schema refs.
+ * The set of numeric schema sentinels is small and bounded (~20 values),
+ * so a regular Map is appropriate.
+ */
+const primitiveSchemaCache = new Map<number | string, NormalizedSchema>();
+
+/**
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
  * Presents a consistent interface for interacting with polymorphic schema representations.
  *
@@ -150,7 +164,27 @@ export class NormalizedSchema implements INormalizedSchema {
       // container.
       throw new Error(`@smithy/core/schema - may not init unwrapped member schema=${JSON.stringify(ref, null, 2)}.`);
     }
-    return new NormalizedSchema(sc as $SchemaRef);
+
+    // Cache lookup for non-member, non-NormalizedSchema refs.
+    if (typeof sc === "object" && sc !== null) {
+      const cached = schemaCache.get(sc);
+      if (cached !== undefined) {
+        return cached;
+      }
+      const ns = new NormalizedSchema(sc as $SchemaRef);
+      schemaCache.set(sc, ns);
+      return ns;
+    }
+
+    // Primitive schemas (numbers, strings) use a regular Map cache.
+    const primitiveKey = sc as number | string;
+    const cachedPrimitive = primitiveSchemaCache.get(primitiveKey);
+    if (cachedPrimitive !== undefined) {
+      return cachedPrimitive;
+    }
+    const ns = new NormalizedSchema(sc as $SchemaRef);
+    primitiveSchemaCache.set(primitiveKey, ns);
+    return ns;
   }
 
   /**
