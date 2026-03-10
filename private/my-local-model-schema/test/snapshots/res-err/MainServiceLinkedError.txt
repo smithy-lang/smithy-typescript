@@ -1,0 +1,98 @@
+======================== minimal response ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "org.xyz.v1#MainServiceLinkedError"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 33, 111, 114, 103, 46, 120, 121, 122, 46, 118, 49, 35, 77, 97, 105,
+110, 83, 101, 114, 118, 105, 99, 101, 76, 105, 110, 107, 101, 100, 69, 114, 114, 111, 114
+
+
+--- [error name & message] ---
+MainServiceLinkedError: Unknown
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "MainServiceLinkedError",
+  message: "Unknown"
+}
+
+======================== w/ optional fields ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "org.xyz.v1#MainServiceLinkedError"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 33, 111, 114, 103, 46, 120, 121, 122, 46, 118, 49, 35, 77, 97, 105,
+110, 83, 101, 114, 118, 105, 99, 101, 76, 105, 110, 107, 101, 100, 69, 114, 114, 111, 114
+
+
+--- [error name & message] ---
+MainServiceLinkedError: Unknown
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "MainServiceLinkedError",
+  message: "Unknown"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+Unknown: 
+
+--- [error object] ---
+{
+  0: (number) 110,
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "Unknown"
+}
+

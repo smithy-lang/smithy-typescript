@@ -11,7 +11,7 @@ content-type: application/cbor
 160
 
 
-[output]
+--- [output object] ---
 {
   $metadata: {
     httpStatusCode: (number) 200,
@@ -79,7 +79,7 @@ content-type: application/cbor
 109, 101, 109, 98, 101, 114, 95, 95
 
 
-[output]
+--- [output object] ---
 {
   sparseStructMap: {
     key1: {

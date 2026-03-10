@@ -296,23 +296,20 @@ public final class PackageApiValidationGenerator {
                 assertions(caseName: string, expected: string, actual: string): Promise<void> {
                   expect(actual).toEqual(expected);
                   return Promise.resolve();
-                },
-                schemas:""",
+                },""",
             """
               });
-
               runner.run();
             }, 30_000);
             """,
             clientName,
             () -> {
-                writer.indent(2);
+                writer.indent();
                 writer.openBlock(
                     """
-                    new Map<any, any>([""",
+                    schemas: new Map<any, any>([""",
                     """
-                    ]),
-                    """,
+                    ]),""",
                     () -> {
                         for (OperationShape operationShape : closure.getOperationShapes()) {
                             String operationSchema = closure.getShapeSchemaVariableName(operationShape, null);
@@ -338,7 +335,30 @@ public final class PackageApiValidationGenerator {
                         }
                     }
                 );
-                writer.dedent(2);
+                writer.openBlock(
+                    """
+                    errors: [""",
+                    """
+                    ],""",
+                    () -> {
+
+                        for (Shape errorShape : closure.getErrorShapes()) {
+                            String schemaName = closure.getShapeSchemaVariableName(errorShape, null);
+                            writer.addRelativeImport(
+                                schemaName,
+                                null,
+                                srcIndex
+                            );
+                            writer.write(
+                                """
+                                $L,""",
+                                schemaName
+                            );
+                        }
+
+                    }
+                );
+                writer.dedent();
             }
         );
     }

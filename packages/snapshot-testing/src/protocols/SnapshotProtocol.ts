@@ -1,13 +1,16 @@
 import { EventStreamSerde } from "@smithy/core/event-streams";
 import { SerdeContext } from "@smithy/core/protocols";
+import { HttpResponse } from "@smithy/protocol-http";
 import type {
   $ShapeDeserializer,
   $ShapeSerializer,
   EventStreamMarshaller,
   EventStreamSerdeContext,
-  HttpResponse,
+  HttpResponse as IHttpResponse,
+  StaticErrorSchema,
   StaticOperationSchema,
 } from "@smithy/types";
+import { Readable } from "stream";
 
 import type { SnapshotServerProtocol } from "../snapshot-testing-types";
 
@@ -22,7 +25,22 @@ export abstract class SnapshotProtocol extends SerdeContext implements SnapshotS
   public abstract serializeResponse<Output extends object>(
     operationSchema: StaticOperationSchema,
     output: Output
-  ): Promise<HttpResponse>;
+  ): Promise<IHttpResponse>;
+
+  public abstract serializeErrorResponse<Output extends object>(
+    errorSchema: StaticErrorSchema,
+    output: Output
+  ): Promise<IHttpResponse>;
+
+  public async serializeGenericFrontendErrorResponse(): Promise<IHttpResponse> {
+    return new HttpResponse({
+      headers: {
+        "content-type": "text/html",
+      },
+      statusCode: 500,
+      body: Readable.from("An unmodeled error occurred in a front end layer."),
+    });
+  }
 
   protected getEventStreamSerde(
     serializer: $ShapeSerializer<string> | $ShapeSerializer,

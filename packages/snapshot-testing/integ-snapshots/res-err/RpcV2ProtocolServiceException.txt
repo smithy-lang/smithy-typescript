@@ -1,0 +1,101 @@
+======================== minimal response ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor#RpcV2ProtocolServiceException"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 84, 115, 109, 105, 116, 104, 121, 46, 116, 115, 46, 115, 100, 107, 46,
+115, 121, 110, 116, 104, 101, 116, 105, 99, 46, 115, 109, 105, 116, 104, 121, 46, 112, 114, 111, 116, 111, 99, 111,
+108, 116, 101, 115, 116, 115, 46, 114, 112, 99, 118, 50, 67, 98, 111, 114, 35, 82, 112, 99, 86, 50, 80, 114,
+111, 116, 111, 99, 111, 108, 83, 101, 114, 118, 105, 99, 101, 69, 120, 99, 101, 112, 116, 105, 111, 110
+
+
+--- [error name & message] ---
+RpcV2ProtocolServiceException: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "RpcV2ProtocolServiceException",
+  __type: "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor#RpcV2ProtocolServiceException"
+}
+
+======================== w/ optional fields ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor#RpcV2ProtocolServiceException"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 84, 115, 109, 105, 116, 104, 121, 46, 116, 115, 46, 115, 100, 107, 46,
+115, 121, 110, 116, 104, 101, 116, 105, 99, 46, 115, 109, 105, 116, 104, 121, 46, 112, 114, 111, 116, 111, 99, 111,
+108, 116, 101, 115, 116, 115, 46, 114, 112, 99, 118, 50, 67, 98, 111, 114, 35, 82, 112, 99, 86, 50, 80, 114,
+111, 116, 111, 99, 111, 108, 83, 101, 114, 118, 105, 99, 101, 69, 120, 99, 101, 112, 116, 105, 111, 110
+
+
+--- [error name & message] ---
+RpcV2ProtocolServiceException: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "RpcV2ProtocolServiceException",
+  __type: "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor#RpcV2ProtocolServiceException"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+Unknown: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 3,
+    totalRetryDelay: (number) 94
+  },
+  name: "Unknown"
+}
+

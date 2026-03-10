@@ -194,10 +194,14 @@ structure MysteryThrottlingError {}
 
 @error("client")
 @retryable
-structure RetryableError {}
+structure RetryableError {
+    message: String
+}
 
 @error("client")
-structure HaltError {}
+structure HaltError {
+    message: String
+}
 
 @error("client")
 structure XYZServiceServiceException {}

@@ -1,0 +1,97 @@
+======================== minimal response ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "smithy.framework#ValidationException"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 36, 115, 109, 105, 116, 104, 121, 46, 102, 114, 97, 109, 101, 119, 111,
+114, 107, 35, 86, 97, 108, 105, 100, 97, 116, 105, 111, 110, 69, 120, 99, 101, 112, 116, 105, 111, 110
+
+
+--- [error name & message] ---
+ValidationException: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "ValidationException",
+  __type: "smithy.framework#ValidationException"
+}
+
+======================== w/ optional fields ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "smithy.framework#ValidationException"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 36, 115, 109, 105, 116, 104, 121, 46, 102, 114, 97, 109, 101, 119, 111,
+114, 107, 35, 86, 97, 108, 105, 100, 97, 116, 105, 111, 110, 69, 120, 99, 101, 112, 116, 105, 111, 110
+
+
+--- [error name & message] ---
+ValidationException: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "ValidationException",
+  __type: "smithy.framework#ValidationException"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+Unknown: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 3,
+    totalRetryDelay: (number) 253
+  },
+  name: "Unknown"
+}
+

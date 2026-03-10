@@ -36,6 +36,7 @@ const _h = "http";
 const _hE = "httpError";
 const _i = "id";
 const _iDN = "inexplicablyDeprecatedNumbers";
+const _m = "message";
 const _mR = "maxResults";
 const _n = "numbers";
 const _nT = "nextToken";
@@ -81,8 +82,8 @@ export var CodedThrottlingError$: StaticErrorSchema = [-3, n0, _CTE,
 n0_registry.registerError(CodedThrottlingError$, CodedThrottlingError);
 export var HaltError$: StaticErrorSchema = [-3, n0, _HE,
   { [_e]: _c },
-  [],
-  []
+  [_m],
+  [0]
 ];
 n0_registry.registerError(HaltError$, HaltError);
 export var MainServiceLinkedError$: StaticErrorSchema = [-3, n0, _MSLE,
@@ -99,8 +100,8 @@ export var MysteryThrottlingError$: StaticErrorSchema = [-3, n0, _MTE,
 n0_registry.registerError(MysteryThrottlingError$, MysteryThrottlingError);
 export var RetryableError$: StaticErrorSchema = [-3, n0, _RE,
   { [_e]: _c },
-  [],
-  []
+  [_m],
+  [0]
 ];
 n0_registry.registerError(RetryableError$, RetryableError);
 export var XYZServiceServiceException$: StaticErrorSchema = [-3, n0, _XYZSSE,

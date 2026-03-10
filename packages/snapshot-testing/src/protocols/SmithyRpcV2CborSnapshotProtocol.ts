@@ -1,6 +1,6 @@
 import { CborCodec } from "@smithy/core/cbor";
 import { NormalizedSchema } from "@smithy/core/schema";
-import type { HttpResponse, StaticOperationSchema } from "@smithy/types";
+import type { HttpResponse, StaticErrorSchema, StaticOperationSchema } from "@smithy/types";
 
 import type { SnapshotServerProtocol } from "../snapshot-testing-types";
 import { SnapshotProtocol } from "./SnapshotProtocol";
@@ -52,6 +52,34 @@ export class SmithyRpcV2CborSnapshotProtocol extends SnapshotProtocol implements
       // refrain from wrapping in Readable so the snapshot can use object view on the bytes.
       response.body = serializer.flush();
     }
+
+    return response;
+  }
+
+  public async serializeErrorResponse<Output extends object>(
+    errorSchema: StaticErrorSchema,
+    output: Output
+  ): Promise<HttpResponse> {
+    const $error = NormalizedSchema.of(errorSchema);
+    const clientFault = $error.getMergedTraits().error !== "server";
+    const httpError = $error.getMergedTraits().httpError;
+    const status = Number(typeof httpError === "number" ? httpError : clientFault ? 400 : 500);
+
+    const response: HttpResponse = {
+      statusCode: status,
+      headers: {
+        "smithy-protocol": "rpc-v2-cbor",
+        "content-type": this.getDefaultContentType(),
+      },
+    };
+
+    const { serializer } = this;
+
+    Object.assign(output, {
+      __type: $error.getName(true),
+    });
+    serializer.write($error, output);
+    response.body = serializer.flush();
 
     return response;
   }

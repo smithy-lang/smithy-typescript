@@ -1,4 +1,5 @@
 import {
+  ComplexError$,
   EmptyInputOutput$,
   EmptyInputOutputCommand,
   Float16$,
@@ -7,6 +8,7 @@ import {
   FractionalSecondsCommand,
   GreetingWithErrors$,
   GreetingWithErrorsCommand,
+  InvalidGreeting$,
   NoInputOutput$,
   NoInputOutputCommand,
   RecursiveShapes$,
@@ -14,10 +16,12 @@ import {
   RpcV2CborSparseMaps$,
   RpcV2CborSparseMapsCommand,
   RpcV2Protocol,
+  RpcV2ProtocolServiceException$,
   SimpleScalarProperties$,
   SimpleScalarPropertiesCommand,
   SparseNullsOperation$,
   SparseNullsOperationCommand,
+  ValidationException$,
 } from "@smithy/smithy-rpcv2-cbor-schema";
 import type { Command, StaticOperationSchema } from "@smithy/types";
 import * as path from "node:path";
@@ -42,6 +46,7 @@ describe("snapshot testing", () => {
       [SparseNullsOperation$, SparseNullsOperationCommand],
       [SimpleScalarProperties$, SimpleScalarPropertiesCommand],
     ]),
+    errors: [RpcV2ProtocolServiceException$, ValidationException$, ComplexError$, InvalidGreeting$],
     mode: "write",
     testCase(caseName: string, run: () => Promise<void>) {
       it(caseName, run);
