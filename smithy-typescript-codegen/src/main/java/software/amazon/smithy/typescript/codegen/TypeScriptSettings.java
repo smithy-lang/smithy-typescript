@@ -62,6 +62,7 @@ public final class TypeScriptSettings {
     private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
     private static final String BIG_NUMBER_MODE = "bigNumberMode";
     private static final String GENERATE_SCHEMAS = "generateSchemas";
+    private static final String VERSIONING_SCHEME = "versioningScheme";
 
     private String packageName;
     private String packageDescription = "";
@@ -84,6 +85,7 @@ public final class TypeScriptSettings {
     private boolean generateSchemas = true;
     private boolean generateIndexTests = false;
     private boolean generateSnapshotTests = false;
+    private String versioningScheme = "";
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -151,6 +153,7 @@ public final class TypeScriptSettings {
 
         settings.setGenerateIndexTests(config.getBooleanMemberOrDefault(GENERATE_INDEX_TESTS, false));
         settings.setGenerateSnapshotTests(config.getBooleanMemberOrDefault(GENERATE_SNAPSHOT_TESTS, false));
+        settings.setVersioningScheme(config.getStringMemberOrDefault(VERSIONING_SCHEME, ""));
 
         return settings;
     }
@@ -282,6 +285,14 @@ public final class TypeScriptSettings {
 
     public boolean generateSnapshotTests() {
         return generateSnapshotTests;
+    }
+
+    public void setVersioningScheme(String scheme) {
+        this.versioningScheme = scheme;
+    }
+
+    public String getVersioningScheme() {
+        return this.versioningScheme;
     }
 
     /**
