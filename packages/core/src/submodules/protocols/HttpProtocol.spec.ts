@@ -28,9 +28,11 @@ describe(HttpProtocol.name, () => {
 
       HttpProtocol.prototype.updateServiceEndpoint(request, endpoint);
 
-      expect(request.headers["x-api-key"]).toBe("my-api-key");
-      expect(request.headers["x-custom-header"]).toBe("value1, value2");
-      expect(request.headers["content-type"]).toBe("application/json");
+      expect(request.headers).toEqual({
+        "content-type": "application/json",
+        "x-api-key": "my-api-key",
+        "x-custom-header": "value1, value2",
+      });
     });
 
     it("handles endpoint with no headers", () => {
@@ -41,8 +43,7 @@ describe(HttpProtocol.name, () => {
 
       HttpProtocol.prototype.updateServiceEndpoint(request, endpoint);
 
-      expect(request.headers["content-type"]).toBe("application/json");
-      expect(Object.keys(request.headers)).toHaveLength(1);
+      expect(request.headers).toEqual({ "content-type": "application/json" });
     });
   });
 

@@ -44,6 +44,7 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  *   fieldWithMessage: "STRING_VALUE",
  *   startToken: "STRING_VALUE",
  *   maxResults: Number("int"),
+ *   customHeaderInput: "STRING_VALUE",
  * };
  * const command = new GetNumbersCommand(input);
  * const response = await client.send(command);
@@ -101,7 +102,10 @@ export class GetNumbersCommand extends $Command
     ServiceInputTypes,
     ServiceOutputTypes
   >()
-  .ep(commonParams)
+  .ep({
+    ...commonParams,
+    CustomHeaderValue: { type: "contextParams", name: "customHeaderInput" },
+  })
   .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
     return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
   })

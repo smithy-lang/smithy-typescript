@@ -65,6 +65,8 @@ describe("endpoint headers", () => {
     });
 
     await xyz.send(new GetNumbersCommand({}));
+
+    expect.assertions(2);
   });
 });
 

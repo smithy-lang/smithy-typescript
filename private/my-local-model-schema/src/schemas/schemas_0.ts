@@ -24,6 +24,7 @@ const _c = "client";
 const _cCO = "camelCaseOperation";
 const _cCOI = "camelCaseOperationInput";
 const _cCOO = "camelCaseOperationOutput";
+const _cHI = "customHeaderInput";
 const _dN = "deprecatedNumbers";
 const _dNWC = "deprecatedNumbersWithoutChronology";
 const _dNWE = "deprecatedNumbersWithoutExplanation";
@@ -146,8 +147,8 @@ export var camelCaseOperationOutput$: StaticStructureSchema = [3, n0, _cCOO,
 ];
 export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
   0,
-  [_bD, _bI, _fWM, _fWMi, _sT, _mR],
-  [19, 17, 0, 0, 0, 1]
+  [_bD, _bI, _fWM, _fWMi, _sT, _mR, _cHI],
+  [19, 17, 0, 0, 0, 1, 0]
 ];
 export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   0,

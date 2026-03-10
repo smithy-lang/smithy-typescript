@@ -357,6 +357,7 @@ it("EndpointResolvedHeadersApplied:Request", async () => {
 
   const command = new GetNumbersCommand(
     {
+      customHeaderInput: "test-custom-value",
     } as any,
   );
   try {
@@ -372,7 +373,7 @@ it("EndpointResolvedHeadersApplied:Request", async () => {
     expect(r.method).toBe("POST");
     expect(r.path).toBe("/service/XYZService/operation/GetNumbers");
 
-    expect(r.headers["x-default-header"]).toBe("default-header-value");
+    expect(r.headers["x-custom-header"]).toBe("test-custom-value");
 
   }
 });

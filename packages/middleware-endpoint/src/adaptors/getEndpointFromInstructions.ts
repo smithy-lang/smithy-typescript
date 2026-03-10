@@ -67,9 +67,7 @@ export const getEndpointFromInstructions = async <
   if (clientConfig.isCustomEndpoint && clientConfig.endpoint) {
     const customEndpoint = await clientConfig.endpoint();
     if (customEndpoint?.headers) {
-      endpoint.headers = {
-        ...endpoint.headers,
-      };
+      endpoint.headers ??= {};
       for (const [name, value] of Object.entries(customEndpoint.headers)) {
         endpoint.headers[name] = Array.isArray(value) ? value : [value];
       }

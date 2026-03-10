@@ -5,6 +5,7 @@ namespace org.xyz.v1
 use org.xyz.secondary#HttpLabelCommand
 use smithy.protocols#rpcv2Cbor
 use smithy.rules#clientContextParams
+use smithy.rules#contextParam
 use smithy.rules#endpointRuleSet
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
@@ -33,8 +34,38 @@ use smithy.waiters#waitable
         debugMode: { type: "boolean", required: true, default: false, documentation: "Debug mode with default" }
         nonConflictingParam: { type: "string", required: true, default: "non-conflict-default", documentation: "Non-conflicting with default" }
         logger: { type: "string", required: true, default: "default-logger", documentation: "Conflicting logger with default" }
+        CustomHeaderValue: { type: "string", required: false, documentation: "Value to send as x-custom-header" }
     }
     rules: [
+        {
+            conditions: [
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
+                            ref: "ApiKey"
+                        }
+                    ]
+                }
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
+                            ref: "CustomHeaderValue"
+                        }
+                    ]
+                }
+            ]
+            endpoint: {
+                url: "{endpoint}"
+                properties: {}
+                headers: {
+                    "x-api-key": ["{ApiKey}"]
+                    "x-custom-header": ["{CustomHeaderValue}"]
+                }
+            }
+            type: "endpoint"
+        }
         {
             conditions: [
                 {
@@ -117,7 +148,8 @@ structure MainServiceLinkedError {}
         protocol: "smithy.protocols#rpcv2Cbor"
         method: "POST"
         uri: "/service/XYZService/operation/GetNumbers"
-        headers: { "x-default-header": "default-header-value" }
+        params: { customHeaderInput: "test-custom-value" }
+        headers: { "x-custom-header": "test-custom-value" }
     }
 ])
 @httpResponseTests([
@@ -159,6 +191,9 @@ structure GetNumbersRequest {
     startToken: String
 
     maxResults: Integer
+
+    @contextParam(name: "CustomHeaderValue")
+    customHeaderInput: String
 }
 
 @output

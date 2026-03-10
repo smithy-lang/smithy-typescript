@@ -50,8 +50,46 @@ export const ruleSet: RuleSetObject = {
       default: "default-logger",
       documentation: "Conflicting logger with default",
     },
+    CustomHeaderValue: {
+      type: "string",
+      required: false,
+      documentation: "Value to send as x-custom-header",
+    },
   },
   rules: [
+    {
+      conditions: [
+        {
+          fn: "isSet",
+          argv: [
+            {
+              ref: "ApiKey",
+            },
+          ],
+        },
+        {
+          fn: "isSet",
+          argv: [
+            {
+              ref: "CustomHeaderValue",
+            },
+          ],
+        },
+      ],
+      endpoint: {
+        url: "{endpoint}",
+        properties: {},
+        headers: {
+          "x-api-key": [
+            "{ApiKey}",
+          ],
+          "x-custom-header": [
+            "{CustomHeaderValue}",
+          ],
+        },
+      },
+      type: "endpoint",
+    },
     {
       conditions: [
         {
