@@ -44,6 +44,10 @@ export class UriSpec<S extends string, O extends string> {
   private readonly method: string;
   private readonly pathSegments: (PathLiteralSegment | PathLabelSegment | GreedySegment)[];
   private readonly querySegments: (QueryLiteralSegment | QuerySegment)[];
+  // Only query_literal segments participate in routing. "query" segments
+  // (from @required @httpQuery) are validated post-routing so they don't
+  // cause UnknownOperationException when missing.
+  private readonly routingQuerySegments: QueryLiteralSegment[];
   readonly rank: number;
   readonly target: ServiceCoordinate<S, O>;
 
@@ -56,7 +60,10 @@ export class UriSpec<S extends string, O extends string> {
     this.method = method;
     this.pathSegments = pathSegments;
     this.querySegments = querySegments;
-    this.rank = this.pathSegments.length + this.querySegments.length;
+    this.routingQuerySegments = this.querySegments.filter(
+      (s): s is QueryLiteralSegment => s.type === "query_literal"
+    );
+    this.rank = this.pathSegments.length + this.routingQuerySegments.length;
     this.target = target;
   }
 
@@ -108,7 +115,7 @@ export class UriSpec<S extends string, O extends string> {
       return false;
     }
 
-    if (this.querySegments.length === 0) {
+    if (this.routingQuerySegments.length === 0) {
       return true;
     }
 
@@ -116,19 +123,17 @@ export class UriSpec<S extends string, O extends string> {
       return false;
     }
 
-    for (const querySegment of this.querySegments) {
+    for (const querySegment of this.routingQuerySegments) {
       if (!(querySegment.key in req.query)) {
         return false;
       }
-      if (querySegment.type === "query_literal") {
-        const input_query_value = req.query[querySegment.key];
-        if (Array.isArray(input_query_value)) {
-          if (querySegment.value && !input_query_value.includes(querySegment.value)) {
-            return false;
-          }
-        } else if (querySegment.value && querySegment.value !== input_query_value) {
+      const input_query_value = req.query[querySegment.key];
+      if (Array.isArray(input_query_value)) {
+        if (querySegment.value && !input_query_value.includes(querySegment.value)) {
           return false;
         }
+      } else if (querySegment.value && querySegment.value !== input_query_value) {
+        return false;
       }
     }
     return true;

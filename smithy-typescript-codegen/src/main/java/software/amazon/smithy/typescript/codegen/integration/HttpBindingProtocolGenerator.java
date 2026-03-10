@@ -404,17 +404,8 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                         writer.write("{ type: 'query_literal', key: $S, value: $S },", e.getKey(), e.getValue());
                     }
                 }
-                operation
-                    .getInput()
-                    .ifPresent(inputId -> {
-                        StructureShape inputShape = context.getModel().expectShape(inputId, StructureShape.class);
-                        for (MemberShape ms : inputShape.members()) {
-                            if (ms.isRequired() && ms.hasTrait(HttpQueryTrait.class)) {
-                                HttpQueryTrait queryTrait = ms.expectTrait(HttpQueryTrait.class);
-                                writer.write("{ type: 'query', key: $S },", queryTrait.getValue());
-                            }
-                        }
-                    });
+                // Required @httpQuery members are validated post-routing, not used for routing.
+                // Including them here would cause UnknownOperationException instead of ValidationException.
             });
             writer.writeInline("{ service: $S, operation: $S }", serviceName, operationName);
         });
