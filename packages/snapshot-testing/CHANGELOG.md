@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 8cc5514: add error snapshots
+
 ## 1.0.10
 
 ### Patch Changes
