@@ -86,7 +86,6 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
-    "@smithy/middleware-serde": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/url-parser": "workspace:^",
