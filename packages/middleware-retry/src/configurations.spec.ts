@@ -132,6 +132,7 @@ describe(resolveRetryConfig.name, () => {
         });
       });
     });
+
     describe("memoizes default strategy across calls", () => {
       it("should return the same promise for concurrent calls (no race condition)", async () => {
         const retryMode = "standard";

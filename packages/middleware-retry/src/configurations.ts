@@ -86,29 +86,21 @@ export interface RetryResolvedConfig {
  * @internal
  */
 export const resolveRetryConfig = <T>(input: T & PreviouslyResolved & RetryInputConfig): T & RetryResolvedConfig => {
-  const { retryStrategy, retryMode: _retryMode, maxAttempts: _maxAttempts } = input;
-  const maxAttempts = normalizeProvider(_maxAttempts ?? DEFAULT_MAX_ATTEMPTS);
+  const { retryStrategy, retryMode } = input;
+  const maxAttempts = normalizeProvider(input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS);
 
-  // Memoize the promise (not just the result) so concurrent callers share
-  // a single construction. Trade-off: if the provider rejects, the rejected
-  // promise is cached and all future calls will see the same error. This is
-  // acceptable because _retryMode is nearly always a string literal, and a
-  // failing provider indicates a config error that won't self-heal on retry.
-  let _strategyPromise: Promise<RetryStrategyV2> | undefined;
+  let controller: Promise<RetryStrategy | RetryStrategyV2> | undefined = retryStrategy
+    ? Promise.resolve(retryStrategy)
+    : undefined;
+
+  const getDefault = async () =>
+    (await normalizeProvider(retryMode)()) === RETRY_MODES.ADAPTIVE
+      ? new AdaptiveRetryStrategy(maxAttempts)
+      : new StandardRetryStrategy(maxAttempts);
 
   return Object.assign(input, {
     maxAttempts,
-    retryStrategy: () => {
-      if (retryStrategy) {
-        return Promise.resolve(retryStrategy);
-      }
-      return (_strategyPromise ??= (async () => {
-        const retryMode = await normalizeProvider(_retryMode)();
-        return retryMode === RETRY_MODES.ADAPTIVE
-          ? new AdaptiveRetryStrategy(maxAttempts)
-          : new StandardRetryStrategy(maxAttempts);
-      })());
-    },
+    retryStrategy: () => (controller ??= getDefault()),
   });
 };
 
