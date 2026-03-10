@@ -3,9 +3,6 @@ import { describe, expect, test as it } from "vitest";
 import { translateTraits } from "./translateTraits";
 
 describe("translateTraits() caching", () => {
-  /**
-   * Validates: Requirements 2.1, 2.2 (Property 3)
-   */
   it("returns the same reference for repeated calls with the same numeric bitmask", () => {
     const first = translateTraits(0b0000_0001);
     const second = translateTraits(0b0000_0001);
@@ -16,25 +13,10 @@ describe("translateTraits() caching", () => {
     expect(b).toBe(a);
   });
 
-  /**
-   * Validates: Requirement 2.3 (Property 4)
-   */
   it("returns object-type indicators as-is (reference equality) without caching", () => {
     const obj = { sensitive: 1 } as const;
     const result = translateTraits(obj);
     expect(result).toBe(obj);
-  });
-
-  /**
-   * Validates: Requirements 3.1, 3.2 (Property 5)
-   */
-  it("cached trait objects are frozen", () => {
-    const traits = translateTraits(0b0000_1000);
-    expect(Object.isFrozen(traits)).toBe(true);
-
-    // Also verify a different bitmask
-    const traits2 = translateTraits(0b0011_0000);
-    expect(Object.isFrozen(traits2)).toBe(true);
   });
 
   /**
@@ -80,5 +62,19 @@ describe("translateTraits() caching", () => {
     it("0b0000_0000 → empty object", () => {
       expect(translateTraits(0b0000_0000)).toEqual({});
     });
+  });
+});
+
+describe("performance", () => {
+  it("translates traits", () => {
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; i++) {
+      const n = i % 128;
+      translateTraits(n);
+    }
+    const end = performance.now();
+
+    // 9ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
   });
 });

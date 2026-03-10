@@ -42,21 +42,26 @@ import { translateTraits } from "./translateTraits";
 const anno = {
   // reference to structure's member iterator.
   it: Symbol.for("@smithy/nor-struct-it"),
+
+  /**
+   * Key for a cached NormalizedSchema on a $SchemaRef object.
+   * For non-object refs, we use `simpleSchemaCache(N|S)`.
+   */
+  ns: Symbol.for("@smithy/ns"),
 };
 
 /**
- * Module-level cache for NormalizedSchema.of().
- * Uses WeakMap keyed on object-type schemas (arrays, objects) so entries
- * are garbage-collected when the schema is no longer referenced.
+ * Cache for numeric schemaRef. Having separate cache objects for number/string improves
+ * lookup performance.
+ * @internal
  */
-const schemaCache = new WeakMap<object, NormalizedSchema>();
+export const simpleSchemaCacheN: Array<NormalizedSchema | undefined> = [];
 
 /**
- * Module-level cache for primitive (number/string) schema refs.
- * The set of numeric schema sentinels is small and bounded (~20 values),
- * so a regular Map is appropriate.
+ * Cache for string schemaRef.
+ * @internal
  */
-const primitiveSchemaCache = new Map<number | string, NormalizedSchema>();
+export const simpleSchemaCacheS: Record<string, NormalizedSchema> = {};
 
 /**
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
@@ -150,6 +155,22 @@ export class NormalizedSchema implements INormalizedSchema {
    * Static constructor that attempts to avoid wrapping a NormalizedSchema within another.
    */
   public static of(ref: SchemaRef | $SchemaRef): NormalizedSchema {
+    const keyAble = typeof ref === "function" || (typeof ref === "object" && ref !== null);
+
+    if (typeof ref === "number") {
+      if (simpleSchemaCacheN[ref]) {
+        return simpleSchemaCacheN[ref];
+      }
+    } else if (typeof ref === "string") {
+      if (simpleSchemaCacheS[ref]) {
+        return simpleSchemaCacheS[ref];
+      }
+    } else if (keyAble) {
+      if ((ref as any)[anno.ns]) {
+        return (ref as any)[anno.ns];
+      }
+    }
+
     const sc = deref(ref);
     if (sc instanceof NormalizedSchema) {
       return sc;
@@ -165,25 +186,22 @@ export class NormalizedSchema implements INormalizedSchema {
       throw new Error(`@smithy/core/schema - may not init unwrapped member schema=${JSON.stringify(ref, null, 2)}.`);
     }
 
-    // Cache lookup for non-member, non-NormalizedSchema refs.
-    if (typeof sc === "object" && sc !== null) {
-      const cached = schemaCache.get(sc);
-      if (cached !== undefined) {
-        return cached;
-      }
-      const ns = new NormalizedSchema(sc as $SchemaRef);
-      schemaCache.set(sc, ns);
-      return ns;
+    const ns = new NormalizedSchema(sc as $SchemaRef);
+
+    if (keyAble) {
+      // we check ref type here because the inner schema may be a simple value, but any
+      // object or function ref can be assigned a symbol key.
+      return ((ref as any)[anno.ns] = ns);
     }
 
-    // Primitive schemas (numbers, strings) use a regular Map cache.
-    const primitiveKey = sc as number | string;
-    const cachedPrimitive = primitiveSchemaCache.get(primitiveKey);
-    if (cachedPrimitive !== undefined) {
-      return cachedPrimitive;
+    if (typeof sc === "string") {
+      return (simpleSchemaCacheS[sc] = ns);
     }
-    const ns = new NormalizedSchema(sc as $SchemaRef);
-    primitiveSchemaCache.set(primitiveKey, ns);
+
+    if (typeof sc === "number") {
+      return (simpleSchemaCacheN[sc] = ns);
+    }
+
     return ns;
   }
 

@@ -2,9 +2,10 @@ import type { SchemaTraits, SchemaTraitsObject } from "@smithy/types";
 
 /**
  * Module-level cache for translateTraits() numeric bitmask inputs.
- * Only ~128 possible bitmask values exist, so a fixed-size Map is fine.
+ *
+ * @internal
  */
-const traitsCache = new Map<number, SchemaTraitsObject>();
+export const traitsCache: SchemaTraitsObject[] = [];
 
 /**
  * @internal
@@ -17,9 +18,8 @@ export function translateTraits(indicator: SchemaTraits): SchemaTraitsObject {
   }
   indicator = indicator | 0;
 
-  const cached = traitsCache.get(indicator);
-  if (cached !== undefined) {
-    return cached;
+  if (traitsCache[indicator]) {
+    return traitsCache[indicator];
   }
 
   const traits = {} as SchemaTraitsObject;
@@ -38,7 +38,5 @@ export function translateTraits(indicator: SchemaTraits): SchemaTraitsObject {
     }
   }
 
-  Object.freeze(traits);
-  traitsCache.set(indicator, traits);
-  return traits;
+  return (traitsCache[indicator] = traits);
 }

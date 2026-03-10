@@ -398,10 +398,48 @@ describe(NormalizedSchema.name, () => {
   });
 });
 
+describe("schema initialization performance", () => {
+  it("throughput - object", () => {
+    const schema: StaticStructureSchema = [3, "ns", "CachedStruct", 0, ["a"], [0]];
+
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; ++i) {
+      NormalizedSchema.of(schema);
+    }
+    const end = performance.now();
+
+    // it's 8ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
+  });
+
+  it("throughput - string sentinel", () => {
+    const schema = "unit" as const;
+
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; ++i) {
+      NormalizedSchema.of(schema);
+    }
+    const end = performance.now();
+
+    // it's 8ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
+  });
+
+  it("throughput - numeric sentinel", () => {
+    const schema: StringSchema = 0;
+
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; ++i) {
+      NormalizedSchema.of(schema);
+    }
+    const end = performance.now();
+
+    // it's 8ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
+  });
+});
+
 describe("NormalizedSchema.of() caching", () => {
-  /**
-   * Validates: Requirements 1.1, 1.2 (Property 1)
-   */
   it("returns the same instance for repeated calls with the same object-type schema", () => {
     const schema: StaticStructureSchema = [3, "ns", "CachedStruct", 0, ["a"], [0]];
     const first = NormalizedSchema.of(schema);
@@ -409,9 +447,6 @@ describe("NormalizedSchema.of() caching", () => {
     expect(second).toBe(first);
   });
 
-  /**
-   * Validates: Requirements 1.3, 4.2 (Property 2)
-   */
   it("returns the same NormalizedSchema instance when passed to of()", () => {
     const schema: StaticStructureSchema = [3, "ns", "PassThrough", 0, ["a"], [0]];
     const ns = NormalizedSchema.of(schema);
@@ -419,9 +454,6 @@ describe("NormalizedSchema.of() caching", () => {
     expect(result).toBe(ns);
   });
 
-  /**
-   * Validates: Requirement 4.1 (Property 6)
-   */
   it("cached instances produce correct getSchema(), getName(), and getMergedTraits()", () => {
     const schema: StaticStructureSchema = [3, "ns", "Equiv", { sensitive: 1 }, ["x"], [0]];
     const first = NormalizedSchema.of(schema);
@@ -442,18 +474,12 @@ describe("NormalizedSchema.of() caching", () => {
     expect(second.getMergedTraits()).toEqual({ sensitive: 1 });
   });
 
-  /**
-   * Validates: Requirement 1.4
-   */
   it("primitive schemas return the same cached instance across calls", () => {
     const a = NormalizedSchema.of(0);
     const b = NormalizedSchema.of(0);
     expect(b).toBe(a);
   });
 
-  /**
-   * Validates: Requirements 1.5, 4.3
-   */
   describe("member schema branch", () => {
     it("throws for unwrapped member schemas", () => {
       const unwrappedMember = [[0, "ns", "Simple", 0, 0] satisfies StaticSimpleSchema, 0b0000_0001] as any;
@@ -479,7 +505,6 @@ describe("NormalizedSchema.of() caching", () => {
   });
 
   /**
-   * Validates: WeakMap reference-identity caching contract.
    * Structurally identical but referentially distinct schemas must produce independent cache entries.
    */
   it("distinct schema arrays with same shape are cached independently", () => {
@@ -488,4 +513,3 @@ describe("NormalizedSchema.of() caching", () => {
     expect(NormalizedSchema.of(a)).not.toBe(NormalizedSchema.of(b));
   });
 });
-
