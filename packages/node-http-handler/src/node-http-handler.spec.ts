@@ -418,11 +418,16 @@ describe("NodeHttpHandler", () => {
       const abortController = new AbortController();
       abortController.abort(customReason);
 
-      await expect(
-        nodeHttpHandler.handle({ protocol: "http:", hostname: "host", path: "/", headers: {} } as any, {
+      try {
+        await nodeHttpHandler.handle({ protocol: "http:", hostname: "host", path: "/", headers: {} } as any, {
           abortSignal: abortController.signal as any,
-        })
-      ).rejects.toBe(customReason);
+        });
+        expect.unreachable("should have thrown");
+      } catch (e: any) {
+        expect(e.message).toBe("Request aborted");
+        expect(e.name).toBe("AbortError");
+        expect(e.cause).toBe(customReason);
+      }
     });
 
     it("rejects with default AbortError when signal has no reason", async () => {
@@ -437,6 +442,27 @@ describe("NodeHttpHandler", () => {
           abortSignal: signal as any,
         })
       ).rejects.toThrow("Request aborted");
+    });
+
+    it("rejects with a mutable error when reason is a frozen Error", async () => {
+      const nodeHttpHandler = new NodeHttpHandler();
+      const frozenReason = Object.freeze(new Error("frozen"));
+      const abortController = new AbortController();
+      abortController.abort(frozenReason);
+
+      try {
+        await nodeHttpHandler.handle({ protocol: "http:", hostname: "host", path: "/", headers: {} } as any, {
+          abortSignal: abortController.signal as any,
+        });
+        expect.unreachable("should have thrown");
+      } catch (e: any) {
+        expect(e.name).toBe("AbortError");
+        expect(e.cause).toBe(frozenReason);
+        // The returned error must be mutable so retry middleware can set $metadata.
+        expect(() => {
+          e.$metadata = {};
+        }).not.toThrow();
+      }
     });
 
     it("rejects with string reason wrapped in an Error", async () => {

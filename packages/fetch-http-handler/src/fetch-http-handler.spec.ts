@@ -232,6 +232,30 @@ const globalFetch = global.fetch;
     expect(mockFetch.mock.calls.length).toBe(0);
   });
 
+  it("rejects with a mutable error when abort reason is a frozen Error", async () => {
+    const mockFetch = vi.fn();
+    (global as any).fetch = mockFetch;
+    const fetchHttpHandler = new FetchHttpHandler();
+    const frozenReason = Object.freeze(new Error("frozen"));
+
+    try {
+      await fetchHttpHandler.handle({} as any, {
+        abortSignal: {
+          aborted: true,
+          reason: frozenReason,
+          onabort: null,
+        },
+      });
+      expect.unreachable("should have thrown");
+    } catch (e: any) {
+      expect(e.name).toBe("AbortError");
+      expect(e.cause).toBe(frozenReason);
+      expect(() => {
+        e.$metadata = {};
+      }).not.toThrow();
+    }
+  });
+
   it("will pass abortSignal to fetch if supported", async () => {
     const mockResponse = {
       headers: {
