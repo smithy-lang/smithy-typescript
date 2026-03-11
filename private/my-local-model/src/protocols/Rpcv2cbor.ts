@@ -46,6 +46,7 @@ import {
   Alpha,
   CamelCaseOperationInput,
   CamelCaseOperationOutput,
+  DifferentShapeName,
   GetNumbersRequest,
   GetNumbersResponse,
   HttpLabelCommandInput,
@@ -344,6 +345,7 @@ const se_TradeEvents = (
     alpha: value => se_Alpha_event(value, context),
     beta: value => se_Unit_event(value, context),
     gamma: value => se_Unit_event(value, context),
+    delta: value => se_DifferentShapeName_event(value, context),
     _: value => value as any
   });
   return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);
@@ -362,12 +364,12 @@ const se_Alpha_event = (
   body = cbor.serialize(body);
   return { headers, body };
   }
-  const se_Unit_event = (
-    input: Unit,
+  const se_DifferentShapeName_event = (
+    input: DifferentShapeName,
     context: __SerdeContext
   ): __Message => {
     const headers: __MessageHeaders = {
-      ":event-type": { type: "string", value: "beta" },
+      ":event-type": { type: "string", value: "delta" },
       ":message-type": { type: "string", value: "event" },
       ":content-type": { type: "string", value: "application/cbor" },
     }
@@ -376,175 +378,207 @@ const se_Alpha_event = (
     body = cbor.serialize(body);
     return { headers, body };
     }
-    /**
-     * deserializeRpcv2cborTradeEvents
-     */
-    const de_TradeEvents = (
-      output: any,
-      context: __SerdeContext & __EventStreamSerdeContext
-    ): AsyncIterable<TradeEvents> => {
-      return context.eventStreamMarshaller.deserialize(
-        output,
-        async event => {
-          if (event["alpha"] != null) {
-            return {
-              alpha: await de_Alpha_event(event["alpha"], context),
-            };
-          }
-          if (event["beta"] != null) {
-            return {
-              beta: await de_Unit_event(event["beta"], context),
-            };
-          }
-          if (event["gamma"] != null) {
-            return {
-              gamma: await de_Unit_event(event["gamma"], context),
-            };
-          }
-          return {$unknown: event as any};
-        }
-      );
-    }
-    const de_Alpha_event = async (
-      output: any,
+    const se_Unit_event = (
+      input: Unit,
       context: __SerdeContext
-    ): Promise<Alpha> => {
-      const contents: Alpha = {} as any;
-      const data: any = await parseBody(output.body, context);
-      Object.assign(contents, de_Alpha(data, context));
-      return contents;
-    }
-    const de_Unit_event = async (
-      output: any,
-      context: __SerdeContext
-    ): Promise<Unit> => {
-      const contents: Unit = {} as any;
-      const data: any = await parseBody(output.body, context);
-      Object.assign(contents, _json(data));
-      return contents;
-    }
-    // se_HttpLabelCommandInput omitted.
+    ): __Message => {
+      const headers: __MessageHeaders = {
+        ":event-type": { type: "string", value: "beta" },
+        ":message-type": { type: "string", value: "event" },
+        ":content-type": { type: "string", value: "application/cbor" },
+      }
+      let body = new Uint8Array();
+      body = _json(input);
+      body = cbor.serialize(body);
+      return { headers, body };
+      }
+      /**
+       * deserializeRpcv2cborTradeEvents
+       */
+      const de_TradeEvents = (
+        output: any,
+        context: __SerdeContext & __EventStreamSerdeContext
+      ): AsyncIterable<TradeEvents> => {
+        return context.eventStreamMarshaller.deserialize(
+          output,
+          async event => {
+            if (event["alpha"] != null) {
+              return {
+                alpha: await de_Alpha_event(event["alpha"], context),
+              };
+            }
+            if (event["beta"] != null) {
+              return {
+                beta: await de_Unit_event(event["beta"], context),
+              };
+            }
+            if (event["gamma"] != null) {
+              return {
+                gamma: await de_Unit_event(event["gamma"], context),
+              };
+            }
+            if (event["delta"] != null) {
+              return {
+                delta: await de_DifferentShapeName_event(event["delta"], context),
+              };
+            }
+            return {$unknown: event as any};
+          }
+        );
+      }
+      const de_Alpha_event = async (
+        output: any,
+        context: __SerdeContext
+      ): Promise<Alpha> => {
+        const contents: Alpha = {} as any;
+        const data: any = await parseBody(output.body, context);
+        Object.assign(contents, de_Alpha(data, context));
+        return contents;
+      }
+      const de_DifferentShapeName_event = async (
+        output: any,
+        context: __SerdeContext
+      ): Promise<DifferentShapeName> => {
+        const contents: DifferentShapeName = {} as any;
+        const data: any = await parseBody(output.body, context);
+        Object.assign(contents, _json(data));
+        return contents;
+      }
+      const de_Unit_event = async (
+        output: any,
+        context: __SerdeContext
+      ): Promise<Unit> => {
+        const contents: Unit = {} as any;
+        const data: any = await parseBody(output.body, context);
+        Object.assign(contents, _json(data));
+        return contents;
+      }
+      // se_HttpLabelCommandInput omitted.
 
-    /**
-     * serializeRpcv2cborAlpha
-     */
-    const se_Alpha = (
-      input: Alpha,
-      context: __SerdeContext
-    ): any => {
-      return take(input, {
-        'id': [],
-        'timestamp': __dateToTag,
+      /**
+       * serializeRpcv2cborAlpha
+       */
+      const se_Alpha = (
+        input: Alpha,
+        context: __SerdeContext
+      ): any => {
+        return take(input, {
+          'id': [],
+          'timestamp': __dateToTag,
+        });
+      }
+
+      // se_CamelCaseOperationInput omitted.
+
+      // se_DifferentShapeName omitted.
+
+      /**
+       * serializeRpcv2cborGetNumbersRequest
+       */
+      const se_GetNumbersRequest = (
+        input: GetNumbersRequest,
+        context: __SerdeContext
+      ): any => {
+        return take(input, {
+          'bigDecimal': __nv,
+          'bigInteger': [],
+          'customHeaderInput': [],
+          'fieldWithMessage': [],
+          'fieldWithoutMessage': [],
+          'maxResults': [],
+          'startToken': [],
+        });
+      }
+
+      // se_Unit omitted.
+
+      // de_HttpLabelCommandOutput omitted.
+
+      /**
+       * deserializeRpcv2cborAlpha
+       */
+      const de_Alpha = (
+        output: any,
+        context: __SerdeContext
+      ): Alpha => {
+        return take(output, {
+          'id': __expectString,
+          'timestamp': (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
+        }) as any;
+      }
+
+      /**
+       * deserializeRpcv2cborBlobs
+       */
+      const de_Blobs = (
+        output: any,
+        context: __SerdeContext
+      ): Uint8Array[] => {
+        const collection = (output || []).filter((e: any) => e != null)
+        return collection;
+      }
+
+      /**
+       * deserializeRpcv2cborCamelCaseOperationOutput
+       */
+      const de_CamelCaseOperationOutput = (
+        output: any,
+        context: __SerdeContext
+      ): CamelCaseOperationOutput => {
+        return take(output, {
+          'results': (_: any) => de_Blobs(_, context),
+          'token': __expectString,
+        }) as any;
+      }
+
+      // de_CodedThrottlingError omitted.
+
+      // de_DifferentShapeName omitted.
+
+      /**
+       * deserializeRpcv2cborGetNumbersResponse
+       */
+      const de_GetNumbersResponse = (
+        output: any,
+        context: __SerdeContext
+      ): GetNumbersResponse => {
+        return take(output, {
+          'bigDecimal': [],
+          'bigInteger': [],
+          'deprecatedNumbers': _json,
+          'deprecatedNumbersWithoutChronology': _json,
+          'deprecatedNumbersWithoutExplanation': _json,
+          'inexplicablyDeprecatedNumbers': _json,
+          'nextToken': __expectString,
+          'numbers': _json,
+        }) as any;
+      }
+
+      // de_HaltError omitted.
+
+      // de_IntegerList omitted.
+
+      // de_MainServiceLinkedError omitted.
+
+      // de_MysteryThrottlingError omitted.
+
+      // de_RetryableError omitted.
+
+      // de_XYZServiceServiceException omitted.
+
+      // de_Unit omitted.
+
+      const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
+        httpStatusCode: output.statusCode,
+        requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
+        extendedRequestId: output.headers["x-amz-id-2"],
+        cfId: output.headers["x-amz-cf-id"],
       });
-    }
 
-    // se_CamelCaseOperationInput omitted.
+      const throwDefaultError = withBaseException(__BaseException);
+      const SHARED_HEADERS: __HeaderBag = {
+        'content-type': "application/cbor",
+        "smithy-protocol": "rpc-v2-cbor",
+        "accept": "application/cbor",
 
-    /**
-     * serializeRpcv2cborGetNumbersRequest
-     */
-    const se_GetNumbersRequest = (
-      input: GetNumbersRequest,
-      context: __SerdeContext
-    ): any => {
-      return take(input, {
-        'bigDecimal': __nv,
-        'bigInteger': [],
-        'customHeaderInput': [],
-        'fieldWithMessage': [],
-        'fieldWithoutMessage': [],
-        'maxResults': [],
-        'startToken': [],
-      });
-    }
-
-    // se_Unit omitted.
-
-    // de_HttpLabelCommandOutput omitted.
-
-    /**
-     * deserializeRpcv2cborAlpha
-     */
-    const de_Alpha = (
-      output: any,
-      context: __SerdeContext
-    ): Alpha => {
-      return take(output, {
-        'id': __expectString,
-        'timestamp': (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
-      }) as any;
-    }
-
-    /**
-     * deserializeRpcv2cborBlobs
-     */
-    const de_Blobs = (
-      output: any,
-      context: __SerdeContext
-    ): Uint8Array[] => {
-      const collection = (output || []).filter((e: any) => e != null)
-      return collection;
-    }
-
-    /**
-     * deserializeRpcv2cborCamelCaseOperationOutput
-     */
-    const de_CamelCaseOperationOutput = (
-      output: any,
-      context: __SerdeContext
-    ): CamelCaseOperationOutput => {
-      return take(output, {
-        'results': (_: any) => de_Blobs(_, context),
-        'token': __expectString,
-      }) as any;
-    }
-
-    // de_CodedThrottlingError omitted.
-
-    /**
-     * deserializeRpcv2cborGetNumbersResponse
-     */
-    const de_GetNumbersResponse = (
-      output: any,
-      context: __SerdeContext
-    ): GetNumbersResponse => {
-      return take(output, {
-        'bigDecimal': [],
-        'bigInteger': [],
-        'deprecatedNumbers': _json,
-        'deprecatedNumbersWithoutChronology': _json,
-        'deprecatedNumbersWithoutExplanation': _json,
-        'inexplicablyDeprecatedNumbers': _json,
-        'nextToken': __expectString,
-        'numbers': _json,
-      }) as any;
-    }
-
-    // de_HaltError omitted.
-
-    // de_IntegerList omitted.
-
-    // de_MainServiceLinkedError omitted.
-
-    // de_MysteryThrottlingError omitted.
-
-    // de_RetryableError omitted.
-
-    // de_XYZServiceServiceException omitted.
-
-    // de_Unit omitted.
-
-    const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
-      httpStatusCode: output.statusCode,
-      requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
-      extendedRequestId: output.headers["x-amz-id-2"],
-      cfId: output.headers["x-amz-cf-id"],
-    });
-
-    const throwDefaultError = withBaseException(__BaseException);
-    const SHARED_HEADERS: __HeaderBag = {
-      'content-type': "application/cbor",
-      "smithy-protocol": "rpc-v2-cbor",
-      "accept": "application/cbor",
-
-    };
+      };

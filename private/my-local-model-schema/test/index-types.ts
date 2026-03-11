@@ -19,6 +19,7 @@ export type {
   Alpha,
   CamelCaseOperationInput,
   CamelCaseOperationOutput,
+  DifferentShapeName,
   GetNumbersRequest,
   GetNumbersResponse,
   TradeEvents,
