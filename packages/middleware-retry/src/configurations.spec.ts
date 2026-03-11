@@ -132,6 +132,33 @@ describe(resolveRetryConfig.name, () => {
         });
       });
     });
+
+    describe("memoizes default strategy across calls", () => {
+      it("should return the same promise for concurrent calls (no race condition)", async () => {
+        const retryMode = "standard";
+        const { retryStrategy } = resolveRetryConfig({ maxAttempts: 3, retryMode });
+        const [a, b] = await Promise.all([retryStrategy(), retryStrategy()]);
+        expect(a).toBe(b);
+        expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
+      });
+
+      it("should return the same instance on sequential calls", async () => {
+        const retryMode = "standard";
+        const { retryStrategy } = resolveRetryConfig({ maxAttempts: 3, retryMode });
+        const first = await retryStrategy();
+        const second = await retryStrategy();
+        expect(first).toBe(second);
+        expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
+      });
+
+      it("should memoize adaptive strategy the same way", async () => {
+        const retryMode = "adaptive";
+        const { retryStrategy } = resolveRetryConfig({ maxAttempts: 3, retryMode });
+        const [a, b] = await Promise.all([retryStrategy(), retryStrategy()]);
+        expect(a).toBe(b);
+        expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe("node maxAttempts config options", () => {
