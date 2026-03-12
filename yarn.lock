@@ -2708,9 +2708,9 @@ __metadata:
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
     "@smithy/eventstream-serde-node": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
+    "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
     "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
@@ -3054,6 +3054,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"

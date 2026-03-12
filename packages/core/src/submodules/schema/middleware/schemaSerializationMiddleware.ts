@@ -1,8 +1,7 @@
+import { toEndpointV1 } from "@smithy/core/endpoints";
 import type {
-  Endpoint,
   EndpointBearer,
   HandlerExecutionContext,
-  Provider,
   SerializeHandler,
   SerializeHandlerArguments,
   StaticOperationSchema,
@@ -24,10 +23,9 @@ export const schemaSerializationMiddleware =
     };
     const [, ns, n, t, i, o] = operationSchema ?? [];
 
-    const endpoint: Provider<Endpoint> =
-      context.endpointV2?.url && config.urlParser
-        ? async () => config.urlParser!(context.endpointV2!.url as URL)
-        : (config as unknown as EndpointBearer).endpoint!;
+    const endpoint = context.endpointV2
+      ? async () => toEndpointV1(context.endpointV2!)
+      : (config as unknown as EndpointBearer).endpoint!;
 
     const request = await config.protocol.serializeRequest(operation(ns, n, t, i, o), args.input, {
       ...config,

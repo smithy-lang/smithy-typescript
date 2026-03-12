@@ -77,4 +77,5 @@ export interface EndpointParameters extends __EndpointParameters {
   debugMode?: boolean | undefined;
   nonConflictingParam?: string | undefined;
   logger?: string | undefined;
+  CustomHeaderValue?: string | undefined;
 }

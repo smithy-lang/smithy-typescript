@@ -69,6 +69,13 @@
       "node": "./dist-cjs/submodules/event-streams/index.js",
       "import": "./dist-es/submodules/event-streams/index.js",
       "require": "./dist-cjs/submodules/event-streams/index.js"
+    },
+    "./endpoints": {
+      "types": "./dist-types/submodules/endpoints/index.d.ts",
+      "module": "./dist-es/submodules/endpoints/index.js",
+      "node": "./dist-cjs/submodules/endpoints/index.js",
+      "import": "./dist-es/submodules/endpoints/index.js",
+      "require": "./dist-cjs/submodules/endpoints/index.js"
     }
   },
   "author": {
@@ -79,9 +86,9 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
-    "@smithy/middleware-serde": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
+    "@smithy/url-parser": "workspace:^",
     "@smithy/util-base64": "workspace:^",
     "@smithy/util-body-length-browser": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
@@ -103,6 +110,8 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./endpoints.d.ts",
+    "./endpoints.js",
     "./event-streams.d.ts",
     "./event-streams.js",
     "./protocols.d.ts",

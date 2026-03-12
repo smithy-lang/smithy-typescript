@@ -60,6 +60,7 @@ export interface GetNumbersRequest {
 
   startToken?: string | undefined;
   maxResults?: number | undefined;
+  customHeaderInput?: string | undefined;
 }
 
 /**

@@ -1,3 +1,4 @@
+import { toEndpointV1 } from "@smithy/core/endpoints";
 import type {
   Endpoint,
   HandlerExecutionContext,
@@ -26,10 +27,9 @@ export const serializerMiddleware =
   async (args: SerializeHandlerArguments<Input>): Promise<SerializeHandlerOutput<Output>> => {
     const endpointConfig = options as V1OrV2Endpoint;
 
-    const endpoint: Provider<Endpoint> =
-      context.endpointV2?.url && endpointConfig.urlParser
-        ? async () => endpointConfig.urlParser!(context.endpointV2!.url as URL)
-        : endpointConfig.endpoint!;
+    const endpoint: Provider<Endpoint> = context.endpointV2
+      ? async () => toEndpointV1(context.endpointV2!)
+      : endpointConfig.endpoint!;
 
     if (!endpoint) {
       throw new Error("No valid endpoint provider available.");

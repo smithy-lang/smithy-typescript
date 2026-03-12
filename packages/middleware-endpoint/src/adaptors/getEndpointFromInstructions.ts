@@ -63,6 +63,17 @@ export const getEndpointFromInstructions = async <
   }
   const endpoint: EndpointV2 = clientConfig.endpointProvider!(endpointParams as T, context);
 
+  // Merge headers from custom endpoint if present
+  if (clientConfig.isCustomEndpoint && clientConfig.endpoint) {
+    const customEndpoint = await clientConfig.endpoint();
+    if (customEndpoint?.headers) {
+      endpoint.headers ??= {};
+      for (const [name, value] of Object.entries(customEndpoint.headers)) {
+        endpoint.headers[name] = Array.isArray(value) ? value : [value];
+      }
+    }
+  }
+
   return endpoint;
 };
 

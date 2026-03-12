@@ -1,4 +1,3 @@
-import { serializerMiddlewareOption } from "@smithy/middleware-serde";
 import type {
   HandlerExecutionContext,
   HttpAuthSchemeParameters,
@@ -21,7 +20,7 @@ export const httpAuthSchemeMiddlewareOptions: SerializeHandlerOptions & Relative
   name: "httpAuthSchemeMiddleware",
   override: true,
   relation: "before",
-  toMiddleware: serializerMiddlewareOption.name!,
+  toMiddleware: "serializerMiddleware",
 };
 
 /**

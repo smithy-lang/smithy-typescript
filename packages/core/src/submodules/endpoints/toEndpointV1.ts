@@ -2,7 +2,7 @@ import type { Endpoint, EndpointV2 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
 
 /**
- * @deprecated Use `toEndpointV1` from `@smithy/core/endpoints` instead.
+ * Converts an endpoint to EndpointV1 format.
  * @internal
  */
 export const toEndpointV1 = (endpoint: string | Endpoint | EndpointV2): Endpoint => {

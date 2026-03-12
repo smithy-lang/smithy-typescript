@@ -155,13 +155,11 @@ const clientParams = {
   region: "us-west-2",
   credentials: { accessKeyId: "key", secretAccessKey: "secret" },
   apiKey: { apiKey: "apiKey" },
-  endpoint: () => {
-    const url = new URL("https://localhost/");
-    return Promise.resolve({
-      hostname: url.hostname,
-      protocol: url.protocol,
-      path: url.pathname,
-    }) as Promise<Endpoint>;
+  endpoint: {
+    url: new URL("https://localhost/"),
+    headers: {
+      "x-default-header": ["default-header-value"],
+    },
   },
 };
 
@@ -350,6 +348,35 @@ it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
   vizBenchmark(logBenchmark(name, timings));
 
 }, BENCHMARK_TIMEOUT);
+
+it("EndpointResolvedHeadersApplied:Request", async () => {
+  const client = new XYZServiceClient({
+    ...clientParams,
+    requestHandler: new RequestSerializationTestHandler(),
+  });
+
+  const command = new GetNumbersCommand(
+    {
+      customHeaderInput: "test-custom-value",
+    } as any,
+  );
+  try {
+    await client.send(command);
+    fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
+    return;
+  } catch (err) {
+    if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {
+      fail(err);
+      return;
+    }
+    const r = err.request;
+    expect(r.method).toBe("POST");
+    expect(r.path).toBe("/service/XYZService/operation/GetNumbers");
+
+    expect(r.headers["x-custom-header"]).toBe("test-custom-value");
+
+  }
+});
 
 it("GetNumbersResponseExample:SerdeBenchmark:Response", async () => {
   const client = new XYZServiceClient({

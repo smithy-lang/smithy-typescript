@@ -101,6 +101,12 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       for (const [k, v] of endpoint.url.searchParams.entries()) {
         request.query[k] = v;
       }
+      // Apply resolved endpoint headers per Endpoints 2.0 spec.
+      if (endpoint.headers) {
+        for (const [name, values] of Object.entries(endpoint.headers)) {
+          request.headers[name] = values.join(", ");
+        }
+      }
       return request;
     } else {
       request.protocol = endpoint.protocol;
@@ -110,6 +116,12 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       request.query = {
         ...endpoint.query,
       };
+      // Apply endpoint headers for deprecated Endpoint type if present
+      if (endpoint.headers) {
+        for (const [name, value] of Object.entries(endpoint.headers)) {
+          request.headers[name] = value;
+        }
+      }
       return request;
     }
   }

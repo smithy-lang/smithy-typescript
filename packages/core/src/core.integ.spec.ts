@@ -5,7 +5,7 @@ import { RpcV2ProtocolClient } from "@smithy/smithy-rpcv2-cbor-schema";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";
 import type { GetNumbersCommandOutput } from "xyz-schema";
-import { XYZService } from "xyz-schema";
+import { GetNumbersCommand, XYZService } from "xyz-schema";
 
 import { NumericValue } from "./submodules/serde";
 
@@ -42,6 +42,31 @@ describe("@smithy/core", () => {
 
     expect(withCtor.config.protocol).toBeInstanceOf(SmithyRpcV2CborProtocol);
     expect((withSettings.config.protocol as HttpProtocol).options.defaultNamespace).toEqual("ns");
+  });
+});
+
+describe("endpoint headers", () => {
+  it("should apply endpoint-resolved headers to the outgoing request", async () => {
+    const xyz = new XYZService({
+      endpoint: {
+        url: new URL("https://localhost"),
+        headers: {
+          "x-custom-header": ["value1", "value2"],
+        },
+      },
+      apiKey: async () => ({ apiKey: "my-api-key" }),
+    });
+
+    requireRequestsFrom(xyz).toMatch({
+      hostname: "localhost",
+      headers: {
+        "x-custom-header": "value1, value2",
+      },
+    });
+
+    await xyz.send(new GetNumbersCommand({}));
+
+    expect.assertions(2);
   });
 });
 

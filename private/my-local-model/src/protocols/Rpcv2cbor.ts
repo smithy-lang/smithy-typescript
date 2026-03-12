@@ -450,6 +450,7 @@ const se_Alpha_event = (
       return take(input, {
         'bigDecimal': __nv,
         'bigInteger': [],
+        'customHeaderInput': [],
         'fieldWithMessage': [],
         'fieldWithoutMessage': [],
         'maxResults': [],
