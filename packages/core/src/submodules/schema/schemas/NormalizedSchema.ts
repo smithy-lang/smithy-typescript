@@ -42,7 +42,26 @@ import { translateTraits } from "./translateTraits";
 const anno = {
   // reference to structure's member iterator.
   it: Symbol.for("@smithy/nor-struct-it"),
+
+  /**
+   * Key for a cached NormalizedSchema on a $SchemaRef object.
+   * For non-object refs, we use `simpleSchemaCache(N|S)`.
+   */
+  ns: Symbol.for("@smithy/ns"),
 };
+
+/**
+ * Cache for numeric schemaRef. Having separate cache objects for number/string improves
+ * lookup performance.
+ * @internal
+ */
+export const simpleSchemaCacheN: Array<NormalizedSchema | undefined> = [];
+
+/**
+ * Cache for string schemaRef.
+ * @internal
+ */
+export const simpleSchemaCacheS: Record<string, NormalizedSchema> = {};
 
 /**
  * Wraps both class instances, numeric sentinel values, and member schema pairs.
@@ -136,6 +155,22 @@ export class NormalizedSchema implements INormalizedSchema {
    * Static constructor that attempts to avoid wrapping a NormalizedSchema within another.
    */
   public static of(ref: SchemaRef | $SchemaRef): NormalizedSchema {
+    const keyAble = typeof ref === "function" || (typeof ref === "object" && ref !== null);
+
+    if (typeof ref === "number") {
+      if (simpleSchemaCacheN[ref]) {
+        return simpleSchemaCacheN[ref];
+      }
+    } else if (typeof ref === "string") {
+      if (simpleSchemaCacheS[ref]) {
+        return simpleSchemaCacheS[ref];
+      }
+    } else if (keyAble) {
+      if ((ref as any)[anno.ns]) {
+        return (ref as any)[anno.ns];
+      }
+    }
+
     const sc = deref(ref);
     if (sc instanceof NormalizedSchema) {
       return sc;
@@ -150,7 +185,24 @@ export class NormalizedSchema implements INormalizedSchema {
       // container.
       throw new Error(`@smithy/core/schema - may not init unwrapped member schema=${JSON.stringify(ref, null, 2)}.`);
     }
-    return new NormalizedSchema(sc as $SchemaRef);
+
+    const ns = new NormalizedSchema(sc as $SchemaRef);
+
+    if (keyAble) {
+      // we check ref type here because the inner schema may be a simple value, but any
+      // object or function ref can be assigned a symbol key.
+      return ((ref as any)[anno.ns] = ns);
+    }
+
+    if (typeof sc === "string") {
+      return (simpleSchemaCacheS[sc] = ns);
+    }
+
+    if (typeof sc === "number") {
+      return (simpleSchemaCacheN[sc] = ns);
+    }
+
+    return ns;
   }
 
   /**

@@ -397,3 +397,119 @@ describe(NormalizedSchema.name, () => {
     });
   });
 });
+
+describe("schema initialization performance", () => {
+  it("throughput - object", () => {
+    const schema: StaticStructureSchema = [3, "ns", "CachedStruct", 0, ["a"], [0]];
+
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; ++i) {
+      NormalizedSchema.of(schema);
+    }
+    const end = performance.now();
+
+    // it's 8ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
+  });
+
+  it("throughput - string sentinel", () => {
+    const schema = "unit" as const;
+
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; ++i) {
+      NormalizedSchema.of(schema);
+    }
+    const end = performance.now();
+
+    // it's 8ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
+  });
+
+  it("throughput - numeric sentinel", () => {
+    const schema: StringSchema = 0;
+
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; ++i) {
+      NormalizedSchema.of(schema);
+    }
+    const end = performance.now();
+
+    // it's 8ms on kuhe's computer.
+    expect(end - start).toBeLessThanOrEqual(200);
+  });
+});
+
+describe("NormalizedSchema.of() caching", () => {
+  it("returns the same instance for repeated calls with the same object-type schema", () => {
+    const schema: StaticStructureSchema = [3, "ns", "CachedStruct", 0, ["a"], [0]];
+    const first = NormalizedSchema.of(schema);
+    const second = NormalizedSchema.of(schema);
+    expect(second).toBe(first);
+  });
+
+  it("returns the same NormalizedSchema instance when passed to of()", () => {
+    const schema: StaticStructureSchema = [3, "ns", "PassThrough", 0, ["a"], [0]];
+    const ns = NormalizedSchema.of(schema);
+    const result = NormalizedSchema.of(ns);
+    expect(result).toBe(ns);
+  });
+
+  it("cached instances produce correct getSchema(), getName(), and getMergedTraits()", () => {
+    const schema: StaticStructureSchema = [3, "ns", "Equiv", { sensitive: 1 }, ["x"], [0]];
+    const first = NormalizedSchema.of(schema);
+    const second = NormalizedSchema.of(schema);
+
+    // same cached instance
+    expect(second).toBe(first);
+
+    // correct results from cached instance
+    expect(first.getSchema()).toBe(schema);
+    expect(first.getName()).toBe("Equiv");
+    expect(first.getName(true)).toBe("ns#Equiv");
+    expect(first.getMergedTraits()).toEqual({ sensitive: 1 });
+
+    expect(second.getSchema()).toBe(schema);
+    expect(second.getName()).toBe("Equiv");
+    expect(second.getName(true)).toBe("ns#Equiv");
+    expect(second.getMergedTraits()).toEqual({ sensitive: 1 });
+  });
+
+  it("primitive schemas return the same cached instance across calls", () => {
+    const a = NormalizedSchema.of(0);
+    const b = NormalizedSchema.of(0);
+    expect(b).toBe(a);
+  });
+
+  describe("member schema branch", () => {
+    it("throws for unwrapped member schemas", () => {
+      const unwrappedMember = [[0, "ns", "Simple", 0, 0] satisfies StaticSimpleSchema, 0b0000_0001] as any;
+      expect(() => NormalizedSchema.of(unwrappedMember)).toThrow(
+        "@smithy/core/schema - may not init unwrapped member schema="
+      );
+    });
+
+    it("mutates traits for NormalizedSchema-wrapped members", () => {
+      const innerSchema: StaticSimpleSchema = [0, "ns", "Inner", 0, 0];
+      const container: StaticStructureSchema = [3, "ns", "Container", 0, ["m"], [[innerSchema, 0b0000_0001]]];
+      const memberNs = NormalizedSchema.of(container).getMemberSchema("m");
+
+      // The member should have httpLabel trait from the bitmask 0b0000_0001
+      expect(memberNs.getMemberTraits()).toEqual({ httpLabel: 1 });
+
+      // Now pass the NormalizedSchema-wrapped member as a member schema to of()
+      // This should mutate its merged traits with the additional traits
+      const result = NormalizedSchema.of([memberNs, 0b0000_1000] as any);
+      expect(result).toBe(memberNs);
+      expect(result.getMergedTraits().sensitive).toBe(1);
+    });
+  });
+
+  /**
+   * Structurally identical but referentially distinct schemas must produce independent cache entries.
+   */
+  it("distinct schema arrays with same shape are cached independently", () => {
+    const a: StaticStructureSchema = [3, "ns", "Foo", 0, ["x"], [0]];
+    const b: StaticStructureSchema = [3, "ns", "Foo", 0, ["x"], [0]];
+    expect(NormalizedSchema.of(a)).not.toBe(NormalizedSchema.of(b));
+  });
+});
