@@ -1,6 +1,7 @@
 POST https://localhost 
 /mock-required-endpoint/service/XYZService/operation/camelCaseOperation
 
+x-api-key: [object Object]
 content-type: application/cbor
 smithy-protocol: rpc-v2-cbor
 accept: application/cbor

@@ -39,6 +39,14 @@ export interface CamelCaseOperationOutput {
 /**
  * @public
  */
+export interface DifferentShapeName {
+  name?: string | undefined;
+  number?: number | undefined;
+}
+
+/**
+ * @public
+ */
 export interface GetNumbersRequest {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;
@@ -111,6 +119,7 @@ export interface Unit {}
 export type TradeEvents =
   | TradeEvents.AlphaMember
   | TradeEvents.BetaMember
+  | TradeEvents.DeltaMember
   | TradeEvents.GammaMember
   | TradeEvents.$UnknownMember;
 
@@ -122,6 +131,7 @@ export namespace TradeEvents {
     alpha: Alpha;
     beta?: never;
     gamma?: never;
+    delta?: never;
     $unknown?: never;
   }
 
@@ -129,6 +139,7 @@ export namespace TradeEvents {
     alpha?: never;
     beta: Unit;
     gamma?: never;
+    delta?: never;
     $unknown?: never;
   }
 
@@ -136,6 +147,15 @@ export namespace TradeEvents {
     alpha?: never;
     beta?: never;
     gamma: Unit;
+    delta?: never;
+    $unknown?: never;
+  }
+
+  export interface DeltaMember {
+    alpha?: never;
+    beta?: never;
+    gamma?: never;
+    delta: DifferentShapeName;
     $unknown?: never;
   }
 
@@ -146,6 +166,7 @@ export namespace TradeEvents {
     alpha?: never;
     beta?: never;
     gamma?: never;
+    delta?: never;
     $unknown: [string, any];
   }
 
@@ -153,6 +174,7 @@ export namespace TradeEvents {
     alpha: (value: Alpha) => T;
     beta: (value: Unit) => T;
     gamma: (value: Unit) => T;
+    delta: (value: DifferentShapeName) => T;
     _: (name: string, value: any) => T;
   }
 
@@ -160,6 +182,7 @@ export namespace TradeEvents {
     if (value.alpha !== undefined) return visitor.alpha(value.alpha);
     if (value.beta !== undefined) return visitor.beta(value.beta);
     if (value.gamma !== undefined) return visitor.gamma(value.gamma);
+    if (value.delta !== undefined) return visitor.delta(value.delta);
     return visitor._(value.$unknown[0], value.$unknown[1]);
   };
 }
@@ -180,6 +203,11 @@ export const TradeEventsFilterSensitiveLog = (obj: TradeEvents): any => {
   if (obj.gamma !== undefined) {
     return {
       gamma: obj.gamma
+    };
+  }
+  if (obj.delta !== undefined) {
+    return {
+      delta: obj.delta
     };
   }
   if (obj.$unknown !== undefined) return { [obj.$unknown[0]]: "UNKNOWN" };

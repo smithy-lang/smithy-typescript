@@ -267,11 +267,19 @@ union TradeEvents {
     alpha: Alpha
     beta: Unit
     gamma: Unit
+    delta: DifferentShapeName
 }
 
 structure Alpha {
     id: String
     timestamp: Timestamp
+}
+
+// this tests that the event stream member associated with it
+// generates using :event-type: delta rather than :event-type: DifferentShapeName.
+structure DifferentShapeName {
+    name: String
+    number: Integer
 }
 
 @rpcv2Cbor

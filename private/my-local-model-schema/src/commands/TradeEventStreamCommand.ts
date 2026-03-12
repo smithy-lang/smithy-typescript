@@ -45,6 +45,10 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  *     },
  *     beta: {},
  *     gamma: {},
+ *     delta: { // DifferentShapeName
+ *       name: "STRING_VALUE",
+ *       number: Number("int"),
+ *     },
  *   },
  * };
  * const command = new TradeEventStreamCommand(input);
@@ -57,6 +61,10 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  * //     },
  * //     beta: {},
  * //     gamma: {},
+ * //     delta: { // DifferentShapeName
+ * //       name: "STRING_VALUE",
+ * //       number: Number("int"),
+ * //     },
  * //   },
  * // };
  *

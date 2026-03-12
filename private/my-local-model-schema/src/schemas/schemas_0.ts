@@ -1,5 +1,6 @@
 const _A = "Alpha";
 const _CTE = "CodedThrottlingError";
+const _DSN = "DifferentShapeName";
 const _GN = "GetNumbers";
 const _GNR = "GetNumbersRequest";
 const _GNRe = "GetNumbersResponse";
@@ -25,6 +26,7 @@ const _cCO = "camelCaseOperation";
 const _cCOI = "camelCaseOperationInput";
 const _cCOO = "camelCaseOperationOutput";
 const _cHI = "customHeaderInput";
+const _d = "delta";
 const _dN = "deprecatedNumbers";
 const _dNWC = "deprecatedNumbersWithoutChronology";
 const _dNWE = "deprecatedNumbersWithoutExplanation";
@@ -39,8 +41,10 @@ const _i = "id";
 const _iDN = "inexplicablyDeprecatedNumbers";
 const _m = "message";
 const _mR = "maxResults";
-const _n = "numbers";
+const _n = "name";
 const _nT = "nextToken";
+const _nu = "number";
+const _num = "numbers";
 const _r = "results";
 const _s = "smithy.ts.sdk.synthetic.org.xyz.v1";
 const _sT = "startToken";
@@ -145,6 +149,11 @@ export var camelCaseOperationOutput$: StaticStructureSchema = [3, n0, _cCOO,
   [_to, _r],
   [0, 64 | 21]
 ];
+export var DifferentShapeName$: StaticStructureSchema = [3, n0, _DSN,
+  0,
+  [_n, _nu],
+  [0, 1]
+];
 export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
   0,
   [_bD, _bI, _fWM, _fWMi, _sT, _mR, _cHI],
@@ -152,7 +161,7 @@ export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
 ];
 export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   0,
-  [_bD, _bI, _n, _nT, _dN, _dNWE, _dNWC, _iDN],
+  [_bD, _bI, _num, _nT, _dN, _dNWE, _dNWC, _iDN],
   [19, 17, 64 | 1, 0, 64 | 1, 64 | 1, 64 | 1, 64 | 1]
 ];
 export var TradeEventStreamRequest$: StaticStructureSchema = [3, n0, _TESR,
@@ -170,8 +179,8 @@ var Blobs = 64 | 21;
 var IntegerList = 64 | 1;
 export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_st]: 1 },
-  [_a, _b, _g],
-  [() => Alpha$, () => __Unit, () => __Unit]
+  [_a, _b, _g, _d],
+  [() => Alpha$, () => __Unit, () => __Unit, () => DifferentShapeName$]
 ];
 export var HttpLabelCommand$: StaticOperationSchema = [9, n1, _HLC,
   { [_h]: ["POST", "/{LabelDoesNotApplyToRpcProtocol}", 200] }, () => HttpLabelCommandInput$, () => HttpLabelCommandOutput$

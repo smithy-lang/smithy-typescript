@@ -6,6 +6,7 @@ import {
   camelCaseOperationOutput$,
   CodedThrottlingError,
   CodedThrottlingError$,
+  DifferentShapeName$,
   GetNumbers$,
   GetNumbersCommand,
   GetNumbersRequest$,
@@ -56,6 +57,7 @@ assert(typeof HttpLabelCommandOutput$ === "object");
 assert(typeof Alpha$ === "object");
 assert(typeof camelCaseOperationInput$ === "object");
 assert(typeof camelCaseOperationOutput$ === "object");
+assert(typeof DifferentShapeName$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
 assert(typeof GetNumbersResponse$ === "object");
 assert(typeof TradeEvents$ === "object");

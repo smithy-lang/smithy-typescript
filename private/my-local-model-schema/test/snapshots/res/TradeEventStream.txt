@@ -82,6 +82,24 @@ content-type: application/cbor
 [message-crc] 2477278713
 ============================================================
 
+[chunk (event-stream object view)]
+  [total-size] 114 [header-size] 75 [prelude-crc] 121566430
+:event-type: delta
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "name": "__name__",
+  "number": 0
+}
+
+[actual bytes]
+162, 100, 110, 97, 109, 101, 104, 95, 95, 110, 97, 109, 101, 95, 95, 102, 110, 117, 109, 98, 101, 114, 0
+
+[message-crc] 3691208368
+============================================================
+
 [chunk (b64)]
 Cg==
 
@@ -101,6 +119,12 @@ Cg==
     },
     {
       gamma: {}
+    },
+    {
+      delta: {
+        name: "__name__",
+        number: (number) 0
+      }
     }
   ],
   $metadata: {
