@@ -16,7 +16,7 @@ export function buildAbortError(abortSignal?: unknown): Error {
     if (reason instanceof Error) {
       const abortError = new Error("Request aborted");
       abortError.name = "AbortError";
-      abortError.cause = reason;
+      (abortError as { cause?: unknown }).cause = reason;
       return abortError;
     }
     const abortError = new Error(String(reason));
