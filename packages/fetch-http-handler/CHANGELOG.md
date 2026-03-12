@@ -1,5 +1,13 @@
 # Change Log
 
+## 5.3.15
+
+### Patch Changes
+
+- dab22f1: fix: do not return caller's Error directly from buildAbortError
+
+  Always create a new mutable Error when the abort reason is an Error, preserving the original via `.cause`. Fixes TypeError when retry middleware tries to set `$metadata` on a frozen/sealed abort reason.
+
 ## 5.3.14
 
 ### Patch Changes

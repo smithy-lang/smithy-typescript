@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.23.11
+
+### Patch Changes
+
+- 2edd638: feat(schema): add caching to NormalizedSchema.of() and translateTraits()
+  - @smithy/util-stream@4.5.19
+
 ## 3.23.10
 
 ### Patch Changes
