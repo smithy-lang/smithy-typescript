@@ -1,5 +1,19 @@
 # Change Log
 
+## 4.4.24
+
+### Patch Changes
+
+- 5340b11: apply resolved endpoint headers to final request
+- Updated dependencies [5340b11]
+  - @smithy/core@3.23.10
+  - @smithy/types@4.13.1
+  - @smithy/middleware-serde@4.2.13
+  - @smithy/node-config-provider@4.3.12
+  - @smithy/shared-ini-file-loader@4.4.7
+  - @smithy/url-parser@4.2.12
+  - @smithy/util-middleware@4.2.12
+
 ## 4.4.23
 
 ### Patch Changes

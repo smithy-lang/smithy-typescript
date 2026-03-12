@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.23.10
+
+### Patch Changes
+
+- 5340b11: apply resolved endpoint headers to final request
+- Updated dependencies [5340b11]
+  - @smithy/types@4.13.1
+  - @smithy/protocol-http@5.3.12
+  - @smithy/url-parser@4.2.12
+  - @smithy/util-middleware@4.2.12
+  - @smithy/util-stream@4.5.18
+
 ## 3.23.9
 
 ### Patch Changes

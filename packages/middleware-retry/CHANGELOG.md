@@ -1,5 +1,19 @@
 # Change Log
 
+## 4.4.41
+
+### Patch Changes
+
+- dfc743d: fix(middleware-retry): memoize default retry strategy in `resolveRetryConfig` so that `StandardRetryStrategy` capacity and `AdaptiveRetryStrategy` rate limiter state persist across requests instead of being reconstructed per-call.
+- Updated dependencies [5340b11]
+  - @smithy/types@4.13.1
+  - @smithy/smithy-client@4.12.4
+  - @smithy/node-config-provider@4.3.12
+  - @smithy/protocol-http@5.3.12
+  - @smithy/service-error-classification@4.2.12
+  - @smithy/util-middleware@4.2.12
+  - @smithy/util-retry@4.2.12
+
 ## 4.4.40
 
 ### Patch Changes

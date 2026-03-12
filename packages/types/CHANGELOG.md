@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.13.1
+
+### Patch Changes
+
+- 5340b11: apply resolved endpoint headers to final request
+
 ## 4.13.0
 
 ### Minor Changes

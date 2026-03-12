@@ -1,5 +1,13 @@
 # @smithy/signature-v4a
 
+## 3.1.12
+
+### Patch Changes
+
+- Updated dependencies [5340b11]
+  - @smithy/types@4.13.1
+  - @smithy/signature-v4@5.3.12
+
 ## 3.1.11
 
 ### Patch Changes
