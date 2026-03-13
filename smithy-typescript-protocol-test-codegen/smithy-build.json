@@ -13,6 +13,7 @@
       "plugins": {
         "typescript-codegen": {
           "package": "@smithy/smithy-rpcv2-cbor",
+          "packageManager": "npm",
           "packageVersion": "1.0.0-alpha.1",
           "packageJson": {
             "author": {
@@ -42,6 +43,7 @@
       "plugins": {
         "typescript-codegen": {
           "package": "@smithy/smithy-rpcv2-cbor-schema",
+          "packageManager": "npm",
           "packageVersion": "1.0.0-alpha.1",
           "packageJson": {
             "author": {
@@ -71,6 +73,7 @@
         "typescript-client-codegen": {
           "service": "org.xyz.v1#XYZService",
           "package": "xyz",
+          "packageManager": "npm",
           "packageVersion": "0.0.1",
           "versioningScheme": "@smithy/core",
           "packageJson": {
@@ -94,6 +97,7 @@
         "typescript-client-codegen": {
           "service": "org.xyz.v1#XYZService",
           "package": "xyz-schema",
+          "packageManager": "npm",
           "packageVersion": "0.0.1",
           "versioningScheme": "@aws-sdk/client",
           "packageJson": {
