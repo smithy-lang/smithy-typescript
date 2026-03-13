@@ -95,5 +95,30 @@ describe(AdaptiveRetryStrategy.name, () => {
       await mockedSuperRetry.mock.calls[0][2]!.afterRequest();
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledTimes(1);
     });
+
+    it("passes abortSignal to rateLimiter.getSendToken", async () => {
+      vi.clearAllMocks();
+      const next = vi.fn();
+      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider);
+      const abortController = new AbortController();
+      await retryStrategy.retry(next, { request: { headers: {} } } as any, {
+        abortSignal: abortController.signal,
+      });
+      expect(mockedSuperRetry).toHaveBeenCalledTimes(1);
+      await mockedSuperRetry.mock.calls[0][2]!.beforeRequest();
+      expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledWith(abortController.signal);
+    });
+
+    it("passes abortSignal through to super.retry options", async () => {
+      vi.clearAllMocks();
+      const next = vi.fn();
+      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider);
+      const abortController = new AbortController();
+      await retryStrategy.retry(next, { request: { headers: {} } } as any, {
+        abortSignal: abortController.signal,
+      });
+      expect(mockedSuperRetry).toHaveBeenCalledTimes(1);
+      expect(mockedSuperRetry.mock.calls[0][2]!.abortSignal).toBe(abortController.signal);
+    });
   });
 });

@@ -29,15 +29,19 @@ export class AdaptiveRetryStrategy extends StandardRetryStrategy {
 
   async retry<Input extends object, Ouput extends MetadataBearer>(
     next: FinalizeHandler<Input, Ouput>,
-    args: FinalizeHandlerArguments<Input>
+    args: FinalizeHandlerArguments<Input>,
+    options?: {
+      abortSignal?: AbortSignal;
+    }
   ) {
     return super.retry(next, args, {
       beforeRequest: async () => {
-        return this.rateLimiter.getSendToken();
+        return this.rateLimiter.getSendToken(options?.abortSignal);
       },
       afterRequest: (response: any) => {
         this.rateLimiter.updateClientSendingRate(response);
       },
+      abortSignal: options?.abortSignal,
     });
   }
 }

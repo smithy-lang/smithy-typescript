@@ -40,6 +40,75 @@ describe(DefaultRateLimiter.name, () => {
       vi.runAllTimers();
       expect(spy).toHaveBeenLastCalledWith(expect.any(Function), delay);
     });
+
+    it("rejects when abortSignal is already aborted", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 500);
+      rateLimiter.updateClientSendingRate({});
+
+      const abortController = new AbortController();
+      const reason = new Error("Lambda timeout approaching");
+      abortController.abort(reason);
+
+      await expect(rateLimiter.getSendToken(abortController.signal)).rejects.toBe(reason);
+    });
+
+    it("rejects when abortSignal fires during wait", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 500);
+      rateLimiter.updateClientSendingRate({});
+
+      const abortController = new AbortController();
+      const reason = new Error("Lambda timeout approaching");
+
+      const promise = rateLimiter.getSendToken(abortController.signal);
+      abortController.abort(reason);
+
+      await expect(promise).rejects.toBe(reason);
+    });
+
+    it("resolves normally when abortSignal is not aborted", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      // Use a spy to immediately resolve the setTimeout callback
+      vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn").mockImplementation((cb: () => void) => {
+        cb();
+        return 0;
+      });
+
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 500);
+      rateLimiter.updateClientSendingRate({});
+
+      const abortController = new AbortController();
+      await expect(rateLimiter.getSendToken(abortController.signal)).resolves.toBeUndefined();
+    });
+
+    it("removes abort listener after successful delay", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn").mockImplementation((cb: () => void) => {
+        cb();
+        return 0;
+      });
+
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 500);
+      rateLimiter.updateClientSendingRate({});
+
+      const abortController = new AbortController();
+      const removeEventListenerSpy = vi.spyOn(abortController.signal, "removeEventListener");
+      await rateLimiter.getSendToken(abortController.signal);
+      expect(removeEventListenerSpy).toHaveBeenCalledWith("abort", expect.any(Function));
+    });
   });
 
   describe("cubicSuccess", () => {

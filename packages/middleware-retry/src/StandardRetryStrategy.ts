@@ -69,6 +69,7 @@ export class StandardRetryStrategy implements RetryStrategy {
     options?: {
       beforeRequest: Function;
       afterRequest: Function;
+      abortSignal?: AbortSignal;
     }
   ) {
     let retryTokenAmount;
@@ -116,7 +117,7 @@ export class StandardRetryStrategy implements RetryStrategy {
 
           totalDelay += delay;
 
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await abortableDelay(delay, options?.abortSignal);
           continue;
         }
 
@@ -147,4 +148,28 @@ const getDelayFromRetryAfterHeader = (response: unknown): number | undefined => 
 
   const retryAfterDate = new Date(retryAfter);
   return retryAfterDate.getTime() - Date.now();
+};
+
+/**
+ * Returns a promise that resolves after the given delay, but rejects
+ * immediately if the optional AbortSignal is triggered.
+ */
+const abortableDelay = (delay: number, abortSignal?: AbortSignal): Promise<void> => {
+  if (!abortSignal) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  if (abortSignal.aborted) {
+    return Promise.reject(abortSignal.reason ?? new Error("Request aborted"));
+  }
+  return new Promise<void>((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(abortSignal.reason ?? new Error("Request aborted"));
+    };
+    const timer = setTimeout(() => {
+      abortSignal.removeEventListener("abort", onAbort);
+      resolve();
+    }, delay);
+    abortSignal.addEventListener("abort", onAbort, { once: true });
+  });
 };

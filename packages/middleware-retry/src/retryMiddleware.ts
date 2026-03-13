@@ -83,7 +83,7 @@ export const retryMiddleware =
           attempts = retryToken.getRetryCount();
           const delay = retryToken.getRetryDelay();
           totalRetryDelay += delay;
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await abortableDelay(delay, context.abortSignal as AbortSignal | undefined);
         }
       }
     } else {
@@ -91,7 +91,7 @@ export const retryMiddleware =
       if (retryStrategy?.mode)
         context.userAgent = [...(context.userAgent || []), ["cfg/retry-mode", retryStrategy.mode]];
 
-      return retryStrategy.retry(next, args);
+      return retryStrategy.retry(next, args, { abortSignal: context.abortSignal as AbortSignal | undefined });
     }
   };
 
@@ -99,6 +99,30 @@ const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&
   typeof (retryStrategy as RetryStrategyV2).refreshRetryTokenForRetry !== "undefined" &&
   typeof (retryStrategy as RetryStrategyV2).recordSuccess !== "undefined";
+
+/**
+ * Returns a promise that resolves after the given delay, but rejects
+ * immediately if the optional AbortSignal is triggered.
+ */
+const abortableDelay = (delay: number, abortSignal?: AbortSignal): Promise<void> => {
+  if (!abortSignal) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  if (abortSignal.aborted) {
+    return Promise.reject(abortSignal.reason ?? new Error("Request aborted"));
+  }
+  return new Promise<void>((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(abortSignal.reason ?? new Error("Request aborted"));
+    };
+    const timer = setTimeout(() => {
+      abortSignal.removeEventListener("abort", onAbort);
+      resolve();
+    }, delay);
+    abortSignal.addEventListener("abort", onAbort, { once: true });
+  });
+};
 
 const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
   const errorInfo: RetryErrorInfo = {
