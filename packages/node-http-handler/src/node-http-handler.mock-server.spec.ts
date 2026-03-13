@@ -1,10 +1,10 @@
 import { AbortController } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/protocol-http";
-import type { Server as HttpServer } from "http";
-import http from "http";
-import type { Server as HttpsServer } from "https";
-import https from "https";
 import type { AddressInfo } from "net";
+import type { Server as HttpServer } from "node:http";
+import http from "node:http";
+import type { Server as HttpsServer } from "node:https";
+import https from "node:https";
 import { afterAll, afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
@@ -42,8 +42,8 @@ vi.mock("https", async () => {
   };
 });
 
-import { request as hRequest } from "http";
-import { request as hsRequest } from "https";
+import { request as hRequest } from "node:http";
+import { request as hsRequest } from "node:https";
 
 describe("http", () => {
   let mockHttpServer: HttpServer;

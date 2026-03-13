@@ -1,6 +1,6 @@
 import type { StreamCollector } from "@smithy/types";
-import type { Readable } from "stream";
-import type { ReadableStream as IReadableStream } from "stream/web";
+import type { Readable } from "node:stream";
+import type { ReadableStream as IReadableStream } from "node:stream/web";
 
 import { Collector } from "./collector";
 
