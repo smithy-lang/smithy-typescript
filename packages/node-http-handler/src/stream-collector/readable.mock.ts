@@ -1,5 +1,5 @@
-import type { ReadableOptions } from "stream";
-import { Readable } from "stream";
+import type { ReadableOptions } from "node:stream";
+import { Readable } from "node:stream";
 
 export interface ReadFromBuffersOptions extends ReadableOptions {
   buffers: Buffer[];

@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
-import type { ClientRequest } from "http";
 import { Socket } from "net";
+import type { ClientRequest } from "node:http";
 import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setSocketKeepAlive } from "./set-socket-keep-alive";

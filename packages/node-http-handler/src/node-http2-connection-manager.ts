@@ -1,8 +1,8 @@
 import type { RequestContext } from "@smithy/types";
 import type { ConnectConfiguration } from "@smithy/types";
 import type { ConnectionManager, ConnectionManagerConfiguration } from "@smithy/types";
-import type { ClientHttp2Session } from "http2";
-import http2 from "http2";
+import type { ClientHttp2Session } from "node:http2";
+import http2 from "node:http2";
 
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
 
