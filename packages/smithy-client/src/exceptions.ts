@@ -36,6 +36,8 @@ export class ServiceException extends Error implements SmithyException, Metadata
     this.name = options.name;
     this.$fault = options.$fault;
     this.$metadata = options.$metadata;
+    this.$retryable = options.$retryable;
+    this.$response = options.$response;
   }
 
   /**
