@@ -88,6 +88,9 @@ describe("simple matching", () => {
       new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar", baz: "quux" } }),
       new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar", baz: null } }),
       new HttpRequest({ method: "DELETE", path: "", query: { foo: "bar", baz: ["quux", "grault"] } }),
+      // "query" type segments (from @required @httpQuery) are not used for routing,
+      // so missing "baz" still routes to Delete — validation catches it later
+      new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar" } }),
     ],
     "Test#QueryKeyOnly": [
       new HttpRequest({ method: "GET", path: "/query_key_only", query: { foo: "bar" } }),
@@ -115,7 +118,6 @@ describe("simple matching", () => {
     new HttpRequest({ method: "GET", path: "/mg/a/y/z/a" }),
     new HttpRequest({ method: "GET", path: "/mg/a/y/a" }),
     new HttpRequest({ method: "GET", path: "/mg/a/b/z/c" }),
-    new HttpRequest({ method: "DELETE", path: "/", query: { foo: "bar" } }),
     new HttpRequest({ method: "DELETE", path: "/", query: { baz: "quux" } }),
     new HttpRequest({ method: "DELETE", path: "/" }),
   ];
