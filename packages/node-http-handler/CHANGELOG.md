@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.5.0
+
+### Minor Changes
+
+- 4e7fa38: defer loading of node:http module
+
 ## 4.4.16
 
 ### Patch Changes

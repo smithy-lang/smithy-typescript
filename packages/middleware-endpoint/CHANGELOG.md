@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.4.26
+
+### Patch Changes
+
+- @smithy/core@3.23.12
+- @smithy/middleware-serde@4.2.15
+
 ## 4.4.25
 
 ### Patch Changes
