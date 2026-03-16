@@ -6,17 +6,18 @@ import type {
   StandardRetryToken,
 } from "@smithy/types";
 
-import { DEFAULT_RETRY_DELAY_BASE } from "./constants";
+import { Retry } from "./retries-2026-config";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 
 /**
- * @public
- *
  * This extension of the StandardRetryStrategy allows customizing the
  * backoff computation.
+ *
+ * @public
  */
 export class ConfiguredRetryStrategy extends StandardRetryStrategy implements RetryStrategyV2 {
   private readonly computeNextBackoffDelay: (attempt: number) => number;
+
   /**
    * @param maxAttempts - the maximum number of retry attempts allowed.
    *                      e.g., if set to 3, then 4 total requests are possible.
@@ -38,7 +39,7 @@ export class ConfiguredRetryStrategy extends StandardRetryStrategy implements Re
    */
   public constructor(
     maxAttempts: number | Provider<number>,
-    computeNextBackoffDelay: number | RetryBackoffStrategy["computeNextBackoffDelay"] = DEFAULT_RETRY_DELAY_BASE
+    computeNextBackoffDelay: number | RetryBackoffStrategy["computeNextBackoffDelay"] = Retry.delay()
   ) {
     super(typeof maxAttempts === "function" ? maxAttempts : async () => maxAttempts);
     if (typeof computeNextBackoffDelay === "number") {

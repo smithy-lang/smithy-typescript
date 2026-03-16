@@ -33,6 +33,7 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/service-error-classification": "workspace:^",

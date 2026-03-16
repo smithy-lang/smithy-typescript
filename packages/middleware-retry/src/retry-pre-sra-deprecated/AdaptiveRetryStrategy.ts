@@ -6,8 +6,9 @@ import type { StandardRetryStrategyOptions } from "./StandardRetryStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 
 /**
- * @public
  * Strategy options to be passed to AdaptiveRetryStrategy
+ * @public
+ * @deprecated replaced by \@smithy/util-retry (SRA).
  */
 export interface AdaptiveRetryStrategyOptions extends StandardRetryStrategyOptions {
   rateLimiter?: RateLimiter;

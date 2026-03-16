@@ -1,7 +1,13 @@
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
-import type { SdkError } from "@smithy/types";
-import type { FinalizeHandler, FinalizeHandlerArguments, MetadataBearer, Provider, RetryStrategy } from "@smithy/types";
+import type {
+  FinalizeHandler,
+  FinalizeHandlerArguments,
+  MetadataBearer,
+  Provider,
+  RetryStrategy,
+  SdkError,
+} from "@smithy/types";
 import {
   DEFAULT_MAX_ATTEMPTS,
   DEFAULT_RETRY_DELAY_BASE,
@@ -13,11 +19,11 @@ import {
 } from "@smithy/util-retry";
 import { v4 } from "@smithy/uuid";
 
+import { asSdkError } from "../util";
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
 import { defaultRetryDecider } from "./retryDecider";
 import type { DelayDecider, RetryDecider, RetryQuota } from "./types";
-import { asSdkError } from "./util";
 
 /**
  * Strategy options to be passed to StandardRetryStrategy
@@ -134,6 +140,8 @@ export class StandardRetryStrategy implements RetryStrategy {
 
 /**
  * Returns number of milliseconds to wait based on "Retry-After" header value.
+ * @internal
+ * @deprecated
  */
 const getDelayFromRetryAfterHeader = (response: unknown): number | undefined => {
   if (!HttpResponse.isInstance(response)) return;

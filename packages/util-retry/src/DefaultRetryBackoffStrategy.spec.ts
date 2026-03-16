@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { DEFAULT_RETRY_DELAY_BASE, MAXIMUM_RETRY_DELAY } from "./constants";
-import { getDefaultRetryBackoffStrategy } from "./defaultRetryBackoffStrategy";
+import { MAXIMUM_RETRY_DELAY } from "./constants";
+import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
+import { Retry } from "./retries-2026-config";
 
 describe("defaultRetryBackoffStrategy", () => {
   const mathDotRandom = Math.random;
@@ -14,10 +15,10 @@ describe("defaultRetryBackoffStrategy", () => {
     Math.random = mathDotRandom;
   });
 
-  describe(`uses ${DEFAULT_RETRY_DELAY_BASE} by default`, () => {
+  describe(`uses ${Retry.delay()} by default`, () => {
     [0, 1, 2, 3].forEach((attempts) => {
-      const expectedDelay = Math.floor(2 ** attempts * DEFAULT_RETRY_DELAY_BASE);
-      const retryBackoffStrategy = getDefaultRetryBackoffStrategy();
+      const expectedDelay = Math.floor(2 ** attempts * Retry.delay());
+      const retryBackoffStrategy = new DefaultRetryBackoffStrategy();
       it(`(${attempts}) returns ${expectedDelay}`, () => {
         expect(retryBackoffStrategy.computeNextBackoffDelay(attempts)).toBe(expectedDelay);
       });
@@ -28,7 +29,7 @@ describe("defaultRetryBackoffStrategy", () => {
     [0, 1, 2, 3].forEach((attempts) => {
       const mockDelayBase = 50;
       const expectedDelay = Math.floor(2 ** attempts * mockDelayBase);
-      const retryBackoffStrategy = getDefaultRetryBackoffStrategy();
+      const retryBackoffStrategy = new DefaultRetryBackoffStrategy();
       retryBackoffStrategy.setDelayBase(mockDelayBase);
       it(`(${attempts}) returns ${expectedDelay}`, () => {
         expect(retryBackoffStrategy.computeNextBackoffDelay(attempts)).toBe(expectedDelay);
@@ -37,7 +38,7 @@ describe("defaultRetryBackoffStrategy", () => {
   });
 
   describe(`caps retry delay at ${MAXIMUM_RETRY_DELAY / 1000} seconds`, () => {
-    const retryBackoffStrategy = getDefaultRetryBackoffStrategy();
+    const retryBackoffStrategy = new DefaultRetryBackoffStrategy();
     it("when value exceeded because of high delayBase", () => {
       retryBackoffStrategy.setDelayBase(MAXIMUM_RETRY_DELAY + 1);
       expect(retryBackoffStrategy.computeNextBackoffDelay(0)).toBe(MAXIMUM_RETRY_DELAY);
@@ -54,7 +55,7 @@ describe("defaultRetryBackoffStrategy", () => {
   });
 
   describe("randomizes the retry delay value", () => {
-    const retryBackoffStrategy = getDefaultRetryBackoffStrategy();
+    const retryBackoffStrategy = new DefaultRetryBackoffStrategy();
     Array.from({ length: 3 }, () => Math.random()).forEach((mockRandomValue) => {
       const attempts = 0;
       const delayBase = 100;

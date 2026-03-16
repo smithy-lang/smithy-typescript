@@ -1,43 +1,28 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type { RetryErrorInfo, RetryErrorType } from "@smithy/types";
-import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+import type { RetryErrorInfo } from "@smithy/types";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { RETRY_MODES } from "./config";
-import { DEFAULT_RETRY_DELAY_BASE } from "./constants";
-import { createDefaultRetryToken } from "./defaultRetryToken";
+import { DefaultRetryToken } from "./DefaultRetryToken";
+import { Retry } from "./retries-2026-config";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 
-vi.mock("./defaultRetryToken");
+vi.mock("./DefaultRetryToken");
 
 describe(StandardRetryStrategy.name, () => {
   const maxAttempts = 3;
   const retryTokenScope = "scope";
-  const mockRetryToken = {
-    getRetryCount: () => 1,
-    getRetryTokenCount: (errorInfo: any) => 1,
-    getRetryCost() {
-      return 0;
-    },
-    getRetryDelay() {
-      return 0;
-    },
-  };
   const noRetryTokenAvailableError = new Error("No retry token available");
   const errorInfo = { errorType: "TRANSIENT" } as RetryErrorInfo;
-
-  beforeEach(() => {
-    vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
-  });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("sets maxAttemptsProvider as a class member variable", () => {
-    [1, 2, 3].forEach(async (maxAttempts) => {
+  it("sets maxAttemptsProvider as a class member variable", async () => {
+    for (const maxAttempts of [1, 2, 3]) {
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
       await expect(retryStrategy["maxAttemptsProvider"]()).resolves.toBe(maxAttempts);
-    });
+    }
   });
 
   it(`sets mode=${RETRY_MODES.STANDARD}`, () => {
@@ -49,30 +34,26 @@ describe(StandardRetryStrategy.name, () => {
     it("returns default retryToken", async () => {
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
       const retryToken = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
-      expect(retryToken).toEqual(
-        createDefaultRetryToken({
-          retryDelay: DEFAULT_RETRY_DELAY_BASE,
-          retryCount: 0,
-        })
-      );
+      const defaultToken = new DefaultRetryToken(Retry.delay(), 0, 0, false);
+      expect([retryToken.getRetryCost(), retryToken.getRetryCount(), retryToken.getRetryDelay()]).toEqual([
+        defaultToken.getRetryCost(),
+        defaultToken.getRetryCount(),
+        defaultToken.getRetryDelay(),
+      ]);
     });
   });
 
   describe("refreshRetryTokenForRetry", () => {
     it("refreshes the token", async () => {
       const getRetryCount = vi.fn().mockReturnValue(0);
-      const hasRetryTokens = vi.fn().mockReturnValue(true);
-      const mockRetryToken = {
-        getRetryCount,
-        hasRetryTokens,
-        getRetryCost() {
-          return 0;
-        },
-        getRetryDelay() {
-          return 0;
-        },
-      };
-      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
+      vi.mocked(DefaultRetryToken).mockImplementation(
+        () =>
+          ({
+            getRetryCount,
+            getRetryCost: () => 0,
+            getRetryDelay: () => 0,
+          }) as any
+      );
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
@@ -80,17 +61,14 @@ describe(StandardRetryStrategy.name, () => {
     });
 
     it("disables any retries when maxAttempts is 1", async () => {
-      const mockRetryToken = {
-        getRetryCount: () => 0,
-        getRetryTokenCount: (errorInfo: any) => 1,
-        getRetryCost() {
-          return 0;
-        },
-        getRetryDelay() {
-          return 0;
-        },
-      };
-      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
+      vi.mocked(DefaultRetryToken).mockImplementation(
+        () =>
+          ({
+            getRetryCount: () => 0,
+            getRetryCost: () => 0,
+            getRetryDelay: () => 0,
+          }) as any
+      );
       const retryStrategy = new StandardRetryStrategy(1);
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
@@ -102,17 +80,14 @@ describe(StandardRetryStrategy.name, () => {
     });
 
     it("throws when attempts exceeds maxAttempts", async () => {
-      const mockRetryToken = {
-        getRetryCount: () => 2,
-        getRetryTokenCount: (errorInfo: any) => 1,
-        getRetryCost() {
-          return 0;
-        },
-        getRetryDelay() {
-          return 0;
-        },
-      };
-      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
+      vi.mocked(DefaultRetryToken).mockImplementation(
+        () =>
+          ({
+            getRetryCount: () => 2,
+            getRetryCost: () => 0,
+            getRetryDelay: () => 0,
+          }) as any
+      );
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(1));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
@@ -124,17 +99,14 @@ describe(StandardRetryStrategy.name, () => {
     });
 
     it("throws when attempts exceeds default max attempts (3)", async () => {
-      const mockRetryToken = {
-        getRetryCount: () => 5,
-        getRetryTokenCount: (errorInfo: any) => 1,
-        getRetryCost() {
-          return 0;
-        },
-        getRetryDelay() {
-          return 0;
-        },
-      };
-      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
+      vi.mocked(DefaultRetryToken).mockImplementation(
+        () =>
+          ({
+            getRetryCount: () => 5,
+            getRetryCost: () => 0,
+            getRetryDelay: () => 0,
+          }) as any
+      );
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(5));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
@@ -146,18 +118,14 @@ describe(StandardRetryStrategy.name, () => {
     });
 
     it("throws when error is non-retryable", async () => {
-      const mockRetryToken = {
-        getRetryCount: () => 0,
-        getRetryTokenCount: (errorInfo: any) => 1,
-        hasRetryTokens: (errorType: RetryErrorType) => true,
-        getRetryCost() {
-          return 0;
-        },
-        getRetryDelay() {
-          return 0;
-        },
-      };
-      vi.mocked(createDefaultRetryToken).mockReturnValue(mockRetryToken);
+      vi.mocked(DefaultRetryToken).mockImplementation(
+        () =>
+          ({
+            getRetryCount: () => 0,
+            getRetryCost: () => 0,
+            getRetryDelay: () => 0,
+          }) as any
+      );
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       const errorInfo = {

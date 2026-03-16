@@ -44,11 +44,11 @@ export class DefaultRateLimiter implements RateLimiter {
   private static setTimeoutFn = setTimeout;
 
   // User configurable constants
-  private beta: number;
-  private minCapacity: number;
-  private minFillRate: number;
-  private scaleConstant: number;
-  private smooth: number;
+  private readonly beta: number;
+  private readonly minCapacity: number;
+  private readonly minFillRate: number;
+  private readonly scaleConstant: number;
+  private readonly smooth: number;
 
   /**
    * Whether adaptive retry rate limiting is active.
@@ -98,53 +98,22 @@ export class DefaultRateLimiter implements RateLimiter {
    */
   private timeWindow = 0;
 
-  constructor(options?: DefaultRateLimiterOptions) {
+  public constructor(options?: DefaultRateLimiterOptions) {
     this.beta = options?.beta ?? 0.7;
     this.minCapacity = options?.minCapacity ?? 1;
     this.minFillRate = options?.minFillRate ?? 0.5;
     this.scaleConstant = options?.scaleConstant ?? 0.4;
     this.smooth = options?.smooth ?? 0.8;
 
-    const currentTimeInSeconds = this.getCurrentTimeInSeconds();
-    this.lastThrottleTime = currentTimeInSeconds;
+    this.lastThrottleTime = this.getCurrentTimeInSeconds();
     this.lastTxRateBucket = Math.floor(this.getCurrentTimeInSeconds());
 
     this.fillRate = this.minFillRate;
     this.maxCapacity = this.minCapacity;
   }
 
-  private getCurrentTimeInSeconds() {
-    return Date.now() / 1000;
-  }
-
   public async getSendToken() {
     return this.acquireTokenBucket(1);
-  }
-
-  private async acquireTokenBucket(amount: number) {
-    // Client side throttling is not enabled until we see a throttling error.
-    if (!this.enabled) {
-      return;
-    }
-
-    this.refillTokenBucket();
-    if (amount > this.availableTokens) {
-      const delay = ((amount - this.availableTokens) / this.fillRate) * 1000;
-      await new Promise((resolve) => DefaultRateLimiter.setTimeoutFn(resolve, delay));
-    }
-    this.availableTokens = this.availableTokens - amount;
-  }
-
-  private refillTokenBucket() {
-    const timestamp = this.getCurrentTimeInSeconds();
-    if (!this.lastTimestamp) {
-      this.lastTimestamp = timestamp;
-      return;
-    }
-
-    const fillAmount = (timestamp - this.lastTimestamp) * this.fillRate;
-    this.availableTokens = Math.min(this.maxCapacity, this.availableTokens + fillAmount);
-    this.lastTimestamp = timestamp;
   }
 
   public updateClientSendingRate(response: any) {
@@ -173,6 +142,36 @@ export class DefaultRateLimiter implements RateLimiter {
 
     const newRate = Math.min(calculatedRate, 2 * this.measuredTxRate);
     this.updateTokenBucketRate(newRate);
+  }
+
+  private getCurrentTimeInSeconds() {
+    return Date.now() / 1000;
+  }
+
+  private async acquireTokenBucket(amount: number) {
+    // Client side throttling is not enabled until we see a throttling error.
+    if (!this.enabled) {
+      return;
+    }
+
+    this.refillTokenBucket();
+    if (amount > this.availableTokens) {
+      const delay = ((amount - this.availableTokens) / this.fillRate) * 1000;
+      await new Promise((resolve) => DefaultRateLimiter.setTimeoutFn(resolve, delay));
+    }
+    this.availableTokens = this.availableTokens - amount;
+  }
+
+  private refillTokenBucket() {
+    const timestamp = this.getCurrentTimeInSeconds();
+    if (!this.lastTimestamp) {
+      this.lastTimestamp = timestamp;
+      return;
+    }
+
+    const fillAmount = (timestamp - this.lastTimestamp) * this.fillRate;
+    this.availableTokens = Math.min(this.maxCapacity, this.availableTokens + fillAmount);
+    this.lastTimestamp = timestamp;
   }
 
   private calculateTimeWindow() {

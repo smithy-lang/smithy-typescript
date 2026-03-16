@@ -2,21 +2,20 @@ import type { Provider, RetryErrorInfo, RetryStrategyV2, RetryToken, StandardRet
 
 import { RETRY_MODES } from "./config";
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
+import type { StandardRetryStrategyOptions } from "./StandardRetryStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import type { RateLimiter } from "./types";
 
 /**
- * @public
- *
  * Strategy options to be passed to AdaptiveRetryStrategy
+ *
+ * @public
  */
-export interface AdaptiveRetryStrategyOptions {
+export interface AdaptiveRetryStrategyOptions extends Partial<StandardRetryStrategyOptions> {
   rateLimiter?: RateLimiter;
 }
 
 /**
- * @public
- *
  * The AdaptiveRetryStrategy is a retry strategy for executing against a very
  * resource constrained set of resources. Care should be taken when using this
  * retry strategy. By default, it uses a dynamic backoff delay based on load
@@ -24,21 +23,26 @@ export interface AdaptiveRetryStrategyOptions {
  * breaking to disable retries in the event of high downstream failures using
  * the DefaultRateLimiter.
  *
+ * @public
+ *
  * @see {@link StandardRetryStrategy}
  * @see {@link DefaultRateLimiter }
  */
 export class AdaptiveRetryStrategy implements RetryStrategyV2 {
+  public readonly mode: string = RETRY_MODES.ADAPTIVE;
   private rateLimiter: RateLimiter;
   private standardRetryStrategy: StandardRetryStrategy;
-  public readonly mode: string = RETRY_MODES.ADAPTIVE;
 
-  constructor(
-    private readonly maxAttemptsProvider: Provider<number>,
-    options?: AdaptiveRetryStrategyOptions
-  ) {
+  constructor(maxAttemptsProvider: number | Provider<number>, options?: AdaptiveRetryStrategyOptions) {
     const { rateLimiter } = options ?? {};
     this.rateLimiter = rateLimiter ?? new DefaultRateLimiter();
-    this.standardRetryStrategy = new StandardRetryStrategy(maxAttemptsProvider);
+
+    this.standardRetryStrategy = options
+      ? new StandardRetryStrategy({
+          maxAttempts: typeof maxAttemptsProvider === "number" ? maxAttemptsProvider : 3,
+          ...options,
+        })
+      : new StandardRetryStrategy(maxAttemptsProvider as Provider<number>);
   }
 
   public async acquireInitialRetryToken(retryTokenScope: string): Promise<RetryToken> {

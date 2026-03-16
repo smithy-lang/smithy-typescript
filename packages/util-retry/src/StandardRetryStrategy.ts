@@ -1,38 +1,67 @@
-import type { Provider, RetryErrorInfo, RetryErrorType, RetryStrategyV2, StandardRetryToken } from "@smithy/types";
+import type {
+  Provider,
+  RetryErrorInfo,
+  RetryErrorType,
+  RetryStrategyV2,
+  StandardRetryBackoffStrategy,
+  StandardRetryToken,
+} from "@smithy/types";
 
 import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
-import {
-  DEFAULT_RETRY_DELAY_BASE,
-  INITIAL_RETRY_TOKENS,
-  NO_RETRY_INCREMENT,
-  RETRY_COST,
-  THROTTLING_RETRY_DELAY_BASE,
-  TIMEOUT_RETRY_COST,
-} from "./constants";
-import { getDefaultRetryBackoffStrategy } from "./defaultRetryBackoffStrategy";
-import { createDefaultRetryToken } from "./defaultRetryToken";
+import { INITIAL_RETRY_TOKENS, NO_RETRY_INCREMENT } from "./constants";
+import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
+import { DefaultRetryToken } from "./DefaultRetryToken";
+import { Retry } from "./retries-2026-config";
+
+/**
+ * @public
+ */
+export type StandardRetryStrategyOptions = {
+  /**
+   * Maximum number of attempts. If set to 1, no retries will be made.
+   */
+  maxAttempts: number;
+  /**
+   * When present, overrides the base delay for non-throttling retries.
+   */
+  baseDelay?: number;
+  /**
+   * Backoff calculator.
+   */
+  backoff?: StandardRetryBackoffStrategy;
+};
 
 /**
  * @public
  */
 export class StandardRetryStrategy implements RetryStrategyV2 {
   public readonly mode: string = RETRY_MODES.STANDARD;
-  private capacity: number = INITIAL_RETRY_TOKENS;
-  private readonly retryBackoffStrategy = getDefaultRetryBackoffStrategy();
-  private readonly maxAttemptsProvider: Provider<number>;
 
-  constructor(maxAttempts: number);
-  constructor(maxAttemptsProvider: Provider<number>);
-  constructor(private readonly maxAttempts: number | Provider<number>) {
-    this.maxAttemptsProvider = typeof maxAttempts === "function" ? maxAttempts : async () => maxAttempts;
+  private capacity: number = INITIAL_RETRY_TOKENS;
+  private readonly retryBackoffStrategy: StandardRetryBackoffStrategy;
+  private readonly maxAttemptsProvider: Provider<number>;
+  private readonly baseDelay: number;
+
+  public constructor(maxAttempts: number);
+  public constructor(maxAttemptsProvider: Provider<number>);
+  public constructor(options: StandardRetryStrategyOptions);
+  public constructor(arg1: number | Provider<number> | StandardRetryStrategyOptions) {
+    if (typeof arg1 === "number") {
+      this.maxAttemptsProvider = async () => arg1;
+    } else if (typeof arg1 === "function") {
+      this.maxAttemptsProvider = arg1;
+    } else if (arg1 && typeof arg1 === "object") {
+      this.maxAttemptsProvider = async () => arg1.maxAttempts;
+      this.baseDelay = arg1.baseDelay!;
+      this.retryBackoffStrategy = arg1.backoff!;
+    }
+    this.maxAttemptsProvider ??= async () => DEFAULT_MAX_ATTEMPTS;
+    this.baseDelay ??= Retry.delay();
+    this.retryBackoffStrategy ??= new DefaultRetryBackoffStrategy();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async acquireInitialRetryToken(retryTokenScope: string): Promise<StandardRetryToken> {
-    return createDefaultRetryToken({
-      retryDelay: DEFAULT_RETRY_DELAY_BASE,
-      retryCount: 0,
-    });
+    return new DefaultRetryToken(Retry.delay(), 0, undefined, Retry.v2026 && retryTokenScope.includes(":longpoll"));
   }
 
   public async refreshRetryTokenForRetry(
@@ -41,37 +70,47 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
   ): Promise<StandardRetryToken> {
     const maxAttempts = await this.getMaxAttempts();
 
-    if (this.shouldRetry(token, errorInfo, maxAttempts)) {
+    const shouldRetry = this.shouldRetry(token, errorInfo, maxAttempts);
+
+    if (shouldRetry || token.isLongPoll?.()) {
       const errorType = errorInfo.errorType;
-      this.retryBackoffStrategy.setDelayBase(
-        errorType === "THROTTLING" ? THROTTLING_RETRY_DELAY_BASE : DEFAULT_RETRY_DELAY_BASE
-      );
+      this.retryBackoffStrategy.setDelayBase(errorType === "THROTTLING" ? Retry.throttlingDelay() : this.baseDelay);
 
       const delayFromErrorType = this.retryBackoffStrategy.computeNextBackoffDelay(token.getRetryCount());
-      const retryDelay = errorInfo.retryAfterHint
-        ? Math.max(errorInfo.retryAfterHint.getTime() - Date.now() || 0, delayFromErrorType)
-        : delayFromErrorType;
 
-      const capacityCost = this.getCapacityCost(errorType);
-      this.capacity -= capacityCost;
-      return createDefaultRetryToken({
-        retryDelay,
-        retryCount: token.getRetryCount() + 1,
-        retryCost: capacityCost,
-      });
+      let retryDelay = delayFromErrorType;
+      if (errorInfo.retryAfterHint instanceof Date) {
+        retryDelay = Math.max(
+          delayFromErrorType /* lower bound */,
+          Math.min(errorInfo.retryAfterHint.getTime() - Date.now(), delayFromErrorType + 5_000 /* upper bound */)
+        );
+      }
+
+      if (!shouldRetry /* implies long poll */) {
+        throw Object.assign(new Error("No retry token available"), { $backoff: Retry.v2026 ? retryDelay : 0 });
+      } else {
+        const capacityCost = this.getCapacityCost(errorType);
+        this.capacity -= capacityCost;
+
+        return new DefaultRetryToken(
+          retryDelay,
+          token.getRetryCount() + 1,
+          capacityCost,
+          token.isLongPoll?.() ?? false
+        );
+      }
     }
 
     throw new Error("No retry token available");
   }
 
   public recordSuccess(token: StandardRetryToken): void {
-    this.capacity = Math.max(INITIAL_RETRY_TOKENS, this.capacity + (token.getRetryCost() ?? NO_RETRY_INCREMENT));
+    this.capacity = Math.min(INITIAL_RETRY_TOKENS, this.capacity + (token.getRetryCost() ?? NO_RETRY_INCREMENT));
   }
 
   /**
-   * @returns the current available retry capacity.
-   *
    * This number decreases when retries are executed and refills when requests or retries succeed.
+   * @returns the current available retry capacity.
    */
   public getCapacity(): number {
     return this.capacity;
@@ -90,14 +129,14 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     const attempts = tokenToRenew.getRetryCount() + 1;
 
     return (
-      attempts < maxAttempts &&
-      this.capacity >= this.getCapacityCost(errorInfo.errorType) &&
-      this.isRetryableError(errorInfo.errorType)
+      /* has attempt remaining */ attempts < maxAttempts &&
+      /* has capacity */ this.capacity >= this.getCapacityCost(errorInfo.errorType) &&
+      /* and is retryable classification */ this.isRetryableError(errorInfo.errorType)
     );
   }
 
   private getCapacityCost(errorType: RetryErrorType) {
-    return errorType === "TRANSIENT" ? TIMEOUT_RETRY_COST : RETRY_COST;
+    return errorType === Retry.modifiedCostType() ? Retry.throttlingCost() : Retry.cost();
   }
 
   private isRetryableError(errorType: RetryErrorType): boolean {

@@ -5,6 +5,7 @@ import type { RetryQuota } from "./types";
 
 /**
  * @internal
+ * @deprecated replaced by \@smithy/util-retry (SRA).
  */
 export interface DefaultRetryQuotaOptions {
   /**
@@ -27,6 +28,7 @@ export interface DefaultRetryQuotaOptions {
 
 /**
  * @internal
+ * @deprecated replaced by \@smithy/util-retry (SRA).
  */
 export const getDefaultRetryQuota = (initialRetryTokens: number, options?: DefaultRetryQuotaOptions): RetryQuota => {
   const MAX_CAPACITY = initialRetryTokens;
