@@ -1,5 +1,13 @@
 # Smithy Typescript Codegen Changelog
 
+## 0.47.0 (2026-03-17)
+
+### Features
+
+- Added `versionScheme` option for automatic versioning of generated packages ([#1914](https://github.com/smithy-lang/smithy-typescript/pull/1914))
+- (experimental) Added option to generate request/response/error snapshots from service models ([#7788](https://github.com/aws/aws-sdk-js-v3/issues/7788))
+
+
 ## 0.46.0 (2026-03-05)
 
 ### Features
