@@ -17,9 +17,9 @@ export const DEFAULT_USE_FIPS_ENDPOINT = false;
 /**
  * @internal
  */
-export const NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS: LoadedConfigSelectors<boolean> = {
+export const NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS: LoadedConfigSelectors<boolean | undefined> = {
   environmentVariableSelector: (env: NodeJS.ProcessEnv) =>
     booleanSelector(env, ENV_USE_FIPS_ENDPOINT, SelectorType.ENV),
   configFileSelector: (profile) => booleanSelector(profile, CONFIG_USE_FIPS_ENDPOINT, SelectorType.CONFIG),
-  default: false,
+  default: undefined,
 };
