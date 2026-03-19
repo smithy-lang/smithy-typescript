@@ -45,8 +45,8 @@ describe("NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS", () => {
     test(configFileSelector, profileContent, CONFIG_USE_FIPS_ENDPOINT, SelectorType.CONFIG);
   });
 
-  it("returns false for default", () => {
+  it("returns undefined for default", () => {
     const { default: defaultValue } = NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS;
-    expect(defaultValue).toEqual(DEFAULT_USE_FIPS_ENDPOINT);
+    expect(defaultValue).toBeUndefined();
   });
 });
