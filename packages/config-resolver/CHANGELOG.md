@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.4.12
+
+### Patch Changes
+
+- 4b5602d: fix: update default value to undefined for dualstack/fips config
+
 ## 4.4.11
 
 ### Patch Changes
