@@ -26,7 +26,9 @@
     "getRegionInfo": "function, since <=4.4.3",
     "resolveCustomEndpointsConfig": "function, since <=4.4.3",
     "resolveEndpointsConfig": "function, since <=4.4.3",
-    "resolveRegionConfig": "function, since <=4.4.3"
+    "resolveRegionConfig": "function, since <=4.4.3",
+    "nodeDualstackConfigSelectors": "object, since 4.4.12",
+    "nodeFipsConfigSelectors": "object, since 4.4.12"
   },
   "@smithy/core": {
     "requestBuilder": "function, since <=3.18.0",
