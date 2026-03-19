@@ -37,12 +37,12 @@ export interface EndpointInputConfig<T extends EndpointParameters = EndpointPara
   /**
    * Enables IPv6/IPv4 dualstack endpoint.
    */
-  useDualstackEndpoint?: boolean | Provider<boolean>;
+  useDualstackEndpoint?: boolean | Provider<boolean | undefined>;
 
   /**
    * Enables FIPS compatible endpoints.
    */
-  useFipsEndpoint?: boolean | Provider<boolean>;
+  useFipsEndpoint?: boolean | Provider<boolean | undefined>;
 
   /**
    * @internal
