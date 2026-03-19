@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.2.47
+
+### Patch Changes
+
+- Updated dependencies [b1f0dba]
+  - @smithy/config-resolver@4.4.13
+  - @smithy/smithy-client@4.12.7
+
 ## 4.2.46
 
 ### Patch Changes
