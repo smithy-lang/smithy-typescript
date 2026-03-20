@@ -28,7 +28,7 @@ export abstract class RpcProtocol extends HttpProtocol {
 
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,
-    input: Input,
+    _input: Input,
     context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
   ): Promise<IHttpRequest> {
     const serializer = this.serializer;
@@ -40,6 +40,7 @@ export abstract class RpcProtocol extends HttpProtocol {
     const schema = ns.getSchema();
 
     let payload: any;
+    const input: any = _input && typeof _input === "object" ? _input : {};
 
     const request = new HttpRequest({
       protocol: "",

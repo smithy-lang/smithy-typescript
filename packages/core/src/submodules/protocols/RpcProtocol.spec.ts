@@ -1,4 +1,4 @@
-import { type TypeRegistry, NormalizedSchema, op } from "@smithy/core/schema";
+import { NormalizedSchema, op } from "@smithy/core/schema";
 import type {
   $Schema,
   $ShapeSerializer,
@@ -6,10 +6,8 @@ import type {
   CodecSettings,
   HandlerExecutionContext,
   HttpResponse as IHttpResponse,
-  MetadataBearer,
   OperationSchema,
   ResponseMetadata,
-  SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
   StaticStructureSchema,
@@ -105,20 +103,7 @@ describe(RpcProtocol.name, () => {
     });
 
     const request = await protocol.serializeRequest(
-      op(
-        "",
-        "",
-        0,
-        [
-          3,
-          "ns",
-          "Struct",
-          0,
-          ["fieldA", "fieldB"],
-          [0, 0],
-        ] satisfies StaticStructureSchema,
-        "unit"
-      ),
+      op("", "", 0, [3, "ns", "Struct", 0, ["fieldA", "fieldB"], [0, 0]] satisfies StaticStructureSchema, "unit"),
       input,
       {
         endpoint: async () => parseUrl("https://localhost"),
@@ -139,20 +124,7 @@ describe(RpcProtocol.name, () => {
     const input = { fieldA: "value" };
 
     await protocol.serializeRequest(
-      op(
-        "",
-        "",
-        0,
-        [
-          3,
-          "ns",
-          "Struct",
-          0,
-          ["fieldA"],
-          [0],
-        ] satisfies StaticStructureSchema,
-        "unit"
-      ),
+      op("", "", 0, [3, "ns", "Struct", 0, ["fieldA"], [0]] satisfies StaticStructureSchema, "unit"),
       input,
       {
         endpoint: async () => parseUrl("https://localhost"),
@@ -175,7 +147,24 @@ describe(RpcProtocol.name, () => {
       } as any
     );
 
-    expect(request.body).toBeUndefined();
+    expect(request.body).toEqual("{}");
     expect(request.method).toBe("POST");
+  });
+
+  it("considers non-object inputs to be equivalent to empty objects", async () => {
+    const protocol = new TestRpcProtocol();
+
+    for (const input of [null, undefined, 5, false, "hello", "{}"]) {
+      const request = await protocol.serializeRequest(
+        op("", "", {}, [3, "ns", "Struct", 0, ["a", "b", "c"], [0, 0, 0]] satisfies StaticStructureSchema, "unit"),
+        input as any,
+        {
+          endpoint: async () => parseUrl("https://localhost"),
+        } as any
+      );
+
+      expect(request.path).toEqual("/");
+      expect(request.body).toEqual("{}");
+    }
   });
 });

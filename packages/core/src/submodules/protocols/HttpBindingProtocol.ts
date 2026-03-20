@@ -35,10 +35,10 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
 
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,
-    input: Input,
+    _input: Input,
     context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
   ): Promise<IHttpRequest> {
-    input = (input ?? {}) as Input;
+    const input: any = _input && typeof _input === "object" ? _input : {};
     const serializer = this.serializer;
     const query = {} as Record<string, string | string[]>;
     const headers = {} as Record<string, string>;

@@ -484,6 +484,31 @@ describe(HttpBindingProtocol.name, () => {
   });
 
   describe("input not mutated by serializeRequest", () => {
+    it("considers non-object inputs to be equivalent to empty objects", async () => {
+      const protocol = new StringRestProtocol();
+
+      for (const input of [null, undefined, 5, false, "hello", "{}"]) {
+        const request = await protocol.serializeRequest(
+          op(
+            "",
+            "",
+            {
+              http: ["PUT", "/resource", 200],
+            },
+            [3, "ns", "Struct", 0, ["a", "b", "c"], [0, 0, 0]] satisfies StaticStructureSchema,
+            "unit"
+          ),
+          input as any,
+          {
+            endpoint: async () => parseUrl("https://localhost"),
+          } as any
+        );
+
+        expect(request.path).toEqual("/resource");
+        expect(request.body).toEqual(undefined);
+      }
+    });
+
     it("should not mutate the caller's input object", async () => {
       const protocol = new StringRestProtocol();
       const input = Object.freeze({
@@ -506,12 +531,7 @@ describe(HttpBindingProtocol.name, () => {
             "Struct",
             0,
             ["labelField", "headerField", "queryField", "bodyField"],
-            [
-              [0, { httpLabel: 1 }],
-              [0, { httpHeader: "x-header" }],
-              [0, { httpQuery: "q" }],
-              0,
-            ],
+            [[0, { httpLabel: 1 }], [0, { httpHeader: "x-header" }], [0, { httpQuery: "q" }], 0],
           ] satisfies StaticStructureSchema,
           "unit"
         ),
@@ -598,13 +618,7 @@ describe(HttpBindingProtocol.name, () => {
             "Struct",
             0,
             ["prefixHeaders", "bodyField"],
-            [
-              [
-                [2, "", "Map", 0, 0, 0],
-                { httpPrefixHeaders: "x-prefix-" },
-              ],
-              0,
-            ],
+            [[[2, "", "Map", 0, 0, 0], { httpPrefixHeaders: "x-prefix-" }], 0],
           ] satisfies StaticStructureSchema,
           "unit"
         ),
@@ -641,10 +655,7 @@ describe(HttpBindingProtocol.name, () => {
             "Struct",
             0,
             ["queryParams", "bodyField"],
-            [
-              [0, { httpQueryParams: 1 }],
-              0,
-            ],
+            [[0, { httpQueryParams: 1 }], 0],
           ] satisfies StaticStructureSchema,
           "unit"
         ),
