@@ -483,6 +483,194 @@ describe(HttpBindingProtocol.name, () => {
     expect(keys).toEqual(["$metadata"]);
   });
 
+  describe("input not mutated by serializeRequest", () => {
+    it("considers non-object inputs to be equivalent to empty objects", async () => {
+      const protocol = new StringRestProtocol();
+
+      for (const input of [null, undefined, 5, false, "hello", "{}"]) {
+        const request = await protocol.serializeRequest(
+          op(
+            "",
+            "",
+            {
+              http: ["PUT", "/resource", 200],
+            },
+            [3, "ns", "Struct", 0, ["a", "b", "c"], [0, 0, 0]] satisfies StaticStructureSchema,
+            "unit"
+          ),
+          input as any,
+          {
+            endpoint: async () => parseUrl("https://localhost"),
+          } as any
+        );
+
+        expect(request.path).toEqual("/resource");
+        expect(request.body).toEqual(undefined);
+      }
+    });
+
+    it("should not mutate the caller's input object", async () => {
+      const protocol = new StringRestProtocol();
+      const input = Object.freeze({
+        labelField: "my-id",
+        headerField: "header-val",
+        queryField: "q",
+        bodyField: "body-val",
+      });
+
+      const request = await protocol.serializeRequest(
+        op(
+          "",
+          "",
+          {
+            http: ["PUT", "/{labelField}/resource", 200],
+          },
+          [
+            3,
+            "ns",
+            "Struct",
+            0,
+            ["labelField", "headerField", "queryField", "bodyField"],
+            [[0, { httpLabel: 1 }], [0, { httpHeader: "x-header" }], [0, { httpQuery: "q" }], 0],
+          ] satisfies StaticStructureSchema,
+          "unit"
+        ),
+        input,
+        {
+          endpoint: async () => parseUrl("https://localhost"),
+        } as any
+      );
+
+      // HTTP bindings are correctly placed
+      expect(request.path).toContain("my-id");
+      expect(request.headers["x-header"]).toBe("header-val");
+      expect(request.query?.q).toBe("q");
+
+      // Body contains only the non-HTTP-bound member
+      const body = JSON.parse(request.body);
+      expect(body).toEqual({ bodyField: "body-val" });
+      expect(body.labelField).toBeUndefined();
+      expect(body.headerField).toBeUndefined();
+      expect(body.queryField).toBeUndefined();
+
+      // Original input is untouched (frozen object didn't throw)
+      expect(input.labelField).toBe("my-id");
+      expect(input.headerField).toBe("header-val");
+      expect(input.queryField).toBe("q");
+      expect(input.bodyField).toBe("body-val");
+    });
+
+    it("should not leak httpPayload member into body when there are also body members", async () => {
+      const protocol = new StringRestProtocol();
+      const input = Object.freeze({
+        payloadField: "payload-data",
+        headerField: "hdr",
+      });
+
+      const request = await protocol.serializeRequest(
+        op(
+          "",
+          "",
+          {
+            http: ["POST", "/resource", 200],
+          },
+          [
+            3,
+            "ns",
+            "Struct",
+            0,
+            ["payloadField", "headerField"],
+            [
+              [0, { httpPayload: 1 }],
+              [0, { httpHeader: "x-hdr" }],
+            ],
+          ] satisfies StaticStructureSchema,
+          "unit"
+        ),
+        input,
+        {
+          endpoint: async () => parseUrl("https://localhost"),
+        } as any
+      );
+
+      expect(request.headers["x-hdr"]).toBe("hdr");
+      // payload is the httpPayload member directly, not a JSON body
+      expect(request.body).toBe("payload-data");
+    });
+
+    it("should not leak httpPrefixHeaders members into body", async () => {
+      const protocol = new StringRestProtocol();
+      const input = Object.freeze({
+        prefixHeaders: { suffix1: "val1", suffix2: "val2" },
+        bodyField: "body-data",
+      });
+
+      const request = await protocol.serializeRequest(
+        op(
+          "",
+          "",
+          {
+            http: ["POST", "/resource", 200],
+          },
+          [
+            3,
+            "ns",
+            "Struct",
+            0,
+            ["prefixHeaders", "bodyField"],
+            [[[2, "", "Map", 0, 0, 0], { httpPrefixHeaders: "x-prefix-" }], 0],
+          ] satisfies StaticStructureSchema,
+          "unit"
+        ),
+        input,
+        {
+          endpoint: async () => parseUrl("https://localhost"),
+        } as any
+      );
+
+      expect(request.headers["x-prefix-suffix1"]).toBe("val1");
+      expect(request.headers["x-prefix-suffix2"]).toBe("val2");
+      const body = JSON.parse(request.body);
+      expect(body).toEqual({ bodyField: "body-data" });
+      expect(body.prefixHeaders).toBeUndefined();
+    });
+
+    it("should not leak httpQueryParams members into body", async () => {
+      const protocol = new StringRestProtocol();
+      const input = Object.freeze({
+        queryParams: "qval",
+        bodyField: "body-data",
+      });
+
+      const request = await protocol.serializeRequest(
+        op(
+          "",
+          "",
+          {
+            http: ["POST", "/resource", 200],
+          },
+          [
+            3,
+            "ns",
+            "Struct",
+            0,
+            ["queryParams", "bodyField"],
+            [[0, { httpQueryParams: 1 }], 0],
+          ] satisfies StaticStructureSchema,
+          "unit"
+        ),
+        input,
+        {
+          endpoint: async () => parseUrl("https://localhost"),
+        } as any
+      );
+
+      const body = JSON.parse(request.body);
+      expect(body).toEqual({ bodyField: "body-data" });
+      expect(body.queryParams).toBeUndefined();
+    });
+  });
+
   describe("httpLabel", () => {
     it("should throw an error if an httpLabel is missing", async () => {
       const protocol = new StringRestProtocol();

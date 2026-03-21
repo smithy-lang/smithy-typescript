@@ -28,7 +28,7 @@ export abstract class RpcProtocol extends HttpProtocol {
 
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,
-    input: Input,
+    _input: Input,
     context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
   ): Promise<IHttpRequest> {
     const serializer = this.serializer;
@@ -40,6 +40,7 @@ export abstract class RpcProtocol extends HttpProtocol {
     const schema = ns.getSchema();
 
     let payload: any;
+    const input: any = _input && typeof _input === "object" ? _input : {};
 
     const request = new HttpRequest({
       protocol: "",
@@ -57,31 +58,27 @@ export abstract class RpcProtocol extends HttpProtocol {
       this.setHostPrefix(request, operationSchema, input);
     }
 
-    const _input: any = {
-      ...input,
-    };
-
     if (input) {
       const eventStreamMember = ns.getEventStreamMember();
 
       if (eventStreamMember) {
-        if (_input[eventStreamMember]) {
+        if (input[eventStreamMember]) {
           const initialRequest = {} as any;
           for (const [memberName, memberSchema] of ns.structIterator()) {
-            if (memberName !== eventStreamMember && _input[memberName]) {
-              serializer.write(memberSchema, _input[memberName]);
+            if (memberName !== eventStreamMember && input[memberName]) {
+              serializer.write(memberSchema, input[memberName]);
               initialRequest[memberName] = serializer.flush();
             }
           }
 
           payload = await this.serializeEventStream({
-            eventStream: _input[eventStreamMember],
+            eventStream: input[eventStreamMember],
             requestSchema: ns,
             initialRequest,
           });
         }
       } else {
-        serializer.write(schema, _input);
+        serializer.write(schema, input);
         payload = serializer.flush() as Uint8Array;
       }
     }

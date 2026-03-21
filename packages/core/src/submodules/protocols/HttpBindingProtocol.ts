@@ -38,9 +38,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     _input: Input,
     context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
   ): Promise<IHttpRequest> {
-    const input: any = {
-      ...(_input ?? {}),
-    };
+    const input: any = _input && typeof _input === "object" ? _input : {};
     const serializer = this.serializer;
     const query = {} as Record<string, string | string[]>;
     const headers = {} as Record<string, string>;
@@ -121,7 +119,6 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
           serializer.write(memberNs, inputMemberValue);
           payload = serializer.flush();
         }
-        delete input[memberName];
       } else if (memberTraits.httpLabel) {
         serializer.write(memberNs, inputMemberValue);
         const replacement = serializer.flush() as string;
@@ -133,21 +130,17 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         } else if (request.path.includes(`{${memberName}}`)) {
           request.path = request.path.replace(`{${memberName}}`, extendedEncodeURIComponent(replacement));
         }
-        delete input[memberName];
       } else if (memberTraits.httpHeader) {
         serializer.write(memberNs, inputMemberValue);
         headers[memberTraits.httpHeader.toLowerCase() as string] = String(serializer.flush());
-        delete input[memberName];
       } else if (typeof memberTraits.httpPrefixHeaders === "string") {
         for (const [key, val] of Object.entries(inputMemberValue)) {
           const amalgam = memberTraits.httpPrefixHeaders + key;
           serializer.write([memberNs.getValueSchema(), { httpHeader: amalgam }], val);
           headers[amalgam.toLowerCase()] = serializer.flush() as string;
         }
-        delete input[memberName];
       } else if (memberTraits.httpQuery || memberTraits.httpQueryParams) {
         this.serializeQuery(memberNs, inputMemberValue, query);
-        delete input[memberName];
       } else {
         hasNonHttpBindingMember = true;
         payloadMemberNames.push(memberName);
