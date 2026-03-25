@@ -3,6 +3,19 @@
 [![NPM version](https://img.shields.io/npm/v/@smithy/middleware-stack/latest.svg)](https://www.npmjs.com/package/@smithy/middleware-stack)
 [![NPM downloads](https://img.shields.io/npm/dm/@smithy/middleware-stack.svg)](https://www.npmjs.com/package/@smithy/middleware-stack)
 
+### :warning: Internal API :warning:
+
+> This is an internal package.
+> That means this is used as a dependency for other, public packages, but
+> should not be taken directly as a dependency in your application's `package.json`.
+
+> If you are updating the version of this package, for example to bring in a
+> bug-fix, you should do so by updating your application lockfile with
+> e.g. `npm up @scope/package` or equivalent command in another
+> package manager, rather than taking a direct dependency.
+
+---
+
 The package contains an implementation of middleware stack interface. Middleware
 stack is a structure storing middleware in specified order and resolve these
 middleware into a single handler.
