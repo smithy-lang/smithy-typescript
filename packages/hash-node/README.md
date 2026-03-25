@@ -6,5 +6,3 @@
 > An internal package
 
 ## Usage
-
-You probably shouldn't, at least directly.
