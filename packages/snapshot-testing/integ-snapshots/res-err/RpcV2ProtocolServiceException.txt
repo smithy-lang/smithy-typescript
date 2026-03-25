@@ -86,6 +86,7 @@ Unknown:
 
 --- [error object] ---
 {
+  0: (number) 110,
   $fault: "client",
   $retryable: (undefined),
   $metadata: {
@@ -93,8 +94,8 @@ Unknown:
     requestId: (undefined),
     extendedRequestId: (undefined),
     cfId: (undefined),
-    attempts: (number) 3,
-    totalRetryDelay: (number) 94
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
   },
   name: "Unknown"
 }
