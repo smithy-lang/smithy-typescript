@@ -3927,6 +3927,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:>=20.0.0":
+  version: 25.5.0
+  resolution: "@types/node@npm:25.5.0"
+  dependencies:
+    undici-types: "npm:~7.18.0"
+  checksum: 10c0/70c508165b6758c4f88d4f91abca526c3985eee1985503d4c2bd994dbaf588e52ac57e571160f18f117d76e963570ac82bd20e743c18987e82564312b3b62119
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^12.7.1":
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
@@ -3940,15 +3949,6 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/68866e53b92be60d8840f5c93232d3ae39c71663101decc1d4f1870d9236c3c89e74177b616c2a2cabce116b1356f3e89c57df3e969c9f9b0e0b5c59b5f790f7
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^20.0.0":
-  version: 20.19.21
-  resolution: "@types/node@npm:20.19.21"
-  dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10c0/a5bedcc71b363abfa425c01e69696820736614dfba03d2363df6d306d2ee6f7619b370c72b4ec75d992e5d76eaccdcdeb362276cac1cd01756db6dec2eb8227c
   languageName: node
   linkType: hard
 
@@ -4007,6 +4007,15 @@ __metadata:
   version: 3.0.2
   resolution: "@types/whatwg-mimetype@npm:3.0.2"
   checksum: 10c0/dad39d1e4abe760a0a963c84bbdbd26b1df0eb68aff83bdf6ecbb50ad781ead777f6906d19a87007790b750f7500a12e5624d31fc6a1529d14bd19b5c3a316d1
+  languageName: node
+  linkType: hard
+
+"@types/ws@npm:^8.18.1":
+  version: 8.18.1
+  resolution: "@types/ws@npm:8.18.1"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/61aff1129143fcc4312f083bc9e9e168aa3026b7dd6e70796276dcfb2c8211c4292603f9c4864fae702f2ed86e4abd4d38aa421831c2fd7f856c931a481afbab
   languageName: node
   linkType: hard
 
@@ -5955,6 +5964,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"entities@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "entities@npm:7.0.1"
+  checksum: 10c0/b4fb9937bb47ecb00aaaceb9db9cdd1cc0b0fb649c0e843d05cf5dbbd2e9d2df8f98721d8b1b286445689c72af7b54a7242fc2d63ef7c9739037a8c73363e7ca
+  languageName: node
+  linkType: hard
+
 "env-paths@npm:^2.2.0":
   version: 2.2.1
   resolution: "env-paths@npm:2.2.1"
@@ -7151,14 +7167,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:20.0.2":
-  version: 20.0.2
-  resolution: "happy-dom@npm:20.0.2"
+"happy-dom@npm:20.8.8":
+  version: 20.8.8
+  resolution: "happy-dom@npm:20.8.8"
   dependencies:
-    "@types/node": "npm:^20.0.0"
+    "@types/node": "npm:>=20.0.0"
     "@types/whatwg-mimetype": "npm:^3.0.2"
+    "@types/ws": "npm:^8.18.1"
+    entities: "npm:^7.0.1"
     whatwg-mimetype: "npm:^3.0.0"
-  checksum: 10c0/d4449e087cb7566fb493f9e6ee99221c64177732bf944ec3e2f464033107832c637e201e3e78e81a8b35871d41aa510806f3f1a2f18b924fc6120226f337a845
+    ws: "npm:^8.18.3"
+  checksum: 10c0/9b2c05f08bbb1cfdef66e1b53f3f7e7aa7ddd8ac19cefc02bf0777b6b444afa975193a26bc67ff9a1eba20724c08ffe663e6ed665177cb074d6dd6e82ea2ed03
   languageName: node
   linkType: hard
 
@@ -10511,7 +10530,7 @@ __metadata:
     eslint-plugin-tsdoc: "npm:0.2.17"
     get-port: "npm:^7.1.0"
     glob: "npm:^7.1.6"
-    happy-dom: "npm:20.0.2"
+    happy-dom: "npm:20.8.8"
     husky: "npm:^4.2.3"
     jest: "npm:29.7.0"
     premove: "npm:4.0.0"
@@ -11473,6 +11492,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:~7.18.0":
+  version: 7.18.2
+  resolution: "undici-types@npm:7.18.2"
+  checksum: 10c0/85a79189113a238959d7a647368e4f7c5559c3a404ebdb8fc4488145ce9426fcd82252a844a302798dfc0e37e6fb178ff481ed03bc4caf634c5757d9ef43521d
+  languageName: node
+  linkType: hard
+
 "unique-filename@npm:^2.0.0":
   version: 2.0.1
   resolution: "unique-filename@npm:2.0.1"
@@ -12196,6 +12222,21 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10c0/579817dbbab3ee46669129c220cfd81ba6cdb9ab5c3e9a105702dd045743c4ab72e33bb384573827c0c481213417cc880e41bc097e0fc541a0b79fa3eb38207d
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.18.3":
+  version: 8.20.0
+  resolution: "ws@npm:8.20.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/956ac5f11738c914089b65878b9223692ace77337ba55379ae68e1ecbeae9b47a0c6eb9403688f609999a58c80d83d99865fe0029b229d308b08c1ef93d4ea14
   languageName: node
   linkType: hard
 
