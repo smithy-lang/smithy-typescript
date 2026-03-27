@@ -1,4 +1,4 @@
-import { AbortController } from "@smithy/abort-controller";
+import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import type { HttpResponse } from "@smithy/protocol-http";
 import { HttpRequest } from "@smithy/protocol-http";
 import type { Mutable } from "@smithy/types";
@@ -365,7 +365,10 @@ describe(NodeHttp2Handler.name, () => {
         expect(requestSpy.mock.calls.length).toBe(0);
       });
 
-      it("will close request on session when aborted", async () => {
+      it.each([
+        { AbortController, label: "native" },
+        { AbortController: AbortControllerPolyfill, label: "polyfill" },
+      ])("will close request on session when aborted ($label)", async ({ AbortController }) => {
         const abortController = new AbortController();
         mockH2Server.removeAllListeners("request");
         mockH2Server.on("request", () => {
