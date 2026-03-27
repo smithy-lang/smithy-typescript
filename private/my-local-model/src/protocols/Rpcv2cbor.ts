@@ -30,10 +30,13 @@ import type {
   SerdeContext as __SerdeContext,
 } from "@smithy/types";
 
-import { CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput } from "../commands/CamelCaseOperationCommand";
-import { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
-import { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "../commands/HttpLabelCommandCommand";
-import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
+import type {
+  CamelCaseOperationCommandInput,
+  CamelCaseOperationCommandOutput,
+} from "../commands/CamelCaseOperationCommand";
+import type { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
+import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "../commands/HttpLabelCommandCommand";
+import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import {
   CodedThrottlingError,
   HaltError,
@@ -43,15 +46,15 @@ import {
   XYZServiceServiceException,
 } from "../models/errors";
 import {
-  Alpha,
-  CamelCaseOperationInput,
-  CamelCaseOperationOutput,
-  DifferentShapeName,
-  GetNumbersRequest,
-  GetNumbersResponse,
-  HttpLabelCommandInput,
+  type Alpha,
+  type CamelCaseOperationInput,
+  type CamelCaseOperationOutput,
+  type DifferentShapeName,
+  type GetNumbersRequest,
+  type GetNumbersResponse,
+  type HttpLabelCommandInput,
+  type Unit,
   TradeEvents,
-  Unit,
 } from "../models/models_0";
 import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
 

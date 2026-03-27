@@ -46,31 +46,40 @@ import {
   defaultRpcV2ProtocolHttpAuthSchemeParametersProvider,
   resolveHttpAuthSchemeConfig,
 } from "./auth/httpAuthSchemeProvider";
-import { EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput } from "./commands/EmptyInputOutputCommand";
-import { Float16CommandInput, Float16CommandOutput } from "./commands/Float16Command";
-import { FractionalSecondsCommandInput, FractionalSecondsCommandOutput } from "./commands/FractionalSecondsCommand";
-import { GreetingWithErrorsCommandInput, GreetingWithErrorsCommandOutput } from "./commands/GreetingWithErrorsCommand";
-import { NoInputOutputCommandInput, NoInputOutputCommandOutput } from "./commands/NoInputOutputCommand";
-import {
+import type { EmptyInputOutputCommandInput, EmptyInputOutputCommandOutput } from "./commands/EmptyInputOutputCommand";
+import type { Float16CommandInput, Float16CommandOutput } from "./commands/Float16Command";
+import type {
+  FractionalSecondsCommandInput,
+  FractionalSecondsCommandOutput,
+} from "./commands/FractionalSecondsCommand";
+import type {
+  GreetingWithErrorsCommandInput,
+  GreetingWithErrorsCommandOutput,
+} from "./commands/GreetingWithErrorsCommand";
+import type { NoInputOutputCommandInput, NoInputOutputCommandOutput } from "./commands/NoInputOutputCommand";
+import type {
   OperationWithDefaultsCommandInput,
   OperationWithDefaultsCommandOutput,
 } from "./commands/OperationWithDefaultsCommand";
-import {
+import type {
   OptionalInputOutputCommandInput,
   OptionalInputOutputCommandOutput,
 } from "./commands/OptionalInputOutputCommand";
-import { RecursiveShapesCommandInput, RecursiveShapesCommandOutput } from "./commands/RecursiveShapesCommand";
-import { RpcV2CborDenseMapsCommandInput, RpcV2CborDenseMapsCommandOutput } from "./commands/RpcV2CborDenseMapsCommand";
-import { RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput } from "./commands/RpcV2CborListsCommand";
-import {
+import type { RecursiveShapesCommandInput, RecursiveShapesCommandOutput } from "./commands/RecursiveShapesCommand";
+import type {
+  RpcV2CborDenseMapsCommandInput,
+  RpcV2CborDenseMapsCommandOutput,
+} from "./commands/RpcV2CborDenseMapsCommand";
+import type { RpcV2CborListsCommandInput, RpcV2CborListsCommandOutput } from "./commands/RpcV2CborListsCommand";
+import type {
   RpcV2CborSparseMapsCommandInput,
   RpcV2CborSparseMapsCommandOutput,
 } from "./commands/RpcV2CborSparseMapsCommand";
-import {
+import type {
   SimpleScalarPropertiesCommandInput,
   SimpleScalarPropertiesCommandOutput,
 } from "./commands/SimpleScalarPropertiesCommand";
-import {
+import type {
   SparseNullsOperationCommandInput,
   SparseNullsOperationCommandOutput,
 } from "./commands/SparseNullsOperationCommand";

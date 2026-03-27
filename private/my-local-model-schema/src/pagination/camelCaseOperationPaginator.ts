@@ -8,7 +8,7 @@ import {
   CamelCaseOperationCommandOutput,
 } from "../commands/CamelCaseOperationCommand";
 import { XYZServiceClient } from "../XYZServiceClient";
-import { XYZServicePaginationConfiguration } from "./Interfaces";
+import type { XYZServicePaginationConfiguration } from "./Interfaces";
 
 /**
  * @public

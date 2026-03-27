@@ -4,6 +4,7 @@
  */
 package software.amazon.smithy.typescript.codegen.schema;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -19,8 +20,8 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 public abstract class SchemaGenerationAllowlist {
 
-    private static final Set<ShapeId> ALLOWED = new HashSet<>();
-    private static final Set<ShapeId> PROTOCOLS = new HashSet<>();
+    private static final Set<ShapeId> ALLOWED = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<ShapeId> PROTOCOLS = Collections.synchronizedSet(new HashSet<>());
 
     static {
         ALLOWED.add(ShapeId.from("smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"));

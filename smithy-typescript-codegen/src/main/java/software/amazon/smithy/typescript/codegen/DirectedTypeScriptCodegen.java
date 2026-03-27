@@ -264,190 +264,6 @@ final class DirectedTypeScriptCodegen
         }
     }
 
-    private void generateClient(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        TypeScriptDelegator delegator = directive.context().writerDelegator();
-        TypeScriptSettings settings = directive.settings();
-        ServiceShape service = directive.shape();
-        Model model = directive.model();
-        SymbolProvider symbolProvider = directive.symbolProvider();
-        FileManifest fileManifest = directive.fileManifest();
-        List<TypeScriptIntegration> integrations = directive.context().integrations();
-        List<RuntimeClientPlugin> runtimePlugins = directive.context().runtimePlugins();
-        ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
-
-        // Generate the bare-bones service client.
-        delegator.useShapeWriter(
-            service,
-            writer -> new ServiceBareBonesClientGenerator(
-                settings,
-                model,
-                symbolProvider,
-                writer,
-                integrations,
-                runtimePlugins,
-                applicationProtocol
-            ).run()
-        );
-
-        if (!directive.settings().useLegacyAuth()) {
-            new HttpAuthSchemeProviderGenerator(
-                delegator,
-                settings,
-                model,
-                symbolProvider,
-                directive.context().integrations()
-            ).run();
-        }
-
-        // Generate the aggregated service client.
-        Symbol serviceSymbol = symbolProvider.toSymbol(service);
-        String aggregatedClientName = ReplaceLast.in(serviceSymbol.getName(), "Client", "");
-        String filename = ReplaceLast.in(serviceSymbol.getDefinitionFile(), "Client", "");
-        delegator.useFileWriter(
-            filename,
-            writer -> new ServiceAggregatedClientGenerator(
-                settings,
-                model,
-                symbolProvider,
-                aggregatedClientName,
-                writer,
-                applicationProtocol
-            ).run()
-        );
-
-        // Generate each operation for the service.
-        Set<OperationShape> containedOperations = directive.operations();
-        for (OperationShape operation : containedOperations) {
-            if (operation.hasTrait(PaginatedTrait.ID)) {
-                String outputFilename = PaginationGenerator.getOutputFileLocation(operation);
-                delegator.useFileWriter(
-                    outputFilename,
-                    paginationWriter -> new PaginationGenerator(
-                        model,
-                        service,
-                        operation,
-                        symbolProvider,
-                        paginationWriter,
-                        aggregatedClientName
-                    ).run()
-                );
-            }
-            if (operation.hasTrait(WaitableTrait.ID)) {
-                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
-                waitableTrait
-                    .getWaiters()
-                    .forEach((String waiterName, Waiter waiter) -> {
-                        String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
-                        delegator.useFileWriter(
-                            outputFilename,
-                            waiterWriter -> new WaiterGenerator(
-                                waiterName,
-                                waiter,
-                                service,
-                                operation,
-                                waiterWriter,
-                                symbolProvider
-                            ).run()
-                        );
-                    });
-            }
-        }
-
-        new SchemaGenerator(model, fileManifest, settings, symbolProvider).run();
-
-        if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
-            PaginationGenerator.writeIndex(model, service, fileManifest);
-            delegator.useFileWriter(
-                PaginationGenerator.PAGINATION_INTERFACE_FILE,
-                paginationWriter -> PaginationGenerator.generateServicePaginationInterfaces(
-                    aggregatedClientName,
-                    serviceSymbol,
-                    paginationWriter
-                )
-            );
-        }
-
-        if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
-            WaiterGenerator.writeIndex(model, service, fileManifest);
-        }
-    }
-
-    private void generateCommands(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        TypeScriptDelegator delegator = directive.context().writerDelegator();
-        TypeScriptSettings settings = directive.settings();
-        ServiceShape service = directive.shape();
-        Model model = directive.model();
-        SymbolProvider symbolProvider = directive.symbolProvider();
-        FileManifest fileManifest = directive.fileManifest();
-        List<RuntimeClientPlugin> runtimePlugins = directive.context().runtimePlugins();
-        ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
-        ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
-
-        // Write operation index files
-        if (settings.generateClient()) {
-            CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
-        }
-        if (settings.generateServerSdk()) {
-            ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
-        }
-
-        // Generate each operation for the service.
-        for (OperationShape operation : directive.operations()) {
-            // Right now this only generates stubs
-            if (settings.generateClient()) {
-                delegator.useShapeWriter(
-                    operation,
-                    commandWriter -> new CommandGenerator(
-                        settings,
-                        model,
-                        operation,
-                        symbolProvider,
-                        commandWriter,
-                        runtimePlugins,
-                        protocolGenerator,
-                        applicationProtocol
-                    ).run()
-                );
-            }
-
-            if (settings.generateServerSdk()) {
-                delegator.useShapeWriter(
-                    operation,
-                    commandWriter -> new ServerCommandGenerator(
-                        settings,
-                        model,
-                        operation,
-                        symbolProvider,
-                        commandWriter,
-                        protocolGenerator,
-                        applicationProtocol
-                    ).run()
-                );
-            }
-        }
-    }
-
-    private void generateEndpointV2(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
-    }
-
-    private void generateServiceInterface(
-        GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive
-    ) {
-        ServiceShape service = directive.shape();
-        SymbolProvider symbolProvider = directive.symbolProvider();
-        Set<OperationShape> operations = directive.operations();
-
-        directive
-            .context()
-            .writerDelegator()
-            .useShapeWriter(service, writer -> {
-                ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
-                ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
-                ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
-            });
-    }
-
     @Override
     public void generateStructure(GenerateStructureDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         directive
@@ -666,6 +482,16 @@ final class DirectedTypeScriptCodegen
         }
     }
 
+    @Override
+    public void customizeAfterIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        LOGGER.fine("Generating package.json files");
+        PackageJsonGenerator.writePackageJson(
+            directive.settings(),
+            directive.fileManifest(),
+            SymbolDependency.gatherDependencies(directive.context().writerDelegator().getDependencies().stream())
+        );
+    }
+
     private void checkValidationSettings(TypeScriptSettings settings, Model model, ServiceShape service) {
         if (settings.isDisableDefaultValidation()) {
             return;
@@ -701,13 +527,187 @@ final class DirectedTypeScriptCodegen
         }
     }
 
-    @Override
-    public void customizeAfterIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
-        LOGGER.fine("Generating package.json files");
-        PackageJsonGenerator.writePackageJson(
-            directive.settings(),
-            directive.fileManifest(),
-            SymbolDependency.gatherDependencies(directive.context().writerDelegator().getDependencies().stream())
+    private void generateClient(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        TypeScriptDelegator delegator = directive.context().writerDelegator();
+        TypeScriptSettings settings = directive.settings();
+        ServiceShape service = directive.shape();
+        Model model = directive.model();
+        SymbolProvider symbolProvider = directive.symbolProvider();
+        FileManifest fileManifest = directive.fileManifest();
+        List<TypeScriptIntegration> integrations = directive.context().integrations();
+        List<RuntimeClientPlugin> runtimePlugins = directive.context().runtimePlugins();
+        ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
+
+        // Generate the bare-bones service client.
+        delegator.useShapeWriter(
+            service,
+            writer -> new ServiceBareBonesClientGenerator(
+                settings,
+                model,
+                symbolProvider,
+                writer,
+                integrations,
+                runtimePlugins,
+                applicationProtocol
+            ).run()
         );
+
+        if (!directive.settings().useLegacyAuth()) {
+            new HttpAuthSchemeProviderGenerator(
+                delegator,
+                settings,
+                model,
+                symbolProvider,
+                directive.context().integrations()
+            ).run();
+        }
+
+        // Generate the aggregated service client.
+        Symbol serviceSymbol = symbolProvider.toSymbol(service);
+        String aggregatedClientName = ReplaceLast.in(serviceSymbol.getName(), "Client", "");
+        String filename = ReplaceLast.in(serviceSymbol.getDefinitionFile(), "Client", "");
+        delegator.useFileWriter(
+            filename,
+            writer -> new ServiceAggregatedClientGenerator(
+                settings,
+                model,
+                symbolProvider,
+                aggregatedClientName,
+                writer,
+                applicationProtocol
+            ).run()
+        );
+
+        // Generate each operation for the service.
+        Set<OperationShape> containedOperations = directive.operations();
+        for (OperationShape operation : containedOperations) {
+            if (operation.hasTrait(PaginatedTrait.ID)) {
+                String outputFilename = PaginationGenerator.getOutputFileLocation(operation);
+                delegator.useFileWriter(
+                    outputFilename,
+                    paginationWriter -> new PaginationGenerator(
+                        model,
+                        service,
+                        operation,
+                        symbolProvider,
+                        paginationWriter,
+                        aggregatedClientName
+                    ).run()
+                );
+            }
+            if (operation.hasTrait(WaitableTrait.ID)) {
+                WaitableTrait waitableTrait = operation.expectTrait(WaitableTrait.class);
+                waitableTrait
+                    .getWaiters()
+                    .forEach((String waiterName, Waiter waiter) -> {
+                        String outputFilename = WaiterGenerator.getOutputFileLocation(waiterName);
+                        delegator.useFileWriter(
+                            outputFilename,
+                            waiterWriter -> new WaiterGenerator(
+                                waiterName,
+                                waiter,
+                                service,
+                                operation,
+                                waiterWriter,
+                                symbolProvider
+                            ).run()
+                        );
+                    });
+            }
+        }
+
+        new SchemaGenerator(model, fileManifest, settings, symbolProvider).run();
+
+        if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(PaginatedTrait.ID))) {
+            PaginationGenerator.writeIndex(model, service, fileManifest);
+            delegator.useFileWriter(
+                PaginationGenerator.PAGINATION_INTERFACE_FILE,
+                paginationWriter -> PaginationGenerator.generateServicePaginationInterfaces(
+                    aggregatedClientName,
+                    serviceSymbol,
+                    paginationWriter
+                )
+            );
+        }
+
+        if (containedOperations.stream().anyMatch(operation -> operation.hasTrait(WaitableTrait.ID))) {
+            WaiterGenerator.writeIndex(model, service, fileManifest);
+        }
+    }
+
+    private void generateCommands(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        TypeScriptDelegator delegator = directive.context().writerDelegator();
+        TypeScriptSettings settings = directive.settings();
+        ServiceShape service = directive.shape();
+        Model model = directive.model();
+        SymbolProvider symbolProvider = directive.symbolProvider();
+        FileManifest fileManifest = directive.fileManifest();
+        List<RuntimeClientPlugin> runtimePlugins = directive.context().runtimePlugins();
+        ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
+        ApplicationProtocol applicationProtocol = directive.context().applicationProtocol();
+
+        // Write operation index files
+        if (settings.generateClient()) {
+            CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
+        }
+        if (settings.generateServerSdk()) {
+            ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
+        }
+
+        // Generate each operation for the service.
+        for (OperationShape operation : directive.operations()) {
+            // Right now this only generates stubs
+            if (settings.generateClient()) {
+                delegator.useShapeWriter(
+                    operation,
+                    commandWriter -> new CommandGenerator(
+                        settings,
+                        model,
+                        operation,
+                        symbolProvider,
+                        commandWriter,
+                        runtimePlugins,
+                        protocolGenerator,
+                        applicationProtocol
+                    ).run()
+                );
+            }
+
+            if (settings.generateServerSdk()) {
+                delegator.useShapeWriter(
+                    operation,
+                    commandWriter -> new ServerCommandGenerator(
+                        settings,
+                        model,
+                        operation,
+                        symbolProvider,
+                        commandWriter,
+                        protocolGenerator,
+                        applicationProtocol
+                    ).run()
+                );
+            }
+        }
+    }
+
+    private void generateEndpointV2(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
+        new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
+    }
+
+    private void generateServiceInterface(
+        GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive
+    ) {
+        ServiceShape service = directive.shape();
+        SymbolProvider symbolProvider = directive.symbolProvider();
+        Set<OperationShape> operations = directive.operations();
+
+        directive
+            .context()
+            .writerDelegator()
+            .useShapeWriter(service, writer -> {
+                ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
+                ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
+                ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
+            });
     }
 }
