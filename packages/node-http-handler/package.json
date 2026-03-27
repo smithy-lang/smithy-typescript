@@ -27,13 +27,13 @@
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
   "dependencies": {
-    "@smithy/abort-controller": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/querystring-builder": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },
   "devDependencies": {
+    "@smithy/abort-controller": "workspace:^",
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",

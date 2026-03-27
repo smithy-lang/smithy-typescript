@@ -1,4 +1,4 @@
-import { AbortController } from "@smithy/abort-controller";
+import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/protocol-http";
 import type { AddressInfo } from "net";
 import type { Server as HttpServer } from "node:http";
@@ -336,7 +336,10 @@ describe("https", () => {
     ).rejects.toHaveProperty("name", "TypeError");
   });
 
-  it("will destroy the request when aborted", async () => {
+  it.each([
+    { AbortController, label: "native" },
+    { AbortController: AbortControllerPolyfill, label: "polyfill" },
+  ])("will destroy the request when aborted ($label)", async ({ AbortController }) => {
     const mockResponse = {
       statusCode: 200,
       headers: {},
