@@ -9,20 +9,24 @@ import type {
 import type { WaiterResult } from "@smithy/util-waiter";
 
 import {
+  type CamelCaseOperationCommandInput,
+  type CamelCaseOperationCommandOutput,
   CamelCaseOperationCommand,
-  CamelCaseOperationCommandInput,
-  CamelCaseOperationCommandOutput,
 } from "./commands/CamelCaseOperationCommand";
-import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
 import {
+  type GetNumbersCommandInput,
+  type GetNumbersCommandOutput,
+  GetNumbersCommand,
+} from "./commands/GetNumbersCommand";
+import {
+  type HttpLabelCommandCommandInput,
+  type HttpLabelCommandCommandOutput,
   HttpLabelCommandCommand,
-  HttpLabelCommandCommandInput,
-  HttpLabelCommandCommandOutput,
 } from "./commands/HttpLabelCommandCommand";
 import {
+  type TradeEventStreamCommandInput,
+  type TradeEventStreamCommandOutput,
   TradeEventStreamCommand,
-  TradeEventStreamCommandInput,
-  TradeEventStreamCommandOutput,
 } from "./commands/TradeEventStreamCommand";
 import { paginatecamelCaseOperation as paginateCamelCaseOperation } from "./pagination/camelCaseOperationPaginator";
 import { paginateGetNumbers } from "./pagination/GetNumbersPaginator";

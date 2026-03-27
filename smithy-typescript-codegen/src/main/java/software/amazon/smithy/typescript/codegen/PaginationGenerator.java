@@ -97,7 +97,7 @@ final class PaginationGenerator implements Runnable {
 
         // Import Pagination types
         writer.addTypeImport("Paginator", null, TypeScriptDependency.SMITHY_TYPES);
-        writer.addRelativeImport(
+        writer.addRelativeTypeImport(
             paginationType,
             paginationType,
             Paths.get(".", PAGINATION_INTERFACE_FILE.replace(".ts", ""))

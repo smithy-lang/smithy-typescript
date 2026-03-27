@@ -51,7 +51,10 @@ class WaiterGenerator implements Runnable {
         this.writer = writer;
 
         this.operationSymbol = symbolProvider.toSymbol(operation);
-        this.serviceSymbol = symbolProvider.toSymbol(service);
+        this.serviceSymbol = symbolProvider.toSymbol(service)
+            .toBuilder()
+            .putProperty("typeOnly", true)
+            .build();
         this.inputSymbol = operationSymbol.expectProperty("inputType", Symbol.class);
     }
 
@@ -68,10 +71,10 @@ class WaiterGenerator implements Runnable {
 
     private void generateWaiter() {
         writer.addImport("createWaiter", null, WAITABLE_UTIL_PACKAGE);
-        writer.addImport("WaiterResult", null, WAITABLE_UTIL_PACKAGE);
+        writer.addTypeImport("WaiterResult", null, WAITABLE_UTIL_PACKAGE);
         writer.addImport("WaiterState", null, WAITABLE_UTIL_PACKAGE);
         writer.addImport("checkExceptions", null, WAITABLE_UTIL_PACKAGE);
-        writer.addImport("WaiterConfiguration", null, WAITABLE_UTIL_PACKAGE);
+        writer.addTypeImport("WaiterConfiguration", null, WAITABLE_UTIL_PACKAGE);
 
         // generates (deprecated) WaitFor....
         writer.writeDocs(

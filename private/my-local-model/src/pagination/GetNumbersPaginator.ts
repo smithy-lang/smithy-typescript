@@ -4,7 +4,7 @@ import type { Paginator } from "@smithy/types";
 
 import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
 import { XYZServiceClient } from "../XYZServiceClient";
-import { XYZServicePaginationConfiguration } from "./Interfaces";
+import type { XYZServicePaginationConfiguration } from "./Interfaces";
 
 /**
  * @public

@@ -7,7 +7,7 @@
  */
 export * from "./XYZServiceClient";
 export * from "./XYZService";
-export { ClientInputEndpointParameters } from "./endpoint/EndpointParameters";
+export type { ClientInputEndpointParameters } from "./endpoint/EndpointParameters";
 export type { RuntimeExtension } from "./runtimeExtensions";
 export type { XYZServiceExtensionConfiguration } from "./extensionConfiguration";
 export * from "./commands";

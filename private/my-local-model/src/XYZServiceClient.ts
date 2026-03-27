@@ -49,10 +49,13 @@ import {
   defaultXYZServiceHttpAuthSchemeParametersProvider,
   resolveHttpAuthSchemeConfig,
 } from "./auth/httpAuthSchemeProvider";
-import { CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput } from "./commands/CamelCaseOperationCommand";
-import { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
-import { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "./commands/HttpLabelCommandCommand";
-import { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
+import type {
+  CamelCaseOperationCommandInput,
+  CamelCaseOperationCommandOutput,
+} from "./commands/CamelCaseOperationCommand";
+import type { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
+import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "./commands/HttpLabelCommandCommand";
+import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import {
   type ClientInputEndpointParameters,
   type ClientResolvedEndpointParameters,

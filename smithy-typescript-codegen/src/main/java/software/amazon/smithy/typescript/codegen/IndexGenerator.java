@@ -103,7 +103,7 @@ final class IndexGenerator {
         writer.write("export * from \"./$L\";", normalizedClientName);
 
         // export endpoints config interface
-        writer.write("export { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
+        writer.write("export type { ClientInputEndpointParameters } from \"./endpoint/EndpointParameters\";");
 
         // Export Runtime Extension and Client ExtensionConfiguration interfaces
         writer.write("export type { RuntimeExtension } from \"./runtimeExtensions\";");
