@@ -97,7 +97,7 @@ export class DefaultRateLimiter implements RateLimiter {
     let calculatedRate: number;
     this.updateMeasuredRate();
 
-    if (isThrottlingError(response)) {
+    if (this.isThrottlingResponse(response)) {
       const rateToUse = !this.enabled ? this.measuredTxRate : Math.min(this.measuredTxRate, this.fillRate);
       this.lastMaxRate = rateToUse;
       this.calculateTimeWindow();
@@ -112,6 +112,14 @@ export class DefaultRateLimiter implements RateLimiter {
     const newRate = Math.min(calculatedRate, 2 * this.measuredTxRate);
     this.updateTokenBucketRate(newRate);
   }
+
+  private isThrottlingResponse(response: any): boolean {
+    if (response?.errorType) {
+      return response.errorType === "THROTTLING";
+    }
+    return isThrottlingError(response);
+  }
+
 
   private calculateTimeWindow() {
     this.timeWindow = this.getPrecise(Math.pow((this.lastMaxRate * (1 - this.beta)) / this.scaleConstant, 1 / 3));

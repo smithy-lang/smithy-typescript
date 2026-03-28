@@ -119,4 +119,43 @@ describe(DefaultRateLimiter.name, () => {
       expect(parseFloat(rateLimiter["fillRate"].toFixed(6))).toEqual(fillRate);
     });
   });
+
+  describe("throttle detection via RetryErrorInfo.errorType", () => {
+    it("enables the rate limiter when errorType is THROTTLING", () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+      expect(rateLimiter["enabled"]).toBe(false);
+
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({ errorType: "THROTTLING" });
+      expect(rateLimiter["enabled"]).toBe(true);
+    });
+
+    it("does not enable the rate limiter for non-throttling errorType", () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({ errorType: "TRANSIENT" });
+      expect(rateLimiter["enabled"]).toBe(false);
+    });
+
+    it("does not call isThrottlingError when errorType is present", () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({ errorType: "THROTTLING" });
+      expect(isThrottlingError).not.toHaveBeenCalled();
+    });
+
+    it("falls back to isThrottlingError when errorType is absent", () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({});
+      expect(isThrottlingError).toHaveBeenCalled();
+    });
+  });
 });
