@@ -63,11 +63,11 @@ export class DefaultRateLimiter implements RateLimiter {
     return Date.now() / 1000;
   }
 
-  public async getSendToken() {
-    return this.acquireTokenBucket(1);
+  public async getSendToken(abortSignal?: AbortSignal) {
+    return this.acquireTokenBucket(1, abortSignal);
   }
 
-  private async acquireTokenBucket(amount: number) {
+  private async acquireTokenBucket(amount: number, abortSignal?: AbortSignal) {
     // Client side throttling is not enabled until we see a throttling error.
     if (!this.enabled) {
       return;
@@ -76,7 +76,27 @@ export class DefaultRateLimiter implements RateLimiter {
     this.refillTokenBucket();
     if (amount > this.currentCapacity) {
       const delay = ((amount - this.currentCapacity) / this.fillRate) * 1000;
-      await new Promise((resolve) => DefaultRateLimiter.setTimeoutFn(resolve, delay));
+      await new Promise<void>((resolve, reject) => {
+        const onAbort = () => {
+          clearTimeout(timer);
+          reject(abortSignal?.reason ?? new Error("Request aborted"));
+        };
+        const timer = DefaultRateLimiter.setTimeoutFn(() => {
+          if (abortSignal) {
+            abortSignal.removeEventListener("abort", onAbort);
+          }
+          resolve();
+        }, delay);
+
+        if (abortSignal) {
+          if (abortSignal.aborted) {
+            clearTimeout(timer);
+            reject(abortSignal.reason ?? new Error("Request aborted"));
+            return;
+          }
+          abortSignal.addEventListener("abort", onAbort, { once: true });
+        }
+      });
     }
     this.currentCapacity = this.currentCapacity - amount;
   }

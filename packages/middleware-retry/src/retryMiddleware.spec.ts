@@ -76,8 +76,28 @@ describe(retryMiddleware.name, () => {
         context
       )(args as FinalizeHandlerArguments<any>);
       expect(mockRetryStrategy.retry).toHaveBeenCalledTimes(1);
-      expect(mockRetryStrategy.retry).toHaveBeenCalledWith(next, args);
+      expect(mockRetryStrategy.retry).toHaveBeenCalledWith(next, args, { abortSignal: undefined });
       expect(context.userAgent).toContainEqual(["cfg/retry-mode", mockRetryStrategy.mode]);
+    });
+
+    it("passes context.abortSignal to retryStrategy.retry", async () => {
+      const next = vi.fn();
+      const args = {
+        request: { headers: {} },
+      };
+      const abortController = new AbortController();
+      const context: HandlerExecutionContext = {
+        abortSignal: abortController.signal,
+      };
+
+      await retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+      })(
+        next,
+        context
+      )(args as FinalizeHandlerArguments<any>);
+      expect(mockRetryStrategy.retry).toHaveBeenCalledWith(next, args, { abortSignal: abortController.signal });
     });
   });
 
@@ -352,6 +372,62 @@ describe(retryMiddleware.name, () => {
           expect(output.$metadata.totalRetryDelay).toBeDefined();
         });
         (isInstance as unknown as any).mockReturnValue(false);
+      });
+    });
+
+    describe("abortSignal support", () => {
+      it("rejects retry delay when abortSignal is triggered", async () => {
+        vi.mocked(isThrottlingError).mockReturnValue(true);
+        const mockError = Object.assign(new Error("mockError"), {
+          $response: { headers: {} },
+          $metadata: {},
+        });
+        const next = vi.fn().mockRejectedValue(mockError);
+        const abortController = new AbortController();
+        const abortReason = new Error("Lambda timeout approaching");
+        const contextWithAbort: HandlerExecutionContext = {
+          partition_id: partitionId,
+          abortSignal: abortController.signal,
+        };
+
+        const promise = retryMiddleware({
+          maxAttempts: () => Promise.resolve(maxAttempts),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+        })(
+          next,
+          contextWithAbort
+        )(args as FinalizeHandlerArguments<any>);
+
+        // Abort after the first failure triggers a retry delay
+        abortController.abort(abortReason);
+
+        await expect(promise).rejects.toBe(abortReason);
+      });
+
+      it("rejects immediately when abortSignal is already aborted", async () => {
+        vi.mocked(isThrottlingError).mockReturnValue(true);
+        const mockError = Object.assign(new Error("mockError"), {
+          $response: { headers: {} },
+          $metadata: {},
+        });
+        const next = vi.fn().mockRejectedValue(mockError);
+        const abortController = new AbortController();
+        const abortReason = new Error("Already aborted");
+        abortController.abort(abortReason);
+        const contextWithAbort: HandlerExecutionContext = {
+          partition_id: partitionId,
+          abortSignal: abortController.signal,
+        };
+
+        const promise = retryMiddleware({
+          maxAttempts: () => Promise.resolve(maxAttempts),
+          retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+        })(
+          next,
+          contextWithAbort
+        )(args as FinalizeHandlerArguments<any>);
+
+        await expect(promise).rejects.toBe(abortReason);
       });
     });
 
