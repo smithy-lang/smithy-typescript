@@ -72,6 +72,7 @@ describe(AdaptiveRetryStrategy.name, () => {
       expect(token).toStrictEqual(mockRetryToken);
     });
   });
+
   describe("refreshRetryTokenForRetry", () => {
     it("calls rateLimiter.updateCientSendingRate and refreshes retry token", async () => {
       const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry");
@@ -87,6 +88,7 @@ describe(AdaptiveRetryStrategy.name, () => {
       expect(token).toStrictEqual(mockRetryToken);
     });
   });
+
   describe("recordSuccess", () => {
     it("rateLimiter.updateCientSendingRate and records success on token", async () => {
       const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "recordSuccess");

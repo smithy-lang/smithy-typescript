@@ -86,6 +86,36 @@ describe(DefaultRateLimiter.name, () => {
     });
   });
 
+  it("detects throttling from an error with status code 429 or $retryable.throttling", async () => {
+    const { isThrottlingError: realIsThrottlingError } = await vi.importActual<any>(
+      "@smithy/service-error-classification"
+    );
+
+    vi.spyOn(Date, "now").mockImplementation(() => 0);
+
+    for (const error of [
+      { name: "ThrottlingStatusCodeException", $metadata: { httpStatusCode: 429 } },
+      { name: "ThrottlingModelMetadataException", $retryable: { throttling: true } },
+    ]) {
+      const rateLimiter = new DefaultRateLimiter();
+      vi.mocked(isThrottlingError).mockImplementation(realIsThrottlingError);
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({ errorType: "TRANSIENT", error } as any);
+      expect(rateLimiter["enabled"]).toBe(true);
+    }
+  });
+
+  it("treats a RetryErrorInfo with errorType THROTTLING as a throttling error", () => {
+    vi.spyOn(Date, "now").mockImplementation(() => 0);
+    const rateLimiter = new DefaultRateLimiter();
+
+    vi.spyOn(Date, "now").mockImplementation(() => 1000);
+    rateLimiter.updateClientSendingRate({ errorType: "THROTTLING" });
+
+    expect(rateLimiter["enabled"]).toBe(true);
+    expect(isThrottlingError).not.toHaveBeenCalled();
+  });
+
   it("updateClientSendingRate", () => {
     vi.spyOn(Date, "now").mockImplementation(() => 0);
     const rateLimiter = new DefaultRateLimiter();

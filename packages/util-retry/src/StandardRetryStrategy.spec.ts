@@ -34,9 +34,9 @@ describe(StandardRetryStrategy.name, () => {
   });
 
   it("sets maxAttemptsProvider as a class member variable", () => {
-    [1, 2, 3].forEach((maxAttempts) => {
+    [1, 2, 3].forEach(async (maxAttempts) => {
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
-      expect(retryStrategy["maxAttemptsProvider"]()).resolves.toBe(maxAttempts);
+      await expect(retryStrategy["maxAttemptsProvider"]()).resolves.toBe(maxAttempts);
     });
   });
 
