@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.5.1
+
+### Patch Changes
+
+- fac1a34: Move `@smithy/abort-controller` to devDeps
+
 ## 4.5.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.4.28
+
+### Patch Changes
+
+- Updated dependencies [7198e09]
+  - @smithy/core@3.23.13
+  - @smithy/middleware-serde@4.2.16
+
 ## 4.4.27
 
 ### Patch Changes
