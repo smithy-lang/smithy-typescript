@@ -1,4 +1,4 @@
-import { AbortController } from "@smithy/abort-controller";
+import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { runPolling } from "./poller";
@@ -136,7 +136,10 @@ describe(runPolling.name, () => {
     nowMock.mockReset();
   });
 
-  it("resolves when abortController is signalled", async () => {
+  it.each([
+    { label: "native", AbortController },
+    { label: "smithy", AbortController: AbortControllerPolyfill },
+  ])("resolves when abortController is signalled ($label)", async ({ AbortController }) => {
     const abortController = new AbortController();
     const localConfig = {
       ...config,
