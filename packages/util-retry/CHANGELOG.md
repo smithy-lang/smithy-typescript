@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.2.13
+
+### Patch Changes
+
+- 3c21a57: fix AdaptiveRetryStrategy throttling detection
+
 ## 4.2.12
 
 ### Patch Changes
