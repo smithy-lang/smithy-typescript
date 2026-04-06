@@ -10,6 +10,8 @@ import type {
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
 
 /**
+ * This is still in use.
+ * See AddOmitRetryHeadersDependency.java.
  * @internal
  */
 export const omitRetryHeadersMiddleware =

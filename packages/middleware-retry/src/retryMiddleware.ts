@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import { NoOpLogger } from "@smithy/smithy-client";
 import type {
@@ -8,6 +8,7 @@ import type {
   FinalizeHandlerOutput,
   FinalizeRequestHandlerOptions,
   HandlerExecutionContext,
+  Logger,
   MetadataBearer,
   Pluggable,
   RetryErrorInfo,
@@ -22,6 +23,7 @@ import { v4 } from "@smithy/uuid";
 
 import type { RetryResolvedConfig } from "./configurations";
 import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
+import { parseRetryAfterHeader } from "./parseRetryAfterHeader";
 import { asSdkError } from "./util";
 
 /**
@@ -39,7 +41,9 @@ export const retryMiddleware =
 
     if (isRetryStrategyV2(retryStrategy)) {
       retryStrategy = retryStrategy as RetryStrategyV2;
-      let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(context["partition_id"]);
+      let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(
+        (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "")
+      );
       let lastError: SdkError = new Error();
       let attempts = 0;
       let totalRetryDelay = 0;
@@ -60,7 +64,7 @@ export const retryMiddleware =
           output.$metadata.totalRetryDelay = totalRetryDelay;
           return { response, output };
         } catch (e: any) {
-          const retryErrorInfo = getRetryErrorInfo(e);
+          const retryErrorInfo = getRetryErrorInfo(e, options.logger);
           lastError = asSdkError(e);
 
           if (isRequest && isStreamingPayload(request)) {
@@ -73,6 +77,9 @@ export const retryMiddleware =
           try {
             retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
           } catch (refreshError) {
+            if (typeof refreshError.$backoff === "number") {
+              await cooldown(refreshError.$backoff);
+            }
             if (!lastError.$metadata) {
               lastError.$metadata = {};
             }
@@ -83,29 +90,32 @@ export const retryMiddleware =
           attempts = retryToken.getRetryCount();
           const delay = retryToken.getRetryDelay();
           totalRetryDelay += delay;
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await cooldown(delay);
         }
       }
     } else {
       retryStrategy = retryStrategy as RetryStrategy;
-      if (retryStrategy?.mode)
+      if (retryStrategy?.mode) {
         context.userAgent = [...(context.userAgent || []), ["cfg/retry-mode", retryStrategy.mode]];
+      }
 
       return retryStrategy.retry(next, args);
     }
   };
+
+const cooldown = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&
   typeof (retryStrategy as RetryStrategyV2).refreshRetryTokenForRetry !== "undefined" &&
   typeof (retryStrategy as RetryStrategyV2).recordSuccess !== "undefined";
 
-const getRetryErrorInfo = (error: SdkError): RetryErrorInfo => {
+const getRetryErrorInfo = (error: SdkError, logger?: Logger): RetryErrorInfo => {
   const errorInfo: RetryErrorInfo = {
     error,
     errorType: getRetryErrorType(error),
   };
-  const retryAfterHint = getRetryAfterHint(error.$response);
+  const retryAfterHint = parseRetryAfterHeader(error.$response, logger);
   if (retryAfterHint) {
     errorInfo.retryAfterHint = retryAfterHint;
   }
@@ -138,20 +148,3 @@ export const getRetryPlugin = (options: RetryResolvedConfig): Pluggable<any, any
     clientStack.add(retryMiddleware(options), retryMiddlewareOptions);
   },
 });
-
-/**
- * @internal
- */
-export const getRetryAfterHint = (response: unknown): Date | undefined => {
-  if (!HttpResponse.isInstance(response)) return;
-
-  const retryAfterHeaderName = Object.keys(response.headers).find((key) => key.toLowerCase() === "retry-after");
-  if (!retryAfterHeaderName) return;
-  const retryAfter = response.headers[retryAfterHeaderName];
-
-  const retryAfterSeconds = Number(retryAfter);
-  if (!Number.isNaN(retryAfterSeconds)) return new Date(retryAfterSeconds * 1000);
-
-  const retryAfterDate = new Date(retryAfter);
-  return retryAfterDate;
-};

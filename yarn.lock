@@ -3068,6 +3068,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-retry@workspace:packages/middleware-retry"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/service-error-classification": "workspace:^"

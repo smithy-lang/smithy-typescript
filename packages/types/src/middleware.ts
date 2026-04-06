@@ -584,6 +584,13 @@ export interface HandlerExecutionContext {
   };
 
   /**
+   * Set by some operations which instructs the retry behavior to backoff
+   * after a failed request even when no further retry (of the same request) is expected.
+   * @internal
+   */
+  __retryLongPoll?: boolean;
+
+  /**
    * @deprecated
    * Do not assign arbitrary members to the context, since
    * they can interfere with existing functionality.

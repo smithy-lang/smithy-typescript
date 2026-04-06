@@ -1,5 +1,5 @@
 import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
-import type { Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
+import type { Logger, Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
 import { normalizeProvider } from "@smithy/util-middleware";
 import {
   AdaptiveRetryStrategy,
@@ -66,6 +66,8 @@ export interface PreviouslyResolved {
    * @internal
    */
   retryMode: string | Provider<string>;
+
+  logger?: Logger;
 }
 
 /**
@@ -80,6 +82,8 @@ export interface RetryResolvedConfig {
    * Resolved value for input config {@link RetryInputConfig.retryStrategy}
    */
   retryStrategy: Provider<RetryStrategyV2 | RetryStrategy>;
+
+  logger?: Logger;
 }
 
 /**

@@ -68,7 +68,7 @@ describe(resolveRetryConfig.name, () => {
                 await retryStrategy();
                 expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(AdaptiveRetryStrategy)).not.toHaveBeenCalled();
-                const output = await vi.mocked(StandardRetryStrategy).mock.calls[0][0]();
+                const output = await vi.mocked(StandardRetryStrategy as any).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -87,7 +87,7 @@ describe(resolveRetryConfig.name, () => {
                 expect(retryMode).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(AdaptiveRetryStrategy)).not.toHaveBeenCalled();
-                const output = await vi.mocked(StandardRetryStrategy).mock.calls[0][0]();
+                const output = await vi.mocked(StandardRetryStrategy as any).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -105,7 +105,7 @@ describe(resolveRetryConfig.name, () => {
                 await retryStrategy();
                 expect(vi.mocked(StandardRetryStrategy)).not.toHaveBeenCalled();
                 expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
-                const output = await vi.mocked(AdaptiveRetryStrategy).mock.calls[0][0]();
+                const output = await vi.mocked(AdaptiveRetryStrategy as any).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }
@@ -124,7 +124,7 @@ describe(resolveRetryConfig.name, () => {
                 expect(retryMode).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(StandardRetryStrategy)).not.toHaveBeenCalled();
                 expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
-                const output = await vi.mocked(AdaptiveRetryStrategy).mock.calls[0][0]();
+                const output = await vi.mocked(AdaptiveRetryStrategy as any).mock.calls[0][0]();
                 expect(output).toStrictEqual(maxAttempts);
               });
             }

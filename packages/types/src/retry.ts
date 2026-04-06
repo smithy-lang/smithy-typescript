@@ -95,6 +95,11 @@ export interface RetryToken {
    * @returns the number of milliseconds to wait before retrying an action.
    */
   getRetryDelay(): number;
+
+  /**
+   * @returns whether the operation which generated this token is long polling.
+   */
+  isLongPoll?(): boolean;
 }
 
 /**
