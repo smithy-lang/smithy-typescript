@@ -58,6 +58,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.traits.SparseTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -165,8 +166,11 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol listShape(ListShape shape) {
+        boolean sparse = shape.hasTrait(SparseTrait.ID);
         Symbol reference = toSymbol(shape.getMember());
-        return createSymbolBuilder(shape, format("%s[]", reference.getName()), null)
+        String valueType = (sparse ? "(" : "") + reference.getName() + (sparse ? " | null)" : "");
+
+        return createSymbolBuilder(shape, format("%s[]", valueType), null)
             .addReference(reference)
             .putProperty("typeOnly", createTypeOnlySymbols)
             .build();
@@ -201,9 +205,12 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
         boolean stringKey = key.toString().equals("string");
 
+        boolean sparse = shape.hasTrait(SparseTrait.ID);
+        String valueType = value.getName() + (sparse ? " | null" : "");
+
         return createSymbolBuilder(
             shape,
-            format(stringKey ? "Record<%s, %s>" : "Partial<Record<%s, %s>>", key.getName(), value.getName()),
+            format(stringKey ? "Record<%s, %s>" : "Partial<Record<%s, %s>>", key.getName(), valueType),
             null
         )
             .addReference(key)

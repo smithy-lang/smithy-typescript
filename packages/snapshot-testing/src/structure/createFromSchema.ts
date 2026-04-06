@@ -55,7 +55,10 @@ export function createFromSchema(schema: $SchemaRef, path = "", options: { mode?
     const $v = $.getValueSchema();
     map.key1 = createFromSchema($v, path + "$k1", options);
     map.key2 = createFromSchema($v, path + "$k2", options);
-    map.key2 = createFromSchema($v, path + "$k3", options);
+    map.key3 = createFromSchema($v, path + "$k3", options);
+    if ($.getMergedTraits().sparse) {
+      map.sparse = null;
+    }
     return map;
   } else if ($.isListSchema()) {
     const list = [] as any;
@@ -68,6 +71,9 @@ export function createFromSchema(schema: $SchemaRef, path = "", options: { mode?
       createFromSchema($v, path + "$l2", options),
       createFromSchema($v, path + "$l3", options)
     );
+    if ($.getMergedTraits().sparse) {
+      list.push(null);
+    }
     return list;
   } else if ($.isStructSchema()) {
     const isUnion = $.isUnionSchema();

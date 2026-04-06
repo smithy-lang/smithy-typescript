@@ -12,6 +12,8 @@ const _LDNATRP = "LabelDoesNotApplyToRpcProtocol";
 const _MSLE = "MainServiceLinkedError";
 const _MTE = "MysteryThrottlingError";
 const _RE = "RetryableError";
+const _SIL = "SparseIntegerList";
+const _SIM = "SparseIntegerMap";
 const _TE = "TradeEvents";
 const _TES = "TradeEventStream";
 const _TESR = "TradeEventStreamRequest";
@@ -47,7 +49,9 @@ const _nu = "number";
 const _num = "numbers";
 const _r = "results";
 const _s = "smithy.ts.sdk.synthetic.org.xyz.v1";
+const _sN = "sparseNumbers";
 const _sT = "startToken";
+const _sp = "sparse";
 const _st = "streaming";
 const _t = "timestamp";
 const _to = "token";
@@ -59,6 +63,7 @@ import { TypeRegistry } from "@smithy/core/schema";
 import type {
   StaticErrorSchema,
   StaticListSchema,
+  StaticMapSchema,
   StaticOperationSchema,
   StaticStructureSchema,
   StaticUnionSchema,
@@ -156,13 +161,13 @@ export var DifferentShapeName$: StaticStructureSchema = [3, n0, _DSN,
 ];
 export var GetNumbersRequest$: StaticStructureSchema = [3, n0, _GNR,
   0,
-  [_bD, _bI, _fWM, _fWMi, _sT, _mR, _cHI],
-  [19, 17, 0, 0, 0, 1, 0]
+  [_bD, _bI, _fWM, _fWMi, _sT, _mR, _cHI, _num, _sN],
+  [19, 17, 0, 0, 0, 1, 0, 128 | 1, [() => SparseIntegerMap, 0]]
 ];
 export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   0,
-  [_bD, _bI, _num, _nT, _dN, _dNWE, _dNWC, _iDN],
-  [19, 17, 64 | 1, 0, 64 | 1, 64 | 1, 64 | 1, 64 | 1]
+  [_bD, _bI, _num, _sN, _nT, _dN, _dNWE, _dNWC, _iDN],
+  [19, 17, 64 | 1, [() => SparseIntegerList, 0], 0, 64 | 1, 64 | 1, 64 | 1, 64 | 1]
 ];
 export var TradeEventStreamRequest$: StaticStructureSchema = [3, n0, _TESR,
   0,
@@ -177,6 +182,13 @@ export var TradeEventStreamResponse$: StaticStructureSchema = [3, n0, _TESRr,
 var __Unit = "unit" as const;
 var Blobs = 64 | 21;
 var IntegerList = 64 | 1;
+var SparseIntegerList: StaticListSchema = [1, n0, _SIL,
+  { [_sp]: 1 }, 1
+];
+var IntegerMap = 128 | 1;
+var SparseIntegerMap: StaticMapSchema = [2, n0, _SIM,
+  { [_sp]: 1 }, 0, 1
+];
 export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_st]: 1 },
   [_a, _b, _g, _d],

@@ -14,6 +14,7 @@ import {
   _json,
   collectBody,
   decorateServiceException as __decorateServiceException,
+  expectInt32 as __expectInt32,
   expectNonNull as __expectNonNull,
   expectString as __expectString,
   parseEpochTimestamp as __parseEpochTimestamp,
@@ -489,8 +490,32 @@ const se_Alpha_event = (
           'fieldWithMessage': [],
           'fieldWithoutMessage': [],
           'maxResults': [],
+          'numbers': _json,
+          'sparseNumbers': _ => se_SparseIntegerMap(_, context),
           'startToken': [],
         });
+      }
+
+      // se_IntegerMap omitted.
+
+      /**
+       * serializeRpcv2cborSparseIntegerMap
+       */
+      const se_SparseIntegerMap = (
+        input: Record<string, number | null>,
+        context: __SerdeContext
+      ): any => {
+        return Object.entries(input).reduce((acc: Record<string, any>, [key, value]: [string, any]) => {
+          if (value !== null) {
+              acc[key] = value;
+          }
+
+          else {
+              acc[key] = null as any;
+          }
+
+          return acc;
+        }, {});
       }
 
       // se_Unit omitted.
@@ -554,6 +579,7 @@ const se_Alpha_event = (
           'inexplicablyDeprecatedNumbers': _json,
           'nextToken': __expectString,
           'numbers': _json,
+          'sparseNumbers': (_: any) => de_SparseIntegerList(_, context),
         }) as any;
       }
 
@@ -566,6 +592,22 @@ const se_Alpha_event = (
       // de_MysteryThrottlingError omitted.
 
       // de_RetryableError omitted.
+
+      /**
+       * deserializeRpcv2cborSparseIntegerList
+       */
+      const de_SparseIntegerList = (
+        output: any,
+        context: __SerdeContext
+      ): (number | null)[] => {
+        const collection = (output || []).map((entry: any) => {
+          if (entry === null) {
+            return null as any;
+          }
+          return __expectInt32(entry) as any;
+        });
+        return collection;
+      }
 
       // de_XYZServiceServiceException omitted.
 
