@@ -69,6 +69,8 @@ export interface GetNumbersRequest {
   startToken?: string | undefined;
   maxResults?: number | undefined;
   customHeaderInput?: string | undefined;
+  numbers?: Record<string, number> | undefined;
+  sparseNumbers?: Record<string, number | null> | undefined;
 }
 
 /**
@@ -78,6 +80,7 @@ export interface GetNumbersResponse {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;
   numbers?: number[] | undefined;
+  sparseNumbers?: (number | null)[] | undefined;
   nextToken?: string | undefined;
   /**
    * This is deprecated documentation annotation.

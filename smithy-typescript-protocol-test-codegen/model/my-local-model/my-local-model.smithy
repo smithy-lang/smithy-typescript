@@ -194,6 +194,10 @@ structure GetNumbersRequest {
 
     @contextParam(name: "CustomHeaderValue")
     customHeaderInput: String
+
+    numbers: IntegerMap
+
+    sparseNumbers: SparseIntegerMap
 }
 
 @output
@@ -203,6 +207,8 @@ structure GetNumbersResponse {
     bigInteger: BigInteger
 
     numbers: IntegerList
+
+    sparseNumbers: SparseIntegerList
 
     nextToken: String
 
@@ -223,6 +229,22 @@ structure GetNumbersResponse {
 
 list IntegerList {
     member: Integer
+}
+
+@sparse
+list SparseIntegerList {
+    member: Integer
+}
+
+map IntegerMap {
+    key: String
+    value: Integer
+}
+
+@sparse
+map SparseIntegerMap {
+    key: String
+    value: Integer
 }
 
 @error("client")
