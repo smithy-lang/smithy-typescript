@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.0.22
+
+### Patch Changes
+
+- Updated dependencies [cffd868]
+  - @smithy/types@4.14.0
+  - @smithy/core@3.23.14
+  - @smithy/util-middleware@4.2.13
+
 ## 1.0.21
 
 ### Patch Changes

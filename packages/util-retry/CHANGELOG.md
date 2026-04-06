@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- cffd868: Introduce default retry behavior modifications slated for 2026. They are:
+  less time between server error retries, but slightly more time between throttling errors. Lower retry capacity consumption for throttling, and improved parsing of the retry-after and x-amz-retry-after headers.
+
+### Patch Changes
+
+- Updated dependencies [cffd868]
+  - @smithy/types@4.14.0
+  - @smithy/service-error-classification@4.2.13
+
 ## 4.2.13
 
 ### Patch Changes

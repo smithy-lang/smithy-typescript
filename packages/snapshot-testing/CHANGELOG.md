@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.0.5
+
+### Patch Changes
+
+- fe15001: generate sparse values in snapshots
+- Updated dependencies [cffd868]
+  - @smithy/types@4.14.0
+  - @smithy/core@3.23.14
+  - @smithy/eventstream-codec@4.2.13
+  - @smithy/node-http-handler@4.5.2
+  - @smithy/protocol-http@5.3.13
+
 ## 2.0.4
 
 ### Patch Changes

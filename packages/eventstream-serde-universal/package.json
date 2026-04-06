@@ -1,6 +1,6 @@
 {
   "name": "@smithy/eventstream-serde-universal",
-  "version": "4.2.12",
+  "version": "4.2.13",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline eventstream-serde-universal",

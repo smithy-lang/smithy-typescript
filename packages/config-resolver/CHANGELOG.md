@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.4.14
+
+### Patch Changes
+
+- Updated dependencies [cffd868]
+  - @smithy/types@4.14.0
+  - @smithy/node-config-provider@4.3.13
+  - @smithy/util-endpoints@3.3.4
+  - @smithy/util-middleware@4.2.13
+
 ## 4.4.13
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.5.22
+
+### Patch Changes
+
+- Updated dependencies [cffd868]
+  - @smithy/types@4.14.0
+  - @smithy/fetch-http-handler@5.3.16
+  - @smithy/node-http-handler@4.5.2
+
 ## 4.5.21
 
 ### Patch Changes

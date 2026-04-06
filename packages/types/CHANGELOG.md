@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.14.0
+
+### Minor Changes
+
+- cffd868: Introduce default retry behavior modifications slated for 2026. They are:
+  less time between server error retries, but slightly more time between throttling errors. Lower retry capacity consumption for throttling, and improved parsing of the retry-after and x-amz-retry-after headers.
+
 ## 4.13.1
 
 ### Patch Changes
