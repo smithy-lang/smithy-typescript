@@ -450,7 +450,8 @@
     "RETRY_COST": "number, since <=4.2.5",
     "StandardRetryStrategy": "function, since <=4.2.5",
     "THROTTLING_RETRY_DELAY_BASE": "number, since <=4.2.5",
-    "TIMEOUT_RETRY_COST": "number, since <=4.2.5"
+    "TIMEOUT_RETRY_COST": "number, since <=4.2.5",
+    "Retry": "function, since 4.3.0"
   },
   "@smithy/util-stream": {
     "Uint8ArrayBlobAdapter": "function, since <=4.5.6",

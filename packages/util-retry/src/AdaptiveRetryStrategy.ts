@@ -62,4 +62,12 @@ export class AdaptiveRetryStrategy implements RetryStrategyV2 {
     this.rateLimiter.updateClientSendingRate({});
     this.standardRetryStrategy.recordSuccess(token);
   }
+
+  /**
+   * There is an existing integration which accesses this field.
+   * @deprecated
+   */
+  public async maxAttemptsProvider(): Promise<number> {
+    return this.standardRetryStrategy.maxAttempts();
+  }
 }
