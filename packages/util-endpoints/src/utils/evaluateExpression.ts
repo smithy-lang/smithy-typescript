@@ -20,13 +20,18 @@ export const callFunction = ({ fn, argv }: FunctionObject, options: EvaluateOpti
   const evaluatedArgs = argv.map((arg) =>
     ["boolean", "number"].includes(typeof arg) ? arg : group.evaluateExpression(arg as Expression, "arg", options)
   );
+
   const fnSegments = fn.split(".");
   if (fnSegments[0] in customEndpointFunctions && fnSegments[1] != null) {
-    // @ts-ignore Element implicitly has an 'any' type
-    return customEndpointFunctions[fnSegments[0]][fnSegments[1]](...evaluatedArgs);
+    return (customEndpointFunctions as any)[fnSegments[0]][fnSegments[1]](...evaluatedArgs);
   }
-  // @ts-ignore Element implicitly has an 'any' type
-  return endpointFunctions[fn](...evaluatedArgs);
+
+  if (typeof (endpointFunctions as Record<string, Function>)[fn] !== "function") {
+    throw new Error(`function ${fn} not loaded in endpointFunctions.`);
+  }
+
+  const callable = endpointFunctions[fn as keyof typeof endpointFunctions] as (...args: any[]) => any;
+  return callable(...evaluatedArgs);
 };
 
 export const group = {

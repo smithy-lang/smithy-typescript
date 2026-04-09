@@ -424,7 +424,9 @@
     "customEndpointFunctions": "object, since <=3.2.5",
     "isIpAddress": "function, since <=3.2.5",
     "isValidHostLabel": "function, since <=3.2.5",
-    "resolveEndpoint": "function, since <=3.2.5"
+    "resolveEndpoint": "function, since <=3.2.5",
+    "BinaryDecisionDiagram": "function, since 3.3.4",
+    "decideEndpoint": "function, since 3.3.4"
   },
   "@smithy/util-hex-encoding": {
     "fromHex": "function, since <=4.2.0",
@@ -450,7 +452,8 @@
     "RETRY_COST": "number, since <=4.2.5",
     "StandardRetryStrategy": "function, since <=4.2.5",
     "THROTTLING_RETRY_DELAY_BASE": "number, since <=4.2.5",
-    "TIMEOUT_RETRY_COST": "number, since <=4.2.5"
+    "TIMEOUT_RETRY_COST": "number, since <=4.2.5",
+    "Retry": "function, since 4.3.0"
   },
   "@smithy/util-stream": {
     "Uint8ArrayBlobAdapter": "function, since <=4.5.6",

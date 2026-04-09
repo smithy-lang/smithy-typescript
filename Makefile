@@ -36,6 +36,9 @@ benchmark:
 bgt:
 	make build generate-protocol-tests test-protocols
 
+gt:
+	make generate-protocol-tests test-protocols
+
 test-unit:
 	yarn g:vitest run -c vitest.config.mts
 
