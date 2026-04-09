@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.1
+
+### Patch Changes
+
+- a45aaf5: add maxAttempts and maxAttemptsProvider public methods to StandardRetryStrategy/AdaptiveRetryStrategy
+
 ## 4.3.0
 
 ### Minor Changes

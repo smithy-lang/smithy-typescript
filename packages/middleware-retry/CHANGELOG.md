@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.5.1
+
+### Patch Changes
+
+- Updated dependencies [a45aaf5]
+  - @smithy/util-retry@4.3.1
+
 ## 4.5.0
 
 ### Minor Changes
