@@ -142,4 +142,12 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
   private isRetryableError(errorType: RetryErrorType): boolean {
     return errorType === "THROTTLING" || errorType === "TRANSIENT";
   }
+
+  /**
+   * There is an existing integration which accesses this field.
+   * @deprecated
+   */
+  public async maxAttempts(): Promise<number> {
+    return this.maxAttemptsProvider();
+  }
 }
