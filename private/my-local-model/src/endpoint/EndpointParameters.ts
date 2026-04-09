@@ -69,7 +69,7 @@ export const commonParams = {
  * @internal
  */
 export interface EndpointParameters extends __EndpointParameters {
-  endpoint: string;
+  endpoint?: string | undefined;
   ApiKey?: string | undefined;
   region?: string | undefined;
   customParam?: string | undefined;

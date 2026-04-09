@@ -6,7 +6,6 @@ export const ruleSet: RuleSetObject = {
   parameters: {
     endpoint: {
       builtIn: "SDK::Endpoint",
-      required: true,
       documentation: "The endpoint used to send the request.",
       type: "string",
     },
@@ -63,6 +62,14 @@ export const ruleSet: RuleSetObject = {
           fn: "isSet",
           argv: [
             {
+              ref: "endpoint",
+            },
+          ],
+        },
+        {
+          fn: "isSet",
+          argv: [
+            {
               ref: "ApiKey",
             },
           ],
@@ -96,6 +103,14 @@ export const ruleSet: RuleSetObject = {
           fn: "isSet",
           argv: [
             {
+              ref: "endpoint",
+            },
+          ],
+        },
+        {
+          fn: "isSet",
+          argv: [
+            {
               ref: "ApiKey",
             },
           ],
@@ -113,13 +128,27 @@ export const ruleSet: RuleSetObject = {
       type: "endpoint",
     },
     {
-      conditions: [],
+      conditions: [
+        {
+          fn: "isSet",
+          argv: [
+            {
+              ref: "endpoint",
+            },
+          ],
+        },
+      ],
       endpoint: {
         url: "{endpoint}",
         properties: {},
         headers: {},
       },
       type: "endpoint",
+    },
+    {
+      conditions: [],
+      error: "endpoint is not set - you must configure an endpoint.",
+      type: "error",
     },
   ],
 };

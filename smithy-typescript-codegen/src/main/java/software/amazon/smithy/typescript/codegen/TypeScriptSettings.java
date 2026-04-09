@@ -62,6 +62,7 @@ public final class TypeScriptSettings {
     private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
     private static final String BIG_NUMBER_MODE = "bigNumberMode";
     private static final String GENERATE_SCHEMAS = "generateSchemas";
+    private static final String GENERATE_ENDPOINT_BDD = "generateEndpointBdd";
     private static final String VERSIONING_SCHEME = "versioningScheme";
 
     private String packageName;
@@ -83,6 +84,7 @@ public final class TypeScriptSettings {
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
     private String bigNumberMode = "native";
     private boolean generateSchemas = true;
+    private boolean generateEndpointBdd = false;
     private boolean generateIndexTests = false;
     private boolean generateSnapshotTests = false;
     private String versioningScheme = "";
@@ -150,6 +152,10 @@ public final class TypeScriptSettings {
         // Internal undocumented configuration used to control rollout of schemas.
         // `true` will eventually be the only available option, and this should not be set by users.
         settings.setGenerateSchemas(config.getBooleanMemberOrDefault(GENERATE_SCHEMAS, true));
+
+        // Internal undocumented configuration used to control rollout of endpoint BDD.
+        // `true` will eventually be the only available option, and this should not be set by users.
+        settings.setGenerateEndpointBdd(config.getBooleanMemberOrDefault(GENERATE_ENDPOINT_BDD, false));
 
         settings.setGenerateIndexTests(config.getBooleanMemberOrDefault(GENERATE_INDEX_TESTS, false));
         settings.setGenerateSnapshotTests(config.getBooleanMemberOrDefault(GENERATE_SNAPSHOT_TESTS, false));
@@ -269,6 +275,16 @@ public final class TypeScriptSettings {
     @SmithyInternalApi
     public boolean generateSchemas() {
         return generateSchemas;
+    }
+
+    @SmithyInternalApi
+    public void setGenerateEndpointBdd(boolean generateEndpointBdd) {
+        this.generateEndpointBdd = generateEndpointBdd;
+    }
+
+    @SmithyInternalApi
+    public boolean generateEndpointBdd() {
+        return generateEndpointBdd;
     }
 
     public void setGenerateIndexTests(boolean generateIndexTests) {
@@ -626,7 +642,9 @@ public final class TypeScriptSettings {
                 GENERATE_INDEX_TESTS,
                 GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
-                GENERATE_SCHEMAS
+                GENERATE_SCHEMAS,
+                GENERATE_ENDPOINT_BDD,
+                VERSIONING_SCHEME
             )
         ),
         SSDK(
@@ -647,7 +665,9 @@ public final class TypeScriptSettings {
                 GENERATE_INDEX_TESTS,
                 GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
-                GENERATE_SCHEMAS
+                GENERATE_SCHEMAS,
+                GENERATE_ENDPOINT_BDD,
+                VERSIONING_SCHEME
             )
         );
 
