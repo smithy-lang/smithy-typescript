@@ -26,7 +26,7 @@ use smithy.waiters#waitable
 @endpointRuleSet({
     version: "1.0"
     parameters: {
-        endpoint: { builtIn: "SDK::Endpoint", required: true, documentation: "The endpoint used to send the request.", type: "string" }
+        endpoint: { builtIn: "SDK::Endpoint", documentation: "The endpoint used to send the request.", type: "string" }
         ApiKey: { required: false, documentation: "ApiKey", type: "string" }
         region: { type: "string", required: false, documentation: "AWS region" }
         customParam: { type: "string", required: true, default: "default-custom-value", documentation: "Custom parameter for testing" }
@@ -39,6 +39,14 @@ use smithy.waiters#waitable
     rules: [
         {
             conditions: [
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
+                            ref: "endpoint"
+                        }
+                    ]
+                }
                 {
                     fn: "isSet"
                     argv: [
@@ -72,6 +80,14 @@ use smithy.waiters#waitable
                     fn: "isSet"
                     argv: [
                         {
+                            ref: "endpoint"
+                        }
+                    ]
+                }
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
                             ref: "ApiKey"
                         }
                     ]
@@ -87,13 +103,27 @@ use smithy.waiters#waitable
             type: "endpoint"
         }
         {
-            conditions: []
+            conditions: [
+                {
+                    fn: "isSet"
+                    argv: [
+                        {
+                            ref: "endpoint"
+                        }
+                    ]
+                }
+            ]
             endpoint: {
                 url: "{endpoint}"
                 properties: {}
                 headers: {}
             }
             type: "endpoint"
+        }
+        {
+            conditions: []
+            error: "endpoint is not set - you must configure an endpoint."
+            type: "error"
         }
     ]
 })

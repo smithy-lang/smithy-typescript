@@ -106,7 +106,8 @@
           "bigNumberMode": "native",
           "generateSchemas": true,
           "generateIndexTests": true,
-          "generateSnapshotTests": true
+          "generateSnapshotTests": true,
+          "generateEndpointBdd": true
         }
       }
     }
