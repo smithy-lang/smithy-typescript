@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.2.50
+
+### Patch Changes
+
+- @smithy/config-resolver@4.4.15
+
 ## 4.2.49
 
 ### Patch Changes

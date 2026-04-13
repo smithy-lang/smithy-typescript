@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.4.0
+
+### Minor Changes
+
+- 8196133: add endpoint binary decision diagrams feature
+- 2490c8c: performance improvements for endpoint resolver functions
+
 ## 3.3.4
 
 ### Patch Changes

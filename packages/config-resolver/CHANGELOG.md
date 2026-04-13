@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.4.15
+
+### Patch Changes
+
+- Updated dependencies [8196133]
+- Updated dependencies [2490c8c]
+  - @smithy/util-endpoints@3.4.0
+
 ## 4.4.14
 
 ### Patch Changes
