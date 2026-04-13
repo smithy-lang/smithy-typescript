@@ -4,10 +4,7 @@ import type { EvaluateOptions } from "../types";
 export const evaluateTemplate = (template: string, options: EvaluateOptions) => {
   const evaluatedTemplateArr: string[] = [];
 
-  const templateContext = {
-    ...options.endpointParams,
-    ...options.referenceRecord,
-  } as Record<string, string>;
+  const { referenceRecord, endpointParams } = options;
 
   let currentIndex = 0;
   while (currentIndex < template.length) {
@@ -38,9 +35,11 @@ export const evaluateTemplate = (template: string, options: EvaluateOptions) => 
 
     if (parameterName.includes("#")) {
       const [refName, attrName] = parameterName.split("#");
-      evaluatedTemplateArr.push(getAttr(templateContext[refName], attrName) as string);
+      evaluatedTemplateArr.push(
+        getAttr((referenceRecord[refName] ?? endpointParams[refName]) as string, attrName) as string
+      );
     } else {
-      evaluatedTemplateArr.push(templateContext[parameterName]);
+      evaluatedTemplateArr.push((referenceRecord[parameterName] ?? endpointParams[parameterName]) as string);
     }
 
     currentIndex = closingBraceIndex + 1;
