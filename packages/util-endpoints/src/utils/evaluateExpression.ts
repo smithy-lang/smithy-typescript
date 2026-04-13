@@ -17,13 +17,24 @@ export const evaluateExpression = (obj: Expression, keyName: string, options: Ev
 };
 
 export const callFunction = ({ fn, argv }: FunctionObject, options: EvaluateOptions): FunctionReturn => {
-  const evaluatedArgs = argv.map((arg) =>
-    ["boolean", "number"].includes(typeof arg) ? arg : group.evaluateExpression(arg as Expression, "arg", options)
-  );
+  const evaluatedArgs = Array(argv.length);
 
-  const fnSegments = fn.split(".");
-  if (fnSegments[0] in customEndpointFunctions && fnSegments[1] != null) {
-    return (customEndpointFunctions as any)[fnSegments[0]][fnSegments[1]](...evaluatedArgs);
+  // manual mapping - hot code path.
+  for (let i = 0; i < evaluatedArgs.length; ++i) {
+    const arg = argv[i];
+    if (typeof arg === "boolean" || typeof arg === "number") {
+      evaluatedArgs[i] = arg;
+    } else {
+      evaluatedArgs[i] = group.evaluateExpression(arg, "arg", options);
+    }
+  }
+
+  // if-statement to avoid split array allocation.
+  if (fn.includes(".")) {
+    const fnSegments = fn.split(".");
+    if (fnSegments[0] in customEndpointFunctions && fnSegments[1] != null) {
+      return (customEndpointFunctions as any)[fnSegments[0]][fnSegments[1]](...evaluatedArgs);
+    }
   }
 
   if (typeof (endpointFunctions as Record<string, Function>)[fn] !== "function") {
