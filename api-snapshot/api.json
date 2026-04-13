@@ -424,7 +424,9 @@
     "customEndpointFunctions": "object, since <=3.2.5",
     "isIpAddress": "function, since <=3.2.5",
     "isValidHostLabel": "function, since <=3.2.5",
-    "resolveEndpoint": "function, since <=3.2.5"
+    "resolveEndpoint": "function, since <=3.2.5",
+    "BinaryDecisionDiagram": "function, since 3.3.4",
+    "decideEndpoint": "function, since 3.3.4"
   },
   "@smithy/util-hex-encoding": {
     "fromHex": "function, since <=4.2.0",

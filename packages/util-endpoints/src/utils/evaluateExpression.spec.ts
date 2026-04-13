@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { EndpointError } from "../types";
-import { evaluateExpression, group } from "./evaluateExpression";
+import { callFunction, evaluateExpression, group } from "./evaluateExpression";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getReferenceValue } from "./getReferenceValue";
 
@@ -62,5 +62,23 @@ describe(evaluateExpression.name, () => {
     expect(evaluateTemplate).not.toHaveBeenCalled();
     expect(callFunction).not.toHaveBeenCalled();
     expect(getReferenceValue).not.toHaveBeenCalled();
+  });
+});
+
+describe(callFunction.name, () => {
+  const mockOptions = {
+    endpointParams: {},
+    referenceRecord: {},
+  };
+
+  it("throws error for unknown function", () => {
+    expect(() => callFunction({ fn: "unknownFn", argv: [] }, mockOptions)).toThrowError(
+      "function unknownFn not loaded in endpointFunctions."
+    );
+  });
+
+  it("calls a known endpoint function", () => {
+    const result = callFunction({ fn: "booleanEquals", argv: [true, true] }, mockOptions);
+    expect(result).toBe(true);
   });
 });
