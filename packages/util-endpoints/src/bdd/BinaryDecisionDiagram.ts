@@ -1,6 +1,6 @@
 import type { EndpointObjectHeaders, ParameterObject } from "@smithy/types";
 
-import type { FunctionArgv } from "../types/shared";
+import type { Expression, FunctionArgv } from "../types/shared";
 
 /**
  * @internal
@@ -10,7 +10,11 @@ type BddCondition = [string, FunctionArgv] | [string, FunctionArgv, string];
 /**
  * @internal
  */
-type BddResult = [-1] | [-1, string] | [string, Record<string, ParameterObject>, EndpointObjectHeaders];
+type BddResult =
+  | [-1]
+  | [-1, Expression]
+  | [string, Record<string, ParameterObject>, EndpointObjectHeaders]
+  | [string, Record<string, ParameterObject>];
 
 /**
  * @internal
