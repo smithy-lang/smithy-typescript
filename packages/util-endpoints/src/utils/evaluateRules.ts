@@ -35,10 +35,12 @@ export const evaluateTreeRule = (treeRule: TreeRuleObject, options: EvaluateOpti
     return;
   }
 
-  return group.evaluateRules(rules, {
-    ...options,
-    referenceRecord: { ...options.referenceRecord, ...referenceRecord },
-  });
+  const treeRuleOptions =
+    Object.keys(referenceRecord ?? {}).length > 0
+      ? { ...options, referenceRecord: { ...options.referenceRecord, ...referenceRecord } }
+      : options;
+
+  return group.evaluateRules(rules, treeRuleOptions);
 };
 
 export const group = {
