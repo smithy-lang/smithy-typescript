@@ -31,6 +31,7 @@
   "author": "AWS Smithy Team",
   "license": "UNLICENSED",
   "dependencies": {
+    "@aws-sdk/util-endpoints": "^3.996.6",
     "@changesets/cli": "^2.27.5",
     "glob": "^7.1.6",
     "premove": "4.0.0"

@@ -81,6 +81,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@aws-sdk/types@npm:^3.973.7":
+  version: 3.973.7
+  resolution: "@aws-sdk/types@npm:3.973.7"
+  dependencies:
+    "@smithy/types": "npm:^4.14.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/4dfe5933ec3624dcc7ecf1154fad67999c9b5ddb010a456edd3cb94e6112e9330e0bb3c03218040ee15bc91b7f8ba5e4c63f82074fef26f4616f74212c732aa7
+  languageName: node
+  linkType: hard
+
+"@aws-sdk/util-endpoints@npm:^3.996.6":
+  version: 3.996.6
+  resolution: "@aws-sdk/util-endpoints@npm:3.996.6"
+  dependencies:
+    "@aws-sdk/types": "npm:^3.973.7"
+    "@smithy/types": "npm:^4.14.0"
+    "@smithy/url-parser": "npm:^4.2.13"
+    "@smithy/util-endpoints": "npm:^3.3.4"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/34c80b2ee5b038d32a0e019f85b62195cb970c62f15e8caab44092632f40410ea960fea4576c864254fc232064d78897f75458629db534146241475caf250d08
+  languageName: node
+  linkType: hard
+
 "@aws-sdk/util-locate-window@npm:^3.0.0":
   version: 3.568.0
   resolution: "@aws-sdk/util-locate-window@npm:3.568.0"
@@ -3415,7 +3438,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/types@workspace:^, @smithy/types@workspace:packages/types":
+"@smithy/types@npm:^4.14.0, @smithy/types@workspace:^, @smithy/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
@@ -3427,7 +3450,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/url-parser@workspace:^, @smithy/url-parser@workspace:packages/url-parser":
+"@smithy/url-parser@npm:^4.2.13, @smithy/url-parser@workspace:^, @smithy/url-parser@workspace:packages/url-parser":
   version: 0.0.0-use.local
   resolution: "@smithy/url-parser@workspace:packages/url-parser"
   dependencies:
@@ -3553,7 +3576,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-endpoints@workspace:^, @smithy/util-endpoints@workspace:packages/util-endpoints":
+"@smithy/util-endpoints@npm:^3.3.4, @smithy/util-endpoints@workspace:^, @smithy/util-endpoints@workspace:packages/util-endpoints":
   version: 0.0.0-use.local
   resolution: "@smithy/util-endpoints@workspace:packages/util-endpoints"
   dependencies:
@@ -10582,6 +10605,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "smithy-typescript@workspace:."
   dependencies:
+    "@aws-sdk/util-endpoints": "npm:^3.996.6"
     "@changesets/cli": "npm:^2.27.5"
     "@microsoft/api-extractor": "npm:7.52.7"
     "@rollup/plugin-json": "npm:^6.1.0"
