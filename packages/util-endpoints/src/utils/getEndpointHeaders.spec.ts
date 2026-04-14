@@ -16,6 +16,7 @@ describe(getEndpointHeaders.name, () => {
   });
 
   it("should return an empty object if empty headers are provided", () => {
+    expect(getEndpointHeaders(null as any, mockOptions)).toEqual({});
     expect(getEndpointHeaders({}, mockOptions)).toEqual({});
     expect(evaluateExpression).not.toHaveBeenCalled();
   });

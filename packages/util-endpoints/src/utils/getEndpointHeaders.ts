@@ -3,7 +3,7 @@ import { EndpointError } from "../types";
 import { evaluateExpression } from "./evaluateExpression";
 
 export const getEndpointHeaders = (headers: EndpointObjectHeaders, options: EvaluateOptions) =>
-  Object.entries(headers).reduce(
+  Object.entries(headers ?? {}).reduce(
     (acc, [headerKey, headerVal]) => ({
       ...acc,
       [headerKey]: headerVal.map((headerValEntry) => {

@@ -4,6 +4,7 @@ import type { BinaryDecisionDiagram } from "./bdd/BinaryDecisionDiagram";
 import type { EndpointResolverOptions } from "./types";
 import { EndpointError } from "./types";
 import { evaluateCondition } from "./utils/evaluateCondition";
+import { evaluateExpression } from "./utils/evaluateExpression";
 import { getEndpointHeaders } from "./utils/getEndpointHeaders";
 import { getEndpointProperties } from "./utils/getEndpointProperties";
 import { getEndpointUrl } from "./utils/getEndpointUrl";
@@ -40,15 +41,15 @@ export const decideEndpoint = (bdd: BinaryDecisionDiagram, options: EndpointReso
   if (ref >= RESULT) {
     const result = results[ref - RESULT];
     if (result[0] === -1) {
-      const [, errorMessage] = result;
-      throw new EndpointError(errorMessage!);
+      const [, errorExpression] = result;
+      throw new EndpointError(evaluateExpression(errorExpression!, "Error", closure) as string);
     }
     const [url, properties, headers] = result;
 
     return {
       url: getEndpointUrl(url, closure),
       properties: getEndpointProperties(properties, closure),
-      headers: getEndpointHeaders(headers, closure),
+      headers: getEndpointHeaders(headers ?? {}, closure),
     };
   }
 

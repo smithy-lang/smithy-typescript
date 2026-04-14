@@ -36,4 +36,20 @@ describe(decideEndpoint.name, () => {
       headers: {},
     });
   });
+
+  it("evaluates templates in error messages", () => {
+    const r = 100_000_000;
+    const bdd = new Int32Array([0, 0, 0, 0, r + 0, -1]);
+    const data = BinaryDecisionDiagram.from(
+      bdd,
+      2,
+      [["isSet", [{ ref: "Region" }]]],
+      [[-1, "Invalid region: {Region}"]]
+    );
+    expect(() =>
+      decideEndpoint(data, {
+        endpointParams: { Region: "us-west-2" },
+      })
+    ).toThrow("Invalid region: us-west-2");
+  });
 });
