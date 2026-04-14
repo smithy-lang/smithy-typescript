@@ -94,8 +94,15 @@ export abstract class Command<
       ...additionalContext,
     };
     const { requestHandler } = configuration;
+    let requestOptions = options ?? {};
+    if (smithyContext.eventStream) {
+      requestOptions = Object.assign({
+        isEventStream: true,
+        requestOptions,
+      });
+    }
     return stack.resolve(
-      (request: FinalizeHandlerArguments<any>) => requestHandler.handle(request.request as HttpRequest, options || {}),
+      (request: FinalizeHandlerArguments<any>) => requestHandler.handle(request.request as HttpRequest, requestOptions),
       handlerExecutionContext
     );
   }

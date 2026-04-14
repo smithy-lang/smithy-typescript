@@ -46,6 +46,19 @@ export interface NodeHttp2HandlerOptions {
 }
 
 /**
+ * This is derived from the smithyContext object. This signals to the NodeHttp2Handler specifically
+ * that the connection pool should not be used to acquire a connection. The event stream should
+ * have its own new connection.
+ *
+ * This does not apply to WebSocket event streams, since there is no pooling.
+ *
+ * @internal
+ */
+type EventStreamSignal = {
+  isEventStream?: boolean;
+};
+
+/**
  * A request handler using the node:http2 package.
  * @public
  */
@@ -86,23 +99,25 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
     });
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.connectionManager.destroy();
   }
 
-  async handle(
+  public async handle(
     request: HttpRequest,
-    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+    { abortSignal, requestTimeout, isEventStream }: HttpHandlerOptions & EventStreamSignal = {}
   ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
-      this.connectionManager.setDisableConcurrentStreams(this.config.disableConcurrentStreams || false);
+      this.connectionManager.setDisableConcurrentStreams(this.config.disableConcurrentStreams ?? false);
       if (this.config.maxConcurrentStreams) {
         this.connectionManager.setMaxConcurrentStreams(this.config.maxConcurrentStreams);
       }
     }
+
     const { requestTimeout: configRequestTimeout, disableConcurrentStreams } = this.config;
     const effectiveRequestTimeout = requestTimeout ?? configRequestTimeout;
+
     return new Promise((_resolve, _reject) => {
       // It's redundant to track fulfilled because promises use the first resolution/rejection
       // but avoids generating unnecessary stack traces in the "close" event handler.
@@ -137,8 +152,8 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       const requestContext = { destination: new URL(authority) } as RequestContext;
       const session = this.connectionManager.lease(requestContext, {
         requestTimeout: this.config?.sessionTimeout,
-        disableConcurrentStreams: disableConcurrentStreams || false,
-      } as ConnectConfiguration);
+        isEventStream,
+      });
 
       const rejectWithDestroy = (err: Error) => {
         if (disableConcurrentStreams) {
@@ -148,7 +163,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
         reject(err);
       };
 
-      const queryString = buildQueryString(query || {});
+      const queryString = buildQueryString(query ?? {});
       let path = request.path;
       if (queryString) {
         path += `?${queryString}`;
@@ -168,7 +183,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
 
       req.on("response", (headers) => {
         const httpResponse = new HttpResponse({
-          statusCode: headers[":status"] || -1,
+          statusCode: headers[":status"] ?? -1,
           headers: getTransformedHeaders(headers),
           body: req,
         });
@@ -236,7 +251,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
     });
   }
 
-  updateHttpClientConfig(key: keyof NodeHttp2HandlerOptions, value: NodeHttp2HandlerOptions[typeof key]): void {
+  public updateHttpClientConfig(key: keyof NodeHttp2HandlerOptions, value: NodeHttp2HandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
       return {
@@ -246,7 +261,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
     });
   }
 
-  httpHandlerConfigs(): NodeHttp2HandlerOptions {
+  public httpHandlerConfigs(): NodeHttp2HandlerOptions {
     return this.config ?? {};
   }
 

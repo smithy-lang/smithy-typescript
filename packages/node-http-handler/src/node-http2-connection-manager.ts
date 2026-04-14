@@ -28,8 +28,11 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
     const existingPool = this.sessionCache.get(url);
 
     if (existingPool) {
+      // This poll call needs to happen regardless of whether existingSession is returned.
+      // polling, and thereby dropping references to the session, allows it to be closed by garbage collection.
       const existingSession = existingPool.poll();
-      if (existingSession && !this.config.disableConcurrency) {
+
+      if (existingSession && !this.config.disableConcurrency && !connectionConfiguration.isEventStream) {
         return existingSession;
       }
     }
