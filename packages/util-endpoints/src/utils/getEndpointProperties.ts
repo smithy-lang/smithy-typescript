@@ -5,13 +5,10 @@ import { EndpointError } from "../types";
 import { evaluateTemplate } from "./evaluateTemplate";
 
 export const getEndpointProperties = (properties: EndpointObjectProperties, options: EvaluateOptions) =>
-  Object.entries(properties).reduce(
-    (acc, [propertyKey, propertyVal]) => ({
-      ...acc,
-      [propertyKey]: group.getEndpointProperty(propertyVal, options),
-    }),
-    {}
-  );
+  Object.entries(properties).reduce((acc, [propertyKey, propertyVal]) => {
+    acc[propertyKey] = group.getEndpointProperty(propertyVal, options);
+    return acc;
+  }, {});
 
 export const getEndpointProperty = (
   property: EndpointObjectProperty,
