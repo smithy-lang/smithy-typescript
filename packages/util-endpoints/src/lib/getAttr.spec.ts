@@ -36,6 +36,8 @@ describe(getAttr.name, () => {
     it.each([
       [mockArr[0], "[0]", ["0"]],
       [mockArr[1], "[1]", ["1"]],
+      [mockArr[1], "[-1]", ["-1"]],
+      [mockArr[0], "[-2]", ["-2"]],
     ])("returns '%s' for '%s'", (output, input, pathList) => {
       testSuccess(mockArr, input, output, pathList);
     });
