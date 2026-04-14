@@ -11,7 +11,8 @@ export const getAttr = (value: GetAttrValue, path: string): GetAttrValue =>
     if (typeof acc !== "object") {
       throw new EndpointError(`Index '${index}' in '${path}' not found in '${JSON.stringify(value)}'`);
     } else if (Array.isArray(acc)) {
-      return acc[parseInt(index)];
+      const i = parseInt(index);
+      return acc[i < 0 ? acc.length + i : i];
     }
     return acc[index];
   }, value);
