@@ -50,14 +50,17 @@ describe(evaluateConditions.name, () => {
     const value1 = "value1";
     const value2 = "value2";
 
-    vi.mocked(evaluateCondition).mockReturnValueOnce({
-      result: true,
-      toAssign: { name: mockCn1.assign!, value: value1 },
-    });
-    vi.mocked(evaluateCondition).mockReturnValueOnce({
-      result: true,
-      toAssign: { name: mockCn2.assign!, value: value2 },
-    });
+    const capturedReferenceRecords: Record<string, unknown>[] = [];
+
+    vi.mocked(evaluateCondition)
+      .mockImplementationOnce((_condition, options) => {
+        capturedReferenceRecords.push({ ...options.referenceRecord });
+        return { result: true, toAssign: { name: mockCn1.assign!, value: value1 } };
+      })
+      .mockImplementationOnce((_condition, options) => {
+        capturedReferenceRecords.push({ ...options.referenceRecord });
+        return { result: true, toAssign: { name: mockCn2.assign!, value: value2 } };
+      });
 
     const { result, referenceRecord } = evaluateConditions([mockCn1, mockCn2], { ...mockOptions });
     expect(result).toBe(true);
@@ -65,11 +68,8 @@ describe(evaluateConditions.name, () => {
       [mockCn1.assign!]: value1,
       [mockCn2.assign!]: value2,
     });
-    expect(evaluateCondition).toHaveBeenNthCalledWith(1, mockCn1, mockOptions);
-    expect(evaluateCondition).toHaveBeenNthCalledWith(2, mockCn2, {
-      ...mockOptions,
-      referenceRecord: { [mockCn1.assign!]: value1 },
-    });
+    expect(capturedReferenceRecords[0]).toEqual({});
+    expect(capturedReferenceRecords[1]).toEqual({ [mockCn1.assign!]: value1 });
     expect(mockLogger.debug).nthCalledWith(1, `${debugId} assign: ${mockCn1.assign} := ${toDebugString(value1)}`);
     expect(mockLogger.debug).nthCalledWith(2, `${debugId} assign: ${mockCn2.assign} := ${toDebugString(value2)}`);
   });

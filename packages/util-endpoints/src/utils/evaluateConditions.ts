@@ -4,15 +4,13 @@ import { evaluateCondition } from "./evaluateCondition";
 
 export const evaluateConditions = (conditions: ConditionObject[] = [], options: EvaluateOptions) => {
   const conditionsReferenceRecord: Record<string, FunctionReturn> = {};
+  const conditionOptions: EvaluateOptions = {
+    ...options,
+    referenceRecord: { ...options.referenceRecord },
+  };
 
   for (const condition of conditions) {
-    const { result, toAssign } = evaluateCondition(condition, {
-      ...options,
-      referenceRecord: {
-        ...options.referenceRecord,
-        ...conditionsReferenceRecord,
-      },
-    });
+    const { result, toAssign } = evaluateCondition(condition, conditionOptions);
 
     if (!result) {
       return { result };
@@ -20,6 +18,7 @@ export const evaluateConditions = (conditions: ConditionObject[] = [], options: 
 
     if (toAssign) {
       conditionsReferenceRecord[toAssign.name] = toAssign.value;
+      conditionOptions.referenceRecord[toAssign.name] = toAssign.value;
       options.logger?.debug?.(`${debugId} assign: ${toAssign.name} := ${toDebugString(toAssign.value)}`);
     }
   }
