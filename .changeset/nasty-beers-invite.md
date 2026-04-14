@@ -2,4 +2,4 @@
 "@smithy/util-endpoints": patch
 ---
 
-Reduce allocations in evaluateCondition(s)
+Reduce temporary object allocations
