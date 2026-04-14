@@ -5,6 +5,7 @@ import type {
   FormattedEvent,
   HttpRequest,
   MessageSigner,
+  MessageSigningArguments,
   RequestPresigner,
   RequestPresigningArguments,
   RequestSigner,
@@ -118,7 +119,7 @@ export class SignatureV4
 
   public async sign(stringToSign: string, options?: SigningArguments): Promise<string>;
   public async sign(event: FormattedEvent, options: EventSigningArguments): Promise<string>;
-  public async sign(event: SignableMessage, options: SigningArguments): Promise<SignedMessage>;
+  public async sign(event: SignableMessage, options: MessageSigningArguments): Promise<SignedMessage>;
   public async sign(requestToSign: HttpRequest, options?: RequestSigningArguments): Promise<HttpRequest>;
   public async sign(toSign: any, options: any): Promise<any> {
     if (typeof toSign === "string") {
@@ -134,7 +135,13 @@ export class SignatureV4
 
   private async signEvent(
     { headers, payload }: FormattedEvent,
-    { signingDate = new Date(), priorSignature, signingRegion, signingService }: EventSigningArguments
+    {
+      signingDate = new Date(),
+      priorSignature,
+      signingRegion,
+      signingService,
+      eventStreamCredentials,
+    }: EventSigningArguments
   ): Promise<string> {
     const region = signingRegion ?? (await this.regionProvider());
     const { shortDate, longDate } = this.formatDate(signingDate);
@@ -151,12 +158,17 @@ export class SignatureV4
       hashedHeaders,
       hashedPayload,
     ].join("\n");
-    return this.signString(stringToSign, { signingDate, signingRegion: region, signingService });
+    return this.signString(stringToSign, {
+      signingDate,
+      signingRegion: region,
+      signingService,
+      eventStreamCredentials,
+    });
   }
 
   async signMessage(
     signableMessage: SignableMessage,
-    { signingDate = new Date(), signingRegion, signingService }: SigningArguments
+    { signingDate = new Date(), signingRegion, signingService, eventStreamCredentials }: MessageSigningArguments
   ): Promise<SignedMessage> {
     const promise = this.signEvent(
       {
@@ -168,6 +180,7 @@ export class SignatureV4
         signingRegion,
         signingService,
         priorSignature: signableMessage.priorSignature,
+        eventStreamCredentials,
       }
     );
 
@@ -178,9 +191,14 @@ export class SignatureV4
 
   private async signString(
     stringToSign: string,
-    { signingDate = new Date(), signingRegion, signingService }: SigningArguments = {}
+    {
+      signingDate = new Date(),
+      signingRegion,
+      signingService,
+      eventStreamCredentials,
+    }: SigningArguments & Partial<EventSigningArguments> = {}
   ): Promise<string> {
-    const credentials = await this.credentialProvider();
+    const credentials = eventStreamCredentials ?? (await this.credentialProvider());
     this.validateResolvedCredentials(credentials);
     const region = signingRegion ?? (await this.regionProvider());
     const { shortDate } = this.formatDate(signingDate);

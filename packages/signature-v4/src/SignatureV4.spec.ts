@@ -794,6 +794,54 @@ describe("SignatureV4", () => {
       );
       expect(eventSignature).toEqual("204bb5e2713e95354680e9522986d3ac0304aeafd33397f39e6540ca51ffe226");
     });
+
+    it("should use eventStreamCredentials when provided instead of credential provider", async () => {
+      const credentialProvider = vi.fn().mockRejectedValue(new Error("should not be called"));
+      const signer = new SignatureV4({
+        ...signerInit,
+        credentials: credentialProvider,
+      });
+      const eventSignature = await signer.sign(
+        {
+          headers: Uint8Array.from([5, 58, 100, 97, 116, 101, 8, 0, 0, 1, 103, 247, 125, 87, 112]),
+          payload: "foo" as any,
+        },
+        {
+          signingDate: new Date(1369353600000),
+          priorSignature: "",
+          eventStreamCredentials: {
+            accessKeyId: "akid",
+            secretAccessKey: "secret",
+          },
+        }
+      );
+      expect(credentialProvider).not.toHaveBeenCalled();
+      expect(eventSignature).toEqual("204bb5e2713e95354680e9522986d3ac0304aeafd33397f39e6540ca51ffe226");
+    });
+
+    it("should produce different signature when eventStreamCredentials differ from signer credentials", async () => {
+      const signer = new SignatureV4(signerInit);
+      const differentCreds = {
+        accessKeyId: "other-akid",
+        secretAccessKey: "other-secret",
+      };
+      const event = {
+        headers: Uint8Array.from([5, 58, 100, 97, 116, 101, 8, 0, 0, 1, 103, 247, 125, 87, 112]),
+        payload: "foo" as any,
+      };
+      const opts = {
+        signingDate: new Date(1369353600000),
+        priorSignature: "",
+      };
+
+      const signatureWithDefault = await signer.sign(event, opts);
+      const signatureWithOverride = await signer.sign(event, {
+        ...opts,
+        eventStreamCredentials: differentCreds,
+      });
+
+      expect(signatureWithDefault).not.toEqual(signatureWithOverride);
+    });
   });
 
   describe("#sign (message)", () => {
@@ -832,6 +880,38 @@ describe("SignatureV4", () => {
       expect(signedMessage.signature).toEqual("204bb5e2713e95354680e9522986d3ac0304aeafd33397f39e6540ca51ffe226");
       expect(signedMessage.message.body).toEqual("foo");
       expect(signedMessage.message.headers).toEqual(headers);
+    });
+
+    it("should use eventStreamCredentials when provided instead of credential provider", async () => {
+      const credentialProvider = vi.fn().mockRejectedValue(new Error("should not be called"));
+      const signer = new SignatureV4({
+        ...signerInit,
+        credentials: credentialProvider,
+      });
+
+      const signedMessage = await signer.sign(
+        {
+          message: {
+            headers: {
+              ":date": {
+                type: "timestamp",
+                value: new Date("2018-12-29T01:04:06.000Z"),
+              } as TimestampHeaderValue,
+            },
+            body: "foo" as any,
+          },
+          priorSignature: "",
+        } as SignableMessage,
+        {
+          signingDate: new Date(1369353600000),
+          eventStreamCredentials: {
+            accessKeyId: "akid",
+            secretAccessKey: "secret",
+          },
+        }
+      );
+      expect(credentialProvider).not.toHaveBeenCalled();
+      expect(signedMessage.signature).toEqual("204bb5e2713e95354680e9522986d3ac0304aeafd33397f39e6540ca51ffe226");
     });
   });
 

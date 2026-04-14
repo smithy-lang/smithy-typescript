@@ -1,5 +1,6 @@
 import type { Message } from "./eventStream";
 import type { HttpRequest } from "./http";
+import type { AwsCredentialIdentity } from "./identity/awsCredentialIdentity";
 
 /**
  * @public
@@ -86,8 +87,25 @@ export interface RequestPresigningArguments extends RequestSigningArguments {
 /**
  * @public
  */
-export interface EventSigningArguments extends SigningArguments {
+export interface EventSigningArguments extends SigningArguments, EventStreamRequestScopedCredentials {
   priorSignature: string;
+}
+
+/**
+ * @public
+ */
+export interface MessageSigningArguments extends SigningArguments, EventStreamRequestScopedCredentials {}
+
+/**
+ * @internal
+ */
+export interface EventStreamRequestScopedCredentials {
+  /**
+   * Optional, static credentials used for the duration of the event-stream request.
+   * If not provided, the signer's internal credential provider would be used, if
+   * the signer is SignatureV4.
+   */
+  eventStreamCredentials?: AwsCredentialIdentity;
 }
 
 /**
@@ -169,6 +187,6 @@ export interface SignedMessage {
  * @public
  */
 export interface MessageSigner {
-  signMessage(message: SignableMessage, args: SigningArguments): Promise<SignedMessage>;
-  sign(event: SignableMessage, options: SigningArguments): Promise<SignedMessage>;
+  signMessage(message: SignableMessage, args: MessageSigningArguments): Promise<SignedMessage>;
+  sign(event: SignableMessage, options: MessageSigningArguments): Promise<SignedMessage>;
 }
