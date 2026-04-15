@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { EndpointError } from "../types";
+import { customEndpointFunctions } from "./customEndpointFunctions";
 import { callFunction, evaluateExpression, group } from "./evaluateExpression";
 import { evaluateTemplate } from "./evaluateTemplate";
 import { getReferenceValue } from "./getReferenceValue";
@@ -80,5 +81,16 @@ describe(callFunction.name, () => {
   it("calls a known endpoint function", () => {
     const result = callFunction({ fn: "booleanEquals", argv: [true, true] }, mockOptions);
     expect(result).toBe(true);
+  });
+
+  it("calls a namespaced custom endpoint function", () => {
+    customEndpointFunctions.aws = {
+      partition: vi.fn(() => "aws"),
+    };
+
+    expect(callFunction({ fn: "aws.partition", argv: [] }, mockOptions)).toBe("aws");
+    expect(customEndpointFunctions.aws.partition).toHaveBeenCalledWith();
+
+    delete customEndpointFunctions.aws;
   });
 });

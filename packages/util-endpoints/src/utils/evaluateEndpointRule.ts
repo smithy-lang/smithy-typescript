@@ -18,10 +18,12 @@ export const evaluateEndpointRule = (
     return;
   }
 
-  const endpointRuleOptions = {
-    ...options,
-    referenceRecord: { ...options.referenceRecord, ...referenceRecord },
-  };
+  const endpointRuleOptions = referenceRecord
+    ? {
+        ...options,
+        referenceRecord: { ...options.referenceRecord, ...referenceRecord },
+      }
+    : options;
 
   const { url, properties, headers } = endpoint;
 

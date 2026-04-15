@@ -73,4 +73,15 @@ describe(evaluateConditions.name, () => {
     expect(mockLogger.debug).nthCalledWith(1, `${debugId} assign: ${mockCn1.assign} := ${toDebugString(value1)}`);
     expect(mockLogger.debug).nthCalledWith(2, `${debugId} assign: ${mockCn2.assign} := ${toDebugString(value2)}`);
   });
+
+  it("returns true without a referenceRecord if no conditions assign values", () => {
+    vi.mocked(evaluateCondition).mockReturnValueOnce({ result: true }).mockReturnValueOnce({ result: true });
+
+    const result = evaluateConditions([mockCn1, mockCn2], mockOptions);
+
+    expect(result).toEqual({ result: true });
+    expect(evaluateCondition).toHaveBeenNthCalledWith(1, mockCn1, mockOptions);
+    expect(evaluateCondition).toHaveBeenNthCalledWith(2, mockCn2, mockOptions);
+    expect(mockLogger.debug).not.toHaveBeenCalled();
+  });
 });

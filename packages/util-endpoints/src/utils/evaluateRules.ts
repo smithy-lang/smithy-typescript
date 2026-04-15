@@ -35,10 +35,9 @@ export const evaluateTreeRule = (treeRule: TreeRuleObject, options: EvaluateOpti
     return;
   }
 
-  const treeRuleOptions =
-    Object.keys(referenceRecord ?? {}).length > 0
-      ? { ...options, referenceRecord: { ...options.referenceRecord, ...referenceRecord } }
-      : options;
+  const treeRuleOptions = referenceRecord
+    ? { ...options, referenceRecord: { ...options.referenceRecord, ...referenceRecord } }
+    : options;
 
   return group.evaluateRules(rules, treeRuleOptions);
 };
