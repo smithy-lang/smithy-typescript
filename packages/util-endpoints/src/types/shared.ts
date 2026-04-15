@@ -1,4 +1,4 @@
-import type { EndpointARN, EndpointPartition, Logger } from "@smithy/types";
+import type { EndpointARN, EndpointPartition, EndpointURL, Logger } from "@smithy/types";
 
 export type ReferenceObject = { ref: string };
 
@@ -10,8 +10,11 @@ export type FunctionReturn =
   | number
   | EndpointARN
   | EndpointPartition
+  | EndpointURL
   | { [key: string]: FunctionReturn }
-  | null;
+  | Array<FunctionReturn>
+  | null
+  | undefined;
 
 export type ConditionObject = FunctionObject & { assign?: string };
 

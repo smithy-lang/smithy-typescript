@@ -12,8 +12,9 @@ import {
   substring,
   uriEncode,
 } from "../lib";
+import type { EndpointFunctions } from "../types";
 
-export const endpointFunctions = {
+export const endpointFunctions: EndpointFunctions = {
   booleanEquals,
   coalesce,
   getAttr,
