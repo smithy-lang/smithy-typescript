@@ -14,24 +14,17 @@ export const resolveEndpoint = (ruleSetObject: RuleSetObject, options: EndpointR
 
   options.logger?.debug?.(`${debugId} Initial EndpointParams: ${toDebugString(endpointParams)}`);
 
-  // @ts-ignore Type 'undefined' is not assignable to type 'string | boolean' (2322)
-  const paramsWithDefault: [string, string | boolean][] = Object.entries(parameters)
-    .filter(([, v]) => v.default != null)
-    .map(([k, v]) => [k, v.default]);
+  for (const paramKey in parameters) {
+    const parameter = parameters[paramKey];
+    const endpointParam = endpointParams[paramKey];
 
-  if (paramsWithDefault.length > 0) {
-    for (const [paramKey, paramDefaultValue] of paramsWithDefault) {
-      endpointParams[paramKey] = endpointParams[paramKey] ?? paramDefaultValue;
+    if (endpointParam == null && parameter.default != null) {
+      endpointParams[paramKey] = parameter.default;
+      continue;
     }
-  }
 
-  const requiredParams = Object.entries(parameters)
-    .filter(([, v]) => v.required)
-    .map(([k]) => k);
-
-  for (const requiredParam of requiredParams) {
-    if (endpointParams[requiredParam] == null) {
-      throw new EndpointError(`Missing required parameter: '${requiredParam}'`);
+    if (parameter.required && endpointParam == null) {
+      throw new EndpointError(`Missing required parameter: '${paramKey}'`);
     }
   }
 
