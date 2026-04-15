@@ -47,6 +47,15 @@ describe(evaluateEndpointRule.name, () => {
     expect(getEndpointProperties).not.toHaveBeenCalled();
   });
 
+  it("reuses the original options when conditions assign no references", () => {
+    vi.mocked(evaluateConditions).mockReturnValue({ result: true });
+    vi.mocked(getEndpointUrl).mockReturnValue(new URL(mockEndpoint.url));
+
+    evaluateEndpointRule(mockEndpointRule, mockOptions);
+
+    expect(getEndpointUrl).toHaveBeenCalledWith(mockEndpoint.url, mockOptions);
+  });
+
   describe("returns endpoint if conditions are true", () => {
     const mockReferenceRecord = { key: "value" };
     const mockEndpointUrl = new URL(mockEndpoint.url);

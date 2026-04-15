@@ -11,10 +11,12 @@ export const evaluateErrorRule = (errorRule: ErrorRuleObject, options: EvaluateO
     return;
   }
 
-  throw new EndpointError(
-    evaluateExpression(error, "Error", {
-      ...options,
-      referenceRecord: { ...options.referenceRecord, ...referenceRecord },
-    }) as string
-  );
+  const errorRuleOptions = referenceRecord
+    ? {
+        ...options,
+        referenceRecord: { ...options.referenceRecord, ...referenceRecord },
+      }
+    : options;
+
+  throw new EndpointError(evaluateExpression(error, "Error", errorRuleOptions) as string);
 };

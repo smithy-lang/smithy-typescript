@@ -33,6 +33,16 @@ describe(evaluateErrorRule.name, () => {
     expect(evaluateExpression).not.toHaveBeenCalled();
   });
 
+  it("reuses the original options if conditions assign no references", () => {
+    const mockErrorMsg = "mockErrorMsg";
+
+    vi.mocked(evaluateConditions).mockReturnValue({ result: true });
+    vi.mocked(evaluateExpression).mockReturnValue(mockErrorMsg);
+
+    expect(() => evaluateErrorRule(mockErrorRule, mockOptions)).toThrowError(new EndpointError(`mockErrorMsg`));
+    expect(evaluateExpression).toHaveBeenCalledWith(mockError, "Error", mockOptions);
+  });
+
   it("throws error if conditions evaluate to true", () => {
     const mockErrorMsg = "mockErrorMsg";
     const mockReferenceRecord = { key: "value" };

@@ -23,5 +23,9 @@ export const evaluateConditions = (conditions: ConditionObject[] = [], options: 
     }
   }
 
+  if (Object.keys(conditionsReferenceRecord).length === 0) {
+    return { result: true };
+  }
+
   return { result: true, referenceRecord: conditionsReferenceRecord };
 };
