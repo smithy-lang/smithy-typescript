@@ -8,6 +8,7 @@ export const evaluateConditions = (conditions: ConditionObject[] = [], options: 
     ...options,
     referenceRecord: { ...options.referenceRecord },
   };
+  let didAssign = false;
 
   for (const condition of conditions) {
     const { result, toAssign } = evaluateCondition(condition, conditionOptions);
@@ -17,15 +18,16 @@ export const evaluateConditions = (conditions: ConditionObject[] = [], options: 
     }
 
     if (toAssign) {
+      didAssign = true;
       conditionsReferenceRecord[toAssign.name] = toAssign.value;
       conditionOptions.referenceRecord[toAssign.name] = toAssign.value;
       options.logger?.debug?.(`${debugId} assign: ${toAssign.name} := ${toDebugString(toAssign.value)}`);
     }
   }
 
-  if (Object.keys(conditionsReferenceRecord).length === 0) {
-    return { result: true };
+  if (didAssign) {
+    return { result: true, referenceRecord: conditionsReferenceRecord };
   }
 
-  return { result: true, referenceRecord: conditionsReferenceRecord };
+  return { result: true };
 };
