@@ -10,11 +10,24 @@ import { Duplex } from "node:stream";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
+import type { ClientHttp2SessionRef } from "./http2/ClientHttp2SessionRef";
+import type { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
 import type { NodeHttp2HandlerOptions } from "./node-http2-handler";
 import { NodeHttp2Handler } from "./node-http2-handler";
 import { createMockHttp2Server, createResponseFunction, createResponseFunctionWithDelay } from "./server.mock";
 import { timing } from "./timing";
+
+const getConnectionManager = (handler: NodeHttp2Handler) =>
+  (handler as any).connectionManager as NodeHttp2ConnectionManager;
+
+const getConnectionPools = (handler: NodeHttp2Handler) =>
+  (getConnectionManager(handler) as any).connectionPools as Map<string, NodeHttp2ConnectionPool>;
+
+const getSessions = (handler: NodeHttp2Handler, authority: string) =>
+  (getConnectionPools(handler).get(authority) as any).sessions as ClientHttp2SessionRef[];
+
+const getFirstSession = (handler: NodeHttp2Handler, authority: string) => getSessions(handler, authority)[0];
 
 describe(NodeHttp2Handler.name, () => {
   let nodeH2Handler: NodeHttp2Handler;
@@ -102,15 +115,25 @@ describe(NodeHttp2Handler.name, () => {
     };
 
     // Keeping node alive while request is open.
+    // With ref-counting: constructor calls unref once, each get() calls ref once.
     const expectSessionCreatedAndReferred = (session: ClientHttp2Session, requestCount = 1) => {
       expect(session.ref).toHaveBeenCalledTimes(requestCount);
-      expect(session.unref).toHaveBeenCalledTimes(1);
+      expect(session.unref).toHaveBeenCalledTimes(1); // initial unref in constructor
     };
 
-    // No longer keeping node alive
+    // No longer keeping node alive.
+    // With ref-counting: constructor calls unref once, each get() calls ref once,
+    // free() calls unref when refcount reaches zero.
     const expectSessionCreatedAndUnreffed = (session: ClientHttp2Session, requestCount = 1) => {
       expect(session.ref).toHaveBeenCalledTimes(requestCount);
-      expect(session.unref).toHaveBeenCalledTimes(requestCount + 1);
+      // 1 (constructor) + 1 (final free reaching zero)
+      expect(session.unref).toHaveBeenCalledTimes(2);
+    };
+
+    // Session was destroyed (e.g. goaway/error), free() is a no-op on destroyed sessions.
+    const expectSessionCreatedAndDestroyed = (session: ClientHttp2Session, requestCount = 1) => {
+      expect(session.ref).toHaveBeenCalledTimes(requestCount);
+      expect(session.unref).toHaveBeenCalledTimes(1); // only constructor unref
     };
 
     afterEach(() => {
@@ -230,9 +253,9 @@ describe(NodeHttp2Handler.name, () => {
 
         // Not keeping node alive
         expect(createdSessions).toHaveLength(3);
-        expectSessionCreatedAndUnreffed(createdSessions[0]);
-        expectSessionCreatedAndUnreffed(createdSessions[1]);
-        expectSessionCreatedAndUnreffed(createdSessions[2]);
+        expectSessionCreatedAndDestroyed(createdSessions[0]);
+        expectSessionCreatedAndDestroyed(createdSessions[1]);
+        expectSessionCreatedAndDestroyed(createdSessions[2]);
 
         // should be able to recover from goaway after reconnecting to a server
         // that doesn't send goaway, and reuse the TCP connection (Http2Session)
@@ -307,33 +330,30 @@ describe(NodeHttp2Handler.name, () => {
 
         // Not keeping node alive
         expect(createdSessions).toHaveLength(3);
-        expectSessionCreatedAndUnreffed(createdSessions[0]);
-        expectSessionCreatedAndUnreffed(createdSessions[1]);
-        expectSessionCreatedAndUnreffed(createdSessions[2]);
+        expectSessionCreatedAndDestroyed(createdSessions[0]);
+        expectSessionCreatedAndDestroyed(createdSessions[1]);
+        expectSessionCreatedAndDestroyed(createdSessions[2]);
       });
     });
 
     describe("destroy", () => {
-      it("destroys session and clears sessionCache", async () => {
+      it("destroys session and clears connectionPools", async () => {
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-        // @ts-ignore: access private property
-        const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
+        const sessionRef = getFirstSession(nodeH2Handler, authority);
+        const session: ClientHttp2Session = sessionRef.deref();
 
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.size).toBe(1);
+        expect(getConnectionPools(nodeH2Handler).size).toBe(1);
         expect(session.destroyed).toBe(false);
         nodeH2Handler.destroy();
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.size).toBe(0);
+        expect(getConnectionPools(nodeH2Handler).size).toBe(0);
         expect(session.destroyed).toBe(true);
       });
     });
 
     describe("abortSignal", () => {
       it("will not create session if request already aborted", async () => {
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.size).toBe(0);
+        expect(getConnectionPools(nodeH2Handler).size).toBe(0);
         await expect(
           nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {
             abortSignal: {
@@ -342,16 +362,14 @@ describe(NodeHttp2Handler.name, () => {
             },
           })
         ).rejects.toHaveProperty("name", "AbortError");
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.size).toBe(0);
+        expect(getConnectionPools(nodeH2Handler).size).toBe(0);
       });
 
       it("will not create request on session if request already aborted", async () => {
         // Create a session by sending a request.
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-        // @ts-ignore: access private property
-        const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
+        const session: ClientHttp2Session = getFirstSession(nodeH2Handler, authority).deref();
         const requestSpy = vi.spyOn(session, "request");
 
         await expect(
@@ -454,15 +472,12 @@ describe(NodeHttp2Handler.name, () => {
         nodeH2Handler = new NodeHttp2Handler(options);
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), { requestTimeout: sessionTimeout });
 
-        // @ts-ignore: access private property
-        const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
+        const session: ClientHttp2Session = getFirstSession(nodeH2Handler, authority).deref();
         expect(session.destroyed).toBe(false);
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.get(authority).sessions.length).toStrictEqual(1);
+        expect(getSessions(nodeH2Handler, authority).length).toStrictEqual(1);
         await promisify(setTimeout)(sessionTimeout + 100);
         expect(session.destroyed).toBe(true);
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.get(authority).sessions.length).toStrictEqual(0);
+        expect(getSessions(nodeH2Handler, authority).length).toStrictEqual(0);
       });
 
       it.each([
@@ -473,10 +488,14 @@ describe(NodeHttp2Handler.name, () => {
 
         nodeH2Handler = new NodeHttp2Handler(options);
 
+        const connectReal = http2.connect;
+        vi.spyOn(http2, "connect").mockImplementation((...args: any[]) => {
+          session = connectReal(args[0], args[1]);
+          return session;
+        });
+
         mockH2Server.removeAllListeners("request");
         mockH2Server.on("request", (request: any, response: any) => {
-          // @ts-ignore: access private property
-          session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
           createResponseFunction(mockResponse)(request, response);
         });
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
@@ -500,8 +519,7 @@ describe(NodeHttp2Handler.name, () => {
 
       await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-      // @ts-ignore: access private property
-      const session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
+      const session = getFirstSession(nodeH2Handler, authority).deref();
 
       if (options.maxConcurrentStreams) {
         expect(session.localSettings.maxConcurrentStreams).toBe(options.maxConcurrentStreams);
@@ -530,15 +548,13 @@ describe(NodeHttp2Handler.name, () => {
     nodeH2Handler = new NodeHttp2Handler();
     // Create a session by sending a request.
     await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
-    // @ts-ignore: access private property
-    const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
+    const session: ClientHttp2Session = getFirstSession(nodeH2Handler, authority).deref();
     const fakeStream = new Duplex() as ClientHttp2Stream;
     const fakeRstCode = 1;
     // @ts-ignore: fake result code
     (fakeStream as Mutable<typeof fakeStream>).rstCode = fakeRstCode;
     vi.spyOn(session, "request").mockImplementation(() => fakeStream);
-    // @ts-ignore: access private property
-    nodeH2Handler.connectionManager.sessionCache.set(authority, new NodeHttp2ConnectionPool([session]));
+    getConnectionPools(nodeH2Handler).set(authority, new NodeHttp2ConnectionPool([session]));
     // Delay response so that onabort is called earlier
     timing.setTimeout(() => {
       fakeStream.emit("aborted");
@@ -554,12 +570,10 @@ describe(NodeHttp2Handler.name, () => {
     nodeH2Handler = new NodeHttp2Handler();
     // Create a session by sending a request.
     await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
-    // @ts-ignore: access private property
-    const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
+    const session: ClientHttp2Session = getFirstSession(nodeH2Handler, authority).deref();
     const fakeStream = new Duplex() as ClientHttp2Stream;
     vi.spyOn(session, "request").mockImplementation(() => fakeStream);
-    // @ts-ignore: access private property
-    nodeH2Handler.connectionManager.sessionCache.set(authority, new NodeHttp2ConnectionPool([session]));
+    getConnectionPools(nodeH2Handler).set(authority, new NodeHttp2ConnectionPool([session]));
     // Delay response so that onabort is called earlier
     timing.setTimeout(() => {
       fakeStream.emit("frameError", "TYPE", "CODE", "ID");
@@ -666,20 +680,24 @@ describe(NodeHttp2Handler.name, () => {
     });
 
     describe("destroy", () => {
-      it("destroys session and empties sessionCache", async () => {
+      it("destroys session and empties connectionPools", async () => {
+        const connectReal = http2.connect;
+        let createdSession: ClientHttp2Session | undefined;
+        vi.spyOn(http2, "connect").mockImplementation((...args: any[]) => {
+          const session = connectReal(args[0], args[1]);
+          createdSession = session;
+          return session;
+        });
+
         await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
 
-        // @ts-ignore: access private property
-        const session: ClientHttp2Session = nodeH2Handler.connectionManager.sessionCache.get(authority).sessions[0];
-
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.size).toBe(1);
-        expect(session.destroyed).toBe(false);
+        // Isolated sessions (disableConcurrentStreams) are not in the pool.
+        expect(createdSession).toBeDefined();
+        expect(createdSession!.destroyed).toBe(false);
 
         nodeH2Handler.destroy();
-        // @ts-ignore: access private property
-        expect(nodeH2Handler.connectionManager.sessionCache.size).toBe(0);
-        expect(session.destroyed).toBe(true);
+        // Pool should be empty (isolated sessions were never added).
+        expect(getConnectionPools(nodeH2Handler).size).toBe(0);
       });
     });
   });
@@ -761,5 +779,103 @@ describe(NodeHttp2Handler.name, () => {
   it("httpHandlerConfigs returns empty object if handle is not called", async () => {
     const nodeHttpHandler = new NodeHttp2Handler();
     expect(nodeHttpHandler.httpHandlerConfigs()).toEqual({});
+  });
+
+  describe("ref-counting for http2 sessions", () => {
+    let createdSessions: ClientHttp2Session[];
+    const connectReal = http2.connect;
+
+    beforeEach(() => {
+      createdSessions = [];
+      vi.spyOn(http2, "connect").mockImplementation((...args: any[]) => {
+        const session = connectReal(args[0], args[1]);
+        vi.spyOn(session, "ref");
+        vi.spyOn(session, "unref");
+        createdSessions.push(session);
+        return session;
+      });
+    });
+
+    it("acquires ref on request start and releases on stream close", async () => {
+      const handler = new NodeHttp2Handler();
+      const { response } = await handler.handle(new HttpRequest(getMockReqOptions()), {});
+      const session = createdSessions[0];
+
+      // constructor unref + get() ref = session is ref'd (keeping node alive)
+      expect(session.unref).toHaveBeenCalledTimes(1);
+      expect(session.ref).toHaveBeenCalledTimes(1);
+
+      // close the response stream to trigger req "close" -> ref.free()
+      const body = response.body as ClientHttp2Stream;
+      const closePromise = new Promise((resolve) => body.once("close", resolve));
+      body.destroy();
+      await closePromise;
+
+      // free() reached zero -> unref called again
+      expect(session.unref).toHaveBeenCalledTimes(2);
+      handler.destroy();
+    });
+
+    it("maintains positive refcount across concurrent requests on same session", async () => {
+      const handler = new NodeHttp2Handler();
+      const { response: r1 } = await handler.handle(new HttpRequest(getMockReqOptions()), {});
+      const { response: r2 } = await handler.handle(new HttpRequest(getMockReqOptions()), {});
+      const session = createdSessions[0];
+
+      // 1 session, 2 get() calls
+      expect(createdSessions).toHaveLength(1);
+      expect(session.ref).toHaveBeenCalledTimes(2);
+      // only constructor unref so far (refcount is 2, not zero)
+      expect(session.unref).toHaveBeenCalledTimes(1);
+
+      // close first stream — refcount drops to 1, no unref
+      const body1 = r1.body as ClientHttp2Stream;
+      const close1 = new Promise((resolve) => body1.once("close", resolve));
+      body1.destroy();
+      await close1;
+      expect(session.unref).toHaveBeenCalledTimes(1); // still 1
+
+      // close second stream — refcount drops to 0, unref called
+      const body2 = r2.body as ClientHttp2Stream;
+      const close2 = new Promise((resolve) => body2.once("close", resolve));
+      body2.destroy();
+      await close2;
+      expect(session.unref).toHaveBeenCalledTimes(2);
+      handler.destroy();
+    });
+
+    it("opens additional sessions when maxConcurrentStreams is reached", async () => {
+      const maxConcurrentStreams = 3;
+      const totalRequests = 10;
+      const handler = new NodeHttp2Handler({ maxConcurrentStreams });
+
+      // Fire all requests concurrently.
+      const responses = await Promise.all(
+        Array.from({ length: totalRequests }, () => handler.handle(new HttpRequest(getMockReqOptions()), {}))
+      );
+
+      // 10 requests at concurrency 3 = ceil(10/3) = 4 sessions.
+      expect(createdSessions).toHaveLength(4);
+
+      const pools = getConnectionManager(handler).debug();
+      const sessions = pools[authority].sessions;
+      const inFlightCounts = sessions.map((s: any) => s.active).sort();
+      expect(inFlightCounts).toEqual([1, 3, 3, 3]);
+
+      // Close all streams.
+      for (const { response } of responses) {
+        const body = response.body as ClientHttp2Stream;
+        const close = new Promise((resolve) => body.once("close", resolve));
+        body.destroy();
+        await close;
+      }
+
+      const poolsAfter = getConnectionManager(handler).debug();
+      for (const s of poolsAfter[authority].sessions) {
+        expect(s.active).toBe(0);
+      }
+
+      handler.destroy();
+    });
   });
 });

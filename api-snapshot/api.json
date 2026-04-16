@@ -248,7 +248,8 @@
     "isRetryableByTrait": "function, since <=4.2.5",
     "isServerError": "function, since <=4.2.5",
     "isThrottlingError": "function, since <=4.2.5",
-    "isTransientError": "function, since <=4.2.5"
+    "isTransientError": "function, since <=4.2.5",
+    "isNodeJsHttp2TransientError": "function, since 4.2.14"
   },
   "@smithy/shared-ini-file-loader": {
     "getSSOTokenFromFile": "function, since <=4.4.0",

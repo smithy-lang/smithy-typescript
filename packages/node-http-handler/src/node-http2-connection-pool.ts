@@ -1,42 +1,79 @@
 import type { ConnectionPool } from "@smithy/types";
 import type { ClientHttp2Session } from "node:http2";
 
-export class NodeHttp2ConnectionPool implements ConnectionPool<ClientHttp2Session> {
-  private sessions: ClientHttp2Session[] = [];
+import { ClientHttp2SessionRef } from "./http2/ClientHttp2SessionRef";
+
+/**
+ * These are keyed by URL, therefore all sessions within this class' state
+ * are for the same URL.
+ *
+ * Sessions remain in the pool for their entire lifetime (until destroyed or
+ * removed). The pool tracks capacity via each session's ref count.
+ *
+ * Interface implementation changed from ConnectionPool<ClientHttp2Session>.
+ * @since 4.6.0
+ * @internal
+ */
+export class NodeHttp2ConnectionPool implements ConnectionPool<ClientHttp2SessionRef> {
+  private readonly sessions: ClientHttp2SessionRef[] = [];
+  private maxConcurrency = 0;
 
   constructor(sessions?: ClientHttp2Session[]) {
-    this.sessions = sessions ?? [];
+    this.sessions = (sessions ?? []).map((session: ClientHttp2Session) => new ClientHttp2SessionRef(session));
   }
 
-  public poll(): ClientHttp2Session | void {
-    if (this.sessions.length > 0) {
-      return this.sessions.shift();
+  /**
+   * Find a session with available capacity (refs < maxConcurrency).
+   * Returns undefined if all sessions are at capacity or the pool is empty.
+   */
+  public poll(): ClientHttp2SessionRef | undefined {
+    let cleanup = false;
+    for (const session of this.sessions) {
+      if (session.deref().destroyed) {
+        cleanup = true;
+        continue;
+      }
+      if (!this.maxConcurrency || session.useCount() < this.maxConcurrency) {
+        return session;
+      }
+    }
+    if (cleanup) {
+      for (const session of this.sessions) {
+        if (session.deref().destroyed) {
+          this.remove(session);
+        }
+      }
     }
   }
 
-  public offerLast(session: ClientHttp2Session): void {
-    this.sessions.push(session);
+  /**
+   * Add a session to the pool.
+   */
+  public offerLast(ref: ClientHttp2SessionRef): void {
+    this.sessions.push(ref);
   }
 
-  public contains(session: ClientHttp2Session): boolean {
-    return this.sessions.includes(session);
-  }
-
-  public remove(session: ClientHttp2Session): void {
-    this.sessions = this.sessions.filter((s) => s !== session);
+  public remove(ref: ClientHttp2SessionRef): void {
+    const ix = this.sessions.indexOf(ref);
+    if (ix > -1) {
+      this.sessions.splice(ix, 1);
+    }
   }
 
   public [Symbol.iterator]() {
     return this.sessions[Symbol.iterator]();
   }
 
-  public destroy(connection: ClientHttp2Session): void {
-    for (const session of this.sessions) {
-      if (session === connection) {
-        if (!session.destroyed) {
-          session.destroy();
-        }
-      }
-    }
+  public setMaxConcurrency(maxConcurrency: number): void {
+    this.maxConcurrency = maxConcurrency;
+  }
+
+  /**
+   * This is unused, but part of the interface.
+   * @deprecated
+   */
+  public destroy(ref: ClientHttp2SessionRef): void {
+    this.remove(ref);
+    ref.destroy();
   }
 }
