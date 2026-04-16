@@ -1,4 +1,4 @@
-import { describe, expect, test as it } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { Command } from "./command";
 
@@ -55,5 +55,39 @@ describe(Command.name, () => {
 
     // private method exists for compatibility
     expect((myCommand as any).deserialize).toBeDefined();
+  });
+
+  it("should spread requestOptions correctly for event stream commands", async () => {
+    const handleFn = vi.fn().mockResolvedValue({ response: {} });
+
+    class MyEventStreamCommand extends Command.classBuilder<any, any, any, any, any>()
+      .m(function () {
+        return [];
+      })
+      .s("MyClient", "MyOp", { eventStream: true })
+      .n("MyClient", "MyOp")
+      .f()
+      .ser(async (_) => ({ ..._, headers: {}, method: "POST", protocol: "https:", hostname: "localhost", path: "/" }))
+      .de(async (_) => ({ $metadata: {} }))
+      .build() {}
+
+    const cmd = new MyEventStreamCommand({});
+    const handler = cmd.resolveMiddleware(
+      { concat: () => ({ resolve: (fn: any, ctx: any) => fn }) } as any,
+      {
+        logger: {} as any,
+        requestHandler: { handle: handleFn },
+      },
+      { requestTimeout: 5000 }
+    );
+
+    await handler({ input: {} });
+
+    expect(handleFn).toHaveBeenCalledTimes(1);
+    const passedOptions = handleFn.mock.calls[0][1];
+    expect(passedOptions).toEqual({
+      isEventStream: true,
+      requestTimeout: 5000,
+    });
   });
 });
