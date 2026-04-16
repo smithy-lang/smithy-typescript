@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.12.11
+
+### Patch Changes
+
+- b69e3c9: fix to set requestOptions correctly
+
 ## 4.12.10
 
 ### Patch Changes
