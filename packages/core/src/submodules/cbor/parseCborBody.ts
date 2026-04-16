@@ -75,7 +75,13 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
     return sanitizeErrorCode(data["__type"]);
   }
 
-  const codeKey = Object.keys(data).find((key) => key.toLowerCase() === "code");
+  let codeKey: string | undefined;
+  for (const key in data) {
+    if (key.toLowerCase() === "code") {
+      codeKey = key;
+      break;
+    }
+  }
   if (codeKey && data[codeKey] !== undefined) {
     return sanitizeErrorCode(data[codeKey]);
   }
@@ -117,8 +123,8 @@ export const buildHttpRpcRequest = async (
     contents.hostname = resolvedHostname;
   }
   if (endpoint.headers) {
-    for (const [name, value] of Object.entries(endpoint.headers)) {
-      contents.headers[name] = value;
+    for (const name in endpoint.headers) {
+      contents.headers[name] = endpoint.headers[name];
     }
   }
   if (body !== undefined) {

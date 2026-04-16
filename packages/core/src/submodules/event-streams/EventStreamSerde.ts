@@ -107,10 +107,13 @@ export class EventStreamSerde {
         };
       }
 
-      const unionMember =
-        Object.keys(event).find((key) => {
-          return key !== "__type";
-        }) ?? "";
+      let unionMember = "";
+      for (const key in event) {
+        if (key !== "__type") {
+          unionMember = key;
+          break;
+        }
+      }
       const { additionalHeaders, body, eventType, explicitPayloadContentType } = this.writeEventBody(
         unionMember,
         unionSchema,
@@ -155,10 +158,13 @@ export class EventStreamSerde {
     const initialResponseMarker = Symbol("initialResponseMarker");
 
     const asyncIterable = marshaller.deserialize(response.body, async (event) => {
-      const unionMember =
-        Object.keys(event).find((key) => {
-          return key !== "__type";
-        }) ?? "";
+      let unionMember = "";
+      for (const key in event) {
+        if (key !== "__type") {
+          unionMember = key;
+          break;
+        }
+      }
 
       const body = event[unionMember].body;
 
@@ -251,8 +257,8 @@ export class EventStreamSerde {
         );
       }
 
-      for (const [key, value] of Object.entries(firstEvent.value)) {
-        initialResponseContainer[key] = value;
+      for (const key in firstEvent.value) {
+        initialResponseContainer[key] = firstEvent.value[key];
       }
     }
 

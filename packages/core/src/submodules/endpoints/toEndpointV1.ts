@@ -12,8 +12,8 @@ export const toEndpointV1 = (endpoint: string | Endpoint | EndpointV2): Endpoint
       const v1Endpoint = parseUrl(endpoint.url);
       if (endpoint.headers) {
         v1Endpoint.headers = {};
-        for (const [name, values] of Object.entries(endpoint.headers)) {
-          v1Endpoint.headers[name.toLowerCase()] = values.join(", ");
+        for (const name in endpoint.headers) {
+          v1Endpoint.headers[name.toLowerCase()] = endpoint.headers[name].join(", ");
         }
       }
       return v1Endpoint;

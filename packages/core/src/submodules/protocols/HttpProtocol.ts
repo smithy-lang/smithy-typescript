@@ -103,8 +103,8 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       }
       // Apply resolved endpoint headers per Endpoints 2.0 spec.
       if (endpoint.headers) {
-        for (const [name, values] of Object.entries(endpoint.headers)) {
-          request.headers[name] = values.join(", ");
+        for (const name in endpoint.headers) {
+          request.headers[name] = endpoint.headers[name].join(", ");
         }
       }
       return request;
@@ -118,8 +118,8 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       };
       // Apply endpoint headers for deprecated Endpoint type if present
       if (endpoint.headers) {
-        for (const [name, value] of Object.entries(endpoint.headers)) {
-          request.headers[name] = value;
+        for (const name in endpoint.headers) {
+          request.headers[name] = endpoint.headers[name];
         }
       }
       return request;
@@ -146,10 +146,10 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
     if (opTraits.endpoint) {
       let hostPrefix = opTraits.endpoint?.[0];
       if (typeof hostPrefix === "string") {
-        const hostLabelInputs = [...inputNs.structIterator()].filter(
-          ([, member]) => member.getMergedTraits().hostLabel
-        );
-        for (const [name] of hostLabelInputs) {
+        for (const [name, member] of inputNs.structIterator()) {
+          if (!member.getMergedTraits().hostLabel) {
+            continue;
+          }
           const replacement = input[name as keyof typeof input];
           if (typeof replacement !== "string") {
             throw new Error(`@smithy/core/schema - ${name} in input must be a string as hostLabel.`);
