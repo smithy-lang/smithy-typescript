@@ -96,10 +96,10 @@ export abstract class Command<
     const { requestHandler } = configuration;
     let requestOptions = options ?? {};
     if (smithyContext.eventStream) {
-      requestOptions = Object.assign({
+      requestOptions = {
         isEventStream: true,
-        requestOptions,
-      });
+        ...requestOptions,
+      };
     }
     return stack.resolve(
       (request: FinalizeHandlerArguments<any>) => requestHandler.handle(request.request as HttpRequest, requestOptions),
