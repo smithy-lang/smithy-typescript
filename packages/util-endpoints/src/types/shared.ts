@@ -13,8 +13,7 @@ export type FunctionReturn =
   | EndpointURL
   | { [key: string]: FunctionReturn }
   | Array<FunctionReturn>
-  | null
-  | undefined;
+  | null;
 
 export type ConditionObject = FunctionObject & { assign?: string };
 
