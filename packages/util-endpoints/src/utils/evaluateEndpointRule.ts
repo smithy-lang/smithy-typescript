@@ -30,10 +30,10 @@ export const evaluateEndpointRule = (
   options.logger?.debug?.(`${debugId} Resolving endpoint from template: ${toDebugString(endpoint)}`);
 
   const endpointToReturn: EndpointV2 = { url: getEndpointUrl(url, endpointRuleOptions) };
-  if (headers != undefined) {
+  if (headers != null) {
     endpointToReturn.headers = getEndpointHeaders(headers, endpointRuleOptions);
   }
-  if (properties != undefined) {
+  if (properties != null) {
     endpointToReturn.properties = getEndpointProperties(properties, endpointRuleOptions);
   }
 
