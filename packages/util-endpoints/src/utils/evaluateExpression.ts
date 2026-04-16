@@ -29,20 +29,21 @@ export const callFunction = ({ fn, argv }: FunctionObject, options: EvaluateOpti
     }
   }
 
-  // if-statement to avoid split array allocation.
-  if (fn.includes(".")) {
-    const fnSegments = fn.split(".");
-    if (fnSegments[0] in customEndpointFunctions && fnSegments[1] != null) {
-      return (customEndpointFunctions as any)[fnSegments[0]][fnSegments[1]](...evaluatedArgs);
+  const namespaceSeparatorIndex = fn.indexOf(".");
+  if (namespaceSeparatorIndex !== -1) {
+    const namespaceFunctions = customEndpointFunctions[fn.slice(0, namespaceSeparatorIndex)];
+    const customFunction = namespaceFunctions?.[fn.slice(namespaceSeparatorIndex + 1)];
+    if (typeof customFunction === "function") {
+      return customFunction(...evaluatedArgs);
     }
   }
 
-  if (typeof (endpointFunctions as Record<string, Function>)[fn] !== "function") {
-    throw new Error(`function ${fn} not loaded in endpointFunctions.`);
+  const callable = endpointFunctions[fn as keyof typeof endpointFunctions];
+  if (typeof callable === "function") {
+    return callable(...evaluatedArgs);
   }
 
-  const callable = endpointFunctions[fn as keyof typeof endpointFunctions] as (...args: any[]) => any;
-  return callable(...evaluatedArgs);
+  throw new Error(`function ${fn} not loaded in endpointFunctions.`);
 };
 
 export const group = {

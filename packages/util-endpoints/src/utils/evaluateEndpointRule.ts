@@ -18,22 +18,24 @@ export const evaluateEndpointRule = (
     return;
   }
 
-  const endpointRuleOptions = {
-    ...options,
-    referenceRecord: { ...options.referenceRecord, ...referenceRecord },
-  };
+  const endpointRuleOptions = referenceRecord
+    ? {
+        ...options,
+        referenceRecord: { ...options.referenceRecord, ...referenceRecord },
+      }
+    : options;
 
   const { url, properties, headers } = endpoint;
 
   options.logger?.debug?.(`${debugId} Resolving endpoint from template: ${toDebugString(endpoint)}`);
 
-  return {
-    ...(headers != undefined && {
-      headers: getEndpointHeaders(headers, endpointRuleOptions),
-    }),
-    ...(properties != undefined && {
-      properties: getEndpointProperties(properties, endpointRuleOptions),
-    }),
-    url: getEndpointUrl(url, endpointRuleOptions),
-  };
+  const endpointToReturn: EndpointV2 = { url: getEndpointUrl(url, endpointRuleOptions) };
+  if (headers != null) {
+    endpointToReturn.headers = getEndpointHeaders(headers, endpointRuleOptions);
+  }
+  if (properties != null) {
+    endpointToReturn.properties = getEndpointProperties(properties, endpointRuleOptions);
+  }
+
+  return endpointToReturn;
 };
