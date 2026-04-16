@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.23.15
+
+### Patch Changes
+
+- Updated dependencies [131fce4]
+- Updated dependencies [52b4789]
+  - @smithy/types@4.14.1
+  - @smithy/util-stream@4.5.23
+  - @smithy/protocol-http@5.3.14
+  - @smithy/url-parser@4.2.14
+  - @smithy/util-middleware@4.2.14
+
 ## 3.23.14
 
 ### Patch Changes

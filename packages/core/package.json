@@ -1,6 +1,6 @@
 {
   "name": "@smithy/core",
-  "version": "3.23.14",
+  "version": "3.23.15",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline core",

@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.4.1
+
+### Patch Changes
+
+- 5a18069: fix getAttr function when using negative index
+- cb76b1f: handle nullish input for getEndpointHeaders function
+- b4a8b6b: Resolve defaults and required params in one pass
+- Updated dependencies [131fce4]
+- Updated dependencies [52b4789]
+  - @smithy/types@4.14.1
+  - @smithy/node-config-provider@4.3.14
+
 ## 3.4.0
 
 ### Minor Changes

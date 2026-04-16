@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.14.1
+
+### Patch Changes
+
+- 131fce4: add eventStream indicator signal for NodeHttp2ConnectionManager so it does not reuse connections for event streams
+- 52b4789: allow snapshot of credentials for event-stream signing
+
 ## 4.14.0
 
 ### Minor Changes

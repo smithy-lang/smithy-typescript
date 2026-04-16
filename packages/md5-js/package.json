@@ -1,6 +1,6 @@
 {
   "name": "@smithy/md5-js",
-  "version": "4.2.13",
+  "version": "4.2.14",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline md5-js",

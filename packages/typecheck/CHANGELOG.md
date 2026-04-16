@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.0.23
+
+### Patch Changes
+
+- Updated dependencies [131fce4]
+- Updated dependencies [52b4789]
+  - @smithy/types@4.14.1
+  - @smithy/core@3.23.15
+  - @smithy/util-middleware@4.2.14
+
 ## 1.0.22
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # Change Log
 
+## 5.3.14
+
+### Patch Changes
+
+- 52b4789: allow snapshot of credentials for event-stream signing
+- Updated dependencies [131fce4]
+- Updated dependencies [52b4789]
+  - @smithy/types@4.14.1
+  - @smithy/protocol-http@5.3.14
+  - @smithy/util-middleware@4.2.14
+
 ## 5.3.13
 
 ### Patch Changes

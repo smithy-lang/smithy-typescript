@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.5.3
+
+### Patch Changes
+
+- 131fce4: add eventStream indicator signal for NodeHttp2ConnectionManager so it does not reuse connections for event streams
+- Updated dependencies [131fce4]
+- Updated dependencies [52b4789]
+  - @smithy/types@4.14.1
+  - @smithy/protocol-http@5.3.14
+  - @smithy/querystring-builder@4.2.14
+
 ## 4.5.2
 
 ### Patch Changes
