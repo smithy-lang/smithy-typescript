@@ -128,7 +128,12 @@ export class TypeRegistry {
    * @returns a schema in this registry matching the predicate.
    */
   public find(predicate: (schema: ISchema) => boolean) {
-    return [...this.schemas.values()].find(predicate);
+    for (const schema of this.schemas.values()) {
+      if (predicate(schema)) {
+        return schema;
+      }
+    }
+    return undefined;
   }
 
   /**

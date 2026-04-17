@@ -84,7 +84,7 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
       const newObject = {} as any;
       if (ns.isMapSchema()) {
         const sparse = !!ns.getMergedTraits().sparse;
-        for (const key of Object.keys(sourceObject)) {
+        for (const key in sourceObject) {
           const value = this.serialize(ns.getValueSchema(), sourceObject[key]);
           if (value != null || sparse) {
             newObject[key] = value;
@@ -104,15 +104,15 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
         } else if (typeof sourceObject.__type === "string") {
           // This if-block is for backwards compatibility support and should not be copied
           // to other implementations.
-          for (const [k, v] of Object.entries(sourceObject)) {
+          for (const k in sourceObject) {
             if (!(k in newObject)) {
               // we have no type information, so serialize with Document rules.
-              newObject[k] = this.serialize(15 satisfies DocumentSchema, v);
+              newObject[k] = this.serialize(15 satisfies DocumentSchema, sourceObject[k]);
             }
           }
         }
       } else if (ns.isDocumentSchema()) {
-        for (const key of Object.keys(sourceObject)) {
+        for (const key in sourceObject) {
           newObject[key] = this.serialize(ns.getValueSchema(), sourceObject[key]);
         }
       } else if (ns.isBigDecimalSchema()) {
@@ -205,7 +205,7 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
       if (ns.isMapSchema()) {
         const targetSchema = ns.getValueSchema();
 
-        for (const key of Object.keys(value)) {
+        for (const key in value) {
           const itemValue = this.readValue(targetSchema, value[key]);
           newObject[key] = itemValue;
         }
@@ -213,7 +213,12 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         const isUnion = ns.isUnionSchema();
         let keys: Set<string> | undefined;
         if (isUnion) {
-          keys = new Set(Object.keys(value).filter((k) => k !== "__type"));
+          keys = new Set<string>();
+          for (const k in value) {
+            if (k !== "__type") {
+              keys.add(k);
+            }
+          }
         }
         for (const [key, memberSchema] of ns.structIterator()) {
           if (isUnion) {
@@ -223,16 +228,23 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
             newObject[key] = this.readValue(memberSchema, value[key]);
           }
         }
-        if (isUnion && keys?.size === 1 && Object.keys(newObject).length === 0) {
-          const k = keys!.values().next().value as string;
-          newObject.$unknown = [k, value[k]];
+        if (isUnion && keys?.size === 1) {
+          let newObjectEmpty = true;
+          for (const _ in newObject) {
+            newObjectEmpty = false;
+            break;
+          }
+          if (newObjectEmpty) {
+            const k = keys!.values().next().value as string;
+            newObject.$unknown = [k, value[k]];
+          }
         } else if (typeof value.__type === "string") {
           // This if-block is for backwards compatibility support and should not be copied
           // to other implementations.
-          for (const [k, v] of Object.entries(value)) {
+          for (const k in value) {
             if (!(k in newObject)) {
               // we have no type information, so copy as-is from CBOR-derived object.
-              newObject[k] = v;
+              newObject[k] = value[k];
             }
           }
         }

@@ -305,9 +305,12 @@ export const expectUnion = (value: unknown): Record<string, any> | undefined => 
   }
   const asObject = expectObject(value)!;
 
-  const setKeys = Object.entries(asObject)
-    .filter(([, v]) => v != null)
-    .map(([k]) => k);
+  const setKeys = [];
+  for (const k in asObject) {
+    if (asObject[k] != null) {
+      setKeys.push(k);
+    }
+  }
 
   if (setKeys.length === 0) {
     throw new TypeError(`Unions must have exactly one non-null member. None were found.`);
