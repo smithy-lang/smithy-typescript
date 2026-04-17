@@ -75,12 +75,22 @@ export const schemaDeserializationMiddleware =
           // by taking information from the response.
           if (HttpResponse.isInstance(response)) {
             const { headers = {} } = response;
-            const headerEntries = Object.entries(headers);
+
+            let requestId: string | undefined;
+            let extendedRequestId: string | undefined;
+            let cfId: string | undefined;
+
+            for (const k in headers) {
+              if (/^x-[\w-]+-request-?id$/.test(k)) requestId = headers[k];
+              else if (/^x-[\w-]+-id-2$/.test(k)) extendedRequestId = headers[k];
+              else if (/^x-[\w-]+-cf-id$/.test(k)) cfId = headers[k];
+            }
+
             (error as MetadataBearer).$metadata = {
               httpStatusCode: response.statusCode,
-              requestId: findHeader(/^x-[\w-]+-request-?id$/, headerEntries),
-              extendedRequestId: findHeader(/^x-[\w-]+-id-2$/, headerEntries),
-              cfId: findHeader(/^x-[\w-]+-cf-id$/, headerEntries),
+              requestId,
+              extendedRequestId,
+              cfId,
             };
           }
         } catch (e) {
@@ -91,13 +101,3 @@ export const schemaDeserializationMiddleware =
       throw error;
     }
   };
-
-/**
- * @internal
- * @returns header value where key matches regex.
- */
-const findHeader = (pattern: RegExp, headers: [string, string][]): string | undefined => {
-  return (headers.find(([k]) => {
-    return k.match(pattern);
-  }) || [void 0, void 1])[1];
-};
