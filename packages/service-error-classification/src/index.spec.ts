@@ -9,7 +9,14 @@ import {
   TRANSIENT_ERROR_CODES,
   TRANSIENT_ERROR_STATUS_CODES,
 } from "./constants";
-import { isClockSkewError, isRetryableByTrait, isServerError, isThrottlingError, isTransientError } from "./index";
+import {
+  isClockSkewError,
+  isNodeJsHttp2TransientError,
+  isRetryableByTrait,
+  isServerError,
+  isThrottlingError,
+  isTransientError,
+} from "./index";
 
 const checkForErrorType = (
   isErrorTypeFunc: (error: SdkError) => boolean,
@@ -169,5 +176,39 @@ describe("isServerError", () => {
     it(`should declare error with the HTTP Status Code "${httpStatusCode}" to not be be a Server error`, () => {
       checkForErrorType(isServerError, { httpStatusCode }, false);
     });
+  });
+});
+
+describe("isNodeJsHttp2TransientError", () => {
+  it("should return true for ERR_HTTP2_STREAM_ERROR with NGHTTP2_REFUSED_STREAM", () => {
+    const error = Object.assign(new Error("Stream closed with error code NGHTTP2_REFUSED_STREAM"), {
+      code: "ERR_HTTP2_STREAM_ERROR",
+    });
+    expect(isNodeJsHttp2TransientError(error)).toBe(true);
+  });
+
+  it("should return false for unrelated errors", () => {
+    const error = Object.assign(new Error("something else"), { code: "ECONNRESET" });
+    expect(isNodeJsHttp2TransientError(error)).toBe(false);
+  });
+
+  it("should classify ERR_HTTP2_STREAM_ERROR with NGHTTP2_REFUSED_STREAM as transient via isTransientError", () => {
+    const error = Object.assign(new Error("Stream closed with error code NGHTTP2_REFUSED_STREAM"), {
+      code: "ERR_HTTP2_STREAM_ERROR",
+      $metadata: {},
+    });
+    expect(isTransientError(error as SdkError)).toBe(true);
+  });
+
+  it("should classify ERR_HTTP2_STREAM_ERROR with NGHTTP2_REFUSED_STREAM in cause as transient", () => {
+    const cause = Object.assign(new Error("Stream closed with error code NGHTTP2_REFUSED_STREAM"), {
+      code: "ERR_HTTP2_STREAM_ERROR",
+      $metadata: {},
+    });
+    const error = Object.assign(new Error("request failed"), {
+      $metadata: {},
+      cause,
+    });
+    expect(isTransientError(error as SdkError)).toBe(true);
   });
 });

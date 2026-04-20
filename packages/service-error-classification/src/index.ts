@@ -62,6 +62,7 @@ export const isTransientError = (error: SdkError, depth = 0): boolean =>
   NODEJS_NETWORK_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
   TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
   isBrowserNetworkError(error) ||
+  isNodeJsHttp2TransientError(error) ||
   (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1));
 
 export const isServerError = (error: SdkError) => {
@@ -74,3 +75,10 @@ export const isServerError = (error: SdkError) => {
   }
   return false;
 };
+
+/**
+ * @internal
+ */
+export function isNodeJsHttp2TransientError(error: Error & { code?: string }): boolean {
+  return error.code === "ERR_HTTP2_STREAM_ERROR" && error.message.includes("NGHTTP2_REFUSED_STREAM");
+}
