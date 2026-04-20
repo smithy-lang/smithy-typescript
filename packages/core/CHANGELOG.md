@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.23.16
+
+### Patch Changes
+
+- a029f0e: Reduce intermediate allocations in hot paths
+  - @smithy/util-stream@4.5.24
+
 ## 3.23.15
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.4.2
+
+### Patch Changes
+
+- 449ba5a: Reduce temporary object allocations
+
 ## 3.4.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 60d13c8: include http refused stream as transient error for Node.js
+
 ## 4.2.14
 
 ### Patch Changes

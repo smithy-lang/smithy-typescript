@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.2.53
+
+### Patch Changes
+
+- @smithy/smithy-client@4.12.12
+- @smithy/config-resolver@4.4.17
+
 ## 4.2.52
 
 ### Patch Changes

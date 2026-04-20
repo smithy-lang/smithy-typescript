@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.0.24
+
+### Patch Changes
+
+- Updated dependencies [a029f0e]
+  - @smithy/core@3.23.16
+
 ## 1.0.23
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/snapshot-testing",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline snapshot-testing",

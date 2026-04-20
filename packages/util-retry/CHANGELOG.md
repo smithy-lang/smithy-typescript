@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.3.3
+
+### Patch Changes
+
+- Updated dependencies [60d13c8]
+  - @smithy/service-error-classification@4.3.0
+
 ## 4.3.2
 
 ### Patch Changes

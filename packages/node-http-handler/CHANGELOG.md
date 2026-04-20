@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.6.0
+
+### Minor Changes
+
+- 60d13c8: adds ref-counting logic for http2 sessions in the client connection pool.
+
 ## 4.5.3
 
 ### Patch Changes
