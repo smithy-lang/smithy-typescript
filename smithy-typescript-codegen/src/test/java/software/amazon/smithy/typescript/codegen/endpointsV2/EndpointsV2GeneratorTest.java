@@ -205,6 +205,7 @@ public class EndpointsV2GeneratorTest {
                     .withMember("service", Node.from("smithy.example#Example"))
                     .withMember("package", Node.from("example"))
                     .withMember("packageVersion", Node.from("1.0.0"))
+                    .withMember("generateEndpointBdd", Node.from(false))
                     .build()
             )
             .build();
