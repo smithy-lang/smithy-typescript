@@ -84,7 +84,7 @@ public final class TypeScriptSettings {
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
     private String bigNumberMode = "native";
     private boolean generateSchemas = true;
-    private boolean generateEndpointBdd = false;
+    private boolean generateEndpointBdd = true;
     private boolean generateIndexTests = false;
     private boolean generateSnapshotTests = false;
     private String versioningScheme = "";
@@ -155,7 +155,7 @@ public final class TypeScriptSettings {
 
         // Internal undocumented configuration used to control rollout of endpoint BDD.
         // `true` will eventually be the only available option, and this should not be set by users.
-        settings.setGenerateEndpointBdd(config.getBooleanMemberOrDefault(GENERATE_ENDPOINT_BDD, false));
+        settings.setGenerateEndpointBdd(config.getBooleanMemberOrDefault(GENERATE_ENDPOINT_BDD, true));
 
         settings.setGenerateIndexTests(config.getBooleanMemberOrDefault(GENERATE_INDEX_TESTS, false));
         settings.setGenerateSnapshotTests(config.getBooleanMemberOrDefault(GENERATE_SNAPSHOT_TESTS, false));
