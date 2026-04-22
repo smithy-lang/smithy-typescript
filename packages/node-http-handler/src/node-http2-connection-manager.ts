@@ -60,17 +60,19 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
       });
     }
 
-    const destroySessionCb = () => {
-      session.destroy();
-      this.removeFromPool(url, ref);
+    const graceful = () => {
+      this.removeFromPoolAndClose(url, ref);
     };
-    session.on("goaway", destroySessionCb);
-    session.on("error", destroySessionCb);
-    session.on("frameError", destroySessionCb);
-    session.on("close", () => this.removeFromPool(url, ref));
+    const ensureDestroyed = () => {
+      this.removeFromPoolAndCheckedDestroy(url, ref);
+    };
+    session.on("goaway", graceful);
+    session.on("error", ensureDestroyed);
+    session.on("frameError", ensureDestroyed);
+    session.on("close", ensureDestroyed);
 
     if (connectionConfiguration.requestTimeout) {
-      session.setTimeout(connectionConfiguration.requestTimeout, destroySessionCb);
+      session.setTimeout(connectionConfiguration.requestTimeout, ensureDestroyed);
     }
 
     pool.offerLast(ref);
@@ -102,17 +104,19 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
 
     session.settings({ maxConcurrentStreams: 1 });
 
-    const destroySession = () => {
-      session.destroy();
+    const ensureDestroyed = () => {
+      ref.destroy();
     };
 
-    session.on("goaway", destroySession);
-    session.on("error", destroySession);
-    session.on("frameError", destroySession);
-    session.on("close", destroySession);
+    // note: there is no goaway handler for an isolated session.
+    // the session is already closing after receiving "goaway" and
+    // there is no pool from which to remove it.
+    session.on("error", ensureDestroyed);
+    session.on("frameError", ensureDestroyed);
+    session.on("close", ensureDestroyed);
 
     if (connectionConfiguration.requestTimeout) {
-      session.setTimeout(connectionConfiguration.requestTimeout, destroySession);
+      session.setTimeout(connectionConfiguration.requestTimeout, ensureDestroyed);
     }
 
     ref.retain();
@@ -165,11 +169,17 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
     return pools;
   }
 
-  /**
-   * Remove a session from the pools. Does not destroy it.
-   */
-  private removeFromPool(authority: string, ref: ClientHttp2SessionRef): void {
+  private removeFromPoolAndClose(authority: string, ref: ClientHttp2SessionRef): void {
     this.connectionPools.get(authority)?.remove(ref);
+    // no-op when this function is called as a "goaway" reaction,
+    // but in case the method is called from another path, this is a defensive closure
+    // because we lose the reference to the session.
+    ref.close();
+  }
+
+  private removeFromPoolAndCheckedDestroy(authority: string, ref: ClientHttp2SessionRef): void {
+    this.connectionPools.get(authority)?.remove(ref);
+    ref.destroy();
   }
 
   private getPool(url: string): NodeHttp2ConnectionPool {

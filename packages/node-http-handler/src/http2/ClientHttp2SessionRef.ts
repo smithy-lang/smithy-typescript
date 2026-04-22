@@ -71,6 +71,15 @@ export class ClientHttp2SessionRef {
     return this.session;
   }
 
+  /**
+   * Allow open refs to free on their own.
+   */
+  public close(): void {
+    if (!this.session.closed) {
+      this.session.close();
+    }
+  }
+
   public destroy(): void {
     this.refs = 0;
     if (!this.session.destroyed) {
