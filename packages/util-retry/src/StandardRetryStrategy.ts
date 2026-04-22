@@ -32,6 +32,25 @@ export type StandardRetryStrategyOptions = {
 };
 
 /**
+ * Reason for refusing to retry.
+ * @internal
+ */
+const refusal = {
+  /**
+   * Error is not retryable via classification.
+   */
+  incompatible: 1,
+  /**
+   * attempt count exhausted.
+   */
+  attempts: 2,
+  /**
+   * capacity exhausted.
+   */
+  capacity: 3,
+} as const;
+
+/**
  * @public
  */
 export class StandardRetryStrategy implements RetryStrategyV2 {
@@ -70,9 +89,11 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
   ): Promise<StandardRetryToken> {
     const maxAttempts = await this.getMaxAttempts();
 
-    const shouldRetry = this.shouldRetry(token, errorInfo, maxAttempts);
+    const retryCode = this.retryCode(token, errorInfo, maxAttempts);
+    const shouldRetry = retryCode === 0;
+    const isLongPoll = token.isLongPoll?.();
 
-    if (shouldRetry || token.isLongPoll?.()) {
+    if (shouldRetry || isLongPoll) {
       const errorType = errorInfo.errorType;
       this.retryBackoffStrategy.setDelayBase(errorType === "THROTTLING" ? Retry.throttlingDelay() : this.baseDelay);
 
@@ -86,8 +107,15 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
         );
       }
 
-      if (!shouldRetry /* implies long poll */) {
-        throw Object.assign(new Error("No retry token available"), { $backoff: Retry.v2026 ? retryDelay : 0 });
+      if (!shouldRetry) {
+        /**
+         * We only apply additional backoff if `isLongPoll` and the retryCode=3 indicates
+         * that capacity is exhausted. Running out of attempts or having a
+         * non-retryable error does *not* apply backoff.
+         */
+        throw Object.assign(new Error("No retry token available"), {
+          $backoff: Retry.v2026 && retryCode === refusal.capacity && isLongPoll ? retryDelay : 0,
+        });
       } else {
         const capacityCost = this.getCapacityCost(errorType);
         this.capacity -= capacityCost;
@@ -116,6 +144,14 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     return this.capacity;
   }
 
+  /**
+   * There is an existing integration which accesses this field.
+   * @deprecated
+   */
+  public async maxAttempts(): Promise<number> {
+    return this.maxAttemptsProvider();
+  }
+
   private async getMaxAttempts() {
     try {
       return await this.maxAttemptsProvider();
@@ -125,14 +161,26 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     }
   }
 
-  private shouldRetry(tokenToRenew: StandardRetryToken, errorInfo: RetryErrorInfo, maxAttempts: number): boolean {
+  /**
+   * 0 - OK to retry.
+   * 1 - error is not classified as retryable.
+   * 2 - attempt count exhausted.
+   * 3 - no capacity left (retry tokens exhausted).
+   *
+   * @returns 0 or the number of the highest priority (lowest integer) reason why retry is not possible.
+   */
+  private retryCode(
+    tokenToRenew: StandardRetryToken,
+    errorInfo: RetryErrorInfo,
+    maxAttempts: number
+  ): 0 | (typeof refusal)[keyof typeof refusal] {
     const attempts = tokenToRenew.getRetryCount() + 1;
 
-    return (
-      /* has attempt remaining */ attempts < maxAttempts &&
-      /* has capacity */ this.capacity >= this.getCapacityCost(errorInfo.errorType) &&
-      /* and is retryable classification */ this.isRetryableError(errorInfo.errorType)
-    );
+    const retryableStatus = this.isRetryableError(errorInfo.errorType) ? 0 : refusal.incompatible;
+    const attemptStatus = attempts < maxAttempts ? 0 : refusal.attempts;
+    const capacityStatus = this.capacity >= this.getCapacityCost(errorInfo.errorType) ? 0 : refusal.capacity;
+
+    return retryableStatus || attemptStatus || capacityStatus;
   }
 
   private getCapacityCost(errorType: RetryErrorType) {
@@ -141,13 +189,5 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
 
   private isRetryableError(errorType: RetryErrorType): boolean {
     return errorType === "THROTTLING" || errorType === "TRANSIENT";
-  }
-
-  /**
-   * There is an existing integration which accesses this field.
-   * @deprecated
-   */
-  public async maxAttempts(): Promise<number> {
-    return this.maxAttemptsProvider();
   }
 }
