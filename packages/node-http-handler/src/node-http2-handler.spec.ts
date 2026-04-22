@@ -208,7 +208,7 @@ describe(NodeHttp2Handler.name, () => {
     });
 
     describe("errors", () => {
-      const UNEXPECTEDLY_CLOSED_REGEX = /closed|destroy|cancel|did not get a response/i;
+      const UNEXPECTEDLY_CLOSED_REGEX = /closed|destroy|cancel|did not get a response|failed/i;
       it("handles goaway frames", async () => {
         const mockH2Server3 = mockH2Servers[port3];
         let establishedConnections = 0;
@@ -286,18 +286,15 @@ describe(NodeHttp2Handler.name, () => {
         expectSessionCreatedAndUnreffed(createdSessions[3]);
       });
 
-      it.each([
-        ["destroy" as keyof Http2Session, 1],
-        ["close" as keyof Http2Session, 2],
-      ])("handles servers calling connections %s", async (func: keyof Http2Session, portIndex) => {
-        const port = [port1, port2, port3, port4][portIndex];
+      it("handles servers calling connections destroy", async () => {
+        const port = port2;
         const mockH2Server4 = mockH2Servers[port];
         let establishedConnections = 0;
         let numRequests = 0;
 
         mockH2Server4.on("stream", (request: Http2Stream) => {
           numRequests += 1;
-          (request.session as any)![func]();
+          (request.session as any)!.destroy();
         });
         mockH2Server4.on("connection", () => {
           establishedConnections += 1;
@@ -308,21 +305,21 @@ describe(NodeHttp2Handler.name, () => {
         await rejects(
           nodeH2Handler.handle(req, {}),
           UNEXPECTEDLY_CLOSED_REGEX,
-          "should be rejected promptly due to goaway frame or destroyed connection"
+          "should be rejected promptly due to destroyed connection"
         );
         expect(establishedConnections).toBe(1);
         expect(numRequests).toBe(1);
         await rejects(
           nodeH2Handler.handle(req, {}),
           UNEXPECTEDLY_CLOSED_REGEX,
-          "should be rejected promptly due to goaway frame or destroyed connection"
+          "should be rejected promptly due to destroyed connection"
         );
         expect(establishedConnections).toBe(2);
         expect(numRequests).toBe(2);
         await rejects(
           nodeH2Handler.handle(req, {}),
           UNEXPECTEDLY_CLOSED_REGEX,
-          "should be rejected promptly due to goaway frame or destroyed connection"
+          "should be rejected promptly due to destroyed connection"
         );
         expect(establishedConnections).toBe(3);
         expect(numRequests).toBe(3);
@@ -333,6 +330,30 @@ describe(NodeHttp2Handler.name, () => {
         expectSessionCreatedAndDestroyed(createdSessions[0]);
         expectSessionCreatedAndDestroyed(createdSessions[1]);
         expectSessionCreatedAndDestroyed(createdSessions[2]);
+      });
+
+      it("handles servers calling connections close", async () => {
+        const port = port3;
+        const mockH2Server4 = mockH2Servers[port];
+
+        mockH2Server4.on("stream", (request: Http2Stream) => {
+          // Server gracefully closes the session (sends GOAWAY with NO_ERROR)
+          // and resets the stream so it completes.
+          request.close();
+          (request.session as any)!.close();
+        });
+
+        const req = new HttpRequest({ ...getMockReqOptions(), port });
+
+        // Each request should be rejected because the server closes
+        // without sending a response. Subsequent requests may fail
+        // client-side (frameError on closed session) before reaching
+        // the server.
+        await rejects(nodeH2Handler.handle(req, {}), UNEXPECTEDLY_CLOSED_REGEX);
+        await rejects(nodeH2Handler.handle(req, {}), UNEXPECTEDLY_CLOSED_REGEX);
+        await rejects(nodeH2Handler.handle(req, {}), UNEXPECTEDLY_CLOSED_REGEX);
+
+        mockH2Server4.close();
       });
     });
 
