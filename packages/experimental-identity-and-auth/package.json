@@ -1,6 +1,6 @@
 {
   "name": "@smithy/experimental-identity-and-auth",
-  "version": "0.5.51",
+  "version": "0.5.52",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline experimental-identity-and-auth",

@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.5.5
+
+### Patch Changes
+
+- Updated dependencies [b877fc2]
+  - @smithy/util-retry@4.3.4
+  - @smithy/core@3.23.17
+  - @smithy/smithy-client@4.12.13
+
 ## 4.5.4
 
 ### Patch Changes

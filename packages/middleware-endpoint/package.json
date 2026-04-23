@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-endpoint",
-  "version": "4.4.31",
+  "version": "4.4.32",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline middleware-endpoint",

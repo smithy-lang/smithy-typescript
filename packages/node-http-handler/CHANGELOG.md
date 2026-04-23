@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.6.1
+
+### Patch Changes
+
+- 769ed47: update http2 session closure to prefer session.close() on goaway rather than immediately invoking session.destroy()
+
 ## 4.6.0
 
 ### Minor Changes

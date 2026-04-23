@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-stream",
-  "version": "4.5.24",
+  "version": "4.5.25",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline util-stream",

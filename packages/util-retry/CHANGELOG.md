@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.4
+
+### Patch Changes
+
+- b877fc2: refine conditions for long poll backoff in v2026 retry behavior
+
 ## 4.3.3
 
 ### Patch Changes
