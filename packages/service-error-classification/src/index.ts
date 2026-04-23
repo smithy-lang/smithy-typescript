@@ -57,6 +57,7 @@ export const isThrottlingError = (error: SdkError) =>
 export const isTransientError = (error: SdkError, depth = 0): boolean =>
   isRetryableByTrait(error) ||
   isClockSkewCorrectedError(error) ||
+  (error.name === "InvalidSignatureException" && error.message?.includes("Signature expired")) ||
   TRANSIENT_ERROR_CODES.includes(error.name) ||
   NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
   NODEJS_NETWORK_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
