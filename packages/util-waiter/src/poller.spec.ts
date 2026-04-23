@@ -27,6 +27,9 @@ describe(runPolling.name, () => {
     reason: {
       mockedReason: "some-failure-value",
     },
+    final: {
+      mockedReason: "some-failure-value",
+    },
     observedResponses: {
       [JSON.stringify({
         mockedReason: "some-failure-value",
@@ -36,6 +39,9 @@ describe(runPolling.name, () => {
   const successState = {
     state: WaiterState.SUCCESS,
     reason: {
+      mockedReason: "some-success-value",
+    },
+    final: {
       mockedReason: "some-success-value",
     },
     observedResponses: {
@@ -150,5 +156,48 @@ describe(runPolling.name, () => {
     abortController.abort();
     await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toStrictEqual(abortedState);
     expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it("should populate 'final' alongside 'reason' on non-retry results", async () => {
+    const reason = { code: "ResourceReady" };
+    mockAcceptorChecks = vi.fn().mockResolvedValueOnce({ state: WaiterState.SUCCESS, reason });
+    const result = await runPolling(config, input, mockAcceptorChecks);
+    expect(result.final).toStrictEqual(reason);
+    expect(result.reason).toStrictEqual(reason);
+  });
+
+  it("should populate 'final' after retries resolve to a terminal state", async () => {
+    const reason = { code: "InstanceRunning" };
+    mockAcceptorChecks = vi
+      .fn()
+      .mockResolvedValueOnce(retryState)
+      .mockResolvedValueOnce({ state: WaiterState.SUCCESS, reason });
+    const result = await runPolling(config, input, mockAcceptorChecks);
+    expect(result.final).toStrictEqual(reason);
+    expect(result.reason).toStrictEqual(reason);
+  });
+
+  it("should not populate 'final' on timeout", async () => {
+    let now = Date.now();
+    const delay = 2;
+    const nowMock = vi
+      .spyOn(Date, "now")
+      .mockReturnValueOnce(now)
+      .mockImplementation(() => {
+        const rtn = now;
+        now += delay * 1000;
+        return rtn;
+      });
+    const localConfig = {
+      ...config,
+      minDelay: delay,
+      maxDelay: delay,
+      maxWaitTime: 5,
+    };
+    mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
+    const result = await runPolling(localConfig, input, mockAcceptorChecks);
+    expect(result.state).toBe(WaiterState.TIMEOUT);
+    expect(result.final).toBeUndefined();
+    nowMock.mockReset();
   });
 });

@@ -5,15 +5,15 @@ import { validateWaiterOptions } from "./utils";
 import type { WaiterOptions, WaiterResult } from "./waiter";
 import { waiterServiceDefaults, WaiterState } from "./waiter";
 
-const abortTimeout = (
+const abortTimeout = <R>(
   abortSignal: AbortSignal | DeprecatedAbortSignal
 ): {
   clearListener: () => void;
-  aborted: Promise<WaiterResult>;
+  aborted: Promise<WaiterResult<R>>;
 } => {
   let onAbort: () => void;
 
-  const promise = new Promise<WaiterResult>((resolve) => {
+  const promise = new Promise<WaiterResult<R>>((resolve) => {
     onAbort = () => resolve({ state: WaiterState.ABORTED });
     if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
       // preferred.
@@ -43,33 +43,33 @@ const abortTimeout = (
  *
  * @internal
  */
-export const createWaiter = async <Client, Input>(
+export const createWaiter = async <Client, Input, Reason = any>(
   options: WaiterOptions<Client>,
   input: Input,
-  acceptorChecks: (client: Client, input: Input) => Promise<WaiterResult>
-): Promise<WaiterResult> => {
+  acceptorChecks: (client: Client, input: Input) => Promise<WaiterResult<Reason>>
+): Promise<WaiterResult<Reason>> => {
   const params = {
     ...waiterServiceDefaults,
     ...options,
   };
   validateWaiterOptions(params);
 
-  const exitConditions = [runPolling<Client, Input>(params, input, acceptorChecks)];
+  const exitConditions = [runPolling<Client, Input, Reason>(params, input, acceptorChecks)];
 
   const finalize = [] as Array<() => void>;
 
   if (options.abortSignal) {
-    const { aborted, clearListener } = abortTimeout(options.abortSignal);
+    const { aborted, clearListener } = abortTimeout<Reason>(options.abortSignal);
     finalize.push(clearListener);
     exitConditions.push(aborted);
   }
   if (options.abortController?.signal) {
-    const { aborted, clearListener } = abortTimeout(options.abortController.signal);
+    const { aborted, clearListener } = abortTimeout<Reason>(options.abortController.signal);
     finalize.push(clearListener);
     exitConditions.push(aborted);
   }
 
-  return Promise.race<WaiterResult>(exitConditions).then((result) => {
+  return Promise.race<WaiterResult<Reason>>(exitConditions).then((result) => {
     for (const fn of finalize) {
       fn();
     }

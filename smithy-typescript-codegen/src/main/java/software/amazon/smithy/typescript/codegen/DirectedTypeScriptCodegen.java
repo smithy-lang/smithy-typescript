@@ -609,7 +609,9 @@ final class DirectedTypeScriptCodegen
                                 service,
                                 operation,
                                 waiterWriter,
-                                symbolProvider
+                                symbolProvider,
+                                settings,
+                                model
                             ).run()
                         );
                     });
