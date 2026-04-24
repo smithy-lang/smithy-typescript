@@ -12,6 +12,7 @@ import {
   type GetNumbersCommandOutput,
   GetNumbersCommand,
 } from "../commands/GetNumbersCommand";
+import type { HaltError } from "../models/errors";
 import type { XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
 import type { XYZServiceClient } from "../XYZServiceClient";
 
@@ -23,20 +24,17 @@ const checkState = async (client: XYZServiceClient, input: GetNumbersCommandInpu
     return { state: WaiterState.SUCCESS, reason };
   } catch (exception) {
     reason = exception;
-    if (exception.name === "MysteryThrottlingError") {
-      return { state: WaiterState.RETRY, reason };
-    }
     if (exception.name === "HaltError") {
-      return { state: WaiterState.FAILURE, reason };
+      return { state: WaiterState.SUCCESS, reason };
     }
   }
   return { state: WaiterState.RETRY, reason };
 };
 /**
- * wait until the numbers align
- *  @deprecated Use waitUntilNumbersAligned instead. waitForNumbersAligned does not throw error in non-success cases.
+ * wait until the numbers align or don't align
+ *  @deprecated Use waitUntilNumbersWhatDoTheyDoAnyway instead. waitForNumbersWhatDoTheyDoAnyway does not throw error in non-success cases.
  */
-export const waitForNumbersAligned = async (
+export const waitForNumbersWhatDoTheyDoAnyway = async (
   params: WaiterConfiguration<XYZServiceClient>,
   input: GetNumbersCommandInput
 ): Promise<WaiterResult<GetNumbersCommandOutput | XYZServiceSyntheticServiceException>> => {
@@ -44,15 +42,15 @@ export const waitForNumbersAligned = async (
   return createWaiter({ ...serviceDefaults, ...params }, input, checkState);
 };
 /**
- * wait until the numbers align
+ * wait until the numbers align or don't align
  *  @param params - Waiter configuration options.
  *  @param input - The input to GetNumbersCommand for polling.
  */
-export const waitUntilNumbersAligned = async (
+export const waitUntilNumbersWhatDoTheyDoAnyway = async (
   params: WaiterConfiguration<XYZServiceClient>,
   input: GetNumbersCommandInput
-): Promise<WaiterResult<GetNumbersCommandOutput>> => {
+): Promise<WaiterResult<GetNumbersCommandOutput | HaltError>> => {
   const serviceDefaults = { minDelay: 2, maxDelay: 120 };
   const result = await createWaiter({ ...serviceDefaults, ...params }, input, checkState);
-  return checkExceptions(result) as WaiterResult<GetNumbersCommandOutput>;
+  return checkExceptions(result) as WaiterResult<GetNumbersCommandOutput | HaltError>;
 };

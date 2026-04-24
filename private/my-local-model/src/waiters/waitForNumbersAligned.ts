@@ -51,8 +51,8 @@ export const waitForNumbersAligned = async (
 export const waitUntilNumbersAligned = async (
   params: WaiterConfiguration<XYZServiceClient>,
   input: GetNumbersCommandInput
-): Promise<WaiterResult<GetNumbersCommandOutput | XYZServiceSyntheticServiceException>> => {
+): Promise<WaiterResult<GetNumbersCommandOutput>> => {
   const serviceDefaults = { minDelay: 2, maxDelay: 120 };
   const result = await createWaiter({ ...serviceDefaults, ...params }, input, checkState);
-  return checkExceptions(result);
+  return checkExceptions(result) as WaiterResult<GetNumbersCommandOutput>;
 };
