@@ -33,7 +33,11 @@ export type {
   XYZServiceServiceException,
   XYZServiceSyntheticServiceException,
   waitForNumbersAligned,
+  waitForNumbersMisaligned,
+  waitForNumbersWhatDoTheyDoAnyway,
   waitUntilNumbersAligned,
+  waitUntilNumbersMisaligned,
+  waitUntilNumbersWhatDoTheyDoAnyway,
   paginateGetNumbers,
   paginatecamelCaseOperation,
 } from "../dist-types/index.d";

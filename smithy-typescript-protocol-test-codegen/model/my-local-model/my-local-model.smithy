@@ -162,6 +162,32 @@ structure MainServiceLinkedError {}
             }
         ]
     }
+    NumbersMisaligned: {
+        documentation: "wait until the numbers don't align"
+        acceptors: [
+            {
+                state: "retry"
+                matcher: { success: true }
+            }
+            {
+                state: "success"
+                matcher: { errorType: "HaltError" }
+            }
+        ]
+    }
+    NumbersWhatDoTheyDoAnyway: {
+        documentation: "wait until the numbers align or don't align"
+        acceptors: [
+            {
+                state: "success"
+                matcher: { success: true }
+            }
+            {
+                state: "success"
+                matcher: { errorType: "HaltError" }
+            }
+        ]
+    }
 )
 @paginated(inputToken: "startToken", outputToken: "nextToken", pageSize: "maxResults", items: "numbers")
 @readonly

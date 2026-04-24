@@ -17,6 +17,8 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.waiters.Acceptor;
 import software.amazon.smithy.waiters.AcceptorState;
@@ -40,6 +42,7 @@ class WaiterGenerator implements Runnable {
     private final Symbol inputSymbol;
     private final Symbol outputSymbol;
     private final String waiterResultType;
+    private final String waitUntilResultType;
 
     WaiterGenerator(
         String waiterName,
@@ -71,6 +74,15 @@ class WaiterGenerator implements Runnable {
             Path.of(".", "src", "models", syntheticBaseExceptionName)
         );
         waiterResultType = outputSymbol.getName() + " | " + syntheticBaseExceptionName;
+        waitUntilResultType = computeWaitUntilResultType(
+            waiter,
+            outputSymbol.getName(),
+            syntheticBaseExceptionName,
+            settings,
+            model,
+            symbolProvider,
+            writer
+        );
     }
 
     @Override
@@ -142,7 +154,7 @@ class WaiterGenerator implements Runnable {
             waiterName,
             serviceSymbol,
             inputSymbol,
-            waiterResultType,
+            waitUntilResultType,
             () -> {
                 writer.write(
                     "const serviceDefaults = { minDelay: $L, maxDelay: $L };",
@@ -152,7 +164,9 @@ class WaiterGenerator implements Runnable {
                 writer.write(
                     "const result = await createWaiter({ ...serviceDefaults, ...params }, input, checkState);"
                 );
-                writer.write("return checkExceptions(result);");
+                // as WaiterResult<Narrowed> is needed because createWaiter is the union type
+                // whereas checkExceptions narrows to only the success type.
+                writer.write("return checkExceptions(result) as WaiterResult<$L>;", waitUntilResultType);
             }
         );
     }
@@ -274,6 +288,85 @@ class WaiterGenerator implements Runnable {
 
     private static String getModulePath(String fileLocation) {
         return fileLocation.substring(fileLocation.lastIndexOf("/") + 1, fileLocation.length()).replace(".ts", "");
+    }
+
+    /**
+     * Determines the narrowest result type for waitUntil based on which acceptors
+     * produce a SUCCESS state.
+     *
+     * - If success only comes from successful responses: OutputType only.
+     * - If success only comes from errors: the specific modeled exception if there
+     *   is exactly one ErrorType success acceptor matching a modeled error, otherwise
+     *   the synthetic base exception.
+     * - If success can come from both: OutputType | exception type.
+     */
+    static String computeWaitUntilResultType(
+        Waiter waiter,
+        String outputTypeName,
+        String exceptionTypeName,
+        TypeScriptSettings settings,
+        Model model,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer
+    ) {
+        boolean waiterSuccessTerminalOnSuccessfulResponse = false;
+        boolean waiterSuccessTerminalOnErrorResponse = false;
+        Set<String> successErrorTypeNames = new TreeSet<>();
+
+        for (Acceptor acceptor : waiter.getAcceptors()) {
+            if (acceptor.getState() != AcceptorState.SUCCESS) {
+                continue;
+            }
+            Matcher<?> matcher = acceptor.getMatcher();
+            if (matcher instanceof Matcher.SuccessMember successMember) {
+                if (successMember.getValue()) {
+                    waiterSuccessTerminalOnSuccessfulResponse = true;
+                } else {
+                    waiterSuccessTerminalOnErrorResponse = true;
+                }
+            } else if (matcher instanceof Matcher.ErrorTypeMember errorTypeMember) {
+                waiterSuccessTerminalOnErrorResponse = true;
+                successErrorTypeNames.add(errorTypeMember.getValue());
+            } else if (
+                matcher instanceof Matcher.OutputMember
+                    || matcher instanceof Matcher.InputOutputMember
+            ) {
+                waiterSuccessTerminalOnSuccessfulResponse = true;
+            }
+        }
+
+        String resolvedExceptionType = exceptionTypeName;
+        if (successErrorTypeNames.size() == 1) {
+            String errorName = successErrorTypeNames.iterator().next();
+            boolean errorTypeQualifiedName = errorName.contains("#");
+
+            // Check if this error is a modeled error shape on the operation.
+            resolvedExceptionType = ServiceClosure.of(model, settings.getService(model))
+                .getErrorShapes()
+                .stream()
+                .filter(
+                    shape -> errorTypeQualifiedName ? ShapeId.from(errorName).equals(shape.getId())
+                        : shape.getId().getName().equals(errorName)
+                )
+                .findFirst()
+                .map(shape -> {
+                    String typeName = symbolProvider.toSymbol(shape).getName();
+                    writer.addRelativeTypeImport(
+                        typeName,
+                        null,
+                        Path.of(".", "src", "models", "errors")
+                    );
+                    return typeName;
+                })
+                .orElse(exceptionTypeName);
+        }
+
+        if (waiterSuccessTerminalOnSuccessfulResponse && waiterSuccessTerminalOnErrorResponse) {
+            return outputTypeName + " | " + resolvedExceptionType;
+        } else if (waiterSuccessTerminalOnErrorResponse) {
+            return resolvedExceptionType;
+        }
+        return outputTypeName;
     }
 
     static void writeIndex(Model model, ServiceShape service, FileManifest fileManifest) {

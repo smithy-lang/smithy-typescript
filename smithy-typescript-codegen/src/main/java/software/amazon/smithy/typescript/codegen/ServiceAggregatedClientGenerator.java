@@ -223,9 +223,22 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
                     Symbol operationSymbol = symbolProvider.toSymbol(operation);
                     Symbol input = operationSymbol.expectProperty("inputType", Symbol.class);
-
-                    // TODO: use this to change WaiterResult to WaiterResult<OutputType>.
                     Symbol output = operationSymbol.expectProperty("outputType", Symbol.class);
+
+                    String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+                    String syntheticBaseExceptionName =
+                        CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
+                    writer.addRelativeTypeImport(
+                        syntheticBaseExceptionName,
+                        null,
+                        Paths.get(
+                            ".",
+                            CodegenUtils.SOURCE_FOLDER,
+                            "models",
+                            syntheticBaseExceptionName
+                        )
+                    );
+                    String waiterResultType = output.getName() + " | " + syntheticBaseExceptionName;
 
                     waitableTrait
                         .getWaiters()
@@ -234,6 +247,16 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
                             writer.addTypeImport("WaiterConfiguration", null, TypeScriptDependency.SMITHY_TYPES);
                             writer.addTypeImport("WaiterResult", null, TypeScriptDependency.AWS_SDK_UTIL_WAITERS);
+
+                            String waitUntilResultType = WaiterGenerator.computeWaitUntilResultType(
+                                waiter,
+                                output.getName(),
+                                syntheticBaseExceptionName,
+                                settings,
+                                model,
+                                symbolProvider,
+                                writer
+                            );
 
                             writer.writeDocs(
                                 """
@@ -247,11 +270,12 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                                 $1L(
                                   args: $2T,
                                   waiterConfig: number | Omit<$3L, "client">
-                                ): Promise<WaiterResult>;
+                                ): Promise<WaiterResult<$4L>>;
                                 """,
                                 waiterLocalName,
                                 input,
-                                "WaiterConfiguration<" + aggregateClientName + ">"
+                                "WaiterConfiguration<" + aggregateClientName + ">",
+                                waitUntilResultType
                             );
                         });
                 }

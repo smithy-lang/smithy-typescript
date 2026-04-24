@@ -28,9 +28,13 @@ import {
   type TradeEventStreamCommandOutput,
   TradeEventStreamCommand,
 } from "./commands/TradeEventStreamCommand";
+import type { HaltError } from "./models/errors";
+import type { XYZServiceSyntheticServiceException } from "./models/XYZServiceSyntheticServiceException";
 import { paginatecamelCaseOperation as paginateCamelCaseOperation } from "./pagination/camelCaseOperationPaginator";
 import { paginateGetNumbers } from "./pagination/GetNumbersPaginator";
 import { waitUntilNumbersAligned } from "./waiters/waitForNumbersAligned";
+import { waitUntilNumbersMisaligned } from "./waiters/waitForNumbersMisaligned";
+import { waitUntilNumbersWhatDoTheyDoAnyway } from "./waiters/waitForNumbersWhatDoTheyDoAnyway";
 import { XYZServiceClient } from "./XYZServiceClient";
 
 const commands = {
@@ -45,6 +49,8 @@ const paginators = {
 };
 const waiters = {
   waitUntilNumbersAligned,
+  waitUntilNumbersMisaligned,
+  waitUntilNumbersWhatDoTheyDoAnyway,
 };
 
 export interface XYZService {
@@ -149,7 +155,27 @@ export interface XYZService {
   waitUntilNumbersAligned(
     args: GetNumbersCommandInput,
     waiterConfig: number | Omit<WaiterConfiguration<XYZService>, "client">
-  ): Promise<WaiterResult>;
+  ): Promise<WaiterResult<GetNumbersCommandOutput>>;
+
+  /**
+   * @see {@link GetNumbersCommand}
+   * @param args - command input.
+   * @param waiterConfig - `maxWaitTime` in seconds or waiter config object.
+   */
+  waitUntilNumbersMisaligned(
+    args: GetNumbersCommandInput,
+    waiterConfig: number | Omit<WaiterConfiguration<XYZService>, "client">
+  ): Promise<WaiterResult<HaltError>>;
+
+  /**
+   * @see {@link GetNumbersCommand}
+   * @param args - command input.
+   * @param waiterConfig - `maxWaitTime` in seconds or waiter config object.
+   */
+  waitUntilNumbersWhatDoTheyDoAnyway(
+    args: GetNumbersCommandInput,
+    waiterConfig: number | Omit<WaiterConfiguration<XYZService>, "client">
+  ): Promise<WaiterResult<GetNumbersCommandOutput | HaltError>>;
 }
 
 /**

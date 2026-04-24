@@ -31,7 +31,11 @@ import {
   TradeEventStreamRequest$,
   TradeEventStreamResponse$,
   waitForNumbersAligned,
+  waitForNumbersMisaligned,
+  waitForNumbersWhatDoTheyDoAnyway,
   waitUntilNumbersAligned,
+  waitUntilNumbersMisaligned,
+  waitUntilNumbersWhatDoTheyDoAnyway,
   XYZService,
   XYZServiceClient,
   XYZServiceServiceException,
@@ -79,7 +83,11 @@ assert(typeof XYZServiceServiceException$ === "object");
 assert(XYZServiceSyntheticServiceException.prototype instanceof Error);
 // waiters
 assert(typeof waitForNumbersAligned === "function");
+assert(typeof waitForNumbersMisaligned === "function");
+assert(typeof waitForNumbersWhatDoTheyDoAnyway === "function");
 assert(typeof waitUntilNumbersAligned === "function");
+assert(typeof waitUntilNumbersMisaligned === "function");
+assert(typeof waitUntilNumbersWhatDoTheyDoAnyway === "function");
 // paginators
 assert(typeof paginateGetNumbers === "function");
 assert(typeof paginatecamelCaseOperation === "function");
