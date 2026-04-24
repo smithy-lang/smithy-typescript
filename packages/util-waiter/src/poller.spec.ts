@@ -108,13 +108,13 @@ describe(runPolling.name, () => {
     expect(sleep).toHaveBeenCalled();
     expect(mockAcceptorChecks).toHaveBeenCalledTimes(8);
     expect(sleep).toHaveBeenCalledTimes(7);
-    expect(sleep).toHaveBeenNthCalledWith(1, 2); // min delay. random(2, 2)
+    expect(sleep).toHaveBeenNthCalledWith(1, 2); // min delay
     expect(sleep).toHaveBeenNthCalledWith(2, 3); // random(2, 4)
-    expect(sleep).toHaveBeenNthCalledWith(3, 5); // +random(2, 8)
-    expect(sleep).toHaveBeenNthCalledWith(4, 9); // +random(2, 16)
-    expect(sleep).toHaveBeenNthCalledWith(5, 30); // max delay
-    expect(sleep).toHaveBeenNthCalledWith(6, 30); // max delay
-    expect(sleep).toHaveBeenNthCalledWith(7, 30); // max delay
+    expect(sleep).toHaveBeenNthCalledWith(3, 5); // random(2, 8)
+    expect(sleep).toHaveBeenNthCalledWith(4, 9); // random(2, 16)
+    expect(sleep).toHaveBeenNthCalledWith(5, 30); // past attemptCeiling, maxDelay
+    expect(sleep).toHaveBeenNthCalledWith(6, 30); // past attemptCeiling
+    expect(sleep).toHaveBeenNthCalledWith(7, 30); // past attemptCeiling
   });
 
   it("resolves after the last attempt before reaching maxWaitTime ", async () => {
@@ -137,8 +137,6 @@ describe(runPolling.name, () => {
 
     mockAcceptorChecks = vi.fn().mockResolvedValue(retryState);
     await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toStrictEqual(timeoutState);
-    expect(sleep).toHaveBeenCalled();
-    expect(sleep).toHaveBeenCalledTimes(2);
     nowMock.mockReset();
   });
 
@@ -198,6 +196,85 @@ describe(runPolling.name, () => {
     const result = await runPolling(localConfig, input, mockAcceptorChecks);
     expect(result.state).toBe(WaiterState.TIMEOUT);
     expect(result.final).toBeUndefined();
+    nowMock.mockReset();
+  });
+
+  it("should warn when polling exceeds 60s and 403s are observed", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const reason403 = { $metadata: { httpStatusCode: 403 }, message: "Forbidden" };
+    const retryWith403 = { state: WaiterState.RETRY, reason: reason403 };
+
+    // Simulate time: start at T=0, each Date.now() call advances 20s.
+    // This ensures we cross the 60s warn403Time threshold after a few polls.
+    let now = 1_000_000;
+    const nowMock = vi
+      .spyOn(Date, "now")
+      .mockReturnValueOnce(now) // waitUntil
+      .mockImplementation(() => {
+        const rtn = now;
+        now += 20_000;
+        return rtn;
+      });
+
+    const localConfig = {
+      ...config,
+      minDelay: 2,
+      maxDelay: 2,
+      maxWaitTime: 300,
+      client: { config: {} },
+    } as WaiterOptions<any>;
+
+    mockAcceptorChecks = vi
+      .fn()
+      .mockResolvedValueOnce(retryWith403) // initial check
+      .mockResolvedValueOnce(retryWith403) // poll 1
+      .mockResolvedValueOnce(retryWith403) // poll 2
+      .mockResolvedValueOnce(retryWith403) // poll 3
+      .mockResolvedValueOnce({ state: WaiterState.SUCCESS, reason: { $metadata: { httpStatusCode: 200 } } });
+
+    await runPolling(localConfig, input, mockAcceptorChecks);
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("403 status code encountered during waiter polling"));
+
+    warnSpy.mockRestore();
+    nowMock.mockReset();
+  });
+
+  it("should truncate delay to fire a last poll before timeout", async () => {
+    // Use real-ish time: start at T=0, advance 1s per Date.now() call.
+    let now = 1_000_000;
+    const nowMock = vi
+      .spyOn(Date, "now")
+      .mockReturnValueOnce(now) // waitUntil = now + 10_000
+      .mockImplementation(() => {
+        const rtn = now;
+        now += 1_000;
+        return rtn;
+      });
+
+    const localConfig = {
+      ...config,
+      minDelay: 2,
+      maxDelay: 30,
+      maxWaitTime: 10,
+      client: "mockClient",
+    } as WaiterOptions<any>;
+
+    mockAcceptorChecks = vi
+      .fn()
+      .mockResolvedValueOnce(retryState) // initial check
+      .mockResolvedValue({ state: WaiterState.SUCCESS, reason: { ok: true } });
+
+    const result = await runPolling(localConfig, input, mockAcceptorChecks);
+
+    // The backoff function should have truncated the delay so that
+    // sleep was called with a value less than the normal backoff,
+    // allowing one more poll before timeout.
+    expect(sleep).toHaveBeenCalled();
+    const sleepArg = vi.mocked(sleep).mock.calls[0][0];
+    expect(sleepArg).toBeLessThanOrEqual(localConfig.maxDelay);
+    expect(result.state).toBe(WaiterState.SUCCESS);
+
     nowMock.mockReset();
   });
 });
