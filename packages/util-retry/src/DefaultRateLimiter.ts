@@ -155,9 +155,11 @@ export class DefaultRateLimiter implements RateLimiter {
     }
 
     this.refillTokenBucket();
-    if (amount > this.availableTokens) {
+
+    while (amount > this.availableTokens) {
       const delay = ((amount - this.availableTokens) / this.fillRate) * 1000;
       await new Promise((resolve) => DefaultRateLimiter.setTimeoutFn(resolve, delay));
+      this.refillTokenBucket();
     }
     this.availableTokens = this.availableTokens - amount;
   }
