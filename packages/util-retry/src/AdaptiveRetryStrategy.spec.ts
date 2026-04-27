@@ -74,18 +74,51 @@ describe(AdaptiveRetryStrategy.name, () => {
   });
 
   describe("refreshRetryTokenForRetry", () => {
-    it("calls rateLimiter.updateCientSendingRate and refreshes retry token", async () => {
+    it("calls getSendToken, updateClientSendingRate, and refreshes retry token", async () => {
       const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry");
       mockedStandardRetryStrategy.mockResolvedValue(mockRetryToken);
       const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
         rateLimiter: mockDefaultRateLimiter,
       });
       const token = await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo);
+      expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledTimes(1);
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledTimes(1);
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledWith(errorInfo);
       expect(mockedStandardRetryStrategy).toHaveBeenCalledTimes(1);
       expect(mockedStandardRetryStrategy).toHaveBeenCalledWith(mockRetryToken, errorInfo);
       expect(token).toStrictEqual(mockRetryToken);
+    });
+
+    it("calls updateClientSendingRate before getSendToken", async () => {
+      const callOrder: string[] = [];
+      mockDefaultRateLimiter.getSendToken.mockImplementation(() => {
+        callOrder.push("getSendToken");
+        return Promise.resolve();
+      });
+      mockDefaultRateLimiter.updateClientSendingRate.mockImplementation(() => {
+        callOrder.push("updateClientSendingRate");
+      });
+      vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry").mockResolvedValue(mockRetryToken);
+
+      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
+        rateLimiter: mockDefaultRateLimiter,
+      });
+      await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo);
+      expect(callOrder).toEqual(["updateClientSendingRate", "getSendToken"]);
+    });
+
+    it("calls getSendToken for each retry in a multi-retry sequence", async () => {
+      vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry").mockResolvedValue(mockRetryToken);
+      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
+        rateLimiter: mockDefaultRateLimiter,
+      });
+
+      await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo);
+      await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo);
+      await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo);
+
+      expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledTimes(3);
+      expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledTimes(3);
     });
   });
 
