@@ -135,7 +135,7 @@ describe(DefaultRateLimiter.name, () => {
       let now = 1000;
       vi.spyOn(Date, "now").mockImplementation(() => now);
       const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
-      spy.mockImplementation((resolve: () => void) => {
+      spy.mockImplementation((resolve: any) => {
         now += 200; // 200ms passes during sleep
         resolve();
       });
@@ -163,7 +163,7 @@ describe(DefaultRateLimiter.name, () => {
 
       let callCount = 0;
       const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
-      spy.mockImplementation((resolve: () => void) => {
+      spy.mockImplementation((resolve: any) => {
         callCount++;
         now += 50; // 50ms passes
         if (callCount === 1) {
@@ -201,7 +201,7 @@ describe(DefaultRateLimiter.name, () => {
 
       const refillSpy = vi.spyOn(rateLimiter as any, "refillTokenBucket");
       const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
-      spy.mockImplementation((resolve: () => void) => {
+      spy.mockImplementation((resolve: any) => {
         now += 600; // enough time for refill to provide tokens
         resolve();
       });
