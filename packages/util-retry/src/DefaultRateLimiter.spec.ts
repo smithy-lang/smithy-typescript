@@ -116,6 +116,103 @@ describe(DefaultRateLimiter.name, () => {
     expect(isThrottlingError).not.toHaveBeenCalled();
   });
 
+  describe("acquireTokenBucket re-checks after sleep", () => {
+    it("availableTokens is never negative after acquire", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      // Enable the rate limiter with a throttle.
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({});
+
+      // Drain tokens to force a sleep path.
+      rateLimiter["availableTokens"] = 0.1;
+      rateLimiter["fillRate"] = 10;
+      rateLimiter["lastTimestamp"] = 1;
+
+      // Time advances during the sleep so refill provides tokens.
+      let now = 1000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
+      spy.mockImplementation((resolve: () => void) => {
+        now += 200; // 200ms passes during sleep
+        resolve();
+      });
+
+      await rateLimiter.getSendToken();
+      expect(rateLimiter["availableTokens"]).toBeGreaterThanOrEqual(0);
+    });
+
+    it("loops when fill rate decreases during sleep", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      // Enable the rate limiter.
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({});
+
+      rateLimiter["availableTokens"] = 0;
+      rateLimiter["fillRate"] = 10;
+      rateLimiter["maxCapacity"] = 10;
+      rateLimiter["lastTimestamp"] = 1;
+
+      let now = 1000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+
+      let callCount = 0;
+      const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
+      spy.mockImplementation((resolve: () => void) => {
+        callCount++;
+        now += 50; // 50ms passes
+        if (callCount === 1) {
+          // Simulate rate dropping mid-sleep (e.g. concurrent throttle response).
+          rateLimiter["fillRate"] = 0.5;
+          rateLimiter["maxCapacity"] = 1;
+        }
+        resolve();
+      });
+
+      await rateLimiter.getSendToken();
+
+      // Should have looped more than once because the first sleep
+      // didn't provide enough tokens after the rate drop.
+      expect(callCount).toBeGreaterThan(1);
+      expect(rateLimiter["availableTokens"]).toBeGreaterThanOrEqual(0);
+    });
+
+    it("refills token bucket after each sleep iteration", async () => {
+      vi.spyOn(Date, "now").mockImplementation(() => 0);
+      const rateLimiter = new DefaultRateLimiter();
+
+      // Enable the rate limiter.
+      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
+      vi.spyOn(Date, "now").mockImplementation(() => 1000);
+      rateLimiter.updateClientSendingRate({});
+
+      rateLimiter["availableTokens"] = 0;
+      rateLimiter["fillRate"] = 2;
+      rateLimiter["maxCapacity"] = 2;
+      rateLimiter["lastTimestamp"] = 1;
+
+      let now = 1000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+
+      const refillSpy = vi.spyOn(rateLimiter as any, "refillTokenBucket");
+      const spy = vi.spyOn(DefaultRateLimiter as any, "setTimeoutFn");
+      spy.mockImplementation((resolve: () => void) => {
+        now += 600; // enough time for refill to provide tokens
+        resolve();
+      });
+
+      await rateLimiter.getSendToken();
+
+      // refillTokenBucket called: once before the loop + once inside the loop
+      expect(refillSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it("updateClientSendingRate", () => {
     vi.spyOn(Date, "now").mockImplementation(() => 0);
     const rateLimiter = new DefaultRateLimiter();
