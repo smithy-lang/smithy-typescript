@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.1
+
+### Patch Changes
+
+- 15f9e53: retry clock skew errors for freeze/thaw/drift situations
+
 ## 4.3.0
 
 ### Minor Changes

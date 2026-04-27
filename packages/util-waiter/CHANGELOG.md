@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- c1395f1: emit warning from waiter polling when repeated 403s are encountered
+- ed851e7: add type information to WaiterResult reason
+
 ## 4.2.16
 
 ### Patch Changes

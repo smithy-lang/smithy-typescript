@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.5.6
+
+### Patch Changes
+
+- Updated dependencies [15f9e53]
+  - @smithy/service-error-classification@4.3.1
+  - @smithy/util-retry@4.3.5
+
 ## 4.5.5
 
 ### Patch Changes
