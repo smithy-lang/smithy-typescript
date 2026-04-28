@@ -18,7 +18,6 @@
     "@smithy/core": "workspace:^",
     "@smithy/is-array-buffer": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-config-provider": "workspace:^",
     "@smithy/util-middleware": "workspace:^",

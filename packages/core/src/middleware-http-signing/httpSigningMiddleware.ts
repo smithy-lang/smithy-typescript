@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { HttpRequest } from "@smithy/protocol-http";
 import type {
   ErrorHandler,
   FinalizeHandler,
@@ -12,6 +11,8 @@ import type {
   SuccessHandler,
 } from "@smithy/types";
 import { getSmithyContext } from "@smithy/util-middleware";
+
+import { HttpRequest } from "../submodules/protocols/protocol-http/httpRequest";
 
 /**
  * @internal

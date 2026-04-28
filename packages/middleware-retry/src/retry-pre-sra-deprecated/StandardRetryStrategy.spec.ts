@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import { isThrottlingError } from "@smithy/service-error-classification";
 import {
   DEFAULT_MAX_ATTEMPTS,

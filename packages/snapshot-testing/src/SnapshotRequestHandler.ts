@@ -1,5 +1,5 @@
+import { type HttpHandler } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
-import { type HttpHandler } from "@smithy/protocol-http";
 import type {
   HttpHandlerOptions,
   HttpRequest as IHttpRequest,

@@ -44,12 +44,16 @@ public class ExtensionConfigurationGenerator {
 
     void generate() {
         Map<String, Dependency> interfaces = new HashMap<>();
+        Map<String, String> submodules = new HashMap<>();
 
         for (TypeScriptIntegration integration : integrations) {
             integration
                 .getExtensionConfigurationInterfaces(model, settings)
                 .forEach(configurationInterface -> {
                     interfaces.put(configurationInterface.name().left, configurationInterface.name().right);
+                    if (configurationInterface.submodule() != null) {
+                        submodules.put(configurationInterface.name().left, configurationInterface.submodule());
+                    }
                 });
         }
 
@@ -68,7 +72,16 @@ public class ExtensionConfigurationGenerator {
                 .entrySet()
                 .forEach(entry -> {
                     writer.addDependency(entry.getValue());
-                    writer.addTypeImport(entry.getKey(), null, entry.getValue());
+                    if (submodules.containsKey(entry.getKey())) {
+                        writer.addTypeImportSubmodule(
+                            entry.getKey(),
+                            null,
+                            entry.getValue(),
+                            submodules.get(entry.getKey())
+                        );
+                    } else {
+                        writer.addTypeImport(entry.getKey(), null, entry.getValue());
+                    }
                 });
             writer.write(clientConfigurationContent);
         });

@@ -17,7 +17,7 @@ import { SimpleScalarPropertiesCommand } from "../../src/commands/SimpleScalarPr
 import { SparseNullsOperationCommand } from "../../src/commands/SparseNullsOperationCommand";
 import { RpcV2ProtocolClient } from "../../src/RpcV2ProtocolClient";
 import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
-import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import { Readable } from "node:stream";
 
 /**

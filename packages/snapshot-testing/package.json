@@ -30,7 +30,6 @@
     "@smithy/core": "workspace:^",
     "@smithy/eventstream-codec": "workspace:^",
     "@smithy/node-http-handler": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-base64": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",

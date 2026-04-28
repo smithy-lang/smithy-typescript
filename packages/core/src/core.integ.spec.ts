@@ -1,6 +1,6 @@
 import { cbor, SmithyRpcV2CborProtocol } from "@smithy/core/cbor";
 import type { HttpProtocol } from "@smithy/core/protocols";
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/core/protocols";
 import { RpcV2ProtocolClient } from "@smithy/smithy-rpcv2-cbor-schema";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";

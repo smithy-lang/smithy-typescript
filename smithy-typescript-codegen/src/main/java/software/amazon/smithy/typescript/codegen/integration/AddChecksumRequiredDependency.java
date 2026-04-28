@@ -119,7 +119,8 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
         return ListUtils.of(
             RuntimeClientPlugin.builder()
                 .withConventions(
-                    TypeScriptDependency.BODY_CHECKSUM.dependency,
+                    "@smithy/core/protocols",
+                    TypeScriptDependency.SMITHY_CORE.version,
                     "ApplyMd5BodyChecksum",
                     HAS_MIDDLEWARE
                 )

@@ -25,8 +25,8 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/is-array-buffer": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-hex-encoding": "workspace:^",
     "@smithy/util-middleware": "workspace:^",

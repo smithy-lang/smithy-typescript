@@ -1,5 +1,5 @@
 import { cbor } from "@smithy/core/cbor";
-import { type HttpHandler, HttpResponse } from "@smithy/protocol-http";
+import { type HttpHandler, HttpResponse } from "@smithy/core/protocols";
 import { Retry } from "@smithy/util-retry";
 import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";

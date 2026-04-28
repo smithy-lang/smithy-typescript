@@ -1,5 +1,5 @@
-import type { HttpHandler, HttpRequest } from "@smithy/protocol-http";
-import { HttpResponse } from "@smithy/protocol-http";
+import type { HttpHandler, HttpRequest } from "@smithy/core/protocols";
+import { HttpResponse } from "@smithy/core/protocols";
 import { buildQueryString } from "@smithy/querystring-builder";
 import type { FetchHttpHandlerOptions } from "@smithy/types";
 import type { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";

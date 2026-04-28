@@ -1,5 +1,5 @@
+import { HttpResponse } from "@smithy/core/protocols";
 import { parseRfc7231DateTime } from "@smithy/core/serde";
-import { HttpResponse } from "@smithy/protocol-http";
 import type { Logger } from "@smithy/types";
 
 /**

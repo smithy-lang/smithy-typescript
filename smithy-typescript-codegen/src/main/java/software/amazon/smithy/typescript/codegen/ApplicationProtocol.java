@@ -54,19 +54,45 @@ public final class ApplicationProtocol {
                 .alias("__HttpHandlerOptions")
                 .build(),
             SymbolReference.builder()
-                .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpRequest", true))
+                .symbol(
+                    createHttpSymbol(
+                        TypeScriptDependency.SMITHY_CORE,
+                        "HttpRequest",
+                        true,
+                        SmithyCoreSubmodules.PROTOCOLS
+                    )
+                )
                 .alias("__HttpRequest")
                 .build(),
             SymbolReference.builder()
-                .symbol(createHttpSymbol(TypeScriptDependency.PROTOCOL_HTTP, "HttpResponse", true))
+                .symbol(
+                    createHttpSymbol(
+                        TypeScriptDependency.SMITHY_CORE,
+                        "HttpResponse",
+                        true,
+                        SmithyCoreSubmodules.PROTOCOLS
+                    )
+                )
                 .alias("__HttpResponse")
                 .build()
         );
     }
 
     private static Symbol createHttpSymbol(TypeScriptDependency dependency, String symbolName, boolean typeOnly) {
+        return createHttpSymbol(dependency, symbolName, typeOnly, null);
+    }
+
+    private static Symbol createHttpSymbol(
+        TypeScriptDependency dependency,
+        String symbolName,
+        boolean typeOnly,
+        String submodule
+    ) {
+        String namespace = submodule != null
+            ? dependency.packageName + submodule
+            : dependency.packageName;
         Symbol.Builder builder = Symbol.builder()
-            .namespace(dependency.packageName, "/")
+            .namespace(namespace, "/")
             .name(symbolName)
             .addDependency(dependency)
             .addDependency(TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER)

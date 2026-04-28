@@ -1,6 +1,6 @@
+import type { HttpRequest } from "@smithy/core/protocols";
 import type { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
 import { constructStack } from "@smithy/middleware-stack";
-import type { HttpRequest } from "@smithy/protocol-http";
 import type {
   Command as ICommand,
   FinalizeHandlerArguments,

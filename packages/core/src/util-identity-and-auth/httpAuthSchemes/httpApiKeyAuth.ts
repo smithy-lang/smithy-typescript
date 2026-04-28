@@ -1,6 +1,7 @@
-import { HttpRequest } from "@smithy/protocol-http";
 import type { ApiKeyIdentity, HttpRequest as IHttpRequest, HttpSigner } from "@smithy/types";
 import { HttpApiKeyAuthLocation } from "@smithy/types";
+
+import { HttpRequest } from "../../submodules/protocols/protocol-http/httpRequest";
 
 /**
  * @internal
