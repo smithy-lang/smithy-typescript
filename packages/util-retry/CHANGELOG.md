@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.3.6
+
+### Patch Changes
+
+- 2e5142c: add a missing call to getSendToken in Adaptive mode retries
+- 9c88c10: adaptive retry fixes for checking capacity during the rate limiter waiting step
+
 ## 4.3.5
 
 ### Patch Changes

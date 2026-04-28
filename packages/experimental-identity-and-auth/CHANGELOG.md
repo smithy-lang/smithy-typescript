@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.5.54
+
+### Patch Changes
+
+- @smithy/middleware-retry@4.5.7
+
 ## 0.5.53
 
 ### Patch Changes

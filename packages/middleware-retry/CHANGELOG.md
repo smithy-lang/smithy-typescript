@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.5.7
+
+### Patch Changes
+
+- Updated dependencies [2e5142c]
+- Updated dependencies [9c88c10]
+  - @smithy/util-retry@4.3.6
+
 ## 4.5.6
 
 ### Patch Changes
