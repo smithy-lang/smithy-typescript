@@ -1,11 +1,20 @@
 # Smithy Typescript Codegen Changelog
 
+[Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
+
+## 0.49.0 (2026-04-28)
+
+### Features
+
+- Endpoint logic is now generated as a compact binary decision diagram ([#1948](https://github.com/smithy-lang/smithy-typescript/pull/1948))
+- Waiters are generated with typed final result values ([#1852](https://github.com/smithy-lang/smithy-typescript/pull/1852))
+
 ## 0.48.0 (2026-04-08)
 
 ### Features
 
 - Generated nullable types for sparse collections ([#1943](https://github.com/smithy-lang/smithy-typescript/pull/1943))
-- Enabled type-only symbols in Schema mode ([#1938](https://github.com/smithy-lang/smithy-typescript/pull/1938)) 
+- Enabled type-only symbols in Schema mode ([#1938](https://github.com/smithy-lang/smithy-typescript/pull/1938))
 
 ## 0.47.0 (2026-03-17)
 
