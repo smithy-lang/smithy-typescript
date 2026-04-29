@@ -153,17 +153,31 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     return new Promise((_resolve, _reject) => {
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
 
-      // Timeouts related to this request to clear upon completion.
-      const timeouts = [] as (number | NodeJS.Timeout)[];
+      // Individual timeout handles for this request, cleared upon completion.
+      // Using individual variables avoids array allocation and forEach on the hot path.
+      type TimeoutId = number | NodeJS.Timeout;
+      let socketWarningTimeoutId: TimeoutId = -1;
+      let connectionTimeoutId: TimeoutId = -1;
+      let requestTimeoutId: TimeoutId = -1;
+      let socketTimeoutId: TimeoutId = -1;
+      let keepAliveTimeoutId: TimeoutId = -1;
+
+      const clearTimeouts = () => {
+        timing.clearTimeout(socketWarningTimeoutId);
+        timing.clearTimeout(connectionTimeoutId);
+        timing.clearTimeout(requestTimeoutId);
+        timing.clearTimeout(socketTimeoutId);
+        timing.clearTimeout(keepAliveTimeoutId);
+      };
 
       const resolve = async (arg: { response: HttpResponse }) => {
         await writeRequestBodyPromise;
-        timeouts.forEach(timing.clearTimeout);
+        clearTimeouts();
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
         await writeRequestBodyPromise;
-        timeouts.forEach(timing.clearTimeout);
+        clearTimeouts();
         _reject(arg);
       };
 
@@ -192,17 +206,15 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
       // If the request is taking a long time, check socket usage and potentially warn.
       // This warning will be cancelled if the request resolves.
-      timeouts.push(
-        timing.setTimeout(
-          () => {
-            this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
-              agent!,
-              this.socketWarningTimestamp,
-              config.logger
-            );
-          },
-          config.socketAcquisitionWarningTimeout ?? (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000)
-        )
+      socketWarningTimeoutId = timing.setTimeout(
+        () => {
+          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
+            agent!,
+            this.socketWarningTimestamp,
+            config.logger
+          );
+        },
+        config.socketAcquisitionWarningTimeout ?? (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000)
       );
 
       const queryString = request.query ? buildQueryString(request.query) : "";
@@ -280,28 +292,30 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // Defer registration of socket event listeners if the connection and request timeouts
       // are longer than a few seconds. This avoids slowing down faster operations.
       const effectiveRequestTimeout = requestTimeout ?? config.requestTimeout;
-      timeouts.push(setConnectionTimeout(req, reject, config.connectionTimeout));
-      timeouts.push(
-        setRequestTimeout(req, reject, effectiveRequestTimeout, config.throwOnRequestTimeout, config.logger ?? console)
+      connectionTimeoutId = setConnectionTimeout(req, reject, config.connectionTimeout);
+      requestTimeoutId = setRequestTimeout(
+        req,
+        reject,
+        effectiveRequestTimeout,
+        config.throwOnRequestTimeout,
+        config.logger ?? console
       );
-      timeouts.push(setSocketTimeout(req, reject, config.socketTimeout));
+      socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;
       if (typeof httpAgent === "object" && "keepAlive" in httpAgent) {
-        timeouts.push(
-          setSocketKeepAlive(req, {
-            // @ts-expect-error keepAlive is not public on httpAgent.
-            keepAlive: (httpAgent as hAgent).keepAlive,
-            // @ts-expect-error keepAliveMsecs is not public on httpAgent.
-            keepAliveMsecs: (httpAgent as hAgent).keepAliveMsecs,
-          })
-        );
+        keepAliveTimeoutId = setSocketKeepAlive(req, {
+          // @ts-expect-error keepAlive is not public on httpAgent.
+          keepAlive: (httpAgent as hAgent).keepAlive,
+          // @ts-expect-error keepAliveMsecs is not public on httpAgent.
+          keepAliveMsecs: (httpAgent as hAgent).keepAliveMsecs,
+        });
       }
 
       writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout, this.externalAgent).catch(
         (e) => {
-          timeouts.forEach(timing.clearTimeout);
+          clearTimeouts();
           return _reject(e);
         }
       );
