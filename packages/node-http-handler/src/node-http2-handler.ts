@@ -126,12 +126,17 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       let fulfilled = false;
 
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
+      let hasWriteRequestBodyPromiseSettled = false;
       const resolve = async (arg: { response: HttpResponse }) => {
-        await writeRequestBodyPromise;
+        if (!hasWriteRequestBodyPromiseSettled) {
+          await writeRequestBodyPromise;
+        }
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
-        await writeRequestBodyPromise;
+        if (!hasWriteRequestBodyPromiseSettled) {
+          await writeRequestBodyPromise;
+        }
         _reject(arg);
       };
 
@@ -255,7 +260,14 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
         }
       });
 
-      writeRequestBodyPromise = writeRequestBody(clientHttp2Stream, request, effectiveRequestTimeout);
+      writeRequestBodyPromise = writeRequestBody(clientHttp2Stream, request, effectiveRequestTimeout).then(
+        () => {
+          hasWriteRequestBodyPromiseSettled = true;
+        },
+        () => {
+          hasWriteRequestBodyPromiseSettled = true;
+        }
+      );
     });
   }
 

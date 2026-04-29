@@ -152,17 +152,22 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
 
     return new Promise((_resolve, _reject) => {
       let writeRequestBodyPromise: Promise<void> | undefined = undefined;
+      let hasWriteRequestBodyPromiseSettled = false;
 
       // Timeouts related to this request to clear upon completion.
       const timeouts = [] as (number | NodeJS.Timeout)[];
 
       const resolve = async (arg: { response: HttpResponse }) => {
-        await writeRequestBodyPromise;
+        if (!hasWriteRequestBodyPromiseSettled) {
+          await writeRequestBodyPromise;
+        }
         timeouts.forEach(timing.clearTimeout);
         _resolve(arg);
       };
       const reject = async (arg: unknown) => {
-        await writeRequestBodyPromise;
+        if (!hasWriteRequestBodyPromiseSettled) {
+          await writeRequestBodyPromise;
+        }
         timeouts.forEach(timing.clearTimeout);
         _reject(arg);
       };
@@ -299,7 +304,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         );
       }
 
-      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout, this.externalAgent).catch(
+      writeRequestBodyPromise = writeRequestBody(req, request, effectiveRequestTimeout, this.externalAgent).then(
+        () => {
+          hasWriteRequestBodyPromiseSettled = true;
+        },
         (e) => {
           timeouts.forEach(timing.clearTimeout);
           return _reject(e);
