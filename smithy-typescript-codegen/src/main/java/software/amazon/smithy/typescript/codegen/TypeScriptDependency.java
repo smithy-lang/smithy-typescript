@@ -158,6 +158,10 @@ public enum TypeScriptDependency implements Dependency {
             version = DependencyVersion.getVersion(name);
         }
 
+        if (version == null) {
+            version = "latest";
+        }
+
         if (name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) {
             if (!version.startsWith("^") && version.matches("^\\d+\\.\\d+\\.\\d+$")) {
                 version = "^" + version;
