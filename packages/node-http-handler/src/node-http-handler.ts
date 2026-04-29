@@ -174,8 +174,8 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         return;
       }
 
-      const headers = request.headers ?? {};
-      const expectContinue = (headers.Expect ?? headers.expect) === "100-continue";
+      const headers = request.headers;
+      const expectContinue = headers ? (headers.Expect ?? headers.expect) === "100-continue" : false;
 
       let agent = isSSL ? config.httpsAgent : config.httpAgent;
       if (expectContinue && !this.externalAgent) {
@@ -205,7 +205,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         )
       );
 
-      const queryString = buildQueryString(request.query || {});
+      const queryString = request.query ? buildQueryString(request.query) : "";
       let auth = undefined;
       if (request.username != null || request.password != null) {
         const username = request.username ?? "";
