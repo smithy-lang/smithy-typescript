@@ -43,7 +43,7 @@ if (!package) {
     await inliner.tsc();
     await inliner.discoverVariants();
     await inliner.bundle();
-    await inliner.rewriteStubs();
+    await inliner.cleanupInlinedFiles();
     await inliner.fixVariantImportPaths();
     await inliner.validate();
   })();

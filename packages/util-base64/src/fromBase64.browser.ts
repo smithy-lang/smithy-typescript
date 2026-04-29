@@ -1,4 +1,4 @@
-import { alphabetByEncoding, bitsPerByte, bitsPerLetter } from "./constants.browser";
+import { alphabetByEncoding, bitsPerByte, bitsPerLetter } from "./constants-for-browser";
 
 /**
  * Converts a base-64 encoded string to a Uint8Array of bytes.

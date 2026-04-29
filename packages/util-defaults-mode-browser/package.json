@@ -48,7 +48,10 @@
   "files": [
     "dist-*/**"
   ],
-  "react-native": {},
+  "react-native": {
+    "./dist-es/resolveDefaultsModeConfig": "./dist-es/resolveDefaultsModeConfig.native",
+    "./dist-cjs/resolveDefaultsModeConfig": "./dist-cjs/resolveDefaultsModeConfig.native"
+  },
   "browser": {},
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-defaults-mode-node",
   "repository": {
