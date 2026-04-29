@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import type { HttpRequest } from "@smithy/protocol-http";
+import type { HttpRequest } from "@smithy/core/protocols";
 
 import type { Mux, ServiceCoordinate } from "..";
 

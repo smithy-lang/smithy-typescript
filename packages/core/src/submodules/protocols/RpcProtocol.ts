@@ -1,5 +1,4 @@
 import { type TypeRegistry, NormalizedSchema } from "@smithy/core/schema";
-import { HttpRequest } from "@smithy/protocol-http";
 import type {
   DocumentSchema,
   Endpoint,
@@ -14,6 +13,7 @@ import type {
 
 import { collectBody } from "./collect-stream-body";
 import { HttpProtocol } from "./HttpProtocol";
+import { HttpRequest } from "./protocol-http/httpRequest";
 
 /**
  * Abstract base for RPC-over-HTTP protocols.

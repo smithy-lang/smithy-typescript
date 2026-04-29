@@ -8,7 +8,7 @@ import {
   parseCborBody as parseBody,
   parseCborErrorBody as parseErrorBody,
 } from "@smithy/core/cbor";
-import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
+import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/core/protocols";
 import {
   _json,
   collectBody,

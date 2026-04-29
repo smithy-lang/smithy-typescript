@@ -1,5 +1,5 @@
+import { Uint8ArrayBlobAdapter } from "@smithy/core/serde";
 import type { SerdeContext } from "@smithy/types";
-import { Uint8ArrayBlobAdapter } from "@smithy/util-stream";
 
 /**
  * @internal

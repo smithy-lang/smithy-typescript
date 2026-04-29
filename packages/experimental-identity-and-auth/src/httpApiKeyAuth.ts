@@ -1,4 +1,4 @@
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import type { HttpRequest as IHttpRequest } from "@smithy/types";
 
 import type { ApiKeyIdentity } from "./apiKeyIdentity";

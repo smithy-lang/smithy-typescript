@@ -8,8 +8,8 @@ import {
   parseCborBody as parseBody,
   parseCborErrorBody as parseErrorBody,
 } from "@smithy/core/cbor";
+import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/core/protocols";
 import { nv as __nv } from "@smithy/core/serde";
-import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
 import {
   _json,
   collectBody,

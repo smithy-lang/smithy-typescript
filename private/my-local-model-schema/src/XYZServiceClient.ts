@@ -4,13 +4,13 @@ import {
   getHttpAuthSchemeEndpointRuleSetPlugin,
   getHttpSigningPlugin,
 } from "@smithy/core";
+import { type HttpHandlerUserInput as __HttpHandlerUserInput, getContentLengthPlugin } from "@smithy/core/protocols";
 import { getSchemaSerdePlugin } from "@smithy/core/schema";
 import {
   type EventStreamSerdeInputConfig,
   type EventStreamSerdeResolvedConfig,
   resolveEventStreamSerdeConfig,
 } from "@smithy/eventstream-serde-config-resolver";
-import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import {
   type EndpointInputConfig,
   type EndpointResolvedConfig,
@@ -22,7 +22,6 @@ import {
   getRetryPlugin,
   resolveRetryConfig,
 } from "@smithy/middleware-retry";
-import type { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
 import {
   type DefaultsMode as __DefaultsMode,
   type SmithyConfiguration as __SmithyConfiguration,

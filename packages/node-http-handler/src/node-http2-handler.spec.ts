@@ -1,6 +1,6 @@
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
-import type { HttpResponse } from "@smithy/protocol-http";
-import { HttpRequest } from "@smithy/protocol-http";
+import type { HttpResponse } from "@smithy/core/protocols";
+import { HttpRequest } from "@smithy/core/protocols";
 import type { Mutable } from "@smithy/types";
 import getPort, { portNumbers } from "get-port";
 import { rejects } from "node:assert";

@@ -19,7 +19,7 @@ export * from "./errors";
 export * from "./validation";
 export * from "./unique";
 
-import type { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { SerdeContext } from "@smithy/types";
 
 import type { ServiceException } from "./errors";

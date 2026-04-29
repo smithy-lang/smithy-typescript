@@ -5,7 +5,7 @@ import { GetNumbersCommand } from "../../src/commands/GetNumbersCommand";
 import { HttpLabelCommandCommand } from "../../src/commands/HttpLabelCommandCommand";
 import { XYZServiceClient } from "../../src/XYZServiceClient";
 import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
-import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import { Readable } from "node:stream";
 
 /**

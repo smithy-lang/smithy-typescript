@@ -1,6 +1,6 @@
-import { HttpRequest } from "@smithy/protocol-http";
 import { describe, expect, test as it } from "vitest";
 
+import { HttpRequest } from "./protocol-http/httpRequest";
 import { requestBuilder } from "./requestBuilder";
 
 describe(requestBuilder.name, () => {

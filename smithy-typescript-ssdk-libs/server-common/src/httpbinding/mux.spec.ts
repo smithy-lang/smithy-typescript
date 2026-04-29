@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 
 import { HttpBindingMux, UriSpec } from ".";
 

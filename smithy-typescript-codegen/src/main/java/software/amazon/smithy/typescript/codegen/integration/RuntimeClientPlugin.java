@@ -950,7 +950,7 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
             return Symbol.builder()
                 .namespace(packageName, "/")
                 .name(name)
-                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
+                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, basePackageName(packageName), version)
                 .build();
         }
 
@@ -959,8 +959,23 @@ public final class RuntimeClientPlugin implements ToSmithyBuilder<RuntimeClientP
                 .namespace(packageName, "/")
                 .name(name)
                 .putProperty("typeOnly", true)
-                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, packageName, version)
+                .addDependency(TypeScriptDependency.NORMAL_DEPENDENCY, basePackageName(packageName), version)
                 .build();
+        }
+
+        /**
+         * Extracts the base npm package name from a potentially submodule-qualified path.
+         * e.g. "@smithy/core/protocols" -> "@smithy/core"
+         */
+        private static String basePackageName(String packageName) {
+            if (packageName.startsWith("@")) {
+                // Scoped package: @scope/name or @scope/name/submodule
+                int secondSlash = packageName.indexOf('/', packageName.indexOf('/') + 1);
+                if (secondSlash > 0) {
+                    return packageName.substring(0, secondSlash);
+                }
+            }
+            return packageName;
         }
     }
 }

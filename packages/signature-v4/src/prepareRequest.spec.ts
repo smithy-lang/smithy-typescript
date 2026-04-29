@@ -1,4 +1,4 @@
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import { describe, expect, test as it } from "vitest";
 
 import { AMZ_DATE_HEADER, AUTH_HEADER, DATE_HEADER } from "./constants";

@@ -19,6 +19,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EndpointTrait;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
@@ -177,8 +178,18 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         writer.write(context.getStringStore().flushVariableDeclarationCode());
 
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImportSubmodule(
+            "HttpRequest",
+            "__HttpRequest",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
+        writer.addImportSubmodule(
+            "HttpResponse",
+            "__HttpResponse",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
     }
 
     @Override

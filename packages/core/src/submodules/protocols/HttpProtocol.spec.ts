@@ -1,5 +1,4 @@
 import { map, struct } from "@smithy/core/schema";
-import { HttpRequest } from "@smithy/protocol-http";
 import type {
   EndpointV2,
   HandlerExecutionContext,
@@ -12,6 +11,7 @@ import type {
 import { describe, expect, test as it } from "vitest";
 
 import { HttpProtocol } from "./HttpProtocol";
+import { HttpRequest } from "./protocol-http/httpRequest";
 import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 
 describe(HttpProtocol.name, () => {

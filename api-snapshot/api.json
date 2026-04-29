@@ -141,12 +141,6 @@
   "@smithy/md5-js": {
     "Md5": "function, since <=4.2.5"
   },
-  "@smithy/middleware-apply-body-checksum": {
-    "applyMd5BodyChecksumMiddleware": "function, since <=4.3.5",
-    "applyMd5BodyChecksumMiddlewareOptions": "object, since <=4.3.5",
-    "getApplyMd5BodyChecksumPlugin": "function, since <=4.3.5",
-    "resolveMd5BodyChecksumConfig": "function, since <=4.3.5"
-  },
   "@smithy/middleware-compression": {
     "DEFAULT_DISABLE_REQUEST_COMPRESSION": "boolean, since <=4.3.7",
     "DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES": "number, since <=4.3.7",
@@ -160,11 +154,6 @@
     "compressionMiddlewareOptions": "object, since <=4.3.7",
     "getCompressionPlugin": "function, since <=4.3.7",
     "resolveCompressionConfig": "function, since <=4.3.7"
-  },
-  "@smithy/middleware-content-length": {
-    "contentLengthMiddleware": "function, since <=4.2.5",
-    "contentLengthMiddlewareOptions": "object, since <=4.2.5",
-    "getContentLengthPlugin": "function, since <=4.2.5"
   },
   "@smithy/middleware-endpoint": {
     "endpointMiddleware": "function, since <=4.3.7",
@@ -222,15 +211,6 @@
     "chain": "function, since <=4.2.5",
     "fromStatic": "function, since <=4.2.5",
     "memoize": "function, since <=4.2.5"
-  },
-  "@smithy/protocol-http": {
-    "Field": "function, since <=5.3.5",
-    "Fields": "function, since <=5.3.5",
-    "HttpRequest": "function, since <=5.3.5",
-    "HttpResponse": "function, since <=5.3.5",
-    "getHttpHandlerExtensionConfiguration": "function, since <=5.3.5",
-    "isValidHostname": "function, since <=5.3.5",
-    "resolveHttpHandlerRuntimeConfig": "function, since <=5.3.5"
   },
   "@smithy/querystring-builder": {
     "buildQueryString": "function, since <=4.2.5"
@@ -377,7 +357,17 @@
     "strictParseInt": "function, since <=4.9.3",
     "strictParseInt32": "function, since <=4.9.3",
     "strictParseLong": "function, since <=4.9.3",
-    "strictParseShort": "function, since <=4.9.3"
+    "strictParseShort": "function, since <=4.9.3",
+    "ChecksumStream": "function, since 4.12.13",
+    "Uint8ArrayBlobAdapter": "function, since 4.12.13",
+    "createBufferedReadable": "function, since 4.12.13",
+    "createChecksumStream": "function, since 4.12.13",
+    "getAwsChunkedEncodingStream": "function, since 4.12.13",
+    "headStream": "function, since 4.12.13",
+    "isBlob": "function, since 4.12.13",
+    "isReadableStream": "function, since 4.12.13",
+    "sdkStreamMixin": "function, since 4.12.13",
+    "splitStream": "function, since 4.12.13"
   },
   "@smithy/types": {
     "HttpAuthLocation": "object, since <=4.9.0",
@@ -397,12 +387,6 @@
   "@smithy/util-base64": {
     "fromBase64": "function, since <=4.3.0",
     "toBase64": "function, since <=4.3.0"
-  },
-  "@smithy/util-body-length-browser": {
-    "calculateBodyLength": "function, since <=4.2.0"
-  },
-  "@smithy/util-body-length-node": {
-    "calculateBodyLength": "function, since <=4.2.1"
   },
   "@smithy/util-buffer-from": {
     "fromArrayBuffer": "function, since <=4.2.0",
@@ -456,18 +440,6 @@
     "TIMEOUT_RETRY_COST": "number, since <=4.2.5",
     "Retry": "function, since 4.3.0"
   },
-  "@smithy/util-stream": {
-    "Uint8ArrayBlobAdapter": "function, since <=4.5.6",
-    "ChecksumStream": "function, since <=4.5.6",
-    "createChecksumStream": "function, since <=4.5.6",
-    "getAwsChunkedEncodingStream": "function, since <=4.5.6",
-    "headStream": "function, since <=4.5.6",
-    "sdkStreamMixin": "function, since <=4.5.6",
-    "splitStream": "function, since <=4.5.6",
-    "isReadableStream": "function, since <=4.5.6",
-    "isBlob": "function, since <=4.5.6",
-    "createBufferedReadable": "function, since 4.5.6"
-  },
   "@smithy/util-stream-node": {
     "getAwsChunkedEncodingStream": "function, since <=4.2.6",
     "sdkStreamMixin": "function, since <=4.2.6"
@@ -520,29 +492,48 @@
     "tagSymbol": "symbol, since <=3.23.17"
   },
   "@smithy/core/protocols": {
+    "Field": "function, since <=3.23.17",
+    "Fields": "function, since <=3.23.17",
     "FromStringShapeDeserializer": "function, since <=3.23.17",
     "HttpBindingProtocol": "function, since <=3.23.17",
     "HttpInterceptingShapeDeserializer": "function, since <=3.23.17",
     "HttpInterceptingShapeSerializer": "function, since <=3.23.17",
     "HttpProtocol": "function, since <=3.23.17",
+    "HttpRequest": "function, since <=3.23.17",
+    "HttpResponse": "function, since <=3.23.17",
     "RequestBuilder": "function, since <=3.23.17",
     "RpcProtocol": "function, since <=3.23.17",
     "SerdeContext": "function, since <=3.23.17",
     "ToStringShapeSerializer": "function, since <=3.23.17",
+    "applyMd5BodyChecksumMiddleware": "function, since <=3.23.17",
+    "applyMd5BodyChecksumMiddlewareOptions": "object, since <=3.23.17",
+    "calculateBodyLength": "function, since <=3.23.17",
     "collectBody": "function, since <=3.23.17",
+    "contentLengthMiddleware": "function, since <=3.23.17",
+    "contentLengthMiddlewareOptions": "object, since <=3.23.17",
     "determineTimestampFormat": "function, since <=3.23.17",
     "extendedEncodeURIComponent": "function, since <=3.23.17",
+    "getApplyMd5BodyChecksumPlugin": "function, since <=3.23.17",
+    "getContentLengthPlugin": "function, since <=3.23.17",
+    "getHttpHandlerExtensionConfiguration": "function, since <=3.23.17",
+    "isValidHostname": "function, since <=3.23.17",
     "requestBuilder": "function, since <=3.23.17",
+    "resolveHttpHandlerRuntimeConfig": "function, since <=3.23.17",
+    "resolveMd5BodyChecksumConfig": "function, since <=3.23.17",
     "resolvedPath": "function, since <=3.23.17"
   },
   "@smithy/core/serde": {
     "generateIdempotencyToken": "function, since <=3.23.17",
+    "ChecksumStream": "function, since <=3.23.17",
     "LazyJsonString": "function, since <=3.23.17",
     "NumericValue": "function, since <=3.23.17",
+    "Uint8ArrayBlobAdapter": "function, since <=3.23.17",
     "_parseEpochTimestamp": "function, since <=3.23.17",
     "_parseRfc3339DateTimeWithOffset": "function, since <=3.23.17",
     "_parseRfc7231DateTime": "function, since <=3.23.17",
     "copyDocumentWithTransform": "function, since <=3.23.17",
+    "createBufferedReadable": "function, since <=3.23.17",
+    "createChecksumStream": "function, since <=3.23.17",
     "dateToUtcString": "function, since <=3.23.17",
     "expectBoolean": "function, since <=3.23.17",
     "expectByte": "function, since <=3.23.17",
@@ -556,7 +547,11 @@
     "expectShort": "function, since <=3.23.17",
     "expectString": "function, since <=3.23.17",
     "expectUnion": "function, since <=3.23.17",
+    "getAwsChunkedEncodingStream": "function, since <=3.23.17",
     "handleFloat": "function, since <=3.23.17",
+    "headStream": "function, since <=3.23.17",
+    "isBlob": "function, since <=3.23.17",
+    "isReadableStream": "function, since <=3.23.17",
     "limitedParseDouble": "function, since <=3.23.17",
     "limitedParseFloat": "function, since <=3.23.17",
     "limitedParseFloat32": "function, since <=3.23.17",
@@ -568,8 +563,10 @@
     "parseRfc3339DateTimeWithOffset": "function, since <=3.23.17",
     "parseRfc7231DateTime": "function, since <=3.23.17",
     "quoteHeader": "function, since <=3.23.17",
+    "sdkStreamMixin": "function, since <=3.23.17",
     "splitEvery": "function, since <=3.23.17",
     "splitHeader": "function, since <=3.23.17",
+    "splitStream": "function, since <=3.23.17",
     "strictParseByte": "function, since <=3.23.17",
     "strictParseDouble": "function, since <=3.23.17",
     "strictParseFloat": "function, since <=3.23.17",

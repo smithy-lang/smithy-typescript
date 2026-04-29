@@ -1,7 +1,7 @@
 import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
+import { HttpResponse } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
-import { HttpResponse } from "@smithy/protocol-http";
 import type {
   BlobSchema,
   BooleanSchema,

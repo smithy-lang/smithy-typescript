@@ -28,22 +28,17 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public enum TypeScriptDependency implements Dependency {
     SMITHY_CORE("dependencies", "@smithy/core", false),
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
-    @Deprecated
-    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", false),
     SMITHY_TYPES("dependencies", "@smithy/types", true),
     AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", true),
     INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", true),
     TYPES_NODE("devDependencies", "@types/node", "^20.14.8", true),
 
-    MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", true),
     MIDDLEWARE_SERDE("dependencies", "@smithy/middleware-serde", true),
     MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", true),
     UTIL_RETRY("dependencies", "@smithy/util-retry", false),
     MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", false),
-    @Deprecated
-    AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
     UTIL_ENDPOINTS("dependencies", "@smithy/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", true),
@@ -53,14 +48,7 @@ public enum TypeScriptDependency implements Dependency {
 
     AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", true),
 
-    @Deprecated
-    AWS_SDK_UTIL_BASE64_BROWSER("dependencies", "@aws-sdk/util-base64-browser", false),
-    @Deprecated
-    AWS_SDK_UTIL_BASE64_NODE("dependencies", "@aws-sdk/util-base64-node", false),
     AWS_SDK_UTIL_BASE64("dependencies", "@smithy/util-base64", true),
-
-    AWS_SDK_UTIL_BODY_LENGTH_BROWSER("dependencies", "@smithy/util-body-length-browser", true),
-    AWS_SDK_UTIL_BODY_LENGTH_NODE("dependencies", "@smithy/util-body-length-node", true),
 
     AWS_SDK_UTIL_UTF8("dependencies", "@smithy/util-utf8", true),
 
@@ -71,20 +59,13 @@ public enum TypeScriptDependency implements Dependency {
 
     NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", false),
 
-    @Deprecated
-    UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
-    @Deprecated
-    UUID("dependencies", "uuid", "^9.0.1", false),
     SMITHY_UUID("dependencies", "@smithy/uuid", false),
 
     // Conditionally added when httpChecksumRequired trait exists
     MD5_BROWSER("dependencies", "@smithy/md5-js", false),
     STREAM_HASHER_NODE("dependencies", "@smithy/hash-stream-node", false),
     STREAM_HASHER_BROWSER("dependencies", "@smithy/hash-blob-browser", false),
-    BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", false),
 
-    // Conditionally added when using an HTTP application protocol.
-    PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", false),
 
@@ -112,13 +93,6 @@ public enum TypeScriptDependency implements Dependency {
     // Conditionally added when XML parser needs to be used.
     XML_PARSER("dependencies", "fast-xml-parser", "5.7.1", false),
     HTML_ENTITIES("dependencies", "entities", "2.2.0", false),
-
-    // Conditionally added when streaming blob response payload exists.
-    @Deprecated
-    UTIL_STREAM_NODE("dependencies", "@smithy/util-stream-node", false),
-    @Deprecated
-    UTIL_STREAM_BROWSER("dependencies", "@smithy/util-stream-browser", false),
-    UTIL_STREAM("dependencies", "@smithy/util-stream", false),
 
     // Conditionally added when @aws.auth#sigv4 is used
     SIGNATURE_V4("dependencies", "@smithy/signature-v4", false),
@@ -156,6 +130,10 @@ public enum TypeScriptDependency implements Dependency {
             version = SdkVersion.getVersion(name);
         } else {
             version = DependencyVersion.getVersion(name);
+        }
+
+        if (version == null) {
+            version = "latest";
         }
 
         if (name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) {

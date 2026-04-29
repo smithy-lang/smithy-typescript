@@ -1,4 +1,4 @@
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import { NoOpLogger } from "@smithy/smithy-client";
 import type {

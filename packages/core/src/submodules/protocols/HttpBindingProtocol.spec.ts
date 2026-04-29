@@ -1,7 +1,6 @@
 import { type TypeRegistry, NormalizedSchema, op } from "@smithy/core/schema";
 import { dateToUtcString, generateIdempotencyToken, LazyJsonString, quoteHeader } from "@smithy/core/serde";
 import { streamCollector } from "@smithy/node-http-handler";
-import { HttpResponse } from "@smithy/protocol-http";
 import type {
   $Schema,
   $ShapeSerializer,
@@ -31,6 +30,7 @@ import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 
 import { HttpBindingProtocol } from "./HttpBindingProtocol";
+import { HttpResponse } from "./protocol-http/httpResponse";
 import { determineTimestampFormat } from "./serde/determineTimestampFormat";
 import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 import { SerdeContext } from "./SerdeContext";

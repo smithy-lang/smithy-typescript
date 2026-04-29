@@ -56,7 +56,12 @@ final class RuntimeConfigGenerator {
         },
         "bodyLengthChecker",
         writer -> {
-            writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
+            writer.addImportSubmodule(
+                "calculateBodyLength",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.PROTOCOLS
+            );
             writer.write("calculateBodyLength");
         },
         "streamCollector",
@@ -78,7 +83,12 @@ final class RuntimeConfigGenerator {
         },
         "bodyLengthChecker",
         writer -> {
-            writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
+            writer.addImportSubmodule(
+                "calculateBodyLength",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.PROTOCOLS
+            );
             writer.write("calculateBodyLength");
         },
         "streamCollector",

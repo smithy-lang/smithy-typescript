@@ -371,7 +371,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (writer == null) {
             context.getWriterDelegator().useFileWriter(createTestCaseFilename(), writer -> this.writer = writer);
             writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            writer.addDependency(TypeScriptDependency.PROTOCOL_HTTP);
+            writer.addDependency(TypeScriptDependency.SMITHY_CORE);
             // Add the template to each generated test.
             writer.write(IoUtils.readUtf8Resource(getClass(), "protocol-test-stub.ts"));
             writer.addImport("test", "it", TypeScriptDependency.VITEST);

@@ -94,7 +94,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@aws-smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway"
   dependencies:
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/aws-lambda": "npm:^8.10.72"
     "@types/node": "npm:^18.11.9"
@@ -111,7 +111,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@aws-smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common"
   dependencies:
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
@@ -128,7 +128,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@aws-smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node"
   dependencies:
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
@@ -2743,13 +2743,13 @@ __metadata:
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
     "@smithy/eventstream-serde-node": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/is-array-buffer": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
+    "@smithy/util-buffer-from": "workspace:^"
+    "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
-    "@smithy/util-stream": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
     "@smithy/uuid": "workspace:^"
     "@types/node": "npm:^18.11.9"
@@ -2858,14 +2858,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
-    "@smithy/util-test": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
@@ -2879,7 +2878,7 @@ __metadata:
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
   dependencies:
     "@smithy/abort-controller": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/querystring-builder": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-base64": "workspace:^"
@@ -2993,22 +2992,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-apply-body-checksum@workspace:packages/middleware-apply-body-checksum":
-  version: 0.0.0-use.local
-  resolution: "@smithy/middleware-apply-body-checksum@workspace:packages/middleware-apply-body-checksum"
-  dependencies:
-    "@smithy/is-array-buffer": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-test": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
 "@smithy/middleware-compression@workspace:packages/middleware-compression":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-compression@workspace:packages/middleware-compression"
@@ -3016,7 +2999,6 @@ __metadata:
     "@smithy/core": "workspace:^"
     "@smithy/is-array-buffer": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-config-provider": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
@@ -3027,21 +3009,6 @@ __metadata:
     premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
     web-streams-polyfill: "npm:3.2.1"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/middleware-content-length@workspace:^, @smithy/middleware-content-length@workspace:packages/middleware-content-length":
-  version: 0.0.0-use.local
-  resolution: "@smithy/middleware-content-length@workspace:packages/middleware-content-length"
-  dependencies:
-    "@smithy/protocol-http": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-test": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
@@ -3070,13 +3037,11 @@ __metadata:
   dependencies:
     "@smithy/core": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/service-error-classification": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
-    "@smithy/util-test": "workspace:^"
     "@smithy/uuid": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3091,9 +3056,7 @@ __metadata:
   resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-test": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
@@ -3136,7 +3099,7 @@ __metadata:
   resolution: "@smithy/node-http-handler@workspace:packages/node-http-handler"
   dependencies:
     "@smithy/abort-controller": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/querystring-builder": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
@@ -3151,19 +3114,6 @@ __metadata:
 "@smithy/property-provider@workspace:^, @smithy/property-provider@workspace:packages/property-provider":
   version: 0.0.0-use.local
   resolution: "@smithy/property-provider@workspace:packages/property-provider"
-  dependencies:
-    "@smithy/types": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/protocol-http@workspace:^, @smithy/protocol-http@workspace:packages/protocol-http":
-  version: 0.0.0-use.local
-  resolution: "@smithy/protocol-http@workspace:packages/protocol-http"
   dependencies:
     "@smithy/types": "workspace:^"
     concurrently: "npm:7.0.0"
@@ -3245,8 +3195,8 @@ __metadata:
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
     "@aws-crypto/sha256-js": "npm:5.2.0"
+    "@smithy/core": "workspace:^"
     "@smithy/is-array-buffer": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
@@ -3265,7 +3215,6 @@ __metadata:
   resolution: "@smithy/signature-v4a@workspace:packages/signature-v4a"
   dependencies:
     "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
@@ -3285,9 +3234,7 @@ __metadata:
     "@smithy/core": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-stream": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3308,21 +3255,17 @@ __metadata:
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
-    "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
@@ -3351,20 +3294,16 @@ __metadata:
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
-    "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
@@ -3389,7 +3328,6 @@ __metadata:
     "@smithy/core": "workspace:^"
     "@smithy/eventstream-codec": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-base64": "workspace:^"
     "@smithy/util-hex-encoding": "workspace:^"
@@ -3447,31 +3385,6 @@ __metadata:
   dependencies:
     "@smithy/util-buffer-from": "workspace:^"
     "@smithy/util-utf8": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-body-length-browser@workspace:^, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-body-length-browser@workspace:packages/util-body-length-browser"
-  dependencies:
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-body-length-node@workspace:^, @smithy/util-body-length-node@workspace:packages/util-body-length-node":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-body-length-node@workspace:packages/util-body-length-node"
-  dependencies:
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3609,65 +3522,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-stream-browser@workspace:packages/util-stream-browser":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-stream-browser@workspace:packages/util-stream-browser"
-  dependencies:
-    "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-stream-node@workspace:packages/util-stream-node":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-stream-node@workspace:packages/util-stream-node"
-  dependencies:
-    "@smithy/node-http-handler": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-buffer-from": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-stream@workspace:^, @smithy/util-stream@workspace:packages/util-stream":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-stream@workspace:packages/util-stream"
-  dependencies:
-    "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/node-http-handler": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-buffer-from": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-test": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-test@workspace:^, @smithy/util-test@workspace:private/util-test":
+"@smithy/util-test@workspace:private/util-test":
   version: 0.0.0-use.local
   resolution: "@smithy/util-test@workspace:private/util-test"
   dependencies:
-    "@smithy/protocol-http": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -12322,21 +12181,17 @@ __metadata:
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
-    "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
@@ -12369,20 +12224,16 @@ __metadata:
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
-    "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
     "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"

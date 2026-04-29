@@ -19,6 +19,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -64,8 +65,13 @@ public final class AddSdkStreamMixinDependency implements TypeScriptIntegration 
 
         if (target == LanguageTarget.SHARED) {
             return MapUtils.of("sdkStreamMixin", writer -> {
-                writer.addDependency(TypeScriptDependency.UTIL_STREAM);
-                writer.addImport("sdkStreamMixin", null, TypeScriptDependency.UTIL_STREAM);
+                writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                writer.addImportSubmodule(
+                    "sdkStreamMixin",
+                    null,
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.SERDE
+                );
                 writer.write("sdkStreamMixin");
             });
         } else {

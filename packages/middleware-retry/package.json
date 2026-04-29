@@ -35,7 +35,6 @@
   "dependencies": {
     "@smithy/core": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/service-error-classification": "workspace:^",
     "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
@@ -45,7 +44,6 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@smithy/util-test": "workspace:^",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",

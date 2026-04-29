@@ -27,7 +27,7 @@
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
   "dependencies": {
-    "@smithy/protocol-http": "workspace:^",
+    "@smithy/core": "workspace:^",
     "@smithy/querystring-builder": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-base64": "workspace:^",

@@ -1,6 +1,6 @@
 import { type TypeRegistry, NormalizedSchema, translateTraits } from "@smithy/core/schema";
 import { splitEvery, splitHeader } from "@smithy/core/serde";
-import { HttpRequest } from "@smithy/protocol-http";
+import { sdkStreamMixin } from "@smithy/core/serde";
 import type {
   DocumentSchema,
   Endpoint,
@@ -15,11 +15,11 @@ import type {
   StaticStructureSchema,
   TimestampDefaultSchema,
 } from "@smithy/types";
-import { sdkStreamMixin } from "@smithy/util-stream";
 
 import { collectBody } from "./collect-stream-body";
 import { extendedEncodeURIComponent } from "./extended-encode-uri-component";
 import { HttpProtocol } from "./HttpProtocol";
+import { HttpRequest } from "./protocol-http/httpRequest";
 
 /**
  * Base for HTTP-binding protocols. Downstream examples

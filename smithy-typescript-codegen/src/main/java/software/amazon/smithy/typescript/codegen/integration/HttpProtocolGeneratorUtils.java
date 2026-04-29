@@ -34,6 +34,7 @@ import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.RetryableTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -439,7 +440,12 @@ public final class HttpProtocolGeneratorUtils {
         writer.write("let { hostname: resolvedHostname } = await context.endpoint();");
         // Check if disableHostPrefixInjection has been set to true at runtime
         writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
-            writer.addImport("isValidHostname", "__isValidHostname", TypeScriptDependency.PROTOCOL_HTTP);
+            writer.addImportSubmodule(
+                "isValidHostname",
+                "__isValidHostname",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.PROTOCOLS
+            );
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
             if (operation.getInput().isPresent()) {
                 List<SmithyPattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();
