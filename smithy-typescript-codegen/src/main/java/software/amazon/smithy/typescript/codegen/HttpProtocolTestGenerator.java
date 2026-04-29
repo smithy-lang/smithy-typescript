@@ -770,7 +770,12 @@ public final class HttpProtocolTestGenerator implements Runnable {
             if (isClientTest) {
                 writer.write("const utf8Encoder = client.config.utf8Encoder;");
             } else {
-                writer.addImport("toUtf8", "__utf8Encoder", TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+                writer.addImportSubmodule(
+                    "toUtf8",
+                    "__utf8Encoder",
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.SERDE
+                );
                 writer.write("const utf8Encoder = __utf8Encoder;");
             }
         }

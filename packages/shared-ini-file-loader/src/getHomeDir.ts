@@ -1,5 +1,5 @@
-import { homedir } from "os";
-import { sep } from "path";
+import { homedir } from "node:os";
+import { sep } from "node:path";
 
 const homeDirCache: Record<string, string> = {};
 

@@ -329,10 +329,10 @@ final class ServerGenerator {
         writer.addImport("ServerSerdeContext", "__ServerSerdeContext", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("NodeHttpHandler", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
         writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-        writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
-        writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
-        writer.addImport("fromUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
-        writer.addImport("toUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+        writer.addImportSubmodule("fromBase64", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
+        writer.addImportSubmodule("toBase64", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
+        writer.addImportSubmodule("fromUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
+        writer.addImportSubmodule("toUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
 
         writer.openBlock("const serdeContextBase = {", "};", () -> {
             writer.write("base64Encoder: toBase64,");

@@ -26,7 +26,7 @@ import type {
   APIGatewayProxyResult,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 
 export function convertEvent(event: APIGatewayProxyEvent): HttpRequest;
 export function convertEvent(event: APIGatewayProxyEventV2): HttpRequest;

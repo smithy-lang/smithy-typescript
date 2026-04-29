@@ -16,8 +16,8 @@ vi.mock("http", async () => {
   };
 });
 
-import EventEmitter from "events";
-import { request } from "http";
+import EventEmitter from "node:events";
+import { request } from "node:http";
 
 describe("httpRequest", () => {
   const hostname = "localhost";

@@ -1,5 +1,5 @@
-import type { IncomingMessage } from "http";
-import type { ClientHttp2Stream } from "http2";
+import type { IncomingMessage } from "node:http";
+import type { ClientHttp2Stream } from "node:http2";
 
 import type { InvokeMethod } from "../client";
 import type { GetOutputType } from "../command";

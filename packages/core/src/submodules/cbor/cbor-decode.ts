@@ -1,5 +1,5 @@
 import { nv } from "@smithy/core/serde";
-import { toUtf8 } from "@smithy/util-utf8";
+import { toUtf8 } from "@smithy/core/serde";
 
 import type {
   CborArgumentLength,

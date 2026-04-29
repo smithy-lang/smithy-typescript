@@ -1,3 +1,9 @@
-export * from "./deserializerMiddleware";
-export * from "./serdePlugin";
-export * from "./serializerMiddleware";
+/** @deprecated Use @smithy/core/serde instead. */
+export {
+  deserializerMiddleware,
+  deserializerMiddlewareOption,
+  serializerMiddlewareOption,
+  V1OrV2Endpoint,
+  getSerdePlugin,
+  serializerMiddleware,
+} from "@smithy/core/serde";

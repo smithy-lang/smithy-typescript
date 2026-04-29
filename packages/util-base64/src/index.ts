@@ -1,2 +1,2 @@
-export * from "./fromBase64";
-export * from "./toBase64";
+/** @deprecated Use @smithy/core/serde instead. */
+export { fromBase64, toBase64 } from "@smithy/core/serde";

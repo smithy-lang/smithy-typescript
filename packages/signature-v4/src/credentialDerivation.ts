@@ -1,6 +1,6 @@
+import { toHex } from "@smithy/core/serde";
+import { toUint8Array } from "@smithy/core/serde";
 import type { AwsCredentialIdentity, ChecksumConstructor, HashConstructor, SourceData } from "@smithy/types";
-import { toHex } from "@smithy/util-hex-encoding";
-import { toUint8Array } from "@smithy/util-utf8";
 
 import { KEY_TYPE_IDENTIFIER, MAX_CACHE_SIZE } from "./constants";
 

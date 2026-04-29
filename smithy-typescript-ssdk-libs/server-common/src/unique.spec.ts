@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  */
 
-import * as util from "util";
+import * as util from "node:util";
 
 import type { Input } from "./unique";
 import { findDuplicates } from "./unique";

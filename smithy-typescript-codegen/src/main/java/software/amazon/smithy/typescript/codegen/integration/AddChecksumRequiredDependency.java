@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.HttpChecksumRequiredTrait;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -79,18 +80,24 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                 return MapUtils.of(
                     "streamHasher",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.STREAM_HASHER_NODE);
-                        writer.addImport(
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
                             "fileStreamHasher",
                             "streamHasher",
-                            TypeScriptDependency.STREAM_HASHER_NODE
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.SERDE
                         );
                         writer.write("streamHasher");
                     },
                     "md5",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.AWS_SDK_HASH_NODE);
-                        writer.addImport("Hash", null, TypeScriptDependency.AWS_SDK_HASH_NODE);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
+                            "Hash",
+                            null,
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.SERDE
+                        );
                         writer.write("Hash.bind(null, \"md5\")");
                     }
                 );
@@ -98,14 +105,24 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                 return MapUtils.of(
                     "streamHasher",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.STREAM_HASHER_BROWSER);
-                        writer.addImport("blobHasher", "streamHasher", TypeScriptDependency.STREAM_HASHER_BROWSER);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
+                            "blobHasher",
+                            "streamHasher",
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.SERDE
+                        );
                         writer.write("streamHasher");
                     },
                     "md5",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.MD5_BROWSER);
-                        writer.addImport("Md5", null, TypeScriptDependency.MD5_BROWSER);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
+                            "Md5",
+                            null,
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.SERDE
+                        );
                         writer.write("Md5");
                     }
                 );

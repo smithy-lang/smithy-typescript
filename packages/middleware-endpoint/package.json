@@ -25,7 +25,6 @@
   "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
-    "@smithy/middleware-serde": "workspace:^",
     "@smithy/node-config-provider": "workspace:^",
     "@smithy/shared-ini-file-loader": "workspace:^",
     "@smithy/types": "workspace:^",

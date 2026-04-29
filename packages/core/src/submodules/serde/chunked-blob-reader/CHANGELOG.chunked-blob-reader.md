@@ -1,0 +1,92 @@
+# Change Log
+
+This is a past changelog, the package has been consolidated into `@smithy/core/serde`.
+
+## 5.2.2
+
+### Patch Changes
+
+- a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+
+## 5.2.1
+
+### Patch Changes
+
+- 03c3dc8: update for rollup build externalLiveBindings=false
+
+## 5.2.0
+
+### Minor Changes
+
+- 45ee67f: update dist-cjs generation to use rollup
+
+## 5.1.0
+
+### Minor Changes
+
+- 64cda93: set sideEffects bundler metadata
+
+## 5.0.0
+
+### Major Changes
+
+- 20d99be: major version bump for dropping node16 support
+
+## 4.0.0
+
+### Major Changes
+
+- c257049: replace FileReader with Blob.arrayBuffer() where possible
+
+## 3.0.0
+
+### Major Changes
+
+- 671aa704: update to node16 minimum
+
+## 2.2.0
+
+### Minor Changes
+
+- 38f9a61f: Update package dependencies
+
+## 2.1.1
+
+### Patch Changes
+
+- 2b1bf055: generate dist-cjs with runtime list of export names for esm
+
+## 2.1.0
+
+### Minor Changes
+
+- 9939f823: bundle dist-cjs index
+
+## 2.0.0
+
+### Major Changes
+
+- 9d53bc76: update to 2.x major versions
+
+## 1.1.0
+
+### Minor Changes
+
+- e3cbb3cc: set types to the 1.x line
+
+## 1.0.2
+
+### Patch Changes
+
+- 6e312329: restore downlevel types
+
+## 1.0.1
+
+### Patch Changes
+
+- 2c57033f: Set correct publishConfig directory
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+See [@aws-sdk/chunked-blob-reader](https://github.com/aws/aws-sdk-js-v3/blob/main/packages/chunked-blob-reader/CHANGELOG.md) for additional history.

@@ -1,6 +1,6 @@
 // smithy-typescript generated code
+import { getSerdePlugin } from "@smithy/core/serde";
 import { getEndpointPlugin } from "@smithy/middleware-endpoint";
-import { getSerdePlugin } from "@smithy/middleware-serde";
 import { Command as $Command } from "@smithy/smithy-client";
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 

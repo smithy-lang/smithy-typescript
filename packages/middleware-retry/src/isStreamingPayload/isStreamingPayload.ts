@@ -1,5 +1,5 @@
 import type { HttpRequest } from "@smithy/protocol-http";
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 
 /**
  * @internal

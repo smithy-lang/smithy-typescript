@@ -6,9 +6,9 @@
 import type { HeaderBag, HttpResponse } from "@smithy/protocol-http";
 import { HttpRequest } from "@smithy/protocol-http";
 import type { QueryParameterBag } from "@smithy/types";
-import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
-import type { URLSearchParams } from "url";
-import { URL } from "url";
+import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
+import type { URLSearchParams } from "node:url";
+import { URL } from "node:url";
 
 function convertHeaders(headers: IncomingHttpHeaders): HeaderBag {
   // TODO make this proper

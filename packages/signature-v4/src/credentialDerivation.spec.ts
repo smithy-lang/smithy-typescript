@@ -1,6 +1,6 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
+import { toHex } from "@smithy/core/serde";
 import type { AwsCredentialIdentity } from "@smithy/types";
-import { toHex } from "@smithy/util-hex-encoding";
 import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { clearCredentialCache, createScope, getSigningKey } from "./credentialDerivation";

@@ -1,6 +1,6 @@
 import { NormalizedSchema } from "@smithy/core/schema";
+import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
-import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 import { SerdeContext } from "../SerdeContext";
 import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";

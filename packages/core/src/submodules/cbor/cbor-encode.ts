@@ -1,5 +1,5 @@
 import { NumericValue } from "@smithy/core/serde";
-import { fromUtf8 } from "@smithy/util-utf8";
+import { fromUtf8 } from "@smithy/core/serde";
 
 import type { CborMajorType, Uint64 } from "./cbor-types";
 import {

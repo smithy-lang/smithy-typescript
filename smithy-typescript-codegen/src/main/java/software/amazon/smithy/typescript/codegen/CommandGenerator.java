@@ -505,7 +505,11 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandMiddlewareResolver(String configType) {
-        Symbol serde = TypeScriptDependency.MIDDLEWARE_SERDE.createSymbol("getSerdePlugin");
+        Symbol serde = Symbol.builder()
+            .namespace(TypeScriptDependency.SMITHY_CORE.packageName + SmithyCoreSubmodules.SERDE, "/")
+            .name("getSerdePlugin")
+            .addDependency(TypeScriptDependency.SMITHY_CORE)
+            .build();
         boolean schemaMode = SchemaGenerationAllowlist.allows(service.getId(), settings);
 
         Function<StructureShape, String> getFilterFunctionName = input -> {

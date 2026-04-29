@@ -1,4 +1,4 @@
-import { toUint8Array } from "@smithy/util-utf8";
+import { toUint8Array } from "@smithy/core/serde";
 import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 import { gzip } from "zlib";
 
@@ -7,7 +7,7 @@ import { compressString } from "./compressString";
 const compressionSuffix = "compressed";
 const compressionSeparator = ".";
 
-vi.mock("@smithy/util-utf8");
+vi.mock("@smithy/core/serde");
 vi.mock("util", () => ({ promisify: vi.fn().mockImplementation((fn) => fn) }));
 vi.mock("zlib", () => ({
   gzip: vi.fn().mockImplementation((data) => [data, compressionSuffix].join(compressionSeparator)),

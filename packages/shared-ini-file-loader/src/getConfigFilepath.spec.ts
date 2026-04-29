@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join } from "node:path";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { ENV_CONFIG_PATH, getConfigFilepath } from "./getConfigFilepath";

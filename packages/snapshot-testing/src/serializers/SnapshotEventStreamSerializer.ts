@@ -1,6 +1,6 @@
+import { toHex } from "@smithy/core/serde";
+import { toUtf8 } from "@smithy/core/serde";
 import type { Message } from "@smithy/types";
-import { toHex } from "@smithy/util-hex-encoding";
-import { toUtf8 } from "@smithy/util-utf8";
 
 import { ContentTypeDetection } from "./ContentTypeDetection";
 import { serializeDate } from "./serializeDate";

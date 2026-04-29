@@ -25,13 +25,11 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
-    "@smithy/is-array-buffer": "workspace:^",
+    "@smithy/core": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
-    "@smithy/util-hex-encoding": "workspace:^",
     "@smithy/util-middleware": "workspace:^",
     "@smithy/util-uri-escape": "workspace:^",
-    "@smithy/util-utf8": "workspace:^",
     "tslib": "^2.6.2"
   },
   "devDependencies": {

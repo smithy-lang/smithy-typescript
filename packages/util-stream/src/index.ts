@@ -1,13 +1,16 @@
-export * from "./blob/Uint8ArrayBlobAdapter";
-export * from "./checksum/ChecksumStream";
-export * from "./checksum/createChecksumStream";
-export * from "./createBufferedReadable";
-export * from "./getAwsChunkedEncodingStream";
-export * from "./headStream";
-export * from "./sdk-stream-mixin";
-export * from "./splitStream";
-
 /**
- * @internal
+ * @deprecated Use @smithy/core/serde instead.
  */
-export { isReadableStream, isBlob } from "./stream-type-check";
+export {
+  Uint8ArrayBlobAdapter,
+  ChecksumStream,
+  ChecksumStreamInit,
+  createChecksumStream,
+  createBufferedReadable,
+  getAwsChunkedEncodingStream,
+  headStream,
+  sdkStreamMixin,
+  splitStream,
+  isReadableStream,
+  isBlob,
+} from "@smithy/core/serde";

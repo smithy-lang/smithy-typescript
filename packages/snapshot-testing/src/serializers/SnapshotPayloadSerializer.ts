@@ -1,5 +1,5 @@
-import { toBase64 } from "@smithy/util-base64";
-import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
+import { toBase64 } from "@smithy/core/serde";
+import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 
 import type { PayloadWithHeaders } from "../snapshot-testing-types";
 import { ContentTypeDetection } from "./ContentTypeDetection";

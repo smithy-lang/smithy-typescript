@@ -1,14 +1,14 @@
+import { v4 } from "@smithy/core/serde";
 import { HttpResponse } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import type { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "@smithy/util-retry";
-import { v4 } from "@smithy/uuid";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "./retryMiddleware";
 
 vi.mock("@smithy/service-error-classification");
-vi.mock("@smithy/uuid");
+vi.mock("@smithy/core/serde");
 
 describe(getRetryPlugin.name, () => {
   const mockClientStack = {

@@ -1,4 +1,4 @@
-import { toUint8Array } from "@smithy/util-utf8";
+import { toUint8Array } from "@smithy/core/serde";
 import { gzip } from "fflate";
 
 export const compressString = async (body: any): Promise<Uint8Array> =>

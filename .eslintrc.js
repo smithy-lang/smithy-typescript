@@ -8,7 +8,7 @@ module.exports = {
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     "plugin:@typescript-eslint/recommended",
   ],
-  plugins: ["@typescript-eslint", "simple-import-sort"],
+  plugins: ["@typescript-eslint", "simple-import-sort", "n"],
   rules: {
     /** Turn off strict enforcement */
     "@typescript-eslint/ban-types": "off",
@@ -35,6 +35,7 @@ module.exports = {
     /** Errors */
     "simple-import-sort/imports": "error",
     "@typescript-eslint/consistent-type-imports": "error",
+    "n/prefer-node-protocol": "error",
   },
   overrides: [
     {
@@ -47,6 +48,27 @@ module.exports = {
             patterns: [
               {
                 group: ["*src*", "*dist-*"],
+              },
+              {
+                group: [
+                  "@smithy/util-hex-encoding",
+                  "@smithy/util-base64",
+                  "@smithy/util-body-length-browser",
+                  "@smithy/util-body-length-node",
+                  "@smithy/util-utf8",
+                  "@smithy/util-buffer-from",
+                  "@smithy/is-array-buffer",
+                  "@smithy/middleware-serde",
+                  "@smithy/hash-node",
+                  "@smithy/hash-blob-browser",
+                  "@smithy/hash-stream-node",
+                  "@smithy/md5-js",
+                  "@smithy/chunked-blob-reader",
+                  "@smithy/chunked-blob-reader-native",
+                  "@smithy/util-stream",
+                  "@smithy/uuid",
+                ],
+                message: "This package has been consolidated into @smithy/core/serde.",
               },
             ],
           },

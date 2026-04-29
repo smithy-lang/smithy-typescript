@@ -1,10 +1,10 @@
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/protocol-http";
-import type { AddressInfo } from "net";
 import type { Server as HttpServer } from "node:http";
 import http from "node:http";
 import type { Server as HttpsServer } from "node:https";
 import https from "node:https";
+import type { AddressInfo } from "node:net";
 import { afterAll, afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";

@@ -1,5 +1,5 @@
+import { fromHex, toHex } from "@smithy/core/serde";
 import type { Decoder, Encoder, MessageHeaders, MessageHeaderValue } from "@smithy/types";
-import { fromHex, toHex } from "@smithy/util-hex-encoding";
 
 import { Int64 } from "./Int64";
 

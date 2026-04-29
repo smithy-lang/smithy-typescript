@@ -1,4 +1,5 @@
 import type { NormalizedSchema } from "@smithy/core/schema";
+import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type {
   DocumentSchema,
   EventStreamMarshaller,
@@ -13,7 +14,6 @@ import type {
   ShapeSerializer,
   StaticStructureSchema,
 } from "@smithy/types";
-import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
 /**
  * Separated module for async mixin of EventStream serde capability.

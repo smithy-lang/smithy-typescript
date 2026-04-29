@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+import EventEmitter from "node:events";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setConnectionTimeout } from "./set-connection-timeout";

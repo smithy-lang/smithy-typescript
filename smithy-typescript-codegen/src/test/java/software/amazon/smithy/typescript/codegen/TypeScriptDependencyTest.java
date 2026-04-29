@@ -20,11 +20,11 @@ public class TypeScriptDependencyTest {
 
     @Test
     public void createsSymbols() {
-        Symbol foo = TypeScriptDependency.AWS_SDK_HASH_NODE.createSymbol("Foo");
+        Symbol foo = TypeScriptDependency.SMITHY_CORE.createSymbol("Foo");
 
-        assertThat(foo.getNamespace(), equalTo(TypeScriptDependency.AWS_SDK_HASH_NODE.packageName));
+        assertThat(foo.getNamespace(), equalTo(TypeScriptDependency.SMITHY_CORE.packageName));
         assertThat(foo.getName(), equalTo("Foo"));
-        assertThat(foo.getDependencies(), contains(TypeScriptDependency.AWS_SDK_HASH_NODE.dependency));
+        assertThat(foo.getDependencies(), contains(TypeScriptDependency.SMITHY_CORE.dependency));
     }
 
     @Test

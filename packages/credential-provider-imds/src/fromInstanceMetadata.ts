@@ -1,7 +1,7 @@
 import { loadConfig } from "@smithy/node-config-provider";
 import { CredentialsProviderError } from "@smithy/property-provider";
 import type { AwsCredentialIdentity, Provider } from "@smithy/types";
-import type { RequestOptions } from "http";
+import type { RequestOptions } from "node:http";
 
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
 import { httpRequest } from "./remoteProvider/httpRequest";

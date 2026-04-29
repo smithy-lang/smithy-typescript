@@ -1,4 +1,4 @@
-import type { Readable } from "stream";
+import type { Readable } from "node:stream";
 
 /**
  * Convert object stream piped in into an async iterable. This

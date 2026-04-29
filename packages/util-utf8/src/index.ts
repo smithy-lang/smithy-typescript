@@ -1,3 +1,2 @@
-export * from "./fromUtf8";
-export * from "./toUint8Array";
-export * from "./toUtf8";
+/** @deprecated Use @smithy/core/serde instead. */
+export { fromUtf8, toUint8Array, toUtf8 } from "@smithy/core/serde";

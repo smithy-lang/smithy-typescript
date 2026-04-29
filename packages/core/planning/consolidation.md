@@ -7,61 +7,61 @@ The "clients" column is a count of AWS SDK clients directly using the package.
 
 ### core/client
 
-| Package                      | LoC  | Description/Rationale                    | Clients | Status |
-| ---------------------------- | ---- | ---------------------------------------- | ------- | ------ |
-| `smithy-client`              | 1504 | Client/command base classes              | 425     |        |
-| `middleware-stack`           | 394  | Core middleware infrastructure           | 425     |        |
-| `util-middleware`            | 28   | Middleware utilities                     | 425     |        |
-| `invalid-dependency`         | 19   | Placeholder used by smithy-client        | 425     |        |
-| `util-defaults-mode-browser` | 152  | Platform-specific, always code-generated | 425     |        |
-| `util-defaults-mode-node`    | 137  | Platform-specific, always code-generated | 425     |        |
-| `middleware-compression`     | 360  | Cloudwatch PutMetricData only            | 1       |        |
-| `util-waiter`                | 373  | Waiter utilities                         | 68      |        |
+| Package              | LoC  | Description/Rationale             | Clients | Status |
+| -------------------- | ---- | --------------------------------- | ------- | ------ |
+| `smithy-client`      | 1504 | Client/command base classes       | 425     |        |
+| `middleware-stack`   | 394  | Core middleware infrastructure    | 425     |        |
+| `util-middleware`    | 28   | Middleware utilities              | 425     |        |
+| `invalid-dependency` | 19   | Placeholder used by smithy-client | 425     |        |
+| `util-waiter`        | 373  | Waiter utilities                  | 68      |        |
 
 ### core/config
 
-| Package                  | LoC | Description/Rationale                             | Clients | Status |
-| ------------------------ | --- | ------------------------------------------------- | ------- | ------ |
-| `config-resolver`        | 628 | Always code-generated                             | 425     |        |
-| `util-config-provider`   | 42  | Only used by config-resolver                      | 0       |        |
-| `node-config-provider`   | 200 | Platform-specific, always present in Node clients | 425     |        |
-| `shared-ini-file-loader` | 509 | Only consumer is node-config-provider             | 0       |        |
-| `property-provider`      | 309 | Provider chain utilities                          | 0       |        |
+| Package                      | LoC | Description/Rationale                             | Clients | Status |
+| ---------------------------- | --- | ------------------------------------------------- | ------- | ------ |
+| `config-resolver`            | 628 | Always code-generated                             | 425     |        |
+| `util-config-provider`       | 42  | Only used by config-resolver                      | 0       |        |
+| `node-config-provider`       | 200 | Platform-specific, always present in Node clients | 425     |        |
+| `shared-ini-file-loader`     | 509 | Only consumer is node-config-provider             | 0       |        |
+| `property-provider`          | 309 | Provider chain utilities                          | 0       |        |
+| `util-defaults-mode-browser` | 152 | Platform-specific, always code-generated          | 425     |        |
+| `util-defaults-mode-node`    | 137 | Platform-specific, always code-generated          | 425     |        |
 
 ### core/protocols
 
-| Package                          | LoC | Description/Rationale             | Clients | Status |
-| -------------------------------- | --- | --------------------------------- | ------- | ------ |
-| `protocol-http`                  | 440 | HttpRequest/HttpResponse          | 425     |        |
-| `middleware-content-length`      | 58  | Always code-generated             | 425     |        |
-| `middleware-apply-body-checksum` | 104 | S3 Control only                   | 1       |        |
-| `util-body-length-browser`       | 34  | Platform-specific, protocol-level | 425     |        |
-| `util-body-length-node`          | 39  | Platform-specific, protocol-level | 425     |        |
+| Package                          | LoC | Description/Rationale         | Clients | Status |
+| -------------------------------- | --- | ----------------------------- | ------- | ------ |
+| `protocol-http`                  | 440 | HttpRequest/HttpResponse      | 425     |        |
+| `middleware-content-length`      | 58  | Always code-generated         | 425     |        |
+| `middleware-compression`         | 360 | Cloudwatch PutMetricData only | 1       |        |
+| `middleware-apply-body-checksum` | 104 | S3 Control only               | 1       |        |
+| `util-uri-escape`                | 22  | Encoding primitive            | 0       |        |
+| `querystring-builder`            | 26  | Depends on uri-escape         | 0       |        |
+| `querystring-parser`             | 28  | No deps                       | 0       |        |
+| `url-parser`                     | 25  | Depends on querystring-parser | 425     |        |
 
 ### core/serde
 
-| Package                      | LoC  | Description/Rationale         | Clients | Status    |
-| ---------------------------- | ---- | ----------------------------- | ------- | --------- |
-| `util-base64`                | 164  | Encoding primitive            | 425     |           |
-| `util-utf8`                  | 55   | Encoding primitive            | 425     |           |
-| `util-hex-encoding`          | 49   | Encoding primitive            | 0       |           |
-| `util-buffer-from`           | 29   | Supports utf8/base64          | 0       |           |
-| `is-array-buffer`            | 6    | Supports buffer-from          | 0       |           |
-| `util-uri-escape`            | 22   | Encoding primitive            | 0       |           |
-| `querystring-builder`        | 26   | Depends on uri-escape         | 0       |           |
-| `querystring-parser`         | 28   | No deps                       | 0       |           |
-| `url-parser`                 | 25   | Depends on querystring-parser | 425     |           |
-| `middleware-serde`           | 228  | Always code-generated         | 425     |           |
-| `hash-node`                  | 52   | Hashing                       | 425     |           |
-| `hash-blob-browser`          | 18   | S3, S3 Control                | 2       |           |
-| `hash-stream-node`           | 102  | S3, S3 Control                | 2       |           |
-| `md5-js`                     | 222  | S3, S3 Control, SQS           | 3       |           |
-| `chunked-blob-reader`        | 18   | Supports hash-blob-browser    | 0       |           |
-| `chunked-blob-reader-native` | 47   | Supports hash-blob-browser    | 0       |           |
-| `util-stream`                | 1009 | Stream utilities              | 36      |           |
-| `util-stream-browser`        | 127  | Stream utilities              | 0       | ✅ unused |
-| `util-stream-node`           | 101  | Stream utilities              | 0       | ✅ unused |
-| `uuid`                       | 65   | Encoding/generation primitive | 0       |           |
+| Package                      | LoC  | Description/Rationale             | Clients | Status    |
+| ---------------------------- | ---- | --------------------------------- | ------- | --------- |
+| `util-base64`                | 164  | Encoding primitive                | 425     | ✅        |
+| `util-body-length-browser`   | 34   | Platform-specific, protocol-level | 425     | ✅        |
+| `util-body-length-node`      | 39   | Platform-specific, protocol-level | 425     | ✅        |
+| `util-utf8`                  | 55   | Encoding primitive                | 425     | ✅        |
+| `util-hex-encoding`          | 49   | Encoding primitive                | 0       | ✅        |
+| `util-buffer-from`           | 29   | Supports utf8/base64              | 0       | ✅        |
+| `is-array-buffer`            | 6    | Supports buffer-from              | 0       | ✅        |
+| `middleware-serde`           | 228  | Always code-generated             | 425     | ✅        |
+| `hash-node`                  | 52   | Hashing                           | 425     | ✅        |
+| `hash-blob-browser`          | 18   | S3, S3 Control                    | 2       | ✅        |
+| `hash-stream-node`           | 102  | S3, S3 Control                    | 2       | ✅        |
+| `md5-js`                     | 222  | S3, S3 Control, SQS               | 3       | ✅        |
+| `chunked-blob-reader`        | 18   | Supports hash-blob-browser        | 0       | ✅        |
+| `chunked-blob-reader-native` | 47   | Supports hash-blob-browser        | 0       | ✅        |
+| `util-stream`                | 1009 | Stream utilities                  | 36      | ✅        |
+| `util-stream-browser`        | 127  | Stream utilities                  | 0       | ✅ unused |
+| `util-stream-node`           | 101  | Stream utilities                  | 0       | ✅ unused |
+| `uuid`                       | 65   | Encoding/generation primitive     | 0       | ✅        |
 
 ### core/endpoints
 

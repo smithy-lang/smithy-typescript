@@ -1,5 +1,5 @@
-import type { Agent as hAgent, AgentOptions as hAgentOptions } from "http";
-import type { Agent as hsAgent, AgentOptions as hsAgentOptions } from "https";
+import type { Agent as hAgent, AgentOptions as hAgentOptions } from "node:http";
+import type { Agent as hsAgent, AgentOptions as hsAgentOptions } from "node:https";
 
 import type { HttpRequest as IHttpRequest } from "../http";
 import type { Logger } from "../logger";

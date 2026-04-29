@@ -7,7 +7,7 @@ import type {
   StaticErrorSchema,
   StaticOperationSchema,
 } from "@smithy/types";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { accessSync, constants, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 

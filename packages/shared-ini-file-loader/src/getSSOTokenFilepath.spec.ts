@@ -1,5 +1,5 @@
-import { createHash } from "crypto";
-import { join } from "path";
+import { createHash } from "node:crypto";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";

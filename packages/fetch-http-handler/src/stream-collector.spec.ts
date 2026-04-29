@@ -1,10 +1,6 @@
-import { Blob as BlobPolyfill } from "buffer";
 import { describe, expect, test as it } from "vitest";
 
 import { streamCollector } from "./stream-collector";
-
-// jsdom inaccurate Blob https://github.com/jsdom/jsdom/issues/2555.
-global.Blob = BlobPolyfill as any;
 
 describe("streamCollector", () => {
   const blobAvailable = typeof Blob === "function";

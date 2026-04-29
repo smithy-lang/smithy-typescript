@@ -1,5 +1,5 @@
-import { createHash } from "crypto";
-import { join } from "path";
+import { createHash } from "node:crypto";
+import { join } from "node:path";
 
 import { getHomeDir } from "./getHomeDir";
 

@@ -1,10 +1,9 @@
 // smithy-typescript generated code
-import { Hash } from "@smithy/hash-node";
+import { calculateBodyLength, Hash } from "@smithy/core/serde";
 import { NODE_MAX_ATTEMPT_CONFIG_OPTIONS, NODE_RETRY_MODE_CONFIG_OPTIONS } from "@smithy/middleware-retry";
 import { loadConfig as loadNodeConfig } from "@smithy/node-config-provider";
 import { NodeHttpHandler as RequestHandler, streamCollector } from "@smithy/node-http-handler";
 import { emitWarningIfUnsupportedVersion, loadConfigsForDefaultMode } from "@smithy/smithy-client";
-import { calculateBodyLength } from "@smithy/util-body-length-node";
 import { resolveDefaultsModeConfig } from "@smithy/util-defaults-mode-node";
 import { DEFAULT_RETRY_MODE } from "@smithy/util-retry";
 

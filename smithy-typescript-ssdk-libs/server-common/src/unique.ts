@@ -13,8 +13,8 @@
  *  permissions and limitations under the License.
  */
 
-import { createHash } from "crypto";
-import * as util from "util";
+import { createHash } from "node:crypto";
+import * as util from "node:util";
 
 /**
  * A shortcut for JSON and Smithy primitives, as well as documents and Smithy-

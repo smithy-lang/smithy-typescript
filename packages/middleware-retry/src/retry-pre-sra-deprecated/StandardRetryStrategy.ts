@@ -1,3 +1,4 @@
+import { v4 } from "@smithy/core/serde";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
 import type {
@@ -17,7 +18,6 @@ import {
   RETRY_MODES,
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
-import { v4 } from "@smithy/uuid";
 
 import { asSdkError } from "../util";
 import { getDefaultRetryQuota } from "./defaultRetryQuota";

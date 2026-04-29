@@ -65,16 +65,31 @@ public class RuntimeExtensionsGenerator {
                         writer.addDependency(configurationInterface.getExtensionConfigurationFn().right);
                         writer.addDependency(configurationInterface.resolveRuntimeConfigFn().right);
 
-                        writer.addImport(
-                            configurationInterface.getExtensionConfigurationFn().left,
-                            null,
-                            configurationInterface.getExtensionConfigurationFn().right
-                        );
-                        writer.addImport(
-                            configurationInterface.resolveRuntimeConfigFn().left,
-                            null,
-                            configurationInterface.resolveRuntimeConfigFn().right
-                        );
+                        if (configurationInterface.submodule() != null) {
+                            writer.addImportSubmodule(
+                                configurationInterface.getExtensionConfigurationFn().left,
+                                null,
+                                configurationInterface.getExtensionConfigurationFn().right,
+                                configurationInterface.submodule()
+                            );
+                            writer.addImportSubmodule(
+                                configurationInterface.resolveRuntimeConfigFn().left,
+                                null,
+                                configurationInterface.resolveRuntimeConfigFn().right,
+                                configurationInterface.submodule()
+                            );
+                        } else {
+                            writer.addImport(
+                                configurationInterface.getExtensionConfigurationFn().left,
+                                null,
+                                configurationInterface.getExtensionConfigurationFn().right
+                            );
+                            writer.addImport(
+                                configurationInterface.resolveRuntimeConfigFn().left,
+                                null,
+                                configurationInterface.resolveRuntimeConfigFn().right
+                            );
+                        }
                     });
             }
 

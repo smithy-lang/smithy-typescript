@@ -1,8 +1,8 @@
 import { NumericValue, nv } from "@smithy/core/serde";
-import * as fs from "fs";
 // @ts-ignore
 import JSONbig from "json-bigint";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { describe, expect, test as it } from "vitest";
 
 import { printBytes } from "./byte-printer";

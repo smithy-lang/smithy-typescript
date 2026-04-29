@@ -1,10 +1,10 @@
-import { toUint8Array } from "@smithy/util-utf8";
+import { toUint8Array } from "@smithy/core/serde";
 import { gzip } from "fflate";
 import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { compressString } from "./compressString.browser";
 
-vi.mock("@smithy/util-utf8");
+vi.mock("@smithy/core/serde");
 vi.mock("fflate");
 
 describe(compressString.name, () => {

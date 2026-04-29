@@ -53,11 +53,12 @@ test-types:
 	npx tsc -p tsconfig.test.json
 
 test-integration:
-	node ./scripts/validation/no-generic-byte-arrays.js
-	node ./scripts/validation/api-snapshot-validation.js
-	make test-browser
-	yarn g:vitest run -c vitest.config.integ.mts
-	make test-types
+	node ./scripts/validation/no-generic-byte-arrays.js;
+	node ./scripts/validation/api-snapshot-validation.js;
+	make test-browser;
+	yarn g:vitest run -c vitest.config.integ.mts;
+	make test-types;
+	make test-bundlers;
 
 turbo-clean:
 	@read -p "Are you sure you want to delete your local cache? [y/N]: " ans && [ $${ans:-N} = y ]

@@ -1,7 +1,7 @@
 import { CredentialsProviderError } from "@smithy/property-provider";
 import type { AwsCredentialIdentityProvider, Logger } from "@smithy/types";
-import type { RequestOptions } from "http";
-import { parse } from "url";
+import type { RequestOptions } from "node:http";
+import { parse } from "node:url";
 
 import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";

@@ -1,5 +1,5 @@
-import type { IncomingMessage } from "http";
-import type { Readable } from "stream";
+import type { IncomingMessage } from "node:http";
+import type { Readable } from "node:stream";
 
 import type { BlobOptionalType, ReadableStreamOptionalType } from "../externals-check/browser-externals-check";
 import type { SdkStream } from "../serde";

@@ -60,6 +60,7 @@ import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.FrameworkErrorModel;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.endpointsV2.RuleSetParameterFinder;
@@ -705,8 +706,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
     private void calculateContentLength(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
-        writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
+        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+        writer.addImportSubmodule(
+            "calculateBodyLength",
+            null,
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.SERDE
+        );
         writer.openBlock(
             "if (body && Object.keys(headers).map((str) => str.toLowerCase())"
                 + ".indexOf('content-length') === -1) {",
@@ -1052,7 +1058,12 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         String idempotencyComponent = "";
         if (isIdempotencyToken && !isRequired) {
-            writer.addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+            writer.addImportSubmodule(
+                "v4",
+                "generateIdempotencyToken",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.SERDE
+            );
             idempotencyComponent = " ?? generateIdempotencyToken()";
         }
         String memberAssertionComponent = (idempotencyComponent.isEmpty() ? "!" : "");
@@ -1187,7 +1198,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String s = headerBuffer.get(headerKey);
                 defaultValue = " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
-                context.getWriter().addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+                context.getWriter()
+                    .addImportSubmodule(
+                        "v4",
+                        "generateIdempotencyToken",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
+                    );
                 defaultValue = " ?? generateIdempotencyToken()";
             }
 
@@ -1212,7 +1229,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 String s = headerBuffer.get(headerKey);
                 constructedHeaderValue += " || " + s.substring(s.indexOf(": ") + 2, s.length() - 1);
             } else if (isIdempotencyToken) {
-                context.getWriter().addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+                context.getWriter()
+                    .addImportSubmodule(
+                        "v4",
+                        "generateIdempotencyToken",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
+                    );
                 constructedHeaderValue += " ?? generateIdempotencyToken()";
             } else {
                 constructedHeaderValue = headerValue;
