@@ -171,7 +171,7 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
         reject(err);
       };
 
-      const queryString = buildQueryString(query ?? {});
+      const queryString = query ? buildQueryString(query) : "";
       let path = request.path;
       if (queryString) {
         path += `?${queryString}`;
