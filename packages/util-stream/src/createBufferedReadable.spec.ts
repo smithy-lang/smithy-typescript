@@ -131,4 +131,26 @@ describe("Buffered Readable stream", () => {
     expect(downstreamChunkCount).toEqual(22);
     expect(logger.warn).toHaveBeenCalled();
   });
+
+  it("should warn when stream chunks mix Uint8Array and Buffer types", async () => {
+    const mixedLogger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error() {},
+    };
+
+    async function* mixedChunks() {
+      yield new Uint8Array(100);
+      yield Buffer.from(new Uint8Array(100));
+    }
+
+    const upstream = Readable.from(mixedChunks());
+    const downstream = createBufferedReadable(upstream, 32 * 1024, mixedLogger);
+    await headStream(downstream, Infinity);
+
+    expect(mixedLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("mixing Uint8Array and Buffer types")
+    );
+  });
 }, 30_000);
