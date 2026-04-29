@@ -34,6 +34,14 @@ let hAgent: { new (...args: any): hAgentType } | undefined = undefined;
 let hRequest: typeof hRequestType | undefined = undefined;
 
 /**
+ * Cached agents for 100-continue requests, shared across all NodeHttpHandler instances.
+ * Reusing a single agent per protocol avoids GC pressure from creating a new Agent
+ * on every 100-continue request (e.g., S3 PutObject workloads).
+ */
+let continueHttpAgent: hAgentType | undefined = undefined;
+let continueHttpsAgent: hsAgent | undefined = undefined;
+
+/**
  * @public
  * A request handler that uses the Node.js http and https modules.
  */
@@ -182,12 +190,25 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         // Because awaiting 100-continue desynchronizes the request and request body transmission,
         // such requests must be offloaded to a separate Agent instance.
         // Additional logic will exist on the client using this handler to determine whether to add the header at all.
-        agent = new (isSSL ? hsAgent : hAgent!)({
-          keepAlive: false,
-          // This is an explicit value matching the default (Infinity).
-          // This should allow the connection to close cleanly after making the single request.
-          maxSockets: Infinity,
-        });
+        // A single cached agent per protocol is reused to avoid GC pressure from creating
+        // a new Agent on every 100-continue request (e.g., S3 PutObject workloads).
+        if (isSSL) {
+          if (!continueHttpsAgent) {
+            continueHttpsAgent = new hsAgent({
+              keepAlive: false,
+              maxSockets: Infinity,
+            });
+          }
+          agent = continueHttpsAgent;
+        } else {
+          if (!continueHttpAgent) {
+            continueHttpAgent = new hAgent!({
+              keepAlive: false,
+              maxSockets: Infinity,
+            });
+          }
+          agent = continueHttpAgent;
+        }
       }
 
       // If the request is taking a long time, check socket usage and potentially warn.
