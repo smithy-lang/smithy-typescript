@@ -57,7 +57,12 @@
     "./dist-es/compressStream": "./dist-es/compressStream.browser",
     "./dist-es/compressString": "./dist-es/compressString.browser"
   },
-  "react-native": {},
+  "react-native": {
+    "./dist-es/compressStream": "./dist-es/compressStream.browser",
+    "./dist-cjs/compressStream": "./dist-cjs/compressStream.browser",
+    "./dist-es/compressString": "./dist-es/compressString.browser",
+    "./dist-cjs/compressString": "./dist-cjs/compressString.browser"
+  },
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-compression",
   "repository": {
     "type": "git",

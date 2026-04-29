@@ -48,7 +48,10 @@
   "browser": {
     "./dist-es/randomUUID": "./dist-es/randomUUID.browser"
   },
-  "react-native": {},
+  "react-native": {
+    "./dist-es/randomUUID": "./dist-es/randomUUID.native",
+    "./dist-cjs/randomUUID": "./dist-cjs/randomUUID.native"
+  },
   "devDependencies": {
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",

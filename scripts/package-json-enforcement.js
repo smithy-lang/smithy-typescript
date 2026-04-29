@@ -1,5 +1,6 @@
 const { error } = require("console");
 const fs = require("fs");
+const path = require("path");
 
 /**
  * This enforcement is not here to prevent adoption of newer
@@ -86,12 +87,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
         ]),
       ]),
     ].reduce((acc, [k, v]) => {
-      const automatic = typeof v === "string" ? v.match(/\.native(\.js)?$/) && k === v.replace(".native", "") : false;
-      if (!automatic) {
-        acc[k] = v;
-      } else {
-        errors.push(`${k} -> ${v} is unnecessary in ${pkgJson.name} (automatic in React-Native bundler)`);
-      }
+      acc[k] = v;
       return acc;
     }, {});
 
@@ -99,6 +95,118 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
       errors.push(`${pkgJson.name} react-native field is incomplete.`);
       if (overwrite) {
         pkgJson["react-native"] = reactNativeCanonical;
+      }
+    }
+  }
+
+  // Validate variant replacement directives match source files.
+  const pkgDir = path.dirname(pkgJsonFilePath);
+  const srcDir = path.join(pkgDir, "src");
+  if (fs.existsSync(srcDir)) {
+    const browserField = pkgJson.browser || {};
+    const reactNativeField = pkgJson["react-native"] || {};
+    let didModify = false;
+
+    // Check that every .browser.ts / .native.ts source file has directives.
+    const walkSync = (dir) => {
+      const results = [];
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          results.push(...walkSync(fullPath));
+        } else {
+          results.push(fullPath);
+        }
+      }
+      return results;
+    };
+
+    for (const file of walkSync(srcDir)) {
+      if (file.match(/\.(browser|native)\.ts$/) && !file.match(/\.spec\.|\.integ\./)) {
+        const relativePath = file.replace(srcDir, "").replace(/\.ts$/, "");
+        const canonicalPath = relativePath.replace(/\.(browser|native)$/, "");
+        const variant = relativePath.match(/\.(browser|native)$/)[1];
+
+        const esCanonical = `./dist-es${canonicalPath}`;
+        const esVariant = `./dist-es${relativePath}`;
+        const cjsCanonical = `./dist-cjs${canonicalPath}`;
+        const cjsVariant = `./dist-cjs${relativePath}`;
+
+        // For react-native, .native takes precedence over .browser.
+        const hasNativeVariant = variant === "browser" &&
+          fs.existsSync(file.replace(/\.browser\.ts$/, ".native.ts"));
+
+        if (variant === "browser") {
+          if (browserField[esCanonical] !== esVariant) {
+            errors.push(`${pkgJson.name} browser["${esCanonical}"] should be "${esVariant}"`);
+            if (overwrite) {
+              browserField[esCanonical] = esVariant;
+              didModify = true;
+            }
+          }
+          if (!hasNativeVariant) {
+            if (reactNativeField[esCanonical] !== esVariant) {
+              errors.push(`${pkgJson.name} react-native["${esCanonical}"] should be "${esVariant}"`);
+              if (overwrite) {
+                reactNativeField[esCanonical] = esVariant;
+                didModify = true;
+              }
+            }
+            if (reactNativeField[cjsCanonical] !== cjsVariant) {
+              errors.push(`${pkgJson.name} react-native["${cjsCanonical}"] should be "${cjsVariant}"`);
+              if (overwrite) {
+                reactNativeField[cjsCanonical] = cjsVariant;
+                didModify = true;
+              }
+            }
+          }
+        } else if (variant === "native") {
+          if (reactNativeField[esCanonical] !== esVariant) {
+            errors.push(`${pkgJson.name} react-native["${esCanonical}"] should be "${esVariant}"`);
+            if (overwrite) {
+              reactNativeField[esCanonical] = esVariant;
+              didModify = true;
+            }
+          }
+          if (reactNativeField[cjsCanonical] !== cjsVariant) {
+            errors.push(`${pkgJson.name} react-native["${cjsCanonical}"] should be "${cjsVariant}"`);
+            if (overwrite) {
+              reactNativeField[cjsCanonical] = cjsVariant;
+              didModify = true;
+            }
+          }
+        }
+      }
+    }
+
+    if (didModify) {
+      if (Object.keys(browserField).length) {
+        pkgJson.browser = browserField;
+      }
+      if (Object.keys(reactNativeField).length) {
+        pkgJson["react-native"] = reactNativeField;
+      }
+    }
+
+    // Verify each existing directive points to an actual source file.
+    for (const [field, directives] of [["browser", pkgJson.browser], ["react-native", pkgJson["react-native"]]]) {
+      if (typeof directives !== "object" || directives === null) {
+        continue;
+      }
+      for (const [canonical, variant] of Object.entries(directives)) {
+        if (typeof variant === "boolean") {
+          continue;
+        }
+        if (!variant.startsWith("./")) {
+          continue;
+        }
+        const variantSrcFile = path.join(
+          pkgDir,
+          variant.replace(/^\.\/dist-(es|cjs)/, "src").replace(/(\.js)?$/, ".ts")
+        );
+        if (!fs.existsSync(variantSrcFile)) {
+          errors.push(`${pkgJson.name} ${field}["${canonical}"] -> "${variant}" has no corresponding source file (expected ${variantSrcFile})`);
+        }
       }
     }
   }

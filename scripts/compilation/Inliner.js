@@ -20,7 +20,6 @@ module.exports = class Inliner {
     this.platform = "node";
     this.submodulePackages = ["core"];
     this.hasSubmodules = this.submodulePackages.includes(pkg);
-    this.reExportStubs = false;
     this.subfolder = "packages";
     this.verbose = process.env.DEBUG || process.argv.includes("--debug");
 
@@ -78,8 +77,11 @@ module.exports = class Inliner {
 
         this.variantEntries.push([canonical, variant]);
       }
-      if (fs.existsSync(file.replace(/\.js$/, ".browser.js"))) {
-        // not applicable to CJS?
+      if (file.endsWith(".js") && !file.endsWith(".browser.js") && fs.existsSync(file.replace(/\.js$/, ".browser.js"))) {
+        const canonical = file.replace(/(.*?)dist-cjs\//, "./dist-cjs/").replace(/\.js$/, "");
+        const variant = canonical.replace(/(.*?)(\.js)?$/, "$1.browser$2");
+
+        this.variantEntries.push([canonical, variant]);
       }
     }
 
@@ -182,12 +184,16 @@ module.exports = class Inliner {
 
         const relative = !!id.match(/^\.?\.?\//);
         if (!relative) {
-          this.verbose && console.log("EXTERN (pkg)", id);
+          if (this.verbose) {
+            console.log("EXTERN (pkg)", id);
+          }
           return (externalityAssessments[id] = true);
         }
 
         if (id === entryPoint) {
-          this.verbose && console.log("INTERN (entry point)", id);
+          if (this.verbose) {
+            console.log("INTERN (entry point)", id);
+          }
           return (externalityAssessments[id] = false);
         }
 
@@ -196,19 +202,25 @@ module.exports = class Inliner {
           ((id.includes(`/packages/`) && !id.includes(`packages/${this.package}/`)) ||
             (id.includes(`/packages-internal/`) && !id.includes(`packages-internal/${this.package}/`)));
         if (local) {
-          this.verbose && console.log("EXTERN (local)", id);
+          if (this.verbose) {
+            console.log("EXTERN (local)", id);
+          }
           return (externalityAssessments[id] = true);
         }
 
         for (const file of externals) {
           const idWithoutExtension = id.replace(/\.[tj]s$/, "");
           if (idWithoutExtension.endsWith(path.basename(file))) {
-            this.verbose && console.log("EXTERN (variant)", id);
+            if (this.verbose) {
+              console.log("EXTERN (variant)", id);
+            }
             return (externalityAssessments[id] = true);
           }
         }
 
-        this.verbose && console.log("INTERN (invariant)", id);
+        if (this.verbose) {
+          console.log("INTERN (invariant)", id);
+        }
         return (externalityAssessments[id] = false);
       },
     });
@@ -293,10 +305,10 @@ module.exports = class Inliner {
   }
 
   /**
-   * step 4: rewrite all existing dist-cjs files except the index.js file.
-   * These now become re-exports of the index to preserve deep-import behavior.
+   * step 4: delete all existing dist-cjs files except the index.js file
+   * and variant externals. These files were inlined into the bundle.
    */
-  async rewriteStubs() {
+  async cleanupInlinedFiles() {
     if (this.bailout || this.hasSubmodules) {
       return this;
     }
@@ -309,44 +321,23 @@ module.exports = class Inliner {
       }
 
       if (!file.endsWith(".js")) {
-        if (this.verbose) {
-          console.log("Skipping", path.basename(file), "file extension is not .js.");
-        }
         continue;
       }
 
       if (relativePath === "index.js") {
-        if (this.verbose) {
-          console.log("Skipping index.js");
-        }
         continue;
       }
 
       if (this.variantExternals.find((external) => relativePath.endsWith(external))) {
-        if (this.verbose) {
-          console.log("Not rewriting.", relativePath, "is variant.");
-        }
         continue;
       }
 
-      const depth = relativePath.split("/").length - 1;
-      const indexRelativePath =
-        (depth === 0
-          ? "."
-          : Array.from({ length: depth })
-              .map(() => "..")
-              .join("/")) + "/index.js";
-
-      if (!this.reExportStubs) {
-        if (fs.readFileSync(file, "utf-8").includes(`Object.defineProperty(exports, "__esModule", { value: true });`)) {
-          fs.rmSync(file);
-        }
-        const files = fs.readdirSync(path.dirname(file));
-        if (files.length === 0) {
-          fs.rmdirSync(path.dirname(file));
-        }
-      } else {
-        fs.writeFileSync(file, `module.exports = require("${indexRelativePath}");`);
+      if (fs.readFileSync(file, "utf-8").includes(`Object.defineProperty(exports, "__esModule", { value: true });`)) {
+        fs.rmSync(file);
+      }
+      const files = fs.readdirSync(path.dirname(file));
+      if (files.length === 0) {
+        fs.rmdirSync(path.dirname(file));
       }
     }
 
@@ -458,6 +449,85 @@ module.exports = class Inliner {
         "require() statements for the following variant externals: " +
           [...externalsToCheck].join(", ") +
           " were not found in the index."
+      );
+    }
+
+    // Validate that all source variant files exist as isolates in dist-cjs.
+    const srcDir = path.join(this.packageDirectory, "src");
+    const distCjsDir = path.join(this.packageDirectory, "dist-cjs");
+    const missingVariants = [];
+    for await (const file of walk(srcDir)) {
+      if (file.match(/\.(browser|native)\.ts$/) && !file.match(/\.spec\.|\.integ\./)) {
+        const relativePath = file.replace(srcDir, "").replace(/\.ts$/, ".js");
+        const expectedDistFile = path.join(distCjsDir, relativePath);
+        if (!fs.existsSync(expectedDistFile)) {
+          missingVariants.push(relativePath);
+        }
+      }
+    }
+    if (missingVariants.length) {
+      throw new Error(
+        "The following variant source files are missing from dist-cjs (they may have been incorrectly inlined):\n" +
+          missingVariants.join("\n")
+      );
+    }
+
+    // Validate that package.json has browser/react-native replacement directives for all variants.
+    const browserField = this.pkgJson.browser || {};
+    const reactNativeField = this.pkgJson["react-native"] || {};
+    const missingDirectives = [];
+    for await (const file of walk(srcDir)) {
+      if (file.match(/\.(browser|native)\.ts$/) && !file.match(/\.spec\.|\.integ\./)) {
+        const relativePath = file.replace(srcDir, "").replace(/\.ts$/, "");
+        const canonicalPath = relativePath.replace(/\.(browser|native)$/, "");
+        const variant = relativePath.match(/\.(browser|native)$/)[1];
+
+        const esCanonical = `./dist-es${canonicalPath}`;
+        const esVariant = `./dist-es${relativePath}`;
+        const cjsCanonical = `./dist-cjs${canonicalPath}`;
+        const cjsVariant = `./dist-cjs${relativePath}`;
+
+        // For react-native, .native takes precedence over .browser.
+        const hasNativeVariant = variant === "browser" &&
+          fs.existsSync(file.replace(/\.browser\.ts$/, ".native.ts"));
+
+        if (variant === "browser") {
+          if (browserField[esCanonical] !== esVariant) {
+            browserField[esCanonical] = esVariant;
+            missingDirectives.push(`browser["${esCanonical}"] = "${esVariant}"`);
+          }
+          if (!hasNativeVariant) {
+            if (reactNativeField[esCanonical] !== esVariant) {
+              reactNativeField[esCanonical] = esVariant;
+              missingDirectives.push(`react-native["${esCanonical}"] = "${esVariant}"`);
+            }
+            if (reactNativeField[cjsCanonical] !== cjsVariant) {
+              reactNativeField[cjsCanonical] = cjsVariant;
+              missingDirectives.push(`react-native["${cjsCanonical}"] = "${cjsVariant}"`);
+            }
+          }
+        } else if (variant === "native") {
+          if (reactNativeField[esCanonical] !== esVariant) {
+            reactNativeField[esCanonical] = esVariant;
+            missingDirectives.push(`react-native["${esCanonical}"] = "${esVariant}"`);
+          }
+          if (reactNativeField[cjsCanonical] !== cjsVariant) {
+            reactNativeField[cjsCanonical] = cjsVariant;
+            missingDirectives.push(`react-native["${cjsCanonical}"] = "${cjsVariant}"`);
+          }
+        }
+      }
+    }
+    if (missingDirectives.length) {
+      this.pkgJson.browser = browserField;
+      this.pkgJson["react-native"] = reactNativeField;
+      fs.writeFileSync(
+        path.join(this.packageDirectory, "package.json"),
+        JSON.stringify(this.pkgJson, null, 2) + "\n"
+      );
+      throw new Error(
+        "package.json is missing replacement directives for variant files (entries have been auto-inserted, please review the diff and rebuild):\n" +
+          missingDirectives.join("\n")
       );
     }
 

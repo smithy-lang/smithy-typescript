@@ -1,6 +1,6 @@
 import { fromUtf8 } from "@smithy/util-utf8";
 
-import { alphabetByValue, bitsPerByte, bitsPerLetter, maxLetterValue } from "./constants.browser";
+import { alphabetByValue, bitsPerByte, bitsPerLetter, maxLetterValue } from "./constants-for-browser";
 
 /**
  * Converts a Uint8Array of binary data or a utf-8 string to a base-64 encoded string.
