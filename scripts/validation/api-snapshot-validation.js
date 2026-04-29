@@ -28,32 +28,49 @@ for (const packageRoot of packageDirs) {
     const { name, version } = packageJson;
     const module = require(cjsPath);
 
-    for (const key of Object.keys(module)) {
-      if (module[key] === undefined) {
-        console.warn(`symbol ${key} in ${name}@${version} has a value of undefined.`);
+    checkModule(name, version, module);
+
+    // Also check submodule exports (e.g. @smithy/core/protocols).
+    if (packageJson.exports) {
+      for (const [exportPath, exportConfig] of Object.entries(packageJson.exports)) {
+        if (exportPath === "." || exportPath === "./package.json") continue;
+        const submoduleCjsPath = path.join(packageRoot, exportConfig.require || exportConfig.node);
+        if (fs.existsSync(submoduleCjsPath)) {
+          const submoduleName = `${name}/${exportPath.replace("./", "")}`;
+          const submodule = require(submoduleCjsPath);
+          checkModule(submoduleName, version, submodule);
+        }
       }
     }
+  }
+}
 
-    if (!api[name]) {
-      api[name] = {};
-      for (const key of Object.keys(module)) {
-        api[name][key] = [typeof module[key], `<=${version}`].join(", since ");
+function checkModule(name, version, module) {
+  for (const key of Object.keys(module)) {
+    if (module[key] === undefined) {
+      console.warn(`symbol ${key} in ${name}@${version} has a value of undefined.`);
+    }
+  }
+
+  if (!api[name]) {
+    api[name] = {};
+    for (const key of Object.keys(module)) {
+      api[name][key] = [typeof module[key], `<=${version}`].join(", since ");
+    }
+  } else {
+    for (const symbol of [...new Set([...Object.keys(api[name]), ...Object.keys(module)])]) {
+      if (symbol in module && !(symbol in api[name])) {
+        errors.push(`You must commit changes in api.json.`);
+        api[name][symbol] = [typeof module[symbol], version].join(", since ");
       }
-    } else {
-      for (const symbol of [...new Set([...Object.keys(api[name]), ...Object.keys(module)])]) {
-        if (symbol in module && !(symbol in api[name])) {
-          errors.push(`You must commit changes in api.json.`);
-          api[name][symbol] = [typeof module[symbol], version].join(", since ");
-        }
-        if (!(symbol in module) && symbol in api[name]) {
-          errors.push(`Symbol [${symbol}] is missing from ${name}, (${api[name][symbol]}).`);
-        }
-        if (symbol in module && symbol in api[name]) {
-          if (api[name][symbol].split(", ")[0] !== typeof module[symbol]) {
-            errors.push(
-              `Symbol [${symbol}] has a different type than expected in ${name}, actual=${typeof module[symbol]} expected=${api[name][symbol]}.`
-            );
-          }
+      if (!(symbol in module) && symbol in api[name]) {
+        errors.push(`Symbol [${symbol}] is missing from ${name}, (${api[name][symbol]}).`);
+      }
+      if (symbol in module && symbol in api[name]) {
+        if (api[name][symbol].split(", ")[0] !== typeof module[symbol]) {
+          errors.push(
+            `Symbol [${symbol}] has a different type than expected in ${name}, actual=${typeof module[symbol]} expected=${api[name][symbol]}.`
+          );
         }
       }
     }
