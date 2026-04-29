@@ -1,5 +1,6 @@
 import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
 import { NormalizedSchema } from "@smithy/core/schema";
+import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import { EventStreamMarshaller } from "@smithy/eventstream-serde-node";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
@@ -12,7 +13,6 @@ import type {
   StringSchema,
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
-import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { describe, expect, test as it } from "vitest";
 
 import { EventStreamSerde } from "./EventStreamSerde";

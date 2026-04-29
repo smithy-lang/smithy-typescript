@@ -17,9 +17,7 @@ type AggregatedClientWaiterConfiguration<C> = Omit<WaiterConfiguration<C>, "clie
  *
  * @param commands - command lookup container.
  * @param Client - client instance on which to add aggregated methods.
- * @param options
- * @param options.paginators - paginator functions.
- * @param options.waiters - waiter functions.
+ * @param options - paginator and waiter functions.
  *
  * @returns an aggregated client with dynamically created methods.
  */

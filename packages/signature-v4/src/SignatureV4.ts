@@ -1,3 +1,5 @@
+import { toHex } from "@smithy/core/serde";
+import { toUint8Array } from "@smithy/core/serde";
 import type {
   AwsCredentialIdentity,
   EventSigner,
@@ -15,8 +17,6 @@ import type {
   SigningArguments,
   StringSigner,
 } from "@smithy/types";
-import { toHex } from "@smithy/util-hex-encoding";
-import { toUint8Array } from "@smithy/util-utf8";
 
 import {
   ALGORITHM_IDENTIFIER,

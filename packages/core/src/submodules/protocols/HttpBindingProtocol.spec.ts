@@ -1,5 +1,6 @@
 import { type TypeRegistry, NormalizedSchema, op } from "@smithy/core/schema";
 import { dateToUtcString, generateIdempotencyToken, LazyJsonString, quoteHeader } from "@smithy/core/serde";
+import { toBase64 } from "@smithy/core/serde";
 import { streamCollector } from "@smithy/node-http-handler";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
@@ -26,7 +27,6 @@ import type {
   TimestampHttpDateSchema,
 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
-import { toBase64 } from "@smithy/util-base64";
 import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 

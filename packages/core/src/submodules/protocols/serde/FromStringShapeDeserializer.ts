@@ -7,6 +7,8 @@ import {
   NumericValue,
   splitHeader,
 } from "@smithy/core/serde";
+import { fromBase64 } from "@smithy/core/serde";
+import { toUtf8 } from "@smithy/core/serde";
 import type {
   CodecSettings,
   Schema,
@@ -15,8 +17,6 @@ import type {
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
 } from "@smithy/types";
-import { fromBase64 } from "@smithy/util-base64";
-import { toUtf8 } from "@smithy/util-utf8";
 
 import { SerdeContext } from "../SerdeContext";
 import { determineTimestampFormat } from "./determineTimestampFormat";

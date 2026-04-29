@@ -1,5 +1,5 @@
+import { fromBase64 } from "@smithy/core/serde";
 import type { StreamCollector } from "@smithy/types";
-import { fromBase64 } from "@smithy/util-base64";
 
 export const streamCollector: StreamCollector = async (stream: Blob | ReadableStream): Promise<Uint8Array> => {
   if ((typeof Blob === "function" && stream instanceof Blob) || stream.constructor?.name === "Blob") {

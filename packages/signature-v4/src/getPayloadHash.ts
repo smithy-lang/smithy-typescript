@@ -1,7 +1,7 @@
-import { isArrayBuffer } from "@smithy/is-array-buffer";
+import { isArrayBuffer } from "@smithy/core/serde";
+import { toHex } from "@smithy/core/serde";
+import { toUint8Array } from "@smithy/core/serde";
 import type { ChecksumConstructor, HashConstructor, HttpRequest } from "@smithy/types";
-import { toHex } from "@smithy/util-hex-encoding";
-import { toUint8Array } from "@smithy/util-utf8";
 
 import { SHA256_HEADER, UNSIGNED_PAYLOAD } from "./constants";
 

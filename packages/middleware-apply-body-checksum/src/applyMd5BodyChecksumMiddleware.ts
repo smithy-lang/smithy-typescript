@@ -1,4 +1,4 @@
-import { isArrayBuffer } from "@smithy/is-array-buffer";
+import { isArrayBuffer } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
   BuildHandler,
