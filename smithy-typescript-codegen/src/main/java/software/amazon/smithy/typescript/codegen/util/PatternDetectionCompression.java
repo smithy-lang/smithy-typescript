@@ -192,7 +192,7 @@ public class PatternDetectionCompression {
                         continue;
                     }
 
-                    String escapedICode = escapeRegexBrackets(iCode);
+                    String escapedICode = Pattern.quote(iCode);
                     String keyPattern = escapedICode + ":([^ ])";
                     codeBlockBuffer.set(
                         j,
@@ -612,17 +612,5 @@ public class PatternDetectionCompression {
             }
         }
         return -1;
-    }
-
-    private static String escapeRegexBrackets(String input) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < input.length(); ++i) {
-            char c = input.charAt(i);
-            if (c == '[' || c == ']' || c == '{' || c == '}' || c == '(' || c == ')') {
-                sb.append('\\');
-            }
-            sb.append(c);
-        }
-        return sb.toString();
     }
 }
