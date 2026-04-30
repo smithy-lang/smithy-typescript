@@ -182,70 +182,72 @@ class PatternDetectionCompressionTest {
 
     @Test
     void doesNotCorruptObjectKeysWhenReplacingWildcardStringValues() {
-        EndpointRuleSet ruleSet = EndpointRuleSet.fromNode(Node.parse(
-            """
-            {
-              "version": "1.3",
-              "parameters": {
-                "ParamA": { "required": false, "type": "String" },
-                "ParamB": { "builtIn": "SDK::Endpoint", "required": false, "type": "String" },
-                "ParamC": { "required": true, "type": "String", "builtIn": "AWS::Region", "default": "us-east-2" }
-              },
-              "rules": [
+        EndpointRuleSet ruleSet = EndpointRuleSet.fromNode(
+            Node.parse(
+                """
                 {
-                  "type": "endpoint",
-                  "conditions": [
-                    { "fn": "isSet", "argv": [{ "ref": "ParamB" }] },
-                    { "fn": "stringEquals", "argv": [{ "ref": "ParamC" }, "*"] }
-                  ],
-                  "endpoint": {
-                    "url": { "ref": "ParamB" },
-                    "properties": { "authSchemes": [{ "name": "sigv4a", "signingRegionSet": ["*"] }] }
-                  }
-                },
-                {
-                  "type": "endpoint",
-                  "conditions": [{ "fn": "isSet", "argv": [{ "ref": "ParamB" }] }],
-                  "endpoint": { "url": { "ref": "ParamB" } }
-                },
-                {
-                  "type": "endpoint",
-                  "conditions": [
-                    { "fn": "isSet", "argv": [{ "ref": "ParamA" }] },
-                    { "fn": "stringEquals", "argv": [{ "ref": "ParamC" }, "*"] }
-                  ],
-                  "endpoint": {
-                    "url": "https://{ParamA}.global.example.com",
-                    "properties": { "authSchemes": [{ "name": "sigv4a", "signingRegionSet": ["*"] }] }
-                  }
-                },
-                {
-                  "type": "endpoint",
-                  "conditions": [{ "fn": "isSet", "argv": [{ "ref": "ParamA" }] }],
-                  "endpoint": {
-                    "url": "https://{ParamC}.{ParamA}.example.com",
-                    "properties": { "authSchemes": [{ "name": "sigv4", "signingRegion": "{ParamC}" }] }
-                  }
-                },
-                {
-                  "type": "endpoint",
-                  "conditions": [{ "fn": "stringEquals", "argv": [{ "ref": "ParamC" }, "*"] }],
-                  "endpoint": {
-                    "url": "https://prod.global.example.com",
-                    "properties": { "authSchemes": [{ "name": "sigv4a", "signingRegionSet": ["*"] }] }
-                  }
-                },
-                {
-                  "type": "endpoint",
-                  "conditions": [],
-                  "endpoint": {
-                    "url": "https://{ParamC}.prod.example.com",
-                    "properties": { "authSchemes": [{ "name": "sigv4", "signingRegion": "{ParamC}" }] }
-                  }
-                }
-              ]
-            }"""
-        ));
+                  "version": "1.3",
+                  "parameters": {
+                    "ParamA": { "required": false, "type": "String" },
+                    "ParamB": { "builtIn": "SDK::Endpoint", "required": false, "type": "String" },
+                    "ParamC": { "required": true, "type": "String", "builtIn": "AWS::Region", "default": "us-east-2" }
+                  },
+                  "rules": [
+                    {
+                      "type": "endpoint",
+                      "conditions": [
+                        { "fn": "isSet", "argv": [{ "ref": "ParamB" }] },
+                        { "fn": "stringEquals", "argv": [{ "ref": "ParamC" }, "*"] }
+                      ],
+                      "endpoint": {
+                        "url": { "ref": "ParamB" },
+                        "properties": { "authSchemes": [{ "name": "sigv4a", "signingRegionSet": ["*"] }] }
+                      }
+                    },
+                    {
+                      "type": "endpoint",
+                      "conditions": [{ "fn": "isSet", "argv": [{ "ref": "ParamB" }] }],
+                      "endpoint": { "url": { "ref": "ParamB" } }
+                    },
+                    {
+                      "type": "endpoint",
+                      "conditions": [
+                        { "fn": "isSet", "argv": [{ "ref": "ParamA" }] },
+                        { "fn": "stringEquals", "argv": [{ "ref": "ParamC" }, "*"] }
+                      ],
+                      "endpoint": {
+                        "url": "https://{ParamA}.global.example.com",
+                        "properties": { "authSchemes": [{ "name": "sigv4a", "signingRegionSet": ["*"] }] }
+                      }
+                    },
+                    {
+                      "type": "endpoint",
+                      "conditions": [{ "fn": "isSet", "argv": [{ "ref": "ParamA" }] }],
+                      "endpoint": {
+                        "url": "https://{ParamC}.{ParamA}.example.com",
+                        "properties": { "authSchemes": [{ "name": "sigv4", "signingRegion": "{ParamC}" }] }
+                      }
+                    },
+                    {
+                      "type": "endpoint",
+                      "conditions": [{ "fn": "stringEquals", "argv": [{ "ref": "ParamC" }, "*"] }],
+                      "endpoint": {
+                        "url": "https://prod.global.example.com",
+                        "properties": { "authSchemes": [{ "name": "sigv4a", "signingRegionSet": ["*"] }] }
+                      }
+                    },
+                    {
+                      "type": "endpoint",
+                      "conditions": [],
+                      "endpoint": {
+                        "url": "https://{ParamC}.prod.example.com",
+                        "properties": { "authSchemes": [{ "name": "sigv4", "signingRegion": "{ParamC}" }] }
+                      }
+                    }
+                  ]
+                }"""
+            )
+        );
 
         Cfg cfg = Cfg.from(ruleSet);
         EndpointBddTrait bddTrait = EndpointBddTrait.from(cfg);

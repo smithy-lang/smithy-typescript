@@ -2,6 +2,12 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.49.1 (2026-04-30)
+
+### Bug Fixes
+
+- Fixed compression edge case in Endpoint BDD generation ([#1989](https://github.com/smithy-lang/smithy-typescript/pull/1989))
+
 ## 0.49.0 (2026-04-28)
 
 ### Features
