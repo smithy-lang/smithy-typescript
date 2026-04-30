@@ -536,7 +536,8 @@ module.exports = class Inliner {
       `import assert from "node:assert";
       
       const namingExceptions = [
-        "paginateOperation" // name for all paginators.
+        "paginateOperation", // name for all paginators.
+        "blobReader" // name collision between chunked-blob-reader and chunked-blob-reader-native.
       ];
       ` +
       this.canonicalExports
@@ -551,6 +552,9 @@ module.exports = class Inliner {
               "limitedParseFloat", // aliased to limitedParseDouble
               "strictParseFloat", // aliased to strictParseDouble
               "strictParseInt", // aliased to strictParseLong
+              "randomUUID", // bound function from crypto.randomUUID.bind(crypto)
+              "blobReaderNative", // re-exported alias of blobReader from chunked-blob-reader-native
+              "blobReader", // name collision in bundle between chunked-blob-reader variants
             ].includes(sym)
           ) {
             return `import { ${sym} } from "${this.pkgJson.name}";`;

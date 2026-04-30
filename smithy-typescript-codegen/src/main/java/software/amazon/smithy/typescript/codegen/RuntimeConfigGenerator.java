@@ -51,12 +51,17 @@ final class RuntimeConfigGenerator {
         },
         "sha256",
         writer -> {
-            writer.addImport("Hash", null, TypeScriptDependency.AWS_SDK_HASH_NODE);
+            writer.addImportSubmodule("Hash", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
             writer.write("Hash.bind(null, \"sha256\")");
         },
         "bodyLengthChecker",
         writer -> {
-            writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_NODE);
+            writer.addImportSubmodule(
+                "calculateBodyLength",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.SERDE
+            );
             writer.write("calculateBodyLength");
         },
         "streamCollector",
@@ -78,7 +83,12 @@ final class RuntimeConfigGenerator {
         },
         "bodyLengthChecker",
         writer -> {
-            writer.addImport("calculateBodyLength", null, TypeScriptDependency.AWS_SDK_UTIL_BODY_LENGTH_BROWSER);
+            writer.addImportSubmodule(
+                "calculateBodyLength",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.SERDE
+            );
             writer.write("calculateBodyLength");
         },
         "streamCollector",
@@ -97,12 +107,12 @@ final class RuntimeConfigGenerator {
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
         "base64Decoder",
         writer -> {
-            writer.addImport("fromBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+            writer.addImportSubmodule("fromBase64", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
             writer.write("fromBase64");
         },
         "base64Encoder",
         writer -> {
-            writer.addImport("toBase64", null, TypeScriptDependency.AWS_SDK_UTIL_BASE64);
+            writer.addImportSubmodule("toBase64", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
             writer.write("toBase64");
         },
         "disableHostPrefix",
@@ -116,12 +126,12 @@ final class RuntimeConfigGenerator {
         },
         "utf8Decoder",
         writer -> {
-            writer.addImport("fromUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+            writer.addImportSubmodule("fromUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
             writer.write("fromUtf8");
         },
         "utf8Encoder",
         writer -> {
-            writer.addImport("toUtf8", null, TypeScriptDependency.AWS_SDK_UTIL_UTF8);
+            writer.addImportSubmodule("toUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
             writer.write("toUtf8");
         },
         "extensions",

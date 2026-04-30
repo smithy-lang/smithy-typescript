@@ -1,4 +1,4 @@
-import { serializerMiddlewareOption } from "@smithy/middleware-serde";
+import { serializerMiddlewareOption } from "@smithy/core/serde";
 import type {
   HandlerExecutionContext,
   Pluggable,

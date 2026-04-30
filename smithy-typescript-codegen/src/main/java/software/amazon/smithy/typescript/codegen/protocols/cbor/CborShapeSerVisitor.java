@@ -20,6 +20,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.SparseTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberSerVisitor;
@@ -133,7 +134,12 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
                 boolean isUnaryCall = UnaryFunctionCall.check(valueExpression);
 
                 if (memberShape.hasTrait(IdempotencyTokenTrait.class)) {
-                    writer.addImport("v4", "generateIdempotencyToken", TypeScriptDependency.SMITHY_UUID);
+                    writer.addImportSubmodule(
+                        "v4",
+                        "generateIdempotencyToken",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
+                    );
                     writer.write("'$L': [true, _ => _ ?? generateIdempotencyToken()],", memberName);
                 } else {
                     if (valueProvider.equals("_ => _")) {

@@ -1,5 +1,5 @@
+import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type { MessageHeaders } from "@smithy/types";
-import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 import { describe, expect, test as it } from "vitest";
 
 import { HeaderMarshaller } from "./HeaderMarshaller";

@@ -4,12 +4,6 @@
     "AbortController": "function, since <=4.2.5",
     "AbortSignal": "function, since <=4.2.5"
   },
-  "@smithy/chunked-blob-reader": {
-    "blobReader": "function, since <=5.2.0"
-  },
-  "@smithy/chunked-blob-reader-native": {
-    "blobReader": "function, since <=4.2.1"
-  },
   "@smithy/config-resolver": {
     "CONFIG_USE_DUALSTACK_ENDPOINT": "string, since <=4.4.3",
     "CONFIG_USE_FIPS_ENDPOINT": "string, since <=4.4.3",
@@ -121,25 +115,9 @@
     "keepAliveSupport": "object, since <=5.3.6",
     "streamCollector": "function, since <=5.3.6"
   },
-  "@smithy/hash-blob-browser": {
-    "blobHasher": "function, since <=4.2.6"
-  },
-  "@smithy/hash-node": {
-    "Hash": "function, since <=4.2.5"
-  },
-  "@smithy/hash-stream-node": {
-    "fileStreamHasher": "function, since <=4.2.5",
-    "readableStreamHasher": "function, since <=4.2.5"
-  },
   "@smithy/invalid-dependency": {
     "invalidFunction": "function, since <=4.2.5",
     "invalidProvider": "function, since <=4.2.5"
-  },
-  "@smithy/is-array-buffer": {
-    "isArrayBuffer": "function, since <=4.2.0"
-  },
-  "@smithy/md5-js": {
-    "Md5": "function, since <=4.2.5"
   },
   "@smithy/middleware-apply-body-checksum": {
     "applyMd5BodyChecksumMiddleware": "function, since <=4.3.5",
@@ -195,13 +173,6 @@
     "resolveRetryConfig": "function, since <=4.4.7",
     "retryMiddleware": "function, since <=4.4.7",
     "retryMiddlewareOptions": "object, since <=4.4.7"
-  },
-  "@smithy/middleware-serde": {
-    "deserializerMiddleware": "function, since <=4.2.5",
-    "deserializerMiddlewareOption": "object, since <=4.2.5",
-    "getSerdePlugin": "function, since <=4.2.5",
-    "serializerMiddleware": "function, since <=4.2.5",
-    "serializerMiddlewareOption": "object, since <=4.2.5"
   },
   "@smithy/middleware-stack": {
     "constructStack": "function, since <=4.2.5"
@@ -377,7 +348,43 @@
     "strictParseInt": "function, since <=4.9.3",
     "strictParseInt32": "function, since <=4.9.3",
     "strictParseLong": "function, since <=4.9.3",
-    "strictParseShort": "function, since <=4.9.3"
+    "strictParseShort": "function, since <=4.9.3",
+    "fromHex": "function, since 4.12.13",
+    "toHex": "function, since 4.12.13",
+    "fromBase64": "function, since 4.12.13",
+    "toBase64": "function, since 4.12.13",
+    "calculateBodyLength": "function, since 4.12.13",
+    "fromUtf8": "function, since 4.12.13",
+    "toUtf8": "function, since 4.12.13",
+    "fromArrayBuffer": "function, since 4.12.13",
+    "fromString": "function, since 4.12.13",
+    "isArrayBuffer": "function, since 4.12.13",
+    "ChecksumStream": "function, since 4.12.13",
+    "createChecksumStream": "function, since 4.12.13",
+    "isBlob": "function, since 4.12.13",
+    "isReadableStream": "function, since 4.12.13",
+    "getAwsChunkedEncodingStream": "function, since 4.12.13",
+    "headStream": "function, since 4.12.13",
+    "sdkStreamMixin": "function, since 4.12.13",
+    "splitStream": "function, since 4.12.13",
+    "randomUUID": "function, since 4.12.13",
+    "Hash": "function, since 4.12.13",
+    "HashCalculator": "function, since 4.12.13",
+    "Md5": "function, since 4.12.13",
+    "Uint8ArrayBlobAdapter": "function, since 4.12.13",
+    "blobHasher": "function, since 4.12.13",
+    "blobReader": "function, since 4.12.13",
+    "blobReaderNative": "function, since 4.12.13",
+    "createBufferedReadable": "function, since 4.12.13",
+    "deserializerMiddleware": "function, since 4.12.13",
+    "deserializerMiddlewareOption": "object, since 4.12.13",
+    "fileStreamHasher": "function, since 4.12.13",
+    "getSerdePlugin": "function, since 4.12.13",
+    "readableStreamHasher": "function, since 4.12.13",
+    "serializerMiddleware": "function, since 4.12.13",
+    "serializerMiddlewareOption": "object, since 4.12.13",
+    "toUint8Array": "function, since 4.12.13",
+    "v4": "function, since 4.12.13"
   },
   "@smithy/types": {
     "HttpAuthLocation": "object, since <=4.9.0",
@@ -393,20 +400,6 @@
   },
   "@smithy/url-parser": {
     "parseUrl": "function, since <=4.2.5"
-  },
-  "@smithy/util-base64": {
-    "fromBase64": "function, since <=4.3.0",
-    "toBase64": "function, since <=4.3.0"
-  },
-  "@smithy/util-body-length-browser": {
-    "calculateBodyLength": "function, since <=4.2.0"
-  },
-  "@smithy/util-body-length-node": {
-    "calculateBodyLength": "function, since <=4.2.1"
-  },
-  "@smithy/util-buffer-from": {
-    "fromArrayBuffer": "function, since <=4.2.0",
-    "fromString": "function, since <=4.2.0"
   },
   "@smithy/util-config-provider": {
     "SelectorType": "object, since <=4.2.0",
@@ -428,10 +421,6 @@
     "resolveEndpoint": "function, since <=3.2.5",
     "BinaryDecisionDiagram": "function, since 3.3.4",
     "decideEndpoint": "function, since 3.3.4"
-  },
-  "@smithy/util-hex-encoding": {
-    "fromHex": "function, since <=4.2.0",
-    "toHex": "function, since <=4.2.0"
   },
   "@smithy/util-middleware": {
     "getSmithyContext": "function, since <=4.2.5",
@@ -456,18 +445,6 @@
     "TIMEOUT_RETRY_COST": "number, since <=4.2.5",
     "Retry": "function, since 4.3.0"
   },
-  "@smithy/util-stream": {
-    "Uint8ArrayBlobAdapter": "function, since <=4.5.6",
-    "ChecksumStream": "function, since <=4.5.6",
-    "createChecksumStream": "function, since <=4.5.6",
-    "getAwsChunkedEncodingStream": "function, since <=4.5.6",
-    "headStream": "function, since <=4.5.6",
-    "sdkStreamMixin": "function, since <=4.5.6",
-    "splitStream": "function, since <=4.5.6",
-    "isReadableStream": "function, since <=4.5.6",
-    "isBlob": "function, since <=4.5.6",
-    "createBufferedReadable": "function, since 4.5.6"
-  },
   "@smithy/util-stream-node": {
     "getAwsChunkedEncodingStream": "function, since <=4.2.6",
     "sdkStreamMixin": "function, since <=4.2.6"
@@ -476,19 +453,11 @@
     "escapeUri": "function, since <=4.2.0",
     "escapeUriPath": "function, since <=4.2.0"
   },
-  "@smithy/util-utf8": {
-    "fromUtf8": "function, since <=4.2.0",
-    "toUint8Array": "function, since <=4.2.0",
-    "toUtf8": "function, since <=4.2.0"
-  },
   "@smithy/util-waiter": {
     "WaiterState": "object, since <=4.2.5",
     "checkExceptions": "function, since <=4.2.5",
     "createWaiter": "function, since <=4.2.5",
     "waiterServiceDefaults": "object, since <=4.2.5"
-  },
-  "@smithy/uuid": {
-    "v4": "function, since <=1.1.0"
   },
   "@smithy/typecheck": {
     "getRuntimeTypecheckPlugin": "function, since <=0.0.0",
@@ -577,7 +546,43 @@
     "strictParseInt": "function, since <=3.23.17",
     "strictParseInt32": "function, since <=3.23.17",
     "strictParseLong": "function, since <=3.23.17",
-    "strictParseShort": "function, since <=3.23.17"
+    "strictParseShort": "function, since <=3.23.17",
+    "fromHex": "function, since 3.23.17",
+    "toHex": "function, since 3.23.17",
+    "fromBase64": "function, since 3.23.17",
+    "toBase64": "function, since 3.23.17",
+    "calculateBodyLength": "function, since 3.23.17",
+    "fromUtf8": "function, since 3.23.17",
+    "toUtf8": "function, since 3.23.17",
+    "fromArrayBuffer": "function, since 3.23.17",
+    "fromString": "function, since 3.23.17",
+    "isArrayBuffer": "function, since 3.23.17",
+    "ChecksumStream": "function, since 3.23.17",
+    "createChecksumStream": "function, since 3.23.17",
+    "isBlob": "function, since 3.23.17",
+    "isReadableStream": "function, since 3.23.17",
+    "getAwsChunkedEncodingStream": "function, since 3.23.17",
+    "headStream": "function, since 3.23.17",
+    "sdkStreamMixin": "function, since 3.23.17",
+    "splitStream": "function, since 3.23.17",
+    "randomUUID": "function, since 3.23.17",
+    "Hash": "function, since 3.23.17",
+    "HashCalculator": "function, since 3.23.17",
+    "Md5": "function, since 3.23.17",
+    "Uint8ArrayBlobAdapter": "function, since 3.23.17",
+    "blobHasher": "function, since 3.23.17",
+    "blobReader": "function, since 3.23.17",
+    "blobReaderNative": "function, since 3.23.17",
+    "createBufferedReadable": "function, since 3.23.17",
+    "deserializerMiddleware": "function, since 3.23.17",
+    "deserializerMiddlewareOption": "object, since 3.23.17",
+    "fileStreamHasher": "function, since 3.23.17",
+    "getSerdePlugin": "function, since 3.23.17",
+    "readableStreamHasher": "function, since 3.23.17",
+    "serializerMiddleware": "function, since 3.23.17",
+    "serializerMiddlewareOption": "object, since 3.23.17",
+    "toUint8Array": "function, since 3.23.17",
+    "v4": "function, since 3.23.17"
   },
   "@smithy/core/schema": {
     "ErrorSchema": "function, since <=3.23.17",

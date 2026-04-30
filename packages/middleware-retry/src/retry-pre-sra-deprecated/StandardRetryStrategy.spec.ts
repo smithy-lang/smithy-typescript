@@ -1,3 +1,4 @@
+import { v4 } from "@smithy/core/serde";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
 import {
@@ -7,7 +8,6 @@ import {
   RETRY_MODES,
   THROTTLING_RETRY_DELAY_BASE,
 } from "@smithy/util-retry";
-import { v4 } from "@smithy/uuid";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
@@ -21,7 +21,7 @@ vi.mock("./delayDecider");
 vi.mock("./retryDecider");
 vi.mock("./defaultRetryQuota");
 vi.mock("@smithy/protocol-http");
-vi.mock("@smithy/uuid");
+vi.mock("@smithy/core/serde");
 
 describe("defaultStrategy", () => {
   let next: any; // variable for next mock function in utility methods

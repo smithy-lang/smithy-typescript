@@ -1220,6 +1220,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/aix-ppc64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/aix-ppc64@npm:0.27.7"
+  conditions: os=aix & cpu=ppc64
+  languageName: node
+  linkType: hard
+
 "@esbuild/android-arm64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/android-arm64@npm:0.25.9"
@@ -1230,6 +1237,13 @@ __metadata:
 "@esbuild/android-arm64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/android-arm64@npm:0.27.2"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/android-arm64@npm:0.27.7"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
@@ -1248,6 +1262,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/android-arm@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/android-arm@npm:0.27.7"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
 "@esbuild/android-x64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/android-x64@npm:0.25.9"
@@ -1258,6 +1279,13 @@ __metadata:
 "@esbuild/android-x64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/android-x64@npm:0.27.2"
+  conditions: os=android & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/android-x64@npm:0.27.7"
   conditions: os=android & cpu=x64
   languageName: node
   linkType: hard
@@ -1276,6 +1304,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/darwin-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/darwin-arm64@npm:0.27.7"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@esbuild/darwin-x64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/darwin-x64@npm:0.25.9"
@@ -1286,6 +1321,13 @@ __metadata:
 "@esbuild/darwin-x64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/darwin-x64@npm:0.27.2"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/darwin-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/darwin-x64@npm:0.27.7"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
@@ -1304,6 +1346,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/freebsd-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/freebsd-arm64@npm:0.27.7"
+  conditions: os=freebsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@esbuild/freebsd-x64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/freebsd-x64@npm:0.25.9"
@@ -1314,6 +1363,13 @@ __metadata:
 "@esbuild/freebsd-x64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/freebsd-x64@npm:0.27.2"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/freebsd-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/freebsd-x64@npm:0.27.7"
   conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
@@ -1332,6 +1388,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-arm64@npm:0.27.7"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-arm@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/linux-arm@npm:0.25.9"
@@ -1342,6 +1405,13 @@ __metadata:
 "@esbuild/linux-arm@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/linux-arm@npm:0.27.2"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-arm@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-arm@npm:0.27.7"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
@@ -1360,6 +1430,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-ia32@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-ia32@npm:0.27.7"
+  conditions: os=linux & cpu=ia32
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-loong64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/linux-loong64@npm:0.25.9"
@@ -1370,6 +1447,13 @@ __metadata:
 "@esbuild/linux-loong64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/linux-loong64@npm:0.27.2"
+  conditions: os=linux & cpu=loong64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-loong64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-loong64@npm:0.27.7"
   conditions: os=linux & cpu=loong64
   languageName: node
   linkType: hard
@@ -1388,6 +1472,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-mips64el@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-mips64el@npm:0.27.7"
+  conditions: os=linux & cpu=mips64el
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-ppc64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/linux-ppc64@npm:0.25.9"
@@ -1398,6 +1489,13 @@ __metadata:
 "@esbuild/linux-ppc64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/linux-ppc64@npm:0.27.2"
+  conditions: os=linux & cpu=ppc64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-ppc64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-ppc64@npm:0.27.7"
   conditions: os=linux & cpu=ppc64
   languageName: node
   linkType: hard
@@ -1416,6 +1514,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-riscv64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-riscv64@npm:0.27.7"
+  conditions: os=linux & cpu=riscv64
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-s390x@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/linux-s390x@npm:0.25.9"
@@ -1426,6 +1531,13 @@ __metadata:
 "@esbuild/linux-s390x@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/linux-s390x@npm:0.27.2"
+  conditions: os=linux & cpu=s390x
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-s390x@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-s390x@npm:0.27.7"
   conditions: os=linux & cpu=s390x
   languageName: node
   linkType: hard
@@ -1444,6 +1556,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/linux-x64@npm:0.27.7"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/netbsd-arm64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/netbsd-arm64@npm:0.25.9"
@@ -1454,6 +1573,13 @@ __metadata:
 "@esbuild/netbsd-arm64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/netbsd-arm64@npm:0.27.2"
+  conditions: os=netbsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/netbsd-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/netbsd-arm64@npm:0.27.7"
   conditions: os=netbsd & cpu=arm64
   languageName: node
   linkType: hard
@@ -1472,6 +1598,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/netbsd-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/netbsd-x64@npm:0.27.7"
+  conditions: os=netbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/openbsd-arm64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/openbsd-arm64@npm:0.25.9"
@@ -1482,6 +1615,13 @@ __metadata:
 "@esbuild/openbsd-arm64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/openbsd-arm64@npm:0.27.2"
+  conditions: os=openbsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/openbsd-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/openbsd-arm64@npm:0.27.7"
   conditions: os=openbsd & cpu=arm64
   languageName: node
   linkType: hard
@@ -1500,6 +1640,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/openbsd-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/openbsd-x64@npm:0.27.7"
+  conditions: os=openbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/openharmony-arm64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/openharmony-arm64@npm:0.25.9"
@@ -1510,6 +1657,13 @@ __metadata:
 "@esbuild/openharmony-arm64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/openharmony-arm64@npm:0.27.2"
+  conditions: os=openharmony & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/openharmony-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/openharmony-arm64@npm:0.27.7"
   conditions: os=openharmony & cpu=arm64
   languageName: node
   linkType: hard
@@ -1528,6 +1682,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/sunos-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/sunos-x64@npm:0.27.7"
+  conditions: os=sunos & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/win32-arm64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/win32-arm64@npm:0.25.9"
@@ -1538,6 +1699,13 @@ __metadata:
 "@esbuild/win32-arm64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/win32-arm64@npm:0.27.2"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-arm64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/win32-arm64@npm:0.27.7"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -1556,6 +1724,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/win32-ia32@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/win32-ia32@npm:0.27.7"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
 "@esbuild/win32-x64@npm:0.25.9":
   version: 0.25.9
   resolution: "@esbuild/win32-x64@npm:0.25.9"
@@ -1566,6 +1741,13 @@ __metadata:
 "@esbuild/win32-x64@npm:0.27.2":
   version: 0.27.2
   resolution: "@esbuild/win32-x64@npm:0.27.2"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-x64@npm:0.27.7":
+  version: 0.27.7
+  resolution: "@esbuild/win32-x64@npm:0.27.7"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -2696,31 +2878,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/chunked-blob-reader-native@workspace:^, @smithy/chunked-blob-reader-native@workspace:packages/chunked-blob-reader-native":
-  version: 0.0.0-use.local
-  resolution: "@smithy/chunked-blob-reader-native@workspace:packages/chunked-blob-reader-native"
-  dependencies:
-    "@smithy/util-base64": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/chunked-blob-reader@workspace:^, @smithy/chunked-blob-reader@workspace:packages/chunked-blob-reader":
-  version: 0.0.0-use.local
-  resolution: "@smithy/chunked-blob-reader@workspace:packages/chunked-blob-reader"
-  dependencies:
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
 "@smithy/config-resolver@workspace:^, @smithy/config-resolver@workspace:packages/config-resolver":
   version: 0.0.0-use.local
   resolution: "@smithy/config-resolver@workspace:packages/config-resolver"
@@ -2742,19 +2899,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
-    "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
-    "@smithy/util-stream": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    "@smithy/uuid": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
+    hash-test-vectors: "npm:^1.3.2"
     json-bigint: "npm:^1.0.0"
     premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
@@ -2784,9 +2936,8 @@ __metadata:
   resolution: "@smithy/eventstream-codec@workspace:packages/eventstream-codec"
   dependencies:
     "@aws-crypto/crc32": "npm:5.2.0"
+    "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -2844,7 +2995,6 @@ __metadata:
   dependencies:
     "@smithy/eventstream-codec": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -2858,9 +3008,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -2879,60 +3029,10 @@ __metadata:
   resolution: "@smithy/fetch-http-handler@workspace:packages/fetch-http-handler"
   dependencies:
     "@smithy/abort-controller": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/querystring-builder": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/hash-blob-browser@workspace:packages/hash-blob-browser":
-  version: 0.0.0-use.local
-  resolution: "@smithy/hash-blob-browser@workspace:packages/hash-blob-browser"
-  dependencies:
-    "@smithy/chunked-blob-reader": "workspace:^"
-    "@smithy/chunked-blob-reader-native": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/hash-node@workspace:^, @smithy/hash-node@workspace:packages/hash-node":
-  version: 0.0.0-use.local
-  resolution: "@smithy/hash-node@workspace:packages/hash-node"
-  dependencies:
-    "@smithy/types": "workspace:^"
-    "@smithy/util-buffer-from": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    hash-test-vectors: "npm:^1.3.2"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/hash-stream-node@workspace:packages/hash-stream-node":
-  version: 0.0.0-use.local
-  resolution: "@smithy/hash-stream-node@workspace:packages/hash-stream-node"
-  dependencies:
-    "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
@@ -2963,41 +3063,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@smithy/is-array-buffer@workspace:^, @smithy/is-array-buffer@workspace:packages/is-array-buffer":
-  version: 0.0.0-use.local
-  resolution: "@smithy/is-array-buffer@workspace:packages/is-array-buffer"
-  dependencies:
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/md5-js@workspace:packages/md5-js":
-  version: 0.0.0-use.local
-  resolution: "@smithy/md5-js@workspace:packages/md5-js"
-  dependencies:
-    "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    hash-test-vectors: "npm:^1.3.2"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
 "@smithy/middleware-apply-body-checksum@workspace:packages/middleware-apply-body-checksum":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-apply-body-checksum@workspace:packages/middleware-apply-body-checksum"
   dependencies:
-    "@smithy/is-array-buffer": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"
@@ -3014,13 +3084,11 @@ __metadata:
   resolution: "@smithy/middleware-compression@workspace:packages/middleware-compression"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/is-array-buffer": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/util-config-provider": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     fflate: "npm:0.8.1"
@@ -3050,7 +3118,6 @@ __metadata:
   resolution: "@smithy/middleware-endpoint@workspace:packages/middleware-endpoint"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/shared-ini-file-loader": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -3076,23 +3143,6 @@ __metadata:
     "@smithy/types": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
-    "@smithy/util-test": "workspace:^"
-    "@smithy/uuid": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/middleware-serde@workspace:^, @smithy/middleware-serde@workspace:packages/middleware-serde":
-  version: 0.0.0-use.local
-  resolution: "@smithy/middleware-serde@workspace:packages/middleware-serde"
-  dependencies:
-    "@smithy/core": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
-    "@smithy/types": "workspace:^"
     "@smithy/util-test": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3245,13 +3295,11 @@ __metadata:
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
     "@aws-crypto/sha256-js": "npm:5.2.0"
-    "@smithy/is-array-buffer": "workspace:^"
+    "@smithy/core": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-uri-escape": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
@@ -3265,11 +3313,10 @@ __metadata:
   resolution: "@smithy/signature-v4a@workspace:packages/signature-v4a"
   dependencies:
     "@aws-crypto/sha256-js": "npm:5.2.0"
+    "@smithy/core": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     elliptic: "npm:6.5.5"
@@ -3287,7 +3334,6 @@ __metadata:
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-stream": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3306,12 +3352,10 @@ __metadata:
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
     "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -3320,15 +3364,11 @@ __metadata:
     "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
@@ -3349,12 +3389,10 @@ __metadata:
     "@smithy/config-resolver": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
     "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -3362,15 +3400,11 @@ __metadata:
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
@@ -3391,9 +3425,6 @@ __metadata:
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
@@ -3441,46 +3472,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-base64@workspace:^, @smithy/util-base64@workspace:packages/util-base64":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-base64@workspace:packages/util-base64"
-  dependencies:
-    "@smithy/util-buffer-from": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-body-length-browser@workspace:^, @smithy/util-body-length-browser@workspace:packages/util-body-length-browser":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-body-length-browser@workspace:packages/util-body-length-browser"
-  dependencies:
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-body-length-node@workspace:^, @smithy/util-body-length-node@workspace:packages/util-body-length-node":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-body-length-node@workspace:packages/util-body-length-node"
-  dependencies:
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
 "@smithy/util-buffer-from@npm:^2.2.0":
   version: 2.2.0
   resolution: "@smithy/util-buffer-from@npm:2.2.0"
@@ -3490,20 +3481,6 @@ __metadata:
   checksum: 10c0/223d6a508b52ff236eea01cddc062b7652d859dd01d457a4e50365af3de1e24a05f756e19433f6ccf1538544076b4215469e21a4ea83dc1d58d829725b0dbc5a
   languageName: node
   linkType: hard
-
-"@smithy/util-buffer-from@workspace:^, @smithy/util-buffer-from@workspace:packages/util-buffer-from":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-buffer-from@workspace:packages/util-buffer-from"
-  dependencies:
-    "@smithy/is-array-buffer": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
 
 "@smithy/util-config-provider@workspace:^, @smithy/util-config-provider@workspace:packages/util-config-provider":
   version: 0.0.0-use.local
@@ -3568,18 +3545,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-hex-encoding@workspace:^, @smithy/util-hex-encoding@workspace:packages/util-hex-encoding":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-hex-encoding@workspace:packages/util-hex-encoding"
-  dependencies:
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
 "@smithy/util-middleware@workspace:^, @smithy/util-middleware@workspace:packages/util-middleware":
   version: 0.0.0-use.local
   resolution: "@smithy/util-middleware@workspace:packages/util-middleware"
@@ -3600,60 +3565,6 @@ __metadata:
   dependencies:
     "@smithy/service-error-classification": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-stream-browser@workspace:packages/util-stream-browser":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-stream-browser@workspace:packages/util-stream-browser"
-  dependencies:
-    "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-stream-node@workspace:packages/util-stream-node":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-stream-node@workspace:packages/util-stream-node"
-  dependencies:
-    "@smithy/node-http-handler": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-buffer-from": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/util-stream@workspace:^, @smithy/util-stream@workspace:packages/util-stream":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-stream@workspace:packages/util-stream"
-  dependencies:
-    "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/node-http-handler": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-buffer-from": "workspace:^"
-    "@smithy/util-hex-encoding": "workspace:^"
-    "@smithy/util-test": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3700,38 +3611,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@smithy/util-utf8@workspace:^, @smithy/util-utf8@workspace:packages/util-utf8":
-  version: 0.0.0-use.local
-  resolution: "@smithy/util-utf8@workspace:packages/util-utf8"
-  dependencies:
-    "@smithy/util-buffer-from": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
 "@smithy/util-waiter@workspace:^, @smithy/util-waiter@workspace:packages/util-waiter":
   version: 0.0.0-use.local
   resolution: "@smithy/util-waiter@workspace:packages/util-waiter"
   dependencies:
     "@smithy/abort-controller": "workspace:^"
     "@smithy/types": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
-  languageName: unknown
-  linkType: soft
-
-"@smithy/uuid@workspace:^, @smithy/uuid@workspace:packages/uuid":
-  version: 0.0.0-use.local
-  resolution: "@smithy/uuid@workspace:packages/uuid"
-  dependencies:
-    "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
@@ -6351,6 +6236,95 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esbuild@npm:~0.27.0":
+  version: 0.27.7
+  resolution: "esbuild@npm:0.27.7"
+  dependencies:
+    "@esbuild/aix-ppc64": "npm:0.27.7"
+    "@esbuild/android-arm": "npm:0.27.7"
+    "@esbuild/android-arm64": "npm:0.27.7"
+    "@esbuild/android-x64": "npm:0.27.7"
+    "@esbuild/darwin-arm64": "npm:0.27.7"
+    "@esbuild/darwin-x64": "npm:0.27.7"
+    "@esbuild/freebsd-arm64": "npm:0.27.7"
+    "@esbuild/freebsd-x64": "npm:0.27.7"
+    "@esbuild/linux-arm": "npm:0.27.7"
+    "@esbuild/linux-arm64": "npm:0.27.7"
+    "@esbuild/linux-ia32": "npm:0.27.7"
+    "@esbuild/linux-loong64": "npm:0.27.7"
+    "@esbuild/linux-mips64el": "npm:0.27.7"
+    "@esbuild/linux-ppc64": "npm:0.27.7"
+    "@esbuild/linux-riscv64": "npm:0.27.7"
+    "@esbuild/linux-s390x": "npm:0.27.7"
+    "@esbuild/linux-x64": "npm:0.27.7"
+    "@esbuild/netbsd-arm64": "npm:0.27.7"
+    "@esbuild/netbsd-x64": "npm:0.27.7"
+    "@esbuild/openbsd-arm64": "npm:0.27.7"
+    "@esbuild/openbsd-x64": "npm:0.27.7"
+    "@esbuild/openharmony-arm64": "npm:0.27.7"
+    "@esbuild/sunos-x64": "npm:0.27.7"
+    "@esbuild/win32-arm64": "npm:0.27.7"
+    "@esbuild/win32-ia32": "npm:0.27.7"
+    "@esbuild/win32-x64": "npm:0.27.7"
+  dependenciesMeta:
+    "@esbuild/aix-ppc64":
+      optional: true
+    "@esbuild/android-arm":
+      optional: true
+    "@esbuild/android-arm64":
+      optional: true
+    "@esbuild/android-x64":
+      optional: true
+    "@esbuild/darwin-arm64":
+      optional: true
+    "@esbuild/darwin-x64":
+      optional: true
+    "@esbuild/freebsd-arm64":
+      optional: true
+    "@esbuild/freebsd-x64":
+      optional: true
+    "@esbuild/linux-arm":
+      optional: true
+    "@esbuild/linux-arm64":
+      optional: true
+    "@esbuild/linux-ia32":
+      optional: true
+    "@esbuild/linux-loong64":
+      optional: true
+    "@esbuild/linux-mips64el":
+      optional: true
+    "@esbuild/linux-ppc64":
+      optional: true
+    "@esbuild/linux-riscv64":
+      optional: true
+    "@esbuild/linux-s390x":
+      optional: true
+    "@esbuild/linux-x64":
+      optional: true
+    "@esbuild/netbsd-arm64":
+      optional: true
+    "@esbuild/netbsd-x64":
+      optional: true
+    "@esbuild/openbsd-arm64":
+      optional: true
+    "@esbuild/openbsd-x64":
+      optional: true
+    "@esbuild/openharmony-arm64":
+      optional: true
+    "@esbuild/sunos-x64":
+      optional: true
+    "@esbuild/win32-arm64":
+      optional: true
+    "@esbuild/win32-ia32":
+      optional: true
+    "@esbuild/win32-x64":
+      optional: true
+  bin:
+    esbuild: bin/esbuild
+  checksum: 10c0/ccd51f0555708bc9ff4ec9dc3ac92d3daacd45ecaac949ca8645984c5c323bf8cefe98c2df307418685e0b4ce37f9a3bdbfe8e3651fe632a0059a436195a17d4
+  languageName: node
+  linkType: hard
+
 "escalade@npm:^3.1.1":
   version: 3.1.1
   resolution: "escalade@npm:3.1.1"
@@ -7081,6 +7055,15 @@ __metadata:
     es-errors: "npm:^1.3.0"
     get-intrinsic: "npm:^1.2.4"
   checksum: 10c0/867be6d63f5e0eb026cb3b0ef695ec9ecf9310febb041072d2e142f260bd91ced9eeb426b3af98791d1064e324e653424afa6fd1af17dee373bea48ae03162bc
+  languageName: node
+  linkType: hard
+
+"get-tsconfig@npm:^4.7.5":
+  version: 4.14.0
+  resolution: "get-tsconfig@npm:4.14.0"
+  dependencies:
+    resolve-pkg-maps: "npm:^1.0.0"
+  checksum: 10c0/abc2b9275468eb589079a0b7a95eb5107c14fdd0ca6dda1bff116fe774ea1f79975421dcb22a0c86b4f820fcc69a7655dddf9b6d6a8a2c06fcb59e19794c0724
   languageName: node
   linkType: hard
 
@@ -9928,6 +9911,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resolve-pkg-maps@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "resolve-pkg-maps@npm:1.0.0"
+  checksum: 10c0/fb8f7bbe2ca281a73b7ef423a1cbc786fb244bd7a95cbe5c3fba25b27d327150beca8ba02f622baea65919a57e061eb5005204daa5f93ed590d9b77463a567ab
+  languageName: node
+  linkType: hard
+
 "resolve.exports@npm:^2.0.0":
   version: 2.0.2
   resolution: "resolve.exports@npm:2.0.2"
@@ -10606,6 +10596,7 @@ __metadata:
     puppeteer: "npm:^19.2.0"
     rollup: "npm:^4.59.0"
     ts-jest: "npm:29.1.2"
+    tsx: "npm:^4.21.0"
     turbo: "npm:2.5.8"
     typescript: "npm:~5.8.3"
     vite: "npm:^7.1.11"
@@ -11234,6 +11225,22 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: 10c0/e03a8a4271152c8b26604ed45535954c0a45296e32445b4b87f8a5abdb2421f40b59b4ca437c4346af0f28179780d604094eb64546bee2019d903d01c6c19bdb
+  languageName: node
+  linkType: hard
+
+"tsx@npm:^4.21.0":
+  version: 4.21.0
+  resolution: "tsx@npm:4.21.0"
+  dependencies:
+    esbuild: "npm:~0.27.0"
+    fsevents: "npm:~2.3.3"
+    get-tsconfig: "npm:^4.7.5"
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    tsx: dist/cli.mjs
+  checksum: 10c0/f5072923cd8459a1f9a26df87823a2ab5754641739d69df2a20b415f61814322b751fa6be85db7c6ec73cf68ba8fac2fd1cfc76bdb0aa86ded984d84d5d2126b
   languageName: node
   linkType: hard
 
@@ -12320,12 +12327,10 @@ __metadata:
     "@smithy/eventstream-serde-config-resolver": "workspace:^"
     "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
     "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -12334,15 +12339,11 @@ __metadata:
     "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@smithy/util-waiter": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
@@ -12367,12 +12368,10 @@ __metadata:
     "@smithy/eventstream-serde-config-resolver": "workspace:^"
     "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/hash-node": "workspace:^"
     "@smithy/invalid-dependency": "workspace:^"
     "@smithy/middleware-content-length": "workspace:^"
     "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
-    "@smithy/middleware-serde": "workspace:^"
     "@smithy/middleware-stack": "workspace:^"
     "@smithy/node-config-provider": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -12380,15 +12379,11 @@ __metadata:
     "@smithy/smithy-client": "workspace:^"
     "@smithy/types": "workspace:^"
     "@smithy/url-parser": "workspace:^"
-    "@smithy/util-base64": "workspace:^"
-    "@smithy/util-body-length-browser": "workspace:^"
-    "@smithy/util-body-length-node": "workspace:^"
     "@smithy/util-defaults-mode-browser": "workspace:^"
     "@smithy/util-defaults-mode-node": "workspace:^"
     "@smithy/util-endpoints": "workspace:^"
     "@smithy/util-middleware": "workspace:^"
     "@smithy/util-retry": "workspace:^"
-    "@smithy/util-utf8": "workspace:^"
     "@smithy/util-waiter": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"

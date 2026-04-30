@@ -76,4 +76,14 @@ public interface ExtensionConfigurationInterface {
      * @return Returns a typescript function name
      */
     Pair<String, Dependency> resolveRuntimeConfigFn();
+
+    /**
+     * Optional submodule path for imports (e.g. "/protocols" for @smithy/core/protocols).
+     * When non-null, consumers should use addImportSubmodule instead of addImport.
+     *
+     * @return Returns the submodule path, or null if not applicable.
+     */
+    default String submodule() {
+        return null;
+    }
 }

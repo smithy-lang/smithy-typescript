@@ -47,5 +47,5 @@ For each group of packages being consolidated into a `@smithy/core` submodule:
 - [ ] `make generate-protocol-tests test-protocols` — regenerated private packages have correct deps and imports
 - [ ] `yarn` — workspace resolution succeeds
 - [ ] `yarn lint` in `packages/core` — no cross-submodule relative import violations
-- [ ] `yarn build` — all packages compile and build
+- [ ] `yarn build` — all packages compile and build. Run this in the repo root, not just the changed packages.
 - [ ] `api-snapshot` script snapshots submodule exports via `package.json` `exports` entries
