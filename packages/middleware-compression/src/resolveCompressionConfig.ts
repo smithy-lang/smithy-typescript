@@ -1,4 +1,4 @@
-import { normalizeProvider } from "@smithy/util-middleware";
+import { normalizeProvider } from "@smithy/core/client";
 
 import type { CompressionInputConfig, CompressionResolvedConfig } from "./configurations";
 

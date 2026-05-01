@@ -106,10 +106,15 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         SymbolReference responseType = getApplicationProtocol().getResponseType();
 
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, responseType);
-        writer.addImport("collectBody", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule("collectBody", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
 
         if (context.getSettings().generateClient()) {
-            writer.addImport("withBaseException", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+            writer.addImportSubmodule(
+                "withBaseException",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CLIENT
+            );
             SymbolReference exception = HttpProtocolGeneratorUtils.getClientBaseException(context);
             writer.write("const throwDefaultError = withBaseException($T);", exception);
         }

@@ -230,7 +230,12 @@ final class RuntimeConfigGenerator {
                         "getSharedRuntimeConfig",
                         Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeConfig.shared")
                     );
-                    writer.addImport("loadConfigsForDefaultMode", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    writer.addImportSubmodule(
+                        "loadConfigsForDefaultMode",
+                        null,
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CLIENT
+                    );
                     break;
                 default:
                     break;
@@ -238,7 +243,12 @@ final class RuntimeConfigGenerator {
 
             switch (target) {
                 case NODE -> {
-                    writer.addImport("emitWarningIfUnsupportedVersion", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    writer.addImportSubmodule(
+                        "emitWarningIfUnsupportedVersion",
+                        null,
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CLIENT
+                    );
                     writer.addImport(
                         "resolveDefaultsModeConfig",
                         null,

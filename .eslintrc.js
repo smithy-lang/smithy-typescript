@@ -70,6 +70,16 @@ module.exports = {
                 ],
                 message: "This package has been consolidated into @smithy/core/serde.",
               },
+              {
+                group: [
+                  "@smithy/smithy-client",
+                  "@smithy/middleware-stack",
+                  "@smithy/util-middleware",
+                  "@smithy/invalid-dependency",
+                  "@smithy/util-waiter",
+                ],
+                message: "This package has been consolidated into @smithy/core/client.",
+              },
             ],
           },
         ],

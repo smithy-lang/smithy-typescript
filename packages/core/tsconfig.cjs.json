@@ -5,11 +5,13 @@
     "rootDir": "src",
     "paths": {
       "@smithy/core/cbor": ["./src/submodules/cbor/index.ts"],
+      "@smithy/core/client": ["./src/submodules/client/index.ts"],
       "@smithy/core/protocols": ["./src/submodules/protocols/index.ts"],
       "@smithy/core/serde": ["./src/submodules/serde/index.ts"],
       "@smithy/core/schema": ["./src/submodules/schema/index.ts"],
       "@smithy/core/event-streams": ["./src/submodules/event-streams/index.ts"],
-      "@smithy/core/endpoints": ["./src/submodules/endpoints/index.ts"]
+      "@smithy/core/endpoints": ["./src/submodules/endpoints/index.ts"],
+      "@smithy/core/client": ["./src/submodules/client/index.ts"]
     }
   },
   "extends": "../../tsconfig.cjs.json",

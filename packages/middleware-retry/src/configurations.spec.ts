@@ -1,5 +1,5 @@
+import { normalizeProvider } from "@smithy/core/client";
 import type { Provider } from "@smithy/types";
-import { normalizeProvider } from "@smithy/util-middleware";
 import { AdaptiveRetryStrategy, DEFAULT_MAX_ATTEMPTS, StandardRetryStrategy } from "@smithy/util-retry";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
@@ -10,7 +10,7 @@ import {
   resolveRetryConfig,
 } from "./configurations";
 
-vi.mock("@smithy/util-middleware");
+vi.mock("@smithy/core/client");
 vi.mock("@smithy/util-retry");
 
 describe(resolveRetryConfig.name, () => {

@@ -131,7 +131,7 @@ final class CommandGenerator implements Runnable {
         writer.addRelativeTypeImport(configType, null, servicePath);
         writer.addRelativeTypeImport("ServiceInputTypes", null, servicePath);
         writer.addRelativeTypeImport("ServiceOutputTypes", null, servicePath);
-        writer.addImport("Command", "$Command", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule("Command", "$Command", TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
 
         String name = symbol.getName();
 

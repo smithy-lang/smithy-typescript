@@ -20,7 +20,6 @@
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-config-provider": "workspace:^",
-    "@smithy/util-middleware": "workspace:^",
     "fflate": "0.8.1",
     "tslib": "^2.6.2"
   },

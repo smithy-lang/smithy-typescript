@@ -1,5 +1,4 @@
 import { SerdeContext } from "@smithy/core/protocols";
-import { constructStack } from "@smithy/middleware-stack";
 import type {
   $ClientProtocol,
   $ClientProtocolCtor,
@@ -14,6 +13,8 @@ import type {
   NodeHttpHandlerOptions,
   RequestHandler,
 } from "@smithy/types";
+
+import { constructStack } from "../middleware-stack/MiddlewareStack";
 
 /**
  * @public

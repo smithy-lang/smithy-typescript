@@ -1,3 +1,4 @@
+import { getSmithyContext } from "@smithy/core/client";
 import type {
   HandlerExecutionContext,
   HttpAuthScheme,
@@ -14,7 +15,6 @@ import type {
   SerializeMiddleware,
   SMITHY_CONTEXT_KEY,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 import { resolveAuthOptions } from "./resolveAuthOptions";
 

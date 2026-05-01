@@ -1,5 +1,7 @@
 # Change Log
 
+This is a past changelog, the package has been consolidated into `@smithy/core/client`.
+
 ## 4.2.14
 
 ### Patch Changes
@@ -322,21 +324,21 @@
 - Updated dependencies [9939f823]
   - @smithy/types@2.9.0
 
-## 2.0.10
+## 2.0.9
 
 ### Patch Changes
 
 - Updated dependencies [590af6b7]
   - @smithy/types@2.8.0
 
-## 2.0.9
+## 2.0.8
 
 ### Patch Changes
 
 - Updated dependencies [340634a5]
   - @smithy/types@2.7.0
 
-## 2.0.8
+## 2.0.7
 
 ### Patch Changes
 
@@ -344,14 +346,14 @@
 - Updated dependencies [9579a9a0]
   - @smithy/types@2.6.0
 
-## 2.0.7
+## 2.0.6
 
 ### Patch Changes
 
 - Updated dependencies [8044a814]
   - @smithy/types@2.5.0
 
-## 2.0.6
+## 2.0.5
 
 ### Patch Changes
 
@@ -359,33 +361,25 @@
 - Updated dependencies [05f5d42c]
   - @smithy/types@2.4.0
 
-## 2.0.5
+## 2.0.4
 
 ### Patch Changes
 
 - Updated dependencies [d6b4c090]
   - @smithy/types@2.3.5
 
-## 2.0.4
-
-### Patch Changes
-
-- 2f70f105: Support `aliases` for `MiddlewareStack`
-- Updated dependencies [2f70f105]
-- Updated dependencies [9a562d37]
-  - @smithy/types@2.3.4
-
 ## 2.0.3
 
 ### Patch Changes
 
-- 20fc148d: check calls to external instances of middlewareStack
+- Updated dependencies [2f70f105]
+- Updated dependencies [9a562d37]
+  - @smithy/types@2.3.4
 
 ## 2.0.2
 
 ### Patch Changes
 
-- ea0635d6: add debug method to middlewareStack
 - Updated dependencies [ea0635d6]
   - @smithy/types@2.3.3
 
@@ -394,6 +388,7 @@
 ### Patch Changes
 
 - e6ea6bd5: move devDeps into deps
+- 5b6fa539: Add `getSmithyContext()` helper function
 - Updated dependencies [fbfeebee]
 - Updated dependencies [c0b17a13]
   - @smithy/types@2.3.2
@@ -425,4 +420,4 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-See [@aws-sdk/middleware-stack](https://github.com/aws/aws-sdk-js-v3/blob/main/packages/middleware-stack/CHANGELOG.md) for additional history.
+See [@aws-sdk/util-middleware](https://github.com/aws/aws-sdk-js-v3/blob/main/packages/util-middleware/CHANGELOG.md) for additional history.

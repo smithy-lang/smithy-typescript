@@ -15,6 +15,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -506,7 +507,7 @@ public final class AddHttpAuthSchemePlugin implements HttpAuthTypeScriptIntegrat
             i++;
         }
         w.write("return Object.assign($L, {", configName).indent();
-        w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+        w.addImportSubmodule("normalizeProvider", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         w.write("authSchemePreference: normalizeProvider(config.authSchemePreference ?? []),");
         for (ConfigField configField : configFields.values()) {
             if (configField.configFieldWriter().isPresent()) {

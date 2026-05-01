@@ -1,4 +1,4 @@
-import type { DefaultsMode } from "@smithy/smithy-client";
+import type { DefaultsMode } from "@smithy/core/client";
 import type { Provider } from "@smithy/types";
 
 /**

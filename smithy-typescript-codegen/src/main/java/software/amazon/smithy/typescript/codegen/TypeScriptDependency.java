@@ -31,15 +31,12 @@ public enum TypeScriptDependency implements Dependency {
     @Deprecated
     AWS_SDK_TYPES("dependencies", "@aws-sdk/types", false),
     SMITHY_TYPES("dependencies", "@smithy/types", true),
-    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", true),
-    INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", true),
     CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", true),
     TYPES_NODE("devDependencies", "@types/node", "^20.14.8", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", true),
     MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", true),
     UTIL_RETRY("dependencies", "@smithy/util-retry", false),
-    MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", true),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", false),
     @Deprecated
     AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
@@ -49,8 +46,6 @@ public enum TypeScriptDependency implements Dependency {
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", true),
 
     AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", true),
-
-    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", false),
 
     AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", true),
     AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", true),
@@ -71,9 +66,6 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", false),
 
     // Conditionally added when setting the auth middleware.
-    UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", false),
-    @Deprecated
-    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", false),
 
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@smithy/eventstream-serde-config-resolver", false),

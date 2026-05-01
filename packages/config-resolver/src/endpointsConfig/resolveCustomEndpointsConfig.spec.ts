@@ -1,9 +1,9 @@
-import { normalizeProvider } from "@smithy/util-middleware";
+import { normalizeProvider } from "@smithy/core/client";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { resolveCustomEndpointsConfig } from "./resolveCustomEndpointsConfig";
 
-vi.mock("@smithy/util-middleware");
+vi.mock("@smithy/core/client");
 
 describe(resolveCustomEndpointsConfig.name, () => {
   const mockEndpoint = {

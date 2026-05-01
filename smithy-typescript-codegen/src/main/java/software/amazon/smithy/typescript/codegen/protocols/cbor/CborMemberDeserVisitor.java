@@ -10,6 +10,7 @@ import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.DocumentMemberDeserVisitor;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
@@ -30,7 +31,8 @@ public class CborMemberDeserVisitor extends DocumentMemberDeserVisitor {
     public CborMemberDeserVisitor(ProtocolGenerator.GenerationContext context, String dataSource) {
         super(context, dataSource, TimestampFormatTrait.Format.EPOCH_SECONDS);
         this.context = context;
-        context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        context.getWriter()
+            .addImportSubmodule("_json", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         this.serdeElisionEnabled = !context.getSettings().generateServerSdk();
         this.dataSource = dataSource;
     }

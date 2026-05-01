@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { normalizeProvider } from "@smithy/util-middleware";
+import { normalizeProvider } from "@smithy/core/client";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { resolveEndpointsConfig } from "./resolveEndpointsConfig";
 import { getEndpointFromRegion } from "./utils/getEndpointFromRegion";
 
-vi.mock("@smithy/util-middleware");
+vi.mock("@smithy/core/client");
 vi.mock("./utils/getEndpointFromRegion");
 
 describe(resolveEndpointsConfig.name, () => {

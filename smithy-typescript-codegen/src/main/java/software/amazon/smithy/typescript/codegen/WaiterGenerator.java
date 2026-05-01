@@ -31,7 +31,7 @@ import software.amazon.smithy.waiters.Waiter;
 class WaiterGenerator implements Runnable {
 
     static final String WAITERS_FOLDER = "waiters";
-    static final TypeScriptDependency WAITABLE_UTIL_PACKAGE = TypeScriptDependency.AWS_SDK_UTIL_WAITERS;
+    static final String WAITER_SUBMODULE = SmithyCoreSubmodules.CLIENT;
 
     private final String waiterName;
     private final Waiter waiter;
@@ -87,7 +87,7 @@ class WaiterGenerator implements Runnable {
 
     @Override
     public void run() {
-        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_WAITERS);
+        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
         this.generateAcceptors();
         this.generateWaiter();
     }
@@ -97,11 +97,11 @@ class WaiterGenerator implements Runnable {
     }
 
     private void generateWaiter() {
-        writer.addImport("createWaiter", null, WAITABLE_UTIL_PACKAGE);
-        writer.addTypeImport("WaiterResult", null, WAITABLE_UTIL_PACKAGE);
-        writer.addImport("WaiterState", null, WAITABLE_UTIL_PACKAGE);
-        writer.addImport("checkExceptions", null, WAITABLE_UTIL_PACKAGE);
-        writer.addTypeImport("WaiterConfiguration", null, WAITABLE_UTIL_PACKAGE);
+        writer.addImportSubmodule("createWaiter", null, TypeScriptDependency.SMITHY_CORE, WAITER_SUBMODULE);
+        writer.addTypeImportSubmodule("WaiterResult", null, TypeScriptDependency.SMITHY_CORE, WAITER_SUBMODULE);
+        writer.addImportSubmodule("WaiterState", null, TypeScriptDependency.SMITHY_CORE, WAITER_SUBMODULE);
+        writer.addImportSubmodule("checkExceptions", null, TypeScriptDependency.SMITHY_CORE, WAITER_SUBMODULE);
+        writer.addTypeImportSubmodule("WaiterConfiguration", null, TypeScriptDependency.SMITHY_CORE, WAITER_SUBMODULE);
 
         // generates (deprecated) WaitFor....
         writer.writeDocs(

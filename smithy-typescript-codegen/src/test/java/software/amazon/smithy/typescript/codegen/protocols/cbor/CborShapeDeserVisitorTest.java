@@ -26,6 +26,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -111,7 +112,7 @@ class CborShapeDeserVisitorTest {
     void deserializeStructure(@Mock StructureShape structureShape) {
         subject.deserializeStructure(context, structureShape);
 
-        verify(writer).addImport("take", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        verify(writer).addImportSubmodule("take", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         verify(writer).openBlock(eq("return take(output, {"), eq("}) as any;"), any());
     }
 

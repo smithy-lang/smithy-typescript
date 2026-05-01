@@ -5,6 +5,7 @@
 package software.amazon.smithy.typescript.codegen.extensions;
 
 import software.amazon.smithy.typescript.codegen.Dependency;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.utils.Pair;
 
@@ -17,11 +18,16 @@ public class DefaultExtensionConfigurationInterface implements ExtensionConfigur
 
     @Override
     public Pair<String, Dependency> getExtensionConfigurationFn() {
-        return Pair.of("getDefaultExtensionConfiguration", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        return Pair.of("getDefaultExtensionConfiguration", TypeScriptDependency.SMITHY_CORE);
     }
 
     @Override
     public Pair<String, Dependency> resolveRuntimeConfigFn() {
-        return Pair.of("resolveDefaultRuntimeConfig", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        return Pair.of("resolveDefaultRuntimeConfig", TypeScriptDependency.SMITHY_CORE);
+    }
+
+    @Override
+    public String submodule() {
+        return SmithyCoreSubmodules.CLIENT;
     }
 }

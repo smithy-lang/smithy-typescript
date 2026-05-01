@@ -9,11 +9,11 @@ The "clients" column is a count of AWS SDK clients directly using the package.
 
 | Package              | LoC  | Description/Rationale             | Clients | Status |
 | -------------------- | ---- | --------------------------------- | ------- | ------ |
-| `smithy-client`      | 1504 | Client/command base classes       | 425     |        |
-| `middleware-stack`   | 394  | Core middleware infrastructure    | 425     |        |
-| `util-middleware`    | 28   | Middleware utilities              | 425     |        |
-| `invalid-dependency` | 19   | Placeholder used by smithy-client | 425     |        |
-| `util-waiter`        | 373  | Waiter utilities                  | 68      |        |
+| `smithy-client`      | 1504 | Client/command base classes       | 425     | ✅     |
+| `middleware-stack`   | 394  | Core middleware infrastructure    | 425     | ✅     |
+| `util-middleware`    | 28   | Middleware utilities              | 425     | ✅     |
+| `invalid-dependency` | 19   | Placeholder used by smithy-client | 425     | ✅     |
+| `util-waiter`        | 373  | Waiter utilities                  | 68      | ✅     |
 
 ### core/config
 

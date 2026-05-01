@@ -4,6 +4,12 @@ import {
   getHttpAuthSchemeEndpointRuleSetPlugin,
   getHttpSigningPlugin,
 } from "@smithy/core";
+import {
+  type DefaultsMode as __DefaultsMode,
+  type SmithyConfiguration as __SmithyConfiguration,
+  type SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
+  Client as __Client,
+} from "@smithy/core/client";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import {
   type EndpointInputConfig,
@@ -20,12 +26,6 @@ import {
   resolveRetryConfig,
 } from "@smithy/middleware-retry";
 import type { HttpHandlerUserInput as __HttpHandlerUserInput } from "@smithy/protocol-http";
-import {
-  type DefaultsMode as __DefaultsMode,
-  type SmithyConfiguration as __SmithyConfiguration,
-  type SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
-  Client as __Client,
-} from "@smithy/smithy-client";
 import type {
   BodyLengthCalculator as __BodyLengthCalculator,
   CheckOptionalClientConfig as __CheckOptionalClientConfig,

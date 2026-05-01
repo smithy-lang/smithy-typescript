@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.utils.SmithyBuilder;
@@ -134,8 +135,8 @@ public record ConfigField(
 
     @SmithyInternalApi
     public static void defaultAuxiliaryConfigFieldWriter(TypeScriptWriter w, ConfigField configField) {
-        w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-        w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+        w.addDependency(TypeScriptDependency.SMITHY_CORE);
+        w.addImportSubmodule("normalizeProvider", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         w.write(
             "const $L = config.$L ? normalizeProvider(config.$L) : undefined;",
             configField.name(),

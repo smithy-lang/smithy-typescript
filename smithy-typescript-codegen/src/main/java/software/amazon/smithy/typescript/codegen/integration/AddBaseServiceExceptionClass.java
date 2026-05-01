@@ -13,6 +13,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -52,15 +53,17 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
             writerFactory.accept(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "models", serviceExceptionName + ".ts").toString(),
                 writer -> {
-                    writer.addImport(
+                    writer.addImportSubmodule(
                         "ServiceException",
                         "__ServiceException",
-                        TypeScriptDependency.AWS_SMITHY_CLIENT
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CLIENT
                     );
-                    writer.addTypeImport(
+                    writer.addTypeImportSubmodule(
                         "ServiceExceptionOptions",
                         "__ServiceExceptionOptions",
-                        TypeScriptDependency.AWS_SMITHY_CLIENT
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CLIENT
                     );
                     // Export ServiceException information to allow
                     //      documentation inheritance to consume their types

@@ -153,7 +153,7 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
         writerFactory.accept(
             Paths.get(CodegenUtils.SOURCE_FOLDER, "middleware", INTEGRATION_NAME, "index.ts").toString(),
             writer -> {
-                writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_MIDDLEWARE);
+                writer.addDependency(TypeScriptDependency.SMITHY_CORE);
                 String source = IoUtils.readUtf8Resource(getClass(), "http-api-key-auth.ts");
                 writer.write("$L$L", noTouchNoticePrefix, "http-api-key-auth.ts");
                 writer.write("$L", source);

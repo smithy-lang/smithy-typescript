@@ -1,4 +1,5 @@
 import { setFeature } from "@smithy/core";
+import { getSmithyContext } from "@smithy/core/client";
 import type {
   AuthScheme,
   EndpointParameters,
@@ -11,7 +12,6 @@ import type {
   SerializeHandlerOutput,
   SerializeMiddleware,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";

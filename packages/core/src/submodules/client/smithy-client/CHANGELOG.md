@@ -1,5 +1,7 @@
 # Change Log
 
+This is a past changelog, the package has been consolidated into `@smithy/core/client`.
+
 ## 4.12.13
 
 ### Patch Changes

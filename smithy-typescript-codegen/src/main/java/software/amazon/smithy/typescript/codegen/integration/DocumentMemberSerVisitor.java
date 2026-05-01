@@ -33,6 +33,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.typescript.codegen.knowledge.SerdeElisionIndex;
@@ -157,7 +158,13 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
     }
 
     private String handleFloat() {
-        context.getWriter().addImport("serializeFloat", "__serializeFloat", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        context.getWriter()
+            .addImportSubmodule(
+                "serializeFloat",
+                "__serializeFloat",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CLIENT
+            );
         return "__serializeFloat(" + dataSource + ")";
     }
 
@@ -260,7 +267,8 @@ public class DocumentMemberSerVisitor implements ShapeVisitor<String> {
         Symbol symbol = context.getSymbolProvider().toSymbol(shape);
 
         if (serdeElisionEnabled && serdeElisionIndex.mayElide(shape)) {
-            context.getWriter().addImport("_json", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+            context.getWriter()
+                .addImportSubmodule("_json", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
             return "_json(" + dataSource + ")";
         }
 

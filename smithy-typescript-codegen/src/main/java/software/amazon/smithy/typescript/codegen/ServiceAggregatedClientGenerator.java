@@ -246,7 +246,12 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                             String waiterLocalName = "waitUntil" + StringUtils.capitalize(waiterName);
 
                             writer.addTypeImport("WaiterConfiguration", null, TypeScriptDependency.SMITHY_TYPES);
-                            writer.addTypeImport("WaiterResult", null, TypeScriptDependency.AWS_SDK_UTIL_WAITERS);
+                            writer.addTypeImportSubmodule(
+                                "WaiterResult",
+                                null,
+                                TypeScriptDependency.SMITHY_CORE,
+                                SmithyCoreSubmodules.CLIENT
+                            );
 
                             String waitUntilResultType = WaiterGenerator.computeWaitUntilResultType(
                                 waiter,
@@ -295,7 +300,12 @@ final class ServiceAggregatedClientGenerator implements Runnable {
             aggregateClientName
         );
 
-        writer.addImport("createAggregatedClient", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule(
+            "createAggregatedClient",
+            null,
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.CLIENT
+        );
 
         if (hasPaginators && hasWaiters) {
             writer.write("createAggregatedClient(commands, $L, { paginators, waiters });", aggregateClientName);

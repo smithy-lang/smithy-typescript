@@ -1,3 +1,4 @@
+import { getSmithyContext } from "@smithy/core/client";
 import type {
   HandlerExecutionContext,
   InitializeHandler,
@@ -8,7 +9,6 @@ import type {
   Pluggable,
   StaticOperationSchema,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 import type { RuntimeTypecheckOptions } from "./types";
 import { validateSchema } from "./validateSchema";

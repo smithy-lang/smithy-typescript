@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import { NoAuthSigner } from "@smithy/core";
+import { NoOpLogger } from "@smithy/core/client";
 import { fromBase64, fromUtf8, toBase64, toUtf8 } from "@smithy/core/serde";
-import { NoOpLogger } from "@smithy/smithy-client";
 import type { IdentityProviderConfig } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
 

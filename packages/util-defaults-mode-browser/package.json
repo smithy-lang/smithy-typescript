@@ -23,8 +23,8 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/property-provider": "workspace:^",
-    "@smithy/smithy-client": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },

@@ -1,3 +1,4 @@
+import { getSmithyContext } from "@smithy/core/client";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
   DeserializeHandler,
@@ -6,7 +7,6 @@ import type {
   MetadataBearer,
   StaticOperationSchema,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 import { operation } from "../schemas/operation";
 import type { PreviouslyResolved } from "./schema-middleware-types";

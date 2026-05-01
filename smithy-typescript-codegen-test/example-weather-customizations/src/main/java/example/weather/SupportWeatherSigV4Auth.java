@@ -12,6 +12,7 @@ import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -99,8 +100,8 @@ public final class SupportWeatherSigV4Auth implements HttpAuthTypeScriptIntegrat
                         .name("region")
                         .type(w -> w.write("string"))
                         .source(w -> {
-                            w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-                            w.addImport("normalizeProvider", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+                            w.addDependency(TypeScriptDependency.SMITHY_CORE);
+                            w.addImportSubmodule("normalizeProvider", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
                             w.openBlock("await normalizeProvider(config.region)() || (() => {", "})()", () -> {
                                 w.write(
                                     "throw new Error(\"expected `region` to be configured for `aws.auth#sigv4`\");"

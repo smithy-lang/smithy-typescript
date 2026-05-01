@@ -1,7 +1,7 @@
 import { NODE_REGION_CONFIG_OPTIONS } from "@smithy/config-resolver";
+import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/core/client";
 import { loadConfig } from "@smithy/node-config-provider";
 import { memoize } from "@smithy/property-provider";
-import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/smithy-client";
 import type { Provider } from "@smithy/types";
 
 import {

@@ -1,5 +1,5 @@
+import type { DefaultsMode } from "@smithy/core/client";
 import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
-import type { DefaultsMode } from "@smithy/smithy-client";
 
 const AWS_DEFAULTS_MODE_ENV = "AWS_DEFAULTS_MODE";
 const AWS_DEFAULTS_MODE_CONFIG = "defaults_mode";

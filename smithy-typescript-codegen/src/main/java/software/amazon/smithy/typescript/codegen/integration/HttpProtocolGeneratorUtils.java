@@ -34,6 +34,7 @@ import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.RetryableTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
@@ -72,14 +73,24 @@ public final class HttpProtocolGeneratorUtils {
             case DATE_TIME:
                 context
                     .getWriter()
-                    .addImport("serializeDateTime", "__serializeDateTime", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    .addImportSubmodule(
+                        "serializeDateTime",
+                        "__serializeDateTime",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CLIENT
+                    );
                 return "__serializeDateTime(" + dataSource + ")";
             case EPOCH_SECONDS:
                 return "(" + dataSource + ".getTime() / 1_000)";
             case HTTP_DATE:
                 context
                     .getWriter()
-                    .addImport("dateToUtcString", "__dateToUtcString", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    .addImportSubmodule(
+                        "dateToUtcString",
+                        "__dateToUtcString",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
+                    );
                 return "__dateToUtcString(" + dataSource + ")";
             default:
                 throw new CodegenException("Unexpected timestamp format `" + format + "` on " + shape);
@@ -112,44 +123,58 @@ public final class HttpProtocolGeneratorUtils {
     ) {
         // This has always explicitly wrapped the dataSource in "new Date(..)", so it could never generate
         // an expression that evaluates to null. Codegen relies on this.
-        writer.addImport("expectNonNull", "__expectNonNull", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule(
+            "expectNonNull",
+            "__expectNonNull",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.SERDE
+        );
         switch (format) {
             case DATE_TIME:
                 // Clients should be able to handle offsets and normalize the datetime to an offset of zero.
                 if (isClient) {
-                    writer.addImport(
+                    writer.addImportSubmodule(
                         "parseRfc3339DateTimeWithOffset",
                         "__parseRfc3339DateTimeWithOffset",
-                        TypeScriptDependency.AWS_SMITHY_CLIENT
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
                     );
                     return String.format("__expectNonNull(__parseRfc3339DateTimeWithOffset(%s))", dataSource);
                 } else {
-                    writer.addImport(
+                    writer.addImportSubmodule(
                         "parseRfc3339DateTime",
                         "__parseRfc3339DateTime",
-                        TypeScriptDependency.AWS_SMITHY_CLIENT
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
                     );
                     return String.format("__expectNonNull(__parseRfc3339DateTime(%s))", dataSource);
                 }
             case HTTP_DATE:
-                writer.addImport(
+                writer.addImportSubmodule(
                     "parseRfc7231DateTime",
                     "__parseRfc7231DateTime",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.SERDE
                 );
                 return String.format("__expectNonNull(__parseRfc7231DateTime(%s))", dataSource);
             case EPOCH_SECONDS:
-                writer.addImport(
+                writer.addImportSubmodule(
                     "parseEpochTimestamp",
                     "__parseEpochTimestamp",
-                    TypeScriptDependency.AWS_SMITHY_CLIENT
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.SERDE
                 );
                 String modifiedDataSource = dataSource;
                 if (
                     requireNumericEpochSecondsInPayload &&
                         (bindingType == Location.DOCUMENT || bindingType == Location.PAYLOAD)
                 ) {
-                    writer.addImport("expectNumber", "__expectNumber", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                    writer.addImportSubmodule(
+                        "expectNumber",
+                        "__expectNumber",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.SERDE
+                    );
                     modifiedDataSource = String.format("__expectNumber(%s)", dataSource);
                 }
                 return String.format("__expectNonNull(__parseEpochTimestamp(%s))", modifiedDataSource);
@@ -177,7 +202,12 @@ public final class HttpProtocolGeneratorUtils {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
                 TypeScriptWriter writer = context.getWriter();
-                writer.addImport("LazyJsonString", "__LazyJsonString", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                writer.addImportSubmodule(
+                    "LazyJsonString",
+                    "__LazyJsonString",
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.SERDE
+                );
                 return "__LazyJsonString.from(" + dataSource + ")";
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
@@ -213,7 +243,12 @@ public final class HttpProtocolGeneratorUtils {
             String mediaType = mediaTypeTrait.get().getValue();
             if (CodegenUtils.isJsonMediaType(mediaType)) {
                 TypeScriptWriter writer = context.getWriter();
-                writer.addImport("LazyJsonString", "__LazyJsonString", TypeScriptDependency.AWS_SMITHY_CLIENT);
+                writer.addImportSubmodule(
+                    "LazyJsonString",
+                    "__LazyJsonString",
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.SERDE
+                );
                 return "__LazyJsonString.from(" + dataSource + ")";
             } else {
                 LOGGER.warning(() -> "Found unsupported mediatype " + mediaType + " on String shape: " + shape);
@@ -223,7 +258,13 @@ public final class HttpProtocolGeneratorUtils {
         if (!useExpect) {
             return dataSource;
         }
-        context.getWriter().addImport("expectString", "__expectString", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        context.getWriter()
+            .addImportSubmodule(
+                "expectString",
+                "__expectString",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.SERDE
+            );
         return "__expectString(" + dataSource + ")";
     }
 
@@ -280,7 +321,7 @@ public final class HttpProtocolGeneratorUtils {
      */
     public static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("collectBody", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule("collectBody", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.write("// Encode Uint8Array data into string with utf-8.");
         writer.write(

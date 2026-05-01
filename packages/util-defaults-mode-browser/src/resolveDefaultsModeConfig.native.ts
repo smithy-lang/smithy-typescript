@@ -1,5 +1,5 @@
+import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/core/client";
 import { memoize } from "@smithy/property-provider";
-import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/smithy-client";
 import type { Provider } from "@smithy/types";
 
 import { DEFAULTS_MODE_OPTIONS } from "./constants";

@@ -1,3 +1,4 @@
+import { getSmithyContext } from "@smithy/core/client";
 import { RpcProtocol } from "@smithy/core/protocols";
 import { TypeRegistry } from "@smithy/core/schema";
 import { deref, NormalizedSchema } from "@smithy/core/schema";
@@ -12,7 +13,6 @@ import type {
   SerdeFunctions,
   StaticErrorSchema,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 import { CborCodec } from "./CborCodec";
 import { loadSmithyRpcV2CborErrorCode } from "./parseCborBody";

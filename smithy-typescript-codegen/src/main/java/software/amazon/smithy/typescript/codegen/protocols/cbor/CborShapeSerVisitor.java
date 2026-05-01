@@ -120,7 +120,7 @@ public class CborShapeSerVisitor extends DocumentShapeSerVisitor {
     @Override
     protected void serializeStructure(ProtocolGenerator.GenerationContext context, StructureShape shape) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImport("take", null, TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule("take", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         writer.openBlock("return take(input, {", "});", () -> {
             Map<String, MemberShape> members = new TreeMap<>(shape.getAllMembers());
             members.forEach((memberName, memberShape) -> {

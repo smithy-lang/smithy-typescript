@@ -89,7 +89,7 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
 
     @Override
     public void run() {
-        writer.addImport("Client", "__Client", TypeScriptDependency.AWS_SMITHY_CLIENT);
+        writer.addImportSubmodule("Client", "__Client", TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
         writer.write("export { __Client };\n");
         writer.addRelativeImport(
             "getRuntimeConfig",
@@ -162,11 +162,17 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
             null,
             Paths.get(".", CodegenUtils.SOURCE_FOLDER, "runtimeExtensions")
         );
-        writer.addTypeImport("SmithyConfiguration", "__SmithyConfiguration", TypeScriptDependency.AWS_SMITHY_CLIENT);
-        writer.addTypeImport(
+        writer.addTypeImportSubmodule(
+            "SmithyConfiguration",
+            "__SmithyConfiguration",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.CLIENT
+        );
+        writer.addTypeImportSubmodule(
             "SmithyResolvedConfiguration",
             "__SmithyResolvedConfiguration",
-            TypeScriptDependency.AWS_SMITHY_CLIENT
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.CLIENT
         );
 
         // Hook for intercepting the client configuration.

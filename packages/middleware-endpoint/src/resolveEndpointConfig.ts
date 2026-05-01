@@ -1,5 +1,5 @@
+import { normalizeProvider } from "@smithy/core/client";
 import type { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@smithy/types";
-import { normalizeProvider } from "@smithy/util-middleware";
 
 import { getEndpointFromConfig } from "./adaptors/getEndpointFromConfig";
 import { toEndpointV1 } from "./adaptors/toEndpointV1";

@@ -22,6 +22,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.ServiceBareBonesClientGenerator;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -230,8 +231,13 @@ public class HttpAuthSchemeProviderGenerator implements Runnable {
                 Paths.get(".", serviceSymbol.getNamespace())
             );
             w.addTypeImport("HandlerExecutionContext", null, TypeScriptDependency.SMITHY_TYPES);
-            w.addDependency(TypeScriptDependency.UTIL_MIDDLEWARE);
-            w.addImport("getSmithyContext", null, TypeScriptDependency.UTIL_MIDDLEWARE);
+            w.addDependency(TypeScriptDependency.SMITHY_CORE);
+            w.addImportSubmodule(
+                "getSmithyContext",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.CLIENT
+            );
             w.openBlock(
                 """
                 /**

@@ -1,5 +1,5 @@
-import type { EndpointParameterInstructions } from "@smithy/middleware-endpoint";
-import { constructStack } from "@smithy/middleware-stack";
+// EndpointParameterInstructions inlined to avoid circular dependency with @smithy/middleware-endpoint.
+type EndpointParameterInstructions = Record<string, unknown>;
 import type { HttpRequest } from "@smithy/protocol-http";
 import type {
   Command as ICommand,
@@ -21,6 +21,7 @@ import type {
 } from "@smithy/types";
 import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 
+import { constructStack } from "../middleware-stack/MiddlewareStack";
 import { schemaLogFilter } from "./schemaLogFilter";
 
 /**

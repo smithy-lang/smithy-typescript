@@ -22,6 +22,7 @@ package software.amazon.smithy.typescript.codegen;
 public final class SmithyCoreSubmodules {
 
     public static final String CBOR = "/cbor";
+    public static final String CLIENT = "/client";
     public static final String PROTOCOLS = "/protocols";
     public static final String SERDE = "/serde";
 

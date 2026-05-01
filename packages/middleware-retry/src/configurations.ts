@@ -1,6 +1,6 @@
+import { normalizeProvider } from "@smithy/core/client";
 import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
 import type { Logger, Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
-import { normalizeProvider } from "@smithy/util-middleware";
 import {
   AdaptiveRetryStrategy,
   DEFAULT_MAX_ATTEMPTS,

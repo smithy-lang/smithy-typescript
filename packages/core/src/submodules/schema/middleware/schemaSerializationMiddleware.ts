@@ -1,3 +1,4 @@
+import { getSmithyContext } from "@smithy/core/client";
 import { toEndpointV1 } from "@smithy/core/endpoints";
 import type {
   EndpointBearer,
@@ -6,7 +7,6 @@ import type {
   SerializeHandlerArguments,
   StaticOperationSchema,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 import { operation } from "../schemas/operation";
 import type { PreviouslyResolved } from "./schema-middleware-types";

@@ -8,19 +8,21 @@ import {
   parseCborBody as parseBody,
   parseCborErrorBody as parseErrorBody,
 } from "@smithy/core/cbor";
-import { nv as __nv } from "@smithy/core/serde";
-import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
 import {
   _json,
   collectBody,
   decorateServiceException as __decorateServiceException,
+  take,
+  withBaseException,
+} from "@smithy/core/client";
+import {
   expectInt32 as __expectInt32,
   expectNonNull as __expectNonNull,
   expectString as __expectString,
+  nv as __nv,
   parseEpochTimestamp as __parseEpochTimestamp,
-  take,
-  withBaseException,
-} from "@smithy/smithy-client";
+} from "@smithy/core/serde";
+import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
 import type {
   Endpoint as __Endpoint,
   EventStreamSerdeContext as __EventStreamSerdeContext,

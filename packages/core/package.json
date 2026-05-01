@@ -75,6 +75,13 @@
       "node": "./dist-cjs/submodules/endpoints/index.js",
       "import": "./dist-es/submodules/endpoints/index.js",
       "require": "./dist-cjs/submodules/endpoints/index.js"
+    },
+    "./client": {
+      "types": "./dist-types/submodules/client/index.d.ts",
+      "module": "./dist-es/submodules/client/index.js",
+      "node": "./dist-cjs/submodules/client/index.js",
+      "import": "./dist-es/submodules/client/index.js",
+      "require": "./dist-cjs/submodules/client/index.js"
     }
   },
   "author": {
@@ -88,7 +95,6 @@
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/url-parser": "workspace:^",
-    "@smithy/util-middleware": "workspace:^",
     "tslib": "^2.6.2"
   },
   "engines": {
@@ -114,7 +120,9 @@
     "./schema.js",
     "./serde.d.ts",
     "./serde.js",
-    "dist-*/**"
+    "dist-*/**",
+    "./client.d.ts",
+    "./client.js"
   ],
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/core",
   "repository": {

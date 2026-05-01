@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { getSmithyContext } from "@smithy/core/client";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
   ErrorHandler,
@@ -11,7 +12,6 @@ import type {
   SMITHY_CONTEXT_KEY,
   SuccessHandler,
 } from "@smithy/types";
-import { getSmithyContext } from "@smithy/util-middleware";
 
 /**
  * @internal
