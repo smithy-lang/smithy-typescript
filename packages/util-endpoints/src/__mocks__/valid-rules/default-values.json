@@ -1,44 +1,46 @@
 {
+  "version": "1.0",
   "parameters": {
-    "Region": {
+    "bar": {
       "type": "string",
-      "builtIn": "AWS::Region",
-      "documentation": "The region to dispatch this request, eg. `us-east-1`.",
-      "default": "us-west-5",
-      "required": true
+      "documentation": "docs"
     },
-    "UseFips": {
-      "type": "boolean",
-      "builtIn": "AWS::UseFIPS",
-      "default": true,
-      "required": true
+    "baz": {
+      "type": "string",
+      "documentation": "docs",
+      "required": true,
+      "default": "baz"
+    },
+    "endpoint": {
+      "type": "string",
+      "builtIn": "SDK::Endpoint",
+      "required": true,
+      "default": "asdf",
+      "documentation": "docs"
     }
   },
   "rules": [
     {
-      "documentation": "Template the region into the URI when FIPS is enabled",
       "conditions": [
         {
-          "fn": "booleanEquals",
+          "fn": "isSet",
           "argv": [
             {
-              "ref": "UseFips"
-            },
-            true
+              "ref": "bar"
+            }
           ]
         }
       ],
       "endpoint": {
-        "url": "https://fips.{Region}.amazonaws.com"
+        "url": "https://example.com/{baz}"
       },
       "type": "endpoint"
     },
     {
-      "documentation": "error when fips is disabled",
       "conditions": [],
-      "error": "UseFips = false",
+      "documentation": "error fallthrough",
+      "error": "endpoint error",
       "type": "error"
     }
-  ],
-  "version": "1.3"
+  ]
 }
