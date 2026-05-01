@@ -80,6 +80,18 @@ module.exports = {
                 ],
                 message: "This package has been consolidated into @smithy/core/client.",
               },
+              {
+                group: [
+                  "@smithy/config-resolver",
+                  "@smithy/util-config-provider",
+                  "@smithy/node-config-provider",
+                  "@smithy/shared-ini-file-loader",
+                  "@smithy/property-provider",
+                  "@smithy/util-defaults-mode-browser",
+                  "@smithy/util-defaults-mode-node",
+                ],
+                message: "This package has been consolidated into @smithy/core/config.",
+              },
             ],
           },
         ],

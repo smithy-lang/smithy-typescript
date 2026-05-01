@@ -125,8 +125,13 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                 return MapUtils.of(
                     "maxAttempts",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                        writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
+                            "loadConfig",
+                            "loadNodeConfig",
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.CONFIG
+                        );
                         writer.addImport(
                             "NODE_MAX_ATTEMPT_CONFIG_OPTIONS",
                             null,
@@ -136,8 +141,13 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
                     },
                     "retryMode",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
-                        writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
+                            "loadConfig",
+                            "loadNodeConfig",
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.CONFIG
+                        );
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_RETRY);
                         writer.addImport(
                             "NODE_RETRY_MODE_CONFIG_OPTIONS",

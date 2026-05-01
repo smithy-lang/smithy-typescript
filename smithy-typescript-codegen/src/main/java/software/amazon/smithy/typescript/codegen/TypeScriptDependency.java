@@ -28,34 +28,19 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public enum TypeScriptDependency implements Dependency {
     SMITHY_CORE("dependencies", "@smithy/core", false),
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
-    @Deprecated
-    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", false),
     SMITHY_TYPES("dependencies", "@smithy/types", true),
-    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", true),
     TYPES_NODE("devDependencies", "@types/node", "^20.14.8", true),
 
     MIDDLEWARE_CONTENT_LENGTH("dependencies", "@smithy/middleware-content-length", true),
     MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", true),
     UTIL_RETRY("dependencies", "@smithy/util-retry", false),
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", false),
-    @Deprecated
-    AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", false),
     UTIL_ENDPOINTS("dependencies", "@smithy/util-endpoints", false),
 
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", true),
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", true),
 
     AWS_SDK_URL_PARSER("dependencies", "@smithy/url-parser", true),
-
-    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", true),
-    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", true),
-
-    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", false),
-
-    @Deprecated
-    UUID_TYPES("dependencies", "@types/uuid", "^9.0.1", false),
-    @Deprecated
-    UUID("dependencies", "uuid", "^9.0.1", false),
 
     // Conditionally added when httpChecksumRequired trait exists
     BODY_CHECKSUM("dependencies", "@smithy/middleware-apply-body-checksum", false),
@@ -64,8 +49,6 @@ public enum TypeScriptDependency implements Dependency {
     PROTOCOL_HTTP("dependencies", "@smithy/protocol-http", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", false),
-
-    // Conditionally added when setting the auth middleware.
 
     // Conditionally added if a event stream shape is found anywhere in the model
     AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@smithy/eventstream-serde-config-resolver", false),
@@ -107,7 +90,38 @@ public enum TypeScriptDependency implements Dependency {
     SERVER_COMMON("dependencies", "@aws-smithy/server-common", false),
 
     // for snapshot testing.
-    SNAPSHOTS("devDependencies", "@smithy/snapshot-testing", false);
+    SNAPSHOTS("devDependencies", "@smithy/snapshot-testing", false),
+
+    // Deprecated: consolidated into @smithy/core submodules.
+    // Retained for backward compatibility with downstream codegen.
+    @Deprecated
+    AWS_SDK_TYPES("dependencies", "@aws-sdk/types", "0.0.0", false),
+    @Deprecated
+    AWS_SMITHY_CLIENT("dependencies", "@smithy/smithy-client", "0.0.0", false),
+    @Deprecated
+    INVALID_DEPENDENCY("dependencies", "@smithy/invalid-dependency", "0.0.0", false),
+    @Deprecated
+    CONFIG_RESOLVER("dependencies", "@smithy/config-resolver", "0.0.0", false),
+    @Deprecated
+    MIDDLEWARE_STACK("dependencies", "@smithy/middleware-stack", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_UTIL_ENDPOINTS("dependencies", "@aws-sdk/util-endpoints", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_UTIL_WAITERS("dependencies", "@smithy/util-waiter", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_UTIL_DEFAULTS_MODE_NODE("dependencies", "@smithy/util-defaults-mode-node", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER("dependencies", "@smithy/util-defaults-mode-browser", "0.0.0", false),
+    @Deprecated
+    NODE_CONFIG_PROVIDER("dependencies", "@smithy/node-config-provider", "0.0.0", false),
+    @Deprecated
+    UUID_TYPES("dependencies", "@types/uuid", "0.0.0", false),
+    @Deprecated
+    UUID("dependencies", "uuid", "0.0.0", false),
+    @Deprecated
+    UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_UTIL_MIDDLEWARE("dependencies", "@smithy/util-middleware", "0.0.0", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

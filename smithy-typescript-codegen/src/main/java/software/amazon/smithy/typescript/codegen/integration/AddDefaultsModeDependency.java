@@ -26,8 +26,7 @@ public class AddDefaultsModeDependency implements TypeScriptIntegration {
         TypeScriptWriter writer
     ) {
         // Dependencies used in the default runtime config template.
-        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER);
-        writer.addDependency(TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_NODE);
+        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
         writer.addTypeImportSubmodule(
             "DefaultsMode",
             "__DefaultsMode",

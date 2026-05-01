@@ -2,16 +2,9 @@
   "name": "@smithy/util-defaults-mode-browser",
   "version": "4.3.49",
   "scripts": {
-    "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
-    "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline util-defaults-mode-browser",
-    "build:types": "yarn g:tsc -p tsconfig.types.json",
-    "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
-    "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
-    "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
-    "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
-    "test": "yarn g:vitest run",
-    "test:watch": "yarn g:vitest watch"
+    "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
+    "clean": "rm -rf dist-cjs dist-es dist-types",
+    "stage-release": "rm -rf .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -24,35 +17,14 @@
   "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
-    "@smithy/property-provider": "workspace:^",
-    "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
-  },
-  "devDependencies": {
-    "@types/node": "^18.11.9",
-    "concurrently": "7.0.0",
-    "downlevel-dts": "0.10.1",
-    "premove": "4.0.0",
-    "typedoc": "0.23.23"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "typesVersions": {
-    "<4.5": {
-      "dist-types/*": [
-        "dist-types/ts3.4/*"
-      ]
-    }
-  },
   "files": [
     "dist-*/**"
   ],
-  "react-native": {
-    "./dist-es/resolveDefaultsModeConfig": "./dist-es/resolveDefaultsModeConfig.native",
-    "./dist-cjs/resolveDefaultsModeConfig": "./dist-cjs/resolveDefaultsModeConfig.native"
-  },
-  "browser": {},
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-defaults-mode-node",
   "repository": {
     "type": "git",

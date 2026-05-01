@@ -1,5 +1,5 @@
-import { loadConfig } from "@smithy/node-config-provider";
-import { CredentialsProviderError } from "@smithy/property-provider";
+import { loadConfig } from "@smithy/core/config";
+import { CredentialsProviderError } from "@smithy/core/config";
 import type { AwsCredentialIdentity, Provider } from "@smithy/types";
 import type { RequestOptions } from "node:http";
 

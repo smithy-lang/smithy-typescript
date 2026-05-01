@@ -1,10 +1,23 @@
-export * from "./getHomeDir";
-export * from "./getProfileName";
-export * from "./getSSOTokenFilepath";
-export { getSSOTokenFromFile, SSOToken } from "./getSSOTokenFromFile";
-export * from "./loadSharedConfigFiles";
-export * from "./loadSsoSessionData";
-export * from "./parseKnownFiles";
-export { externalDataInterceptor } from "./externalDataInterceptor";
-export * from "./types";
-export { type ReadFileOptions, readFile } from "./readFile";
+/** @deprecated Use @smithy/core/config instead. */
+export {
+  getHomeDir,
+  ENV_PROFILE,
+  DEFAULT_PROFILE,
+  getProfileName,
+  getSSOTokenFilepath,
+  getSSOTokenFromFile,
+  SSOToken,
+  SharedConfigInit,
+  CONFIG_PREFIX_SEPARATOR,
+  loadSharedConfigFiles,
+  SsoSessionInit,
+  loadSsoSessionData,
+  SourceProfileInit,
+  parseKnownFiles,
+  externalDataInterceptor,
+  Profile,
+  ParsedIniData,
+  SharedConfigFiles,
+  ReadFileOptions,
+  readFile,
+} from "@smithy/core/config";

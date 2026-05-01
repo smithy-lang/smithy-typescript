@@ -1,5 +1,17 @@
-import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
 import type { IniSection } from "@smithy/types";
+
+/**
+ * @internal
+ * Inlined from @smithy/core/config to avoid circular dependency.
+ */
+type LoadedConfigSelectors<T> = {
+  environmentVariableSelector: (env: Record<string, string | undefined>) => T | undefined;
+  configFileSelector: (
+    profile: Record<string, string | undefined>,
+    configFile?: Record<string, Record<string, string | undefined>>
+  ) => T | undefined;
+  default: T | (() => T);
+};
 
 const ENV_ENDPOINT_URL = "AWS_ENDPOINT_URL";
 const CONFIG_ENDPOINT_URL = "endpoint_url";

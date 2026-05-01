@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.RequestCompressionTrait;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -49,9 +50,14 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                 return MapUtils.of(
                     "disableRequestCompression",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImportSubmodule(
+                            "loadConfig",
+                            "loadNodeConfig",
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.CONFIG
+                        );
                         writer.addImport(
                             "NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS",
                             null,
@@ -61,9 +67,14 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                     },
                     "requestMinCompressionSizeBytes",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
                         writer.addDependency(TypeScriptDependency.MIDDLEWARE_COMPRESSION);
-                        writer.addImport("loadConfig", "loadNodeConfig", TypeScriptDependency.NODE_CONFIG_PROVIDER);
+                        writer.addImportSubmodule(
+                            "loadConfig",
+                            "loadNodeConfig",
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.CONFIG
+                        );
                         writer.addImport(
                             "NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS",
                             null,

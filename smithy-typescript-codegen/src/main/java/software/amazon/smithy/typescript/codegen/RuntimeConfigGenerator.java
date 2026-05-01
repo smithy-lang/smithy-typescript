@@ -249,17 +249,19 @@ final class RuntimeConfigGenerator {
                         TypeScriptDependency.SMITHY_CORE,
                         SmithyCoreSubmodules.CLIENT
                     );
-                    writer.addImport(
+                    writer.addImportSubmodule(
                         "resolveDefaultsModeConfig",
                         null,
-                        TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_NODE
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CONFIG
                     );
                 }
                 case BROWSER -> {
-                    writer.addImport(
+                    writer.addImportSubmodule(
                         "resolveDefaultsModeConfig",
                         null,
-                        TypeScriptDependency.AWS_SDK_UTIL_DEFAULTS_MODE_BROWSER
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.CONFIG
                     );
                 }
                 case REACT_NATIVE -> {

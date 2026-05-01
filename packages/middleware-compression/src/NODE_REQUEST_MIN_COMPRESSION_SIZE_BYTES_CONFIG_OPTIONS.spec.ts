@@ -1,4 +1,4 @@
-import { numberSelector, SelectorType } from "@smithy/util-config-provider";
+import { numberSelector, SelectorType } from "@smithy/core/config";
 import { afterEach, describe, expect,test as it, vi } from "vitest";
 
 import {
@@ -8,7 +8,7 @@ import {
   NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_INI_NAME,
 } from "./NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS";
 
-vi.mock("@smithy/util-config-provider");
+vi.mock("@smithy/core/config");
 
 describe("NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS", () => {
   afterEach(() => {

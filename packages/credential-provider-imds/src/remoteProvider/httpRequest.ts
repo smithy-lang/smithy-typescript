@@ -1,4 +1,4 @@
-import { ProviderError } from "@smithy/property-provider";
+import { ProviderError } from "@smithy/core/config";
 import type { IncomingMessage, RequestOptions } from "node:http";
 import { request } from "node:http";
 

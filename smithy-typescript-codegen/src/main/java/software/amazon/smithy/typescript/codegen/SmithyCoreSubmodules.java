@@ -23,6 +23,7 @@ public final class SmithyCoreSubmodules {
 
     public static final String CBOR = "/cbor";
     public static final String CLIENT = "/client";
+    public static final String CONFIG = "/config";
     public static final String PROTOCOLS = "/protocols";
     public static final String SERDE = "/serde";
 

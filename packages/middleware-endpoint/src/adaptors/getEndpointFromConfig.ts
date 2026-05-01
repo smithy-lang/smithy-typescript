@@ -1,4 +1,4 @@
-import { loadConfig } from "@smithy/node-config-provider";
+import { loadConfig } from "@smithy/core/config";
 
 import { getEndpointUrlConfig } from "./getEndpointUrlConfig";
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { loadConfig } from "@smithy/node-config-provider";
+import { loadConfig } from "@smithy/core/config";
 import type { Endpoint } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
 

@@ -1,4 +1,4 @@
-import { CredentialsProviderError } from "@smithy/property-provider";
+import { CredentialsProviderError } from "@smithy/core/config";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";

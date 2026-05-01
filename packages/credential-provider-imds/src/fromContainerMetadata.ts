@@ -1,4 +1,4 @@
-import { CredentialsProviderError } from "@smithy/property-provider";
+import { CredentialsProviderError } from "@smithy/core/config";
 import type { AwsCredentialIdentityProvider, Logger } from "@smithy/types";
 import type { RequestOptions } from "node:http";
 import { parse } from "node:url";

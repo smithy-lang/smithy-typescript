@@ -1,5 +1,5 @@
-import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
-import { CONFIG_PREFIX_SEPARATOR } from "@smithy/shared-ini-file-loader";
+import type { LoadedConfigSelectors } from "@smithy/core/config";
+import { CONFIG_PREFIX_SEPARATOR } from "@smithy/core/config";
 
 const ENV_ENDPOINT_URL = "AWS_ENDPOINT_URL";
 const CONFIG_ENDPOINT_URL = "endpoint_url";

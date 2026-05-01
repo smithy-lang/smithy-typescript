@@ -1,5 +1,5 @@
 import { normalizeProvider } from "@smithy/core/client";
-import type { LoadedConfigSelectors } from "@smithy/node-config-provider";
+import type { LoadedConfigSelectors } from "@smithy/core/config";
 import type { Logger, Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
 import {
   AdaptiveRetryStrategy,

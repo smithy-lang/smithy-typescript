@@ -1,0 +1,54 @@
+import type { Provider } from "@smithy/types";
+
+import { chain } from "../property-provider/chain";
+import { memoize } from "../property-provider/memoize";
+import type { EnvOptions, GetterFromEnv } from "./fromEnv";
+import { fromEnv } from "./fromEnv";
+import type { GetterFromConfig, NodeSharedConfigInit } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
+import type { FromStaticConfig } from "./fromStatic";
+import { fromStatic } from "./fromStatic";
+
+/**
+ * @internal
+ */
+export type LocalConfigOptions = NodeSharedConfigInit & EnvOptions;
+
+/**
+ * @internal
+ */
+export interface LoadedConfigSelectors<T> {
+  /**
+   * A getter function getting the config values from all the environment
+   * variables.
+   */
+  environmentVariableSelector: GetterFromEnv<T>;
+  /**
+   * A getter function getting config values associated with the inferred
+   * profile from shared INI files
+   */
+  configFileSelector: GetterFromConfig<T>;
+  /**
+   * Default value or getter
+   */
+  default: FromStaticConfig<T>;
+}
+
+/**
+ * @internal
+ */
+export const loadConfig = <T = string>(
+  { environmentVariableSelector, configFileSelector, default: defaultValue }: LoadedConfigSelectors<T>,
+  configuration: LocalConfigOptions = {}
+): Provider<T> => {
+  const { signingName, logger } = configuration;
+  const envOptions: EnvOptions = { signingName, logger };
+
+  return memoize(
+    chain(
+      fromEnv(environmentVariableSelector, envOptions),
+      fromSharedConfigFiles(configFileSelector, configuration),
+      fromStatic(defaultValue)
+    )
+  );
+};

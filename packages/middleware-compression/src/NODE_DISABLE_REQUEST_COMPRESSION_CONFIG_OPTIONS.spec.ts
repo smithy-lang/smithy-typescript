@@ -1,4 +1,4 @@
-import { booleanSelector, SelectorType } from "@smithy/util-config-provider";
+import { booleanSelector, SelectorType } from "@smithy/core/config";
 import { afterEach, describe, expect,test as it, vi } from "vitest";
 
 import {
@@ -8,7 +8,7 @@ import {
   NODE_DISABLE_REQUEST_COMPRESSION_INI_NAME,
 } from "./NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS";
 
-vi.mock("@smithy/util-config-provider");
+vi.mock("@smithy/core/config");
 
 describe("NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS", () => {
   afterEach(() => {

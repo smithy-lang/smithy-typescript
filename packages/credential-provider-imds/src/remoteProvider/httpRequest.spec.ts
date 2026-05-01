@@ -1,4 +1,4 @@
-import { ProviderError } from "@smithy/property-provider";
+import { ProviderError } from "@smithy/core/config";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { httpRequest } from "./httpRequest";

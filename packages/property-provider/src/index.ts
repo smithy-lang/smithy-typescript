@@ -1,24 +1,10 @@
-/**
- * @internal
- */
-export * from "./CredentialsProviderError";
-/**
- * @internal
- */
-export * from "./ProviderError";
-/**
- * @internal
- */
-export * from "./TokenProviderError";
-/**
- * @internal
- */
-export * from "./chain";
-/**
- * @internal
- */
-export * from "./fromStatic";
-/**
- * @internal
- */
-export * from "./memoize";
+/** @deprecated Use @smithy/core/config instead. */
+export {
+  ProviderError,
+  ProviderErrorOptionsType,
+  CredentialsProviderError,
+  TokenProviderError,
+  chain,
+  fromValue as fromStatic,
+  memoize,
+} from "@smithy/core/config";

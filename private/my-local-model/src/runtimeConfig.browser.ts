@@ -1,10 +1,10 @@
 // smithy-typescript generated code
 import { Sha256 } from "@aws-crypto/sha256-browser";
 import { loadConfigsForDefaultMode } from "@smithy/core/client";
+import { resolveDefaultsModeConfig } from "@smithy/core/config";
 import { calculateBodyLength } from "@smithy/core/serde";
 import { eventStreamSerdeProvider } from "@smithy/eventstream-serde-browser";
 import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
-import { resolveDefaultsModeConfig } from "@smithy/util-defaults-mode-browser";
 import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/util-retry";
 
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";

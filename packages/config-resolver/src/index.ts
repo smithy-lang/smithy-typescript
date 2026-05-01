@@ -1,12 +1,32 @@
-/**
- * @internal
- */
-export * from "./endpointsConfig";
-/**
- * @internal
- */
-export * from "./regionConfig";
-/**
- * @internal
- */
-export * from "./regionInfo";
+/** @deprecated Use @smithy/core/config instead. */
+export {
+  ENV_USE_DUALSTACK_ENDPOINT,
+  CONFIG_USE_DUALSTACK_ENDPOINT,
+  DEFAULT_USE_DUALSTACK_ENDPOINT,
+  NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS,
+  nodeDualstackConfigSelectors,
+  ENV_USE_FIPS_ENDPOINT,
+  CONFIG_USE_FIPS_ENDPOINT,
+  DEFAULT_USE_FIPS_ENDPOINT,
+  NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS,
+  nodeFipsConfigSelectors,
+  CustomEndpointsInputConfig,
+  CustomEndpointsResolvedConfig,
+  resolveCustomEndpointsConfig,
+  EndpointsInputConfig,
+  EndpointsResolvedConfig,
+  resolveEndpointsConfig,
+  REGION_ENV_NAME,
+  REGION_INI_NAME,
+  NODE_REGION_CONFIG_OPTIONS,
+  NODE_REGION_CONFIG_FILE_OPTIONS,
+  RegionInputConfig,
+  RegionResolvedConfig,
+  resolveRegionConfig,
+  PartitionHash,
+  RegionHash,
+  EndpointVariant,
+  EndpointVariantTag,
+  GetRegionInfoOptions,
+  getRegionInfo,
+} from "@smithy/core/config";

@@ -31,7 +31,7 @@ For each group of packages being consolidated into a `@smithy/core` submodule:
 - [ ] Remove the old package from `core/package.json` dependencies.
 - [ ] Add any new transitive dependencies to `core/package.json` (e.g. `@smithy/util-buffer-from`).
 - [ ] Update all source imports (`from "@smithy/old-package"` → `from "@smithy/core/<submodule>"`).
-- [ ] Update `vi.mock()` paths in test files to match the new import paths.
+- [ ] Update `vi.mock()` paths in test files to match the new import paths. This includes mocks of the old package name (e.g. `vi.mock("@smithy/old-package")` → `vi.mock("@smithy/core/<submodule>")`) and mocks of relative paths that changed due to file relocation.
 - [ ] Don't forget `smithy-typescript-ssdk-libs/` packages.
 - [ ] Add the old package names to the banned imports list in `.eslintrc.js`, one group per submodule.
 

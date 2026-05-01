@@ -19,26 +19,28 @@ The "clients" column is a count of AWS SDK clients directly using the package.
 
 | Package                      | LoC | Description/Rationale                             | Clients | Status |
 | ---------------------------- | --- | ------------------------------------------------- | ------- | ------ |
-| `config-resolver`            | 628 | Always code-generated                             | 425     |        |
-| `util-config-provider`       | 42  | Only used by config-resolver                      | 0       |        |
-| `node-config-provider`       | 200 | Platform-specific, always present in Node clients | 425     |        |
-| `shared-ini-file-loader`     | 509 | Only consumer is node-config-provider             | 0       |        |
-| `property-provider`          | 309 | Provider chain utilities                          | 0       |        |
-| `util-defaults-mode-browser` | 152 | Platform-specific, always code-generated          | 425     |        |
-| `util-defaults-mode-node`    | 137 | Platform-specific, always code-generated          | 425     |        |
+| `config-resolver`            | 628 | Always code-generated                             | 425     | ✅     |
+| `util-config-provider`       | 42  | Only used by config-resolver                      | 0       | ✅     |
+| `node-config-provider`       | 200 | Platform-specific, always present in Node clients | 425     | ✅     |
+| `shared-ini-file-loader`     | 509 | Only consumer is node-config-provider             | 0       | ✅     |
+| `property-provider`          | 309 | Provider chain utilities                          | 0       | ✅     |
+| `util-defaults-mode-browser` | 152 | Platform-specific, always code-generated          | 425     | ✅     |
+| `util-defaults-mode-node`    | 137 | Platform-specific, always code-generated          | 425     | ✅     |
 
 ### core/protocols
 
-| Package                          | LoC | Description/Rationale         | Clients | Status |
-| -------------------------------- | --- | ----------------------------- | ------- | ------ |
-| `protocol-http`                  | 440 | HttpRequest/HttpResponse      | 425     |        |
-| `middleware-content-length`      | 58  | Always code-generated         | 425     |        |
-| `middleware-compression`         | 360 | Cloudwatch PutMetricData only | 1       |        |
-| `middleware-apply-body-checksum` | 104 | S3 Control only               | 1       |        |
-| `util-uri-escape`                | 22  | Encoding primitive            | 0       |        |
-| `querystring-builder`            | 26  | Depends on uri-escape         | 0       |        |
-| `querystring-parser`             | 28  | No deps                       | 0       |        |
-| `url-parser`                     | 25  | Depends on querystring-parser | 425     |        |
+| Package                          | LoC  | Description/Rationale         | Clients | Status |
+| -------------------------------- | ---- | ----------------------------- | ------- | ------ |
+| `protocol-http`                  | 440  | HttpRequest/HttpResponse      | 425     |        |
+| `middleware-content-length`      | 58   | Always code-generated         | 425     |        |
+| `middleware-compression`         | 360  | Cloudwatch PutMetricData only | 1       |        |
+| `middleware-apply-body-checksum` | 104  | S3 Control only               | 1       |        |
+| `util-uri-escape`                | 22   | Encoding primitive            | 0       |        |
+| `querystring-builder`            | 26   | Depends on uri-escape         | 0       |        |
+| `querystring-parser`             | 28   | No deps                       | 0       |        |
+| `url-parser`                     | 25   | Depends on querystring-parser | 425     |        |
+| `node-http-handler`              | 1600 | Platform-specific, large      | 425     |        |
+| `fetch-http-handler`             | 329  | Platform-specific             | 425     |        |
 
 ### core/serde
 
@@ -100,8 +102,6 @@ in turn depends on `-universal`, and then `-codec`.
 | ---------------------------------------- | ---- | ---------------------------- | ------- | ------------------------------ |
 | `types`                                  | 4666 | Root of dependency graph     | 425     | ✅                             |
 | `core`                                   | 6761 | --                           | 425     | ✅                             |
-| `node-http-handler`                      | 1600 | Platform-specific, large     | 425     | ✅                             |
-| `fetch-http-handler`                     | 329  | Platform-specific            | 425     | ✅                             |
 | `signature-v4`                           | 1425 | Not all clients need signing | 0       | ✅                             |
 | `signature-v4a`                          | 9906 | Very large, optional         | 0       | ✅                             |
 | `credential-provider-imds`               | 682  | AWS-specific, optional       | 0       | ✅                             |

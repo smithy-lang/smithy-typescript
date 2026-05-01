@@ -210,7 +210,8 @@ module.exports = class Inliner {
 
         for (const file of externals) {
           const idWithoutExtension = id.replace(/\.[tj]s$/, "");
-          if (idWithoutExtension.endsWith(path.basename(file))) {
+          const idBasename = path.basename(idWithoutExtension);
+          if (idBasename === path.basename(file)) {
             if (this.verbose) {
               console.log("EXTERN (variant)", id);
             }
