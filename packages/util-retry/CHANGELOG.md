@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.7
+
+### Patch Changes
+
+- add missing await to token acquisition in AdaptiveRetryStrategy
+
 ## 4.3.6
 
 ### Patch Changes

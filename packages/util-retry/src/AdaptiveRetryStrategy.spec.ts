@@ -71,6 +71,29 @@ describe(AdaptiveRetryStrategy.name, () => {
       expect(mockedStandardRetryStrategy).toHaveBeenCalledTimes(1);
       expect(token).toStrictEqual(mockRetryToken);
     });
+
+    it("resolves the token before calling getSendToken", async () => {
+      const mockedStandardRetryStrategy = vi.spyOn(StandardRetryStrategy.prototype, "acquireInitialRetryToken");
+      let tokenResolved = false;
+      mockedStandardRetryStrategy.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => {
+              tokenResolved = true;
+              resolve(mockRetryToken);
+            }, 10)
+          )
+      );
+      mockDefaultRateLimiter.getSendToken.mockImplementation(() => {
+        expect(tokenResolved).toBe(true);
+        return Promise.resolve();
+      });
+      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
+        rateLimiter: mockDefaultRateLimiter,
+      });
+      const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
+      expect(token).toStrictEqual(mockRetryToken);
+    });
   });
 
   describe("refreshRetryTokenForRetry", () => {
@@ -86,6 +109,28 @@ describe(AdaptiveRetryStrategy.name, () => {
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledWith(errorInfo);
       expect(mockedStandardRetryStrategy).toHaveBeenCalledTimes(1);
       expect(mockedStandardRetryStrategy).toHaveBeenCalledWith(mockRetryToken, errorInfo);
+      expect(token).toStrictEqual(mockRetryToken);
+    });
+
+    it("resolves the token before calling getSendToken", async () => {
+      let tokenResolved = false;
+      vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry").mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => {
+              tokenResolved = true;
+              resolve(mockRetryToken);
+            }, 10)
+          )
+      );
+      mockDefaultRateLimiter.getSendToken.mockImplementation(() => {
+        expect(tokenResolved).toBe(true);
+        return Promise.resolve();
+      });
+      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
+        rateLimiter: mockDefaultRateLimiter,
+      });
+      const token = await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo);
       expect(token).toStrictEqual(mockRetryToken);
     });
 

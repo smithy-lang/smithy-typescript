@@ -46,7 +46,7 @@ export class AdaptiveRetryStrategy implements RetryStrategyV2 {
   }
 
   public async acquireInitialRetryToken(retryTokenScope: string): Promise<RetryToken> {
-    const token = this.standardRetryStrategy.acquireInitialRetryToken(retryTokenScope);
+    const token = await this.standardRetryStrategy.acquireInitialRetryToken(retryTokenScope);
     await this.rateLimiter.getSendToken();
     return token;
   }
@@ -56,7 +56,7 @@ export class AdaptiveRetryStrategy implements RetryStrategyV2 {
     errorInfo: RetryErrorInfo
   ): Promise<RetryToken> {
     this.rateLimiter.updateClientSendingRate(errorInfo);
-    const token = this.standardRetryStrategy.refreshRetryTokenForRetry(tokenToRenew, errorInfo);
+    const token = await this.standardRetryStrategy.refreshRetryTokenForRetry(tokenToRenew, errorInfo);
     // called prior to return in case the token refresh throws (no need to wait in that case).
     await this.rateLimiter.getSendToken();
     return token;
