@@ -56,3 +56,11 @@ For each group of packages being consolidated into a `@smithy/core` submodule:
 - [ ] `yarn test:integration` — includes bundler and browser tests.
 - [ ] `yarn lint` in `packages/core` — no cross-submodule relative import violations.
 - [ ] `api-snapshot` script snapshots submodule exports via `package.json` `exports` entries.
+
+## Post-migration cleanup
+
+- [ ] Export types using `export type` so there is no `undefined` value showing up in the API snapshot.
+- [ ] Clean up tsdoc blocks to preserve pre-existing `@internal` and `@public` annotations instead of replacing them with `@deprecated`. The use of `@deprecated` should be additional.
+- [ ] Create an easy way to run a subset of core vitest tests. The CLI should accept a partial string match of the test filename or a submodule name to run only that submodule's tests.
+- [ ] Ban star exports (`export *`) in all client packages.
+- [ ] Enforce uniform imports using `@ianvs/prettier-plugin-sort-imports`.
