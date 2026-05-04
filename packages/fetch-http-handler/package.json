@@ -28,8 +28,6 @@
   "types": "./dist-types/index.d.ts",
   "dependencies": {
     "@smithy/core": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
-    "@smithy/querystring-builder": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },

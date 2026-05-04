@@ -106,7 +106,8 @@ public class SmithyRpcV2Cbor extends HttpRpcProtocolGenerator {
         SymbolReference responseType = getApplicationProtocol().getResponseType();
 
         HttpProtocolGeneratorUtils.generateMetadataDeserializer(context, responseType);
-        writer.addImportSubmodule("collectBody", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
+        writer
+            .addImportSubmodule("collectBody", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.PROTOCOLS);
 
         if (context.getSettings().generateClient()) {
             writer.addImportSubmodule(

@@ -1,5 +1,5 @@
 import { getSmithyContext } from "@smithy/core/client";
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/core/protocols";
 import type {
   DeserializeHandler,
   DeserializeHandlerArguments,

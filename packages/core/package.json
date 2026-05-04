@@ -99,9 +99,7 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
-    "@smithy/url-parser": "workspace:^",
     "@smithy/util-endpoints": "workspace:^",
     "tslib": "^2.6.2"
   },

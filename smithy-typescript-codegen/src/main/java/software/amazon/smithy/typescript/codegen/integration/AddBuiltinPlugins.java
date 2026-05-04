@@ -26,7 +26,8 @@ public class AddBuiltinPlugins implements TypeScriptIntegration {
                 .build(),
             RuntimeClientPlugin.builder()
                 .withConventions(
-                    TypeScriptDependency.MIDDLEWARE_CONTENT_LENGTH.dependency,
+                    "@smithy/core/protocols",
+                    TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
                     "ContentLength",
                     HAS_MIDDLEWARE
                 )

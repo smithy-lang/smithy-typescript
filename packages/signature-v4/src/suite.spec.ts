@@ -1,5 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import { describe, expect, test as it } from "vitest";
 
 import { SignatureV4 } from "./SignatureV4";

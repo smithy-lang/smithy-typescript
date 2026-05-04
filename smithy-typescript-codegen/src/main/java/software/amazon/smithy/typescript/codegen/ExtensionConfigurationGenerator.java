@@ -72,7 +72,19 @@ public class ExtensionConfigurationGenerator {
                 .entrySet()
                 .forEach(entry -> {
                     writer.addDependency(entry.getValue());
-                    writer.addTypeImport(entry.getKey(), null, entry.getValue());
+                    if (
+                        submodules.containsKey(entry.getKey())
+                            && entry.getValue().getPackageName().equals("@smithy/core")
+                    ) {
+                        writer.addTypeImportSubmodule(
+                            entry.getKey(),
+                            null,
+                            entry.getValue(),
+                            submodules.get(entry.getKey())
+                        );
+                    } else {
+                        writer.addTypeImport(entry.getKey(), null, entry.getValue());
+                    }
                 });
             writer.write(clientConfigurationContent);
         });

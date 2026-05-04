@@ -1,5 +1,5 @@
+import { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import { v4 } from "@smithy/core/serde";
-import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
 import {
   DEFAULT_MAX_ATTEMPTS,
@@ -16,6 +16,7 @@ import { defaultRetryDecider } from "./retryDecider";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import type { RetryQuota } from "./types";
 
+vi.mock("@smithy/core/protocols");
 vi.mock("@smithy/service-error-classification");
 vi.mock("./delayDecider");
 vi.mock("./retryDecider");

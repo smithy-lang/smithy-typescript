@@ -1,8 +1,21 @@
-export * from "./extensions";
-export * from "./Field";
-export * from "./Fields";
-export * from "./httpHandler";
-export * from "./httpRequest";
-export * from "./httpResponse";
-export * from "./isValidHostname";
-export * from "./types";
+/** @deprecated Use @smithy/core/protocols instead. */
+export {
+  Field,
+  Fields,
+  FieldsOptions,
+  HttpHandler,
+  HttpHandlerUserInput,
+  HttpRequest,
+  IHttpRequest,
+  HttpResponse,
+  isValidHostname,
+  HttpHandlerExtensionConfiguration,
+  HttpHandlerExtensionConfigType,
+  getHttpHandlerExtensionConfiguration,
+  resolveHttpHandlerRuntimeConfig,
+  FieldOptions,
+  FieldPosition,
+  HeaderBag,
+  HttpMessage,
+  HttpHandlerOptions,
+} from "@smithy/core/protocols";

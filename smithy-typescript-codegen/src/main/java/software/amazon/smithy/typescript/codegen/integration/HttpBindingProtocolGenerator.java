@@ -212,8 +212,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
 
         writer.write(context.getStringStore().flushVariableDeclarationCode());
 
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImportSubmodule(
+            "HttpRequest",
+            "__HttpRequest",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
+        writer.addImportSubmodule(
+            "HttpResponse",
+            "__HttpResponse",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
     }
 
     @Override
@@ -444,8 +454,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             )
         );
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", TypeScriptDependency.SERVER_COMMON);
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImportSubmodule(
+            "HttpRequest",
+            "__HttpRequest",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
+        writer.addImportSubmodule(
+            "HttpResponse",
+            "__HttpResponse",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
 
         Symbol serviceSymbol = symbolProvider.toSymbol(context.getService());
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
@@ -529,8 +549,18 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 ProtocolGenerator.getSanitizedName(getName())
             ).toString()
         );
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImportSubmodule(
+            "HttpRequest",
+            "__HttpRequest",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
+        writer.addImportSubmodule(
+            "HttpResponse",
+            "__HttpResponse",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
 
         final Symbol operationSymbol = symbolProvider.toSymbol(operation);
         final Symbol inputType = operationSymbol.expectProperty("inputType", Symbol.class);
@@ -973,7 +1003,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                 "resolvedPath",
                 "__resolvedPath",
                 TypeScriptDependency.SMITHY_CORE,
-                SmithyCoreSubmodules.CLIENT
+                SmithyCoreSubmodules.PROTOCOLS
             );
 
             Model model = context.getModel();
@@ -1064,7 +1094,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
             "extendedEncodeURIComponent",
             "__extendedEncodeURIComponent",
             TypeScriptDependency.SMITHY_CORE,
-            SmithyCoreSubmodules.CLIENT
+            SmithyCoreSubmodules.PROTOCOLS
         );
 
         Shape target = model.expectShape(binding.getMember().getTarget());

@@ -92,6 +92,17 @@ module.exports = {
                 ],
                 message: "This package has been consolidated into @smithy/core/config.",
               },
+              {
+                group: [
+                  "@smithy/protocol-http",
+                  "@smithy/middleware-content-length",
+                  "@smithy/util-uri-escape",
+                  "@smithy/querystring-builder",
+                  "@smithy/querystring-parser",
+                  "@smithy/url-parser",
+                ],
+                message: "This package has been consolidated into @smithy/core/protocols.",
+              },
             ],
           },
         ],

@@ -1,5 +1,5 @@
+import { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import { v4 } from "@smithy/core/serde";
-import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { isThrottlingError } from "@smithy/service-error-classification";
 import type {
   FinalizeHandler,

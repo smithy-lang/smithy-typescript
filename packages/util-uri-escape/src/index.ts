@@ -1,8 +1,2 @@
-/**
- * @internal
- */
-export * from "./escape-uri";
-/**
- * @internal
- */
-export * from "./escape-uri-path";
+/** @deprecated Use @smithy/core/protocols instead. */
+export { escapeUri, escapeUriPath } from "@smithy/core/protocols";

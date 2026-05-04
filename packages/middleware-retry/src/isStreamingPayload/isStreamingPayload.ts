@@ -1,4 +1,4 @@
-import type { HttpRequest } from "@smithy/protocol-http";
+import type { HttpRequest } from "@smithy/core/protocols";
 import { Readable } from "node:stream";
 
 /**

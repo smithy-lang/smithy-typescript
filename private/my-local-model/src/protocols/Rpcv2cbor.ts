@@ -10,11 +10,15 @@ import {
 } from "@smithy/core/cbor";
 import {
   _json,
-  collectBody,
   decorateServiceException as __decorateServiceException,
   take,
   withBaseException,
 } from "@smithy/core/client";
+import {
+  type HttpRequest as __HttpRequest,
+  type HttpResponse as __HttpResponse,
+  collectBody,
+} from "@smithy/core/protocols";
 import {
   expectInt32 as __expectInt32,
   expectNonNull as __expectNonNull,
@@ -22,7 +26,6 @@ import {
   nv as __nv,
   parseEpochTimestamp as __parseEpochTimestamp,
 } from "@smithy/core/serde";
-import type { HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/protocol-http";
 import type {
   Endpoint as __Endpoint,
   EventStreamSerdeContext as __EventStreamSerdeContext,

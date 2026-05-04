@@ -183,8 +183,18 @@ public abstract class HttpRpcProtocolGenerator implements ProtocolGenerator {
 
         writer.write(context.getStringStore().flushVariableDeclarationCode());
 
-        writer.addImport("HttpRequest", "__HttpRequest", TypeScriptDependency.PROTOCOL_HTTP);
-        writer.addImport("HttpResponse", "__HttpResponse", TypeScriptDependency.PROTOCOL_HTTP);
+        writer.addImportSubmodule(
+            "HttpRequest",
+            "__HttpRequest",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
+        writer.addImportSubmodule(
+            "HttpResponse",
+            "__HttpResponse",
+            TypeScriptDependency.SMITHY_CORE,
+            SmithyCoreSubmodules.PROTOCOLS
+        );
     }
 
     @Override

@@ -2,9 +2,9 @@
 import { NoAuthSigner } from "@smithy/core";
 import { SmithyRpcV2CborProtocol } from "@smithy/core/cbor";
 import { NoOpLogger } from "@smithy/core/client";
+import { parseUrl } from "@smithy/core/protocols";
 import { fromBase64, fromUtf8, toBase64, toUtf8 } from "@smithy/core/serde";
 import type { IdentityProviderConfig } from "@smithy/types";
-import { parseUrl } from "@smithy/url-parser";
 
 import { defaultRpcV2ProtocolHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";

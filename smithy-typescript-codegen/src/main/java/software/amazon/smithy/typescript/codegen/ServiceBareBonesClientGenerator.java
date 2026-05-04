@@ -301,7 +301,12 @@ public final class ServiceBareBonesClientGenerator implements Runnable {
         }
 
         Runnable innerContent = () -> {
-            writer.addTypeImport("HttpHandlerUserInput", "__HttpHandlerUserInput", TypeScriptDependency.PROTOCOL_HTTP);
+            writer.addTypeImportSubmodule(
+                "HttpHandlerUserInput",
+                "__HttpHandlerUserInput",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.PROTOCOLS
+            );
             writer.writeDocs(
                 "The HTTP handler to use or its constructor options. Fetch in browser and Https in Nodejs."
             );

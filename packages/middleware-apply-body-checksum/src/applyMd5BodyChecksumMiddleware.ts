@@ -1,5 +1,5 @@
+import { HttpRequest } from "@smithy/core/protocols";
 import { isArrayBuffer } from "@smithy/core/serde";
-import { HttpRequest } from "@smithy/protocol-http";
 import type {
   BuildHandler,
   BuildHandlerArguments,

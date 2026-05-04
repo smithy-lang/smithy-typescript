@@ -1,4 +1,4 @@
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
 
 import { compressionMiddleware } from "./compressionMiddleware";
@@ -7,7 +7,7 @@ import { compressString } from "./compressString";
 import { CompressionAlgorithm } from "./constants";
 import { isStreaming } from "./isStreaming";
 
-vi.mock("@smithy/protocol-http");
+vi.mock("@smithy/core/protocols");
 vi.mock("./compressString");
 vi.mock("./compressStream");
 vi.mock("./isStreaming");

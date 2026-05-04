@@ -1,3 +1,4 @@
+// Existing protocols submodule exports
 export * from "./collect-stream-body";
 export * from "./extended-encode-uri-component";
 export * from "./HttpBindingProtocol";
@@ -11,3 +12,38 @@ export * from "./serde/HttpInterceptingShapeSerializer";
 export * from "./serde/ToStringShapeSerializer";
 export * from "./serde/determineTimestampFormat";
 export * from "./SerdeContext";
+
+// protocol-http
+export { Field } from "./protocol-http/Field";
+export { Fields, FieldsOptions } from "./protocol-http/Fields";
+export { HttpHandler, HttpHandlerUserInput } from "./protocol-http/httpHandler";
+export { HttpRequest, IHttpRequest } from "./protocol-http/httpRequest";
+export { HttpResponse } from "./protocol-http/httpResponse";
+export { isValidHostname } from "./protocol-http/isValidHostname";
+export {
+  HttpHandlerExtensionConfiguration,
+  HttpHandlerExtensionConfigType,
+  getHttpHandlerExtensionConfiguration,
+  resolveHttpHandlerRuntimeConfig,
+} from "./protocol-http/extensions/httpExtensionConfiguration";
+export { FieldOptions, FieldPosition, HeaderBag, HttpMessage, HttpHandlerOptions } from "./protocol-http/types";
+
+// middleware-content-length
+export {
+  contentLengthMiddleware,
+  contentLengthMiddlewareOptions,
+  getContentLengthPlugin,
+} from "./middleware-content-length/contentLengthMiddleware";
+
+// util-uri-escape
+export { escapeUri } from "./util-uri-escape/escape-uri";
+export { escapeUriPath } from "./util-uri-escape/escape-uri-path";
+
+// querystring-builder
+export { buildQueryString } from "./querystring-builder/buildQueryString";
+
+// querystring-parser
+export { parseQueryString } from "./querystring-parser/parseQueryString";
+
+// url-parser
+export { parseUrl } from "./url-parser/parseUrl";

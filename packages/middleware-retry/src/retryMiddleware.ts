@@ -1,6 +1,6 @@
 import { NoOpLogger } from "@smithy/core/client";
+import { HttpRequest } from "@smithy/core/protocols";
 import { v4 } from "@smithy/core/serde";
-import { HttpRequest } from "@smithy/protocol-http";
 import { isServerError, isThrottlingError, isTransientError } from "@smithy/service-error-classification";
 import type {
   AbsoluteLocation,

@@ -1,6 +1,6 @@
 import { collectBody } from "@smithy/core/protocols";
+import { HttpRequest as __HttpRequest } from "@smithy/core/protocols";
 import { calculateBodyLength } from "@smithy/core/serde";
-import { HttpRequest as __HttpRequest } from "@smithy/protocol-http";
 import type {
   HeaderBag as __HeaderBag,
   HttpResponse,

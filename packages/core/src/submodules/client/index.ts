@@ -22,7 +22,6 @@ export {
 
 // formerly @smithy/smithy-client
 export { SmithyConfiguration, SmithyResolvedConfiguration, Client } from "./smithy-client/client";
-export { collectBody } from "./smithy-client/collect-stream-body";
 export { Command, CommandImpl } from "./smithy-client/command";
 export { SENSITIVE_STRING } from "./smithy-client/constants";
 export { createAggregatedClient } from "./smithy-client/create-aggregated-client";
@@ -40,7 +39,6 @@ export {
   ServiceException,
   decorateServiceException,
 } from "./smithy-client/exceptions";
-export { extendedEncodeURIComponent } from "./smithy-client/extended-encode-uri-component";
 export {
   getDefaultExtensionConfiguration,
   getDefaultClientConfiguration,
@@ -74,7 +72,6 @@ export {
   convertMap,
   take,
 } from "./smithy-client/object-mapping";
-export { resolvedPath } from "./smithy-client/resolve-path";
 export { schemaLogFilter } from "./smithy-client/schemaLogFilter";
 export { serializeFloat, serializeDateTime } from "./smithy-client/ser-utils";
 export { _json } from "./smithy-client/serde-json";

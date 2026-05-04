@@ -90,7 +90,7 @@ describe(sdkStreamMixin.name, () => {
 
     it("should transform the stream to string with utf-8 encoding by default", async () => {
       vi.mocked(fromArrayBuffer).mockImplementation(
-        ((await vi.importActual("@smithy/util-buffer-from")) as any).fromArrayBuffer
+        ((await vi.importActual("@smithy/core/serde")) as any).fromArrayBuffer
       );
       const sdkStream = sdkStreamMixin(passThrough);
       await writeDataToStream(passThrough, [Buffer.from("foo")]);

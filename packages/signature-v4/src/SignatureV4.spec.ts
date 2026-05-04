@@ -1,5 +1,5 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import type { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
 import type { MockInstance } from "vitest";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";

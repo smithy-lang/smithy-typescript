@@ -34,7 +34,6 @@
   "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/service-error-classification": "workspace:^",
     "@smithy/types": "workspace:^",
     "@smithy/util-retry": "workspace:^",

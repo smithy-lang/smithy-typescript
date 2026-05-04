@@ -16,7 +16,6 @@
   "module": "./dist-es/index.js",
   "dependencies": {
     "@smithy/core": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "fflate": "0.8.1",
     "tslib": "^2.6.2"

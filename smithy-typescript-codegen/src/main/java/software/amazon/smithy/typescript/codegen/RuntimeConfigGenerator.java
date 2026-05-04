@@ -121,7 +121,8 @@ final class RuntimeConfigGenerator {
         },
         "urlParser",
         writer -> {
-            writer.addImport("parseUrl", null, TypeScriptDependency.AWS_SDK_URL_PARSER);
+            writer
+                .addImportSubmodule("parseUrl", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.PROTOCOLS);
             writer.write("parseUrl");
         },
         "utf8Decoder",

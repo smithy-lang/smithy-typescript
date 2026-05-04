@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import type { HttpRequest as IHttpRequest, HttpSigner, TokenIdentity } from "@smithy/types";
 
 /**

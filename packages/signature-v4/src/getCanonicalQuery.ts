@@ -1,5 +1,5 @@
+import { escapeUri } from "@smithy/core/protocols";
 import type { HttpRequest } from "@smithy/types";
-import { escapeUri } from "@smithy/util-uri-escape";
 
 import { SIGNATURE_HEADER } from "./constants";
 

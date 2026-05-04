@@ -26,8 +26,7 @@
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
   "dependencies": {
-    "@smithy/protocol-http": "workspace:^",
-    "@smithy/querystring-builder": "workspace:^",
+    "@smithy/core": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },

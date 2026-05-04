@@ -1,7 +1,7 @@
 import type { QueryParameterBag } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { parseQueryString } from "./";
+import { parseQueryString } from "./parseQueryString";
 
 describe("parseQueryString", () => {
   const testCases = new Map<string, QueryParameterBag>([

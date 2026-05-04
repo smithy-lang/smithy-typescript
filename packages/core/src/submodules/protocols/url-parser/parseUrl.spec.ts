@@ -1,7 +1,7 @@
 import type { Endpoint } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { parseUrl } from ".";
+import { parseUrl } from "./parseUrl";
 
 describe("parseUrl", () => {
   const testCases = new Map<string, Endpoint>([

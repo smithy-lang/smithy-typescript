@@ -26,7 +26,6 @@
   "dependencies": {
     "@smithy/core": "workspace:^",
     "@smithy/types": "workspace:^",
-    "@smithy/url-parser": "workspace:^",
     "tslib": "^2.6.2"
   },
   "devDependencies": {

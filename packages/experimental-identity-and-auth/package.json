@@ -29,7 +29,6 @@
     "@smithy/core": "workspace:^",
     "@smithy/middleware-endpoint": "workspace:^",
     "@smithy/middleware-retry": "workspace:^",
-    "@smithy/protocol-http": "workspace:^",
     "@smithy/signature-v4": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"

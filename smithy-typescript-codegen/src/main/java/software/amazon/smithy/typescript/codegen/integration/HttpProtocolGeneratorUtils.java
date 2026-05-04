@@ -321,7 +321,8 @@ public final class HttpProtocolGeneratorUtils {
      */
     public static void generateCollectBodyString(GenerationContext context) {
         TypeScriptWriter writer = context.getWriter();
-        writer.addImportSubmodule("collectBody", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CLIENT);
+        writer
+            .addImportSubmodule("collectBody", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.PROTOCOLS);
         writer.addTypeImport("SerdeContext", "__SerdeContext", TypeScriptDependency.SMITHY_TYPES);
         writer.write("// Encode Uint8Array data into string with utf-8.");
         writer.write(
@@ -480,7 +481,12 @@ public final class HttpProtocolGeneratorUtils {
         writer.write("let { hostname: resolvedHostname } = await context.endpoint();");
         // Check if disableHostPrefixInjection has been set to true at runtime
         writer.openBlock("if (context.disableHostPrefix !== true) {", "}", () -> {
-            writer.addImport("isValidHostname", "__isValidHostname", TypeScriptDependency.PROTOCOL_HTTP);
+            writer.addImportSubmodule(
+                "isValidHostname",
+                "__isValidHostname",
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.PROTOCOLS
+            );
             writer.write("resolvedHostname = $S + resolvedHostname;", trait.getHostPrefix().toString());
             if (operation.getInput().isPresent()) {
                 List<SmithyPattern.Segment> prefixLabels = trait.getHostPrefix().getLabels();

@@ -1,4 +1,5 @@
 import { normalizeProvider } from "@smithy/core/client";
+import { escapeUri } from "@smithy/core/protocols";
 import { toHex } from "@smithy/core/serde";
 import { toUint8Array } from "@smithy/core/serde";
 import type {
@@ -10,7 +11,6 @@ import type {
   HttpRequest,
   Provider,
 } from "@smithy/types";
-import { escapeUri } from "@smithy/util-uri-escape";
 
 import { getCanonicalQuery } from "./getCanonicalQuery";
 import { iso8601 } from "./utilDate";

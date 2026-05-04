@@ -371,7 +371,7 @@ public final class HttpProtocolTestGenerator implements Runnable {
         if (writer == null) {
             context.getWriterDelegator().useFileWriter(createTestCaseFilename(), writer -> this.writer = writer);
             writer.addDependency(TypeScriptDependency.SMITHY_TYPES);
-            writer.addDependency(TypeScriptDependency.PROTOCOL_HTTP);
+            writer.addDependency(TypeScriptDependency.SMITHY_CORE);
             // Add the template to each generated test.
             writer.write(IoUtils.readUtf8Resource(getClass(), "protocol-test-stub.ts"));
             writer.addImport("test", "it", TypeScriptDependency.VITEST);
@@ -689,8 +689,13 @@ public final class HttpProtocolTestGenerator implements Runnable {
         List<String> explicitQueryValues = testCase.getQueryParams();
         if (!explicitQueryValues.isEmpty()) {
             // Use buildQueryString like the fetch handler will.
-            writer.addDependency(TypeScriptDependency.AWS_SDK_QUERYSTRING_BUILDER);
-            writer.addImport("buildQueryString", null, TypeScriptDependency.AWS_SDK_QUERYSTRING_BUILDER);
+            writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+            writer.addImportSubmodule(
+                "buildQueryString",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.PROTOCOLS
+            );
 
             writer.write("const queryString = buildQueryString(r.query);");
             explicitQueryValues.forEach(

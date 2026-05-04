@@ -21,6 +21,7 @@ generate-protocol-tests:
 	node ./scripts/post-protocol-test-codegen
 	yarn
 	yarn turbo run build -F="./private/*" --only
+	make test-protocols;
 
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals && yarn test:index)
@@ -34,10 +35,10 @@ benchmark:
 
 # "build generate test"
 bgt:
-	make build generate-protocol-tests test-protocols
+	make build generate-protocol-tests
 
 gt:
-	make generate-protocol-tests test-protocols
+	make generate-protocol-tests
 
 test-unit:
 	yarn g:vitest run -c vitest.config.mts

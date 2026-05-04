@@ -1,4 +1,4 @@
-import type { HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpHandler, HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { Client, HttpHandlerOptions, RequestHandler, RequestHandlerOutput } from "@smithy/types";
 import { expect } from "vitest";
 

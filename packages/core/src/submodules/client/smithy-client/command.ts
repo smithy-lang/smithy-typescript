@@ -1,6 +1,6 @@
 // EndpointParameterInstructions inlined to avoid circular dependency with @smithy/middleware-endpoint.
 type EndpointParameterInstructions = Record<string, unknown>;
-import type { HttpRequest } from "@smithy/protocol-http";
+import type { HttpRequest } from "@smithy/core/protocols";
 import type {
   Command as ICommand,
   FinalizeHandlerArguments,

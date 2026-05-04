@@ -582,7 +582,22 @@
     "determineTimestampFormat": "function, since <=3.23.17",
     "extendedEncodeURIComponent": "function, since <=3.23.17",
     "requestBuilder": "function, since <=3.23.17",
-    "resolvedPath": "function, since <=3.23.17"
+    "resolvedPath": "function, since <=3.23.17",
+    "Field": "function, since 3.23.17",
+    "Fields": "function, since 3.23.17",
+    "HttpRequest": "function, since 3.23.17",
+    "HttpResponse": "function, since 3.23.17",
+    "buildQueryString": "function, since 3.23.17",
+    "contentLengthMiddleware": "function, since 3.23.17",
+    "contentLengthMiddlewareOptions": "object, since 3.23.17",
+    "escapeUri": "function, since 3.23.17",
+    "escapeUriPath": "function, since 3.23.17",
+    "getContentLengthPlugin": "function, since 3.23.17",
+    "getHttpHandlerExtensionConfiguration": "function, since 3.23.17",
+    "isValidHostname": "function, since 3.23.17",
+    "parseQueryString": "function, since 3.23.17",
+    "parseUrl": "function, since 3.23.17",
+    "resolveHttpHandlerRuntimeConfig": "function, since 3.23.17"
   },
   "@smithy/core/serde": {
     "generateIdempotencyToken": "function, since <=3.23.17",
@@ -700,9 +715,6 @@
   "@smithy/core/client": {
     "WaiterState": "object, since <=3.23.17",
     "AlgorithmId": "object, since <=3.23.17",
-    "collectBody": "function, since <=3.23.17",
-    "extendedEncodeURIComponent": "function, since <=3.23.17",
-    "resolvedPath": "function, since <=3.23.17",
     "Client": "function, since <=3.23.17",
     "Command": "function, since <=3.23.17",
     "NoOpLogger": "function, since <=3.23.17",

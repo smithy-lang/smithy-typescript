@@ -1,5 +1,5 @@
+import { parseUrl } from "@smithy/core/protocols";
 import type { Endpoint, EndpointV2 } from "@smithy/types";
-import { parseUrl } from "@smithy/url-parser";
 
 /**
  * @deprecated Use `toEndpointV1` from `@smithy/core/endpoints` instead.

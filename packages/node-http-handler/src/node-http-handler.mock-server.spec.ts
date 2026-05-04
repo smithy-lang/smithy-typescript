@@ -1,5 +1,5 @@
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import type { Server as HttpServer } from "node:http";
 import http from "node:http";
 import type { Server as HttpsServer } from "node:https";
