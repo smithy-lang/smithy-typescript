@@ -1,8 +1,21 @@
-export { BinaryDecisionDiagram } from "./bdd/BinaryDecisionDiagram";
-export * from "./cache/EndpointCache";
-export { decideEndpoint } from "./decideEndpoint";
-export * from "./lib/isIpAddress";
-export * from "./lib/isValidHostLabel";
-export * from "./utils/customEndpointFunctions";
-export * from "./resolveEndpoint";
-export * from "./types";
+/** @deprecated Use @smithy/core/endpoints instead. */
+export {
+  BinaryDecisionDiagram,
+  EndpointCache,
+  decideEndpoint,
+  isIpAddress,
+  isValidHostLabel,
+  customEndpointFunctions,
+  resolveEndpoint,
+  EndpointError,
+} from "@smithy/core/endpoints";
+export type {
+  EndpointFunctions,
+  EndpointRuleObject,
+  ConditionObject,
+  ErrorRuleObject,
+  RuleSetObject,
+  TreeRuleObject,
+  EvaluateOptions,
+  EndpointParams,
+} from "@smithy/core/endpoints";

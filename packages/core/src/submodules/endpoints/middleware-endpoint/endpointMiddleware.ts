@@ -1,4 +1,3 @@
-import { setFeature } from "@smithy/core";
 import { getSmithyContext } from "@smithy/core/client";
 import type {
   AuthScheme,
@@ -11,9 +10,23 @@ import type {
   SerializeHandlerArguments,
   SerializeHandlerOutput,
   SerializeMiddleware,
+  SmithyFeatures,
 } from "@smithy/types";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
+
+function setFeature<F extends keyof SmithyFeatures>(
+  context: HandlerExecutionContext,
+  feature: F,
+  value: SmithyFeatures[F]
+) {
+  if (!context.__smithy_context) {
+    context.__smithy_context = { features: {} };
+  } else if (!context.__smithy_context.features) {
+    context.__smithy_context.features = {};
+  }
+  context.__smithy_context.features![feature] = value;
+}
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
 import type { EndpointParameterInstructions } from "./types";
 

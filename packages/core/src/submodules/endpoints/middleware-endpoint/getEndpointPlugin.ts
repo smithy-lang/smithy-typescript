@@ -1,9 +1,18 @@
-import { serializerMiddlewareOption } from "@smithy/core/serde";
 import type { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
 import { endpointMiddleware } from "./endpointMiddleware";
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
 import type { EndpointParameterInstructions } from "./types";
+
+/**
+ * Inlined from @smithy/core/serde to avoid cross-submodule CJS resolution issue.
+ */
+const serializerMiddlewareOption: SerializeHandlerOptions = {
+  name: "serializerMiddleware",
+  step: "serialize",
+  tags: ["SERIALIZER"],
+  override: true,
+};
 
 /**
  * @internal

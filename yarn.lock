@@ -2928,7 +2928,6 @@ __metadata:
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
     "@smithy/types": "workspace:^"
-    "@smithy/util-endpoints": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
@@ -3168,12 +3167,7 @@ __metadata:
   resolution: "@smithy/middleware-endpoint@workspace:packages/middleware-endpoint"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/types": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
@@ -3525,13 +3519,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/util-endpoints@workspace:packages/util-endpoints"
   dependencies:
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
+    "@smithy/core": "workspace:^"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 

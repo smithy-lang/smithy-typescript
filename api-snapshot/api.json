@@ -710,7 +710,23 @@
     "EventStreamSerde": "function, since <=3.23.17"
   },
   "@smithy/core/endpoints": {
-    "toEndpointV1": "function, since <=3.23.17"
+    "toEndpointV1": "function, since <=3.23.17",
+    "BinaryDecisionDiagram": "function, since 3.23.17",
+    "EndpointCache": "function, since 3.23.17",
+    "EndpointError": "function, since 3.23.17",
+    "customEndpointFunctions": "object, since 3.23.17",
+    "decideEndpoint": "function, since 3.23.17",
+    "endpointMiddleware": "function, since 3.23.17",
+    "endpointMiddlewareOptions": "object, since 3.23.17",
+    "getEndpointFromInstructions": "function, since 3.23.17",
+    "getEndpointPlugin": "function, since 3.23.17",
+    "isIpAddress": "function, since 3.23.17",
+    "isValidHostLabel": "function, since 3.23.17",
+    "middlewareEndpointToEndpointV1": "function, since 3.23.17",
+    "resolveEndpoint": "function, since 3.23.17",
+    "resolveEndpointConfig": "function, since 3.23.17",
+    "resolveEndpointRequiredConfig": "function, since 3.23.17",
+    "resolveParams": "function, since 3.23.17"
   },
   "@smithy/core/client": {
     "WaiterState": "object, since <=3.23.17",

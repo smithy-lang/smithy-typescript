@@ -100,7 +100,6 @@
   "sideEffects": false,
   "dependencies": {
     "@smithy/types": "workspace:^",
-    "@smithy/util-endpoints": "workspace:^",
     "tslib": "^2.6.2"
   },
   "engines": {
@@ -178,6 +177,7 @@
     "./dist-es/submodules/config/shared-ini-file-loader/parseIni": false,
     "./dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles": false,
     "./dist-es/submodules/config/shared-ini-file-loader/readFile": false,
+    "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser",
     "./dist-es/submodules/serde/hash-node/hash-node": false,
     "./dist-es/submodules/serde/hash-stream-node/fileStreamHasher": false,
     "./dist-es/submodules/serde/hash-stream-node/readableStreamHasher": false,
@@ -280,6 +280,8 @@
     "./dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles": false,
     "./dist-cjs/submodules/config/shared-ini-file-loader/parseKnownFiles": false,
     "./dist-es/submodules/config/shared-ini-file-loader/externalDataInterceptor": false,
-    "./dist-cjs/submodules/config/shared-ini-file-loader/externalDataInterceptor": false
+    "./dist-cjs/submodules/config/shared-ini-file-loader/externalDataInterceptor": false,
+    "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser",
+    "./dist-cjs/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-cjs/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser"
   }
 }
