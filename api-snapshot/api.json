@@ -390,9 +390,6 @@
     "fromString": "function, since 4.12.13",
     "isArrayBuffer": "function, since 4.12.13",
     "Hash": "function, since 4.12.13",
-    "blobReader": "function, since 4.12.13",
-    "fileStreamHasher": "function, since 4.12.13",
-    "readableStreamHasher": "function, since 4.12.13",
     "ChecksumStream": "function, since 4.12.13",
     "createChecksumStream": "function, since 4.12.13",
     "createBufferedReadable": "function, since 4.12.13",
@@ -403,9 +400,7 @@
     "isBlob": "function, since 4.12.13",
     "isReadableStream": "function, since 4.12.13",
     "randomUUID": "function, since 4.12.13",
-    "Md5": "function, since 4.12.13",
     "Uint8ArrayBlobAdapter": "function, since 4.12.13",
-    "blobHasher": "function, since 4.12.13",
     "deserializerMiddleware": "function, since 4.12.13",
     "deserializerMiddlewareOption": "object, since 4.12.13",
     "getSerdePlugin": "function, since 4.12.13",
@@ -654,9 +649,6 @@
     "fromString": "function, since 3.23.17",
     "isArrayBuffer": "function, since 3.23.17",
     "Hash": "function, since 3.23.17",
-    "blobReader": "function, since 3.23.17",
-    "fileStreamHasher": "function, since 3.23.17",
-    "readableStreamHasher": "function, since 3.23.17",
     "ChecksumStream": "function, since 3.23.17",
     "createChecksumStream": "function, since 3.23.17",
     "createBufferedReadable": "function, since 3.23.17",
@@ -667,9 +659,7 @@
     "isBlob": "function, since 3.23.17",
     "isReadableStream": "function, since 3.23.17",
     "randomUUID": "function, since 3.23.17",
-    "Md5": "function, since 3.23.17",
     "Uint8ArrayBlobAdapter": "function, since 3.23.17",
-    "blobHasher": "function, since 3.23.17",
     "deserializerMiddleware": "function, since 3.23.17",
     "deserializerMiddlewareOption": "object, since 3.23.17",
     "getSerdePlugin": "function, since 3.23.17",
@@ -811,5 +801,12 @@
     "resolveEndpointsConfig": "function, since <=3.23.17",
     "resolveRegionConfig": "function, since <=3.23.17",
     "fromValue": "function, since 3.23.17"
+  },
+  "@smithy/core/checksum": {
+    "blobReader": "function, since 3.23.17",
+    "fileStreamHasher": "function, since 3.23.17",
+    "readableStreamHasher": "function, since 3.23.17",
+    "Md5": "function, since 3.23.17",
+    "blobHasher": "function, since 3.23.17"
   }
 }

@@ -85,7 +85,7 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                             "fileStreamHasher",
                             "streamHasher",
                             TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.SERDE
+                            SmithyCoreSubmodules.CHECKSUM
                         );
                         writer.write("streamHasher");
                     },
@@ -110,7 +110,7 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                             "blobHasher",
                             "streamHasher",
                             TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.SERDE
+                            SmithyCoreSubmodules.CHECKSUM
                         );
                         writer.write("streamHasher");
                     },
@@ -121,7 +121,7 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                             "Md5",
                             null,
                             TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.SERDE
+                            SmithyCoreSubmodules.CHECKSUM
                         );
                         writer.write("Md5");
                     }

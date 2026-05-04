@@ -1,6 +1,6 @@
+import { toHex } from "@smithy/core/serde";
 import { describe, expect, test as it } from "vitest";
 
-import { toHex } from "../util-hex-encoding/hex-encoding";
 import { blobHasher } from "./blobHasher";
 
 describe("blobHasher", () => {

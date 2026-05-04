@@ -1,6 +1,6 @@
+import { toUint8Array } from "@smithy/core/serde";
 import { describe, expect, test as it } from "vitest";
 
-import { toUint8Array } from "../util-utf8/toUint8Array";
 import { HashCalculator } from "./HashCalculator";
 
 function createMockHash(): {

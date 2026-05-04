@@ -1,4 +1,4 @@
-import { fromBase64 } from "../util-base64/fromBase64";
+import { fromBase64 } from "@smithy/core/serde";
 /**
  * @internal
  */

@@ -80,19 +80,6 @@ export { serializerMiddleware } from "./middleware-serde/serializerMiddleware";
 // formerly @smithy/hash-node
 export { Hash } from "./hash-node/hash-node";
 
-// formerly @smithy/hash-blob-browser
-export { blobHasher } from "./hash-blob-browser/blobHasher";
-
-// formerly @smithy/hash-stream-node
-export { fileStreamHasher } from "./hash-stream-node/fileStreamHasher";
-export { readableStreamHasher } from "./hash-stream-node/readableStreamHasher";
-
-// formerly @smithy/md5-js
-export { Md5 } from "./md5-js/md5";
-
-// formerly @smithy/chunked-blob-reader and @smithy/chunked-blob-reader-native
-export { blobReader } from "./chunked-blob-reader/chunked-blob-reader";
-
 // formerly @smithy/util-stream
 export { Uint8ArrayBlobAdapter } from "./util-stream/blob/Uint8ArrayBlobAdapter";
 export { ChecksumStream, ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";

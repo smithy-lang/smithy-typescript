@@ -89,6 +89,13 @@
       "node": "./dist-cjs/submodules/config/index.js",
       "import": "./dist-es/submodules/config/index.js",
       "require": "./dist-cjs/submodules/config/index.js"
+    },
+    "./checksum": {
+      "types": "./dist-types/submodules/checksum/index.d.ts",
+      "module": "./dist-es/submodules/checksum/index.js",
+      "node": "./dist-cjs/submodules/checksum/index.js",
+      "import": "./dist-es/submodules/checksum/index.js",
+      "require": "./dist-cjs/submodules/checksum/index.js"
     }
   },
   "author": {
@@ -129,7 +136,9 @@
     "./client.d.ts",
     "./client.js",
     "./config.d.ts",
-    "./config.js"
+    "./config.js",
+    "./checksum.d.ts",
+    "./checksum.js"
   ],
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/core",
   "repository": {
@@ -153,6 +162,8 @@
     "directory": ".release/package"
   },
   "browser": {
+    "./dist-es/submodules/checksum/hash-stream-node/fileStreamHasher": false,
+    "./dist-es/submodules/checksum/hash-stream-node/readableStreamHasher": false,
     "./dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseDualstackEndpointConfigOptions": false,
     "./dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseFipsEndpointConfigOptions": false,
     "./dist-es/submodules/config/config-resolver/regionConfig/config": false,
@@ -179,8 +190,6 @@
     "./dist-es/submodules/config/shared-ini-file-loader/readFile": false,
     "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser",
     "./dist-es/submodules/serde/hash-node/hash-node": false,
-    "./dist-es/submodules/serde/hash-stream-node/fileStreamHasher": false,
-    "./dist-es/submodules/serde/hash-stream-node/readableStreamHasher": false,
     "./dist-es/submodules/serde/util-base64/fromBase64": "./dist-es/submodules/serde/util-base64/fromBase64.browser",
     "./dist-es/submodules/serde/util-base64/toBase64": "./dist-es/submodules/serde/util-base64/toBase64.browser",
     "./dist-es/submodules/serde/util-body-length/calculateBodyLength": "./dist-es/submodules/serde/util-body-length/calculateBodyLength.browser",
@@ -223,16 +232,10 @@
     "./dist-cjs/submodules/serde/uuid/randomUUID": "./dist-cjs/submodules/serde/uuid/randomUUID.native",
     "./dist-es/submodules/serde/util-stream/stream-collector": "./dist-es/submodules/serde/util-stream/stream-collector.browser",
     "./dist-cjs/submodules/serde/util-stream/stream-collector": "./dist-cjs/submodules/serde/util-stream/stream-collector.browser",
-    "./dist-es/submodules/serde/chunked-blob-reader/chunked-blob-reader": "./dist-es/submodules/serde/chunked-blob-reader/chunked-blob-reader.native",
-    "./dist-cjs/submodules/serde/chunked-blob-reader/chunked-blob-reader": "./dist-cjs/submodules/serde/chunked-blob-reader/chunked-blob-reader.native",
     "./dist-es/submodules/serde/util-stream/createBufferedReadable": "./dist-es/submodules/serde/util-stream/createBufferedReadable.browser",
     "./dist-cjs/submodules/serde/util-stream/createBufferedReadable": "./dist-cjs/submodules/serde/util-stream/createBufferedReadable.browser",
     "./dist-es/submodules/serde/hash-node/hash-node": false,
     "./dist-cjs/submodules/serde/hash-node/hash-node": false,
-    "./dist-es/submodules/serde/hash-stream-node/fileStreamHasher": false,
-    "./dist-cjs/submodules/serde/hash-stream-node/fileStreamHasher": false,
-    "./dist-es/submodules/serde/hash-stream-node/readableStreamHasher": false,
-    "./dist-cjs/submodules/serde/hash-stream-node/readableStreamHasher": false,
     "./dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFromFile": false,
     "./dist-cjs/submodules/config/shared-ini-file-loader/getSSOTokenFromFile": false,
     "./dist-es/submodules/config/shared-ini-file-loader/readFile": false,
@@ -282,6 +285,12 @@
     "./dist-es/submodules/config/shared-ini-file-loader/externalDataInterceptor": false,
     "./dist-cjs/submodules/config/shared-ini-file-loader/externalDataInterceptor": false,
     "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser",
-    "./dist-cjs/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-cjs/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser"
+    "./dist-cjs/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-cjs/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser",
+    "./dist-es/submodules/checksum/chunked-blob-reader/chunked-blob-reader": "./dist-es/submodules/checksum/chunked-blob-reader/chunked-blob-reader.native",
+    "./dist-cjs/submodules/checksum/chunked-blob-reader/chunked-blob-reader": "./dist-cjs/submodules/checksum/chunked-blob-reader/chunked-blob-reader.native",
+    "./dist-es/submodules/checksum/hash-stream-node/fileStreamHasher": false,
+    "./dist-cjs/submodules/checksum/hash-stream-node/fileStreamHasher": false,
+    "./dist-es/submodules/checksum/hash-stream-node/readableStreamHasher": false,
+    "./dist-cjs/submodules/checksum/hash-stream-node/readableStreamHasher": false
   }
 }

@@ -1,2 +1,2 @@
 /** @deprecated Use @smithy/core/serde instead. */
-export { fileStreamHasher, readableStreamHasher } from "@smithy/core/serde";
+export { fileStreamHasher, readableStreamHasher } from "@smithy/core/checksum";

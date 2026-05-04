@@ -1,7 +1,7 @@
+import { fromBase64 } from "@smithy/core/serde";
+import { toHex } from "@smithy/core/serde";
 import { describe, expect, test as it } from "vitest";
 
-import { fromBase64 } from "../util-base64/fromBase64";
-import { toHex } from "../util-hex-encoding/hex-encoding";
 import { Md5 } from "./md5";
 const hashVectors = require("hash-test-vectors");
 

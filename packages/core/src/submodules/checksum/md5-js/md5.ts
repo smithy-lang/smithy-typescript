@@ -1,6 +1,6 @@
+import { fromUtf8 } from "@smithy/core/serde";
 import type { Checksum, SourceData } from "@smithy/types";
 
-import { fromUtf8 } from "../util-utf8/fromUtf8";
 import { BLOCK_SIZE, DIGEST_LENGTH, INIT } from "./constants";
 
 /**

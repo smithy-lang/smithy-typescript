@@ -61,8 +61,8 @@ The "clients" column shows two counts: direct dependents, then transitive depend
 
 | Package               | LoC | Description/Rationale | Clients  | Status |
 | --------------------- | --- | --------------------- | -------- | ------ |
-| `util-endpoints`      | 995 | Endpoint rules engine | 425, 425 |        |
-| `middleware-endpoint` | 755 | Always code-generated | 425, 425 |        |
+| `util-endpoints`      | 995 | Endpoint rules engine | 425, 425 | ✅     |
+| `middleware-endpoint` | 755 | Always code-generated | 425, 425 | ✅     |
 
 ### core/retry
 
@@ -92,11 +92,11 @@ in turn depends on `-universal`, and then `-codec`.
 
 | Package                      | LoC | Description/Rationale      | Clients | Status |
 | ---------------------------- | --- | -------------------------- | ------- | ------ |
-| `hash-blob-browser`          | 18  | S3, S3 Control             | 2, 2    |        |
-| `hash-stream-node`           | 102 | S3, S3 Control             | 2, 2    |        |
-| `md5-js`                     | 222 | S3, S3 Control, SQS        | 3, 3    |        |
-| `chunked-blob-reader`        | 18  | Supports hash-blob-browser | 0, 3    |        |
-| `chunked-blob-reader-native` | 47  | Supports hash-blob-browser | 0, 2    |        |
+| `hash-blob-browser`          | 18  | S3, S3 Control             | 2, 2    | ✅     |
+| `hash-stream-node`           | 102 | S3, S3 Control             | 2, 2    | ✅     |
+| `md5-js`                     | 222 | S3, S3 Control, SQS        | 3, 3    | ✅     |
+| `chunked-blob-reader`        | 18  | Supports hash-blob-browser | 0, 3    | ✅     |
+| `chunked-blob-reader-native` | 47  | Supports hash-blob-browser | 0, 2    | ✅     |
 
 ## Stay external
 

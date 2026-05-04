@@ -1,2 +1,2 @@
 /** @deprecated Use @smithy/core/serde instead. */
-export { Md5 } from "@smithy/core/serde";
+export { Md5 } from "@smithy/core/checksum";
