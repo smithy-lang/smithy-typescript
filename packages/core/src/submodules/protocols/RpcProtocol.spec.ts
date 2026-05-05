@@ -16,8 +16,8 @@ import { parseUrl } from "@smithy/url-parser";
 import { describe, expect, test as it } from "vitest";
 
 import { RpcProtocol } from "./RpcProtocol";
-import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 import { SerdeContext } from "./SerdeContext";
+import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 
 describe(RpcProtocol.name, () => {
   /**

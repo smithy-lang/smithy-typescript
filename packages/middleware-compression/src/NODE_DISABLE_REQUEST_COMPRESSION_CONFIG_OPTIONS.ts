@@ -1,5 +1,4 @@
-import type { LoadedConfigSelectors } from "@smithy/core/config";
-import { booleanSelector, SelectorType } from "@smithy/core/config";
+import { SelectorType, booleanSelector, type LoadedConfigSelectors } from "@smithy/core/config";
 
 /**
  * @internal

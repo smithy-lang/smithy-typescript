@@ -1,9 +1,9 @@
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/core/protocols";
 import type { AwsCredentialIdentity, SignableMessage, TimestampHeaderValue } from "@smithy/types";
-import type { MockInstance } from "vitest";
-import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi, type MockInstance } from "vitest";
 
+import { SignatureV4 } from "./SignatureV4";
 import {
   ALGORITHM_IDENTIFIER,
   ALGORITHM_QUERY_PARAM,
@@ -19,8 +19,8 @@ import {
   TOKEN_QUERY_PARAM,
   UNSIGNED_PAYLOAD,
 } from "./constants";
-import { SignatureV4 } from "./SignatureV4";
 import { iso8601 } from "./utilDate";
+
 import Spy = jasmine.Spy;
 
 const signerInit = {

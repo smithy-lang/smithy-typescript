@@ -1,8 +1,7 @@
 import type { QueryParameterBag } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import type { IHttpRequest } from "./httpRequest";
-import { HttpRequest } from "./httpRequest";
+import { HttpRequest, type IHttpRequest } from "./httpRequest";
 
 describe("HttpRequest", () => {
   const httpRequest: IHttpRequest = {

@@ -1,8 +1,7 @@
 import type { EndpointV2 } from "@smithy/types";
 
 import type { BinaryDecisionDiagram } from "./bdd/BinaryDecisionDiagram";
-import type { EndpointResolverOptions } from "./types";
-import { EndpointError } from "./types";
+import { EndpointError, type EndpointResolverOptions } from "./types";
 import { evaluateCondition } from "./utils/evaluateCondition";
 import { evaluateExpression } from "./utils/evaluateExpression";
 import { getEndpointHeaders } from "./utils/getEndpointHeaders";

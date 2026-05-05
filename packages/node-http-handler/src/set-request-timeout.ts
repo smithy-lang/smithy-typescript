@@ -1,5 +1,5 @@
-import type { Logger } from "@smithy/types";
 import type { ClientRequest } from "node:http";
+import type { Logger } from "@smithy/types";
 
 import { timing } from "./timing";
 

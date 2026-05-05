@@ -1,5 +1,4 @@
-import type { Readable } from "node:stream";
-import { PassThrough } from "node:stream";
+import { PassThrough, type Readable } from "node:stream";
 
 import { splitStream as splitWebStream } from "./splitStream.browser";
 import { isBlob, isReadableStream } from "./stream-type-check";

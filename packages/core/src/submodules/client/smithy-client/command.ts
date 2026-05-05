@@ -1,28 +1,29 @@
-// EndpointParameterInstructions inlined to avoid circular dependency with @smithy/middleware-endpoint.
-type EndpointParameterInstructions = Record<string, unknown>;
 import type { HttpRequest } from "@smithy/core/protocols";
-import type {
-  Command as ICommand,
-  FinalizeHandlerArguments,
-  Handler,
-  HandlerExecutionContext,
-  HttpRequest as IHttpRequest,
-  HttpResponse as IHttpResponse,
-  Logger,
-  MetadataBearer,
-  MiddlewareStack as IMiddlewareStack,
-  Mutable,
-  OperationSchema,
-  OptionalParameter,
-  Pluggable,
-  RequestHandler,
-  SerdeContext,
-  StaticOperationSchema,
+import {
+  SMITHY_CONTEXT_KEY,
+  type FinalizeHandlerArguments,
+  type Handler,
+  type HandlerExecutionContext,
+  type Command as ICommand,
+  type HttpRequest as IHttpRequest,
+  type HttpResponse as IHttpResponse,
+  type MiddlewareStack as IMiddlewareStack,
+  type Logger,
+  type MetadataBearer,
+  type Mutable,
+  type OperationSchema,
+  type OptionalParameter,
+  type Pluggable,
+  type RequestHandler,
+  type SerdeContext,
+  type StaticOperationSchema,
 } from "@smithy/types";
-import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 
 import { constructStack } from "../middleware-stack/MiddlewareStack";
 import { schemaLogFilter } from "./schemaLogFilter";
+
+// EndpointParameterInstructions inlined to avoid circular dependency with @smithy/middleware-endpoint.
+type EndpointParameterInstructions = Record<string, unknown>;
 
 /**
  * @public

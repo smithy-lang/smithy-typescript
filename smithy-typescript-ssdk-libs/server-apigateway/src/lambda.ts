@@ -13,8 +13,8 @@
  *  permissions and limitations under the License.
  */
 
-import type { HeaderBag, HttpResponse } from "@smithy/protocol-http";
-import { HttpRequest } from "@smithy/protocol-http";
+import { Readable } from "node:stream";
+import { HttpRequest, type HeaderBag, type HttpResponse } from "@smithy/protocol-http";
 import type { QueryParameterBag } from "@smithy/types";
 import type {
   APIGatewayProxyEvent,
@@ -26,7 +26,6 @@ import type {
   APIGatewayProxyResult,
   APIGatewayProxyResultV2,
 } from "aws-lambda";
-import { Readable } from "node:stream";
 
 export function convertEvent(event: APIGatewayProxyEvent): HttpRequest;
 export function convertEvent(event: APIGatewayProxyEventV2): HttpRequest;

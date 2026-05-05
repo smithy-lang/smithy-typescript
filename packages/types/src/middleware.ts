@@ -1,5 +1,5 @@
-import type { AuthScheme, HttpAuthDefinition } from "./auth/auth";
 import type { SelectedHttpAuthScheme } from "./auth/HttpAuthScheme";
+import type { AuthScheme, HttpAuthDefinition } from "./auth/auth";
 import type { Command } from "./command";
 import type { EndpointV2 } from "./endpoint";
 import type { SmithyFeatures } from "./feature-ids";

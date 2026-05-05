@@ -1,5 +1,4 @@
-import type { EvaluateOptions, Expression } from "../types";
-import { EndpointError } from "../types";
+import { EndpointError, type EvaluateOptions, type Expression } from "../types";
 import { evaluateExpression } from "./evaluateExpression";
 
 export const getEndpointUrl = (endpointUrl: Expression, options: EvaluateOptions): URL => {

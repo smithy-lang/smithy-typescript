@@ -1,6 +1,6 @@
+import { Readable } from "node:stream";
 import { EventStreamSerde } from "@smithy/core/event-streams";
-import { SerdeContext } from "@smithy/core/protocols";
-import { HttpResponse } from "@smithy/core/protocols";
+import { HttpResponse, SerdeContext } from "@smithy/core/protocols";
 import type {
   $ShapeDeserializer,
   $ShapeSerializer,
@@ -10,7 +10,6 @@ import type {
   StaticErrorSchema,
   StaticOperationSchema,
 } from "@smithy/types";
-import { Readable } from "node:stream";
 
 import type { SnapshotServerProtocol } from "../snapshot-testing-types";
 

@@ -1,3 +1,5 @@
+import EventEmitter from "node:events";
+import { request } from "node:http";
 import { ProviderError } from "@smithy/core/config";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
@@ -15,9 +17,6 @@ vi.mock("http", async () => {
     default: pkg,
   };
 });
-
-import EventEmitter from "node:events";
-import { request } from "node:http";
 
 describe("httpRequest", () => {
   const hostname = "localhost";

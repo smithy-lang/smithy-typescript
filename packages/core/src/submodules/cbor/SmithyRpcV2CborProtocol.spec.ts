@@ -1,5 +1,4 @@
-import type { TypeRegistry } from "@smithy/core/schema";
-import { op } from "@smithy/core/schema";
+import { op, type TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import type {
   $SchemaRef,
@@ -17,9 +16,9 @@ import type {
 } from "@smithy/types";
 import { beforeEach, describe, expect, test as it } from "vitest";
 
+import { SmithyRpcV2CborProtocol } from "./SmithyRpcV2CborProtocol";
 import { cbor } from "./cbor";
 import { dateToTag } from "./parseCborBody";
-import { SmithyRpcV2CborProtocol } from "./SmithyRpcV2CborProtocol";
 
 describe(SmithyRpcV2CborProtocol.name, () => {
   const bytes = (arr: number[]) => Buffer.from(arr);

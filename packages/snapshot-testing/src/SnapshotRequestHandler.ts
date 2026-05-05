@@ -1,4 +1,4 @@
-import { type HttpHandler } from "@smithy/core/protocols";
+import type { HttpHandler } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import type {
   HttpHandlerOptions,

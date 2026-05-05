@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import {
   ComplexError$,
   EmptyInputOutput$,
@@ -24,7 +25,6 @@ import {
   ValidationException$,
 } from "@smithy/smithy-rpcv2-cbor-schema";
 import type { Command, StaticOperationSchema } from "@smithy/types";
-import * as path from "node:path";
 import { describe, expect, test as it } from "vitest";
 
 import { SnapshotRunner } from "./SnapshotRunner";

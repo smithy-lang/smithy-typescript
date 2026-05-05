@@ -1,5 +1,5 @@
-import type { Checksum } from "@smithy/types";
 import { Readable } from "node:stream";
+import type { Checksum } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { toBase64 } from "../../util-base64/toBase64";

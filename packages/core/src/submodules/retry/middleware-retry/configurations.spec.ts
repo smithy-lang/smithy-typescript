@@ -3,8 +3,8 @@ import type { Provider } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { AdaptiveRetryStrategy } from "../util-retry/AdaptiveRetryStrategy";
-import { DEFAULT_MAX_ATTEMPTS } from "../util-retry/config";
 import { StandardRetryStrategy } from "../util-retry/StandardRetryStrategy";
+import { DEFAULT_MAX_ATTEMPTS } from "../util-retry/config";
 import {
   CONFIG_MAX_ATTEMPTS,
   ENV_MAX_ATTEMPTS,

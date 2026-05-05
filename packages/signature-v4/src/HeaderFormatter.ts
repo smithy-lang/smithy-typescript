@@ -1,6 +1,5 @@
-import { fromHex, toHex } from "@smithy/core/serde";
-import { fromUtf8 } from "@smithy/core/serde";
-import type { Int64 as IInt64, MessageHeaders, MessageHeaderValue } from "@smithy/types";
+import { fromHex, fromUtf8, toHex } from "@smithy/core/serde";
+import type { Int64 as IInt64, MessageHeaderValue, MessageHeaders } from "@smithy/types";
 
 /**
  * @internal

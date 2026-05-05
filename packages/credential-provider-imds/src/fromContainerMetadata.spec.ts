@@ -6,9 +6,8 @@ import {
   ENV_CMDS_RELATIVE_URI,
   fromContainerMetadata,
 } from "./fromContainerMetadata";
+import { fromImdsCredentials, type ImdsCredentials } from "./remoteProvider/ImdsCredentials";
 import { httpRequest } from "./remoteProvider/httpRequest";
-import type { ImdsCredentials } from "./remoteProvider/ImdsCredentials";
-import { fromImdsCredentials } from "./remoteProvider/ImdsCredentials";
 
 const mockHttpRequest = <any>httpRequest;
 vi.mock("./remoteProvider/httpRequest");

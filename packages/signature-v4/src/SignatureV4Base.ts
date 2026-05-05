@@ -1,7 +1,6 @@
 import { normalizeProvider } from "@smithy/core/client";
 import { escapeUri } from "@smithy/core/protocols";
-import { toHex } from "@smithy/core/serde";
-import { toUint8Array } from "@smithy/core/serde";
+import { toHex, toUint8Array } from "@smithy/core/serde";
 import type {
   AwsCredentialIdentity,
   ChecksumConstructor,

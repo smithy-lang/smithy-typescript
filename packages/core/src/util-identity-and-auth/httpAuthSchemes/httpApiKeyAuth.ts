@@ -1,6 +1,10 @@
 import { HttpRequest } from "@smithy/core/protocols";
-import type { ApiKeyIdentity, HttpRequest as IHttpRequest, HttpSigner } from "@smithy/types";
-import { HttpApiKeyAuthLocation } from "@smithy/types";
+import {
+  HttpApiKeyAuthLocation,
+  type ApiKeyIdentity,
+  type HttpSigner,
+  type HttpRequest as IHttpRequest,
+} from "@smithy/types";
 
 /**
  * @internal

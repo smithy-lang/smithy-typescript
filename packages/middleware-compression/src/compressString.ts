@@ -1,6 +1,6 @@
+import { promisify } from "node:util";
+import { gzip } from "node:zlib";
 import { toUint8Array } from "@smithy/core/serde";
-import { promisify } from "util";
-import { gzip } from "zlib";
 
 const gzipAsync = promisify(gzip);
 

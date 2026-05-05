@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { RETRY_MODES } from "../../util-retry/config";
 import { DefaultRateLimiter } from "../../util-retry/DefaultRateLimiter";
+import { RETRY_MODES } from "../../util-retry/config";
 import type { RateLimiter } from "../../util-retry/types";
 import { AdaptiveRetryStrategy } from "./AdaptiveRetryStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";

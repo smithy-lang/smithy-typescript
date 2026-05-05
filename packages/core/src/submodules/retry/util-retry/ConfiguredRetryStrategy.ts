@@ -6,8 +6,8 @@ import type {
   StandardRetryToken,
 } from "@smithy/types";
 
-import { Retry } from "./retries-2026-config";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
+import { Retry } from "./retries-2026-config";
 
 /**
  * This extension of the StandardRetryStrategy allows customizing the

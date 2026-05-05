@@ -1,5 +1,4 @@
-import type { ErrorRuleObject, EvaluateOptions } from "../types";
-import { EndpointError } from "../types";
+import { EndpointError, type ErrorRuleObject, type EvaluateOptions } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateExpression } from "./evaluateExpression";
 

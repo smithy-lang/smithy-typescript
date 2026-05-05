@@ -1,5 +1,4 @@
-import type { LoadedConfigSelectors } from "@smithy/core/config";
-import { numberSelector, SelectorType } from "@smithy/core/config";
+import { SelectorType, numberSelector, type LoadedConfigSelectors } from "@smithy/core/config";
 
 /**
  * @internal

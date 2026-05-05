@@ -1,6 +1,7 @@
 import { describe, expect, test as it } from "vitest";
 
 import { splitEvery } from "./split-every";
+
 describe("splitEvery", () => {
   const m1 = "foo";
   const m2 = "foo, bar";

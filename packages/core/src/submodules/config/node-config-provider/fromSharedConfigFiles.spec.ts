@@ -4,8 +4,7 @@ import { beforeEach, describe, expect, test as it, vi } from "vitest";
 import { CredentialsProviderError } from "../property-provider/CredentialsProviderError";
 import { getProfileName } from "../shared-ini-file-loader/getProfileName";
 import { loadSharedConfigFiles } from "../shared-ini-file-loader/loadSharedConfigFiles";
-import type { GetterFromConfig, NodeSharedConfigInit } from "./fromSharedConfigFiles";
-import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles, type GetterFromConfig, type NodeSharedConfigInit } from "./fromSharedConfigFiles";
 
 vi.mock("../shared-ini-file-loader/getProfileName");
 vi.mock("../shared-ini-file-loader/loadSharedConfigFiles");

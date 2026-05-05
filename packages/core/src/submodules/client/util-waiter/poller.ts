@@ -1,7 +1,6 @@
 import { getCircularReplacer } from "./circularReplacer";
 import { sleep } from "./utils/sleep";
-import type { WaiterOptions, WaiterResult } from "./waiter";
-import { WaiterState } from "./waiter";
+import { WaiterState, type WaiterOptions, type WaiterResult } from "./waiter";
 
 /**
  * Function that runs polling as part of waiters. This will make one inital attempt and then

@@ -1,4 +1,5 @@
 import { fromBase64 } from "@smithy/core/serde";
+
 /**
  * @internal
  */

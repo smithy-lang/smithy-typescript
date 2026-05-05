@@ -1,3 +1,5 @@
+import { accessSync, constants, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { NormalizedSchema } from "@smithy/core/schema";
 import type {
   Client,
@@ -7,15 +9,12 @@ import type {
   StaticErrorSchema,
   StaticOperationSchema,
 } from "@smithy/types";
-import { readFileSync } from "node:fs";
-import { accessSync, constants, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
+import { SnapshotRequestHandler } from "./SnapshotRequestHandler";
 import { snapshotTestingProtocolResponseSerializers } from "./protocols/index";
 import { serializeDocument } from "./serializers/serializeDocument";
 import { serializeHttpResponse } from "./serializers/serializeHttpResponse";
 import { RequestSnapshotCompleted } from "./snapshot-testing-types";
-import { SnapshotRequestHandler } from "./SnapshotRequestHandler";
 import { createFromSchema } from "./structure/createFromSchema";
 
 /**

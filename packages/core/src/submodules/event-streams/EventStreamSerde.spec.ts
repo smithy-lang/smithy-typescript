@@ -1,4 +1,4 @@
-import { cbor, CborCodec, dateToTag } from "@smithy/core/cbor";
+import { CborCodec, cbor, dateToTag } from "@smithy/core/cbor";
 import { HttpResponse } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
@@ -14,8 +14,8 @@ import type {
 } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { EventStreamMarshaller } from "./eventstream-serde/EventStreamMarshaller";
 import { EventStreamSerde } from "./EventStreamSerde";
+import { EventStreamMarshaller } from "./eventstream-serde/EventStreamMarshaller";
 
 describe(EventStreamSerde.name, () => {
   describe("event stream serde", () => {

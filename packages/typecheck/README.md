@@ -42,8 +42,8 @@ It can also be potentially useful when accepting an input from another source.
 
 ```ts
 // example: attaching the runtime typechecker.
-import { XYZClient, XYZCommand } from "xyz";
 import { getRuntimeTypecheckPlugin } from "@smithy/typecheck";
+import { XYZClient, XYZCommand } from "xyz";
 
 const client = new XYZClient({});
 
@@ -91,7 +91,6 @@ These schemas can be used to validate the shape of an input object.
 ```ts
 // example: validating a schema and object pair.
 import { validateSchema } from "@smithy/typecheck";
-
 import { MyStruct$ } from "my-smithy-client-package";
 
 const errors: string[] = validateSchema(

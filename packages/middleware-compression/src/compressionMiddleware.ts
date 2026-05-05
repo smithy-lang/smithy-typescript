@@ -14,8 +14,7 @@ import type {
 import { compressStream } from "./compressStream";
 import { compressString } from "./compressString";
 import type { CompressionPreviouslyResolved, CompressionResolvedConfig } from "./configurations";
-import type { CompressionAlgorithm } from "./constants";
-import { CLIENT_SUPPORTED_ALGORITHMS } from "./constants";
+import { CLIENT_SUPPORTED_ALGORITHMS, type CompressionAlgorithm } from "./constants";
 import { isStreaming } from "./isStreaming";
 
 /**

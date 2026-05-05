@@ -1,7 +1,7 @@
+import { Readable } from "node:stream";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { NumericValue } from "@smithy/core/serde";
 import type { $SchemaRef, StaticStructureSchema } from "@smithy/types";
-import { Readable } from "node:stream";
 
 /**
  * Creates a static value for a given schema.

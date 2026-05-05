@@ -1,7 +1,6 @@
 import { getSmithyContext } from "@smithy/core/client";
 import { RpcProtocol } from "@smithy/core/protocols";
-import { TypeRegistry } from "@smithy/core/schema";
-import { deref, NormalizedSchema } from "@smithy/core/schema";
+import { NormalizedSchema, TypeRegistry, deref } from "@smithy/core/schema";
 import type {
   EndpointBearer,
   HandlerExecutionContext,

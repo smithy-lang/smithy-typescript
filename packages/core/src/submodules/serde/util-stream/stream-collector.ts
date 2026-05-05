@@ -1,5 +1,4 @@
-import type { Readable } from "node:stream";
-import { Writable } from "node:stream";
+import { Writable, type Readable } from "node:stream";
 import type { ReadableStream as IReadableStream } from "node:stream/web";
 
 /**

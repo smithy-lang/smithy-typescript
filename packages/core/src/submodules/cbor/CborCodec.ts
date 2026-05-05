@@ -1,8 +1,6 @@
 import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
-import { _parseEpochTimestamp, generateIdempotencyToken } from "@smithy/core/serde";
-import { NumericValue } from "@smithy/core/serde";
-import { fromBase64 } from "@smithy/core/serde";
+import { NumericValue, _parseEpochTimestamp, fromBase64, generateIdempotencyToken } from "@smithy/core/serde";
 import type { Codec, DocumentSchema, Schema, ShapeDeserializer, ShapeSerializer } from "@smithy/types";
 
 import { cbor } from "./cbor";

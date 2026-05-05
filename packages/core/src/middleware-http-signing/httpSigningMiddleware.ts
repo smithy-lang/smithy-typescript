@@ -8,8 +8,8 @@ import type {
   FinalizeHandlerOutput,
   FinalizeRequestMiddleware,
   HandlerExecutionContext,
-  SelectedHttpAuthScheme,
   SMITHY_CONTEXT_KEY,
+  SelectedHttpAuthScheme,
   SuccessHandler,
 } from "@smithy/types";
 

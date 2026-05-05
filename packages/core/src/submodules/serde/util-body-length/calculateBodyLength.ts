@@ -1,4 +1,4 @@
-import { fstatSync, lstatSync, ReadStream } from "node:fs";
+import { ReadStream, fstatSync, lstatSync } from "node:fs";
 
 /**
  * @internal

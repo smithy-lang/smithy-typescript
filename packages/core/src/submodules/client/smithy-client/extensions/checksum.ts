@@ -1,5 +1,10 @@
-import type { ChecksumAlgorithm, ChecksumConfiguration, ChecksumConstructor, HashConstructor } from "@smithy/types";
-import { AlgorithmId } from "@smithy/types";
+import {
+  AlgorithmId,
+  type ChecksumAlgorithm,
+  type ChecksumConfiguration,
+  type ChecksumConstructor,
+  type HashConstructor,
+} from "@smithy/types";
 
 export { AlgorithmId, ChecksumAlgorithm, ChecksumConfiguration };
 

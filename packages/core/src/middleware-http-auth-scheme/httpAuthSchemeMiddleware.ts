@@ -8,12 +8,12 @@ import type {
   HttpAuthSchemeProvider,
   IdentityProviderConfig,
   Provider,
+  SMITHY_CONTEXT_KEY,
   SelectedHttpAuthScheme,
   SerializeHandler,
   SerializeHandlerArguments,
   SerializeHandlerOutput,
   SerializeMiddleware,
-  SMITHY_CONTEXT_KEY,
 } from "@smithy/types";
 
 import { resolveAuthOptions } from "./resolveAuthOptions";

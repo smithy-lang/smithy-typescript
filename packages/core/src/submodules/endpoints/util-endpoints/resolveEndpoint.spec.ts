@@ -2,8 +2,7 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { resolveEndpoint } from "./resolveEndpoint";
-import type { EndpointParams, ParameterObject, RuleSetObject } from "./types";
-import { EndpointError } from "./types";
+import { EndpointError, type EndpointParams, type ParameterObject, type RuleSetObject } from "./types";
 import { evaluateRules } from "./utils";
 
 vi.mock("./utils");

@@ -1,7 +1,6 @@
 import { homedir } from "node:os";
 import { sep } from "node:path";
-import type { Mock } from "vitest";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test as it, vi, type Mock } from "vitest";
 
 import { getHomeDir } from "./getHomeDir";
 

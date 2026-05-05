@@ -7,15 +7,16 @@ This package provides glue code to enable using a server sdk with NodeJS.
 ### Example
 
 ```typescript
-import { createServer, IncomingMessage, ServerResponse } from "http";
-import { HttpRequest } from "@smithy/protocol-http";
+import { IncomingMessage, ServerResponse, createServer } from "http";
+import { convertEvent, convertResponse } from "@aws-smithy/server-node";
 import {
-  GreetingService as __GreetingService,
   SayHelloInput,
   SayHelloOutput,
+  GreetingService as __GreetingService,
   getGreetingServiceHandler,
 } from "@greeting-service/service-greeting";
-import { convertEvent, convertResponse } from "@aws-smithy/server-node";
+import { HttpRequest } from "@smithy/protocol-http";
+
 class GreetingService implements __GreetingService {
   SayHello(input: SayHelloInput, request: HttpRequest): SayHelloOutput {
     return {

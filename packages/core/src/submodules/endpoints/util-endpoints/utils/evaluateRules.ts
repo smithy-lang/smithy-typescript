@@ -1,7 +1,6 @@
 import type { EndpointV2 } from "@smithy/types";
 
-import type { EvaluateOptions, RuleSetRules, TreeRuleObject } from "../types";
-import { EndpointError } from "../types";
+import { EndpointError, type EvaluateOptions, type RuleSetRules, type TreeRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateEndpointRule } from "./evaluateEndpointRule";
 import { evaluateErrorRule } from "./evaluateErrorRule";

@@ -1,6 +1,6 @@
-import { type TypeRegistry, NormalizedSchema, op } from "@smithy/core/schema";
-import { dateToUtcString, generateIdempotencyToken, LazyJsonString, quoteHeader } from "@smithy/core/serde";
-import { toBase64 } from "@smithy/core/serde";
+import { Readable } from "node:stream";
+import { NormalizedSchema, op, type TypeRegistry } from "@smithy/core/schema";
+import { LazyJsonString, dateToUtcString, generateIdempotencyToken, quoteHeader, toBase64 } from "@smithy/core/serde";
 import { streamCollector } from "@smithy/node-http-handler";
 import { HttpResponse } from "@smithy/protocol-http";
 import type {
@@ -27,13 +27,12 @@ import type {
   TimestampHttpDateSchema,
 } from "@smithy/types";
 import { parseUrl } from "@smithy/url-parser";
-import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 
 import { HttpBindingProtocol } from "./HttpBindingProtocol";
-import { determineTimestampFormat } from "./serde/determineTimestampFormat";
-import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 import { SerdeContext } from "./SerdeContext";
+import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
+import { determineTimestampFormat } from "./serde/determineTimestampFormat";
 
 describe(HttpBindingProtocol.name, () => {
   class ToStringTestShapeSerializer extends SerdeContext implements $ShapeSerializer<string> {

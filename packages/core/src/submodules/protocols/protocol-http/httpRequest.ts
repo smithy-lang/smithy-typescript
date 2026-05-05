@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-import type { HeaderBag, HttpMessage, QueryParameterBag, URI } from "@smithy/types";
-import { HttpRequest as IHttpRequest } from "@smithy/types";
+import {
+  HttpRequest as IHttpRequest,
+  type HeaderBag,
+  type HttpMessage,
+  type QueryParameterBag,
+  type URI,
+} from "@smithy/types";
 
 type HttpRequestOptions = Partial<HttpMessage> & Partial<URI> & { method?: string };
 

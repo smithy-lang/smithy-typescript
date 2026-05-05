@@ -1,5 +1,5 @@
-import type { HashConstructor, StreamHasher } from "@smithy/types";
 import type { Readable } from "node:stream";
+import type { HashConstructor, StreamHasher } from "@smithy/types";
 
 import { HashCalculator } from "./HashCalculator";
 

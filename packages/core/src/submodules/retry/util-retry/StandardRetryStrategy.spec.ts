@@ -1,12 +1,12 @@
 import type { RetryErrorInfo } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { RETRY_MODES } from "./config";
-import { MAXIMUM_RETRY_DELAY } from "./constants";
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { DefaultRetryToken } from "./DefaultRetryToken";
-import { Retry } from "./retries-2026-config";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
+import { RETRY_MODES } from "./config";
+import { MAXIMUM_RETRY_DELAY } from "./constants";
+import { Retry } from "./retries-2026-config";
 
 class DeterministicRetryBackoffStrategy extends DefaultRetryBackoffStrategy {
   public computeNextBackoffDelay(i: number): number {

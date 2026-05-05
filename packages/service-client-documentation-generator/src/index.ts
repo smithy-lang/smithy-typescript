@@ -1,5 +1,4 @@
-import type { Application } from "typedoc";
-import { ParameterType } from "typedoc";
+import { ParameterType, type Application } from "typedoc";
 
 import { SdkClientTocPlugin } from "./sdk-client-toc-plugin";
 

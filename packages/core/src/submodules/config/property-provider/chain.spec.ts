@@ -1,7 +1,7 @@
 import { describe, expect, test as it, vi } from "vitest";
 
-import { chain } from "./chain";
 import { ProviderError } from "./ProviderError";
+import { chain } from "./chain";
 
 const resolveStatic = (staticValue: unknown) => vi.fn().mockResolvedValue(staticValue);
 const rejectWithError = (errorMsg: string) => vi.fn().mockRejectedValue(new Error(errorMsg));

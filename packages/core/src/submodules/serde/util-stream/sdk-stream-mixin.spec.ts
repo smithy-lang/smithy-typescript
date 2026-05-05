@@ -1,6 +1,5 @@
+import { PassThrough, Readable, type Writable } from "node:stream";
 import type { SdkStreamMixin } from "@smithy/types";
-import type { Writable } from "node:stream";
-import { PassThrough, Readable } from "node:stream";
 import { afterAll, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { fromArrayBuffer } from "../util-buffer-from/buffer-from";

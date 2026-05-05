@@ -1,13 +1,16 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
+  expectBoolean,
   expectByte,
   expectFloat32,
   expectInt32,
   expectLong,
   expectNonNull,
+  expectNumber,
   expectObject,
   expectShort,
+  expectString,
   expectUnion,
   limitedParseDouble,
   limitedParseFloat32,
@@ -20,7 +23,6 @@ import {
   strictParseLong,
   strictParseShort,
 } from "./parse-utils";
-import { expectBoolean, expectNumber, expectString } from "./parse-utils";
 
 logger.warn = () => {};
 

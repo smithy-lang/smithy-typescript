@@ -1,6 +1,6 @@
-import { HttpRequest } from "@smithy/core/protocols";
 import http, { request as hRequest } from "node:http";
 import https, { request as hsRequest } from "node:https";
+import { HttpRequest } from "@smithy/core/protocols";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";

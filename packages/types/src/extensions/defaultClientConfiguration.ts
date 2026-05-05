@@ -1,5 +1,4 @@
-import type { ChecksumConfiguration } from "./checksum";
-import { getChecksumConfiguration, resolveChecksumRuntimeConfig } from "./checksum";
+import { getChecksumConfiguration, resolveChecksumRuntimeConfig, type ChecksumConfiguration } from "./checksum";
 
 /**
  * @deprecated will be replaced by DefaultExtensionConfiguration.

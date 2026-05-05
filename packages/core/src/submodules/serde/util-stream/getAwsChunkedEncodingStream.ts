@@ -1,5 +1,5 @@
-import type { GetAwsChunkedEncodingStreamOptions } from "@smithy/types";
 import { Readable } from "node:stream";
+import type { GetAwsChunkedEncodingStreamOptions } from "@smithy/types";
 
 import { getAwsChunkedEncodingStream as getAwsChunkedEncodingStreamBrowser } from "./getAwsChunkedEncodingStream.browser";
 import { isReadableStream } from "./stream-type-check";

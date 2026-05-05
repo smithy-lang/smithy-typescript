@@ -1,6 +1,5 @@
+import { Duplex, type Readable } from "node:stream";
 import type { Checksum, Encoder } from "@smithy/types";
-import type { Readable } from "node:stream";
-import { Duplex } from "node:stream";
 
 import { toBase64 } from "../../util-base64/toBase64";
 

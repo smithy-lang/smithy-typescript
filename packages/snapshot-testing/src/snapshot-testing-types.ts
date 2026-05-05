@@ -1,6 +1,6 @@
 import type {
-  HttpRequest as IHttpRequest,
   HttpResponse,
+  HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
   StaticOperationSchema,
 } from "@smithy/types";

@@ -1,7 +1,7 @@
 import { describe, expect, test as it } from "vitest";
 
-import { getResolvedPartition } from "./getResolvedPartition";
 import type { PartitionHash } from "./PartitionHash";
+import { getResolvedPartition } from "./getResolvedPartition";
 
 describe(getResolvedPartition.name, () => {
   const mockRegion = "mockRegion";

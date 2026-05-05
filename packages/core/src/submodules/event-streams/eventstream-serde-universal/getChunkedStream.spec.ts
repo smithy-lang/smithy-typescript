@@ -1,5 +1,4 @@
-import type { ReadableOptions } from "node:stream";
-import { Readable } from "node:stream";
+import { Readable, type ReadableOptions } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 
 import { getChunkedStream } from "./getChunkedStream";

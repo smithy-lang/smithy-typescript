@@ -1,3 +1,8 @@
+import type { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { SerdeContext } from "@smithy/types";
+
+import type { ServiceException } from "./errors";
+
 /*
  *  Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -18,11 +23,6 @@ export * from "./accept";
 export * from "./errors";
 export * from "./validation";
 export * from "./unique";
-
-import type { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import type { SerdeContext } from "@smithy/types";
-
-import type { ServiceException } from "./errors";
 
 export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 

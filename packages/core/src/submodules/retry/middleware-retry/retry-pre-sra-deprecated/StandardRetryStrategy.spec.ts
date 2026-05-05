@@ -9,10 +9,10 @@ import {
   INITIAL_RETRY_TOKENS,
   THROTTLING_RETRY_DELAY_BASE,
 } from "../../util-retry/constants";
+import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import { getDefaultRetryQuota } from "./defaultRetryQuota";
 import { defaultDelayDecider } from "./delayDecider";
 import { defaultRetryDecider } from "./retryDecider";
-import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import type { RetryQuota } from "./types";
 
 vi.mock("@smithy/core/protocols");

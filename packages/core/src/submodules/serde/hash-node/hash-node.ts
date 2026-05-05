@@ -1,9 +1,7 @@
+import { createHash, createHmac, type Hmac, type Hash as NodeHash } from "node:crypto";
 import type { Checksum, SourceData } from "@smithy/types";
-import type { Hash as NodeHash, Hmac } from "node:crypto";
-import { createHash, createHmac } from "node:crypto";
 
-import type { StringEncoding } from "../util-buffer-from/buffer-from";
-import { fromArrayBuffer, fromString } from "../util-buffer-from/buffer-from";
+import { fromArrayBuffer, fromString, type StringEncoding } from "../util-buffer-from/buffer-from";
 import { toUint8Array } from "../util-utf8/toUint8Array";
 
 /**

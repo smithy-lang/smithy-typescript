@@ -1,15 +1,15 @@
+import { Readable } from "node:stream";
 import { cbor } from "@smithy/core/cbor";
 import { HttpResponse } from "@smithy/protocol-http";
 import type { RetryErrorType, StandardRetryToken } from "@smithy/types";
 import { requireRequestsFrom } from "@smithy/util-test/src";
-import { Readable } from "node:stream";
 import { afterAll, beforeAll, describe, expect, test as it } from "vitest";
 import { XYZService } from "xyz";
 
-import { MAXIMUM_RETRY_DELAY } from "./constants";
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
-import { Retry } from "./retries-2026-config";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
+import { MAXIMUM_RETRY_DELAY } from "./constants";
+import { Retry } from "./retries-2026-config";
 
 class DeterministicRetryBackoffStrategy extends DefaultRetryBackoffStrategy {
   public computeNextBackoffDelay(i: number): number {

@@ -1,6 +1,6 @@
+import type { IncomingMessage } from "node:http";
 import type { DefaultsMode, ResolvedDefaultsMode } from "@smithy/core/client";
 import type { Provider } from "@smithy/types";
-import type { IncomingMessage } from "node:http";
 
 import { NODE_REGION_CONFIG_OPTIONS } from "../config-resolver/regionConfig/config";
 import { loadConfig } from "../node-config-provider/configLoader";

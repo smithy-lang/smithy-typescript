@@ -1,8 +1,7 @@
-import type { HttpHandler } from "@smithy/protocol-http";
-import { HttpResponse } from "@smithy/protocol-http";
+import { Readable } from "node:stream";
+import { HttpResponse, type HttpHandler } from "@smithy/protocol-http";
 import type { HttpRequest as IHttpRequest } from "@smithy/types";
 import { requireRequestsFrom } from "@smithy/util-test/src";
-import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";
 import { Weather } from "weather";
 

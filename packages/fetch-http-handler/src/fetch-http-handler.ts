@@ -1,7 +1,5 @@
-import type { HttpHandler, HttpRequest } from "@smithy/core/protocols";
-import { buildQueryString, HttpResponse } from "@smithy/core/protocols";
-import type { FetchHttpHandlerOptions } from "@smithy/types";
-import type { HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
+import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
+import type { FetchHttpHandlerOptions, HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
 import { createRequest } from "./create-request";
 import { requestTimeout as requestTimeoutFn } from "./request-timeout";

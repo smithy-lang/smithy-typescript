@@ -1,9 +1,11 @@
 import type { DefaultExtensionConfiguration } from "@smithy/types";
 
-import type { PartialChecksumRuntimeConfigType } from "./checksum";
-import { getChecksumConfiguration, resolveChecksumRuntimeConfig } from "./checksum";
-import type { PartialRetryRuntimeConfigType } from "./retry";
-import { getRetryConfiguration, resolveRetryRuntimeConfig } from "./retry";
+import {
+  getChecksumConfiguration,
+  resolveChecksumRuntimeConfig,
+  type PartialChecksumRuntimeConfigType,
+} from "./checksum";
+import { getRetryConfiguration, resolveRetryRuntimeConfig, type PartialRetryRuntimeConfigType } from "./retry";
 
 /**
  * @internal

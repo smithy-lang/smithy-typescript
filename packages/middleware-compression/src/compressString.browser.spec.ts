@@ -1,6 +1,6 @@
 import { toUint8Array } from "@smithy/core/serde";
 import { gzip } from "fflate";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { compressString } from "./compressString.browser";
 

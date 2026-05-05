@@ -1,5 +1,5 @@
-import type { HeaderBag } from "@smithy/types";
 import type { IncomingHttpHeaders } from "node:http2";
+import type { HeaderBag } from "@smithy/types";
 
 const getTransformedHeaders = (headers: IncomingHttpHeaders) => {
   const transformedHeaders: HeaderBag = {};

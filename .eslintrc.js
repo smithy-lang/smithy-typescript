@@ -8,7 +8,7 @@ module.exports = {
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     "plugin:@typescript-eslint/recommended",
   ],
-  plugins: ["@typescript-eslint", "simple-import-sort", "n"],
+  plugins: ["@typescript-eslint", "n"],
   rules: {
     /** Turn off strict enforcement */
     "@typescript-eslint/ban-types": "off",
@@ -33,8 +33,8 @@ module.exports = {
     "@typescript-eslint/no-namespace": "warn",
 
     /** Errors */
-    "simple-import-sort/imports": "error",
     "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/no-import-type-side-effects": "error",
     "n/prefer-node-protocol": "error",
   },
   overrides: [

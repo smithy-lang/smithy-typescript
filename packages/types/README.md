@@ -54,8 +54,8 @@ When using the transform on non-aggregated client with the `Command` syntax,
 the input cannot be validated because it goes through another class.
 
 ```ts
-import { S3Client, ListBucketsCommand, GetObjectCommand, GetObjectCommandInput } from "@aws-sdk/client-s3";
-import type { AssertiveClient, UncheckedClient, NoUndefined } from "@smithy/types";
+import { GetObjectCommand, GetObjectCommandInput, ListBucketsCommand, S3Client } from "@aws-sdk/client-s3";
+import type { AssertiveClient, NoUndefined, UncheckedClient } from "@smithy/types";
 
 const s3 = new S3Client({}) as UncheckedClient<S3Client>;
 
@@ -93,9 +93,9 @@ Because blob payload types are platform dependent, you may wish to indicate in y
 environment. This narrows the blob payload types.
 
 ```typescript
+import type { IncomingMessage } from "node:http";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { NodeJsClient, SdkStream, StreamingBlobPayloadOutputTypes } from "@smithy/types";
-import type { IncomingMessage } from "node:http";
 
 // default client init.
 const s3Default = new S3Client({});

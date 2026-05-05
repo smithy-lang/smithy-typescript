@@ -1,8 +1,6 @@
-import type { HttpHandler, HttpRequest } from "@smithy/core/protocols";
-import { HttpResponse } from "@smithy/core/protocols";
-import { buildQueryString } from "@smithy/core/protocols";
-import type { HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
 import { constants } from "node:http2";
+import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
+import type { HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
 
 import { buildAbortError } from "./build-abort-error";
 import { getTransformedHeaders } from "./get-transformed-headers";

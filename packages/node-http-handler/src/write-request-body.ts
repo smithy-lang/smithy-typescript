@@ -1,7 +1,7 @@
-import type { HttpRequest } from "@smithy/types";
-import type { ClientRequest } from "node:http";
 import type { ClientHttp2Stream } from "node:http2";
+import type { ClientRequest } from "node:http";
 import { Readable } from "node:stream";
+import type { HttpRequest } from "@smithy/types";
 
 import { timing } from "./timing";
 

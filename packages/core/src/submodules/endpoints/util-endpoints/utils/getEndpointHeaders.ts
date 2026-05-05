@@ -1,5 +1,4 @@
-import type { EndpointObjectHeaders, EvaluateOptions } from "../types";
-import { EndpointError } from "../types";
+import { EndpointError, type EndpointObjectHeaders, type EvaluateOptions } from "../types";
 import { evaluateExpression } from "./evaluateExpression";
 
 export const getEndpointHeaders = (headers: EndpointObjectHeaders, options: EvaluateOptions) =>

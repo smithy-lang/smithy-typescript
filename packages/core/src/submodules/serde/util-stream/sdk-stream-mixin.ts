@@ -1,5 +1,5 @@
-import type { SdkStream, SdkStreamMixin } from "@smithy/types";
 import { Readable } from "node:stream";
+import type { SdkStream, SdkStreamMixin } from "@smithy/types";
 
 import { fromArrayBuffer } from "../util-buffer-from/buffer-from";
 import { sdkStreamMixin as sdkStreamMixinReadableStream } from "./sdk-stream-mixin.browser";

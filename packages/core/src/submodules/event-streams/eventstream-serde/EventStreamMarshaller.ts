@@ -1,13 +1,13 @@
+import { Readable } from "node:stream";
 import type {
   Decoder,
   Encoder,
   EventSigner,
-  EventStreamMarshaller as IEventStreamMarshaller,
   EventStreamSerdeProvider,
+  EventStreamMarshaller as IEventStreamMarshaller,
   Message,
   Provider,
 } from "@smithy/types";
-import { Readable } from "node:stream";
 
 import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "../eventstream-serde-universal/EventStreamMarshaller";
 

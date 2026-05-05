@@ -1,5 +1,4 @@
-import type { HandlerExecutionContext } from "@smithy/types";
-import { SMITHY_CONTEXT_KEY } from "@smithy/types";
+import { SMITHY_CONTEXT_KEY, type HandlerExecutionContext } from "@smithy/types";
 
 /**
  * @internal

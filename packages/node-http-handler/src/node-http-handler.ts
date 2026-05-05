@@ -1,10 +1,7 @@
-import type { HttpHandler, HttpRequest } from "@smithy/core/protocols";
-import { HttpResponse } from "@smithy/core/protocols";
-import { buildQueryString } from "@smithy/core/protocols";
-import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 import type { Agent as hAgentType, request as hRequestType } from "node:http";
-import type { RequestOptions } from "node:https";
-import { Agent as hsAgent, request as hsRequest } from "node:https";
+import { Agent as hsAgent, request as hsRequest, type RequestOptions } from "node:https";
+import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
+import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 
 import { buildAbortError } from "./build-abort-error";
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";

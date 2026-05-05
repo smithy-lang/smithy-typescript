@@ -1,11 +1,10 @@
-import { cbor, SmithyRpcV2CborProtocol } from "@smithy/core/cbor";
+import { SmithyRpcV2CborProtocol, cbor } from "@smithy/core/cbor";
 import type { HttpProtocol } from "@smithy/core/protocols";
 import { HttpResponse } from "@smithy/protocol-http";
 import { RpcV2ProtocolClient } from "@smithy/smithy-rpcv2-cbor-schema";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";
-import type { GetNumbersCommandOutput } from "xyz-schema";
-import { GetNumbersCommand, XYZService } from "xyz-schema";
+import { GetNumbersCommand, XYZService, type GetNumbersCommandOutput } from "xyz-schema";
 
 import { NumericValue } from "./submodules/serde";
 

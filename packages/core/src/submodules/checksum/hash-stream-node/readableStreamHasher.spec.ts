@@ -1,5 +1,5 @@
-import type { Hash } from "@smithy/types";
 import { Readable, Writable } from "node:stream";
+import type { Hash } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { HashCalculator } from "./HashCalculator";

@@ -1,6 +1,6 @@
-import { cbor } from "@smithy/core/cbor";
-import { type HttpHandler, HttpResponse } from "@smithy/core/protocols";
 import { Readable } from "node:stream";
+import { cbor } from "@smithy/core/cbor";
+import { HttpResponse, type HttpHandler } from "@smithy/core/protocols";
 import { describe, expect, test as it } from "vitest";
 import { GetNumbersCommand, XYZService } from "xyz-schema";
 

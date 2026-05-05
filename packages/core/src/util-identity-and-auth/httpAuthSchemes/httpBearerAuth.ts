@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpRequest } from "@smithy/core/protocols";
-import type { HttpRequest as IHttpRequest, HttpSigner, TokenIdentity } from "@smithy/types";
+import type { HttpSigner, HttpRequest as IHttpRequest, TokenIdentity } from "@smithy/types";
 
 /**
  * @internal

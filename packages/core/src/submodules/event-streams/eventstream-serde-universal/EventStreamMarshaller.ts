@@ -2,8 +2,8 @@ import type {
   Decoder,
   Encoder,
   EventSigner,
-  EventStreamMarshaller as IEventStreamMarshaller,
   EventStreamSerdeProvider,
+  EventStreamMarshaller as IEventStreamMarshaller,
   Message,
   Provider,
 } from "@smithy/types";

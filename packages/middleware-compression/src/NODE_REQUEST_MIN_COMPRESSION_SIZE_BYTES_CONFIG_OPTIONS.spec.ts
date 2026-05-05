@@ -1,5 +1,5 @@
-import { numberSelector, SelectorType } from "@smithy/core/config";
-import { afterEach, describe, expect,test as it, vi } from "vitest";
+import { SelectorType, numberSelector } from "@smithy/core/config";
+import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES,
@@ -17,14 +17,14 @@ describe("NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS", () => {
 
   const test = (func: Function, obj: Record<string, string>, key: string, type: SelectorType) => {
     it.each([0, 1, undefined])("returns %s", (output) => {
-      (vi.mocked(numberSelector)).mockReturnValueOnce(output);
+      vi.mocked(numberSelector).mockReturnValueOnce(output);
       expect(func(obj)).toEqual(output);
       expect(numberSelector).toBeCalledWith(obj, key, type);
     });
 
     it("throws error", () => {
       const mockError = new Error("error");
-      (vi.mocked(numberSelector)).mockImplementationOnce(() => {
+      vi.mocked(numberSelector).mockImplementationOnce(() => {
         throw mockError;
       });
       expect(() => {

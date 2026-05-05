@@ -3,8 +3,8 @@ import type { LoadedConfigSelectors } from "@smithy/core/config";
 import type { Logger, Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/types";
 
 import { AdaptiveRetryStrategy } from "../util-retry/AdaptiveRetryStrategy";
-import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE, RETRY_MODES } from "../util-retry/config";
 import { StandardRetryStrategy } from "../util-retry/StandardRetryStrategy";
+import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE, RETRY_MODES } from "../util-retry/config";
 
 /**
  * @internal

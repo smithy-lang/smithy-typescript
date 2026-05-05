@@ -1,8 +1,7 @@
 import { describe, expect, test as it } from "vitest";
 
 import type { EndpointVariant } from "./EndpointVariant";
-import type { GetHostnameFromVariantsOptions } from "./getHostnameFromVariants";
-import { getHostnameFromVariants } from "./getHostnameFromVariants";
+import { getHostnameFromVariants, type GetHostnameFromVariantsOptions } from "./getHostnameFromVariants";
 
 describe(getHostnameFromVariants.name, () => {
   const getMockHostname = (options: GetHostnameFromVariantsOptions) => JSON.stringify(options);

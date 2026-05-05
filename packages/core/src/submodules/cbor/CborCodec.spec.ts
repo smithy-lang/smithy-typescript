@@ -10,9 +10,9 @@ import type {
 } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
+import { CborCodec, CborShapeSerializer } from "./CborCodec";
 import { cbor } from "./cbor";
 import { tagSymbol } from "./cbor-types";
-import { CborCodec, CborShapeSerializer } from "./CborCodec";
 
 describe(CborShapeSerializer.name, () => {
   const codec = new CborCodec();

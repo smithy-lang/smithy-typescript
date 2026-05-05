@@ -8,15 +8,16 @@ apigateway.
 ### Example
 
 ```typescript
-import { HttpRequest } from "@smithy/protocol-http";
+import { convertEvent, convertResponse } from "@aws-smithy/server-apigateway";
 import {
-  GreetingService as __GreetingService,
   SayHelloInput,
   SayHelloOutput,
+  GreetingService as __GreetingService,
   getGreetingServiceHandler,
 } from "@greeting-service/service-greeting";
-import { convertEvent, convertResponse } from "@aws-smithy/server-apigateway";
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { HttpRequest } from "@smithy/protocol-http";
+import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2, APIGatewayProxyResultV2 } from "aws-lambda";
+
 class GreetingService implements __GreetingService {
   SayHello(input: SayHelloInput, request: HttpRequest): SayHelloOutput {
     return {

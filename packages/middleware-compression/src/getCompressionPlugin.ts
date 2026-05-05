@@ -1,10 +1,9 @@
 import type { Pluggable } from "@smithy/types";
 
-import type {
-  CompressionMiddlewareConfig} from "./compressionMiddleware";
 import {
   compressionMiddleware,
   compressionMiddlewareOptions,
+  type CompressionMiddlewareConfig,
 } from "./compressionMiddleware";
 import type { CompressionPreviouslyResolved, CompressionResolvedConfig } from "./configurations";
 

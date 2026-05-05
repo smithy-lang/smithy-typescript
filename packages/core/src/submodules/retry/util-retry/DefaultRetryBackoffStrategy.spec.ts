@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { MAXIMUM_RETRY_DELAY } from "./constants";
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
+import { MAXIMUM_RETRY_DELAY } from "./constants";
 import { Retry } from "./retries-2026-config";
 
 describe("defaultRetryBackoffStrategy", () => {

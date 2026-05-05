@@ -1,6 +1,6 @@
-import { Readable } from "stream";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
-import { createGzip } from "zlib";
+import { Readable } from "node:stream";
+import { createGzip } from "node:zlib";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { compressStream } from "./compressStream";
 
@@ -19,7 +19,7 @@ describe(compressStream.name, () => {
   const testOutputStream = Readable.from(getGenerator(["input", "gzipped"])());
 
   beforeEach(() => {
-    (vi.mocked(createGzip)).mockReturnValue(mockGzipFn as any);
+    vi.mocked(createGzip).mockReturnValue(mockGzipFn as any);
     testInputStream.pipe = vi.fn().mockReturnValue(testOutputStream);
   });
 
@@ -41,7 +41,7 @@ describe(compressStream.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    (vi.mocked(createGzip)).mockImplementationOnce(() => {
+    vi.mocked(createGzip).mockImplementationOnce(() => {
       throw compressionError;
     });
 

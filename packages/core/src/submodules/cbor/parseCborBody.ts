@@ -1,16 +1,14 @@
-import { collectBody } from "@smithy/core/protocols";
-import { HttpRequest as __HttpRequest } from "@smithy/core/protocols";
+import { HttpRequest as __HttpRequest, collectBody } from "@smithy/core/protocols";
 import { calculateBodyLength } from "@smithy/core/serde";
 import type {
-  HeaderBag as __HeaderBag,
   HttpResponse,
-  SerdeContext as __SerdeContext,
   SerdeContext,
+  HeaderBag as __HeaderBag,
+  SerdeContext as __SerdeContext,
 } from "@smithy/types";
 
 import { cbor } from "./cbor";
-import type { tagSymbol } from "./cbor-types";
-import { tag } from "./cbor-types";
+import { tag, type tagSymbol } from "./cbor-types";
 
 /**
  * @internal

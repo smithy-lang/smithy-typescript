@@ -1,14 +1,14 @@
 import { NormalizedSchema } from "@smithy/core/schema";
 import {
+  LazyJsonString,
+  NumericValue,
   _parseEpochTimestamp,
   _parseRfc3339DateTimeWithOffset,
   _parseRfc7231DateTime,
-  LazyJsonString,
-  NumericValue,
+  fromBase64,
   splitHeader,
+  toUtf8,
 } from "@smithy/core/serde";
-import { fromBase64 } from "@smithy/core/serde";
-import { toUtf8 } from "@smithy/core/serde";
 import type {
   CodecSettings,
   Schema,

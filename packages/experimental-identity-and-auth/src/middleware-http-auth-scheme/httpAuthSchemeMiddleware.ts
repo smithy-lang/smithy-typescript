@@ -1,11 +1,11 @@
 import { getSmithyContext } from "@smithy/core/client";
 import type {
   HandlerExecutionContext,
+  SMITHY_CONTEXT_KEY,
   SerializeHandler,
   SerializeHandlerArguments,
   SerializeHandlerOutput,
   SerializeMiddleware,
-  SMITHY_CONTEXT_KEY,
 } from "@smithy/types";
 
 import type { HttpAuthScheme, HttpAuthSchemeId, SelectedHttpAuthScheme } from "../HttpAuthScheme";

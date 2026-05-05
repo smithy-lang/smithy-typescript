@@ -14,6 +14,8 @@ import type {
 } from "@smithy/types";
 
 import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
+import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
+import type { EndpointParameterInstructions } from "./types";
 
 function setFeature<F extends keyof SmithyFeatures>(
   context: HandlerExecutionContext,
@@ -27,8 +29,6 @@ function setFeature<F extends keyof SmithyFeatures>(
   }
   context.__smithy_context.features![feature] = value;
 }
-import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
-import type { EndpointParameterInstructions } from "./types";
 
 /**
  * @internal

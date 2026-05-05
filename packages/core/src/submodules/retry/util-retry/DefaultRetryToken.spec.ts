@@ -1,7 +1,7 @@
 import { describe, expect, test as it, vi } from "vitest";
 
-import { MAXIMUM_RETRY_DELAY } from "./constants";
 import { DefaultRetryToken } from "./DefaultRetryToken";
+import { MAXIMUM_RETRY_DELAY } from "./constants";
 import { Retry } from "./retries-2026-config";
 
 vi.mock("./defaultRetryBackoffStrategy");

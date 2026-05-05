@@ -1,5 +1,5 @@
 import { AsyncGzip } from "fflate";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 import { ReadableStream } from "web-streams-polyfill";
 
 import { compressStream } from "./compressStream.browser";
@@ -15,11 +15,11 @@ describe(compressStream.name, () => {
       const data = typeof chunk === "string" ? [chunk, compressionSuffix].join(compressionSeparator) : null;
       asyncGzip.ondata(undefined, data, final);
     }),
-    terminate() {}
+    terminate() {},
   };
 
   beforeEach(() => {
-    (vi.mocked(AsyncGzip)).mockImplementation(() => asyncGzip);
+    vi.mocked(AsyncGzip).mockImplementation(() => asyncGzip);
   });
 
   afterEach(() => {
@@ -59,7 +59,7 @@ describe(compressStream.name, () => {
   it("should throw an error if compression fails", async () => {
     const compressionErrorMsg = "compression error message";
     const compressionError = new Error(compressionErrorMsg);
-    (vi.mocked(AsyncGzip)).mockImplementationOnce(() => {
+    vi.mocked(AsyncGzip).mockImplementationOnce(() => {
       throw compressionError;
     });
 

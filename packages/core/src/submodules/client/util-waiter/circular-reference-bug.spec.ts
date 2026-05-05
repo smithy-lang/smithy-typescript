@@ -9,8 +9,7 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 
 import { runPolling } from "./poller";
 import { sleep } from "./utils/sleep";
-import type { WaiterOptions, WaiterResult } from "./waiter";
-import { checkExceptions, WaiterState } from "./waiter";
+import { WaiterState, checkExceptions, type WaiterOptions, type WaiterResult } from "./waiter";
 
 vi.mock("./utils/sleep");
 

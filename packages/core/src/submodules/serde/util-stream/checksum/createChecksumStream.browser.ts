@@ -1,7 +1,6 @@
 import { toBase64 } from "../../util-base64/toBase64";
 import { isReadableStream } from "../stream-type-check";
-import type { ChecksumStreamInit } from "./ChecksumStream.browser";
-import { ChecksumStream } from "./ChecksumStream.browser";
+import { ChecksumStream, type ChecksumStreamInit } from "./ChecksumStream.browser";
 
 /**
  * Alias prevents compiler from turning

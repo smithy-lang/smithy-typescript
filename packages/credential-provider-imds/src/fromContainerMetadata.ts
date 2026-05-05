@@ -1,12 +1,11 @@
-import { CredentialsProviderError } from "@smithy/core/config";
-import type { AwsCredentialIdentityProvider, Logger } from "@smithy/types";
 import type { RequestOptions } from "node:http";
 import { parse } from "node:url";
+import { CredentialsProviderError } from "@smithy/core/config";
+import type { AwsCredentialIdentityProvider, Logger } from "@smithy/types";
 
-import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
-import type { RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
-import { providerConfigFromInit } from "./remoteProvider/RemoteProviderInit";
+import { providerConfigFromInit, type RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
+import { httpRequest } from "./remoteProvider/httpRequest";
 import { retry } from "./remoteProvider/retry";
 
 /**

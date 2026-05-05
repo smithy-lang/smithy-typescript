@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { HeaderBag, HttpResponse } from "@smithy/protocol-http";
-import { HttpRequest } from "@smithy/protocol-http";
-import type { QueryParameterBag } from "@smithy/types";
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
-import type { URLSearchParams } from "node:url";
-import { URL } from "node:url";
+import { URL, type URLSearchParams } from "node:url";
+import { HttpRequest, type HeaderBag, type HttpResponse } from "@smithy/protocol-http";
+import type { QueryParameterBag } from "@smithy/types";
 
 function convertHeaders(headers: IncomingHttpHeaders): HeaderBag {
   // TODO make this proper

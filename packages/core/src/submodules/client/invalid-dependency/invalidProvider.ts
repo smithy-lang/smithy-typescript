@@ -1,4 +1,5 @@
 import type { Provider } from "@smithy/types";
+
 /**
  * @internal
  */

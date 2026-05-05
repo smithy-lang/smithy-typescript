@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { createWaiter } from "./createWaiter";
-import type { WaiterOptions } from "./waiter";
-import { WaiterState } from "./waiter";
+import { WaiterState, type WaiterOptions } from "./waiter";
 
 vi.mock("./utils/validate", () => ({
   validateWaiterOptions: vi.fn(),

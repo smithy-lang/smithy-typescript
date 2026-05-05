@@ -1,9 +1,9 @@
 import { HttpRequest } from "@smithy/core/protocols";
-import { afterEach, beforeEach, describe, expect,test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { compressionMiddleware } from "./compressionMiddleware";
 import { compressStream } from "./compressStream";
 import { compressString } from "./compressString";
+import { compressionMiddleware } from "./compressionMiddleware";
 import { CompressionAlgorithm } from "./constants";
 import { isStreaming } from "./isStreaming";
 
@@ -42,7 +42,7 @@ describe(compressionMiddleware.name, () => {
     beforeEach(() => {
       const { isInstance } = HttpRequest;
       (isInstance as unknown as any).mockReturnValue(true);
-      (vi.mocked(isStreaming)).mockReturnValue(false);
+      vi.mocked(isStreaming).mockReturnValue(false);
     });
 
     it("skips compression if disabled", async () => {
@@ -65,7 +65,7 @@ describe(compressionMiddleware.name, () => {
 
     describe("streaming", () => {
       beforeEach(() => {
-        (vi.mocked(isStreaming)).mockReturnValue(true);
+        vi.mocked(isStreaming).mockReturnValue(true);
       });
 
       it("throws error if streaming blob requires length", async () => {
@@ -83,7 +83,7 @@ describe(compressionMiddleware.name, () => {
 
       it("compresses streaming blob", async () => {
         const mockCompressedStream = "compressed-stream" as any;
-        (vi.mocked(compressStream)).mockResolvedValueOnce(mockCompressedStream);
+        vi.mocked(compressStream).mockResolvedValueOnce(mockCompressedStream);
 
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
 
@@ -120,7 +120,7 @@ describe(compressionMiddleware.name, () => {
 
       it("compresses body", async () => {
         const mockCompressedBody = "compressed-body" as any;
-        (vi.mocked(compressString)).mockResolvedValueOnce(mockCompressedBody);
+        vi.mocked(compressString).mockResolvedValueOnce(mockCompressedBody);
 
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({ ...mockArgs } as any);
 
@@ -141,7 +141,7 @@ describe(compressionMiddleware.name, () => {
 
       it("appends algorithm to existing Content-Encoding header", async () => {
         const mockCompressedBody = "compressed-body" as any;
-        (vi.mocked(compressString)).mockResolvedValueOnce(mockCompressedBody);
+        vi.mocked(compressString).mockResolvedValueOnce(mockCompressedBody);
 
         const mockExistingContentEncoding = "deflate";
         await compressionMiddleware(mockConfig, mockMiddlewareConfig)(mockNext, mockContext)({

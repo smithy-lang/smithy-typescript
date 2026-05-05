@@ -1,4 +1,4 @@
-import { type TypeRegistry, NormalizedSchema } from "@smithy/core/schema";
+import { NormalizedSchema, type TypeRegistry } from "@smithy/core/schema";
 import type {
   DocumentSchema,
   Endpoint,
@@ -11,8 +11,8 @@ import type {
   SerdeFunctions,
 } from "@smithy/types";
 
-import { collectBody } from "./collect-stream-body";
 import { HttpProtocol } from "./HttpProtocol";
+import { collectBody } from "./collect-stream-body";
 import { HttpRequest } from "./protocol-http/httpRequest";
 
 /**

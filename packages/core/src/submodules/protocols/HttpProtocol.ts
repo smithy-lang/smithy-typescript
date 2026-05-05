@@ -1,5 +1,5 @@
 import type { EventStreamSerde } from "@smithy/core/event-streams";
-import { NormalizedSchema, translateTraits, TypeRegistry } from "@smithy/core/schema";
+import { NormalizedSchema, TypeRegistry, translateTraits } from "@smithy/core/schema";
 import type {
   ClientProtocol,
   Codec,
@@ -20,9 +20,9 @@ import type {
   ShapeSerializer,
 } from "@smithy/types";
 
+import { SerdeContext } from "./SerdeContext";
 import { HttpRequest } from "./protocol-http/httpRequest";
 import { HttpResponse } from "./protocol-http/httpResponse";
-import { SerdeContext } from "./SerdeContext";
 
 /**
  * Abstract base for HTTP-based client protocols.

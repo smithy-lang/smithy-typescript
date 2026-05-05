@@ -5,8 +5,7 @@ import { chain } from "../property-provider/chain";
 import { memoize } from "../property-provider/memoize";
 import { loadConfig } from "./configLoader";
 import { fromEnv } from "./fromEnv";
-import type { NodeSharedConfigInit } from "./fromSharedConfigFiles";
-import { fromSharedConfigFiles } from "./fromSharedConfigFiles";
+import { fromSharedConfigFiles, type NodeSharedConfigInit } from "./fromSharedConfigFiles";
 import { fromStatic } from "./fromStatic";
 
 vi.mock("./fromEnv");

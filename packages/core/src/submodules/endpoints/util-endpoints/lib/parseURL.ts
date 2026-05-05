@@ -1,5 +1,4 @@
-import type { Endpoint, EndpointURL } from "@smithy/types";
-import { EndpointURLScheme } from "@smithy/types";
+import { EndpointURLScheme, type Endpoint, type EndpointURL } from "@smithy/types";
 
 import { isIpAddress } from "./isIpAddress";
 

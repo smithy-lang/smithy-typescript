@@ -1,13 +1,11 @@
-import { loadConfig } from "@smithy/core/config";
-import { CredentialsProviderError } from "@smithy/core/config";
-import type { AwsCredentialIdentity, Provider } from "@smithy/types";
 import type { RequestOptions } from "node:http";
+import { CredentialsProviderError, loadConfig } from "@smithy/core/config";
+import type { AwsCredentialIdentity, Provider } from "@smithy/types";
 
 import { InstanceMetadataV1FallbackError } from "./error/InstanceMetadataV1FallbackError";
-import { httpRequest } from "./remoteProvider/httpRequest";
 import { fromImdsCredentials, isImdsCredentials } from "./remoteProvider/ImdsCredentials";
-import type { RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
-import { providerConfigFromInit } from "./remoteProvider/RemoteProviderInit";
+import { providerConfigFromInit, type RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
+import { httpRequest } from "./remoteProvider/httpRequest";
 import { retry } from "./remoteProvider/retry";
 import type { InstanceMetadataCredentials } from "./types";
 import { getInstanceMetadataEndpoint } from "./utils/getInstanceMetadataEndpoint";

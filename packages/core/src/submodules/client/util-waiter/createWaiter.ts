@@ -2,8 +2,7 @@ import type { AbortSignal as DeprecatedAbortSignal } from "@smithy/types";
 
 import { runPolling } from "./poller";
 import { validateWaiterOptions } from "./utils/validate";
-import type { WaiterOptions, WaiterResult } from "./waiter";
-import { waiterServiceDefaults, WaiterState } from "./waiter";
+import { WaiterState, waiterServiceDefaults, type WaiterOptions, type WaiterResult } from "./waiter";
 
 const abortTimeout = <R>(
   abortSignal: AbortSignal | DeprecatedAbortSignal

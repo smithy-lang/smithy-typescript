@@ -1,13 +1,13 @@
 import type { SchemaRef, SchemaTraits } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
-import { error, ErrorSchema } from "./ErrorSchema";
-import { list, ListSchema } from "./ListSchema";
-import { map, MapSchema } from "./MapSchema";
-import { op, OperationSchema } from "./OperationSchema";
+import { ErrorSchema, error } from "./ErrorSchema";
+import { ListSchema, list } from "./ListSchema";
+import { MapSchema, map } from "./MapSchema";
+import { OperationSchema, op } from "./OperationSchema";
 import { Schema } from "./Schema";
-import { sim, SimpleSchema } from "./SimpleSchema";
-import { struct, StructureSchema } from "./StructureSchema";
+import { SimpleSchema, sim } from "./SimpleSchema";
+import { StructureSchema, struct } from "./StructureSchema";
 
 describe("schemas", () => {
   describe(ErrorSchema.name, () => {

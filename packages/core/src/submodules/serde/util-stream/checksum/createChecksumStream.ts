@@ -1,10 +1,11 @@
 import type { Readable } from "node:stream";
 
 import { isReadableStream } from "../stream-type-check";
-import type { ChecksumStreamInit } from "./ChecksumStream";
-import { ChecksumStream } from "./ChecksumStream";
-import type { ReadableStreamType } from "./createChecksumStream.browser";
-import { createChecksumStream as createChecksumStreamWeb } from "./createChecksumStream.browser";
+import { ChecksumStream, type ChecksumStreamInit } from "./ChecksumStream";
+import {
+  createChecksumStream as createChecksumStreamWeb,
+  type ReadableStreamType,
+} from "./createChecksumStream.browser";
 
 /**
  * Creates a stream mirroring the input stream's interface, but

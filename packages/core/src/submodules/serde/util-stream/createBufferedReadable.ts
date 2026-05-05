@@ -1,9 +1,16 @@
-import type { Logger } from "@smithy/types";
 import { Readable } from "node:stream";
+import type { Logger } from "@smithy/types";
 
 import { ByteArrayCollector } from "./ByteArrayCollector";
-import type { BufferStore, Modes } from "./createBufferedReadable.browser";
-import { createBufferedReadableStream, flush, merge, modeOf, sizeOf } from "./createBufferedReadable.browser";
+import {
+  createBufferedReadableStream,
+  flush,
+  merge,
+  modeOf,
+  sizeOf,
+  type BufferStore,
+  type Modes,
+} from "./createBufferedReadable.browser";
 import { isReadableStream } from "./stream-type-check";
 
 /**

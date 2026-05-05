@@ -1,18 +1,18 @@
-import { toHex } from "@smithy/core/serde";
-import { toUint8Array } from "@smithy/core/serde";
-import type { SignatureV4CryptoInit, SignatureV4Init } from "@smithy/signature-v4";
+import { toHex, toUint8Array } from "@smithy/core/serde";
 import {
   ALGORITHM_IDENTIFIER_V4A,
   AMZ_DATE_HEADER,
   AUTH_HEADER,
   SHA256_HEADER,
+  SignatureV4Base,
   TOKEN_HEADER,
+  getCanonicalHeaders,
+  getPayloadHash,
+  hasHeader,
+  prepareRequest,
+  type SignatureV4CryptoInit,
+  type SignatureV4Init,
 } from "@smithy/signature-v4";
-import { getCanonicalHeaders } from "@smithy/signature-v4";
-import { getPayloadHash } from "@smithy/signature-v4";
-import { hasHeader } from "@smithy/signature-v4";
-import { prepareRequest } from "@smithy/signature-v4";
-import { SignatureV4Base } from "@smithy/signature-v4";
 import type { HttpRequest, RequestSigner, RequestSigningArguments } from "@smithy/types";
 
 import { REGION_HEADER } from "./constants";

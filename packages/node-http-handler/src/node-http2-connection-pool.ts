@@ -1,5 +1,5 @@
-import type { ConnectionPool } from "@smithy/types";
 import type { ClientHttp2Session } from "node:http2";
+import type { ConnectionPool } from "@smithy/types";
 
 import { ClientHttp2SessionRef } from "./http2/ClientHttp2SessionRef";
 

@@ -8,8 +8,7 @@ import type {
   SerializeHandlerOptions,
 } from "@smithy/types";
 
-import type { PreviouslyResolved } from "./httpAuthSchemeMiddleware";
-import { httpAuthSchemeMiddleware } from "./httpAuthSchemeMiddleware";
+import { httpAuthSchemeMiddleware, type PreviouslyResolved } from "./httpAuthSchemeMiddleware";
 
 /**
  * @internal

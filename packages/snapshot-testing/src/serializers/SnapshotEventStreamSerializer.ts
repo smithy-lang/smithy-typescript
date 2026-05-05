@@ -1,5 +1,4 @@
-import { toHex } from "@smithy/core/serde";
-import { toUtf8 } from "@smithy/core/serde";
+import { toHex, toUtf8 } from "@smithy/core/serde";
 import type { Message } from "@smithy/types";
 
 import { ContentTypeDetection } from "./ContentTypeDetection";

@@ -1,10 +1,10 @@
+import http2 from "node:http2";
 import type {
   ConnectConfiguration,
   ConnectionManager,
   ConnectionManagerConfiguration,
   RequestContext,
 } from "@smithy/types";
-import http2 from "node:http2";
 
 import { ClientHttp2SessionRef } from "./http2/ClientHttp2SessionRef";
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";

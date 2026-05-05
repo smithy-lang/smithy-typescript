@@ -1,7 +1,6 @@
+import { Writable, type WritableOptions } from "node:stream";
 import { toUint8Array } from "@smithy/core/serde";
 import type { Checksum, Hash } from "@smithy/types";
-import type { WritableOptions } from "node:stream";
-import { Writable } from "node:stream";
 
 /**
  * @internal

@@ -1,10 +1,8 @@
+import http, { request as hRequest, type Server as HttpServer } from "node:http";
+import https, { request as hsRequest, type Server as HttpsServer } from "node:https";
+import type { AddressInfo } from "node:net";
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/core/protocols";
-import type { Server as HttpServer } from "node:http";
-import http from "node:http";
-import type { Server as HttpsServer } from "node:https";
-import https from "node:https";
-import type { AddressInfo } from "node:net";
 import { afterAll, afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
@@ -41,9 +39,6 @@ vi.mock("https", async () => {
     default: pkg,
   };
 });
-
-import { request as hRequest } from "node:http";
-import { request as hsRequest } from "node:https";
 
 describe("http", () => {
   let mockHttpServer: HttpServer;

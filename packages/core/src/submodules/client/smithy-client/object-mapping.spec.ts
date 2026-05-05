@@ -1,7 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
-import type { ObjectMappingInstructions, SourceMappingInstructions } from "./object-mapping";
-import { map, take } from "./object-mapping";
+import { map, take, type ObjectMappingInstructions, type SourceMappingInstructions } from "./object-mapping";
 
 describe("object mapping", () => {
   const example: ObjectMappingInstructions = {

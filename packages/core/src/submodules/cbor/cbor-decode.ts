@@ -1,19 +1,5 @@
-import { nv } from "@smithy/core/serde";
-import { toUtf8 } from "@smithy/core/serde";
+import { nv, toUtf8 } from "@smithy/core/serde";
 
-import type {
-  CborArgumentLength,
-  CborArgumentLengthOffset,
-  CborListType,
-  CborMapType,
-  CborOffset,
-  CborUnstructuredByteStringType,
-  CborValueType,
-  Float32,
-  Uint8,
-  Uint32,
-  Uint64,
-} from "./cbor-types";
 import {
   alloc,
   extendedFloat16,
@@ -33,6 +19,17 @@ import {
   specialTrue,
   specialUndefined,
   tag,
+  type CborArgumentLength,
+  type CborArgumentLengthOffset,
+  type CborListType,
+  type CborMapType,
+  type CborOffset,
+  type CborUnstructuredByteStringType,
+  type CborValueType,
+  type Float32,
+  type Uint8,
+  type Uint32,
+  type Uint64,
 } from "./cbor-types";
 
 const USE_TEXT_DECODER = typeof TextDecoder !== "undefined";

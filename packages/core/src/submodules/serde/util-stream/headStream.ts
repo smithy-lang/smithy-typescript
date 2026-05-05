@@ -1,5 +1,4 @@
-import type { Readable } from "node:stream";
-import { Writable } from "node:stream";
+import { Writable, type Readable } from "node:stream";
 
 import { headStream as headWebStream } from "./headStream.browser";
 import { isReadableStream } from "./stream-type-check";

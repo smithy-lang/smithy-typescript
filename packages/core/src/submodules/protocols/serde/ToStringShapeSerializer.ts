@@ -1,6 +1,5 @@
 import { NormalizedSchema } from "@smithy/core/schema";
-import { dateToUtcString, generateIdempotencyToken, LazyJsonString, quoteHeader } from "@smithy/core/serde";
-import { toBase64 } from "@smithy/core/serde";
+import { LazyJsonString, dateToUtcString, generateIdempotencyToken, quoteHeader, toBase64 } from "@smithy/core/serde";
 import type {
   CodecSettings,
   Schema,

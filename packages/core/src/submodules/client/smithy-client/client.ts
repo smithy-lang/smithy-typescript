@@ -1,13 +1,12 @@
-import { SerdeContext } from "@smithy/core/protocols";
 import type {
   $ClientProtocol,
   $ClientProtocolCtor,
-  Client as IClient,
   ClientProtocol,
   ClientProtocolCtor,
   Command,
   FetchHttpHandlerOptions,
   Handler,
+  Client as IClient,
   MetadataBearer,
   MiddlewareStack,
   NodeHttpHandlerOptions,

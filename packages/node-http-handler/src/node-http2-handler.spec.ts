@@ -1,20 +1,24 @@
-import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
-import type { HttpResponse } from "@smithy/core/protocols";
-import { HttpRequest } from "@smithy/core/protocols";
-import type { Mutable } from "@smithy/types";
-import getPort, { portNumbers } from "get-port";
 import { rejects } from "node:assert";
-import type { ClientHttp2Session, ClientHttp2Stream, Http2Server, Http2Session, Http2Stream } from "node:http2";
-import http2, { constants } from "node:http2";
+import http2, {
+  constants,
+  type ClientHttp2Session,
+  type ClientHttp2Stream,
+  type Http2Server,
+  type Http2Session,
+  type Http2Stream,
+} from "node:http2";
 import { Duplex } from "node:stream";
 import { promisify } from "node:util";
+import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
+import { HttpRequest, type HttpResponse } from "@smithy/core/protocols";
+import type { Mutable } from "@smithy/types";
+import getPort, { portNumbers } from "get-port";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import type { ClientHttp2SessionRef } from "./http2/ClientHttp2SessionRef";
 import type { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
 import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
-import type { NodeHttp2HandlerOptions } from "./node-http2-handler";
-import { NodeHttp2Handler } from "./node-http2-handler";
+import { NodeHttp2Handler, type NodeHttp2HandlerOptions } from "./node-http2-handler";
 import { createMockHttp2Server, createResponseFunction, createResponseFunctionWithDelay } from "./server.mock";
 import { timing } from "./timing";
 

@@ -1,8 +1,8 @@
-import { fromBase64 } from "@smithy/core/serde";
-import { toHex } from "@smithy/core/serde";
+import { fromBase64, toHex } from "@smithy/core/serde";
 import { describe, expect, test as it } from "vitest";
 
 import { Md5 } from "./md5";
+
 const hashVectors = require("hash-test-vectors");
 
 describe("Md5", () => {

@@ -1,6 +1,5 @@
+import { request, type IncomingMessage, type RequestOptions } from "node:http";
 import { ProviderError } from "@smithy/core/config";
-import type { IncomingMessage, RequestOptions } from "node:http";
-import { request } from "node:http";
 
 /**
  * @internal

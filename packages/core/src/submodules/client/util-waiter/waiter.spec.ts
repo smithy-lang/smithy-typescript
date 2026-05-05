@@ -1,6 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
-import { checkExceptions, WaiterState } from "./waiter";
+import { WaiterState, checkExceptions } from "./waiter";
 
 describe(checkExceptions.name, () => {
   const reason = "generic reason";

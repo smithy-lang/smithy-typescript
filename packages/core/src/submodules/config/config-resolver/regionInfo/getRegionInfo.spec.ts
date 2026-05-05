@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
+import type { PartitionHash } from "./PartitionHash";
+import type { RegionHash } from "./RegionHash";
 import { getHostnameFromVariants } from "./getHostnameFromVariants";
 import { getRegionInfo } from "./getRegionInfo";
 import { getResolvedHostname } from "./getResolvedHostname";
 import { getResolvedPartition } from "./getResolvedPartition";
 import { getResolvedSigningRegion } from "./getResolvedSigningRegion";
-import type { PartitionHash } from "./PartitionHash";
-import type { RegionHash } from "./RegionHash";
 
 vi.mock("./getHostnameFromVariants");
 vi.mock("./getResolvedHostname");

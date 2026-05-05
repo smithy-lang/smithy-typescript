@@ -7,10 +7,10 @@ import type {
   StandardRetryToken,
 } from "@smithy/types";
 
-import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
-import { INITIAL_RETRY_TOKENS, NO_RETRY_INCREMENT } from "./constants";
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { DefaultRetryToken } from "./DefaultRetryToken";
+import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
+import { INITIAL_RETRY_TOKENS, NO_RETRY_INCREMENT } from "./constants";
 import { Retry } from "./retries-2026-config";
 
 /**

@@ -1,5 +1,5 @@
-import type { HttpRequest } from "@smithy/core/protocols";
 import { Readable } from "node:stream";
+import type { HttpRequest } from "@smithy/core/protocols";
 
 /**
  * @internal

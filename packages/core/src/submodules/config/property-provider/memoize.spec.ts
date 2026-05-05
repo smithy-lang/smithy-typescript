@@ -1,5 +1,4 @@
-import type { Mock } from "vitest";
-import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi, type Mock } from "vitest";
 
 import { memoize } from "./memoize";
 

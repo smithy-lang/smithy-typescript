@@ -15,17 +15,17 @@
 
 import { RE2 } from "re2-wasm";
 
-import { findDuplicates } from "../unique";
-import type {
-  EnumValidationFailure,
-  IntegerEnumValidationFailure,
-  LengthValidationFailure,
-  PatternValidationFailure,
-  RangeValidationFailure,
-  UniqueItemsValidationFailure,
-  ValidationFailure,
+import {
+  RequiredValidationFailure,
+  type EnumValidationFailure,
+  type IntegerEnumValidationFailure,
+  type LengthValidationFailure,
+  type PatternValidationFailure,
+  type RangeValidationFailure,
+  type UniqueItemsValidationFailure,
+  type ValidationFailure,
 } from ".";
-import { RequiredValidationFailure } from ".";
+import { findDuplicates } from "../unique";
 
 export class CompositeValidator<T> implements MultiConstraintValidator<T> {
   private readonly validators: SingleConstraintValidator<T, any>[];

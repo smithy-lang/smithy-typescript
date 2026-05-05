@@ -1,5 +1,4 @@
-import { toHex } from "@smithy/core/serde";
-import { toUint8Array } from "@smithy/core/serde";
+import { toHex, toUint8Array } from "@smithy/core/serde";
 import type {
   AwsCredentialIdentity,
   EventSigner,
@@ -18,6 +17,8 @@ import type {
   StringSigner,
 } from "@smithy/types";
 
+import { HeaderFormatter } from "./HeaderFormatter";
+import { SignatureV4Base, type SignatureV4CryptoInit, type SignatureV4Init } from "./SignatureV4Base";
 import {
   ALGORITHM_IDENTIFIER,
   ALGORITHM_QUERY_PARAM,
@@ -37,12 +38,9 @@ import {
 import { createScope, getSigningKey } from "./credentialDerivation";
 import { getCanonicalHeaders } from "./getCanonicalHeaders";
 import { getPayloadHash } from "./getPayloadHash";
-import { HeaderFormatter } from "./HeaderFormatter";
 import { hasHeader } from "./headerUtil";
 import { moveHeadersToQuery } from "./moveHeadersToQuery";
 import { prepareRequest } from "./prepareRequest";
-import type { SignatureV4CryptoInit, SignatureV4Init } from "./SignatureV4Base";
-import { SignatureV4Base } from "./SignatureV4Base";
 
 /**
  * @public

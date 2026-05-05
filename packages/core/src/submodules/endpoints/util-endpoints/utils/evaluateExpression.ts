@@ -1,5 +1,11 @@
-import type { EvaluateOptions, Expression, FunctionObject, FunctionReturn, ReferenceObject } from "../types";
-import { EndpointError } from "../types";
+import {
+  EndpointError,
+  type EvaluateOptions,
+  type Expression,
+  type FunctionObject,
+  type FunctionReturn,
+  type ReferenceObject,
+} from "../types";
 import { customEndpointFunctions } from "./customEndpointFunctions";
 import { endpointFunctions } from "./endpointFunctions";
 import { evaluateTemplate } from "./evaluateTemplate";

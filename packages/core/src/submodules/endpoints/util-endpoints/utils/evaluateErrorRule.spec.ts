@@ -1,7 +1,6 @@
 import { describe, expect, test as it, vi } from "vitest";
 
-import type { ErrorRuleObject } from "../types";
-import { EndpointError } from "../types";
+import { EndpointError, type ErrorRuleObject } from "../types";
 import { evaluateConditions } from "./evaluateConditions";
 import { evaluateErrorRule } from "./evaluateErrorRule";
 import { evaluateExpression } from "./evaluateExpression";

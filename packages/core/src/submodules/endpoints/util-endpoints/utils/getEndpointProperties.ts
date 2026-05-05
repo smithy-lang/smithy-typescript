@@ -1,7 +1,6 @@
 import type { EndpointObjectProperty } from "@smithy/types";
 
-import type { EndpointObjectProperties, EvaluateOptions } from "../types";
-import { EndpointError } from "../types";
+import { EndpointError, type EndpointObjectProperties, type EvaluateOptions } from "../types";
 import { evaluateTemplate } from "./evaluateTemplate";
 
 export const getEndpointProperties = (properties: EndpointObjectProperties, options: EvaluateOptions) =>

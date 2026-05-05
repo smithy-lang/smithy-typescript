@@ -1,6 +1,6 @@
+import { Readable } from "node:stream";
 import { streamCollector } from "@smithy/node-http-handler";
 import type { HttpResponse } from "@smithy/types";
-import { Readable } from "node:stream";
 
 import { SnapshotPayloadSerializer } from "./SnapshotPayloadSerializer";
 
