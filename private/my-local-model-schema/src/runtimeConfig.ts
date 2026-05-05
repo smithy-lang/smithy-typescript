@@ -1,11 +1,14 @@
 // smithy-typescript generated code
 import { emitWarningIfUnsupportedVersion, loadConfigsForDefaultMode } from "@smithy/core/client";
 import { loadConfig as loadNodeConfig, resolveDefaultsModeConfig } from "@smithy/core/config";
+import {
+  DEFAULT_RETRY_MODE,
+  NODE_MAX_ATTEMPT_CONFIG_OPTIONS,
+  NODE_RETRY_MODE_CONFIG_OPTIONS,
+} from "@smithy/core/retry";
 import { calculateBodyLength, Hash } from "@smithy/core/serde";
 import { eventStreamSerdeProvider } from "@smithy/eventstream-serde-node";
-import { NODE_MAX_ATTEMPT_CONFIG_OPTIONS, NODE_RETRY_MODE_CONFIG_OPTIONS } from "@smithy/middleware-retry";
 import { NodeHttpHandler as RequestHandler, streamCollector } from "@smithy/node-http-handler";
-import { DEFAULT_RETRY_MODE } from "@smithy/util-retry";
 
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";
 import type { XYZServiceClientConfig } from "./XYZServiceClient";

@@ -3032,7 +3032,6 @@ __metadata:
   resolution: "@smithy/experimental-identity-and-auth@workspace:packages/experimental-identity-and-auth"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/middleware-endpoint": "workspace:^"
     "@smithy/middleware-retry": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -3162,7 +3161,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/middleware-endpoint@workspace:^, @smithy/middleware-endpoint@workspace:packages/middleware-endpoint":
+"@smithy/middleware-endpoint@workspace:packages/middleware-endpoint":
   version: 0.0.0-use.local
   resolution: "@smithy/middleware-endpoint@workspace:packages/middleware-endpoint"
   dependencies:
@@ -3176,15 +3175,7 @@ __metadata:
   resolution: "@smithy/middleware-retry@workspace:packages/middleware-retry"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/service-error-classification": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@smithy/util-retry": "workspace:^"
-    "@smithy/util-test": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
@@ -3280,15 +3271,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/service-error-classification@workspace:^, @smithy/service-error-classification@workspace:packages/service-error-classification":
+"@smithy/service-error-classification@workspace:packages/service-error-classification":
   version: 0.0.0-use.local
   resolution: "@smithy/service-error-classification@workspace:packages/service-error-classification"
   dependencies:
-    "@smithy/types": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
-    typedoc: "npm:0.23.23"
+    "@smithy/core": "workspace:^"
+    tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
 
@@ -3350,13 +3338,9 @@ __metadata:
     "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/middleware-endpoint": "workspace:^"
-    "@smithy/middleware-retry": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-endpoints": "workspace:^"
-    "@smithy/util-retry": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
@@ -3376,12 +3360,8 @@ __metadata:
     "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/middleware-endpoint": "workspace:^"
-    "@smithy/middleware-retry": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-endpoints": "workspace:^"
-    "@smithy/util-retry": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
@@ -3515,7 +3495,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-endpoints@workspace:^, @smithy/util-endpoints@workspace:packages/util-endpoints":
+"@smithy/util-endpoints@workspace:packages/util-endpoints":
   version: 0.0.0-use.local
   resolution: "@smithy/util-endpoints@workspace:packages/util-endpoints"
   dependencies:
@@ -3542,18 +3522,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-retry@workspace:^, @smithy/util-retry@workspace:packages/util-retry":
+"@smithy/util-retry@workspace:packages/util-retry":
   version: 0.0.0-use.local
   resolution: "@smithy/util-retry@workspace:packages/util-retry"
   dependencies:
-    "@smithy/service-error-classification": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
+    "@smithy/core": "workspace:^"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
@@ -12430,13 +12404,9 @@ __metadata:
     "@smithy/eventstream-serde-config-resolver": "workspace:^"
     "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/middleware-endpoint": "workspace:^"
-    "@smithy/middleware-retry": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/snapshot-testing": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-endpoints": "workspace:^"
-    "@smithy/util-retry": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"
@@ -12459,12 +12429,8 @@ __metadata:
     "@smithy/eventstream-serde-config-resolver": "workspace:^"
     "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
-    "@smithy/middleware-endpoint": "workspace:^"
-    "@smithy/middleware-retry": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
-    "@smithy/util-endpoints": "workspace:^"
-    "@smithy/util-retry": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"
     concurrently: "npm:7.0.0"

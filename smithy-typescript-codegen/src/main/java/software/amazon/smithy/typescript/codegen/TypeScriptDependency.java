@@ -50,12 +50,16 @@ public enum TypeScriptDependency implements Dependency {
     AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", false),
 
     // todo: core/endpoints
-    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", false),
-    UTIL_ENDPOINTS("dependencies", "@smithy/util-endpoints", false),
+    @Deprecated
+    MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "0.0.0", false),
+    @Deprecated
+    UTIL_ENDPOINTS("dependencies", "@smithy/util-endpoints", "0.0.0", false),
 
     // todo: core/retry
-    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", true),
-    UTIL_RETRY("dependencies", "@smithy/util-retry", false),
+    @Deprecated
+    MIDDLEWARE_RETRY("dependencies", "@smithy/middleware-retry", "0.0.0", false),
+    @Deprecated
+    UTIL_RETRY("dependencies", "@smithy/util-retry", "0.0.0", false),
 
     // devtools
     @Deprecated

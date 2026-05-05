@@ -1,10 +1,13 @@
 // smithy-typescript generated code
 import { emitWarningIfUnsupportedVersion, loadConfigsForDefaultMode } from "@smithy/core/client";
 import { loadConfig as loadNodeConfig, resolveDefaultsModeConfig } from "@smithy/core/config";
+import {
+  DEFAULT_RETRY_MODE,
+  NODE_MAX_ATTEMPT_CONFIG_OPTIONS,
+  NODE_RETRY_MODE_CONFIG_OPTIONS,
+} from "@smithy/core/retry";
 import { calculateBodyLength, Hash } from "@smithy/core/serde";
-import { NODE_MAX_ATTEMPT_CONFIG_OPTIONS, NODE_RETRY_MODE_CONFIG_OPTIONS } from "@smithy/middleware-retry";
 import { NodeHttpHandler as RequestHandler, streamCollector } from "@smithy/node-http-handler";
-import { DEFAULT_RETRY_MODE } from "@smithy/util-retry";
 
 import type { RpcV2ProtocolClientConfig } from "./RpcV2ProtocolClient";
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";

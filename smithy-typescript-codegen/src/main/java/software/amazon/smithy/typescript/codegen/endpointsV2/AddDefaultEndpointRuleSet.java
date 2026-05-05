@@ -88,7 +88,12 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
     @Override
     public List<RuntimeClientPlugin> getClientPlugins() {
         RuntimeClientPlugin endpointConfigResolver = RuntimeClientPlugin.builder()
-            .withConventions(TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency, "Endpoint", HAS_CONFIG)
+            .withConventions(
+                "@smithy/core/endpoints",
+                TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
+                "Endpoint",
+                HAS_CONFIG
+            )
             .build();
 
         if (usesDefaultEndpointRuleset) {
@@ -96,7 +101,8 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
                 endpointConfigResolver,
                 RuntimeClientPlugin.builder()
                     .withConventions(
-                        TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency,
+                        "@smithy/core/endpoints",
+                        TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
                         "EndpointRequired",
                         HAS_CONFIG
                     )

@@ -1,0 +1,25 @@
+---
+"@smithy/experimental-identity-and-auth": minor
+"@smithy/service-error-classification": minor
+"@smithy/util-defaults-mode-browser": minor
+"@smithy/middleware-content-length": minor
+"@smithy/util-defaults-mode-node": minor
+"@smithy/shared-ini-file-loader": minor
+"@smithy/node-config-provider": minor
+"@smithy/util-config-provider": minor
+"@smithy/middleware-endpoint": minor
+"@smithy/querystring-parser": minor
+"@smithy/property-provider": minor
+"@smithy/middleware-retry": minor
+"@smithy/config-resolver": minor
+"@smithy/util-uri-escape": minor
+"@smithy/util-endpoints": minor
+"@smithy/protocol-http": minor
+"@smithy/smithy-client": minor
+"@smithy/util-stream": minor
+"@smithy/url-parser": minor
+"@smithy/util-retry": minor
+"@smithy/core": minor
+---
+
+consolidate core/retry and related cleanup

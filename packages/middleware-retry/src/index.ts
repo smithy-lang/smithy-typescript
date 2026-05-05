@@ -1,9 +1,23 @@
-export * from "./retry-pre-sra-deprecated/AdaptiveRetryStrategy";
-export * from "./retry-pre-sra-deprecated/StandardRetryStrategy";
-export * from "./retry-pre-sra-deprecated/delayDecider";
-export * from "./retry-pre-sra-deprecated/retryDecider";
-
-export * from "./configurations";
-export * from "./omitRetryHeadersMiddleware";
-export * from "./retryMiddleware";
-export { getRetryAfterHint } from "./parseRetryAfterHeader";
+/** @deprecated Use @smithy/core/retry instead. */
+export {
+  DeprecatedAdaptiveRetryStrategy as AdaptiveRetryStrategy,
+  type DeprecatedAdaptiveRetryStrategyOptions as AdaptiveRetryStrategyOptions,
+  DeprecatedStandardRetryStrategy as StandardRetryStrategy,
+  type DeprecatedStandardRetryStrategyOptions as StandardRetryStrategyOptions,
+  CONFIG_MAX_ATTEMPTS,
+  CONFIG_RETRY_MODE,
+  ENV_MAX_ATTEMPTS,
+  ENV_RETRY_MODE,
+  NODE_MAX_ATTEMPT_CONFIG_OPTIONS,
+  NODE_RETRY_MODE_CONFIG_OPTIONS,
+  defaultDelayDecider,
+  defaultRetryDecider,
+  getOmitRetryHeadersPlugin,
+  getRetryAfterHint,
+  getRetryPlugin,
+  omitRetryHeadersMiddleware,
+  omitRetryHeadersMiddlewareOptions,
+  resolveRetryConfig,
+  retryMiddleware,
+  retryMiddlewareOptions,
+} from "@smithy/core/retry";

@@ -52,7 +52,8 @@ public final class ExampleWeatherCustomEndpointsRuntimeConfig implements TypeScr
                 .build(),
             RuntimeClientPlugin.builder()
                 .withConventions(
-                    TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2.dependency,
+                    "@smithy/core/endpoints",
+                    TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
                     "Endpoint",
                     Convention.HAS_CONFIG
                 )

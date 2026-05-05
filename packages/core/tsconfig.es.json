@@ -9,6 +9,7 @@
       "@smithy/core/cbor": ["./src/submodules/cbor/index.ts"],
       "@smithy/core/config": ["./src/submodules/config/index.ts"],
       "@smithy/core/client": ["./src/submodules/client/index.ts"],
+      "@smithy/core/retry": ["./src/submodules/retry/index.ts"],
       "@smithy/core/protocols": ["./src/submodules/protocols/index.ts"],
       "@smithy/core/serde": ["./src/submodules/serde/index.ts"],
       "@smithy/core/schema": ["./src/submodules/schema/index.ts"],

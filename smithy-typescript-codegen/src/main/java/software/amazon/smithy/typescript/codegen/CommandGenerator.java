@@ -550,7 +550,12 @@ final class CommandGenerator implements Runnable {
                         .map(RuntimeClientPlugin::getPluginFunction)
                         .anyMatch(Optional::isPresent);
 
-            writer.addImport("getEndpointPlugin", null, TypeScriptDependency.MIDDLEWARE_ENDPOINTS_V2);
+            writer.addImportSubmodule(
+                "getEndpointPlugin",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.ENDPOINTS
+            );
 
             if (multiplePlugins) {
                 writer.write("");

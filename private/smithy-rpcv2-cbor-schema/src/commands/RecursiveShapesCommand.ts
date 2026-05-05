@@ -1,6 +1,6 @@
 // smithy-typescript generated code
 import { Command as $Command } from "@smithy/core/client";
-import { getEndpointPlugin } from "@smithy/middleware-endpoint";
+import { getEndpointPlugin } from "@smithy/core/endpoints";
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
 import { commonParams } from "../endpoint/EndpointParameters";

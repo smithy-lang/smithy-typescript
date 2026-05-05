@@ -1,5 +1,78 @@
-/** @deprecated Use @smithy/core/client instead. */
+/** @deprecated Use @smithy/core submodules instead. */
 export type { DocumentType, SdkError, SmithyException } from "@smithy/types";
-export * from "@smithy/core/serde";
-export * from "@smithy/core/client";
+
+// from @smithy/core/serde
+export {
+  LazyJsonString,
+  NumericValue,
+  _parseEpochTimestamp,
+  _parseRfc3339DateTimeWithOffset,
+  _parseRfc7231DateTime,
+  copyDocumentWithTransform,
+  dateToUtcString,
+  expectBoolean,
+  expectByte,
+  expectFloat32,
+  expectInt,
+  expectInt32,
+  expectLong,
+  expectNonNull,
+  expectNumber,
+  expectObject,
+  expectShort,
+  expectString,
+  expectUnion,
+  generateIdempotencyToken,
+  handleFloat,
+  limitedParseDouble,
+  limitedParseFloat,
+  limitedParseFloat32,
+  logger,
+  nv,
+  parseBoolean,
+  parseEpochTimestamp,
+  parseRfc3339DateTime,
+  parseRfc3339DateTimeWithOffset,
+  parseRfc7231DateTime,
+  quoteHeader,
+  splitEvery,
+  splitHeader,
+  strictParseByte,
+  strictParseDouble,
+  strictParseFloat,
+  strictParseFloat32,
+  strictParseInt,
+  strictParseInt32,
+  strictParseLong,
+  strictParseShort,
+} from "@smithy/core/serde";
+
+// from @smithy/core/client
+export {
+  Client,
+  Command,
+  NoOpLogger,
+  SENSITIVE_STRING,
+  ServiceException,
+  _json,
+  convertMap,
+  createAggregatedClient,
+  decorateServiceException,
+  emitWarningIfUnsupportedVersion,
+  getArrayIfSingleItem,
+  getDefaultClientConfiguration,
+  getDefaultExtensionConfiguration,
+  getValueFromTextNode,
+  isSerializableHeaderValue,
+  loadConfigsForDefaultMode,
+  map,
+  resolveDefaultRuntimeConfig,
+  serializeDateTime,
+  serializeFloat,
+  take,
+  throwDefaultError,
+  withBaseException,
+} from "@smithy/core/client";
+
+// from @smithy/core/protocols
 export { collectBody, extendedEncodeURIComponent, resolvedPath } from "@smithy/core/protocols";

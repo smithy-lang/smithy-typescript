@@ -103,6 +103,31 @@ module.exports = {
                 ],
                 message: "This package has been consolidated into @smithy/core/protocols.",
               },
+              {
+                group: [
+                  "@smithy/util-retry",
+                  "@smithy/middleware-retry",
+                  "@smithy/service-error-classification",
+                ],
+                message: "This package has been consolidated into @smithy/core/retry.",
+              },
+              {
+                group: [
+                  "@smithy/util-endpoints",
+                  "@smithy/middleware-endpoint",
+                ],
+                message: "This package has been consolidated into @smithy/core/endpoints.",
+              },
+              {
+                group: [
+                  "@smithy/hash-blob-browser",
+                  "@smithy/hash-stream-node",
+                  "@smithy/md5-js",
+                  "@smithy/chunked-blob-reader",
+                  "@smithy/chunked-blob-reader-native",
+                ],
+                message: "This package has been consolidated into @smithy/core/checksum.",
+              },
             ],
           },
         ],

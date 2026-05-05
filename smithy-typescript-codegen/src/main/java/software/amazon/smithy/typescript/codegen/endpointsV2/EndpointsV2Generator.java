@@ -24,6 +24,7 @@ import software.amazon.smithy.rulesengine.traits.EndpointBddTrait;
 import software.amazon.smithy.rulesengine.traits.EndpointRuleSetTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.Dependency;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDelegator;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -266,10 +267,20 @@ public final class EndpointsV2Generator implements Runnable {
                 writer.addTypeImport("EndpointV2", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addTypeImport("Logger", null, TypeScriptDependency.SMITHY_TYPES);
 
-                writer.addDependency(TypeScriptDependency.UTIL_ENDPOINTS);
-                writer.addTypeImport("EndpointParams", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                writer.addTypeImportSubmodule(
+                    "EndpointParams",
+                    null,
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.ENDPOINTS
+                );
                 if (settings.generateEndpointBdd()) {
-                    writer.addImport("decideEndpoint", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                    writer.addImportSubmodule(
+                        "decideEndpoint",
+                        null,
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.ENDPOINTS
+                    );
                     writer.addRelativeImport(
                         "bdd",
                         null,
@@ -281,7 +292,12 @@ public final class EndpointsV2Generator implements Runnable {
                         )
                     );
                 } else {
-                    writer.addImport("resolveEndpoint", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                    writer.addImportSubmodule(
+                        "resolveEndpoint",
+                        null,
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.ENDPOINTS
+                    );
                     writer.addRelativeImport(
                         "ruleSet",
                         null,
@@ -304,7 +320,12 @@ public final class EndpointsV2Generator implements Runnable {
                     )
                 );
 
-                writer.addImport("EndpointCache", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.addImportSubmodule(
+                    "EndpointCache",
+                    null,
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.ENDPOINTS
+                );
 
                 List<String> effectiveParams = ruleSetParameterFinder.getEffectiveParams();
                 boolean longList = effectiveParams.size() >= 8;
@@ -421,7 +442,12 @@ public final class EndpointsV2Generator implements Runnable {
 
                 writer.dedent().write("""
                                       ]);""");
-                writer.addImport("BinaryDecisionDiagram", null, TypeScriptDependency.UTIL_ENDPOINTS);
+                writer.addImportSubmodule(
+                    "BinaryDecisionDiagram",
+                    null,
+                    TypeScriptDependency.SMITHY_CORE,
+                    SmithyCoreSubmodules.ENDPOINTS
+                );
                 writer.write("""
                              export const bdd = BinaryDecisionDiagram.from(
                                nodes, root, _data.conditions, _data.results

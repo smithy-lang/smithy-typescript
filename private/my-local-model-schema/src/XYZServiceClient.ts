@@ -10,24 +10,20 @@ import {
   type SmithyResolvedConfiguration as __SmithyResolvedConfiguration,
   Client as __Client,
 } from "@smithy/core/client";
+import { type EndpointInputConfig, type EndpointResolvedConfig, resolveEndpointConfig } from "@smithy/core/endpoints";
 import { type HttpHandlerUserInput as __HttpHandlerUserInput, getContentLengthPlugin } from "@smithy/core/protocols";
+import {
+  type RetryInputConfig,
+  type RetryResolvedConfig,
+  getRetryPlugin,
+  resolveRetryConfig,
+} from "@smithy/core/retry";
 import { getSchemaSerdePlugin } from "@smithy/core/schema";
 import {
   type EventStreamSerdeInputConfig,
   type EventStreamSerdeResolvedConfig,
   resolveEventStreamSerdeConfig,
 } from "@smithy/eventstream-serde-config-resolver";
-import {
-  type EndpointInputConfig,
-  type EndpointResolvedConfig,
-  resolveEndpointConfig,
-} from "@smithy/middleware-endpoint";
-import {
-  type RetryInputConfig,
-  type RetryResolvedConfig,
-  getRetryPlugin,
-  resolveRetryConfig,
-} from "@smithy/middleware-retry";
 import type {
   BodyLengthCalculator as __BodyLengthCalculator,
   CheckOptionalClientConfig as __CheckOptionalClientConfig,

@@ -1,4 +1,4 @@
-import { endpointMiddlewareOptions } from "@smithy/middleware-endpoint";
+import { endpointMiddlewareOptions } from "@smithy/core/endpoints";
 import type {
   HandlerExecutionContext,
   Pluggable,

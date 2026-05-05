@@ -96,6 +96,13 @@
       "node": "./dist-cjs/submodules/checksum/index.js",
       "import": "./dist-es/submodules/checksum/index.js",
       "require": "./dist-cjs/submodules/checksum/index.js"
+    },
+    "./retry": {
+      "types": "./dist-types/submodules/retry/index.d.ts",
+      "module": "./dist-es/submodules/retry/index.js",
+      "node": "./dist-cjs/submodules/retry/index.js",
+      "import": "./dist-es/submodules/retry/index.js",
+      "require": "./dist-cjs/submodules/retry/index.js"
     }
   },
   "author": {
@@ -138,7 +145,9 @@
     "./config.d.ts",
     "./config.js",
     "./checksum.d.ts",
-    "./checksum.js"
+    "./checksum.js",
+    "./retry.d.ts",
+    "./retry.js"
   ],
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/core",
   "repository": {
@@ -189,6 +198,7 @@
     "./dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles": false,
     "./dist-es/submodules/config/shared-ini-file-loader/readFile": false,
     "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig": "./dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.browser",
+    "./dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload": "./dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.browser",
     "./dist-es/submodules/serde/hash-node/hash-node": false,
     "./dist-es/submodules/serde/util-base64/fromBase64": "./dist-es/submodules/serde/util-base64/fromBase64.browser",
     "./dist-es/submodules/serde/util-base64/toBase64": "./dist-es/submodules/serde/util-base64/toBase64.browser",
@@ -291,6 +301,8 @@
     "./dist-es/submodules/checksum/hash-stream-node/fileStreamHasher": false,
     "./dist-cjs/submodules/checksum/hash-stream-node/fileStreamHasher": false,
     "./dist-es/submodules/checksum/hash-stream-node/readableStreamHasher": false,
-    "./dist-cjs/submodules/checksum/hash-stream-node/readableStreamHasher": false
+    "./dist-cjs/submodules/checksum/hash-stream-node/readableStreamHasher": false,
+    "./dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload": "./dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.browser",
+    "./dist-cjs/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload": "./dist-cjs/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.browser"
   }
 }
