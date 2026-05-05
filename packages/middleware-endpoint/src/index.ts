@@ -7,13 +7,18 @@ export {
   endpointMiddlewareOptions,
   getEndpointPlugin,
   resolveEndpointConfig,
-  EndpointInputConfig,
-  EndpointResolvedConfig,
   resolveEndpointRequiredConfig,
-  EndpointRequiredInputConfig,
-  EndpointRequiredResolvedConfig,
 } from "@smithy/core/endpoints";
 export type {
+  EndpointInputConfig,
+  EndpointResolvedConfig,
+  EndpointRequiredInputConfig,
+  EndpointRequiredResolvedConfig,
   EndpointParameterInstructions,
   EndpointParameterInstructionsSupplier,
+  BuiltInParamInstruction,
+  ClientContextParamInstruction,
+  ContextParamInstruction,
+  OperationContextParamInstruction,
+  StaticContextParamInstruction,
 } from "@smithy/core/endpoints";

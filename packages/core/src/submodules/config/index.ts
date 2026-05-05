@@ -1,5 +1,5 @@
 // property-provider
-export { ProviderError, ProviderErrorOptionsType } from "./property-provider/ProviderError";
+export { ProviderError, type ProviderErrorOptionsType } from "./property-provider/ProviderError";
 export { CredentialsProviderError } from "./property-provider/CredentialsProviderError";
 export { TokenProviderError } from "./property-provider/TokenProviderError";
 export { chain } from "./property-provider/chain";
@@ -15,20 +15,20 @@ export { SelectorType } from "./util-config-provider/types";
 export { getHomeDir } from "./shared-ini-file-loader/getHomeDir";
 export { ENV_PROFILE, DEFAULT_PROFILE, getProfileName } from "./shared-ini-file-loader/getProfileName";
 export { getSSOTokenFilepath } from "./shared-ini-file-loader/getSSOTokenFilepath";
-export { getSSOTokenFromFile, SSOToken } from "./shared-ini-file-loader/getSSOTokenFromFile";
+export { getSSOTokenFromFile, type SSOToken } from "./shared-ini-file-loader/getSSOTokenFromFile";
 export { CONFIG_PREFIX_SEPARATOR } from "./shared-ini-file-loader/constants";
-export { SharedConfigInit, loadSharedConfigFiles } from "./shared-ini-file-loader/loadSharedConfigFiles";
-export { SsoSessionInit, loadSsoSessionData } from "./shared-ini-file-loader/loadSsoSessionData";
-export { SourceProfileInit, parseKnownFiles } from "./shared-ini-file-loader/parseKnownFiles";
+export { loadSharedConfigFiles, type SharedConfigInit } from "./shared-ini-file-loader/loadSharedConfigFiles";
+export { loadSsoSessionData, type SsoSessionInit } from "./shared-ini-file-loader/loadSsoSessionData";
+export { parseKnownFiles, type SourceProfileInit } from "./shared-ini-file-loader/parseKnownFiles";
 export { externalDataInterceptor } from "./shared-ini-file-loader/externalDataInterceptor";
-export { Profile, ParsedIniData, SharedConfigFiles } from "./shared-ini-file-loader/types";
-export { ReadFileOptions, readFile } from "./shared-ini-file-loader/readFile";
+export { type Profile, type ParsedIniData, type SharedConfigFiles } from "./shared-ini-file-loader/types";
+export { readFile, type ReadFileOptions } from "./shared-ini-file-loader/readFile";
 
 // node-config-provider
-export { loadConfig, LocalConfigOptions, LoadedConfigSelectors } from "./node-config-provider/configLoader";
-export { EnvOptions, GetterFromEnv } from "./node-config-provider/fromEnv";
+export { loadConfig, type LocalConfigOptions, type LoadedConfigSelectors } from "./node-config-provider/configLoader";
+export { type EnvOptions, type GetterFromEnv } from "./node-config-provider/fromEnv";
 export { fromStatic } from "./node-config-provider/fromStatic";
-export { NodeSharedConfigInit, GetterFromConfig } from "./node-config-provider/fromSharedConfigFiles";
+export { type NodeSharedConfigInit, type GetterFromConfig } from "./node-config-provider/fromSharedConfigFiles";
 
 // config-resolver - endpointsConfig
 export {
@@ -46,14 +46,14 @@ export {
   nodeFipsConfigSelectors,
 } from "./config-resolver/endpointsConfig/NodeUseFipsEndpointConfigOptions";
 export {
-  CustomEndpointsInputConfig,
-  CustomEndpointsResolvedConfig,
   resolveCustomEndpointsConfig,
+  type CustomEndpointsInputConfig,
+  type CustomEndpointsResolvedConfig,
 } from "./config-resolver/endpointsConfig/resolveCustomEndpointsConfig";
 export {
-  EndpointsInputConfig,
-  EndpointsResolvedConfig,
   resolveEndpointsConfig,
+  type EndpointsInputConfig,
+  type EndpointsResolvedConfig,
 } from "./config-resolver/endpointsConfig/resolveEndpointsConfig";
 
 // config-resolver - regionConfig
@@ -64,17 +64,20 @@ export {
   NODE_REGION_CONFIG_FILE_OPTIONS,
 } from "./config-resolver/regionConfig/config";
 export {
-  RegionInputConfig,
-  RegionResolvedConfig,
   resolveRegionConfig,
+  type RegionInputConfig,
+  type RegionResolvedConfig,
 } from "./config-resolver/regionConfig/resolveRegionConfig";
 
 // config-resolver - regionInfo
-export { PartitionHash } from "./config-resolver/regionInfo/PartitionHash";
-export { RegionHash } from "./config-resolver/regionInfo/RegionHash";
-export { EndpointVariant } from "./config-resolver/regionInfo/EndpointVariant";
-export { EndpointVariantTag } from "./config-resolver/regionInfo/EndpointVariantTag";
-export { GetRegionInfoOptions, getRegionInfo } from "./config-resolver/regionInfo/getRegionInfo";
+export { type PartitionHash } from "./config-resolver/regionInfo/PartitionHash";
+export { type RegionHash } from "./config-resolver/regionInfo/RegionHash";
+export { type EndpointVariant } from "./config-resolver/regionInfo/EndpointVariant";
+export { type EndpointVariantTag } from "./config-resolver/regionInfo/EndpointVariantTag";
+export { getRegionInfo, type GetRegionInfoOptions } from "./config-resolver/regionInfo/getRegionInfo";
 
 // defaults-mode (node default, browser variant, native variant)
-export { ResolveDefaultsModeConfigOptions, resolveDefaultsModeConfig } from "./defaults-mode/resolveDefaultsModeConfig";
+export {
+  resolveDefaultsModeConfig,
+  type ResolveDefaultsModeConfigOptions,
+} from "./defaults-mode/resolveDefaultsModeConfig";

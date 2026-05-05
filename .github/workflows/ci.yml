@@ -117,8 +117,8 @@ jobs:
         run: |
           yarn
           yarn turbo telemetry disable
-      - name: Build packages
-        run: node ./scripts/retry -- yarn build
+      - name: Build and validate API snapshot
+        run: node ./scripts/retry -- make api-snapshot
       - name: Run unit tests
         run: node ./scripts/retry -- yarn test
       - name: Run integration tests

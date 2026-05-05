@@ -12,65 +12,75 @@ export { invalidProvider } from "./invalid-dependency/invalidProvider";
 // formerly @smithy/util-waiter
 export { createWaiter } from "./util-waiter/createWaiter";
 export {
-  WaiterConfiguration,
   waiterServiceDefaults,
-  WaiterOptions,
   WaiterState,
-  WaiterResult,
   checkExceptions,
+  type WaiterConfiguration,
+  type WaiterOptions,
+  type WaiterResult,
 } from "./util-waiter/waiter";
 
 // formerly @smithy/smithy-client
-export { SmithyConfiguration, SmithyResolvedConfiguration, Client } from "./smithy-client/client";
-export { Command, CommandImpl } from "./smithy-client/command";
+export { Client, type SmithyConfiguration, type SmithyResolvedConfiguration } from "./smithy-client/client";
+export { Command, type CommandImpl } from "./smithy-client/command";
 export { SENSITIVE_STRING } from "./smithy-client/constants";
 export { createAggregatedClient } from "./smithy-client/create-aggregated-client";
 export { throwDefaultError, withBaseException } from "./smithy-client/default-error-handler";
 export {
   loadConfigsForDefaultMode,
-  DefaultsMode,
-  ResolvedDefaultsMode,
-  DefaultsModeConfigs,
+  type DefaultsMode,
+  type ResolvedDefaultsMode,
+  type DefaultsModeConfigs,
 } from "./smithy-client/defaults-mode";
 export { emitWarningIfUnsupportedVersion } from "./smithy-client/emitWarningIfUnsupportedVersion";
 export {
-  ExceptionOptionType,
-  ServiceExceptionOptions,
   ServiceException,
   decorateServiceException,
+  type ExceptionOptionType,
+  type ServiceExceptionOptions,
 } from "./smithy-client/exceptions";
 export {
   getDefaultExtensionConfiguration,
   getDefaultClientConfiguration,
   resolveDefaultRuntimeConfig,
-  DefaultExtensionRuntimeConfigType,
+  type DefaultExtensionRuntimeConfigType,
 } from "./smithy-client/extensions/defaultExtensionConfiguration";
 export {
   AlgorithmId,
-  ChecksumAlgorithm,
-  ChecksumConfiguration,
   getChecksumConfiguration,
   resolveChecksumRuntimeConfig,
-  PartialChecksumRuntimeConfigType,
+  type ChecksumAlgorithm,
+  type ChecksumConfiguration,
+  type PartialChecksumRuntimeConfigType,
 } from "./smithy-client/extensions/checksum";
 export {
   getRetryConfiguration,
   resolveRetryRuntimeConfig,
-  PartialRetryRuntimeConfigType,
+  type PartialRetryRuntimeConfigType,
 } from "./smithy-client/extensions/retry";
 export { getArrayIfSingleItem } from "./smithy-client/get-array-if-single-item";
 export { getValueFromTextNode } from "./smithy-client/get-value-from-text-node";
 export { isSerializableHeaderValue } from "./smithy-client/is-serializable-header-value";
 export { NoOpLogger } from "./smithy-client/NoOpLogger";
 export {
-  ObjectMappingInstructions,
-  SourceMappingInstructions,
-  ObjectMappingInstruction,
-  UnfilteredValue,
-  LazyValueInstruction,
   map,
   convertMap,
   take,
+  type ObjectMappingInstructions,
+  type SourceMappingInstructions,
+  type ObjectMappingInstruction,
+  type UnfilteredValue,
+  type LazyValueInstruction,
+  type ConditionalLazyValueInstruction,
+  type SimpleValueInstruction,
+  type ConditionalValueInstruction,
+  type SourceMappingInstruction,
+  type FilterStatus,
+  type FilterStatusSupplier,
+  type ValueFilteringFunction,
+  type ValueSupplier,
+  type ValueMapper,
+  type Value,
 } from "./smithy-client/object-mapping";
 export { schemaLogFilter } from "./smithy-client/schemaLogFilter";
 export { serializeFloat, serializeDateTime } from "./smithy-client/ser-utils";

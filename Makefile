@@ -1,4 +1,4 @@
-.PHONY: build sync
+.PHONY: build sync api-snapshot
 
 build:
 	./gradlew clean build publishToMavenLocal
@@ -55,7 +55,6 @@ test-types:
 
 test-integration:
 	node ./scripts/validation/no-generic-byte-arrays.js;
-	node ./scripts/validation/api-snapshot-validation.js;
 	node ./scripts/check-dependencies.js;
 	node ./scripts/runtime-dep-version-check.js;
 	make test-browser;
@@ -67,3 +66,8 @@ turbo-clean:
 	@read -p "Are you sure you want to delete your local cache? [y/N]: " ans && [ $${ans:-N} = y ]
 	@echo "\nDeleted cache folders: \n--------"
 	@find . -name '.turbo' -type d -prune -print -exec rm -rf '{}' + && echo '\n'
+
+api-snapshot:
+	yarn build
+	node scripts/validation/api-snapshot-validation.js --write
+	git diff --exit-code api-snapshot/

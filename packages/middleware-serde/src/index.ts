@@ -3,7 +3,7 @@ export {
   deserializerMiddleware,
   deserializerMiddlewareOption,
   serializerMiddlewareOption,
-  V1OrV2Endpoint,
+  type V1OrV2Endpoint,
   getSerdePlugin,
   serializerMiddleware,
 } from "@smithy/core/serde";

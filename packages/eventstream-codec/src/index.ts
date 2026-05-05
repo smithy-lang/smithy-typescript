@@ -8,3 +8,21 @@ export {
   SmithyMessageDecoderStream,
   SmithyMessageEncoderStream,
 } from "@smithy/core/event-streams";
+export type {
+  BinaryHeaderValue,
+  BooleanHeaderValue,
+  ByteHeaderValue,
+  IntegerHeaderValue,
+  LongHeaderValue,
+  Message,
+  MessageDecoderStreamOptions,
+  MessageEncoderStreamOptions,
+  MessageHeaders,
+  MessageHeaderValue,
+  ShortHeaderValue,
+  SmithyMessageDecoderStreamOptions,
+  SmithyMessageEncoderStreamOptions,
+  StringHeaderValue,
+  TimestampHeaderValue,
+  UuidHeaderValue,
+} from "@smithy/core/event-streams";

@@ -7,7 +7,7 @@ export {
   parseEpochTimestamp,
 } from "./date-utils";
 export { generateIdempotencyToken } from "./generateIdempotencyToken";
-export { AutomaticJsonStringConversion, LazyJsonString } from "./lazy-json";
+export { LazyJsonString, type AutomaticJsonStringConversion } from "./lazy-json";
 export {
   logger,
   parseBoolean,
@@ -44,7 +44,7 @@ export {
 } from "./schema-serde-lib/schema-date-utils";
 export { splitEvery } from "./split-every";
 export { splitHeader } from "./split-header";
-export { NumericType, NumericValue, nv } from "./value/NumericValue";
+export { NumericValue, nv, type NumericType } from "./value/NumericValue";
 
 // formerly @smithy/util-hex-encoding
 export { fromHex, toHex } from "./util-hex-encoding/hex-encoding";
@@ -62,7 +62,7 @@ export { toUint8Array } from "./util-utf8/toUint8Array";
 export { toUtf8 } from "./util-utf8/toUtf8";
 
 // formerly @smithy/util-buffer-from
-export { fromArrayBuffer, StringEncoding, fromString } from "./util-buffer-from/buffer-from";
+export { fromArrayBuffer, fromString, type StringEncoding } from "./util-buffer-from/buffer-from";
 
 // formerly @smithy/is-array-buffer
 export { isArrayBuffer } from "./is-array-buffer/is-array-buffer";
@@ -72,8 +72,8 @@ export { deserializerMiddleware } from "./middleware-serde/deserializerMiddlewar
 export {
   deserializerMiddlewareOption,
   serializerMiddlewareOption,
-  V1OrV2Endpoint,
   getSerdePlugin,
+  type V1OrV2Endpoint,
 } from "./middleware-serde/serdePlugin";
 export { serializerMiddleware } from "./middleware-serde/serializerMiddleware";
 
@@ -82,7 +82,7 @@ export { Hash } from "./hash-node/hash-node";
 
 // formerly @smithy/util-stream
 export { Uint8ArrayBlobAdapter } from "./util-stream/blob/Uint8ArrayBlobAdapter";
-export { ChecksumStream, ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
+export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream";
 export { createBufferedReadable } from "./util-stream/createBufferedReadable";
 export { getAwsChunkedEncodingStream } from "./util-stream/getAwsChunkedEncodingStream";

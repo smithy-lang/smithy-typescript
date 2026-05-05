@@ -1,9 +1,7 @@
 /** @deprecated Use @smithy/core/retry instead. */
 export {
   DeprecatedAdaptiveRetryStrategy as AdaptiveRetryStrategy,
-  type DeprecatedAdaptiveRetryStrategyOptions as AdaptiveRetryStrategyOptions,
   DeprecatedStandardRetryStrategy as StandardRetryStrategy,
-  type DeprecatedStandardRetryStrategyOptions as StandardRetryStrategyOptions,
   CONFIG_MAX_ATTEMPTS,
   CONFIG_RETRY_MODE,
   ENV_MAX_ATTEMPTS,
@@ -20,4 +18,11 @@ export {
   resolveRetryConfig,
   retryMiddleware,
   retryMiddlewareOptions,
+} from "@smithy/core/retry";
+export type {
+  DeprecatedAdaptiveRetryStrategyOptions as AdaptiveRetryStrategyOptions,
+  DeprecatedStandardRetryStrategyOptions as StandardRetryStrategyOptions,
+  RetryInputConfig,
+  RetryResolvedConfig,
+  PreviouslyResolved,
 } from "@smithy/core/retry";

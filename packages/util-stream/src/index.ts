@@ -4,7 +4,6 @@
 export {
   Uint8ArrayBlobAdapter,
   ChecksumStream,
-  ChecksumStreamInit,
   createChecksumStream,
   createBufferedReadable,
   getAwsChunkedEncodingStream,
@@ -14,3 +13,4 @@ export {
   isReadableStream,
   isBlob,
 } from "@smithy/core/serde";
+export type { ChecksumStreamInit } from "@smithy/core/serde";

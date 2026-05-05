@@ -11,10 +11,10 @@ export {
 } from "./service-error-classification/service-error-classification";
 
 // util-retry
-export { AdaptiveRetryStrategy, AdaptiveRetryStrategyOptions } from "./util-retry/AdaptiveRetryStrategy";
+export { AdaptiveRetryStrategy, type AdaptiveRetryStrategyOptions } from "./util-retry/AdaptiveRetryStrategy";
 export { ConfiguredRetryStrategy } from "./util-retry/ConfiguredRetryStrategy";
-export { DefaultRateLimiter, DefaultRateLimiterOptions } from "./util-retry/DefaultRateLimiter";
-export { StandardRetryStrategy, StandardRetryStrategyOptions } from "./util-retry/StandardRetryStrategy";
+export { DefaultRateLimiter, type DefaultRateLimiterOptions } from "./util-retry/DefaultRateLimiter";
+export { StandardRetryStrategy, type StandardRetryStrategyOptions } from "./util-retry/StandardRetryStrategy";
 export { RETRY_MODES, DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "./util-retry/config";
 export {
   DEFAULT_RETRY_DELAY_BASE,
@@ -33,11 +33,11 @@ export { Retry } from "./util-retry/retries-2026-config";
 // middleware-retry (deprecated retry strategies exported under prefixed names)
 export {
   AdaptiveRetryStrategy as DeprecatedAdaptiveRetryStrategy,
-  AdaptiveRetryStrategyOptions as DeprecatedAdaptiveRetryStrategyOptions,
+  type AdaptiveRetryStrategyOptions as DeprecatedAdaptiveRetryStrategyOptions,
 } from "./middleware-retry/retry-pre-sra-deprecated/AdaptiveRetryStrategy";
 export {
   StandardRetryStrategy as DeprecatedStandardRetryStrategy,
-  StandardRetryStrategyOptions as DeprecatedStandardRetryStrategyOptions,
+  type StandardRetryStrategyOptions as DeprecatedStandardRetryStrategyOptions,
 } from "./middleware-retry/retry-pre-sra-deprecated/StandardRetryStrategy";
 export { defaultDelayDecider } from "./middleware-retry/retry-pre-sra-deprecated/delayDecider";
 export { defaultRetryDecider } from "./middleware-retry/retry-pre-sra-deprecated/retryDecider";
@@ -50,7 +50,7 @@ export {
   NODE_RETRY_MODE_CONFIG_OPTIONS,
   resolveRetryConfig,
 } from "./middleware-retry/configurations";
-export type { RetryInputConfig, RetryResolvedConfig } from "./middleware-retry/configurations";
+export type { RetryInputConfig, RetryResolvedConfig, PreviouslyResolved } from "./middleware-retry/configurations";
 export {
   omitRetryHeadersMiddleware,
   omitRetryHeadersMiddlewareOptions,

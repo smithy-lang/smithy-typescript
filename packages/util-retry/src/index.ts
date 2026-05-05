@@ -18,3 +18,9 @@ export {
   THROTTLING_RETRY_DELAY_BASE,
   TIMEOUT_RETRY_COST,
 } from "@smithy/core/retry";
+export type {
+  AdaptiveRetryStrategyOptions,
+  DefaultRateLimiterOptions,
+  RateLimiter,
+  StandardRetryStrategyOptions,
+} from "@smithy/core/retry";

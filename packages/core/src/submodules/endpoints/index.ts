@@ -15,7 +15,7 @@ export * from "./util-endpoints/types";
 export {
   getEndpointFromInstructions,
   resolveParams,
-  EndpointParameterInstructionsSupplier,
+  type EndpointParameterInstructionsSupplier,
 } from "./middleware-endpoint/adaptors/getEndpointFromInstructions";
 export { toEndpointV1 as middlewareEndpointToEndpointV1 } from "./middleware-endpoint/adaptors/toEndpointV1";
 export { endpointMiddleware } from "./middleware-endpoint/endpointMiddleware";
@@ -28,3 +28,10 @@ export type {
   EndpointRequiredResolvedConfig,
 } from "./middleware-endpoint/resolveEndpointRequiredConfig";
 export type { EndpointParameterInstructions } from "./middleware-endpoint/types";
+export type {
+  BuiltInParamInstruction,
+  ClientContextParamInstruction,
+  ContextParamInstruction,
+  OperationContextParamInstruction,
+  StaticContextParamInstruction,
+} from "./middleware-endpoint/types";

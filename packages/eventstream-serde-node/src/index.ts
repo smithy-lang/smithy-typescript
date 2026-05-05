@@ -3,3 +3,4 @@ export {
   EventStreamMarshaller,
   eventStreamSerdeProvider,
 } from "@smithy/core/event-streams";
+export type { EventStreamMarshallerOptions } from "@smithy/core/event-streams";

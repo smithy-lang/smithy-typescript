@@ -15,18 +15,24 @@ export * from "./SerdeContext";
 
 // protocol-http
 export { Field } from "./protocol-http/Field";
-export { Fields, FieldsOptions } from "./protocol-http/Fields";
-export { HttpHandler, HttpHandlerUserInput } from "./protocol-http/httpHandler";
-export { HttpRequest, IHttpRequest } from "./protocol-http/httpRequest";
+export { Fields, type FieldsOptions } from "./protocol-http/Fields";
+export { type HttpHandler, type HttpHandlerUserInput } from "./protocol-http/httpHandler";
+export { HttpRequest, type IHttpRequest } from "./protocol-http/httpRequest";
 export { HttpResponse } from "./protocol-http/httpResponse";
 export { isValidHostname } from "./protocol-http/isValidHostname";
 export {
-  HttpHandlerExtensionConfiguration,
-  HttpHandlerExtensionConfigType,
   getHttpHandlerExtensionConfiguration,
   resolveHttpHandlerRuntimeConfig,
+  type HttpHandlerExtensionConfiguration,
+  type HttpHandlerExtensionConfigType,
 } from "./protocol-http/extensions/httpExtensionConfiguration";
-export { FieldOptions, FieldPosition, HeaderBag, HttpMessage, HttpHandlerOptions } from "./protocol-http/types";
+export {
+  type FieldOptions,
+  type FieldPosition,
+  type HeaderBag,
+  type HttpMessage,
+  type HttpHandlerOptions,
+} from "./protocol-http/types";
 
 // middleware-content-length
 export {

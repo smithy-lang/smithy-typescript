@@ -46,6 +46,7 @@ export {
   strictParseLong,
   strictParseShort,
 } from "@smithy/core/serde";
+export type { AutomaticJsonStringConversion, NumericType } from "@smithy/core/serde";
 
 // from @smithy/core/client
 export {
@@ -72,6 +73,32 @@ export {
   take,
   throwDefaultError,
   withBaseException,
+} from "@smithy/core/client";
+export type {
+  CommandImpl,
+  ConditionalLazyValueInstruction,
+  ConditionalValueInstruction,
+  DefaultExtensionRuntimeConfigType,
+  DefaultsMode,
+  DefaultsModeConfigs,
+  ExceptionOptionType,
+  FilterStatus,
+  FilterStatusSupplier,
+  LazyValueInstruction,
+  ObjectMappingInstruction,
+  ObjectMappingInstructions,
+  ResolvedDefaultsMode,
+  ServiceExceptionOptions,
+  SimpleValueInstruction,
+  SmithyConfiguration,
+  SmithyResolvedConfiguration,
+  SourceMappingInstruction,
+  SourceMappingInstructions,
+  UnfilteredValue,
+  Value,
+  ValueFilteringFunction,
+  ValueMapper,
+  ValueSupplier,
 } from "@smithy/core/client";
 
 // from @smithy/core/protocols
