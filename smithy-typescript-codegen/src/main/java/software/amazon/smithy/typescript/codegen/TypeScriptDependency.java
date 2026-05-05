@@ -43,12 +43,6 @@ public enum TypeScriptDependency implements Dependency {
     TYPES_NODE("devDependencies", "@types/node", "^20.14.8", true),
     XML_PARSER("dependencies", "fast-xml-parser", "5.7.1", false),
 
-    // todo: core/event-streams
-    AWS_SDK_EVENTSTREAM_CODEC("dependencies", "@smithy/eventstream-codec", false),
-    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", false),
-    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER("dependencies", "@smithy/eventstream-serde-config-resolver", false),
-    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", false),
-
     // todo: core/endpoints
     @Deprecated
     MIDDLEWARE_ENDPOINTS_V2("dependencies", "@smithy/middleware-endpoint", "0.0.0", false),
@@ -128,7 +122,20 @@ public enum TypeScriptDependency implements Dependency {
     @Deprecated
     UUID("dependencies", "uuid", "0.0.0", false),
     @Deprecated
-    UUID_TYPES("dependencies", "@types/uuid", "0.0.0", false);
+    UUID_TYPES("dependencies", "@types/uuid", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_EVENTSTREAM_CODEC("dependencies", "@smithy/eventstream-codec", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_EVENTSTREAM_SERDE_BROWSER("dependencies", "@smithy/eventstream-serde-browser", "0.0.0", false),
+    @Deprecated
+    AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER(
+        "dependencies",
+        "@smithy/eventstream-serde-config-resolver",
+        "0.0.0",
+        false
+    ),
+    @Deprecated
+    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", "0.0.0", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";

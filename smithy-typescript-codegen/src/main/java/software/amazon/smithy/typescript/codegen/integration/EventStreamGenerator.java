@@ -364,7 +364,12 @@ public class EventStreamGenerator {
             Shape target = model.expectShape(headerMember.getTarget());
             writer.openBlock("if (input.$L != null) {", "}", memberName, () -> {
                 if (target.isLongShape()) {
-                    writer.addImport("Int64", "__Int64", TypeScriptDependency.AWS_SDK_EVENTSTREAM_CODEC);
+                    writer.addImportSubmodule(
+                        "Int64",
+                        "__Int64",
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.EVENT_STREAMS
+                    );
                     writer.write(
                         "headers[$1S] = { type: $2S, value: __Int64.fromNumber(input.$1L) }",
                         memberName,

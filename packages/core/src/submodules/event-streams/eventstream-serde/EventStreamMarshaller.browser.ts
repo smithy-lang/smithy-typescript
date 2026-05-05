@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "@smithy/eventstream-serde-universal";
-import type { Decoder, Encoder, EventStreamMarshaller as IEventStreamMarshaller, Message } from "@smithy/types";
+import type {
+  Decoder,
+  Encoder,
+  EventSigner,
+  EventStreamMarshaller as IEventStreamMarshaller,
+  EventStreamSerdeProvider,
+  Message,
+  Provider,
+} from "@smithy/types";
 
-import { iterableToReadableStream, readableStreamtoIterable } from "./utils";
-
-/**
- * @internal
- */
-export interface EventStreamMarshaller extends IEventStreamMarshaller {}
+import { EventStreamMarshaller as UniversalEventStreamMarshaller } from "../eventstream-serde-universal/EventStreamMarshaller";
+import { iterableToReadableStream, readableStreamToIterable } from "./utils";
 
 /**
  * @internal
@@ -18,8 +20,6 @@ export interface EventStreamMarshallerOptions {
 }
 
 /**
- * @internal
- *
  * Utility class used to serialize and deserialize event streams in
  * browsers and ReactNative.
  *
@@ -33,9 +33,11 @@ export interface EventStreamMarshallerOptions {
  * We use ReadableStream API in browsers because of the consistency with other
  * streaming operations, where ReadableStream API is used to denote streaming data.
  * Whereas in ReactNative, ReadableStream API is not available, we use async iterable
- * for streaming data although it has lower throughput.
+ * for streaming data, although it has lower throughput.
+ *
+ * @internal
  */
-export class EventStreamMarshaller {
+export class EventStreamMarshaller implements IEventStreamMarshaller {
   private readonly universalMarshaller: UniversalEventStreamMarshaller;
   constructor({ utf8Encoder, utf8Decoder }: EventStreamMarshallerOptions) {
     this.universalMarshaller = new UniversalEventStreamMarshaller({
@@ -48,7 +50,7 @@ export class EventStreamMarshaller {
     body: ReadableStream<Uint8Array> | AsyncIterable<Uint8Array>,
     deserializer: (input: Record<string, Message>) => Promise<T>
   ): AsyncIterable<T> {
-    const bodyIterable = isReadableStream(body) ? readableStreamtoIterable(body) : body;
+    const bodyIterable = isReadableStream(body) ? readableStreamToIterable(body) : body;
     return this.universalMarshaller.deserialize(bodyIterable, deserializer);
   }
 
@@ -63,16 +65,25 @@ export class EventStreamMarshaller {
    *
    */
   serialize<T>(input: AsyncIterable<T>, serializer: (event: T) => Message): ReadableStream | AsyncIterable<Uint8Array> {
-    const serialziedIterable = this.universalMarshaller.serialize(input, serializer);
-    return typeof ReadableStream === "function" ? iterableToReadableStream(serialziedIterable) : serialziedIterable;
+    const serializedIterable = this.universalMarshaller.serialize(input, serializer);
+    return typeof ReadableStream === "function" ? iterableToReadableStream(serializedIterable) : serializedIterable;
   }
 }
 
 /**
- * @internal
  * Warning: do not export this without aliasing the reference to
  * global ReadableStream.
+ * @internal
  * @see https://github.com/smithy-lang/smithy-typescript/issues/1341.
  */
 const isReadableStream = (body: any): body is ReadableStream =>
   typeof ReadableStream === "function" && body instanceof ReadableStream;
+
+/**
+ * @internal
+ */
+export const eventStreamSerdeProvider: EventStreamSerdeProvider = (options: {
+  utf8Encoder: Encoder;
+  utf8Decoder: Decoder;
+  eventSigner: EventSigner | Provider<EventSigner>;
+}) => new EventStreamMarshaller(options);

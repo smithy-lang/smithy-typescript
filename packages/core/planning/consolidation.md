@@ -68,9 +68,9 @@ The "clients" column shows two counts: direct dependents, then transitive depend
 
 | Package                        | LoC | Description/Rationale          | Clients  | Status |
 | ------------------------------ | --- | ------------------------------ | -------- | ------ |
-| `util-retry`                   | 778 | Retry strategies, rate limiter | 425, 425 |        |
-| `middleware-retry`             | 833 | Always code-generated          | 425, 425 |        |
-| `service-error-classification` | 142 | Only consumer is retry         | 0, 425   |        |
+| `util-retry`                   | 778 | Retry strategies, rate limiter | 425, 425 | ✅     |
+| `middleware-retry`             | 833 | Always code-generated          | 425, 425 | ✅     |
+| `service-error-classification` | 142 | Only consumer is retry         | 0, 425   | ✅     |
 
 This is a separate module because the integration tests are very time-consuming, and we'll
 likely want to run them separately.
@@ -79,11 +79,11 @@ likely want to run them separately.
 
 | Package                             | LoC | Description/Rationale    | Clients | Status |
 | ----------------------------------- | --- | ------------------------ | ------- | ------ |
-| `eventstream-codec`                 | 763 | Binary codec             | 0, 37   |        |
-| `eventstream-serde-universal`       | 246 | Platform-agnostic serde  | 0, 17   |        |
-| `eventstream-serde-browser`         | 138 | Platform-specific        | 17, 17  |        |
-| `eventstream-serde-node`            | 106 | Platform-specific        | 17, 17  |        |
-| `eventstream-serde-config-resolver` | 38  | Config for event streams | 17, 17  |        |
+| `eventstream-codec`                 | 763 | Binary codec             | 0, 37   | ✅     |
+| `eventstream-serde-universal`       | 246 | Platform-agnostic serde  | 0, 17   | ✅     |
+| `eventstream-serde-browser`         | 138 | Platform-specific        | 17, 17  | ✅     |
+| `eventstream-serde-node`            | 106 | Platform-specific        | 17, 17  | ✅     |
+| `eventstream-serde-config-resolver` | 38  | Config for event streams | 17, 17  | ✅     |
 
 Clients currently depend on the platform specific `eventstream-serde-browser/node`, which
 in turn depends on `-universal`, and then `-codec`.

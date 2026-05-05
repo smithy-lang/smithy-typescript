@@ -1,8 +1,10 @@
-export * from "./EventStreamCodec";
-export * from "./HeaderMarshaller";
-export * from "./Int64";
-export * from "./Message";
-export * from "./MessageDecoderStream";
-export * from "./MessageEncoderStream";
-export * from "./SmithyMessageDecoderStream";
-export * from "./SmithyMessageEncoderStream";
+/** @deprecated Use @smithy/core/event-streams instead. */
+export {
+  EventStreamCodec,
+  HeaderMarshaller,
+  Int64,
+  MessageDecoderStream,
+  MessageEncoderStream,
+  SmithyMessageDecoderStream,
+  SmithyMessageEncoderStream,
+} from "@smithy/core/event-streams";

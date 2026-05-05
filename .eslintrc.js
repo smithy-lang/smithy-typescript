@@ -104,18 +104,11 @@ module.exports = {
                 message: "This package has been consolidated into @smithy/core/protocols.",
               },
               {
-                group: [
-                  "@smithy/util-retry",
-                  "@smithy/middleware-retry",
-                  "@smithy/service-error-classification",
-                ],
+                group: ["@smithy/util-retry", "@smithy/middleware-retry", "@smithy/service-error-classification"],
                 message: "This package has been consolidated into @smithy/core/retry.",
               },
               {
-                group: [
-                  "@smithy/util-endpoints",
-                  "@smithy/middleware-endpoint",
-                ],
+                group: ["@smithy/util-endpoints", "@smithy/middleware-endpoint"],
                 message: "This package has been consolidated into @smithy/core/endpoints.",
               },
               {
@@ -128,10 +121,20 @@ module.exports = {
                 ],
                 message: "This package has been consolidated into @smithy/core/checksum.",
               },
+              {
+                group: [
+                  "@smithy/eventstream-codec",
+                  "@smithy/eventstream-serde-universal",
+                  "@smithy/eventstream-serde-browser",
+                  "@smithy/eventstream-serde-node",
+                  "@smithy/eventstream-serde-config-resolver",
+                ],
+                message: "This package has been consolidated into @smithy/core/event-streams.",
+              },
             ],
           },
         ],
-      }
+      },
     },
   ],
 };

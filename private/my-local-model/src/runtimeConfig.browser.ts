@@ -2,9 +2,9 @@
 import { Sha256 } from "@aws-crypto/sha256-browser";
 import { loadConfigsForDefaultMode } from "@smithy/core/client";
 import { resolveDefaultsModeConfig } from "@smithy/core/config";
+import { eventStreamSerdeProvider } from "@smithy/core/event-streams";
 import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/core/retry";
 import { calculateBodyLength } from "@smithy/core/serde";
-import { eventStreamSerdeProvider } from "@smithy/eventstream-serde-browser";
 import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
 
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";

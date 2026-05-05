@@ -1,6 +1,8 @@
 # Change Log
 
-## 4.3.14
+This is a past changelog, the package has been consolidated into `@smithy/core/event-streams`.
+
+## 4.2.14
 
 ### Patch Changes
 
@@ -8,91 +10,94 @@
 - Updated dependencies [52b4789]
   - @smithy/types@4.14.1
 
-## 4.3.13
+## 4.2.13
 
 ### Patch Changes
 
 - Updated dependencies [cffd868]
   - @smithy/types@4.14.0
 
-## 4.3.12
+## 4.2.12
 
 ### Patch Changes
 
 - Updated dependencies [5340b11]
   - @smithy/types@4.13.1
 
-## 4.3.11
+## 4.2.11
 
 ### Patch Changes
 
 - a4d95e6: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a4d95e6]
+  - @smithy/util-hex-encoding@4.2.2
 
-## 4.3.10
+## 4.2.10
 
 ### Patch Changes
 
 - Updated dependencies [d0954cc]
   - @smithy/types@4.13.0
 
-## 4.3.9
+## 4.2.9
 
 ### Patch Changes
 
 - 03c3dc8: update for rollup build externalLiveBindings=false
 - Updated dependencies [03c3dc8]
   - @smithy/types@4.12.1
+  - @smithy/util-hex-encoding@4.2.1
 
-## 4.3.8
+## 4.2.8
 
 ### Patch Changes
 
 - Updated dependencies [745867a]
   - @smithy/types@4.12.0
 
-## 4.3.7
+## 4.2.7
 
 ### Patch Changes
 
 - Updated dependencies [9ccb841]
   - @smithy/types@4.11.0
 
-## 4.3.6
+## 4.2.6
 
 ### Patch Changes
 
 - Updated dependencies [5a56762]
   - @smithy/types@4.10.0
 
-## 4.3.5
+## 4.2.5
 
 ### Patch Changes
 
 - Updated dependencies [3926fd7]
   - @smithy/types@4.9.0
 
-## 4.3.4
+## 4.2.4
 
 ### Patch Changes
 
 - Updated dependencies [6da0ab3]
   - @smithy/types@4.8.1
 
-## 4.3.3
+## 4.2.3
 
 ### Patch Changes
 
 - Updated dependencies [8a2a912]
   - @smithy/types@4.8.0
 
-## 4.3.2
+## 4.2.2
 
 ### Patch Changes
 
 - Updated dependencies [052d261]
   - @smithy/types@4.7.1
 
-## 4.3.1
+## 4.2.1
 
 ### Patch Changes
 
@@ -100,7 +105,7 @@
 - Updated dependencies [7f8af58]
   - @smithy/types@4.7.0
 
-## 4.3.0
+## 4.2.0
 
 ### Minor Changes
 
@@ -110,15 +115,16 @@
 
 - Updated dependencies [45ee67f]
   - @smithy/types@4.6.0
+  - @smithy/util-hex-encoding@4.2.0
 
-## 4.2.1
+## 4.1.1
 
 ### Patch Changes
 
 - Updated dependencies [bb7c1c1]
   - @smithy/types@4.5.0
 
-## 4.2.0
+## 4.1.0
 
 ### Minor Changes
 
@@ -129,34 +135,31 @@
 - f884df7: enforce consistent-type-imports
 - Updated dependencies [64cda93]
 - Updated dependencies [f884df7]
+  - @smithy/util-hex-encoding@4.1.0
   - @smithy/types@4.4.0
 
-## 4.1.3
+## 4.0.5
 
 ### Patch Changes
 
 - Updated dependencies [64e033f]
   - @smithy/types@4.3.2
 
-## 4.1.2
+## 4.0.4
 
 ### Patch Changes
 
 - Updated dependencies [358c1ff]
   - @smithy/types@4.3.1
 
-## 4.1.1
+## 4.0.3
 
 ### Patch Changes
 
 - Updated dependencies [0547fab]
   - @smithy/types@4.3.0
 
-## 4.1.0
-
-### Minor Changes
-
-- e917e61: enforce singular config object during client instantiation
+## 4.0.2
 
 ### Patch Changes
 
@@ -181,57 +184,58 @@
 
 - Updated dependencies [20d99be]
   - @smithy/types@4.0.0
+  - @smithy/util-hex-encoding@4.0.0
 
-## 3.0.11
+## 3.1.10
 
 ### Patch Changes
 
 - Updated dependencies [b52b4e8]
   - @smithy/types@3.7.2
 
-## 3.0.10
+## 3.1.9
 
 ### Patch Changes
 
 - Updated dependencies [fcd5ca8]
   - @smithy/types@3.7.1
 
-## 3.0.9
+## 3.1.8
 
 ### Patch Changes
 
 - Updated dependencies [cd1929b]
   - @smithy/types@3.7.0
 
-## 3.0.8
+## 3.1.7
 
 ### Patch Changes
 
 - Updated dependencies [84bec05]
   - @smithy/types@3.6.0
 
-## 3.0.7
+## 3.1.6
 
 ### Patch Changes
 
 - Updated dependencies [a4c1285]
   - @smithy/types@3.5.0
 
-## 3.0.6
+## 3.1.5
 
 ### Patch Changes
 
 - Updated dependencies [e7b438b]
   - @smithy/types@3.4.2
 
-## 3.0.5
+## 3.1.4
 
 ### Patch Changes
 
 - Updated dependencies [cf9257e]
   - @smithy/types@3.4.1
 
-## 3.0.4
+## 3.1.3
 
 ### Patch Changes
 
@@ -239,20 +243,26 @@
 - Updated dependencies [9f3f2f5]
   - @smithy/types@3.4.0
 
-## 3.0.3
+## 3.1.2
 
 ### Patch Changes
 
 - Updated dependencies [4784fb9]
   - @smithy/types@3.3.0
 
-## 3.0.2
+## 3.1.1
 
 ### Patch Changes
 
 - Updated dependencies [c16e014]
 - Updated dependencies [c2a5595]
   - @smithy/types@3.2.0
+
+## 3.1.0
+
+### Minor Changes
+
+- 3c23a83b: update versions of @aws-crypto/\* packages
 
 ## 3.0.1
 
@@ -272,6 +282,7 @@
 - Updated dependencies [7a7c84d3]
 - Updated dependencies [671aa704]
   - @smithy/types@3.0.0
+  - @smithy/util-hex-encoding@3.0.0
 
 ## 2.2.0
 
@@ -283,6 +294,7 @@
 
 - Updated dependencies [38f9a61f]
 - Updated dependencies [661f1d60]
+  - @smithy/util-hex-encoding@2.2.0
   - @smithy/types@2.12.0
 
 ## 2.1.4
@@ -314,6 +326,7 @@
 - 2b1bf055: generate dist-cjs with runtime list of export names for esm
 - Updated dependencies [2b1bf055]
   - @smithy/types@2.9.1
+  - @smithy/util-hex-encoding@2.1.1
 
 ## 2.1.0
 
@@ -324,6 +337,7 @@
 ### Patch Changes
 
 - Updated dependencies [9939f823]
+  - @smithy/util-hex-encoding@2.1.0
   - @smithy/types@2.9.0
 
 ## 2.0.16
@@ -434,7 +448,6 @@
 
 ### Patch Changes
 
-- 3e1ab589: add release tag public to client init interface components
 - Updated dependencies [59548ba9]
 - Updated dependencies [3e1ab589]
   - @smithy/types@2.1.0
@@ -455,6 +468,7 @@
 ### Patch Changes
 
 - Updated dependencies [9d53bc76]
+  - @smithy/util-hex-encoding@2.0.0
   - @smithy/types@2.0.1
 
 ## 1.1.0
@@ -467,6 +481,7 @@
 
 - Updated dependencies [e3cbb3cc]
   - @smithy/types@1.2.0
+  - @smithy/util-hex-encoding@1.1.0
 
 ## 1.0.3
 
@@ -482,6 +497,7 @@
 
 - 6e312329: restore downlevel types
 - Updated dependencies [6e312329]
+  - @smithy/util-hex-encoding@1.0.2
   - @smithy/types@1.1.1
 
 ## 1.0.1
@@ -489,8 +505,10 @@
 ### Patch Changes
 
 - 2c57033f: Set correct publishConfig directory
+- Updated dependencies [2c57033f]
+  - @smithy/util-hex-encoding@1.0.1
 
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-See [@aws-sdk/eventstream-serde-config-resolver](https://github.com/aws/aws-sdk-js-v3/blob/main/packages/eventstream-serde-config-resolver/CHANGELOG.md) for additional history.
+See [@aws-sdk/eventstream-codec](https://github.com/aws/aws-sdk-js-v3/blob/main/packages/eventstream-codec/CHANGELOG.md) for additional history.

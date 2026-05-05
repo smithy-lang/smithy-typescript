@@ -2927,6 +2927,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
+    "@aws-crypto/crc32": "npm:5.2.0"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
@@ -2954,76 +2955,48 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-codec@workspace:^, @smithy/eventstream-codec@workspace:packages/eventstream-codec":
+"@smithy/eventstream-codec@workspace:packages/eventstream-codec":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-codec@workspace:packages/eventstream-codec"
   dependencies:
-    "@aws-crypto/crc32": "npm:5.2.0"
     "@smithy/core": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-browser@workspace:^, @smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser":
+"@smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser"
   dependencies:
-    "@smithy/eventstream-serde-universal": "workspace:^"
-    "@smithy/types": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
+    "@smithy/core": "workspace:^"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-config-resolver@workspace:^, @smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver":
+"@smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver"
   dependencies:
-    "@smithy/types": "workspace:^"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
+    "@smithy/core": "workspace:^"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-node@workspace:^, @smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node":
+"@smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node"
   dependencies:
-    "@smithy/eventstream-serde-universal": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
+    "@smithy/core": "workspace:^"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
-"@smithy/eventstream-serde-universal@workspace:^, @smithy/eventstream-serde-universal@workspace:packages/eventstream-serde-universal":
+"@smithy/eventstream-serde-universal@workspace:packages/eventstream-serde-universal":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-serde-universal@workspace:packages/eventstream-serde-universal"
   dependencies:
-    "@smithy/eventstream-codec": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:0.10.1"
-    premove: "npm:4.0.0"
+    "@smithy/core": "workspace:^"
     tslib: "npm:^2.6.2"
-    typedoc: "npm:0.23.23"
   languageName: unknown
   linkType: soft
 
@@ -3378,7 +3351,6 @@ __metadata:
   resolution: "@smithy/snapshot-testing@workspace:packages/snapshot-testing"
   dependencies:
     "@smithy/core": "workspace:^"
-    "@smithy/eventstream-codec": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: "npm:7.0.0"
@@ -12400,9 +12372,6 @@ __metadata:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
-    "@smithy/eventstream-serde-browser": "workspace:^"
-    "@smithy/eventstream-serde-config-resolver": "workspace:^"
-    "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/snapshot-testing": "workspace:^"
@@ -12425,9 +12394,6 @@ __metadata:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
-    "@smithy/eventstream-serde-browser": "workspace:^"
-    "@smithy/eventstream-serde-config-resolver": "workspace:^"
-    "@smithy/eventstream-serde-node": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"

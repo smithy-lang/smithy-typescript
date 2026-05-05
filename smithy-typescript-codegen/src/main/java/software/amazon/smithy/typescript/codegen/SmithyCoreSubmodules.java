@@ -26,6 +26,7 @@ public final class SmithyCoreSubmodules {
     public static final String CLIENT = "/client";
     public static final String CONFIG = "/config";
     public static final String ENDPOINTS = "/endpoints";
+    public static final String EVENT_STREAMS = "/event-streams";
     public static final String RETRY = "/retry";
     public static final String PROTOCOLS = "/protocols";
     public static final String SERDE = "/serde";

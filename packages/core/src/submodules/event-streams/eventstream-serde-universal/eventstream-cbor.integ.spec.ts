@@ -1,5 +1,5 @@
 import { cbor, dateToTag } from "@smithy/core/cbor";
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/core/protocols";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { Readable } from "node:stream";
 import { describe, expect, test as it } from "vitest";

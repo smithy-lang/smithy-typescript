@@ -16,6 +16,7 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
+import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptCodegenContext;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
@@ -43,7 +44,8 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         return ListUtils.of(
             RuntimeClientPlugin.builder()
                 .withConventions(
-                    TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER.dependency,
+                    "@smithy/core/event-streams",
+                    TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
                     "EventStreamSerde",
                     RuntimeClientPlugin.Convention.HAS_CONFIG
                 )
@@ -63,7 +65,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
             return;
         }
 
-        writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_CONFIG_RESOLVER);
+        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
         writer.addTypeImport(
             "EventStreamSerdeProvider",
             "__EventStreamSerdeProvider",
@@ -86,21 +88,23 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         switch (target) {
             case NODE:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
-                    writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE);
-                    writer.addImport(
+                    writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                    writer.addImportSubmodule(
                         "eventStreamSerdeProvider",
                         null,
-                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_NODE
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.EVENT_STREAMS
                     );
                     writer.write("eventStreamSerdeProvider");
                 });
             case BROWSER:
                 return MapUtils.of("eventStreamSerdeProvider", writer -> {
-                    writer.addDependency(TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER);
-                    writer.addImport(
+                    writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                    writer.addImportSubmodule(
                         "eventStreamSerdeProvider",
                         null,
-                        TypeScriptDependency.AWS_SDK_EVENTSTREAM_SERDE_BROWSER
+                        TypeScriptDependency.SMITHY_CORE,
+                        SmithyCoreSubmodules.EVENT_STREAMS
                     );
                     writer.write("eventStreamSerdeProvider");
                 });

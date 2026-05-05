@@ -1,8 +1,8 @@
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
-import { EventStreamCodec } from "@smithy/eventstream-codec";
 import type { Message } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
+import { EventStreamCodec } from "../eventstream-codec/EventStreamCodec";
 import { endEventMessage, exception, recordEventMessage, statsEventMessage } from "./getChunkedStream.spec";
 import { getUnmarshalledStream } from "./getUnmarshalledStream";
 

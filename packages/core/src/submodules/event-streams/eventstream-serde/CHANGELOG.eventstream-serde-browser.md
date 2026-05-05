@@ -1,5 +1,7 @@
 # Change Log
 
+This is a past changelog, the package has been consolidated into `@smithy/core/event-streams`.
+
 ## 4.2.14
 
 ### Patch Changes

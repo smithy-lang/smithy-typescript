@@ -653,7 +653,24 @@
     "translateTraits": "function, since <=3.23.17"
   },
   "@smithy/core/event-streams": {
-    "EventStreamSerde": "function, since <=3.23.17"
+    "EventStreamSerde": "function, since <=3.23.17",
+    "EventStreamCodec": "function, since 3.23.17",
+    "HeaderMarshaller": "function, since 3.23.17",
+    "Int64": "function, since 3.23.17",
+    "MessageDecoderStream": "function, since 3.23.17",
+    "MessageEncoderStream": "function, since 3.23.17",
+    "SmithyMessageDecoderStream": "function, since 3.23.17",
+    "SmithyMessageEncoderStream": "function, since 3.23.17",
+    "UniversalEventStreamMarshaller": "function, since 3.23.17",
+    "getChunkedStream": "function, since 3.23.17",
+    "getMessageUnmarshaller": "function, since 3.23.17",
+    "getUnmarshalledStream": "function, since 3.23.17",
+    "iterableToReadableStream": "function, since 3.23.17",
+    "resolveEventStreamSerdeConfig": "function, since 3.23.17",
+    "universalEventStreamSerdeProvider": "function, since 3.23.17",
+    "EventStreamMarshaller": "function, since 3.23.17",
+    "eventStreamSerdeProvider": "function, since 3.23.17",
+    "readableStreamToIterable": "function, since 3.23.17"
   },
   "@smithy/core/endpoints": {
     "toEndpointV1": "function, since <=3.23.17",
