@@ -1,4 +1,4 @@
-import { constants } from "node:http2";
+import { constants, type ClientSessionOptions, type SecureClientSessionOptions } from "node:http2";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
 
@@ -40,6 +40,12 @@ export interface NodeHttp2HandlerOptions {
    * https://nodejs.org/api/http2.html#class-http2stream
    */
   maxConcurrentStreams?: number;
+
+  /**
+   * A set of raw options that will be passed to http2.connect.
+   * https://nodejs.org/api/http2.html#http2connectauthority-options-listener
+   */
+  nodeHttp2ConnectOptions?: Partial<SecureClientSessionOptions | ClientSessionOptions>;
 }
 
 /**
@@ -106,11 +112,14 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
   ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
       this.config = await this.configProvider;
-      const { disableConcurrentStreams, maxConcurrentStreams } = this.config;
+      const { disableConcurrentStreams, maxConcurrentStreams, nodeHttp2ConnectOptions } = this.config;
 
       this.connectionManager.setDisableConcurrentStreams(disableConcurrentStreams ?? false);
       if (maxConcurrentStreams) {
         this.connectionManager.setMaxConcurrentStreams(maxConcurrentStreams);
+      }
+      if (nodeHttp2ConnectOptions) {
+        this.connectionManager.setNodeHttp2ConnectOptions(nodeHttp2ConnectOptions);
       }
     }
 

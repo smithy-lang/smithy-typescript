@@ -903,4 +903,27 @@ describe(NodeHttp2Handler.name, () => {
       handler.destroy();
     });
   });
+
+  describe("nodeHttp2ConnectOptions", () => {
+    it("passes nodeHttp2ConnectOptions to http2.connect", async () => {
+      const handler = new NodeHttp2Handler({ nodeHttp2ConnectOptions: { maxSessionMemory: 64 } });
+      const connectSpy = vi.spyOn(http2, "connect");
+      await handler.handle(new HttpRequest(getMockReqOptions()), {});
+      expect(connectSpy).toHaveBeenCalledWith(authority, { maxSessionMemory: 64 });
+      handler.destroy();
+    });
+
+    it("passes nodeHttp2ConnectOptions to http2.connect for isolated sessions", async () => {
+      const handler = new NodeHttp2Handler({
+        disableConcurrentStreams: true,
+        nodeHttp2ConnectOptions: { maxSessionMemory: 64 },
+      });
+      const connectSpy = vi.spyOn(http2, "connect");
+
+      await handler.handle(new HttpRequest(getMockReqOptions()), {});
+
+      expect(connectSpy).toHaveBeenCalledWith(authority, { maxSessionMemory: 64 });
+      handler.destroy();
+    });
+  });
 });

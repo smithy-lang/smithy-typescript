@@ -1,4 +1,4 @@
-import http2 from "node:http2";
+import http2, { type ClientHttp2Session, type ClientSessionOptions, type SecureClientSessionOptions } from "node:http2";
 import type {
   ConnectConfiguration,
   ConnectionManager,
@@ -18,6 +18,7 @@ import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
  */
 export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2SessionRef> {
   private config: ConnectionManagerConfiguration;
+  private connectOptions?: Partial<SecureClientSessionOptions | ClientSessionOptions>;
   private readonly connectionPools: Map<string, NodeHttp2ConnectionPool> = new Map<string, NodeHttp2ConnectionPool>();
 
   constructor(config: ConnectionManagerConfiguration) {
@@ -44,7 +45,7 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
       }
     }
 
-    const ref = new ClientHttp2SessionRef(http2.connect(url));
+    const ref = new ClientHttp2SessionRef(this.connect(url));
     const session = ref.deref();
 
     if (this.config.maxConcurrency) {
@@ -99,7 +100,7 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
     connectionConfiguration: ConnectConfiguration
   ): ClientHttp2SessionRef {
     const url = this.getUrlString(requestContext);
-    const ref = new ClientHttp2SessionRef(http2.connect(url));
+    const ref = new ClientHttp2SessionRef(this.connect(url));
     const session = ref.deref();
 
     session.settings({ maxConcurrentStreams: 1 });
@@ -146,6 +147,12 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
 
   public setDisableConcurrentStreams(disableConcurrentStreams: boolean) {
     this.config.disableConcurrency = disableConcurrentStreams;
+  }
+
+  public setNodeHttp2ConnectOptions(
+    nodeHttp2ConnectOptions: Partial<SecureClientSessionOptions | ClientSessionOptions>
+  ) {
+    this.connectOptions = nodeHttp2ConnectOptions;
   }
 
   /**
@@ -195,5 +202,9 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
 
   private getUrlString(request: RequestContext): string {
     return request.destination.toString();
+  }
+
+  private connect(url: string): ClientHttp2Session {
+    return this.connectOptions === undefined ? http2.connect(url) : http2.connect(url, this.connectOptions);
   }
 }
