@@ -1,4 +1,4 @@
-.PHONY: build sync api-snapshot
+.PHONY: build sync api-snapshot ct cti cwt cwti
 
 build:
 	./gradlew clean build publishToMavenLocal
@@ -71,3 +71,21 @@ api-snapshot:
 	yarn build
 	node scripts/validation/api-snapshot-validation.js --write
 	git diff --exit-code api-snapshot/
+
+S ?= $(word 2,$(MAKECMDGOALS))
+
+# make ct retry, for example, to run a subset of core unit tests.
+ct:
+	cd packages/core && yarn g:vitest run src/submodules/$(S)
+cwt:
+	cd packages/core && yarn g:vitest watch src/submodules/$(S)
+
+# same as ct, but for integration tests.
+cti:
+	cd packages/core && yarn g:vitest run -c vitest.config.integ.mts src/submodules/$(S)
+cwti:
+	cd packages/core && yarn g:vitest watch -c vitest.config.integ.mts src/submodules/$(S)
+
+# swallow extra positional args (e.g. make ct endpoints)
+%:
+	@:

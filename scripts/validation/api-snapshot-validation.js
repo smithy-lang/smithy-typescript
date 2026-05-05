@@ -51,21 +51,20 @@ for (const packageRoot of packageDirs) {
 }
 
 // Create a single TypeScript program with all entry points.
+const submodulesDir = path.join(root, "packages", "core", "src", "submodules");
+const submodulePaths = {};
+for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
+  if (dir.isDirectory()) {
+    submodulePaths[`@smithy/core/${dir.name}`] = [`packages/core/dist-types/submodules/${dir.name}/index.d.ts`];
+  }
+}
+
 const allDtsPaths = dtsEntries.map((e) => e.dtsPath);
 const program = ts.createProgram(allDtsPaths, {
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   baseUrl: root,
   paths: {
-    "@smithy/core/cbor": ["packages/core/dist-types/submodules/cbor/index.d.ts"],
-    "@smithy/core/protocols": ["packages/core/dist-types/submodules/protocols/index.d.ts"],
-    "@smithy/core/serde": ["packages/core/dist-types/submodules/serde/index.d.ts"],
-    "@smithy/core/schema": ["packages/core/dist-types/submodules/schema/index.d.ts"],
-    "@smithy/core/event-streams": ["packages/core/dist-types/submodules/event-streams/index.d.ts"],
-    "@smithy/core/endpoints": ["packages/core/dist-types/submodules/endpoints/index.d.ts"],
-    "@smithy/core/client": ["packages/core/dist-types/submodules/client/index.d.ts"],
-    "@smithy/core/config": ["packages/core/dist-types/submodules/config/index.d.ts"],
-    "@smithy/core/checksum": ["packages/core/dist-types/submodules/checksum/index.d.ts"],
-    "@smithy/core/retry": ["packages/core/dist-types/submodules/retry/index.d.ts"],
+    ...submodulePaths,
     "@smithy/*": ["packages/*/dist-types"],
   },
 });
@@ -145,8 +144,9 @@ function checkModule(name, version, module, typeExports) {
       const inCurrent = inRuntime || inTypes;
 
       if (inCurrent && !inSnapshot) {
-        errors.push(`You must commit changes in api.json.`);
-        api[name][symbol] = inRuntime ? typeof module[symbol] : typeExports.get(symbol);
+        const kind = inRuntime ? typeof module[symbol] : typeExports.get(symbol);
+        errors.push(`You must commit changes in api.json adding ${symbol} (${kind}) to ${name}.`);
+        api[name][symbol] = kind;
       }
       if (!inCurrent && inSnapshot) {
         errors.push(`Symbol [${symbol}] is missing from ${name}, (${api[name][symbol]}).`);
