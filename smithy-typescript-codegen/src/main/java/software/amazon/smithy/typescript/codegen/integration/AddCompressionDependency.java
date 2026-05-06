@@ -50,37 +50,31 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                 return MapUtils.of(
                     "disableRequestCompression",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
                         writer.addImportSubmodule(
                             "loadConfig",
                             "loadNodeConfig",
                             TypeScriptDependency.SMITHY_CORE,
                             SmithyCoreSubmodules.CONFIG
                         );
-                        writer.addImportSubmodule(
+                        writer.addImport(
                             "NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS",
                             null,
-                            TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.PROTOCOLS
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
                         );
                         writer.write("loadNodeConfig(NODE_DISABLE_REQUEST_COMPRESSION_CONFIG_OPTIONS, config)");
                     },
                     "requestMinCompressionSizeBytes",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
                         writer.addImportSubmodule(
                             "loadConfig",
                             "loadNodeConfig",
                             TypeScriptDependency.SMITHY_CORE,
                             SmithyCoreSubmodules.CONFIG
                         );
-                        writer.addImportSubmodule(
+                        writer.addImport(
                             "NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS",
                             null,
-                            TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.PROTOCOLS
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
                         );
                         writer.write(
                             "loadNodeConfig(NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS, config)"
@@ -91,23 +85,19 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                 return MapUtils.of(
                     "disableRequestCompression",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        writer.addImportSubmodule(
+                        writer.addImport(
                             "DEFAULT_DISABLE_REQUEST_COMPRESSION",
                             null,
-                            TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.PROTOCOLS
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
                         );
                         writer.write("DEFAULT_DISABLE_REQUEST_COMPRESSION");
                     },
                     "requestMinCompressionSizeBytes",
                     writer -> {
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        writer.addImportSubmodule(
+                        writer.addImport(
                             "DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES",
                             null,
-                            TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.PROTOCOLS
+                            TypeScriptDependency.MIDDLEWARE_COMPRESSION
                         );
                         writer.write("DEFAULT_NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES");
                     }
@@ -122,8 +112,7 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
         return ListUtils.of(
             RuntimeClientPlugin.builder()
                 .withConventions(
-                    "@smithy/core/protocols",
-                    TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
+                    TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
                     "Compression",
                     RuntimeClientPlugin.Convention.HAS_CONFIG
                 )
@@ -131,8 +120,7 @@ public final class AddCompressionDependency implements TypeScriptIntegration {
                 .build(),
             RuntimeClientPlugin.builder()
                 .withConventions(
-                    "@smithy/core/protocols",
-                    TypeScriptDependency.SMITHY_CORE.dependency.getVersion(),
+                    TypeScriptDependency.MIDDLEWARE_COMPRESSION.dependency,
                     "Compression",
                     RuntimeClientPlugin.Convention.HAS_MIDDLEWARE
                 )

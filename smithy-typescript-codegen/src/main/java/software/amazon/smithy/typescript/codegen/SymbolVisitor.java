@@ -382,7 +382,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder addSmithyUseImport(Symbol.Builder builder, String name, String as) {
-        Symbol importSymbol = Symbol.builder().name(name).namespace("@smithy/smithy-client", "/").build();
+        Symbol importSymbol = Symbol.builder().name(name).namespace("@smithy/core/serde", "/").build();
         SymbolReference reference = SymbolReference.builder()
             .symbol(importSymbol)
             .alias(as)

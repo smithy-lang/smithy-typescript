@@ -4,9 +4,9 @@ import { afterAll, expect, test as it } from "vitest";
 import { GetNumbersCommand } from "../../src/commands/GetNumbersCommand";
 import { HttpLabelCommandCommand } from "../../src/commands/HttpLabelCommandCommand";
 import { XYZServiceClient } from "../../src/XYZServiceClient";
-import type { HttpHandlerOptions, HeaderBag, Endpoint } from "@smithy/types";
-import { type HttpHandler, HttpRequest, HttpResponse } from "@smithy/protocol-http";
 import { Readable } from "node:stream";
+import { HttpRequest, HttpResponse, type HttpHandler } from "@smithy/core/protocols";
+import type { Endpoint, HeaderBag, HttpHandlerOptions } from "@smithy/types";
 
 /**
  * Throws an expected exception that contains the serialized request.
