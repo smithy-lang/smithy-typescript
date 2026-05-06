@@ -89,7 +89,7 @@ const checkWarn403 = (observedResponses: Record<string, number> = {}, client: an
       ? clientLogger
       : console;
 
-  if (count403 >= 3 || orderedErrors[orderedErrors.length - 1].startsWith("403:")) {
+  if (count403 >= 3 || orderedErrors[orderedErrors.length - 1]?.startsWith("403:")) {
     warningLogger.warn(`@smithy/util-waiter WARN - 403 status code encountered during waiter polling.`);
   }
 };

@@ -239,6 +239,45 @@ describe(runPolling.name, () => {
     nowMock.mockReset();
   });
 
+  it("should not warn or throw when polling exceeds 60s without observed responses", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    // Simulate time: start at T=0, each Date.now() call advances 20s.
+    // This ensures we cross the 60s warn403Time threshold after a few polls.
+    let now = 1_000_000;
+    const nowMock = vi
+      .spyOn(Date, "now")
+      .mockReturnValueOnce(now) // waitUntil
+      .mockImplementation(() => {
+        const rtn = now;
+        now += 20_000;
+        return rtn;
+      });
+
+    const localConfig = {
+      ...config,
+      minDelay: 2,
+      maxDelay: 2,
+      maxWaitTime: 300,
+      client: { config: {} },
+    } as WaiterOptions<any>;
+
+    mockAcceptorChecks = vi
+      .fn()
+      .mockResolvedValueOnce(retryState) // initial check
+      .mockResolvedValueOnce(retryState) // poll 1
+      .mockResolvedValueOnce(retryState) // poll 2
+      .mockResolvedValueOnce({ state: WaiterState.SUCCESS, reason: { $metadata: { httpStatusCode: 200 } } });
+
+    await expect(runPolling(localConfig, input, mockAcceptorChecks)).resolves.toMatchObject({
+      state: WaiterState.SUCCESS,
+    });
+    expect(warnSpy).not.toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+    nowMock.mockReset();
+  });
+
   it("should truncate delay to fire a last poll before timeout", async () => {
     // Use real-ish time: start at T=0, advance 1s per Date.now() call.
     let now = 1_000_000;
