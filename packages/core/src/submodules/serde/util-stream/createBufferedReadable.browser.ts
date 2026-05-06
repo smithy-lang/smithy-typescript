@@ -7,12 +7,13 @@ export type BufferUnion = string | Uint8Array;
 export type Modes = 0 | 1 | 2;
 
 /**
+ * the minimum size is met, except for the last chunk.
+ *
  * @internal
  * @param upstream - any ReadableStream.
  * @param size - byte or character length minimum. Buffering occurs when a chunk fails to meet this value.
  * @param logger - for emitting warnings when buffering occurs.
  * @returns another stream of the same data, but buffers chunks until
- * the minimum size is met, except for the last chunk.
  */
 export function createBufferedReadableStream(upstream: ReadableStream, size: number, logger?: Logger): ReadableStream {
   const reader = upstream.getReader();

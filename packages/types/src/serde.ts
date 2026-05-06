@@ -4,9 +4,9 @@ import type { RequestHandler } from "./transfer";
 import type { Decoder, Encoder, Provider } from "./util";
 
 /**
- * @public
- *
  * Interface for object requires an Endpoint set.
+ *
+ * @public
  */
 export interface EndpointBearer {
   /* TODO(endpointsv2) post-release */
@@ -28,9 +28,9 @@ export interface StreamCollector {
 }
 
 /**
- * @public
- *
  * Request and Response serde util functions and settings for AWS services
+ *
+ * @public
  */
 export interface SerdeContext extends SerdeFunctions, EndpointBearer {
   requestHandler: RequestHandler<any, any>;
@@ -39,9 +39,9 @@ export interface SerdeContext extends SerdeFunctions, EndpointBearer {
 }
 
 /**
- * @public
- *
  * Serde functions from the client config.
+ *
+ * @public
  */
 export interface SerdeFunctions {
   base64Encoder: Encoder;
@@ -92,19 +92,19 @@ export interface SdkStreamMixin {
 }
 
 /**
- * @public
- *
  * The type describing a runtime-specific stream implementation with mix-in
  * utility functions.
+ *
+ * @public
  */
 export type SdkStream<BaseStream> = BaseStream & SdkStreamMixin;
 
 /**
- * @public
- *
  * Indicates that the member of type T with
  * key StreamKey have been extended
  * with the SdkStreamMixin helper methods.
+ *
+ * @public
  */
 export type WithSdkStreamMixin<T, StreamKey extends keyof T> = {
   [key in keyof T]: key extends StreamKey ? SdkStream<T[StreamKey]> : T[key];

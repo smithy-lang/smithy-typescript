@@ -1,7 +1,7 @@
 /**
- * @internal
- *
  * Authentication schemes represent a way that the service will authenticate the customer’s identity.
+ *
+ * @internal
  */
 export interface AuthScheme {
   /**
@@ -29,8 +29,9 @@ export interface AuthScheme {
 }
 
 /**
- * @internal
  * @deprecated
+ *
+ * @internal
  */
 export interface HttpAuthDefinition {
   /**
@@ -50,8 +51,9 @@ export interface HttpAuthDefinition {
 }
 
 /**
- * @internal
  * @deprecated
+ *
+ * @internal
  */
 export enum HttpAuthLocation {
   HEADER = "header",

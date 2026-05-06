@@ -1,6 +1,7 @@
 /**
- * @internal
  * For test spies.
+ *
+ * @internal
  */
 export const timing = {
   setTimeout: (cb: (...ignored: any[]) => void | unknown, ms?: number) => setTimeout(cb, ms),

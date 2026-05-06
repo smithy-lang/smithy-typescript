@@ -13,26 +13,26 @@ import { getRetryConfiguration, resolveRetryRuntimeConfig, type PartialRetryRunt
 export type DefaultExtensionRuntimeConfigType = PartialRetryRuntimeConfigType & PartialChecksumRuntimeConfigType;
 
 /**
- * @internal
- *
  * Helper function to resolve default extension configuration from runtime config
+ *
+ * @internal
  */
 export const getDefaultExtensionConfiguration = (runtimeConfig: DefaultExtensionRuntimeConfigType) => {
   return Object.assign(getChecksumConfiguration(runtimeConfig), getRetryConfiguration(runtimeConfig));
 };
 
 /**
- * @deprecated use getDefaultExtensionConfiguration
- * @internal
- *
  * Helper function to resolve default extension configuration from runtime config
+ *
+ * @internal
+ * @deprecated use getDefaultExtensionConfiguration
  */
 export const getDefaultClientConfiguration = getDefaultExtensionConfiguration;
 
 /**
- * @internal
- *
  * Helper function to resolve runtime config from default extension configuration
+ *
+ * @internal
  */
 export const resolveDefaultRuntimeConfig = (
   config: DefaultExtensionConfiguration

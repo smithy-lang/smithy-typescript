@@ -1,8 +1,7 @@
 /**
- * @internal
- *
  * Serializes a number, turning non-numeric values into strings.
  *
+ * @internal
  * @param value - The number to serialize.
  * @returns A number, or a string if the given number was non-numeric.
  */

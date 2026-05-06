@@ -25,8 +25,9 @@ export interface RequestHandlerMetadata {
 }
 
 /**
- * @public
  * Values from ALPN Protocol IDs.
+ *
+ * @public
  * @see https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
  */
 export enum RequestHandlerProtocol {

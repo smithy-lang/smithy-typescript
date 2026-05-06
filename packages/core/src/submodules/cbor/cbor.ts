@@ -26,15 +26,14 @@ export const cbor = {
     }
   },
   /**
-   * @public
-   * @param size - byte length to allocate.
-   *
    * This may be used to garbage collect the CBOR
    * shared encoding buffer space,
    * e.g. resizeEncodingBuffer(0);
-   *
    * This may also be used to pre-allocate more space for
    * CBOR encoding, e.g. resizeEncodingBuffer(100_000_000);
+   *
+   * @public
+   * @param size - byte length to allocate.
    */
   resizeEncodingBuffer(size: number) {
     resize(size);

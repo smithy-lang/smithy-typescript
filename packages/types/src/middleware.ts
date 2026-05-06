@@ -149,10 +149,10 @@ export interface DeserializeHandler<Input extends object, Output extends object>
 }
 
 /**
- * @public
- *
  * A factory function that creates functions implementing the `Handler`
  * interface.
+ *
+ * @public
  */
 export interface InitializeMiddleware<Input extends object, Output extends object> {
   /**
@@ -165,10 +165,10 @@ export interface InitializeMiddleware<Input extends object, Output extends objec
 }
 
 /**
- * @public
- *
  * A factory function that creates functions implementing the `BuildHandler`
  * interface.
+ *
+ * @public
  */
 export interface SerializeMiddleware<Input extends object, Output extends object> {
   /**
@@ -181,10 +181,10 @@ export interface SerializeMiddleware<Input extends object, Output extends object
 }
 
 /**
- * @public
- *
  * A factory function that creates functions implementing the `FinalizeHandler`
  * interface.
+ *
+ * @public
  */
 export interface FinalizeRequestMiddleware<Input extends object, Output extends object> {
   /**
@@ -221,10 +221,10 @@ export type MiddlewareType<Input extends object, Output extends object> =
   | DeserializeMiddleware<Input, Output>;
 
 /**
- * @public
- *
  * A factory function that creates the terminal handler atop which a middleware
  * stack sits.
+ *
+ * @public
  */
 export interface Terminalware {
   <Input extends object, Output extends object>(context: HandlerExecutionContext): DeserializeHandler<Input, Output>;
@@ -287,10 +287,11 @@ export interface HandlerOptions {
   name?: string;
 
   /**
-   * @internal
    * Aliases allows for middleware to be found by multiple names besides {@link HandlerOptions.name}.
    * This allows for references to replaced middleware to continue working, e.g. replacing
    * multiple auth-specific middleware with a single generic auth middleware.
+   *
+   * @internal
    */
   aliases?: Array<string>;
 
@@ -375,21 +376,21 @@ export interface DeserializeHandlerOptions extends HandlerOptions {
 }
 
 /**
- * @public
- *
  * A stack storing middleware. It can be resolved into a handler. It supports 2
  * approaches for adding middleware:
  * 1. Adding middleware to specific step with `add()`. The order of middleware
- *    added into same step is determined by order of adding them. If one middleware
- *    needs to be executed at the front of the step or at the end of step, set
- *    `priority` options to `high` or `low`.
+ * added into same step is determined by order of adding them. If one middleware
+ * needs to be executed at the front of the step or at the end of step, set
+ * `priority` options to `high` or `low`.
  * 2. Adding middleware to location relative to known middleware with `addRelativeTo()`.
- *    This is useful when given middleware must be executed before or after specific
- *    middleware(`toMiddleware`). You can add a middleware relatively to another
- *    middleware which also added relatively. But eventually, this relative middleware
- *    chain **must** be 'anchored' by a middleware that added using `add()` API
- *    with absolute `step` and `priority`. This mothod will throw if specified
- *    `toMiddleware` is not found.
+ * This is useful when given middleware must be executed before or after specific
+ * middleware(`toMiddleware`). You can add a middleware relatively to another
+ * middleware which also added relatively. But eventually, this relative middleware
+ * chain **must** be 'anchored' by a middleware that added using `add()` API
+ * with absolute `step` and `priority`. This mothod will throw if specified
+ * `toMiddleware` is not found.
+ *
+ * @public
  */
 export interface MiddlewareStack<Input extends object, Output extends object> extends Pluggable<Input, Output> {
   /**
@@ -477,14 +478,13 @@ export interface MiddlewareStack<Input extends object, Output extends object> ex
   identify(): string[];
 
   /**
-   * @internal
-   *
    * When an operation is called using this stack,
    * it will log its list of middleware to the console using
    * the identify function.
+   * If no argument given, returns the current value.
    *
+   * @internal
    * @param toggle - set whether to log on resolve.
-   *                 If no argument given, returns the current value.
    */
   identifyOnResolve(toggle?: boolean): boolean;
 
@@ -510,10 +510,10 @@ export interface MiddlewareStack<Input extends object, Output extends object> ex
 export const SMITHY_CONTEXT_KEY = "__smithy_context";
 
 /**
- * @public
- *
  * Data and helper objects that are not expected to change from one execution of
  * a composed handler to another.
+ *
+ * @public
  */
 export interface HandlerExecutionContext {
   /**
@@ -566,8 +566,9 @@ export interface HandlerExecutionContext {
   }>;
 
   /**
-   * @internal
    * Context for Smithy properties.
+   *
+   * @internal
    */
   [SMITHY_CONTEXT_KEY]?: {
     service?: string;

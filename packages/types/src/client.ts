@@ -4,17 +4,17 @@ import type { MetadataBearer } from "./response";
 import type { OptionalParameter } from "./util";
 
 /**
- * @public
- *
  * A type which checks if the client configuration is optional.
  * If all entries of the client configuration are optional, it allows client creation without passing any config.
+ *
+ * @public
  */
 export type CheckOptionalClientConfig<T> = OptionalParameter<T>;
 
 /**
- * @public
- *
  * function definition for different overrides of client's 'send' function.
+ *
+ * @public
  */
 export interface InvokeFunction<
   InputTypes extends object,
@@ -42,9 +42,9 @@ export interface InvokeFunction<
 }
 
 /**
- * @public
- *
  * Signature that appears on aggregated clients' methods.
+ *
+ * @public
  */
 export interface InvokeMethod<InputType extends object, OutputType extends MetadataBearer> {
   (input: InputType, options?: any): Promise<OutputType>;
@@ -54,9 +54,9 @@ export interface InvokeMethod<InputType extends object, OutputType extends Metad
 }
 
 /**
- * @public
- *
  * Signature that appears on aggregated clients' methods when argument is optional.
+ *
+ * @public
  */
 export interface InvokeMethodOptionalArgs<InputType extends object, OutputType extends MetadataBearer> {
   (): Promise<OutputType>;

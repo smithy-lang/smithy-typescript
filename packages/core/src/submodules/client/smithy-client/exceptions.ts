@@ -19,9 +19,9 @@ export interface ServiceExceptionOptions extends SmithyException, MetadataBearer
 }
 
 /**
- * @public
- *
  * Base exception class for the exceptions from the server-side.
+ *
+ * @public
  */
 export class ServiceException extends Error implements SmithyException, MetadataBearer {
   readonly $fault: "client" | "server";

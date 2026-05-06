@@ -59,10 +59,10 @@ export interface EndpointsResolvedConfig extends Required<EndpointsInputConfig> 
 }
 
 /**
- * @internal
- *
- * @deprecated endpoints rulesets use \@smithy/middleware-endpoint resolveEndpointConfig.
  * All generated clients should migrate to Endpoints 2.0 endpointRuleSet traits.
+ *
+ * @internal
+ * @deprecated endpoints rulesets use \@smithy/middleware-endpoint resolveEndpointConfig.
  */
 export const resolveEndpointsConfig = <T>(
   input: T & EndpointsInputConfig & PreviouslyResolved

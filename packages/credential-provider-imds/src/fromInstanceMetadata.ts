@@ -18,10 +18,10 @@ const PROFILE_AWS_EC2_METADATA_V1_DISABLED = "ec2_metadata_v1_disabled";
 const X_AWS_EC2_METADATA_TOKEN = "x-aws-ec2-metadata-token";
 
 /**
- * @internal
- *
  * Creates a credential provider that will source credentials from the EC2
  * Instance Metadata Service
+ *
+ * @internal
  */
 export const fromInstanceMetadata = (init: RemoteProviderInit = {}): Provider<InstanceMetadataCredentials> =>
   staticStabilityProvider(getInstanceMetadataProvider(init), { logger: init.logger });

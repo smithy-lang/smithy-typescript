@@ -1,19 +1,17 @@
 import type { SourceData } from "./crypto";
 
 /**
- * @public
- *
  * An object that provides a checksum of data provided in chunks to `update`.
  * The checksum may be performed incrementally as chunks are received or all
  * at once when the checksum is finalized, depending on the underlying
  * implementation.
- *
  * It's recommended to compute checksum incrementally to avoid reading the
  * entire payload in memory.
- *
  * A class that implements this interface may accept an optional secret key in its
  * constructor while computing checksum value, when using HMAC. If provided,
  * this secret key would be used when computing checksum.
+ *
+ * @public
  */
 export interface Checksum {
   /**
@@ -59,11 +57,11 @@ export interface Checksum {
 }
 
 /**
- * @public
- *
  * A constructor for a Checksum that may be used to calculate an HMAC. Implementing
  * classes should not directly hold the provided key in memory beyond the
  * lexical scope of the constructor.
+ *
+ * @public
  */
 export interface ChecksumConstructor {
   new (secret?: SourceData): Checksum;

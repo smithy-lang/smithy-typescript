@@ -5,8 +5,9 @@ import type { StreamCollector } from "@smithy/types";
 import { Collector } from "./collector";
 
 /**
- * @internal
  * Converts a stream to a byte array.
+ *
+ * @internal
  */
 export const streamCollector: StreamCollector = (stream: Readable | IReadableStream): Promise<Uint8Array> => {
   if (isReadableStreamInstance(stream)) {

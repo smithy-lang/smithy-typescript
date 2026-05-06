@@ -16,9 +16,9 @@ const makePagedClientRequest = async <ClientType extends Client<any, any, any>, 
 };
 
 /**
- * @internal
- *
  * Creates a paginator.
+ *
+ * @internal
  */
 export function createPaginator<
   PaginationConfigType extends PaginationConfiguration,

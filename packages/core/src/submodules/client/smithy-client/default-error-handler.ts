@@ -20,9 +20,9 @@ export const throwDefaultError = ({ output, parsedBody, exceptionCtor, errorCode
 };
 
 /**
- * @internal
- *
  * Creates {@link throwDefaultError} with bound ExceptionCtor.
+ *
+ * @internal
  */
 export const withBaseException = (ExceptionCtor: { new (...args: any): any }): any => {
   return ({ output, parsedBody, errorCode }: any) => {

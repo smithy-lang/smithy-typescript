@@ -2,14 +2,13 @@ import type { HttpResponse } from "./http";
 import type { MetadataBearer } from "./response";
 
 /**
- * @public
- *
  * A document type represents an untyped JSON-like value.
- *
  * Not all protocols support document types, and the serialization format of a
  * document type is protocol specific. All JSON protocols SHOULD support
  * document types and they SHOULD serialize document types inline as normal
  * JSON values.
+ *
+ * @public
  */
 export type DocumentType =
   | null
@@ -22,10 +21,10 @@ export type DocumentType =
     };
 
 /**
- * @public
- *
  * A structure shape with the error trait.
  * https://smithy.io/2.0/spec/behavior-traits.html#smithy-api-retryable-trait
+ *
+ * @public
  */
 export interface RetryableTrait {
   /**
@@ -35,10 +34,10 @@ export interface RetryableTrait {
 }
 
 /**
- * @public
- *
  * Type that is implemented by all Smithy shapes marked with the
  * error trait.
+ *
+ * @public
  * @deprecated
  */
 export interface SmithyException {
@@ -65,19 +64,17 @@ export interface SmithyException {
 }
 
 /**
- * @public
- *
- * @deprecated See {@link https://aws.amazon.com/blogs/developer/service-error-handling-modular-aws-sdk-js/}
- *
  * This type should not be used in your application.
  * Users of the AWS SDK for JavaScript v3 service clients should prefer to
  * use the specific Exception classes corresponding to each operation.
  * These can be found as code in the deserializer for the operation's Command class,
  * or as declarations in the service model file in codegen/sdk-codegen/aws-models.
- *
  * If no exceptions are enumerated by a particular Command operation,
  * the base exception for the service should be used. Each client exports
  * a base ServiceException prefixed with the service name.
+ *
+ * @public
+ * @deprecated See {@link https://aws.amazon.com/blogs/developer/service-error-handling-modular-aws-sdk-js/}
  */
 export type SdkError = Error &
   Partial<SmithyException> &

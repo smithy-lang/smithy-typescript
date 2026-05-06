@@ -22,10 +22,10 @@ export const ENV_CMDS_RELATIVE_URI = "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI";
 export const ENV_CMDS_AUTH_TOKEN = "AWS_CONTAINER_AUTHORIZATION_TOKEN";
 
 /**
- * @internal
- *
  * Creates a credential provider that will source credentials from the ECS
  * Container Metadata Service
+ *
+ * @internal
  */
 export const fromContainerMetadata = (init: RemoteProviderInit = {}): AwsCredentialIdentityProvider => {
   const { timeout, maxRetries } = providerConfigFromInit(init);

@@ -1,8 +1,9 @@
 import type { IniSection } from "@smithy/types";
 
 /**
- * @internal
  * Inlined from @smithy/core/config to avoid circular dependency.
+ *
+ * @internal
  */
 type LoadedConfigSelectors<T> = {
   environmentVariableSelector: (env: Record<string, string | undefined>) => T | undefined;

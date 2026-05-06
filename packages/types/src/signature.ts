@@ -3,10 +3,10 @@ import type { HttpRequest } from "./http";
 import type { AwsCredentialIdentity } from "./identity/awsCredentialIdentity";
 
 /**
- * @public
- *
  * A `Date` object, a unix (epoch) timestamp in seconds, or a string that can be
  * understood by the JavaScript `Date` constructor.
+ *
+ * @public
  */
 export type DateInput = number | string | Date;
 
@@ -125,10 +125,10 @@ export interface RequestPresigner {
 }
 
 /**
- * @public
- *
  * An object that signs request objects with AWS credentials using one of the
  * AWS authentication protocols.
+ *
+ * @public
  */
 export interface RequestSigner {
   /**

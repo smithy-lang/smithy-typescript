@@ -2,10 +2,9 @@
 let warningEmitted = false;
 
 /**
- * @internal
- *
  * Emits warning if the provided Node.js version string is pending deprecation.
  *
+ * @internal
  * @param version - The Node.js version string.
  */
 export const emitWarningIfUnsupportedVersion = (version: string) => {

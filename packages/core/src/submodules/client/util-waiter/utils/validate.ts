@@ -1,9 +1,9 @@
 import type { WaiterOptions } from "../waiter";
 
 /**
- * @internal
- *
  * Validates that waiter options are passed correctly
+ *
+ * @internal
  * @param options - a waiter configuration object
  */
 export const validateWaiterOptions = <Client>(options: WaiterOptions<Client>): void => {

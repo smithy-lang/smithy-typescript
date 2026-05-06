@@ -5,11 +5,11 @@ import type { GetEndpointFromConfig } from "./adaptors/getEndpointFromInstructio
 import { toEndpointV1 } from "./adaptors/toEndpointV1";
 
 /**
- * @public
- *
  * Endpoint config interfaces and resolver for Endpoint v2. They live in separate package to allow per-service onboarding.
  * When all services onboard Endpoint v2, the resolver in config-resolver package can be removed.
  * This interface includes all the endpoint parameters with built-in bindings of "AWS::*" and "SDK::*"
+ *
+ * @public
  */
 export interface EndpointInputConfig<T extends EndpointParameters = EndpointParameters> {
   /**
@@ -45,8 +45,9 @@ export interface EndpointInputConfig<T extends EndpointParameters = EndpointPara
   useFipsEndpoint?: boolean | Provider<boolean | undefined>;
 
   /**
-   * @internal
    * This field is used internally so you should not fill any value to this field.
+   *
+   * @internal
    */
   serviceConfiguredEndpoint?: never;
 }
@@ -62,10 +63,10 @@ export interface PreviouslyResolved<T extends EndpointParameters = EndpointParam
 }
 
 /**
- * @internal
- *
  * This supersedes the similarly named EndpointsResolvedConfig (no parametric types)
  * from resolveEndpointsConfig.ts in \@smithy/config-resolver.
+ *
+ * @internal
  */
 export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointParameters> {
   /**

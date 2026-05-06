@@ -1,10 +1,10 @@
 import { getChecksumConfiguration, resolveChecksumRuntimeConfig, type ChecksumConfiguration } from "./checksum";
 
 /**
- * @deprecated will be replaced by DefaultExtensionConfiguration.
- * @internal
- *
  * Default client configuration consisting various configurations for modifying a service client
+ *
+ * @internal
+ * @deprecated will be replaced by DefaultExtensionConfiguration.
  */
 export interface DefaultClientConfiguration extends ChecksumConfiguration {}
 
@@ -14,11 +14,10 @@ export interface DefaultClientConfiguration extends ChecksumConfiguration {}
 type GetDefaultConfigurationType = (runtimeConfig: any) => DefaultClientConfiguration;
 
 /**
- * @deprecated moving to @smithy/smithy-client.
- * @internal
- *
  * Helper function to resolve default client configuration from runtime config
  *
+ * @internal
+ * @deprecated moving to @smithy/smithy-client.
  */
 export const getDefaultClientConfiguration: GetDefaultConfigurationType = (runtimeConfig: any) => {
   return getChecksumConfiguration(runtimeConfig);
@@ -30,10 +29,10 @@ export const getDefaultClientConfiguration: GetDefaultConfigurationType = (runti
 type ResolveDefaultRuntimeConfigType = (clientConfig: DefaultClientConfiguration) => any;
 
 /**
- * @deprecated moving to @smithy/smithy-client.
- * @internal
- *
  * Helper function to resolve runtime config from default client configuration
+ *
+ * @internal
+ * @deprecated moving to @smithy/smithy-client.
  */
 export const resolveDefaultRuntimeConfig: ResolveDefaultRuntimeConfigType = (config: DefaultClientConfiguration) => {
   return resolveChecksumRuntimeConfig(config);

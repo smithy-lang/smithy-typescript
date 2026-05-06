@@ -52,8 +52,9 @@ interface HttpAuthSchemeMiddlewareHandlerExecutionContext extends HandlerExecuti
 }
 
 /**
- * @internal
  * Later HttpAuthSchemes with the same HttpAuthSchemeId will overwrite previous ones.
+ *
+ * @internal
  */
 function convertHttpAuthSchemesToMap(httpAuthSchemes: HttpAuthScheme[]): Map<HttpAuthSchemeId, HttpAuthScheme> {
   const map = new Map();

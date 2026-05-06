@@ -21,9 +21,9 @@ import {
 import { isClientModel } from "./utils";
 
 /**
- * @internal
- *
  * Group the ToC for easier observability.
+ *
+ * @internal
  */
 export class SdkClientTocPlugin {
   private clientDir?: string;

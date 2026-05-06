@@ -1,16 +1,16 @@
 /**
- * @public
- *
  * The base number of milliseconds to use in calculating a suitable cool-down
  * time when a retryable error is encountered.
+ *
+ * @public
  */
 export const DEFAULT_RETRY_DELAY_BASE = 100;
 
 /**
- * @public
- *
  * The maximum amount of time (in milliseconds) that will be used as a delay
  * between retry attempts.
+ *
+ * @public
  */
 export const MAXIMUM_RETRY_DELAY = 20 * 1000;
 

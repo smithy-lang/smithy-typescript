@@ -14,12 +14,13 @@ import {
 import { isReadableStream } from "./stream-type-check";
 
 /**
+ * the minimum size is met, except for the last chunk.
+ *
  * @internal
  * @param upstream - any Readable or ReadableStream.
  * @param size - byte or character length minimum. Buffering occurs when a chunk fails to meet this value.
  * @param logger - for emitting warnings when buffering occurs.
  * @returns another stream of the same data and stream class, but buffers chunks until
- * the minimum size is met, except for the last chunk.
  */
 export function createBufferedReadable(upstream: Readable, size: number, logger?: Logger): Readable;
 /**

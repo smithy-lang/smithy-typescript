@@ -1,6 +1,7 @@
 /**
- * @internal
  * Reads the blob data into the onChunk consumer.
+ *
+ * @internal
  */
 export async function blobReader(
   blob: Blob,

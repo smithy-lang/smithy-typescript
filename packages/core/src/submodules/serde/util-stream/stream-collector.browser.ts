@@ -1,8 +1,9 @@
 import { fromBase64 } from "../util-base64/fromBase64";
 
 /**
- * @internal
  * Inlined from @smithy/fetch-http-handler streamCollector.
+ *
+ * @internal
  */
 export const streamCollector = async (stream: Blob | ReadableStream): Promise<Uint8Array> => {
   if ((typeof Blob === "function" && stream instanceof Blob) || stream.constructor?.name === "Blob") {

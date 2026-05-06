@@ -9,8 +9,9 @@ export const createIsIdentityExpiredFunction = (expirationMs: number) =>
   };
 
 /**
- * @internal
  * This may need to be configurable in the future, but for now it is defaulted to 5min.
+ *
+ * @internal
  */
 export const EXPIRATION_MS = 300_000;
 

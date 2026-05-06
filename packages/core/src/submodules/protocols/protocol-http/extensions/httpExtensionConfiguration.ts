@@ -18,9 +18,9 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
 }>;
 
 /**
- * @internal
- *
  * Helper function to resolve default extension configuration from runtime config
+ *
+ * @internal
  */
 export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends object = {}>(
   runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig>
@@ -42,9 +42,9 @@ export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends objec
 };
 
 /**
- * @internal
- *
  * Helper function to resolve runtime config from default extension configuration
+ *
+ * @internal
  */
 export const resolveHttpHandlerRuntimeConfig = <HandlerConfig extends object = {}>(
   httpHandlerExtensionConfiguration: HttpHandlerExtensionConfiguration<HandlerConfig>

@@ -4,8 +4,9 @@ import { HttpRequest } from "./protocol-http/httpRequest";
 import { resolvedPath } from "./resolve-path";
 
 /**
- * @internal
  * used in code-generated serde.
+ *
+ * @internal
  */
 export function requestBuilder(input: any, context: SerdeContext): RequestBuilder {
   return new RequestBuilder(input, context);

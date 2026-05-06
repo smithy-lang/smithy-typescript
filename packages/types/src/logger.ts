@@ -1,8 +1,8 @@
 /**
- * @public
- *
  * Represents a logger object that is available in HandlerExecutionContext
  * throughout the middleware stack.
+ *
+ * @public
  */
 export interface Logger {
   trace?: (...content: any[]) => void;

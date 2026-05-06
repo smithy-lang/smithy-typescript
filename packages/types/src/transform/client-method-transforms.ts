@@ -4,9 +4,9 @@ import type { StreamingBlobPayloadOutputTypes } from "../streaming-payload/strea
 import type { Transform } from "./type-transform";
 
 /**
- * @internal
- *
  * Narrowed version of InvokeFunction used in Client::send.
+ *
+ * @internal
  */
 export interface NarrowedInvokeFunction<
   NarrowType,
@@ -35,9 +35,9 @@ export interface NarrowedInvokeFunction<
 }
 
 /**
- * @internal
- *
  * Narrowed version of InvokeMethod used in aggregated Client methods.
+ *
+ * @internal
  */
 export interface NarrowedInvokeMethod<
   NarrowType,

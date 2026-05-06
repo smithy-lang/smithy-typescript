@@ -4,12 +4,11 @@
 export type SourceData = string | ArrayBuffer | ArrayBufferView;
 
 /**
- * @public
- *
  * An object that provides a hash of data provided in chunks to `update`. The
  * hash may be performed incrementally as chunks are received or all at once
  * when the hash is finalized, depending on the underlying implementation.
  *
+ * @public
  * @deprecated use {@link Checksum}
  */
 export interface Hash {
@@ -31,12 +30,11 @@ export interface Hash {
 }
 
 /**
- * @public
- *
  * A constructor for a hash that may be used to calculate an HMAC. Implementing
  * classes should not directly hold the provided key in memory beyond the
  * lexical scope of the constructor.
  *
+ * @public
  * @deprecated use {@link ChecksumConstructor}
  */
 export interface HashConstructor {
@@ -44,21 +42,21 @@ export interface HashConstructor {
 }
 
 /**
- * @public
- *
  * A function that calculates the hash of a data stream. Determining the hash
  * will consume the stream, so only replayable streams should be provided to an
  * implementation of this interface.
+ *
+ * @public
  */
 export interface StreamHasher<StreamType = any> {
   (hashCtor: HashConstructor, stream: StreamType): Promise<Uint8Array>;
 }
 
 /**
- * @public
- *
  * A function that returns a promise fulfilled with bytes from a
  * cryptographically secure pseudorandom number generator.
+ *
+ * @public
  */
 export interface randomValues {
   (byteLength: number): Promise<Uint8Array>;

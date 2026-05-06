@@ -45,10 +45,10 @@ const textDecoder = USE_TEXT_DECODER ? new TextDecoder() : null;
 let _offset: CborOffset = 0;
 
 /**
+ * Sets the decode bytearray source and its data view.
+ *
  * @internal
  * @param bytes - to be set as the decode source.
- *
- * Sets the decode bytearray source and its data view.
  */
 export function setPayload(bytes: Uint8Array) {
   payload = bytes;
@@ -56,8 +56,9 @@ export function setPayload(bytes: Uint8Array) {
 }
 
 /**
- * @internal
  * Decodes the data between the two indices.
+ *
+ * @internal
  */
 export function decode(at: Uint32, to: Uint32): CborValueType {
   if (at >= to) {

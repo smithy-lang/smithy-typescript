@@ -2,8 +2,9 @@ import { Writable, type Readable } from "node:stream";
 import type { ReadableStream as IReadableStream } from "node:stream/web";
 
 /**
- * @internal
  * Inlined from @smithy/node-http-handler streamCollector.
+ *
+ * @internal
  */
 class Collector extends Writable {
   public readonly bufferedBytes: Buffer[] = [];

@@ -1,10 +1,10 @@
 import type { QueryParameterBag } from "./http";
 
 /**
- * @internal
- *
  * Represents the components parts of a Uniform Resource Identifier used to
  * construct the target location of a Request.
+ *
+ * @internal
  */
 export type URI = {
   protocol: string;

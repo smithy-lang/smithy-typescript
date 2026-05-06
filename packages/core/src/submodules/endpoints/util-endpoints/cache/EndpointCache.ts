@@ -1,9 +1,9 @@
 import type { EndpointParams, EndpointV2 } from "@smithy/types";
 
 /**
- * @internal
- *
  * Cache for endpoint ruleSet resolution.
+ *
+ * @internal
  */
 export class EndpointCache {
   private capacity: number;

@@ -14,12 +14,11 @@ export type OptionalSigV4aSigner = {
 };
 
 /**
- * @public
- *
  * \@smithy/signature-v4a will install the constructor in this
  * container if it's installed.
- *
  * This avoids a runtime-require being interpreted statically by bundlers.
+ *
+ * @public
  */
 export const signatureV4aContainer: {
   SignatureV4a: null | OptionalSigV4aSigner;

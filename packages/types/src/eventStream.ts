@@ -8,11 +8,11 @@ import type {
 import type { MetadataBearer } from "./response";
 
 /**
- * @public
- *
  * An event stream message. The headers and body properties will always be
  * defined, with empty headers represented as an object with no keys and an
  * empty body represented as a zero-length Uint8Array.
+ *
+ * @public
  */
 export interface Message {
   headers: MessageHeaders;
@@ -90,37 +90,37 @@ export interface Int64 {
 }
 
 /**
- * @public
- *
  * Util functions for serializing or deserializing event stream
+ *
+ * @public
  */
 export interface EventStreamSerdeContext {
   eventStreamMarshaller: EventStreamMarshaller;
 }
 
 /**
- * @public
- *
  * A function which deserializes binary event stream message into modeled shape.
+ *
+ * @public
  */
 export interface EventStreamMarshallerDeserFn<StreamType> {
   <T>(body: StreamType, deserializer: (input: Record<string, Message>) => Promise<T>): AsyncIterable<T>;
 }
 
 /**
- * @public
- *
  * A function that serializes modeled shape into binary stream message.
+ *
+ * @public
  */
 export interface EventStreamMarshallerSerFn<StreamType> {
   <T>(input: AsyncIterable<T>, serializer: (event: T) => Message): StreamType;
 }
 
 /**
- * @public
- *
  * An interface which provides functions for serializing and deserializing binary event stream
  * to/from corresponsing modeled shape.
+ *
+ * @public
  */
 export interface EventStreamMarshaller<StreamType = any> {
   deserialize: EventStreamMarshallerDeserFn<StreamType>;

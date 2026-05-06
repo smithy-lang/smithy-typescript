@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-wrapper-object-types */
 /**
- * @public
- *
  * A model field with this type means that you may provide a JavaScript
  * object in lieu of a JSON string, and it will be serialized to JSON
  * automatically before being sent in a request.
- *
  * For responses, you will receive a "LazyJsonString", which is a boxed String object
  * with additional mixin methods.
  * To get the string value, call `.toString()`, or to get the JSON object value,
  * call `.deserializeJSON()` or parse it yourself.
+ *
+ * @public
  */
 export type AutomaticJsonStringConversion = Parameters<typeof JSON.stringify>[0] | LazyJsonString;
 
@@ -29,14 +28,13 @@ export interface LazyJsonString extends String {
 }
 
 /**
- * @internal
- *
  * Extension of the native String class in the previous implementation
  * has negative global performance impact on method dispatch for strings,
  * and is generally discouraged.
- *
  * This current implementation may look strange, but is necessary to preserve the interface and
  * behavior of extending the String class.
+ *
+ * @internal
  */
 export const LazyJsonString = function LazyJsonString(val: string): void {
   const str = Object.assign(new String(val), {

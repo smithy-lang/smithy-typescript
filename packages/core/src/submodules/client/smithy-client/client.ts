@@ -29,19 +29,16 @@ export interface SmithyConfiguration<HandlerOptions> {
     | Record<string, unknown>;
 
   /**
-   * @public
-   *
    * Default false.
-   *
    * When true, the client will only resolve the middleware stack once per
    * Command class. This means modifying the middlewareStack of the
    * command or client after requests have been made will not be
    * recognized.
-   *
    * Calling client.destroy() also clears this cache.
-   *
    * Enable this only if needing the additional time saved (0-1ms per request)
    * and not needing middleware modifications between requests.
+   *
+   * @public
    */
   cacheMiddleware?: boolean;
 

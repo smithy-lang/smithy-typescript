@@ -14,10 +14,10 @@ export interface GetAwsChunkedEncodingStreamOptions {
 }
 
 /**
- * @public
- *
  * A function that returns Readable Stream which follows aws-chunked encoding stream.
  * It optionally adds checksum if options are provided.
+ *
+ * @public
  */
 export interface GetAwsChunkedEncodingStream<StreamType = any> {
   (readableStream: StreamType, options: GetAwsChunkedEncodingStreamOptions): StreamType;

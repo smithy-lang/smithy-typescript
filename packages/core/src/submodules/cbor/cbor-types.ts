@@ -69,18 +69,18 @@ export function alloc(size: number): Uint8Array {
 }
 
 /**
- * @public
- *
  * The presence of this symbol as an object key indicates it should be considered a tag
  * for CBOR serialization purposes.
- *
  * The object must also have the properties "tag" and "value".
+ *
+ * @public
  */
 export const tagSymbol = Symbol("@smithy/core/cbor::tagSymbol");
 
 /**
- * @public
  * Applies the tag symbol to the object.
+ *
+ * @public
  */
 export function tag(data: { tag: number | bigint; value: any; [tagSymbol]?: true }): {
   tag: number | bigint;

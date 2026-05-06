@@ -1,10 +1,10 @@
 import { CredentialsProviderError } from "@smithy/core/config";
 
 /**
- * @public
- *
  * A specific sub-case of CredentialsProviderError, when the IMDSv1 fallback
  * has been attempted but shut off by SDK configuration.
+ *
+ * @public
  */
 export class InstanceMetadataV1FallbackError extends CredentialsProviderError {
   public name = "InstanceMetadataV1FallbackError";

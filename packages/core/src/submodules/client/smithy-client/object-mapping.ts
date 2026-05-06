@@ -1,6 +1,4 @@
 /**
- * @internal
- *
  * A set of instructions for multiple keys.
  * The aim is to provide a concise yet readable way to map and filter values
  * onto a target object.
@@ -43,22 +41,24 @@
  *   conditionalValue3: 12,
  * };
  * ```
+ *
+ * @internal
  */
 export type ObjectMappingInstructions = Record<string, ObjectMappingInstruction>;
 
 /**
- * @internal
- *
  * A variant of the object mapping instruction for the `take` function.
  * In this case, the source value is provided to the value function, turning it
  * from a supplier into a mapper.
+ *
+ * @internal
  */
 export type SourceMappingInstructions = Record<string, ValueMapper | SourceMappingInstruction>;
 
 /**
- * @internal
- *
  * An instruction set for assigning a value to a target object.
+ *
+ * @internal
  */
 export type ObjectMappingInstruction =
   | LazyValueInstruction
@@ -68,9 +68,9 @@ export type ObjectMappingInstruction =
   | UnfilteredValue;
 
 /**
- * @internal
- *
  * non-array
+ *
+ * @internal
  */
 export type UnfilteredValue = any;
 /**
@@ -95,53 +95,52 @@ export type ConditionalValueInstruction = [ValueFilteringFunction, Value];
 export type SourceMappingInstruction = [(ValueFilteringFunction | FilterStatus)?, ValueMapper?, string?];
 
 /**
- * @internal
- *
  * Filter is considered passed if
  * 1. It is a boolean true.
  * 2. It is not undefined and is itself truthy.
  * 3. It is undefined and the corresponding _value_ is neither null nor undefined.
+ *
+ * @internal
  */
 export type FilterStatus = boolean | unknown | void;
 
 /**
- * @internal
- *
  * Supplies the filter check but not against any value as input.
+ *
+ * @internal
  */
 export type FilterStatusSupplier = () => boolean;
 
 /**
- * @internal
- *
  * Filter check with the given value.
+ *
+ * @internal
  */
 export type ValueFilteringFunction = (value: any) => boolean;
 
 /**
- * @internal
- *
  * Supplies the value for lazy evaluation.
+ *
+ * @internal
  */
 export type ValueSupplier = () => any;
 
 /**
- * @internal
- *
  * A function that maps the source value to the target value.
  * Defaults to pass-through with nullish check.
+ *
+ * @internal
  */
 export type ValueMapper = (value: any) => any;
 
 /**
- * @internal
- *
  * A non-function value.
+ *
+ * @internal
  */
 export type Value = any;
 
 /**
- * @internal
  * Internal/Private, for codegen use only.
  *
  * Transfer a set of keys from [instructions] to [target].
@@ -151,6 +150,8 @@ export type Value = any;
  * The target assigned value will be supplied by the instructions as an evaluable function or non-function value.
  *
  * @see ObjectMappingInstructions for an example.
+ *
+ * @internal
  */
 export function map(
   target: any,
@@ -265,9 +266,9 @@ const mapWithFilter = (
 };
 
 /**
- * @internal
- *
  * Applies a single instruction at the given key from source to target.
+ *
+ * @internal
  */
 const applyInstruction = (
   target: any,

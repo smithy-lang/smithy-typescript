@@ -3,8 +3,6 @@ import type { GetOutputType } from "../command";
 import type { DocumentType } from "../shapes";
 
 /**
- * @public
- *
  * This type is intended as a type helper for generated clients.
  * When initializing client, cast it to this type by passing
  * the client constructor type as the type parameter.
@@ -17,21 +15,23 @@ import type { DocumentType } from "../shapes";
  * ```ts
  * const client = new Client({}) as AssertiveClient<Client>;
  * ```
+ *
+ * @public
  */
 export type AssertiveClient<Client extends object> = NarrowClientIOTypes<Client>;
 
 /**
- * @public
- *
  * This is similar to AssertiveClient but additionally changes all
  * output types to (recursive) Required<T> so as to bypass all output nullability guards.
+ *
+ * @public
  */
 export type UncheckedClient<Client extends object> = UncheckedClientOutputTypes<Client>;
 
 /**
- * @internal
- *
  * Excludes undefined recursively.
+ *
+ * @internal
  */
 export type NoUndefined<T> = T extends Function
   ? T
@@ -44,9 +44,9 @@ export type NoUndefined<T> = T extends Function
       : Exclude<T, undefined>;
 
 /**
- * @internal
- *
  * Excludes undefined and optional recursively.
+ *
+ * @internal
  */
 export type RecursiveRequired<T> = T extends Function
   ? T
@@ -59,9 +59,9 @@ export type RecursiveRequired<T> = T extends Function
       : Exclude<T, undefined>;
 
 /**
- * @internal
- *
  * Removes undefined from unions.
+ *
+ * @internal
  */
 type NarrowClientIOTypes<ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [
@@ -76,9 +76,9 @@ type NarrowClientIOTypes<ClientType extends object> = {
 };
 
 /**
- * @internal
- *
  * Removes undefined from unions and adds yolo output types.
+ *
+ * @internal
  */
 type UncheckedClientOutputTypes<ClientType extends object> = {
   [key in keyof ClientType]: [ClientType[key]] extends [

@@ -27,9 +27,9 @@ export interface Command<
 }
 
 /**
- * @internal
- *
  * This is a subset of the Command type used only to detect the i/o types.
+ *
+ * @internal
  */
 export interface CommandIO<InputType extends object, OutputType extends MetadataBearer> {
   readonly input: InputType;

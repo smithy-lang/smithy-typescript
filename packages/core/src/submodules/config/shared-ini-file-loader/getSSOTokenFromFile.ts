@@ -58,9 +58,10 @@ export interface SSOToken {
 export const tokenIntercept = {} as Record<string, any>;
 
 /**
+ * Returns the SSO token from the file system.
+ *
  * @internal
  * @param id - can be either a start URL or the SSO session name.
- * Returns the SSO token from the file system.
  */
 export const getSSOTokenFromFile = async (id: string) => {
   if (tokenIntercept[id]) {
