@@ -53,7 +53,7 @@ export class BundlerSizeBenchmarker {
           throw err;
         }
         const stat = fs.statSync(outfile);
-        resolve(this.report(stat, "webpack"));
+        resolve(this.report(stat, "webpack", outfile));
       });
     });
   }
@@ -94,7 +94,7 @@ export class BundlerSizeBenchmarker {
     });
 
     const stat = fs.statSync(outfile);
-    return this.report(stat, "rollup");
+    return this.report(stat, "rollup", outfile);
   }
 
   async rollupNoMinification() {
@@ -129,7 +129,7 @@ export class BundlerSizeBenchmarker {
     });
 
     const stat = fs.statSync(outfile);
-    return this.report(stat, "rollup_no_minification");
+    return this.report(stat, "rollup_no_minification", outfile);
   }
 
   /**
@@ -152,7 +152,7 @@ export class BundlerSizeBenchmarker {
     });
 
     const stat = fs.statSync(outfile);
-    return this.report(stat, "esbuild");
+    return this.report(stat, "esbuild", outfile);
   }
 
   async all() {
@@ -174,9 +174,18 @@ export class BundlerSizeBenchmarker {
   /**
    * @param {fs.Stats} stat
    * @param {string} bundler
+   * @param {string} outfile
    * @returns {{app, size: string}}
    */
-  report(stat, bundler) {
+  report(stat, bundler, outfile) {
+    if (outfile) {
+      const contents = fs.readFileSync(outfile, "utf-8");
+      if (contents.includes('Symbol.for("node-only")') || contents.includes("Symbol.for('node-only')")) {
+        throw new Error(
+          `${this.application} (${bundler}): bundle contains Symbol.for("node-only") — node-only code was not tree-shaken.`
+        );
+      }
+    }
     return {
       app: this.application,
       size: byteSize(stat.size),

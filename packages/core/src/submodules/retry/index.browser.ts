@@ -1,3 +1,5 @@
+const no = Symbol.for("node-only");
+
 // @smithy/service-error-classification
 export {
   isRetryableByTrait,
@@ -41,15 +43,13 @@ export {
 } from "./middleware-retry/retry-pre-sra-deprecated/StandardRetryStrategy";
 export { defaultDelayDecider } from "./middleware-retry/retry-pre-sra-deprecated/delayDecider";
 export { defaultRetryDecider } from "./middleware-retry/retry-pre-sra-deprecated/retryDecider";
-export {
-  ENV_MAX_ATTEMPTS,
-  CONFIG_MAX_ATTEMPTS,
-  NODE_MAX_ATTEMPT_CONFIG_OPTIONS,
-  ENV_RETRY_MODE,
-  CONFIG_RETRY_MODE,
-  NODE_RETRY_MODE_CONFIG_OPTIONS,
-  resolveRetryConfig,
-} from "./middleware-retry/configurations";
+export const ENV_MAX_ATTEMPTS = no;
+export const CONFIG_MAX_ATTEMPTS = no;
+export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS = no;
+export const ENV_RETRY_MODE = no;
+export const CONFIG_RETRY_MODE = no;
+export const NODE_RETRY_MODE_CONFIG_OPTIONS = no;
+export { resolveRetryConfig } from "./middleware-retry/configurations";
 export type { RetryInputConfig, RetryResolvedConfig, PreviouslyResolved } from "./middleware-retry/configurations";
 export {
   omitRetryHeadersMiddleware,

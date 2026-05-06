@@ -1,3 +1,5 @@
+const no = Symbol.for("node-only");
+
 export { copyDocumentWithTransform } from "./copyDocumentWithTransform";
 export {
   dateToUtcString,
@@ -76,6 +78,9 @@ export {
   type V1OrV2Endpoint,
 } from "./middleware-serde/serdePlugin";
 export { serializerMiddleware } from "./middleware-serde/serializerMiddleware";
+
+// @smithy/hash-node
+export const Hash = no;
 
 // @smithy/util-stream
 export { Uint8ArrayBlobAdapter } from "./util-stream/blob/Uint8ArrayBlobAdapter";

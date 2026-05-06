@@ -106,7 +106,7 @@ function getTypeExports(dtsPath) {
         else if (type.flags & ts.TypeFlags.Object) kind = "type(object)";
         else kind = "type(alias)";
       } else {
-        kind = "type(enum)";
+        kind = "type(?)";
       }
       typeExports.set(sym.getName(), kind);
     }
@@ -154,11 +154,102 @@ function checkModule(name, version, module, typeExports) {
       if (inCurrent && inSnapshot) {
         const expectedKind = api[name][symbol];
         const actualKind = inRuntime ? typeof module[symbol] : typeExports.get(symbol);
-        if (expectedKind !== actualKind) {
+        const baseExpectedKind = expectedKind.replace("(node-only)", "");
+        if (baseExpectedKind !== actualKind) {
           errors.push(
             `Symbol [${symbol}] has a different type than expected in ${name}, actual=${actualKind} expected=${expectedKind}.`
           );
         }
+      }
+    }
+  }
+}
+
+// Validate submodule variant indexes export the same symbols as the node canonical.
+const coreDir = path.join(root, "packages", "core");
+
+// Create separate TS programs for browser and native variant type checking.
+function createVariantProgram(variant) {
+  const variantDtsPaths = [];
+  for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
+    if (!dir.isDirectory()) continue;
+    const variantDts = path.join(coreDir, "dist-types", "submodules", dir.name, `index.${variant}.d.ts`);
+    const nodeDts = path.join(coreDir, "dist-types", "submodules", dir.name, "index.d.ts");
+    variantDtsPaths.push(fs.existsSync(variantDts) ? variantDts : nodeDts);
+  }
+  return ts.createProgram(variantDtsPaths, {
+    moduleResolution: ts.ModuleResolutionKind.NodeJs,
+    baseUrl: root,
+    paths: {
+      ...submodulePaths,
+      "@smithy/*": ["packages/*/dist-types"],
+    },
+  });
+}
+
+const variantPrograms = {
+  browser: createVariantProgram("browser"),
+  native: createVariantProgram("native"),
+};
+
+for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
+  if (!dir.isDirectory()) continue;
+  const sub = dir.name;
+  const nodeIndex = path.join(coreDir, "dist-cjs", "submodules", sub, "index.js");
+  if (!fs.existsSync(nodeIndex)) continue;
+
+  const nodeModule = require(nodeIndex);
+  const snapshotName = `@smithy/core/${sub}`;
+  const nodeTypeExports = getTypeExports(path.join(coreDir, "dist-types", "submodules", sub, "index.d.ts"));
+
+  for (const variant of ["browser", "native"]) {
+    const variantIndex = path.join(coreDir, "dist-cjs", "submodules", sub, `index.${variant}.js`);
+    if (!fs.existsSync(variantIndex)) continue;
+
+    const variantModule = require(variantIndex);
+
+    // Check runtime exports match 1:1.
+    for (const key of Object.keys(nodeModule)) {
+      if (!(key in variantModule)) {
+        errors.push(`Symbol [${key}] is missing from ${snapshotName} index.${variant}.js`);
+      }
+    }
+    for (const key of Object.keys(variantModule)) {
+      if (!(key in nodeModule)) {
+        errors.push(`Symbol [${key}] in ${snapshotName} index.${variant}.js is not in the node index`);
+      }
+    }
+
+    // Check type exports match 1:1.
+    const variantDts = path.join(coreDir, "dist-types", "submodules", sub, `index.${variant}.d.ts`);
+    if (fs.existsSync(variantDts)) {
+      const variantChecker = variantPrograms[variant].getTypeChecker();
+      const variantSourceFile = variantPrograms[variant].getSourceFile(variantDts);
+      if (variantSourceFile) {
+        const variantModuleSymbol = variantChecker.getSymbolAtLocation(variantSourceFile);
+        const variantTypeNames = new Set(
+          variantModuleSymbol ? variantChecker.getExportsOfModule(variantModuleSymbol).map((s) => s.getName()) : []
+        );
+        for (const [typeName] of nodeTypeExports) {
+          if (!variantTypeNames.has(typeName)) {
+            errors.push(`Type [${typeName}] is missing from ${snapshotName} index.${variant}.d.ts`);
+          }
+        }
+        for (const typeName of variantTypeNames) {
+          if (!nodeTypeExports.has(typeName) && !(typeName in nodeModule)) {
+            errors.push(`Type [${typeName}] in ${snapshotName} index.${variant}.d.ts is not in the node index`);
+          }
+        }
+      }
+    }
+
+    // Mark node-only symbols (Symbol.for("node-only") in variant) in the snapshot.
+    const nodeOnlySymbol = Symbol.for("node-only");
+    for (const key of Object.keys(variantModule)) {
+      if (variantModule[key] === nodeOnlySymbol && nodeModule[key] != null && api[snapshotName]) {
+        const baseKind = typeof nodeModule[key];
+        const nodeOnlyKind = `${baseKind}(node-only)`;
+        api[snapshotName][key] = nodeOnlyKind;
       }
     }
   }

@@ -1,5 +1,11 @@
+const no = Symbol.for("node-only");
+
 // @smithy/hash-blob-browser
 export { blobHasher } from "./hash-blob-browser/blobHasher";
+
+// @smithy/hash-stream-node
+export const fileStreamHasher = no;
+export const readableStreamHasher = no;
 
 // @smithy/md5-js
 export { Md5 } from "./md5-js/md5";
