@@ -50,16 +50,16 @@ export { NumericValue, nv, type NumericType } from "./value/NumericValue";
 export { fromHex, toHex } from "./util-hex-encoding/hex-encoding";
 
 // @smithy/util-base64
-export { fromBase64 } from "./util-base64/fromBase64";
-export { toBase64 } from "./util-base64/toBase64";
+export { fromBase64 } from "./util-base64/fromBase64.browser";
+export { toBase64 } from "./util-base64/toBase64.browser";
 
-// @smithy/util-body-length-browser and @smithy/util-body-length-node
-export { calculateBodyLength } from "./util-body-length/calculateBodyLength";
+// @smithy/util-body-length-browser
+export { calculateBodyLength } from "./util-body-length/calculateBodyLength.browser";
 
 // @smithy/util-utf8
-export { fromUtf8 } from "./util-utf8/fromUtf8";
+export { fromUtf8 } from "./util-utf8/fromUtf8.browser";
 export { toUint8Array } from "./util-utf8/toUint8Array";
-export { toUtf8 } from "./util-utf8/toUtf8";
+export { toUtf8 } from "./util-utf8/toUtf8.browser";
 
 // @smithy/util-buffer-from
 export { fromArrayBuffer, fromString, type StringEncoding } from "./util-buffer-from/buffer-from";
@@ -77,18 +77,15 @@ export {
 } from "./middleware-serde/serdePlugin";
 export { serializerMiddleware } from "./middleware-serde/serializerMiddleware";
 
-// @smithy/hash-node
-export { Hash } from "./hash-node/hash-node";
-
 // @smithy/util-stream
 export { Uint8ArrayBlobAdapter } from "./util-stream/blob/Uint8ArrayBlobAdapter";
-export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
-export { createChecksumStream } from "./util-stream/checksum/createChecksumStream";
-export { createBufferedReadable } from "./util-stream/createBufferedReadable";
-export { getAwsChunkedEncodingStream } from "./util-stream/getAwsChunkedEncodingStream";
-export { headStream } from "./util-stream/headStream";
-export { sdkStreamMixin } from "./util-stream/sdk-stream-mixin";
-export { splitStream } from "./util-stream/splitStream";
+export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream.browser";
+export { createChecksumStream } from "./util-stream/checksum/createChecksumStream.browser";
+export { createBufferedReadable } from "./util-stream/createBufferedReadable.browser";
+export { getAwsChunkedEncodingStream } from "./util-stream/getAwsChunkedEncodingStream.browser";
+export { headStream } from "./util-stream/headStream.browser";
+export { sdkStreamMixin } from "./util-stream/sdk-stream-mixin.browser";
+export { splitStream } from "./util-stream/splitStream.browser";
 export { isReadableStream, isBlob } from "./util-stream/stream-type-check";
 
 // @smithy/uuid

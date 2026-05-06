@@ -1,4 +1,3 @@
-// Existing protocols submodule exports
 export * from "./collect-stream-body";
 export * from "./extended-encode-uri-component";
 export * from "./HttpBindingProtocol";
@@ -13,7 +12,7 @@ export * from "./serde/ToStringShapeSerializer";
 export * from "./serde/determineTimestampFormat";
 export * from "./SerdeContext";
 
-// protocol-http
+// @smithy/protocol-http
 export { Field } from "./protocol-http/Field";
 export { Fields, type FieldsOptions } from "./protocol-http/Fields";
 export { type HttpHandler, type HttpHandlerUserInput } from "./protocol-http/httpHandler";
@@ -34,22 +33,22 @@ export {
   type HttpHandlerOptions,
 } from "./protocol-http/types";
 
-// middleware-content-length
+// @smithy/middleware-content-length
 export {
   contentLengthMiddleware,
   contentLengthMiddlewareOptions,
   getContentLengthPlugin,
 } from "./middleware-content-length/contentLengthMiddleware";
 
-// util-uri-escape
+// @smithy/util-uri-escape
 export { escapeUri } from "./util-uri-escape/escape-uri";
 export { escapeUriPath } from "./util-uri-escape/escape-uri-path";
 
-// querystring-builder
+// @smithy/querystring-builder
 export { buildQueryString } from "./querystring-builder/buildQueryString";
 
-// querystring-parser
+// @smithy/querystring-parser
 export { parseQueryString } from "./querystring-parser/parseQueryString";
 
-// url-parser
+// @smithy/url-parser
 export { parseUrl } from "./url-parser/parseUrl";

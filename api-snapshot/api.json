@@ -504,7 +504,6 @@
     "parseRfc3339DateTimeWithOffset": "function",
     "parseRfc7231DateTime": "function",
     "quoteHeader": "function",
-    "randomUUID": "function",
     "sdkStreamMixin": "function",
     "serializerMiddleware": "function",
     "serializerMiddlewareOption": "object",

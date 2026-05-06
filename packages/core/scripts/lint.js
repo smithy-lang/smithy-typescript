@@ -80,6 +80,36 @@ declare module "@smithy/core/${submodule}" {
 }
 
 /**
+ * Check that submodules with .browser.ts or .native.ts files have corresponding index variant files.
+ */
+for (const submodule of submodules) {
+  const submodulePath = path.join(root, "src", "submodules", submodule);
+  if (!fs.lstatSync(submodulePath).isDirectory()) continue;
+
+  let hasBrowserVariant = false;
+  let hasNativeVariant = false;
+
+  const scanDir = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        scanDir(path.join(dir, entry.name));
+      } else if (!entry.name.includes(".spec.") && !entry.name.includes(".integ.")) {
+        if (entry.name.endsWith(".browser.ts")) hasBrowserVariant = true;
+        if (entry.name.endsWith(".native.ts")) hasNativeVariant = true;
+      }
+    }
+  };
+  scanDir(submodulePath);
+
+  if (hasBrowserVariant && !fs.existsSync(path.join(submodulePath, "index.browser.ts"))) {
+    errors.push(`${submodule} has .browser.ts variant files but is missing index.browser.ts`);
+  }
+  if (hasNativeVariant && !fs.existsSync(path.join(submodulePath, "index.native.ts"))) {
+    errors.push(`${submodule} has .native.ts variant files but is missing index.native.ts`);
+  }
+}
+
+/**
  * Check for cross-submodule relative imports.
  */
 

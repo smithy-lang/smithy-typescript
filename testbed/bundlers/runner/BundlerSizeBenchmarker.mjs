@@ -26,6 +26,10 @@ export class BundlerSizeBenchmarker {
       mode: "production",
       entry: path.resolve(__dirname, "..", "applications", this.application),
       target: "web",
+      resolve: {
+        conditionNames: ["browser", "import", "module"],
+        aliasFields: ["browser"],
+      },
       output: {
         path: path.dirname(outfile),
         filename: path.basename(outfile),
@@ -46,6 +50,7 @@ export class BundlerSizeBenchmarker {
       webpack(config, (err, stats) => {
         if (err) {
           console.error(err);
+          throw err;
         }
         const stat = fs.statSync(outfile);
         resolve(this.report(stat, "webpack"));
@@ -63,6 +68,9 @@ export class BundlerSizeBenchmarker {
 
     await build({
       logLevel: "silent",
+      resolve: {
+        conditions: ["browser", "module", "import"],
+      },
       build: {
         outDir: "./dist-vite",
         lib: {
@@ -95,6 +103,9 @@ export class BundlerSizeBenchmarker {
 
     await build({
       logLevel: "silent",
+      resolve: {
+        conditions: ["browser", "module", "import"],
+      },
       build: {
         outDir: "./dist-rollup",
         lib: {

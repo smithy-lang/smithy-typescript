@@ -19,6 +19,7 @@ import type {
   SdkError,
 } from "@smithy/types";
 
+import { container } from "../di";
 import {
   isServerError,
   isThrottlingError,
@@ -26,7 +27,6 @@ import {
 } from "../service-error-classification/service-error-classification";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
 import type { RetryResolvedConfig } from "./configurations";
-import { isStreamingPayload } from "./isStreamingPayload/isStreamingPayload";
 import { parseRetryAfterHeader } from "./parseRetryAfterHeader";
 import { asSdkError } from "./util";
 
@@ -71,7 +71,7 @@ export const retryMiddleware =
           const retryErrorInfo = getRetryErrorInfo(e, options.logger);
           lastError = asSdkError(e);
 
-          if (isRequest && isStreamingPayload(request)) {
+          if (isRequest && container.isStreamingPayload(request)) {
             (context.logger instanceof NoOpLogger ? console : context.logger)?.warn(
               "An error was encountered in a non-retryable streaming request."
             );

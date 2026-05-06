@@ -1,2 +1,2 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getEndpointFromConfig = async (serviceId: string) => undefined;
+export const getEndpointFromConfig = async (serviceId?: string): Promise<string | undefined> => undefined;

@@ -1,7 +1,7 @@
 import { normalizeProvider } from "@smithy/core/client";
 import type { Endpoint, EndpointParameters, EndpointV2, Logger, Provider, UrlParser } from "@smithy/types";
 
-import { getEndpointFromConfig } from "./adaptors/getEndpointFromConfig";
+import { container } from "../di";
 import { toEndpointV1 } from "./adaptors/toEndpointV1";
 
 /**
@@ -141,7 +141,7 @@ export const resolveEndpointConfig = <T, P extends EndpointParameters = Endpoint
   let configuredEndpointPromise: undefined | Promise<string | undefined> = undefined;
   resolvedConfig.serviceConfiguredEndpoint = async () => {
     if (input.serviceId && !configuredEndpointPromise) {
-      configuredEndpointPromise = getEndpointFromConfig(input.serviceId);
+      configuredEndpointPromise = container.getEndpointFromConfig(input.serviceId);
     }
     return configuredEndpointPromise;
   };

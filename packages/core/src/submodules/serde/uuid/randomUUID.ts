@@ -1,4 +1,4 @@
-// ToDo: Merge Node.js and browser implementations after dropping support for Node.js 22.x
-import * as crypto from "node:crypto";
-
-export const randomUUID = crypto.randomUUID.bind(crypto);
+export const randomUUID =
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? (crypto.randomUUID.bind(crypto) as typeof crypto.randomUUID)
+    : undefined;

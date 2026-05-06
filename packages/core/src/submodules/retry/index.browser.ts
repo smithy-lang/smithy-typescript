@@ -1,8 +1,3 @@
-import { container } from "./di";
-import { isStreamingPayload } from "./middleware-retry/isStreamingPayload/isStreamingPayload";
-
-container.isStreamingPayload = isStreamingPayload;
-
 // @smithy/service-error-classification
 export {
   isRetryableByTrait,

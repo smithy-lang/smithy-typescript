@@ -1,15 +1,15 @@
-// formerly @smithy/middleware-stack
+// @smithy/middleware-stack
 export { constructStack } from "./middleware-stack/MiddlewareStack";
 
-// formerly @smithy/util-middleware
+// @smithy/util-middleware
 export { getSmithyContext } from "./util-middleware/getSmithyContext";
 export { normalizeProvider } from "./util-middleware/normalizeProvider";
 
-// formerly @smithy/invalid-dependency
+// @smithy/invalid-dependency
 export { invalidFunction } from "./invalid-dependency/invalidFunction";
 export { invalidProvider } from "./invalid-dependency/invalidProvider";
 
-// formerly @smithy/util-waiter
+// @smithy/util-waiter
 export { createWaiter } from "./util-waiter/createWaiter";
 export {
   waiterServiceDefaults,
@@ -20,7 +20,7 @@ export {
   type WaiterResult,
 } from "./util-waiter/waiter";
 
-// formerly @smithy/smithy-client
+// @smithy/smithy-client
 export { Client, type SmithyConfiguration, type SmithyResolvedConfiguration } from "./smithy-client/client";
 export { Command, type CommandImpl } from "./smithy-client/command";
 export { SENSITIVE_STRING } from "./smithy-client/constants";

@@ -1,5 +1,7 @@
 import { afterAll, describe, expect, test as it, vi } from "vitest";
 
+import "../../index";
+
 import { getEndpointFromInstructions } from "./getEndpointFromInstructions";
 
 describe(getEndpointFromInstructions.name, () => {

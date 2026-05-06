@@ -1,9 +1,4 @@
-import { container } from "./di";
-import { getEndpointFromConfig } from "./middleware-endpoint/adaptors/getEndpointFromConfig";
-
 export * from "./toEndpointV1";
-
-container.getEndpointFromConfig = getEndpointFromConfig;
 
 // @smithy/util-endpoints
 export { BinaryDecisionDiagram } from "./util-endpoints/bdd/BinaryDecisionDiagram";

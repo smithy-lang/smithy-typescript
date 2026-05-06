@@ -25,9 +25,9 @@ export type { SmithyMessageDecoderStreamOptions } from "./eventstream-codec/Smit
 export { SmithyMessageEncoderStream } from "./eventstream-codec/SmithyMessageEncoderStream";
 export type { SmithyMessageEncoderStreamOptions } from "./eventstream-codec/SmithyMessageEncoderStream";
 
-// @smithy/eventstream-serde-node
-export { EventStreamMarshaller, eventStreamSerdeProvider } from "./eventstream-serde/EventStreamMarshaller";
-export type { EventStreamMarshallerOptions } from "./eventstream-serde/EventStreamMarshaller";
+// @smithy/eventstream-serde-browser
+export { EventStreamMarshaller, eventStreamSerdeProvider } from "./eventstream-serde/EventStreamMarshaller.browser";
+export type { EventStreamMarshallerOptions } from "./eventstream-serde/EventStreamMarshaller.browser";
 export { readableStreamToIterable, iterableToReadableStream } from "./eventstream-serde/utils";
 
 // @smithy/eventstream-serde-universal

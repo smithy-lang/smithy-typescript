@@ -1,10 +1,10 @@
 import type { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
 
+import { container } from "../../di";
 import type { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";
 import type { EndpointParameterInstructions } from "../types";
 import { createConfigValueProvider } from "./createConfigValueProvider";
-import { getEndpointFromConfig } from "./getEndpointFromConfig";
 import { toEndpointV1 } from "./toEndpointV1";
 
 /**
@@ -47,7 +47,7 @@ export const getEndpointFromInstructions = async <
     if (clientConfig.serviceConfiguredEndpoint) {
       endpointFromConfig = await clientConfig.serviceConfiguredEndpoint();
     } else {
-      endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId);
+      endpointFromConfig = await container.getEndpointFromConfig(clientConfig.serviceId);
     }
 
     if (endpointFromConfig) {
