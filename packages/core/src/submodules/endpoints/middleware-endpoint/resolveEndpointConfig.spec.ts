@@ -1,6 +1,6 @@
 import { describe, expect, test as it, vi } from "vitest";
 
-import { resolveEndpointConfig } from "./resolveEndpointConfig";
+import { resolveEndpointConfig } from "../index";
 
 describe(resolveEndpointConfig.name, () => {
   it("maintains object custody", () => {

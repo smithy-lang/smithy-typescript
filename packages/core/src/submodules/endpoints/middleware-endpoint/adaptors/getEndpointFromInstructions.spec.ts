@@ -1,8 +1,6 @@
 import { afterAll, describe, expect, test as it, vi } from "vitest";
 
-import "../../index";
-
-import { getEndpointFromInstructions } from "./getEndpointFromInstructions";
+import { getEndpointFromInstructions } from "../../index";
 
 describe(getEndpointFromInstructions.name, () => {
   afterAll(async () => {

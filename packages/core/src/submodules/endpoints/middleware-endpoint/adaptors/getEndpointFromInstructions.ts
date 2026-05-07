@@ -1,6 +1,5 @@
 import type { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
 
-import { container } from "../../di";
 import type { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";
 import type { EndpointParameterInstructions } from "../types";
@@ -15,67 +14,77 @@ export type EndpointParameterInstructionsSupplier = Partial<{
 }>;
 
 /**
- * This step in the endpoint resolution process is exposed as a function
- * to allow packages such as signers, lib-upload, etc. to get
- * the V2 Endpoint associated to an instance of some api operation command
- * without needing to send it or resolve its middleware stack.
- *
  * @internal
- * @param commandInput         - the input of the Command in question.
- * @param instructionsSupplier - this is typically a Command constructor. A static function supplying the
- *                               endpoint parameter instructions will exist for commands in services
- *                               having an endpoints ruleset trait.
- * @param clientConfig         - config of the service client.
- * @param context              - optional context.
  */
-export const getEndpointFromInstructions = async <
-  T extends EndpointParameters,
-  CommandInput extends Record<string, unknown>,
-  Config extends Record<string, unknown>,
->(
-  commandInput: CommandInput,
-  instructionsSupplier: EndpointParameterInstructionsSupplier,
-  clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
-  context?: HandlerExecutionContext
-): Promise<EndpointV2> => {
-  if (!clientConfig.isCustomEndpoint) {
-    let endpointFromConfig: string | undefined;
+export type GetEndpointFromConfig = (serviceId?: string) => Promise<string | undefined>;
 
-    // This field is guaranteed by the type indicated by the config resolver, but is new
-    // and some existing standalone calls to this function may not provide the function, so
-    // this check should remain here.
-    if (clientConfig.serviceConfiguredEndpoint) {
-      endpointFromConfig = await clientConfig.serviceConfiguredEndpoint();
-    } else {
-      endpointFromConfig = await container.getEndpointFromConfig(clientConfig.serviceId);
-    }
+/**
+ * @internal
+ */
+export function bindGetEndpointFromInstructions(getEndpointFromConfig: GetEndpointFromConfig) {
+  /**
+   * This step in the endpoint resolution process is exposed as a function
+   * to allow packages such as signers, lib-upload, etc. to get
+   * the V2 Endpoint associated to an instance of some api operation command
+   * without needing to send it or resolve its middleware stack.
+   *
+   * @internal
+   * @param commandInput         - the input of the Command in question.
+   * @param instructionsSupplier - this is typically a Command constructor. A static function supplying the
+   *                               endpoint parameter instructions will exist for commands in services
+   *                               having an endpoints ruleset trait.
+   * @param clientConfig         - config of the service client.
+   * @param context              - optional context.
+   */
+  return async <
+    T extends EndpointParameters,
+    CommandInput extends Record<string, unknown>,
+    Config extends Record<string, unknown>,
+  >(
+    commandInput: CommandInput,
+    instructionsSupplier: EndpointParameterInstructionsSupplier,
+    clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
+    context?: HandlerExecutionContext
+  ): Promise<EndpointV2> => {
+    if (!clientConfig.isCustomEndpoint) {
+      let endpointFromConfig: string | undefined;
 
-    if (endpointFromConfig) {
-      clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig!));
-      clientConfig.isCustomEndpoint = true;
-    }
-  }
+      // This field is guaranteed by the type indicated by the config resolver, but is new
+      // and some existing standalone calls to this function may not provide the function, so
+      // this check should remain here.
+      if (clientConfig.serviceConfiguredEndpoint) {
+        endpointFromConfig = await clientConfig.serviceConfiguredEndpoint();
+      } else {
+        endpointFromConfig = await getEndpointFromConfig(clientConfig.serviceId);
+      }
 
-  const endpointParams = await resolveParams(commandInput, instructionsSupplier, clientConfig);
-
-  if (typeof clientConfig.endpointProvider !== "function") {
-    throw new Error("config.endpointProvider is not set.");
-  }
-  const endpoint: EndpointV2 = clientConfig.endpointProvider!(endpointParams as T, context);
-
-  // Merge headers from custom endpoint if present
-  if (clientConfig.isCustomEndpoint && clientConfig.endpoint) {
-    const customEndpoint = await clientConfig.endpoint();
-    if (customEndpoint?.headers) {
-      endpoint.headers ??= {};
-      for (const [name, value] of Object.entries(customEndpoint.headers)) {
-        endpoint.headers[name] = Array.isArray(value) ? value : [value];
+      if (endpointFromConfig) {
+        clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig!));
+        clientConfig.isCustomEndpoint = true;
       }
     }
-  }
 
-  return endpoint;
-};
+    const endpointParams = await resolveParams(commandInput, instructionsSupplier, clientConfig);
+
+    if (typeof clientConfig.endpointProvider !== "function") {
+      throw new Error("config.endpointProvider is not set.");
+    }
+    const endpoint: EndpointV2 = clientConfig.endpointProvider!(endpointParams as T, context);
+
+    // Merge headers from custom endpoint if present
+    if (clientConfig.isCustomEndpoint && clientConfig.endpoint) {
+      const customEndpoint = await clientConfig.endpoint();
+      if (customEndpoint?.headers) {
+        endpoint.headers ??= {};
+        for (const [name, value] of Object.entries(customEndpoint.headers)) {
+          endpoint.headers[name] = Array.isArray(value) ? value : [value];
+        }
+      }
+    }
+
+    return endpoint;
+  };
+}
 
 /**
  * @internal

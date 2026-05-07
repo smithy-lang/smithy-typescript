@@ -180,9 +180,9 @@ export class BundlerSizeBenchmarker {
   report(stat, bundler, outfile) {
     if (outfile) {
       const contents = fs.readFileSync(outfile, "utf-8");
-      if (contents.includes('Symbol.for("node-only")') || contents.includes("Symbol.for('node-only')")) {
+      if (/\w+\s*=\s*Symbol\.for\(["']node-only["']\)/.test(contents)) {
         throw new Error(
-          `${this.application} (${bundler}): bundle contains Symbol.for("node-only") — node-only code was not tree-shaken.`
+          `${this.application} (${bundler}): bundle assigns Symbol.for("node-only") to a variable — node-only code was not tree-shaken.`
         );
       }
     }

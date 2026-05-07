@@ -1,6 +1,7 @@
 import type { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
 
-import { endpointMiddleware } from "./endpointMiddleware";
+import type { GetEndpointFromConfig } from "./adaptors/getEndpointFromInstructions";
+import { bindEndpointMiddleware } from "./endpointMiddleware";
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
 import type { EndpointParameterInstructions } from "./types";
 
@@ -29,17 +30,21 @@ export const endpointMiddlewareOptions: SerializeHandlerOptions & RelativeMiddle
 /**
  * @internal
  */
-export const getEndpointPlugin = <T extends EndpointParameters>(
-  config: EndpointResolvedConfig<T>,
-  instructions: EndpointParameterInstructions
-): Pluggable<any, any> => ({
-  applyToStack: (clientStack) => {
-    clientStack.addRelativeTo(
-      endpointMiddleware<T>({
-        config,
-        instructions,
-      }),
-      endpointMiddlewareOptions
-    );
-  },
-});
+export function bindGetEndpointPlugin(getEndpointFromConfig: GetEndpointFromConfig) {
+  const endpointMiddleware = bindEndpointMiddleware(getEndpointFromConfig);
+
+  return <T extends EndpointParameters>(
+    config: EndpointResolvedConfig<T>,
+    instructions: EndpointParameterInstructions
+  ): Pluggable<any, any> => ({
+    applyToStack: (clientStack) => {
+      clientStack.addRelativeTo(
+        endpointMiddleware<T>({
+          config,
+          instructions,
+        }),
+        endpointMiddlewareOptions
+      );
+    },
+  });
+}

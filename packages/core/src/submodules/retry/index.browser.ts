@@ -1,3 +1,6 @@
+import { isStreamingPayload } from "./middleware-retry/isStreamingPayload/isStreamingPayload.browser";
+import { bindGetRetryPlugin, bindRetryMiddleware } from "./middleware-retry/retryMiddleware";
+
 const no = Symbol.for("node-only");
 
 // @smithy/service-error-classification
@@ -56,5 +59,8 @@ export {
   omitRetryHeadersMiddlewareOptions,
   getOmitRetryHeadersPlugin,
 } from "./middleware-retry/omitRetryHeadersMiddleware";
-export { retryMiddleware, retryMiddlewareOptions, getRetryPlugin } from "./middleware-retry/retryMiddleware";
+export { retryMiddlewareOptions } from "./middleware-retry/retryMiddleware";
 export { getRetryAfterHint } from "./middleware-retry/parseRetryAfterHeader";
+
+export const retryMiddleware = bindRetryMiddleware(isStreamingPayload);
+export const getRetryPlugin = bindGetRetryPlugin(isStreamingPayload);

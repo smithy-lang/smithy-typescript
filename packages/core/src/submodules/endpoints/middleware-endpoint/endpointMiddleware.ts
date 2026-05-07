@@ -13,7 +13,7 @@ import type {
   SmithyFeatures,
 } from "@smithy/types";
 
-import { getEndpointFromInstructions } from "./adaptors/getEndpointFromInstructions";
+import { bindGetEndpointFromInstructions, type GetEndpointFromConfig } from "./adaptors/getEndpointFromInstructions";
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
 import type { EndpointParameterInstructions } from "./types";
 
@@ -40,61 +40,63 @@ interface EndpointMiddlewareSmithyContext extends Record<string, unknown> {
 /**
  * @internal
  */
-export const endpointMiddleware = <T extends EndpointParameters>({
-  config,
-  instructions,
-}: {
-  config: EndpointResolvedConfig<T>;
-  instructions: EndpointParameterInstructions;
-}): SerializeMiddleware<any, any> => {
-  return <Output extends MetadataBearer>(
-      next: SerializeHandler<any, Output>,
-      context: HandlerExecutionContext
-    ): SerializeHandler<any, Output> =>
-    async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
-      if (config.isCustomEndpoint) {
-        setFeature(context, "ENDPOINT_OVERRIDE", "N");
-      }
+export function bindEndpointMiddleware(getEndpointFromConfig: GetEndpointFromConfig) {
+  const getEndpointFromInstructions = bindGetEndpointFromInstructions(getEndpointFromConfig);
 
-      const endpoint: EndpointV2 = await getEndpointFromInstructions(
-        args.input,
-        {
-          getEndpointParameterInstructions() {
-            return instructions;
-          },
-        },
-        { ...config },
-        context
-      );
-
-      context.endpointV2 = endpoint;
-      context.authSchemes = endpoint.properties?.authSchemes;
-
-      const authScheme: AuthScheme | undefined = context.authSchemes?.[0];
-      if (authScheme) {
-        context["signing_region"] = authScheme.signingRegion;
-        context["signing_service"] = authScheme.signingName;
-        const smithyContext: EndpointMiddlewareSmithyContext = getSmithyContext(context);
-        const httpAuthOption = smithyContext?.selectedHttpAuthScheme?.httpAuthOption;
-        if (httpAuthOption) {
-          // TODO(experimentalIdentityAndAuth): Should be constrained somehow, but currently the only properties
-          //                                    found were `signing_region` and `signing_service`.
-          httpAuthOption.signingProperties = Object.assign(
-            httpAuthOption.signingProperties || {},
-            {
-              signing_region: authScheme.signingRegion,
-              signingRegion: authScheme.signingRegion,
-              signing_service: authScheme.signingName,
-              signingName: authScheme.signingName,
-              signingRegionSet: authScheme.signingRegionSet,
-            },
-            authScheme.properties
-          );
+  return <T extends EndpointParameters>({
+    config,
+    instructions,
+  }: {
+    config: EndpointResolvedConfig<T>;
+    instructions: EndpointParameterInstructions;
+  }): SerializeMiddleware<any, any> => {
+    return <Output extends MetadataBearer>(
+        next: SerializeHandler<any, Output>,
+        context: HandlerExecutionContext
+      ): SerializeHandler<any, Output> =>
+      async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
+        if (config.isCustomEndpoint) {
+          setFeature(context, "ENDPOINT_OVERRIDE", "N");
         }
-      }
 
-      return next({
-        ...args,
-      });
-    };
-};
+        const endpoint: EndpointV2 = await getEndpointFromInstructions(
+          args.input,
+          {
+            getEndpointParameterInstructions() {
+              return instructions;
+            },
+          },
+          { ...config },
+          context
+        );
+
+        context.endpointV2 = endpoint;
+        context.authSchemes = endpoint.properties?.authSchemes;
+
+        const authScheme: AuthScheme | undefined = context.authSchemes?.[0];
+        if (authScheme) {
+          context["signing_region"] = authScheme.signingRegion;
+          context["signing_service"] = authScheme.signingName;
+          const smithyContext: EndpointMiddlewareSmithyContext = getSmithyContext(context);
+          const httpAuthOption = smithyContext?.selectedHttpAuthScheme?.httpAuthOption;
+          if (httpAuthOption) {
+            httpAuthOption.signingProperties = Object.assign(
+              httpAuthOption.signingProperties || {},
+              {
+                signing_region: authScheme.signingRegion,
+                signingRegion: authScheme.signingRegion,
+                signing_service: authScheme.signingName,
+                signingName: authScheme.signingName,
+                signingRegionSet: authScheme.signingRegionSet,
+              },
+              authScheme.properties
+            );
+          }
+        }
+
+        return next({
+          ...args,
+        });
+      };
+  };
+}

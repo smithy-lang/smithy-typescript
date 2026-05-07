@@ -3,13 +3,13 @@ import { v4 } from "@smithy/core/serde";
 import type { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
+import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "../index";
 import {
   isServerError,
   isThrottlingError,
   isTransientError,
 } from "../service-error-classification/service-error-classification";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
-import { getRetryPlugin, retryMiddleware, retryMiddlewareOptions } from "./retryMiddleware";
 
 vi.mock("../service-error-classification/service-error-classification");
 vi.mock("@smithy/core/serde");
