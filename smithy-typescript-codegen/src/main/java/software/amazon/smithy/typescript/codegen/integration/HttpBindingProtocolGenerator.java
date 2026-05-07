@@ -3268,7 +3268,7 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
                                 "strictParseFloat",
                                 "__strictParseFloat",
                                 TypeScriptDependency.SMITHY_CORE,
-                                SmithyCoreSubmodules.CLIENT
+                                SmithyCoreSubmodules.SERDE
                             );
                         return "__strictParseFloat(" + dataSource + ")";
                     case LONG:
