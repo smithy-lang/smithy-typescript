@@ -3,6 +3,7 @@
   "version": "5.3.0",
   "scripts": {
     "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
+    "build:types": "yarn g:tsc -p tsconfig.types.json",
     "clean": "rm -rf dist-cjs dist-es dist-types",
     "stage-release": "rm -rf .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz"
   },
