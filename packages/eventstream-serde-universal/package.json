@@ -3,7 +3,8 @@
   "version": "4.3.0",
   "scripts": {
     "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
-    "stage-release": "tw-release-prep"
+    "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
+    "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz"
   },
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -17,6 +18,9 @@
   "dependencies": {
     "@smithy/core": "workspace:^",
     "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "premove": "4.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -3100,6 +3100,7 @@ __metadata:
   resolution: "@smithy/eventstream-codec@workspace:packages/eventstream-codec"
   dependencies:
     "@smithy/core": "workspace:^"
+    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
@@ -3109,6 +3110,7 @@ __metadata:
   resolution: "@smithy/eventstream-serde-browser@workspace:packages/eventstream-serde-browser"
   dependencies:
     "@smithy/core": "workspace:^"
+    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
@@ -3118,6 +3120,7 @@ __metadata:
   resolution: "@smithy/eventstream-serde-config-resolver@workspace:packages/eventstream-serde-config-resolver"
   dependencies:
     "@smithy/core": "workspace:^"
+    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
@@ -3127,6 +3130,7 @@ __metadata:
   resolution: "@smithy/eventstream-serde-node@workspace:packages/eventstream-serde-node"
   dependencies:
     "@smithy/core": "workspace:^"
+    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
@@ -3136,6 +3140,7 @@ __metadata:
   resolution: "@smithy/eventstream-serde-universal@workspace:packages/eventstream-serde-universal"
   dependencies:
     "@smithy/core": "workspace:^"
+    premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
   languageName: unknown
   linkType: soft
