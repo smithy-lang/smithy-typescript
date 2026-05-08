@@ -12,8 +12,6 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
-        with:
-          token: ${{secrets.PR_TOKEN}}
       - uses: actions/setup-node@v5
         with:
           node-version: 18
@@ -33,6 +31,20 @@ jobs:
           role-to-assume: ${{ secrets.JS_TEAM_ROLE_TO_ASSUME }}
           role-session-name: SmithyTypeScriptGitHubRelease
           audience: sts.amazonaws.com
+      - name: Configure deploy key for push
+        if: steps.version.outputs.porcelain != '0'
+        run: |
+          deploy_key=$(aws secretsmanager get-secret-value \
+            --region us-west-2 \
+            --secret-id ${{ secrets.DEPLOY_KEY_SECRET_ARN }} \
+            --query SecretString --output text)
+          echo "::add-mask::$deploy_key"
+          mkdir -p ~/.ssh
+          echo "$deploy_key" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          git remote set-url origin git@github.com:smithy-lang/smithy-typescript.git
+          git config core.sshCommand "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes"
       - name: Commit
         id: commit
         if: steps.version.outputs.porcelain != '0'
