@@ -1,3 +1,7 @@
+import { getRandomValues } from "node:crypto";
+
+import { bindV4 } from "./uuid/v4";
+
 export { copyDocumentWithTransform } from "./copyDocumentWithTransform";
 export {
   dateToUtcString,
@@ -6,7 +10,6 @@ export {
   parseRfc7231DateTime,
   parseEpochTimestamp,
 } from "./date-utils";
-export { generateIdempotencyToken } from "./generateIdempotencyToken";
 export { LazyJsonString, type AutomaticJsonStringConversion } from "./lazy-json";
 export {
   logger,
@@ -92,4 +95,6 @@ export { splitStream } from "./util-stream/splitStream";
 export { isReadableStream, isBlob } from "./util-stream/stream-type-check";
 
 // @smithy/uuid
-export { v4 } from "./uuid/v4";
+const _getRandomValues = getRandomValues as (array: Uint8Array) => Uint8Array;
+export const v4 = bindV4(_getRandomValues);
+export const generateIdempotencyToken = v4;

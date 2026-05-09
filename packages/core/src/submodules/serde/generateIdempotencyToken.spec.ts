@@ -1,6 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
-import { generateIdempotencyToken } from "./generateIdempotencyToken";
+import { generateIdempotencyToken } from "./index";
 
 describe("generateIdempotencyToken", () => {
   // This test is not meaningful when using uuid v4 as an external package, but

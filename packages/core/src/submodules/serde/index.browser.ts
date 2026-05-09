@@ -1,3 +1,5 @@
+import { bindV4 } from "./uuid/v4";
+
 const no = Symbol.for("node-only");
 
 export { copyDocumentWithTransform } from "./copyDocumentWithTransform";
@@ -8,7 +10,6 @@ export {
   parseRfc7231DateTime,
   parseEpochTimestamp,
 } from "./date-utils";
-export { generateIdempotencyToken } from "./generateIdempotencyToken";
 export { LazyJsonString, type AutomaticJsonStringConversion } from "./lazy-json";
 export {
   logger,
@@ -94,4 +95,6 @@ export { splitStream } from "./util-stream/splitStream.browser";
 export { isReadableStream, isBlob } from "./util-stream/stream-type-check";
 
 // @smithy/uuid
-export { v4 } from "./uuid/v4";
+const _getRandomValues = (array: Uint8Array) => crypto.getRandomValues(array);
+export const v4 = bindV4(_getRandomValues);
+export const generateIdempotencyToken = v4;
