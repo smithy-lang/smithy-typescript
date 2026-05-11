@@ -46,6 +46,27 @@ describe(TypeRegistry.name, () => {
     expect(tr.getBaseException()).toBe(err);
   });
 
+  describe("unqualified shapeId lookup", () => {
+    it("resolves an unqualified name when there is exactly one matching schema", () => {
+      const tr = TypeRegistry.for("com.unrelated");
+      tr.register("com.example#MyShape", List);
+      expect(tr.getSchema("MyShape")).toBe(List);
+    });
+
+    it("throws when an unqualified name matches multiple schemas", () => {
+      const tr = TypeRegistry.for("com.unrelated");
+      tr.register("com.example#Ambiguous", List);
+      tr.register("com.other#Ambiguous", Map);
+      expect(() => tr.getSchema("Ambiguous")).toThrow("schema not found");
+    });
+
+    it("throws when an unqualified name matches no schemas", () => {
+      const tr = TypeRegistry.for("com.unrelated");
+      tr.register("com.example#Exists", List);
+      expect(() => tr.getSchema("DoesNotExist")).toThrow("schema not found");
+    });
+  });
+
   describe("composition", () => {
     it("can be composed", () => {
       const tr1 = TypeRegistry.for("namespace");

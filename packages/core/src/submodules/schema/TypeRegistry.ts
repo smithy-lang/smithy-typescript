@@ -67,6 +67,18 @@ export class TypeRegistry {
   public getSchema(shapeId: string): ISchema {
     const id = this.normalizeShapeId(shapeId);
     if (!this.schemas.has(id)) {
+      if (!shapeId.includes("#")) {
+        const suffix = "#" + shapeId;
+        const candidates: ISchema[] = [];
+        for (const [shapeId, schema] of this.schemas.entries()) {
+          if (shapeId.endsWith(suffix)) {
+            candidates.push(schema);
+          }
+        }
+        if (candidates.length === 1) {
+          return candidates[0];
+        }
+      }
       throw new Error(`@smithy/core/schema - schema not found for ${id}`);
     }
     return this.schemas.get(id)!;
