@@ -16,21 +16,30 @@ export type Transform<T, FromType, ToType> = ConditionalRecursiveTransformExact<
 type TransformExact<T, FromType, ToType> = [T] extends [FromType] ? ([FromType] extends [T] ? ToType : T) : T;
 
 /**
+ * Types excluded from recursive transformation to avoid circular references.
+ *
+ * @internal
+ */
+type ExcludedTransformTypes = SharedArrayBuffer;
+
+/**
  * Applies TransformExact to members of an object recursively.
  *
  * @internal
  */
 type RecursiveTransformExact<T, FromType, ToType> = T extends Function
   ? T
-  : T extends object
-    ? {
-        [key in keyof T]: [T[key]] extends [FromType]
-          ? [FromType] extends [T[key]]
-            ? ToType
-            : ConditionalRecursiveTransformExact<T[key], FromType, ToType>
-          : ConditionalRecursiveTransformExact<T[key], FromType, ToType>;
-      }
-    : TransformExact<T, FromType, ToType>;
+  : T extends ExcludedTransformTypes
+    ? T
+    : T extends object
+      ? {
+          [key in keyof T]: [T[key]] extends [FromType]
+            ? [FromType] extends [T[key]]
+              ? ToType
+              : ConditionalRecursiveTransformExact<T[key], FromType, ToType>
+            : ConditionalRecursiveTransformExact<T[key], FromType, ToType>;
+        }
+      : TransformExact<T, FromType, ToType>;
 
 /**
  * Same as RecursiveTransformExact but does not assign to an object
