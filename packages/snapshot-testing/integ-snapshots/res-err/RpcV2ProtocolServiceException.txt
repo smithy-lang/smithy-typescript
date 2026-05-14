@@ -17,11 +17,11 @@ content-type: application/cbor
 
 
 --- [error name & message] ---
-RpcV2ProtocolServiceException: 
+undefined: Unknown
 
 --- [error object] ---
 {
-  $fault: "client",
+  $fault: (undefined),
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 400,
@@ -31,8 +31,8 @@ RpcV2ProtocolServiceException:
     attempts: (number) 1,
     totalRetryDelay: (number) 0
   },
-  name: "RpcV2ProtocolServiceException",
-  __type: "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor#RpcV2ProtocolServiceException"
+  name: (undefined),
+  message: "Unknown"
 }
 
 ======================== w/ optional fields ========================
@@ -54,11 +54,11 @@ content-type: application/cbor
 
 
 --- [error name & message] ---
-RpcV2ProtocolServiceException: 
+undefined: Unknown
 
 --- [error object] ---
 {
-  $fault: "client",
+  $fault: (undefined),
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 400,
@@ -68,8 +68,8 @@ RpcV2ProtocolServiceException:
     attempts: (number) 1,
     totalRetryDelay: (number) 0
   },
-  name: "RpcV2ProtocolServiceException",
-  __type: "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Cbor#RpcV2ProtocolServiceException"
+  name: (undefined),
+  message: "Unknown"
 }
 
 ======================== frontend error ========================

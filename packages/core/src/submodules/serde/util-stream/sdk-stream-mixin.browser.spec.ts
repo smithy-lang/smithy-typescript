@@ -1,16 +1,16 @@
 import type { SdkStreamMixin } from "@smithy/types";
 import { afterEach, beforeAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
-import { toBase64 } from "../util-base64/toBase64";
+import { toBase64 } from "../util-base64/toBase64.browser";
 import { toHex } from "../util-hex-encoding/hex-encoding";
-import { toUtf8 } from "../util-utf8/toUtf8";
+import { toUtf8 } from "../util-utf8/toUtf8.browser";
 import { sdkStreamMixin } from "./sdk-stream-mixin.browser";
 import { streamCollector } from "./stream-collector.browser";
 
 vi.mock("./stream-collector.browser");
-vi.mock("../util-base64/toBase64");
+vi.mock("../util-base64/toBase64.browser");
 vi.mock("../util-hex-encoding/hex-encoding");
-vi.mock("../util-utf8/toUtf8");
+vi.mock("../util-utf8/toUtf8.browser");
 
 const mockStreamCollectorReturn = Uint8Array.from([117, 112, 113]);
 vi.mocked(streamCollector).mockReturnValue(Promise.resolve(mockStreamCollectorReturn));

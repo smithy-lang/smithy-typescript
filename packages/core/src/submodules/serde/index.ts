@@ -1,5 +1,10 @@
 import { getRandomValues } from "node:crypto";
 
+import { fromBase64 } from "./util-base64/fromBase64";
+import { toBase64 } from "./util-base64/toBase64";
+import { bindUint8ArrayBlobAdapter } from "./util-stream/blob/Uint8ArrayBlobAdapter";
+import { fromUtf8 } from "./util-utf8/fromUtf8";
+import { toUtf8 } from "./util-utf8/toUtf8";
 import { bindV4 } from "./uuid/v4";
 
 export { copyDocumentWithTransform } from "./copyDocumentWithTransform";
@@ -53,16 +58,14 @@ export { NumericValue, nv, type NumericType } from "./value/NumericValue";
 export { fromHex, toHex } from "./util-hex-encoding/hex-encoding";
 
 // @smithy/util-base64
-export { fromBase64 } from "./util-base64/fromBase64";
-export { toBase64 } from "./util-base64/toBase64";
+export { toBase64, fromBase64 };
 
 // @smithy/util-body-length-browser and @smithy/util-body-length-node
 export { calculateBodyLength } from "./util-body-length/calculateBodyLength";
 
 // @smithy/util-utf8
-export { fromUtf8 } from "./util-utf8/fromUtf8";
 export { toUint8Array } from "./util-utf8/toUint8Array";
-export { toUtf8 } from "./util-utf8/toUtf8";
+export { toUtf8, fromUtf8 };
 
 // @smithy/util-buffer-from
 export { fromArrayBuffer, fromString, type StringEncoding } from "./util-buffer-from/buffer-from";
@@ -84,7 +87,7 @@ export { serializerMiddleware } from "./middleware-serde/serializerMiddleware";
 export { Hash } from "./hash-node/hash-node";
 
 // @smithy/util-stream
-export { Uint8ArrayBlobAdapter } from "./util-stream/blob/Uint8ArrayBlobAdapter";
+export class Uint8ArrayBlobAdapter extends bindUint8ArrayBlobAdapter(toUtf8, fromUtf8, toBase64, fromBase64) {}
 export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream";
 export { createBufferedReadable } from "./util-stream/createBufferedReadable";

@@ -141,7 +141,7 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     const ns = NormalizedSchema.of(errorSchema);
     const ErrorCtor = registry.getErrorCtor(errorSchema);
     const message = dataObject.message ?? dataObject.Message ?? "Unknown";
-    const exception = new ErrorCtor(message);
+    const exception = new ErrorCtor({});
 
     const output = {} as any;
     for (const [name, member] of ns.structIterator()) {

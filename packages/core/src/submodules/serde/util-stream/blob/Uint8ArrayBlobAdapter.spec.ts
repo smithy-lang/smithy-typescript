@@ -1,6 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
-import { Uint8ArrayBlobAdapter } from "./Uint8ArrayBlobAdapter";
+import { Uint8ArrayBlobAdapter } from "../../index";
 
 describe(Uint8ArrayBlobAdapter.name, () => {
   it("extends Uint8Array", () => {

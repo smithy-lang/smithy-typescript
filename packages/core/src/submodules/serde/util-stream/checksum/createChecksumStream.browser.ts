@@ -1,4 +1,4 @@
-import { toBase64 } from "../../util-base64/toBase64";
+import { toBase64 } from "../../util-base64/toBase64.browser";
 import { isReadableStream } from "../stream-type-check";
 import { ChecksumStream, type ChecksumStreamInit } from "./ChecksumStream.browser";
 

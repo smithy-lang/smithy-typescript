@@ -1,8 +1,8 @@
 import type { SdkStream, SdkStreamMixin } from "@smithy/types";
 
-import { toBase64 } from "../util-base64/toBase64";
+import { toBase64 } from "../util-base64/toBase64.browser";
 import { toHex } from "../util-hex-encoding/hex-encoding";
-import { toUtf8 } from "../util-utf8/toUtf8";
+import { toUtf8 } from "../util-utf8/toUtf8.browser";
 import { streamCollector } from "./stream-collector.browser";
 import { isReadableStream } from "./stream-type-check";
 

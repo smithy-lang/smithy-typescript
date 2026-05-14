@@ -185,6 +185,27 @@ export class BundlerSizeBenchmarker {
           `${this.application} (${bundler}): bundle assigns Symbol.for("node-only") to a variable — node-only code was not tree-shaken.`
         );
       }
+      const lines = contents.split("\n");
+      const bufferLines = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (
+          /Buffer\.(from|alloc|allocUnsafe|isBuffer|concat|byteLength)\b/.test(line) &&
+          !line.includes("typeof Buffer")
+        ) {
+          // Check surrounding lines for guards.
+          const context = lines.slice(Math.max(0, i - 3), i + 1).join("\n");
+          if (!context.includes("typeof Buffer") && !/\bUSE_BUFFER\b/.test(context)) {
+            bufferLines.push(line);
+          }
+        }
+      }
+      if (bufferLines.length > 0) {
+        throw new Error(
+          `${this.application} (${bundler}): bundle contains an unguarded call to a global Buffer class method — Node.js Buffer should not be in browser bundles.\n` +
+            bufferLines.map((l) => "  " + l.trim()).join("\n")
+        );
+      }
     }
     return {
       app: this.application,

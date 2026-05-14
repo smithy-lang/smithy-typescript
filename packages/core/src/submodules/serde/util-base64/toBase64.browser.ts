@@ -1,4 +1,4 @@
-import { fromUtf8 } from "../util-utf8/fromUtf8";
+import { fromUtf8 } from "../util-utf8/fromUtf8.browser";
 import { alphabetByValue, bitsPerByte, bitsPerLetter, maxLetterValue } from "./constants-for-browser";
 
 /**

@@ -1,7 +1,7 @@
 {
   "name": "xyz",
   "description": "xyz client",
-  "version": "3.23.17",
+  "version": "3.24.1",
   "scripts": {
     "build": "concurrently 'npm:build:cjs' 'npm:build:es' 'npm:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",

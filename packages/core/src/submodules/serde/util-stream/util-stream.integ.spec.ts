@@ -5,8 +5,8 @@ import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";
 import { Weather } from "weather";
 
+import { Uint8ArrayBlobAdapter } from "../index";
 import { fromUtf8 } from "../util-utf8/fromUtf8";
-import { Uint8ArrayBlobAdapter } from "./blob/Uint8ArrayBlobAdapter";
 
 describe("util-stream", () => {
   describe(Weather.name, () => {
