@@ -3536,6 +3536,7 @@ __metadata:
   dependencies:
     "@smithy/abort-controller": "workspace:^"
     "@smithy/core": "workspace:^"
+    "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"

@@ -3,8 +3,10 @@
     "baseUrl": ".",
     "declarationDir": "dist-types",
     "rootDir": "src",
-    "target": "es2022"
+    "target": "es2022",
+    "skipLibCheck": true
   },
   "extends": "../../tsconfig.types.json",
-  "include": ["src/"]
+  "include": ["src/"],
+  "exclude": ["src/**/*.bench.ts"]
 }

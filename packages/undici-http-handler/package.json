@@ -13,6 +13,7 @@
     "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "yarn g:vitest run",
+    "test:bench": "yarn g:vitest bench --config vitest.config.bench.mts",
     "test:watch": "yarn g:vitest watch"
   },
   "author": {
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@smithy/abort-controller": "workspace:^",
+    "@smithy/node-http-handler": "workspace:^",
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
