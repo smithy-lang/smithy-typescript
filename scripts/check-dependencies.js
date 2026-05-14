@@ -50,7 +50,7 @@ const node_libraries = [
     for await (const file of walk(srcPath, ["node_modules"])) {
       const contents = fs.readFileSync(file);
 
-      if (file.endsWith(".spec.ts")) {
+      if (file.endsWith(".spec.ts") || file.endsWith(".bench.ts")) {
         continue;
       }
 
