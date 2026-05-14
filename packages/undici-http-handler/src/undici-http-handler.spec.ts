@@ -13,7 +13,7 @@ function createMockRequest(overrides: Partial<HttpRequest> = {}): HttpRequest {
   return Object.assign(
     new HttpRequest({
       protocol: "http:",
-      hostname: "localhost",
+      hostname: "127.0.0.1",
       port,
       method: "GET",
       path: "/",
@@ -538,7 +538,7 @@ describe("UndiciHttpHandler", () => {
 
       // Old external dispatcher should still be usable (not destroyed)
       const { statusCode } = await oldDispatcher.request({
-        origin: `http://localhost:${port}`,
+        origin: `http://127.0.0.1:${port}`,
         path: "/",
         method: "GET",
       });
@@ -559,7 +559,7 @@ describe("UndiciHttpHandler", () => {
 
       // The dispatcher should still be functional since it's external
       const { statusCode } = await newDispatcher.request({
-        origin: `http://localhost:${port}`,
+        origin: `http://127.0.0.1:${port}`,
         path: "/",
         method: "GET",
       });
