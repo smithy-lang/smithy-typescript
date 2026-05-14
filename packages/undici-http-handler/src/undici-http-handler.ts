@@ -23,30 +23,30 @@ export interface UndiciHttpHandlerOptions {
  * Smithy-compatible request handler backed by undici.
  */
 export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> {
-  #config: UndiciHttpHandlerOptions;
-  #externalDispatcher = false;
+  private config: UndiciHttpHandlerOptions;
+  private externalDispatcher = false;
 
   constructor(options?: UndiciHttpHandlerOptions) {
-    this.#config = { ...options };
-    if (this.#config.dispatcher) {
-      this.#externalDispatcher = true;
+    this.config = { ...options };
+    if (this.config.dispatcher) {
+      this.externalDispatcher = true;
     }
   }
 
-  #getOrCreateDispatcher(): Dispatcher {
-    if (this.#config.dispatcher) {
-      return this.#config.dispatcher;
+  private getOrCreateDispatcher(): Dispatcher {
+    if (this.config.dispatcher) {
+      return this.config.dispatcher;
     }
 
-    this.#config.dispatcher = new Agent({ allowH2: true });
+    this.config.dispatcher = new Agent({ allowH2: true });
 
-    return this.#config.dispatcher;
+    return this.config.dispatcher;
   }
 
   public destroy(): void {
-    if (this.#config.dispatcher && !this.#externalDispatcher) {
-      this.#config.dispatcher.destroy();
-      this.#config.dispatcher = undefined;
+    if (this.config.dispatcher && !this.externalDispatcher) {
+      this.config.dispatcher.destroy();
+      this.config.dispatcher = undefined;
     }
   }
 
@@ -54,7 +54,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     request: HttpRequest,
     { abortSignal, requestTimeout }: HttpHandlerOptions = {}
   ): Promise<{ response: HttpResponse }> {
-    const dispatcher = this.#getOrCreateDispatcher();
+    const dispatcher = this.getOrCreateDispatcher();
 
     if (abortSignal?.aborted) {
       throw Object.assign(new Error("Request aborted"), {
@@ -161,7 +161,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     value: NonNullable<UndiciHttpHandlerOptions[K]>
   ): void {
     if (key !== "dispatcher") {
-      (this.#config as any)[key] = value;
+      (this.config as any)[key] = value;
       return;
     }
 
@@ -171,24 +171,24 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
 
     // No-op when the same dispatcher instance is reassigned.
-    if (value === this.#config.dispatcher) {
+    if (value === this.config.dispatcher) {
       return;
     }
 
     // Capture the previous dispatcher before assignment.
-    const previousDispatcher = this.#config.dispatcher;
+    const previousDispatcher = this.config.dispatcher;
 
     // Destroy the previous dispatcher only if it was internally created.
-    if (previousDispatcher && !this.#externalDispatcher) {
+    if (previousDispatcher && !this.externalDispatcher) {
       previousDispatcher.destroy();
     }
 
     // Assign the new value and update externalDispatcher based on it.
-    this.#config.dispatcher = value as Dispatcher;
-    this.#externalDispatcher = true;
+    this.config.dispatcher = value as Dispatcher;
+    this.externalDispatcher = true;
   }
 
   public httpHandlerConfigs(): UndiciHttpHandlerOptions {
-    return { ...this.#config };
+    return { ...this.config };
   }
 }

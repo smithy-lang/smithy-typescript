@@ -3,7 +3,6 @@
     "baseUrl": ".",
     "declarationDir": "dist-types",
     "rootDir": "src",
-    "target": "es2022",
     "skipLibCheck": true
   },
   "extends": "../../tsconfig.types.json",
