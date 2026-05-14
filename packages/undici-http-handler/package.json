@@ -1,6 +1,6 @@
 {
   "name": "@smithy/undici-http-handler",
-  "version": "6.0.0-rc.0",
+  "version": "5.0.0-rc.0",
   "description": "Smithy-compatible HTTP handler backed by Node.js undici",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
@@ -36,7 +36,6 @@
     "@smithy/abort-controller": "workspace:^",
     "@smithy/node-http-handler": "workspace:^",
     "@types/node": "^18.11.9",
-    "compare-versions": "^6.1.1",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
