@@ -41,10 +41,10 @@ const node_libraries = [
 
 (async () => {
   const errors = [];
-  for (const folder of fs.readdirSync(packages)) {
-    const pkgJsonPath = path.join(packages, folder, "package.json");
+  for (const packageFolder of fs.readdirSync(packages)) {
+    const pkgJsonPath = path.join(packages, packageFolder, "package.json");
     errors.push(...pkgJsonEnforcement(pkgJsonPath, true));
-    const srcPath = path.join(packages, folder, "src");
+    const srcPath = path.join(packages, packageFolder, "src");
     const pkgJson = require(pkgJsonPath);
 
     for await (const file of walk(srcPath, ["node_modules"])) {
