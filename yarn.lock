@@ -3545,6 +3545,8 @@ __metadata:
     tslib: "npm:^2.6.2"
     typedoc: "npm:0.23.23"
     undici: "npm:^6.0.0"
+  peerDependencies:
+    undici: ^6.0.0
   languageName: unknown
   linkType: soft
 

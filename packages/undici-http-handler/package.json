@@ -1,6 +1,6 @@
 {
   "name": "@smithy/undici-http-handler",
-  "version": "5.0.0-rc.0",
+  "version": "0.5.0",
   "description": "Smithy-compatible HTTP handler backed by Node.js undici",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
@@ -40,6 +40,9 @@
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
     "typedoc": "0.23.23"
+  },
+  "peerDependencies": {
+    "undici": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
