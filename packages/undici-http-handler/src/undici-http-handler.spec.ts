@@ -38,7 +38,8 @@ beforeAll(async () => {
     const url = new URL(req.url!, `http://localhost`);
 
     if (url.pathname === "/delay") {
-      const ms = parseInt(url.searchParams.get("ms") ?? "1000", 10);
+      const parsedMs = parseInt(url.searchParams.get("ms") ?? "1000", 10);
+      const ms = Number.isFinite(parsedMs) ? Math.min(Math.max(parsedMs, 0), 5000) : 1000;
       setTimeout(() => {
         res.writeHead(200, { "content-type": "text/plain" });
         res.end("delayed");
