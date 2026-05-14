@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declarationDir": "dist-types",
+    "rootDir": "src",
+    "target": "es2022"
+  },
+  "extends": "../../tsconfig.types.json",
+  "include": ["src/"]
+}
