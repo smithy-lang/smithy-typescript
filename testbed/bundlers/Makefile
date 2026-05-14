@@ -1,7 +1,5 @@
 .PHONY: run
 
 run:
-	mkdir -p dist-vite
-	mkdir -p dist-esbuild
-	mkdir -p dist-webpack
+	npm install
 	node ./runner/run.mjs
