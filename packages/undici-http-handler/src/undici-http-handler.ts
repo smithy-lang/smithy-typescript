@@ -82,8 +82,8 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // Strip the Expect header — undici does not support 100-continue and
     // sends the body immediately, so the header is unnecessary.
     const headers = request.headers;
-    if ("Expect" in headers) delete headers["Expect"];
-    if ("expect" in headers) delete headers["expect"];
+    if (headers["Expect"] === "100-continue") delete headers["Expect"];
+    if (headers["expect"] === "100-continue") delete headers["expect"];
 
     // Strip transfer-encoding header for streaming bodies — undici manages
     // chunked encoding internally for streams, so the explicit header is not
