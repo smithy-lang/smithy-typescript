@@ -26,8 +26,31 @@ client.listBuckets().then(console.log);
 
 ### Configuring undici Dispatcher
 
-Pass an undici `Dispatcher` to configure transport behavior such as connection
-pooling and timeouts.
+You can pass `Agent.Options` to configure transport behavior such as connection
+pooling and timeouts. The handler creates an `Agent` internally for you.
+
+```js
+import { S3 } from "@aws-sdk/client-s3";
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+
+const client = new S3({
+  requestHandler: new UndiciHttpHandler({
+    dispatcher: {
+      connections: 50,
+      headersTimeout: 3000,
+      bodyTimeout: 3000,
+      connect: {
+        timeout: 3000,
+      },
+    },
+  }),
+});
+
+client.listBuckets().then(console.log);
+```
+
+Alternatively, pass an existing undici `Dispatcher` instance (Agent, Pool,
+Client, etc.) directly if you need full control over its lifecycle.
 
 ```js
 import { S3 } from "@aws-sdk/client-s3";
@@ -49,6 +72,11 @@ const client = new S3({
 
 client.listBuckets().then(console.log);
 ```
+
+> **Note:** When you pass a `Dispatcher` instance, the handler treats it as
+> externally owned and will not destroy it when `handler.destroy()` is called.
+> When you pass `Agent.Options`, the handler owns the created Agent and will
+> destroy it on cleanup.
 
 ## Benchmarks
 

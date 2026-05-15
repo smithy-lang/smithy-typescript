@@ -474,18 +474,19 @@ describe("UndiciHttpHandler", () => {
       expect(handler.httpHandlerConfigs().logger).toBe(updatedLogger);
     });
 
-    it("throws if dispatcher value is not a Dispatcher instance", () => {
+    it("throws if dispatcher value is not a Dispatcher instance or Agent.Options", () => {
       handler = new UndiciHttpHandler();
       expect(() => handler.updateHttpClientConfig("dispatcher", undefined as any)).toThrow(
-        "must be an instance of undici Dispatcher"
+        "must be an instance of undici Dispatcher or Agent.Options"
       );
     });
 
-    it("throws if dispatcher value is a plain object", () => {
+    it("accepts Agent.Options and creates an Agent internally", async () => {
       handler = new UndiciHttpHandler();
-      expect(() => handler.updateHttpClientConfig("dispatcher", {} as any)).toThrow(
-        "must be an instance of undici Dispatcher"
-      );
+      handler.updateHttpClientConfig("dispatcher", { connections: 2 } as any);
+
+      const { response } = await handler.handle(createMockRequest());
+      expect(response.statusCode).toBe(200);
     });
 
     it("does not destroy previous dispatcher when validation fails", async () => {
@@ -494,7 +495,7 @@ describe("UndiciHttpHandler", () => {
       await handler.handle(createMockRequest());
 
       expect(() => handler.updateHttpClientConfig("dispatcher", "invalid" as any)).toThrow(
-        "must be an instance of undici Dispatcher"
+        "must be an instance of undici Dispatcher or Agent.Options"
       );
 
       // Handler should still work with its internal dispatcher

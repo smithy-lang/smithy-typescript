@@ -4,15 +4,24 @@ import type { HttpHandlerOptions, Logger } from "@smithy/types";
 import { Agent, Dispatcher } from "undici";
 
 /**
+ * Duck-type check: returns true if the value looks like a Dispatcher
+ * (has a `request` method), as opposed to plain Agent.Options.
+ */
+const isDispatcher = (value: unknown): value is Dispatcher =>
+  value instanceof Dispatcher ||
+  (typeof value === "object" && value !== null && typeof (value as any).request === "function");
+
+/**
  * Options for the UndiciHttpHandler.
  *
  * @public
  */
 export interface UndiciHttpHandlerOptions {
   /**
-   * An existing undici Dispatcher (Agent, Pool, Client, etc.) to use.
+   * You can pass an existing undici Dispatcher (Agent, Pool, Client, etc.)
+   * or Agent.Options to have one created for you.
    */
-  dispatcher?: Dispatcher;
+  dispatcher?: Dispatcher | Agent.Options;
 
   /**
    * Optional logger.
@@ -27,13 +36,18 @@ export interface UndiciHttpHandlerOptions {
  * @public
  */
 export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> {
-  private config: UndiciHttpHandlerOptions;
+  private config: { dispatcher?: Dispatcher; logger?: Logger };
   private externalDispatcher = false;
 
   constructor(options?: UndiciHttpHandlerOptions) {
-    this.config = { ...options };
-    if (this.config.dispatcher) {
+    if (options?.dispatcher && isDispatcher(options.dispatcher)) {
+      this.config = { ...options, dispatcher: options.dispatcher };
       this.externalDispatcher = true;
+    } else if (options?.dispatcher) {
+      // Caller passed Agent.Options — create an Agent for them.
+      this.config = { ...options, dispatcher: new Agent({ allowH2: true, ...options.dispatcher }) };
+    } else {
+      this.config = { ...options } as { dispatcher?: Dispatcher; logger?: Logger };
     }
   }
 
@@ -161,13 +175,24 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return;
     }
 
-    // Validate before any side effects so the handler isn't left in a broken state.
-    if (!(value instanceof Dispatcher)) {
-      throw new Error("updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher.");
+    let newDispatcher: Dispatcher;
+    let isExternal: boolean;
+
+    if (isDispatcher(value)) {
+      newDispatcher = value;
+      isExternal = true;
+    } else if (typeof value === "object" && value !== null) {
+      // Caller passed Agent.Options — create an Agent for them.
+      newDispatcher = new Agent({ allowH2: true, ...(value as Agent.Options) });
+      isExternal = false;
+    } else {
+      throw new Error(
+        "updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher or Agent.Options."
+      );
     }
 
     // No-op when the same dispatcher instance is reassigned.
-    if (value === this.config.dispatcher) {
+    if (newDispatcher === this.config.dispatcher) {
       return;
     }
 
@@ -180,11 +205,11 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
 
     // Assign the new value and update externalDispatcher based on it.
-    this.config.dispatcher = value as Dispatcher;
-    this.externalDispatcher = true;
+    this.config.dispatcher = newDispatcher;
+    this.externalDispatcher = isExternal;
   }
 
-  public httpHandlerConfigs(): UndiciHttpHandlerOptions {
+  public httpHandlerConfigs(): { dispatcher?: Dispatcher; logger?: Logger } {
     return { ...this.config };
   }
 
