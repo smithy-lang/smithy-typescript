@@ -96,7 +96,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
 
     // greater than 0 number or undefined.
-    const timeout: number | undefined = requestTimeout > 0 ? requestTimeout : undefined;
+    const timeout: number | undefined = requestTimeout && requestTimeout > 0 ? requestTimeout : undefined;
     const headersTimeout = timeout;
     const bodyTimeout = timeout;
 
