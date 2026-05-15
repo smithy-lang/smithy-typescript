@@ -183,12 +183,13 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
   }
 
   private getOrCreateDispatcher(): Dispatcher {
-    if (this.config.dispatcher) {
-      return this.config.dispatcher;
+    const { config } = this;
+    const { dispatcher } = config;
+
+    if (dispatcher) {
+      return dispatcher;
     }
 
-    this.config.dispatcher = new Agent({ allowH2: true });
-
-    return this.config.dispatcher;
+    return (config.dispatcher = new Agent({ allowH2: true }));
   }
 }
