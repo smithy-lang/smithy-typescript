@@ -95,8 +95,10 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       if ("Transfer-Encoding" in headers) delete headers["Transfer-Encoding"];
     }
 
-    const headersTimeout = requestTimeout !== undefined ? requestTimeout || undefined : undefined;
-    const bodyTimeout = requestTimeout !== undefined ? requestTimeout || undefined : undefined;
+    // greater than 0 number or undefined.
+    const timeout: number | undefined = requestTimeout > 0 ? requestTimeout : undefined;
+    const headersTimeout = timeout;
+    const bodyTimeout = timeout;
 
     try {
       const {
