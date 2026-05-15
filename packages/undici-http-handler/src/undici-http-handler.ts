@@ -33,16 +33,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
   }
 
-  private getOrCreateDispatcher(): Dispatcher {
-    if (this.config.dispatcher) {
-      return this.config.dispatcher;
-    }
-
-    this.config.dispatcher = new Agent({ allowH2: true });
-
-    return this.config.dispatcher;
-  }
-
   public destroy(): void {
     if (this.config.dispatcher && !this.externalDispatcher) {
       this.config.dispatcher.destroy();
@@ -190,5 +180,15 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public httpHandlerConfigs(): UndiciHttpHandlerOptions {
     return { ...this.config };
+  }
+
+  private getOrCreateDispatcher(): Dispatcher {
+    if (this.config.dispatcher) {
+      return this.config.dispatcher;
+    }
+
+    this.config.dispatcher = new Agent({ allowH2: true });
+
+    return this.config.dispatcher;
   }
 }
