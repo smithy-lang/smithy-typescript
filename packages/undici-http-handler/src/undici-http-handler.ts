@@ -91,8 +91,8 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // Uses the same duck-typing check as undici's isStream (pipe + on).
     const body = request.body as Readable | undefined;
     if (body && typeof body.pipe === "function" && typeof body.on === "function") {
-      if ("transfer-encoding" in headers) delete headers["transfer-encoding"];
-      if ("Transfer-Encoding" in headers) delete headers["Transfer-Encoding"];
+      if (headers["transfer-encoding"] === "chunked") delete headers["transfer-encoding"];
+      if (headers["Transfer-Encoding"] === "chunked") delete headers["Transfer-Encoding"];
     }
 
     // greater than 0 number or undefined.
