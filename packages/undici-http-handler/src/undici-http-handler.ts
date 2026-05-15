@@ -5,6 +5,8 @@ import { Agent, Dispatcher } from "undici";
 
 /**
  * Options for the UndiciHttpHandler.
+ *
+ * @public
  */
 export interface UndiciHttpHandlerOptions {
   /**
@@ -21,6 +23,8 @@ export interface UndiciHttpHandlerOptions {
 /**
  * An HTTP handler that uses undici instead of Node.js native http/https modules.
  * Smithy-compatible request handler backed by undici.
+ *
+ * @public
  */
 export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> {
   private config: UndiciHttpHandlerOptions;
