@@ -73,6 +73,32 @@ const client = new S3({
 client.listBuckets().then(console.log);
 ```
 
+If your application only talks to a single origin (e.g. a Lambda function
+calling one service endpoint), you can pass a `Client` for lower overhead by
+skipping the per-origin routing that `Agent` performs.
+
+```js
+import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+import { Client } from "undici";
+
+const region = "us-east-1";
+const endpoint = `https://dynamodb.${region}.amazonaws.com`;
+
+const dispatcher = new Client(endpoint, {
+  pipelining: 1,
+  connect: { timeout: 3000 },
+});
+
+const client = new DynamoDB({
+  region,
+  endpoint,
+  requestHandler: new UndiciHttpHandler({ dispatcher }),
+});
+
+client.listTables({}).then(console.log);
+```
+
 > **Note:** When you pass a `Dispatcher` instance, the handler treats it as
 > externally owned and will not destroy it when `handler.destroy()` is called.
 > When you pass `Agent.Options`, the handler owns the created Agent and will
