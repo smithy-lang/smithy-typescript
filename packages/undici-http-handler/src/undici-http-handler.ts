@@ -168,7 +168,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public updateHttpClientConfig<K extends keyof UndiciHttpHandlerOptions>(
     key: K,
-    value: NonNullable<UndiciHttpHandlerOptions[K]>
+    value: UndiciHttpHandlerOptions[K]
   ): void {
     if (key !== "dispatcher") {
       (this.config as any)[key] = value;
@@ -178,7 +178,10 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     let newDispatcher: Dispatcher;
     let isExternal: boolean;
 
-    if (isDispatcher(value)) {
+    if (value === undefined) {
+      // Retain existing dispatcher, matching constructor behavior.
+      return;
+    } else if (isDispatcher(value)) {
       newDispatcher = value;
       isExternal = true;
     } else if (typeof value === "object" && value !== null) {

@@ -474,11 +474,12 @@ describe("UndiciHttpHandler", () => {
       expect(handler.httpHandlerConfigs().logger).toBe(updatedLogger);
     });
 
-    it("throws if dispatcher value is not a Dispatcher instance or Agent.Options", () => {
+    it("retains existing dispatcher if undefined is passed", () => {
       handler = new UndiciHttpHandler();
-      expect(() => handler.updateHttpClientConfig("dispatcher", undefined as any)).toThrow(
-        "must be an instance of undici Dispatcher or Agent.Options"
-      );
+      const configBefore = handler.httpHandlerConfigs();
+      handler.updateHttpClientConfig("dispatcher", undefined as any);
+      const configAfter = handler.httpHandlerConfigs();
+      expect(configAfter.dispatcher).toBe(configBefore.dispatcher);
     });
 
     it("accepts Agent.Options and creates an Agent internally", async () => {
