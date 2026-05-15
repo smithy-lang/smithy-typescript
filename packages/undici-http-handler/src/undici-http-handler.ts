@@ -202,9 +202,10 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // Capture the previous dispatcher before assignment.
     const previousDispatcher = this.config.dispatcher;
 
-    // Destroy the previous dispatcher only if it was internally created.
+    // Close the previous dispatcher only if it was internally created.
+    // Fire-and-forget: let in-flight requests drain without blocking.
     if (previousDispatcher && !this.externalDispatcher) {
-      previousDispatcher.destroy();
+      previousDispatcher.close();
     }
 
     // Assign the new value and update externalDispatcher based on it.

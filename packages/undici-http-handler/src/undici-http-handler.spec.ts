@@ -504,22 +504,22 @@ describe("UndiciHttpHandler", () => {
       expect(response.statusCode).toBe(200);
     });
 
-    it("destroys previous internal dispatcher when updating with a new Dispatcher", async () => {
+    it("closes previous internal dispatcher when updating with a new Dispatcher", async () => {
       handler = new UndiciHttpHandler();
       // Trigger internal dispatcher creation
       await handler.handle(createMockRequest());
 
-      // Capture the internal dispatcher and spy on its destroy method
+      // Capture the internal dispatcher and spy on its close method
       const previousDispatcher = handler.httpHandlerConfigs().dispatcher!;
-      const destroySpy = vi.spyOn(previousDispatcher, "destroy");
+      const closeSpy = vi.spyOn(previousDispatcher, "close");
 
       const newDispatcher = new Agent();
 
       handler.updateHttpClientConfig("dispatcher", newDispatcher);
 
-      // Assert the previous internal dispatcher's destroy was called
-      expect(destroySpy).toHaveBeenCalled();
-      destroySpy.mockRestore();
+      // Assert the previous internal dispatcher's close was called (fire-and-forget)
+      expect(closeSpy).toHaveBeenCalled();
+      closeSpy.mockRestore();
 
       // The new dispatcher should be used for subsequent requests
       const { response } = await handler.handle(createMockRequest());
