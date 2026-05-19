@@ -144,17 +144,28 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       });
 
       // Transform undici headers (Record<string, string | string[]>) to HeaderBag (Record<string, string>)
-      const transformedHeaders: Record<string, string> = {};
+      // Only allocate a new object if multi-value headers are present.
+      let transformedHeaders: Record<string, string> | undefined;
       for (const key in responseHeaders) {
         const value = responseHeaders[key];
-        if (value !== undefined) {
-          transformedHeaders[key] = Array.isArray(value) ? value.join(", ") : value;
+        if (Array.isArray(value)) {
+          if (!transformedHeaders) {
+            // Lazily copy all headers seen so far.
+            transformedHeaders = {};
+            for (const k in responseHeaders) {
+              if (k === key) break;
+              transformedHeaders[k] = responseHeaders[k] as string;
+            }
+          }
+          transformedHeaders[key] = value.join(", ");
+        } else if (transformedHeaders) {
+          transformedHeaders[key] = value as string;
         }
       }
 
       const httpResponse = new HttpResponse({
         statusCode,
-        headers: transformedHeaders,
+        headers: (transformedHeaders ?? responseHeaders) as Record<string, string>,
         body: responseBody,
       });
 
