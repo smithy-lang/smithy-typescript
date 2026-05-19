@@ -1,8 +1,9 @@
+import { engines as undiciEngines } from "undici/package.json";
 import { describe, expect, it } from "vitest";
 
 import { dependencies, engines, peerDependencies } from "../package.json";
 
-const EXPECTED_ENGINES_NODE = ">=18.0.0";
+const EXPECTED_ENGINES_NODE = ">=18.17";
 
 describe("undici version", () => {
   it("peerDependencies[undici] should accept dependencies[undici]", () => {
@@ -13,7 +14,15 @@ describe("undici version", () => {
     expect(
       engines.node,
       "Note: If engines.node was updated to drop support for Node.js major version," +
-        " check if undici version can also be updated with this change."
+        " the undici version should ideally be also updated with this change."
     ).toEqual(EXPECTED_ENGINES_NODE);
+  });
+
+  it("engines.node should match undici's engines.node", () => {
+    expect(
+      engines.node,
+      "Note: undici-http-handler engines.node should be the same as undici's engines.node." +
+        " If undici updated it's engines requirement, update undici-http-handler to match."
+    ).toEqual(undiciEngines.node);
   });
 });
