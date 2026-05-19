@@ -369,6 +369,87 @@ describe("UndiciHttpHandler", () => {
     });
   });
 
+  describe("event stream (isEventStream)", () => {
+    it("makes a successful request with an isolated client", async () => {
+      handler = new UndiciHttpHandler();
+      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("does not use the shared dispatcher for event stream requests", async () => {
+      const mockDispatcher = {
+        request: vi.fn().mockResolvedValue({
+          statusCode: 200,
+          headers: {},
+          body: null,
+        }),
+        destroy: vi.fn(),
+      } as unknown as Dispatcher;
+
+      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
+      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
+      expect(response.statusCode).toBe(200);
+      // The shared dispatcher should NOT have been called — an isolated client is used instead.
+      expect(mockDispatcher.request).not.toHaveBeenCalled();
+    });
+
+    it("uses the shared dispatcher when isEventStream is false", async () => {
+      const mockDispatcher = {
+        request: vi.fn().mockResolvedValue({
+          statusCode: 200,
+          headers: {},
+          body: null,
+        }),
+        destroy: vi.fn(),
+      } as unknown as Dispatcher;
+
+      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
+      await handler.handle(createMockRequest(), { isEventStream: false });
+      expect(mockDispatcher.request).toHaveBeenCalledOnce();
+    });
+
+    it("destroys isolated client when abort signal is already aborted", async () => {
+      handler = new UndiciHttpHandler();
+      const controller = new AbortController();
+      controller.abort();
+      await expect(
+        handler.handle(createMockRequest(), {
+          abortSignal: controller.signal as any,
+          isEventStream: true,
+        })
+      ).rejects.toThrow("Request aborted");
+    });
+
+    it("destroys isolated client on request error", async () => {
+      handler = new UndiciHttpHandler();
+      // Use a port that nothing is listening on to trigger a connection error.
+      const badRequest = Object.assign(
+        new HttpRequest({
+          protocol: "http:",
+          hostname: "127.0.0.1",
+          port: 1,
+          method: "GET",
+          path: "/",
+          headers: {},
+        })
+      );
+      await expect(handler.handle(badRequest, { isEventStream: true })).rejects.toThrow();
+    });
+
+    it("appends query string to path with isolated client", async () => {
+      handler = new UndiciHttpHandler();
+      const { response } = await handler.handle(
+        createMockRequest({
+          path: "/echo",
+          query: { foo: "bar" },
+        }),
+        { isEventStream: true }
+      );
+      expect(response.statusCode).toBe(200);
+      expect(response.headers["x-url"]).toContain("foo=bar");
+    });
+  });
+
   describe("expect header", () => {
     it.each(["expect", "Expect"])("strips '%s' header before sending to undici", async (expectHeader) => {
       const mockDispatcher = {

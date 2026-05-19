@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
-import { Agent, Dispatcher } from "undici";
+import { Agent, Client, Dispatcher } from "undici";
 
 /**
  * Duck-type check: returns true if the value looks like a Dispatcher
@@ -30,6 +30,19 @@ export interface UndiciHttpHandlerOptions {
 }
 
 /**
+ * This is derived from the smithyContext object. This signals to the UndiciHttpHandler
+ * that the shared connection pool should not be used. The event stream should
+ * have its own dedicated connection.
+ *
+ * This does not apply to WebSocket event streams, since there is no pooling.
+ *
+ * @internal
+ */
+type EventStreamSignal = {
+  isEventStream?: boolean;
+};
+
+/**
  * An HTTP handler that uses undici instead of Node.js native http/https modules.
  * Smithy-compatible request handler backed by undici.
  *
@@ -56,11 +69,15 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public async handle(
     request: HttpRequest,
-    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
+    { abortSignal, requestTimeout, isEventStream }: HttpHandlerOptions & EventStreamSignal = {}
   ): Promise<{ response: HttpResponse }> {
-    const dispatcher = this.getOrCreateDispatcher();
+    // Use an isolated client for event streams to avoid sharing the
+    // connection pool with regular requests.
+    const isolatedClient = isEventStream ? this.createIsolatedClient(request) : undefined;
+    const dispatcher = isolatedClient ?? this.getOrCreateDispatcher();
 
     if (abortSignal?.aborted) {
+      isolatedClient?.destroy();
       throw Object.assign(new Error("Request aborted"), {
         name: "AbortError",
       });
@@ -141,8 +158,20 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         body: responseBody,
       });
 
+      // Destroy the isolated client once the response body stream closes.
+      if (isolatedClient) {
+        (responseBody as Readable).once("close", () => {
+          isolatedClient.destroy();
+        });
+      }
+
       return { response: httpResponse };
     } catch (err: any) {
+      // Ensure the isolated client is cleaned up on errors.
+      if (isolatedClient) {
+        isolatedClient.destroy();
+      }
+
       if (err?.code === "UND_ERR_ABORTED") {
         throw Object.assign(err, { name: "AbortError" });
       }
@@ -207,6 +236,28 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public httpHandlerConfigs(): { dispatcher?: Dispatcher; logger?: Logger } {
     return { ...this.config };
+  }
+
+  /**
+   * Creates a one-off undici Client for an event stream request.
+   * This mirrors NodeHttp2Handler's isolated session behavior — the event stream
+   * gets its own dedicated connection that isn't shared with the connection pool.
+   */
+  private createIsolatedClient(request: HttpRequest): Client {
+    const port = request.port ? `:${request.port}` : "";
+    let origin: string;
+    if (request.username != null || request.password != null) {
+      const username = request.username ?? "";
+      const password = request.password ?? "";
+      origin = `${request.protocol}//${username}:${password}@${request.hostname}${port}`;
+    } else {
+      origin = `${request.protocol}//${request.hostname}${port}`;
+    }
+
+    return new Client(origin, {
+      allowH2: true,
+      pipelining: 0, // no pipelining — dedicated connection
+    });
   }
 
   private getOrCreateDispatcher(): Dispatcher {
