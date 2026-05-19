@@ -166,10 +166,10 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         body: responseBody,
       });
 
-      // Destroy the isolated client once the response body stream closes.
+      // Close the isolated client once the response body stream closes.
       if (isolatedClient) {
         (responseBody as Readable).once("close", () => {
-          isolatedClient.destroy();
+          isolatedClient.close();
         });
       }
 
