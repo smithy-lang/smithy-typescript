@@ -42,7 +42,7 @@
     "typedoc": "0.23.23"
   },
   "peerDependencies": {
-    "undici": "^6.0.0"
+    "undici": ">=6.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

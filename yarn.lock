@@ -3546,7 +3546,7 @@ __metadata:
     typedoc: "npm:0.23.23"
     undici: "npm:^6.0.0"
   peerDependencies:
-    undici: ^6.0.0
+    undici: ">=6.0.0"
   languageName: unknown
   linkType: soft
 

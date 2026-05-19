@@ -5,8 +5,8 @@ import { dependencies, engines, peerDependencies } from "../package.json";
 const EXPECTED_ENGINES_NODE = ">=18.0.0";
 
 describe("undici version", () => {
-  it("dependencies[undici] should match peerDependencies[undici]", () => {
-    expect(dependencies["undici"]).toEqual(peerDependencies["undici"]);
+  it("peerDependencies[undici] should accept dependencies[undici]", () => {
+    expect(peerDependencies["undici"]).toEqual(`>=${dependencies["undici"].replace("^", "")}`);
   });
 
   it(`engines.node should be ${EXPECTED_ENGINES_NODE}`, () => {
