@@ -33,7 +33,6 @@
     "undici": "^6.0.0"
   },
   "devDependencies": {
-    "@smithy/abort-controller": "workspace:^",
     "@smithy/node-http-handler": "workspace:^",
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",

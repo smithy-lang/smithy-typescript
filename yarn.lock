@@ -3534,7 +3534,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/undici-http-handler@workspace:packages/undici-http-handler"
   dependencies:
-    "@smithy/abort-controller": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
