@@ -37,12 +37,10 @@ export interface UndiciHttpHandlerOptions {
  */
 export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> {
   private config: { dispatcher?: Dispatcher; logger?: Logger };
-  private externalDispatcher = false;
 
   constructor(options?: UndiciHttpHandlerOptions) {
     if (options?.dispatcher && isDispatcher(options.dispatcher)) {
       this.config = { ...options, dispatcher: options.dispatcher };
-      this.externalDispatcher = true;
     } else if (options?.dispatcher) {
       // Caller passed Agent.Options — create an Agent for them.
       this.config = { ...options, dispatcher: new Agent({ allowH2: true, ...options.dispatcher }) };
@@ -52,10 +50,8 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
   }
 
   public destroy(): void {
-    if (this.config.dispatcher && !this.externalDispatcher) {
-      this.config.dispatcher.destroy();
-      this.config.dispatcher = undefined;
-    }
+    this.config.dispatcher?.destroy();
+    this.config.dispatcher = undefined;
   }
 
   public async handle(
@@ -176,18 +172,15 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
 
     let newDispatcher: Dispatcher;
-    let isExternal: boolean;
 
     if (value === undefined) {
       // Retain existing dispatcher, matching constructor behavior.
       return;
     } else if (isDispatcher(value)) {
       newDispatcher = value;
-      isExternal = true;
     } else if (typeof value === "object" && value !== null) {
       // Caller passed Agent.Options — create an Agent for them.
       newDispatcher = new Agent({ allowH2: true, ...(value as Agent.Options) });
-      isExternal = false;
     } else {
       throw new Error(
         "updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher or Agent.Options."
@@ -202,15 +195,14 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // Capture the previous dispatcher before assignment.
     const previousDispatcher = this.config.dispatcher;
 
-    // Close the previous dispatcher only if it was internally created.
+    // Close the previous dispatcher regardless of whether it was externally provided.
     // Fire-and-forget: let in-flight requests drain without blocking.
-    if (previousDispatcher && !this.externalDispatcher) {
+    if (previousDispatcher) {
       previousDispatcher.close();
     }
 
-    // Assign the new value and update externalDispatcher based on it.
+    // Assign the new value.
     this.config.dispatcher = newDispatcher;
-    this.externalDispatcher = isExternal;
   }
 
   public httpHandlerConfigs(): { dispatcher?: Dispatcher; logger?: Logger } {

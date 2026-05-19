@@ -357,14 +357,15 @@ describe("UndiciHttpHandler", () => {
       expect(mockDispatcher.request).toHaveBeenCalledOnce();
     });
 
-    it("does not destroy external dispatcher on handler destroy", () => {
+    it("destroys external dispatcher on handler destroy", () => {
       const mockDispatcher = {
+        request: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
       handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
       handler.destroy();
-      expect(mockDispatcher.destroy).not.toHaveBeenCalled();
+      expect(mockDispatcher.destroy).toHaveBeenCalled();
     });
   });
 
@@ -528,8 +529,9 @@ describe("UndiciHttpHandler", () => {
       newDispatcher.destroy();
     });
 
-    it("does not destroy previous external dispatcher when updating", async () => {
+    it("closes previous external dispatcher when updating", async () => {
       const oldDispatcher = new Agent();
+      const closeSpy = vi.spyOn(oldDispatcher, "close");
 
       handler = new UndiciHttpHandler({ dispatcher: oldDispatcher });
       await handler.handle(createMockRequest());
@@ -538,36 +540,25 @@ describe("UndiciHttpHandler", () => {
 
       handler.updateHttpClientConfig("dispatcher", newDispatcher);
 
-      // Old external dispatcher should still be usable (not destroyed)
-      const { statusCode } = await oldDispatcher.request({
-        origin: `http://127.0.0.1:${port}`,
-        path: "/",
-        method: "GET",
-      });
-      expect(statusCode).toBe(200);
+      // Old external dispatcher should be closed (fire-and-forget)
+      expect(closeSpy).toHaveBeenCalled();
+      closeSpy.mockRestore();
 
       oldDispatcher.destroy();
       newDispatcher.destroy();
     });
 
-    it("marks new dispatcher as external after update", async () => {
+    it("destroys dispatcher on handler destroy even if set via update", async () => {
       const newDispatcher = new Agent();
+      const destroySpy = vi.spyOn(newDispatcher, "destroy");
 
       handler = new UndiciHttpHandler();
       handler.updateHttpClientConfig("dispatcher", newDispatcher);
 
-      // destroy() should not destroy an external dispatcher — handler still usable after
       handler.destroy();
 
-      // The dispatcher should still be functional since it's external
-      const { statusCode } = await newDispatcher.request({
-        origin: `http://127.0.0.1:${port}`,
-        path: "/",
-        method: "GET",
-      });
-      expect(statusCode).toBe(200);
-
-      newDispatcher.destroy();
+      expect(destroySpy).toHaveBeenCalled();
+      destroySpy.mockRestore();
     });
   });
 });
