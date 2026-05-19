@@ -157,7 +157,7 @@ describe("UndiciHttpHandler", () => {
       expect(response.headers["set-cookie"]).toBe("a=1, b=2");
     });
 
-    it("handles fragment in path", async () => {
+    it("does not send fragment over the wire", async () => {
       handler = new UndiciHttpHandler();
       const { response } = await handler.handle(
         createMockRequest({
@@ -166,6 +166,7 @@ describe("UndiciHttpHandler", () => {
         } as any)
       );
       expect(response.statusCode).toBe(200);
+      expect(response.headers["x-url"]).toBe("/echo");
     });
   });
 

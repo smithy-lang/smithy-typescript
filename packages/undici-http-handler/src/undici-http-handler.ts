@@ -91,9 +91,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         path += `?${queryString}`;
       }
     }
-    if (request.fragment) {
-      path += `#${request.fragment}`;
-    }
 
     // Build origin string.
     const port = request.port ? `:${request.port}` : "";
