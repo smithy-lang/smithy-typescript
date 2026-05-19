@@ -77,7 +77,9 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     const dispatcher = isolatedClient ?? this.getOrCreateDispatcher();
 
     if (abortSignal?.aborted) {
-      isolatedClient?.destroy();
+      if (isolatedClient) {
+        isolatedClient.destroy();
+      }
       throw Object.assign(new Error("Request aborted"), {
         name: "AbortError",
       });
