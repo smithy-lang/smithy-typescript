@@ -303,13 +303,21 @@ it("HttpLabelCommandExample:Response", async () => {
 it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
   const client = new XYZServiceClient({
     ...clientParams,
-    requestHandler: new RequestSerializationTestHandler(),
   });
 
   const command = new GetNumbersCommand(
     {
     } as any,
   );
+  if (!command.schema) {
+    return;
+  }
+  const protocol = client.config.protocol;
+  const [, namespace, _name, traits, input, output] = command.schema as any;
+  const $schema = {namespace, name: _name, traits, input, output} as any;
+  const $input = command.input as any;
+  const $context = client.config as any;
+
   const name = "GetNumbersRequestExample:SerdeBenchmark:Request";
   const timings = [] as number[];
   const testStart = performance.now();
@@ -318,21 +326,11 @@ it("GetNumbersRequestExample:SerdeBenchmark:Request", async () => {
 
   while (++i) {
     const preSerialize = performance.now();
-    try {
-      await client.send(command);
-      fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
-      return;
-    } catch (err) {
-      if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {
-        fail(err);
-        return;
-      }
-      const r = err.request;
-    };
+    await (protocol.serializeRequest as any)($schema, $input, $context);
     const postSerialize = performance.now();
     if (i >= WARMUP_ITERATIONS) {
       // allow warmup
-      timings.push(postSerialize * 1_000_000 - preSerialize  * 1_000_000);
+      timings.push(postSerialize * 1_000_000 - preSerialize * 1_000_000);
     }
 
     if (timings.length >= BENCHMARK_ITERATIONS) {
@@ -379,54 +377,45 @@ it("EndpointResolvedHeadersApplied:Request", async () => {
 });
 
 it("GetNumbersResponseExample:SerdeBenchmark:Response", async () => {
-  const client = new XYZServiceClient({
-    ...clientParams,
-    requestHandler: new ResponseDeserializationTestHandler(
-      true,
-      200,
-      {
-        "smithy-protocol": "rpc-v2-cbor",
-      }
-    ),
-  });
-
   const params: any = {};
   const command = new GetNumbersCommand(params);
+
+  const client = new XYZServiceClient({
+    ...clientParams,
+  });
+
+  if (!command.schema) {
+    return;
+  }
+  const [, namespace, _name, traits, input, output] = command.schema as any;
+  const $schema = {namespace, name: _name, traits, input, output} as any;
+  const $context = client.config as any;
+  const protocol = client.config.protocol as any;
 
   const name = "GetNumbersResponseExample:SerdeBenchmark:Response";
   const timings = [] as number[];
   const numeric = (a: number, b: number) => a - b;
   let i = 0;
 
-  client.middlewareStack.addRelativeTo(
-      (next: any) => async (args: any) => {
-        const preDeserialize = performance.now();
-        const r = await next(args);
-        const postDeserialize = performance.now();
-        if (i >= WARMUP_ITERATIONS) {
-          timings.push(postDeserialize * 1_000_000 - preDeserialize * 1_000_000);
-        }
-        return r;
-      },
-      {
-        name: "deserializerBenchmarkMiddleware",
-        toMiddleware: "deserializerMiddleware",
-        relation: "before",
-        override: true,
-      }
-  );
-
   const benchmarkStart = performance.now();
 
   while (++i) {
-    let r: any;
-    try {
-      r = await client.send(command);
-    } catch (err) {
-      fail("Expected a valid response to be returned, got " + err);
-      return;
+    const $httpResponse = new HttpResponse({
+      statusCode: 200,
+      headers: {
+        "smithy-protocol": "rpc-v2-cbor",
+      },
+      body: undefined,
+    });
+    const preDeserialize = performance.now();
+    await (protocol.deserializeResponse as any)($schema, $context, $httpResponse);
+    const postDeserialize = performance.now();
+    if (i >= WARMUP_ITERATIONS) {
+      timings.push(postDeserialize * 1_000_000 - preDeserialize * 1_000_000);
     }
-    if (i >= WARMUP_ITERATIONS + BENCHMARK_ITERATIONS) {
+
+    if (timings.length >= BENCHMARK_ITERATIONS) {
+      timings.length = BENCHMARK_ITERATIONS;
       break;
     } else if (benchmarkStart + 30_000 < performance.now()) {
       break;

@@ -919,7 +919,6 @@ public final class HttpProtocolTestGenerator implements Runnable {
                     .ifPresent(host -> {
                         writer.write("endpoint: \"https://$L\",", host);
                     });
-                writer.write("requestHandler: new RequestSerializationTestHandler(),");
             });
 
             ObjectNode params = testCase.getParams();
@@ -936,10 +935,18 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 writer.write("const command = new $T({});", operationSymbol);
             }
 
-            // Send the request and look for the expected exception to then perform assertions.
             writer
                 .write(
                     """
+                    if (!command.schema) {
+                      return;
+                    }
+                    const protocol = client.config.protocol;
+                    const [, namespace, _name, traits, input, output] = command.schema as any;
+                    const $$schema = {namespace, name: _name, traits, input, output} as any;
+                    const $$input = command.input as any;
+                    const $$context = client.config as any;
+
                     const name = $S;
                     const timings = [] as number[];
                     const testStart = performance.now();
@@ -948,21 +955,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
 
                     while (++i) {
                       const preSerialize = performance.now();
-                      try {
-                        await client.send(command);
-                        fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
-                        return;
-                      } catch (err) {
-                        if (!(err instanceof EXPECTED_REQUEST_SERIALIZATION_ERROR)) {
-                          fail(err);
-                          return;
-                        }
-                        const r = err.request;
-                      };
+                      await (protocol.serializeRequest as any)($$schema, $$input, $$context);
                       const postSerialize = performance.now();
                       if (i >= WARMUP_ITERATIONS) {
                         // allow warmup
-                        timings.push(postSerialize * 1_000_000 - preSerialize  * 1_000_000);
+                        timings.push(postSerialize * 1_000_000 - preSerialize * 1_000_000);
                       }
 
                       if (timings.length >= BENCHMARK_ITERATIONS) {
@@ -983,12 +980,58 @@ public final class HttpProtocolTestGenerator implements Runnable {
     }
 
     private void generateResponseBenchmark(OperationShape operation, HttpResponseTestCase testCase) {
+        Symbol operationSymbol = symbolProvider.toSymbol(operation);
         testCase.getDocumentation().ifPresent(writer::writeDocs);
 
         String testName = testCase.getId() + ":SerdeBenchmark:Response";
 
         openTestBlock(operation, testCase, testName, () -> {
-            writeResponseTestSetup(operation, testCase, true);
+            Collection<MemberShape> httpLabelMembers = model.expectShape(operation.getInputShape())
+                .getAllMembers()
+                .values()
+                .stream()
+                .filter(m -> m.hasTrait(HttpLabelTrait.ID))
+                .toList();
+
+            writer.openCollapsibleBlock("const params: any = {", "};", !httpLabelMembers.isEmpty(), () -> {
+                for (MemberShape httpLabelMember : httpLabelMembers) {
+                    writer.write(
+                        """
+                        $L: "placeholder",""",
+                        PropertyAccessor.inlineKey(httpLabelMember.getMemberName())
+                    );
+                }
+            });
+            writer.write("const command = new $T(params);\n", operationSymbol);
+
+            // Lowercase all the headers we're expecting as this is what we'll get.
+            Map<String, String> headers = testCase
+                .getHeaders()
+                .entrySet()
+                .stream()
+                .map(entry -> new Pair<>(entry.getKey().toLowerCase(Locale.US), entry.getValue()))
+                .collect(MapUtils.toUnmodifiableMap(Pair::getLeft, Pair::getRight));
+            String body = testCase.getBody().orElse(null);
+
+            writer.openBlock("const client = new $T({", "});\n", serviceSymbol, () -> {
+                writer.write("...clientParams,");
+            });
+
+            writer.write(
+                """
+                if (!command.schema) {
+                  return;
+                }
+                const [, namespace, _name, traits, input, output] = command.schema as any;
+                const $$schema = {namespace, name: _name, traits, input, output} as any;
+                const $$context = client.config as any;
+                const protocol = client.config.protocol as any;
+                """
+            );
+
+            if (body != null) {
+                writer.write("const bodyBuffer = Buffer.from(`$L`);", body);
+            }
 
             writer.write(
                 """
@@ -997,47 +1040,55 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 const numeric = (a: number, b: number) => a - b;
                 let i = 0;
 
-                client.middlewareStack.addRelativeTo(
-                    (next: any) => async (args: any) => {
-                      const preDeserialize = performance.now();
-                      const r = await next(args);
-                      const postDeserialize = performance.now();
-                      if (i >= WARMUP_ITERATIONS) {
-                        timings.push(postDeserialize * 1_000_000 - preDeserialize * 1_000_000);
-                      }
-                      return r;
-                    },
-                    {
-                      name: "deserializerBenchmarkMiddleware",
-                      toMiddleware: "deserializerMiddleware",
-                      relation: "before",
-                      override: true,
-                    }
-                );
-
                 const benchmarkStart = performance.now();
+                """,
+                testName
+            );
 
-                while (++i) {
-                  let r: any;
-                  try {
-                    r = await client.send(command);
-                  } catch (err) {
-                    fail("Expected a valid response to be returned, got " + err);
-                    return;
-                  }
-                  if (i >= WARMUP_ITERATIONS + BENCHMARK_ITERATIONS) {
-                    break;
-                  } else if (benchmarkStart + 30_000 < performance.now()) {
-                    break;
-                  }
-                }
+            writer.openBlock("while (++i) {", "}", () -> {
+                writer.openBlock("const $$httpResponse = new HttpResponse({", "});", () -> {
+                    writer.write("statusCode: $L,", testCase.getCode());
+                    if (headers.isEmpty()) {
+                        writer.write("headers: {},");
+                    } else {
+                        writer.openBlock("headers: {", "},", () -> {
+                            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                                writer.write("$S: $S,", entry.getKey(), entry.getValue());
+                            }
+                        });
+                    }
+                    if (body != null) {
+                        writer.write("body: Readable.from(bodyBuffer),");
+                    } else {
+                        writer.write("body: undefined,");
+                    }
+                });
+                writer.write(
+                    """
+                    const preDeserialize = performance.now();
+                    await (protocol.deserializeResponse as any)($$schema, $$context, $$httpResponse);
+                    const postDeserialize = performance.now();
+                    if (i >= WARMUP_ITERATIONS) {
+                      timings.push(postDeserialize * 1_000_000 - preDeserialize * 1_000_000);
+                    }
+
+                    if (timings.length >= BENCHMARK_ITERATIONS) {
+                      timings.length = BENCHMARK_ITERATIONS;
+                      break;
+                    } else if (benchmarkStart + 30_000 < performance.now()) {
+                      break;
+                    }"""
+                );
+            });
+
+            writer.write(
+                """
 
                 timings.sort(numeric);
                 timings.length = Math.min(timings.length, BENCHMARK_ITERATIONS);
 
                 vizBenchmark(logBenchmark(name, timings));
-                """,
-                testName
+                """
             );
         });
     }
