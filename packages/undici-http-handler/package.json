@@ -1,7 +1,7 @@
 {
   "name": "@smithy/undici-http-handler",
   "version": "1.0.0",
-  "description": "Smithy-compatible HTTP handler backed by Node.js undici",
+  "description": "Smithy-compatible HTTP handler backed by modern and high performance Node.js undici",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline undici-http-handler",
