@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.1
+
+### Patch Changes
+
+- 2785e2a: A dummy change for automated patch release, which fixes installation issue
+
 ## 1.0.0
 
 ### Major Changes
