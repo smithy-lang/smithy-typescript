@@ -3,7 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/@smithy/undici-http-handler/latest.svg)](https://www.npmjs.com/package/@smithy/undici-http-handler)
 [![NPM downloads](https://img.shields.io/npm/dm/@smithy/undici-http-handler.svg)](https://www.npmjs.com/package/@smithy/undici-http-handler)
 
-Smithy-compatible HTTP handler backed by Node.js [undici][].
+Smithy-compatible HTTP handler backed by modern and high performance Node.js [undici][].
 
 ## Usage
 
