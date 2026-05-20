@@ -1321,6 +1321,10 @@
     "WaiterConfiguration": "type(interface)",
     "WithSdkStreamMixin": "type(object)"
   },
+  "@smithy/undici-http-handler": {
+    "UndiciHttpHandler": "function",
+    "UndiciHttpHandlerOptions": "type(interface)"
+  },
   "@smithy/url-parser": {
     "parseUrl": "function"
   },
