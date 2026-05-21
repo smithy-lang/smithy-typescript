@@ -5,11 +5,27 @@ import { Agent, Client, Dispatcher } from "undici";
 
 /**
  * Duck-type check: returns true if the value looks like a Dispatcher
- * (has a `request` method), as opposed to plain Agent.Options.
+ * (has `request`, `close`, and `destroy` methods), as opposed to plain
+ * Agent.Options. We require all three because the handler invokes each
+ * of them — checking only `request` would let a partial mock through
+ * and surface as a TypeError later when `close`/`destroy` is called.
  */
-const isDispatcher = (value: unknown): value is Dispatcher =>
-  value instanceof Dispatcher ||
-  (typeof value === "object" && value !== null && typeof (value as any).request === "function");
+const isDispatcher = (value: unknown): value is Dispatcher => {
+  if (value instanceof Dispatcher) {
+    return true;
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.request === "function" &&
+    typeof candidate.close === "function" &&
+    typeof candidate.destroy === "function"
+  );
+};
 
 /**
  * Options for the UndiciHttpHandler.

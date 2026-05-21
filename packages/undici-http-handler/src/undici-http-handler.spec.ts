@@ -213,6 +213,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(abortError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -244,6 +245,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(timeoutError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -264,6 +266,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(timeoutError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -284,6 +287,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(timeoutError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -306,6 +310,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(socketError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -326,6 +331,7 @@ describe("UndiciHttpHandler", () => {
       const unknownError = new Error("something unexpected");
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(unknownError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -348,6 +354,7 @@ describe("UndiciHttpHandler", () => {
           headers: { "x-custom": "value" },
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -361,6 +368,7 @@ describe("UndiciHttpHandler", () => {
     it("destroys external dispatcher on handler destroy", () => {
       const mockDispatcher = {
         request: vi.fn(),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -384,6 +392,7 @@ describe("UndiciHttpHandler", () => {
           headers: {},
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -401,6 +410,7 @@ describe("UndiciHttpHandler", () => {
           headers: {},
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -459,6 +469,7 @@ describe("UndiciHttpHandler", () => {
           headers: {},
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -488,6 +499,7 @@ describe("UndiciHttpHandler", () => {
             headers: {},
             body: null,
           }),
+          close: vi.fn(),
           destroy: vi.fn(),
         } as unknown as Dispatcher;
 
