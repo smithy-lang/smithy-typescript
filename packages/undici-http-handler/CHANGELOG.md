@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.3
+
+### Patch Changes
+
+- 5952e20: Honor caller dispatcher for event streams
+- 931420e: Skip compiling test files
+- 5c2c13b: Require close/destroy in isDispatcher duck-type check
+
 ## 1.0.2
 
 ### Patch Changes
