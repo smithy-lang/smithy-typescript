@@ -48,6 +48,7 @@ test-browser:
 
 test-bundlers:
 	(cd ./testbed/bundlers && make run)
+	(cd ./testbed/bundler-compat && make run)
 
 # typecheck for test code.
 test-types:
