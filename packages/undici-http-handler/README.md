@@ -99,11 +99,6 @@ const client = new DynamoDB({
 client.listTables({}).then(console.log);
 ```
 
-> **Note:** When you pass a `Dispatcher` instance, the handler treats it as
-> externally owned and will not destroy it when `handler.destroy()` is called.
-> When you pass `Agent.Options`, the handler owns the created Agent and will
-> destroy it on cleanup.
-
 ## Benchmarks
 
 Our benchmark spin up a local HTTP server and runs two scenarios:
