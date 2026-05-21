@@ -386,11 +386,13 @@ describe("UndiciHttpHandler", () => {
     });
 
     it("does not use the shared dispatcher for event stream requests", async () => {
+      const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
       handler = new UndiciHttpHandler();
       // Internal Agent is in use here, so the isolated client path applies.
       // Event stream goes through an isolated Client instead of the shared Agent.
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
+      expect(sharedAgentRequestSpy).not.toHaveBeenCalled();
     });
 
     it("routes event streams through caller-provided dispatcher", async () => {
