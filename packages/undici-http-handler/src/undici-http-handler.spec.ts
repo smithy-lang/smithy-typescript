@@ -213,6 +213,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(abortError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -244,6 +245,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(timeoutError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -264,6 +266,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(timeoutError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -284,6 +287,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(timeoutError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -306,6 +310,7 @@ describe("UndiciHttpHandler", () => {
       });
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(socketError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -326,6 +331,7 @@ describe("UndiciHttpHandler", () => {
       const unknownError = new Error("something unexpected");
       const mockDispatcher = {
         request: vi.fn().mockRejectedValue(unknownError),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -348,6 +354,7 @@ describe("UndiciHttpHandler", () => {
           headers: { "x-custom": "value" },
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -361,6 +368,7 @@ describe("UndiciHttpHandler", () => {
     it("destroys external dispatcher on handler destroy", () => {
       const mockDispatcher = {
         request: vi.fn(),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -384,6 +392,7 @@ describe("UndiciHttpHandler", () => {
           headers: {},
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -401,6 +410,7 @@ describe("UndiciHttpHandler", () => {
           headers: {},
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -459,6 +469,7 @@ describe("UndiciHttpHandler", () => {
           headers: {},
           body: null,
         }),
+        close: vi.fn(),
         destroy: vi.fn(),
       } as unknown as Dispatcher;
 
@@ -488,6 +499,7 @@ describe("UndiciHttpHandler", () => {
             headers: {},
             body: null,
           }),
+          close: vi.fn(),
           destroy: vi.fn(),
         } as unknown as Dispatcher;
 
@@ -585,6 +597,19 @@ describe("UndiciHttpHandler", () => {
       // Handler should still work with its internal dispatcher
       const { response } = await handler.handle(createMockRequest());
       expect(response.statusCode).toBe(200);
+    });
+
+    it("rejects a partial dispatcher mock that is missing close (treated as Agent.Options)", async () => {
+      // A mock with only `request` would have previously passed the duck-type
+      // check and then thrown a TypeError when updateHttpClientConfig called
+      // close() on the previous dispatcher. The tightened check now requires
+      // close/destroy too, so a partial mock is treated as Agent.Options.
+      handler = new UndiciHttpHandler();
+      const partial = { request: vi.fn() } as any;
+      // Should not throw when assigning the partial mock — it falls into the
+      // Agent.Options branch and the deferred Agent will be created lazily.
+      expect(() => handler.updateHttpClientConfig("dispatcher", partial)).not.toThrow();
+      expect(handler.httpHandlerConfigs().dispatcher).toBeUndefined();
     });
 
     it("closes previous internal dispatcher when updating with a new Dispatcher", async () => {
