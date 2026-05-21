@@ -1,5 +1,5 @@
 /**
  * Do not edit:
- * This is a compatibility redirect for bundlers that do not support package.json exports field.
+ * This is a compatibility redirect for contexts that do not understand package.json exports field.
  */
-export * from "./dist-types/submodules/retry/index.d";
+export * from "./dist-types/submodules/retry/index";
