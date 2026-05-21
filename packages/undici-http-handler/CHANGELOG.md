@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.0.2
+
+### Patch Changes
+
+- e6a40c5: Document that passing a user-owned Dispatcher lets the application pin a newer undici than the one bundled with the handler, picking up upstream performance improvements (HTTP parser, connection pooling, etc.).
+- 821dac8: Remove note about dispatcher destroy on cleanup
+- Updated dependencies [9eaa5c6]
+  - @smithy/core@3.24.4
+
 ## 1.0.1
 
 ### Patch Changes

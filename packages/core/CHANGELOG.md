@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.24.4
+
+### Patch Changes
+
+- 9eaa5c6: add bundler compatibility for tsup
+
 ## 3.24.3
 
 ### Patch Changes
