@@ -7,5 +7,5 @@
   },
   "extends": "../../tsconfig.es.json",
   "include": ["src/"],
-  "exclude": ["src/**/*.bench.ts"]
+  "exclude": ["src/**/*.spec.ts", "src/**/*.bench.ts"]
 }
