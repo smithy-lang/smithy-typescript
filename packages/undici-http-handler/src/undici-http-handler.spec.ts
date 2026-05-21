@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
-import { Agent, type Dispatcher } from "undici";
+import { Agent, Pool, buildConnector, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -499,8 +499,6 @@ describe("UndiciHttpHandler", () => {
     it("propagates Agent.Options 'connect' to the isolated Client for event streams", async () => {
       const connect = vi.fn(((opts: any, cb: any) => {
         // Delegate to undici's default connector so the request still completes.
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { buildConnector } = require("undici");
         const real = buildConnector({});
         return real(opts, cb);
       }) as any);
@@ -520,7 +518,6 @@ describe("UndiciHttpHandler", () => {
           maxRedirections: 0,
           factory: ((origin: any, opts: any) => {
             // Should not be called for the isolated Client.
-            const { Pool } = require("undici");
             return new Pool(origin, opts);
           }) as any,
         } as any,
