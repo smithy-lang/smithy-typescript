@@ -11,8 +11,14 @@ import { Agent, Client, Dispatcher } from "undici";
  * and surface as a TypeError later when `close`/`destroy` is called.
  */
 const isDispatcher = (value: unknown): value is Dispatcher => {
-  if (value instanceof Dispatcher) return true;
-  if (typeof value !== "object" || value === null) return false;
+  if (value instanceof Dispatcher) {
+    return true;
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
   const candidate = value as Record<string, unknown>;
   return (
     typeof candidate.request === "function" &&
