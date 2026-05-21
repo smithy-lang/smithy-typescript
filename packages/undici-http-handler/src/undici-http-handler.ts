@@ -28,6 +28,25 @@ const isDispatcher = (value: unknown): value is Dispatcher => {
 };
 
 /**
+ * Keys present on Agent.Options or Pool.Options that are not valid on
+ * Client.Options. We strip these when propagating the caller's options
+ * to an isolated Client used for event streams.
+ */
+const AGENT_AND_POOL_ONLY_OPTION_KEYS = ["factory", "maxRedirections", "connections", "interceptors"] as const;
+
+/**
+ * Returns a Client.Options-compatible subset of the given Agent.Options by
+ * removing keys that only apply to Agent or Pool.
+ */
+const toClientOptions = (options: Agent.Options): Client.Options => {
+  const result: Record<string, unknown> = { ...options };
+  for (const key of AGENT_AND_POOL_ONLY_OPTION_KEYS) {
+    delete result[key];
+  }
+  return result as Client.Options;
+};
+
+/**
  * Options for the UndiciHttpHandler.
  *
  * @public
@@ -71,12 +90,37 @@ type EventStreamSignal = {
 export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> {
   private config: { dispatcher?: Dispatcher; logger?: Logger };
 
+  /**
+   * Tracks whether the current dispatcher was created internally by this
+   * handler (true) or supplied by the caller as a Dispatcher instance (false).
+   *
+   * When the caller supplied their own Dispatcher, event-stream requests
+   * are routed through it as well so that proxy settings, mock interceptors,
+   * and similar behaviors are honored. When we own the dispatcher, event
+   * streams get an isolated Client so a long-lived stream does not occupy
+   * a slot in the shared pool.
+   */
+  private isInternalDispatcher: boolean = true;
+
+  /**
+   * Options used to construct the internally-managed Agent, retained so they
+   * can be propagated to isolated Clients created for event streams. This
+   * preserves caller-configured TLS, connect, and timeout settings on the
+   * dedicated event-stream connection.
+   */
+  private internalAgentOptions?: Agent.Options;
+
   constructor(options?: UndiciHttpHandlerOptions) {
     if (options?.dispatcher && isDispatcher(options.dispatcher)) {
       this.config = { ...options, dispatcher: options.dispatcher };
+      this.isInternalDispatcher = false;
     } else if (options?.dispatcher) {
-      // Caller passed Agent.Options — create an Agent for them.
-      this.config = { ...options, dispatcher: new Agent({ allowH2: true, ...options.dispatcher }) };
+      // Caller passed Agent.Options — store them and defer Agent creation
+      // until the first request, so we don't pay for an unused dispatcher
+      // (e.g. when the handler is constructed but never invoked).
+      this.internalAgentOptions = { allowH2: true, ...options.dispatcher };
+      const { dispatcher: _ignored, ...rest } = options;
+      this.config = rest;
     } else {
       this.config = { ...options } as { dispatcher?: Dispatcher; logger?: Logger };
     }
@@ -91,9 +135,12 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     request: HttpRequest,
     { abortSignal, requestTimeout, isEventStream }: HttpHandlerOptions & EventStreamSignal = {}
   ): Promise<{ response: HttpResponse }> {
-    // Use an isolated client for event streams to avoid sharing the
-    // connection pool with regular requests.
-    const isolatedClient = isEventStream ? this.createIsolatedClient(request) : undefined;
+    // Use an isolated client for event streams only when the dispatcher is
+    // internally managed. If the caller supplied their own Dispatcher, route
+    // event streams through it as well so proxy settings, mock interceptors,
+    // and pool sizing decisions made by the caller are preserved.
+    const useIsolatedClient = isEventStream && this.isInternalDispatcher;
+    const isolatedClient = useIsolatedClient ? this.createIsolatedClient(request) : undefined;
     const dispatcher = isolatedClient ?? this.getOrCreateDispatcher();
 
     if (abortSignal?.aborted) {
@@ -230,38 +277,46 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return;
     }
 
-    let newDispatcher: Dispatcher;
-
     if (value === undefined) {
       // Retain existing dispatcher, matching constructor behavior.
       return;
-    } else if (isDispatcher(value)) {
-      newDispatcher = value;
-    } else if (typeof value === "object" && value !== null) {
-      // Caller passed Agent.Options — create an Agent for them.
-      newDispatcher = new Agent({ allowH2: true, ...(value as Agent.Options) });
-    } else {
-      throw new Error(
-        "updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher or Agent.Options."
-      );
     }
 
-    // No-op when the same dispatcher instance is reassigned.
-    if (newDispatcher === this.config.dispatcher) {
+    if (isDispatcher(value)) {
+      // No-op when the same dispatcher instance is reassigned.
+      if (value === this.config.dispatcher) {
+        return;
+      }
+
+      const previousDispatcher = this.config.dispatcher;
+      // Close the previous dispatcher regardless of whether it was externally provided.
+      // Fire-and-forget: let in-flight requests drain without blocking.
+      if (previousDispatcher) {
+        previousDispatcher.close();
+      }
+
+      this.config.dispatcher = value;
+      this.isInternalDispatcher = false;
+      this.internalAgentOptions = undefined;
       return;
     }
 
-    // Capture the previous dispatcher before assignment.
-    const previousDispatcher = this.config.dispatcher;
+    if (typeof value === "object" && value !== null) {
+      // Caller passed Agent.Options — defer Agent creation to first request.
+      const previousDispatcher = this.config.dispatcher;
+      if (previousDispatcher) {
+        previousDispatcher.close();
+      }
 
-    // Close the previous dispatcher regardless of whether it was externally provided.
-    // Fire-and-forget: let in-flight requests drain without blocking.
-    if (previousDispatcher) {
-      previousDispatcher.close();
+      this.internalAgentOptions = { allowH2: true, ...(value as Agent.Options) };
+      this.config.dispatcher = undefined;
+      this.isInternalDispatcher = true;
+      return;
     }
 
-    // Assign the new value.
-    this.config.dispatcher = newDispatcher;
+    throw new Error(
+      "updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher or Agent.Options."
+    );
   }
 
   public httpHandlerConfigs(): { dispatcher?: Dispatcher; logger?: Logger } {
@@ -272,6 +327,10 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
    * Creates a one-off undici Client for an event stream request.
    * This mirrors NodeHttp2Handler's isolated session behavior — the event stream
    * gets its own dedicated connection that isn't shared with the connection pool.
+   *
+   * Caller-provided Agent.Options (TLS, connect, timeouts, etc.) are propagated
+   * to the isolated Client. Agent/Pool-only keys are stripped. `pipelining` is
+   * forced to 0 so the dedicated connection is not pipelined.
    */
   private createIsolatedClient(request: HttpRequest): Client {
     const port = request.port ? `:${request.port}` : "";
@@ -284,8 +343,12 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       origin = `${request.protocol}//${request.hostname}${port}`;
     }
 
+    const baseOptions: Client.Options = this.internalAgentOptions
+      ? toClientOptions(this.internalAgentOptions)
+      : { allowH2: true };
+
     return new Client(origin, {
-      allowH2: true,
+      ...baseOptions,
       pipelining: 0, // no pipelining — dedicated connection
     });
   }
@@ -298,6 +361,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return dispatcher;
     }
 
-    return (config.dispatcher = new Agent({ allowH2: true }));
+    return (config.dispatcher = new Agent(this.internalAgentOptions ?? { allowH2: true }));
   }
 }
