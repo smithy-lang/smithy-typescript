@@ -99,6 +99,11 @@ const client = new DynamoDB({
 client.listTables({}).then(console.log);
 ```
 
+> **Tip:** When you pass your own `Dispatcher`, you control which version of
+> `undici` is used. For best performance, install the latest `undici` directly
+> in your application — improvements in newer releases (HTTP parser, connection
+> pooling, etc.) will then apply to requests made through this handler.
+
 ## Benchmarks
 
 Our benchmark spin up a local HTTP server and runs two scenarios:

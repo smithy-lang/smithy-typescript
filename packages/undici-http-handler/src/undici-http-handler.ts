@@ -20,6 +20,10 @@ export interface UndiciHttpHandlerOptions {
   /**
    * You can pass an existing undici Dispatcher (Agent, Pool, Client, etc.)
    * or Agent.Options to have one created for you.
+   *
+   * Passing your own Dispatcher lets you control the undici version at
+   * runtime, independent of this package's bundled version. This lets
+   * you pick up upstream performance improvements sooner.
    */
   dispatcher?: Dispatcher | Agent.Options;
 
