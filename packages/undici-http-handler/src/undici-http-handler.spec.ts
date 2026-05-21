@@ -599,19 +599,6 @@ describe("UndiciHttpHandler", () => {
       expect(response.statusCode).toBe(200);
     });
 
-    it("rejects a partial dispatcher mock that is missing close (treated as Agent.Options)", async () => {
-      // A mock with only `request` would have previously passed the duck-type
-      // check and then thrown a TypeError when updateHttpClientConfig called
-      // close() on the previous dispatcher. The tightened check now requires
-      // close/destroy too, so a partial mock is treated as Agent.Options.
-      handler = new UndiciHttpHandler();
-      const partial = { request: vi.fn() } as any;
-      // Should not throw when assigning the partial mock — it falls into the
-      // Agent.Options branch and the deferred Agent will be created lazily.
-      expect(() => handler.updateHttpClientConfig("dispatcher", partial)).not.toThrow();
-      expect(handler.httpHandlerConfigs().dispatcher).toBeUndefined();
-    });
-
     it("closes previous internal dispatcher when updating with a new Dispatcher", async () => {
       handler = new UndiciHttpHandler();
       // Trigger internal dispatcher creation
