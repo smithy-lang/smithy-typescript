@@ -17,5 +17,6 @@
     }
   },
   "extends": "../../tsconfig.cjs.json",
-  "include": ["src/"]
+  "include": ["src/"],
+  "exclude": ["src/**/*.fixture.ts", "src/**/*.spec.ts"]
 }

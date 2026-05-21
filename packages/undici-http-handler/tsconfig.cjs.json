@@ -6,5 +6,5 @@
   },
   "extends": "../../tsconfig.cjs.json",
   "include": ["src/"],
-  "exclude": ["src/**/*.bench.ts"]
+  "exclude": ["src/**/*.bench.ts", "src/**/*.spec.ts"]
 }
