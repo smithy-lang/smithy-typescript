@@ -22,52 +22,42 @@ const root = path.join(__dirname, "..", "..");
 const validationDir = __dirname;
 
 const VALIDATIONS = [
-  { name: "imports-declared", label: "all package imports appear in package.json dependencies", script: "validate-imports-declared.js" },
-  { name: "relative-imports", label: "all relative imports are to paths that exist", script: "validate-relative-imports.js" },
-  { name: "deps-used", label: "all package.json dependencies are used", script: "validate-deps-used.js" },
-  { name: "no-unreachable-files", label: "no unreachable files", script: "validate-no-unreachable-files.js" },
-  { name: "no-dynamic-imports", label: "no dynamic imports with non-literal specifiers", script: "validate-no-dynamic-imports.js" },
-  { name: "eslint", label: "eslint passes on source", script: "validate-eslint.js" },
+  { name: "imports-declared", label: "all package imports appear in package.json dependencies", script: "imports-declared.js" },
+  { name: "relative-imports", label: "all relative imports are to paths that exist", script: "relative-imports.js" },
+  { name: "deps-used", label: "all package.json dependencies are used", script: "deps-used.js" },
+  { name: "no-unreachable-files", label: "no unreachable files", script: "unreachable-files.js" },
+  { name: "no-dynamic-imports", label: "no dynamic imports with non-literal specifiers", script: "static-import-names.js" },
+  { name: "no-cycles", label: "no cyclical file or package dependencies", script: "cycles.js" },
+  { name: "eslint", label: "eslint passes on source", script: "eslint.js" },
 ];
 
 function parseArgs() {
   const args = process.argv.slice(2);
-  const dirs = [];
   const skip = new Set();
-  let useAll = false;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--all") {
-      useAll = true;
-    } else if (args[i] === "--skip") {
+    if (args[i] === "--skip") {
       skip.add(args[++i]);
-    } else {
-      dirs.push(path.resolve(args[i]));
     }
   }
 
-  if (useAll) {
-    const packagesDir = path.join(root, "packages");
-    for (const folder of fs.readdirSync(packagesDir)) {
-      const pkgDir = path.join(packagesDir, folder);
-      if (fs.existsSync(path.join(pkgDir, "package.json"))) {
-        dirs.push(pkgDir);
-      }
-    }
-  }
-
-  return { dirs, skip };
+  return { skip };
 }
 
 function main() {
-  const { dirs, skip } = parseArgs();
+  const { skip } = parseArgs();
 
-  if (!dirs.length) {
-    console.error("Usage: validate-all.js [--all] [--skip <name>] <packageDir> [...]");
-    process.exit(1);
+  // Count packages for display.
+  const packageRoots = ["packages", "private"];
+  let count = 0;
+  for (const pkgRoot of packageRoots) {
+    const dir = path.join(root, pkgRoot);
+    if (fs.existsSync(dir)) {
+      count += fs.readdirSync(dir).filter((f) => fs.existsSync(path.join(dir, f, "package.json"))).length;
+    }
   }
 
-  console.log(`Running validations on ${dirs.length} package(s)...\n`);
+  console.log(`Running validations on ${count} package(s)...\n`);
 
   const failures = [];
   const warnings = [];
@@ -79,7 +69,7 @@ function main() {
     }
 
     try {
-      const output = execFileSync("node", [path.join(validationDir, script), ...dirs], {
+      const output = execFileSync("node", [path.join(validationDir, script)], {
         cwd: root,
         stdio: "pipe",
         encoding: "utf-8",

@@ -16,9 +16,9 @@ export * from "./SerdeContext";
 export { Field } from "./protocol-http/Field";
 export { Fields, type FieldsOptions } from "./protocol-http/Fields";
 export { type HttpHandler, type HttpHandlerUserInput } from "./protocol-http/httpHandler";
-export { HttpRequest, type IHttpRequest } from "./protocol-http/httpRequest";
-export { HttpResponse } from "./protocol-http/httpResponse";
-export { isValidHostname } from "./protocol-http/isValidHostname";
+export { HttpRequest, type IHttpRequest } from "@smithy/core/transport";
+export { HttpResponse } from "@smithy/core/transport";
+export { isValidHostname } from "@smithy/core/transport";
 export {
   getHttpHandlerExtensionConfiguration,
   resolveHttpHandlerRuntimeConfig,
@@ -48,7 +48,7 @@ export { escapeUriPath } from "./util-uri-escape/escape-uri-path";
 export { buildQueryString } from "./querystring-builder/buildQueryString";
 
 // @smithy/querystring-parser
-export { parseQueryString } from "./querystring-parser/parseQueryString";
+export { parseQueryString } from "@smithy/core/transport";
 
 // @smithy/url-parser
-export { parseUrl } from "./url-parser/parseUrl";
+export { parseUrl } from "@smithy/core/transport";

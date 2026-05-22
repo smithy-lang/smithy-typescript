@@ -2,7 +2,7 @@ export * from "./booleanEquals";
 export * from "./coalesce";
 export * from "./getAttr";
 export * from "./isSet";
-export * from "./isValidHostLabel";
+export { isValidHostLabel } from "@smithy/core/transport";
 export * from "./ite";
 export * from "./not";
 export * from "./parseURL";

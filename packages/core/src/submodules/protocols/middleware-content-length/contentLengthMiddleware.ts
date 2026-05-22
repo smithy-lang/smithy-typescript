@@ -1,3 +1,4 @@
+import { HttpRequest } from "@smithy/core/transport";
 import type {
   BodyLengthCalculator,
   BuildHandler,
@@ -8,8 +9,6 @@ import type {
   MetadataBearer,
   Pluggable,
 } from "@smithy/types";
-
-import { HttpRequest } from "../protocol-http/httpRequest";
 
 const CONTENT_LENGTH_HEADER = "content-length";
 

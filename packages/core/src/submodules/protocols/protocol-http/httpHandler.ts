@@ -1,12 +1,10 @@
+import type { HttpRequest, HttpResponse } from "@smithy/core/transport";
 import type {
   FetchHttpHandlerOptions,
   HttpHandlerOptions,
   NodeHttpHandlerOptions,
   RequestHandler,
 } from "@smithy/types";
-
-import type { HttpRequest } from "./httpRequest";
-import type { HttpResponse } from "./httpResponse";
 
 /**
  * @internal

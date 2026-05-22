@@ -527,6 +527,18 @@
     "V1OrV2Endpoint": "type(object)",
     "v4": "function"
   },
+  "@smithy/core/transport": {
+    "getSmithyContext": "function",
+    "HttpRequest": "function",
+    "HttpResponse": "function",
+    "IHttpRequest": "type(interface)",
+    "isValidHostLabel": "function",
+    "isValidHostname": "function",
+    "normalizeProvider": "function",
+    "parseQueryString": "function",
+    "parseUrl": "function",
+    "toEndpointV1": "function"
+  },
   "@smithy/credential-provider-imds": {
     "DEFAULT_MAX_RETRIES": "number",
     "DEFAULT_TIMEOUT": "number",

@@ -1,6 +1,6 @@
+import { HttpRequest } from "@smithy/core/transport";
 import type { SerdeContext } from "@smithy/types";
 
-import { HttpRequest } from "./protocol-http/httpRequest";
 import { resolvedPath } from "./resolve-path";
 
 /**

@@ -151,6 +151,13 @@
       "node": "./dist-cjs/submodules/retry/index.js",
       "import": "./dist-es/submodules/retry/index.js",
       "require": "./dist-cjs/submodules/retry/index.js"
+    },
+    "./transport": {
+      "types": "./dist-types/submodules/transport/index.d.ts",
+      "module": "./dist-es/submodules/transport/index.js",
+      "node": "./dist-cjs/submodules/transport/index.js",
+      "import": "./dist-es/submodules/transport/index.js",
+      "require": "./dist-cjs/submodules/transport/index.js"
     }
   },
   "author": {
@@ -178,25 +185,27 @@
   "files": [
     "./cbor.d.ts",
     "./cbor.js",
+    "./checksum.d.ts",
+    "./checksum.js",
+    "./client.d.ts",
+    "./client.js",
+    "./config.d.ts",
+    "./config.js",
     "./endpoints.d.ts",
     "./endpoints.js",
     "./event-streams.d.ts",
     "./event-streams.js",
     "./protocols.d.ts",
     "./protocols.js",
+    "./retry.d.ts",
+    "./retry.js",
     "./schema.d.ts",
     "./schema.js",
     "./serde.d.ts",
     "./serde.js",
-    "dist-*/**",
-    "./client.d.ts",
-    "./client.js",
-    "./config.d.ts",
-    "./config.js",
-    "./checksum.d.ts",
-    "./checksum.js",
-    "./retry.d.ts",
-    "./retry.js"
+    "./transport.d.ts",
+    "./transport.js",
+    "dist-*/**"
   ],
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/core",
   "repository": {

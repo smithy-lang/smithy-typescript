@@ -1,4 +1,4 @@
-import { isValidHostLabel } from "@smithy/core/endpoints";
+import { isValidHostLabel } from "@smithy/core/transport";
 
 /**
  * @internal
