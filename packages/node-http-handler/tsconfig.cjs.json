@@ -5,5 +5,6 @@
     "rootDir": "src"
   },
   "extends": "../../tsconfig.cjs.json",
-  "include": ["src/"]
+  "include": ["src/"],
+  "exclude": ["src/**/*.mock.ts", "src/**/*.spec.ts"]
 }

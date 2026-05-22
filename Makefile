@@ -55,13 +55,17 @@ test-types:
 	npx tsc -p tsconfig.test.json
 
 test-integration:
-	node ./scripts/validation/no-generic-byte-arrays.js;
-	node ./scripts/check-dependencies.js;
-	node ./scripts/runtime-dep-version-check.js;
+	make static-analysis;
 	make test-browser;
 	yarn g:vitest run -c vitest.config.integ.mts;
 	make test-types;
 	make test-bundlers;
+
+static-analysis:
+	node ./scripts/validation/no-generic-byte-arrays.js;
+	node ./scripts/check-dependencies.js;
+	node ./scripts/runtime-dep-version-check.js;
+	node ./scripts/validation/validate-all.js --all;
 
 turbo-clean:
 	@read -p "Are you sure you want to delete your local cache? [y/N]: " ans && [ $${ans:-N} = y ]

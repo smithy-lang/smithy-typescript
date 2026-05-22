@@ -304,7 +304,7 @@ module.exports = class Inliner {
    * and variant externals. These files were inlined into the bundle.
    */
   async cleanupInlinedFiles() {
-    if (this.bailout || this.hasSubmodules) {
+    if (this.bailout) {
       return this;
     }
 
