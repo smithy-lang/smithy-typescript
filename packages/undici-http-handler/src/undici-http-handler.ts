@@ -3,6 +3,8 @@ import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } fr
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
 import { Agent, Client, Dispatcher } from "undici";
 
+import { buildAbortError } from "./build-abort-error";
+
 /**
  * Duck-type check: returns true if the value looks like a Dispatcher
  * (has `request`, `close`, and `destroy` methods), as opposed to plain
@@ -147,9 +149,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       if (isolatedClient) {
         isolatedClient.destroy();
       }
-      throw Object.assign(new Error("Request aborted"), {
-        name: "AbortError",
-      });
+      throw buildAbortError(abortSignal);
     }
 
     // Build path with query string — skip buildQueryString when query is undefined.
@@ -250,7 +250,17 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       }
 
       if (err?.code === "UND_ERR_ABORTED") {
-        throw Object.assign(err, { name: "AbortError" });
+        // Preserve the abort reason from the signal as `cause` so callers can
+        // distinguish user-provided abort reasons from undici's generic abort.
+        const reason =
+          abortSignal && typeof abortSignal === "object" && "reason" in abortSignal
+            ? (abortSignal as { reason?: unknown }).reason
+            : undefined;
+        const assigned: { name: string; cause?: unknown } = { name: "AbortError" };
+        if (reason !== undefined && (err as { cause?: unknown }).cause === undefined) {
+          assigned.cause = reason;
+        }
+        throw Object.assign(err, assigned);
       }
 
       if (

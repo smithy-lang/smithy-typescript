@@ -196,6 +196,39 @@ describe("UndiciHttpHandler", () => {
       }
     });
 
+    it("preserves AbortSignal.reason as cause when signal is already aborted with Error reason", async () => {
+      handler = new UndiciHttpHandler();
+      const controller = new AbortController();
+      const reason = new Error("custom abort reason");
+      reason.name = "MyCustomAbortError";
+      controller.abort(reason);
+      try {
+        await handler.handle(createMockRequest(), {
+          abortSignal: controller.signal as any,
+        });
+        expect.unreachable("should have thrown");
+      } catch (err: any) {
+        expect(err.name).toBe("AbortError");
+        expect(err.message).toBe("Request aborted");
+        expect(err.cause).toBe(reason);
+      }
+    });
+
+    it("uses AbortSignal.reason as message when reason is not an Error", async () => {
+      handler = new UndiciHttpHandler();
+      const controller = new AbortController();
+      controller.abort("string reason");
+      try {
+        await handler.handle(createMockRequest(), {
+          abortSignal: controller.signal as any,
+        });
+        expect.unreachable("should have thrown");
+      } catch (err: any) {
+        expect(err.name).toBe("AbortError");
+        expect(err.message).toBe("string reason");
+      }
+    });
+
     it("throws AbortError when signal is aborted during request", async () => {
       handler = new UndiciHttpHandler();
       const controller = new AbortController();
@@ -225,6 +258,37 @@ describe("UndiciHttpHandler", () => {
         expect(err.name).toBe("AbortError");
         expect(err.code).toBe("UND_ERR_ABORTED");
         expect(err).toBe(abortError);
+      }
+    });
+
+    it("sets AbortSignal.reason as cause on mid-flight UND_ERR_ABORTED", async () => {
+      const reason = new Error("custom abort reason");
+      reason.name = "MyCustomAbortError";
+
+      const abortError = Object.assign(new Error("aborted"), {
+        code: "UND_ERR_ABORTED",
+      });
+      const controller = new AbortController();
+      // Abort the signal mid-flight before the dispatcher rejects, so the
+      // catch path sees `abortSignal.reason` populated alongside UND_ERR_ABORTED.
+      const mockDispatcher = {
+        request: vi.fn().mockImplementation(async () => {
+          controller.abort(reason);
+          throw abortError;
+        }),
+        close: vi.fn(),
+        destroy: vi.fn(),
+      } as unknown as Dispatcher;
+
+      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
+
+      try {
+        await handler.handle(createMockRequest(), { abortSignal: controller.signal as any });
+        expect.unreachable("should have thrown");
+      } catch (err: any) {
+        expect(err.name).toBe("AbortError");
+        expect(err.code).toBe("UND_ERR_ABORTED");
+        expect(err.cause).toBe(reason);
       }
     });
   });
