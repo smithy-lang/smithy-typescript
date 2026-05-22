@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.4
+
+### Patch Changes
+
+- dcd1356: Preserve AbortSignal.reason on aborted requests
+
 ## 1.0.3
 
 ### Patch Changes
