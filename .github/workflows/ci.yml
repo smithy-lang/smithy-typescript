@@ -117,10 +117,24 @@ jobs:
         run: |
           yarn
           yarn turbo telemetry disable
+      # @smithy/undici-http-handler requires undici, which may drop Node 18
+      # support in a future major. Skip build/test of that package on Node 18
+      # so the rest of the matrix continues to validate it.
       - name: Build and validate API snapshot
+        if: matrix.node != 18
         run: node ./scripts/retry -- make api-snapshot
+      - name: Build and validate API snapshot (skip undici-http-handler)
+        if: matrix.node == 18
+        run: |
+          node ./scripts/retry -- yarn build --filter '!@smithy/undici-http-handler'
+          node scripts/validation/api-snapshot-validation.js --write
+          git diff --exit-code api-snapshot/
       - name: Run unit tests
+        if: matrix.node != 18
         run: node ./scripts/retry -- yarn test
+      - name: Run unit tests (skip undici-http-handler)
+        if: matrix.node == 18
+        run: node ./scripts/retry -- yarn g:vitest run -c vitest.config.mts --exclude='**/undici-http-handler/**'
       - name: Run integration tests
         run: |
           yarn config set enableImmutableInstalls false
