@@ -28,6 +28,13 @@ async function validate(packageDir) {
   const declared = new Set(Object.keys(pkgJson.dependencies || {}));
   const used = new Set();
 
+  // If none of the dist folders exist, the package has not been built.
+  // Skip rather than report every declared dep as unused.
+  const distFolders = ["dist-cjs", "dist-es", "dist-types"];
+  if (!distFolders.some((d) => fs.existsSync(path.join(packageDir, d)))) {
+    return [];
+  }
+
   // Scan compiled JS.
   for (const dist of ["dist-cjs", "dist-es"]) {
     const distDir = path.join(packageDir, dist);
