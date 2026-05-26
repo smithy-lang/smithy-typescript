@@ -89,14 +89,40 @@ jobs:
       - name: Run eslint
         run: yarn lint --concurrency=3
 
+  detect-changes:
+    runs-on: ubuntu-latest
+    name: Detect changed packages
+    outputs:
+      node-versions: ${{ steps.set-matrix.outputs.node-versions }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Detect changes to undici-http-handler
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            undici-http-handler:
+              - 'packages/undici-http-handler/**'
+      - name: Compute Node.js test matrix
+        id: set-matrix
+        run: |
+          # undici-http-handler requires Node.js >=20.18.1, so skip Node 18
+          # entirely when this package has changes to avoid build failures.
+          if [[ "${{ steps.filter.outputs.undici-http-handler }}" == "true" ]]; then
+            echo 'node-versions=[20, 22, 24, 26]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'node-versions=[18, 20, 22, 24, 26]' >> "$GITHUB_OUTPUT"
+          fi
+
   test-typescript:
     runs-on: smithy-typescript_ubuntu-latest_8-core
     name: TypeScript Test ${{ matrix.node }}
-    needs: ["ensure-typescript-packages-have-changesets", "lint-typescript", "ensure-typescript-formatted"]
+    needs:
+      ["detect-changes", "ensure-typescript-packages-have-changesets", "lint-typescript", "ensure-typescript-formatted"]
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22, 24, 26]
+        node: ${{ fromJSON(needs.detect-changes.outputs.node-versions) }}
 
     steps:
       - uses: actions/checkout@v5
