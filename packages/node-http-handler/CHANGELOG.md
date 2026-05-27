@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.7.5
+
+### Patch Changes
+
+- Updated dependencies [721fbed]
+  - @smithy/core@3.24.5
+
 ## 4.7.4
 
 ### Patch Changes

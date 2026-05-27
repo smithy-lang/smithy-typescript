@@ -1,5 +1,13 @@
 # @smithy/signature-v4a
 
+## 3.2.5
+
+### Patch Changes
+
+- Updated dependencies [721fbed]
+  - @smithy/core@3.24.5
+  - @smithy/signature-v4@5.4.5
+
 ## 3.2.4
 
 ### Patch Changes

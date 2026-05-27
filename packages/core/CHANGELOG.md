@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.24.5
+
+### Patch Changes
+
+- 721fbed: remove and prevent circular file-level dependencies
+
 ## 3.24.4
 
 ### Patch Changes
