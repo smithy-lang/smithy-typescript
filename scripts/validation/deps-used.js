@@ -24,7 +24,17 @@ async function validate(packageDir) {
   if (!fs.existsSync(pkgJsonPath)) {
     return [];
   }
+
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+  if (pkgJson.name === "@smithy/undici-http-handler") {
+    const nodeMajorVersion = parseInt(process.versions.node.split(".")[0], 10);
+    // @smithy/undici-http-handler depends on undici@7, which requires Node.js >= 20.
+    // Skip validation, as the package isn't built.
+    if (nodeMajorVersion < 20) {
+      return [];
+    }
+  }
+
   const declared = new Set(Object.keys(pkgJson.dependencies || {}));
   const used = new Set();
 
