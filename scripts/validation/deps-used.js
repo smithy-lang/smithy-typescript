@@ -4,13 +4,13 @@
  * For every declared dependency in package.json, validates that it is
  * actually imported somewhere in the package's dist-cjs, dist-es, or dist-types.
  *
- * Usage: node validate-deps-used.js <packageDir> [...]
+ * Usage: node deps-used.js <packageDir> [...]
  */
 
 const fs = require("node:fs");
 const path = require("node:path");
 const walk = require("../utils/walk");
-const { getPackageName, extractImports } = require("./validation-shared");
+const { getPackageName, extractImports, getPackageDirs } = require("./validation-shared");
 
 const IMPLICIT_DEPS = new Set(["tslib"]);
 const DTS_IMPORT_RE = /from\s+["']([^"']+)["']/g;
@@ -80,14 +80,10 @@ async function validate(packageDir) {
 }
 
 async function main() {
-  const dirs = process.argv.slice(2);
-  if (!dirs.length) {
-    console.error("Usage: validate-deps-used.js <packageDir> [...]");
-    process.exit(1);
-  }
+  const packages = getPackageDirs();
   const errors = [];
-  for (const dir of dirs) {
-    errors.push(...(await validate(path.resolve(dir))));
+  for (const { dir } of packages) {
+    errors.push(...(await validate(dir)));
   }
   if (errors.length) {
     console.error(`❌ ${errors.length} unused dependency declaration(s):\n  ${errors.join("\n  ")}`);

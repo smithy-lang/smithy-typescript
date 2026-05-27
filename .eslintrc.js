@@ -136,5 +136,22 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ["packages/*/src/**/*.ts"],
+      excludedFiles: ["packages/core/src/**/*.ts", "packages/*/src/**/*.spec.ts"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            patterns: [
+              {
+                group: ["@smithy/core/transport"],
+                message: "@smithy/core/transport is internal to @smithy/core. Import from the public submodule that re-exports it (e.g. @smithy/core/protocols, @smithy/core/client, @smithy/core/endpoints).",
+              },
+            ],
+          },
+        ],
+      },
+    },
   ],
 };

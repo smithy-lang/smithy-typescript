@@ -1,5 +1,4 @@
-import { getSmithyContext } from "@smithy/core/client";
-import { toEndpointV1 } from "@smithy/core/endpoints";
+import { getSmithyContext, toEndpointV1 } from "@smithy/core/transport";
 import type {
   EndpointBearer,
   HandlerExecutionContext,

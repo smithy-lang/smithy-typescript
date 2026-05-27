@@ -1,5 +1,5 @@
 /**
- * @deprecated Use `toEndpointV1` from `@smithy/core/endpoints` instead.
+ * @deprecated Use `toEndpointV1` from `@smithy/core/transport` instead.
  * @internal
  */
-export { toEndpointV1 } from "../../toEndpointV1";
+export { toEndpointV1 } from "@smithy/core/transport";

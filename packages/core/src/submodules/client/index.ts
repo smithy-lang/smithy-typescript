@@ -2,8 +2,8 @@
 export { constructStack } from "./middleware-stack/MiddlewareStack";
 
 // @smithy/util-middleware
-export { getSmithyContext } from "./util-middleware/getSmithyContext";
-export { normalizeProvider } from "./util-middleware/normalizeProvider";
+export { getSmithyContext } from "@smithy/core/transport";
+export { normalizeProvider } from "@smithy/core/transport";
 
 // @smithy/invalid-dependency
 export { invalidFunction } from "./invalid-dependency/invalidFunction";

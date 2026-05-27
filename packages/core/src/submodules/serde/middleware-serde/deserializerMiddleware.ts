@@ -1,4 +1,4 @@
-import { HttpResponse } from "@smithy/core/protocols";
+import { HttpResponse } from "@smithy/core/transport";
 import type {
   DeserializeHandler,
   DeserializeHandlerArguments,

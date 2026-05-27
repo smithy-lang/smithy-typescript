@@ -56,16 +56,17 @@ test-types:
 
 test-integration:
 	make static-analysis;
+	make api-snapshot;
 	make test-browser;
 	yarn g:vitest run -c vitest.config.integ.mts;
 	make test-types;
 	make test-bundlers;
 
 static-analysis:
-	node ./scripts/validation/no-generic-byte-arrays.js;
+	node ./scripts/validation/generic-byte-array.js;
 	node ./scripts/check-dependencies.js;
 	node ./scripts/runtime-dep-version-check.js;
-	node ./scripts/validation/validate-all.js --all;
+	node ./scripts/validation/validate-all.js;
 
 turbo-clean:
 	@read -p "Are you sure you want to delete your local cache? [y/N]: " ans && [ $${ans:-N} = y ]
@@ -73,8 +74,7 @@ turbo-clean:
 	@find . -name '.turbo' -type d -prune -print -exec rm -rf '{}' + && echo '\n'
 
 api-snapshot:
-	yarn build
-	node scripts/validation/api-snapshot-validation.js --write
+	node scripts/validation/api-snapshot.js --write
 	git diff --exit-code api-snapshot/
 
 S ?= $(word 2,$(MAKECMDGOALS))

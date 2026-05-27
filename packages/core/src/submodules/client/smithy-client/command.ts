@@ -1,4 +1,4 @@
-import type { HttpRequest } from "@smithy/core/protocols";
+import type { HttpRequest } from "@smithy/core/transport";
 import {
   SMITHY_CONTEXT_KEY,
   type FinalizeHandlerArguments,

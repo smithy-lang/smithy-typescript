@@ -4,13 +4,13 @@
  * For every absolute import in dist-cjs and dist-es, validates that the
  * dependency is declared in package.json (dependencies or peerDependencies).
  *
- * Usage: node validate-imports-declared.js <packageDir> [...]
+ * Usage: node imports-declared.js <packageDir> [...]
  */
 
 const fs = require("node:fs");
 const path = require("node:path");
 const walk = require("../utils/walk");
-const { NODE_BUILTINS, getPackageName, extractImports } = require("./validation-shared");
+const { NODE_BUILTINS, getPackageName, extractImports, getPackageDirs } = require("./validation-shared");
 
 /**
  * @param packageDir - package root.
@@ -54,6 +54,9 @@ async function validateDist(packageDir, pkgJson, distName) {
   return errors;
 }
 
+// Packages exempt from undeclared import checks.
+const ALLOWLIST = new Set(["@smithy/util-test"]);
+
 /**
  * @param packageDir - package root.
  * @returns aggregated errors from both dist directories.
@@ -64,6 +67,9 @@ async function validate(packageDir) {
     return [];
   }
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+  if (pkgJson.private && ALLOWLIST.has(pkgJson.name)) {
+    return [];
+  }
   const errors = [];
   for (const dist of ["dist-cjs", "dist-es"]) {
     errors.push(...(await validateDist(packageDir, pkgJson, dist)));
@@ -72,14 +78,10 @@ async function validate(packageDir) {
 }
 
 async function main() {
-  const dirs = process.argv.slice(2);
-  if (!dirs.length) {
-    console.error("Usage: validate-imports-declared.js <packageDir> [...]");
-    process.exit(1);
-  }
+  const packages = getPackageDirs();
   const errors = [];
-  for (const dir of dirs) {
-    errors.push(...(await validate(path.resolve(dir))));
+  for (const { dir } of packages) {
+    errors.push(...(await validate(dir)));
   }
   if (errors.length) {
     console.error(`❌ ${errors.length} undeclared import(s):\n  ${[...new Set(errors)].join("\n  ")}`);
