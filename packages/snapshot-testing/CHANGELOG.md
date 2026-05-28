@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.6
+
+### Patch Changes
+
+- a87363c: filter out exec-env with version suffix
+
 ## 2.1.5
 
 ### Patch Changes
