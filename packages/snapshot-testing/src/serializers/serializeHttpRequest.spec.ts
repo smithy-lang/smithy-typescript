@@ -1,10 +1,10 @@
 import type { HttpRequest } from "@smithy/types";
-import { describe, expect, it as test } from "vitest";
+import { describe, expect, test as it } from "vitest";
 
 import { serializeHttpRequest } from "./serializeHttpRequest";
 
 describe("serializeHttpRequest user-agent replacement", () => {
-  test("should replace aws-sdk-js version", async () => {
+  it("should replace aws-sdk-js version", async () => {
     const request: HttpRequest = {
       method: "GET",
       protocol: "https:",
@@ -26,7 +26,7 @@ user-agent: aws-sdk-js/3.___._ lang/js
 `);
   });
 
-  test("should remove os metadata", async () => {
+  it("should remove os metadata", async () => {
     const request: HttpRequest = {
       method: "GET",
       protocol: "https:",
@@ -48,7 +48,7 @@ user-agent: aws-sdk-js/3.___._ lang/js
 `);
   });
 
-  test("should remove exec-env with various formats", async () => {
+  it("should remove exec-env with various formats", async () => {
     const request: HttpRequest = {
       method: "GET",
       protocol: "https:",
@@ -70,7 +70,7 @@ user-agent: aws-sdk-js/3.___._ lang/js
 `);
   });
 
-  test("should remove exec-env with periods, underscores, and dashes", async () => {
+  it("should remove exec-env with periods, underscores, and dashes", async () => {
     const request: HttpRequest = {
       method: "GET",
       protocol: "https:",
@@ -92,7 +92,29 @@ x-amz-user-agent: aws-sdk-js/3.___._ lang/js
 `);
   });
 
-  test("should replace hash version", async () => {
+  it("should remove exec-env with slashes (e.g. Hyphenated-Version-Name/2.4.2)", async () => {
+    const request: HttpRequest = {
+      method: "GET",
+      protocol: "https:",
+      hostname: "example.com",
+      path: "/",
+      headers: {
+        "user-agent": "aws-sdk-js/3.0.0 exec-env/Hyphenated-Version-Name/2.4.2 lang/js",
+      },
+    };
+
+    const result = await serializeHttpRequest(request);
+    expect(result).toEqual(`GET https://example.com 
+/
+
+user-agent: aws-sdk-js/3.___._ lang/js
+
+[no body]
+
+`);
+  });
+
+  it("should replace hash version", async () => {
     const request: HttpRequest = {
       method: "GET",
       protocol: "https:",
