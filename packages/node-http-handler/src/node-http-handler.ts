@@ -1,5 +1,5 @@
-import type { Agent as hAgentType, request as hRequestType } from "node:http";
-import { Agent as hsAgent, request as hsRequest, type RequestOptions } from "node:https";
+import type hNodeType from "node:http";
+import hsNode from "node:https";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 
@@ -16,9 +16,9 @@ import { writeRequestBody } from "./write-request-body";
 export { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
-  httpAgentProvider: () => Promise<hAgentType>;
-  httpAgent?: hAgentType;
-  httpsAgent: hsAgent;
+  httpAgentProvider: () => Promise<hNodeType.Agent>;
+  httpAgent?: hNodeType.Agent;
+  httpsAgent: hsNode.Agent;
 }
 
 /**
@@ -28,8 +28,7 @@ interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "ht
  */
 export const DEFAULT_REQUEST_TIMEOUT = 0;
 
-let hAgent: { new (...args: any): hAgentType } | undefined = undefined;
-let hRequest: typeof hRequestType | undefined = undefined;
+let hNode: typeof hNodeType | undefined = undefined;
 
 /**
  * A request handler that uses the Node.js http and https modules.
@@ -69,7 +68,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
    * @returns timestamp of last emitted warning.
    */
   public static checkSocketUsage(
-    agent: hAgentType | hsAgent,
+    agent: hNodeType.Agent | hsNode.Agent,
     socketWarningTimestamp: number,
     logger: Logger = console
   ): number {
@@ -195,7 +194,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         // Because awaiting 100-continue desynchronizes the request and request body transmission,
         // such requests must be offloaded to a separate Agent instance.
         // Additional logic will exist on the client using this handler to determine whether to add the header at all.
-        agent = new (isSSL ? hsAgent : hAgent!)({
+        agent = new (isSSL ? hsNode.Agent : hNode!.Agent)({
           keepAlive: false,
           // This is an explicit value matching the default (Infinity).
           // This should allow the connection to close cleanly after making the single request.
@@ -238,7 +237,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         hostname = request.hostname;
       }
 
-      const nodeHttpsOptions: RequestOptions = {
+      const nodeHttpsOptions: hNodeType.RequestOptions = {
         headers: request.headers,
         host: hostname,
         method: request.method,
@@ -249,7 +248,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       };
 
       // create the http request
-      const requestFunc = isSSL ? hsRequest : hRequest!;
+      const requestFunc = isSSL ? hsNode.request : hNode!.request;
 
       const req = requestFunc(nodeHttpsOptions, (res) => {
         const httpResponse = new HttpResponse({
@@ -356,22 +355,20 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       socketAcquisitionWarningTimeout,
       throwOnRequestTimeout,
       httpAgentProvider: async () => {
-        const { Agent, request } = await import("node:http");
-        hRequest = request;
-        hAgent = Agent;
+        hNode = (await import("node:http")).default;
 
-        if (httpAgent instanceof hAgent || typeof (httpAgent as hAgentType)?.destroy === "function") {
+        if (httpAgent instanceof hNode.Agent || typeof (httpAgent as hNodeType.Agent)?.destroy === "function") {
           this.externalAgent = true;
-          return httpAgent as hAgentType;
+          return httpAgent as hNodeType.Agent;
         }
-        return new hAgent({ keepAlive, maxSockets, ...httpAgent });
+        return new hNode.Agent({ keepAlive, maxSockets, ...httpAgent });
       },
       httpsAgent: (() => {
-        if (httpsAgent instanceof hsAgent || typeof (httpsAgent as hsAgent)?.destroy === "function") {
+        if (httpsAgent instanceof hsNode.Agent || typeof (httpsAgent as hsNode.Agent)?.destroy === "function") {
           this.externalAgent = true;
-          return httpsAgent as hsAgent;
+          return httpsAgent as hsNode.Agent;
         }
-        return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
+        return new hsNode.Agent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
       logger,
     };
