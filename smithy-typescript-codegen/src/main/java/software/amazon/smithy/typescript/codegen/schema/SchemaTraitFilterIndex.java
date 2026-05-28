@@ -32,6 +32,7 @@ import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.JsonNameTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.model.traits.ProtocolDefinitionTrait;
+import software.amazon.smithy.model.traits.RequestCompressionTrait;
 import software.amazon.smithy.model.traits.RequiresLengthTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.SparseTrait;
@@ -50,7 +51,9 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
 
     private static final Set<ShapeId> EXCLUDED_TRAITS = SetUtils.of(
         // excluded due to special schema handling.
-        TimestampFormatTrait.ID
+        TimestampFormatTrait.ID,
+        // excluded because AddCompressionDependency handles it via middleware plugin.
+        RequestCompressionTrait.ID
     );
 
     /**
