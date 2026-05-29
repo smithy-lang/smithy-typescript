@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.6
+
+### Patch Changes
+
+- dfa58f2: switch from node:url->parse to new URL() for parsing URI
+
 ## 4.3.5
 
 ### Patch Changes
