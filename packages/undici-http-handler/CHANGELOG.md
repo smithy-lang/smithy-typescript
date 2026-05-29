@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 8644700: Bump undici to 7.x. This drops support for node 18 too.
+
 ## 1.0.5
 
 ### Patch Changes
