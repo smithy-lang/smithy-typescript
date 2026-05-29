@@ -2,6 +2,25 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.50.0 (2026-05-29)
+
+### Bug Fixes
+
+- Excluded RequestCompressionTrait from schema generation ([#2056](https://github.com/smithy-lang/smithy-typescript/pull/2056))
+- Corrected import source of strictParseFloat ([#2014](https://github.com/smithy-lang/smithy-typescript/pull/2014))
+- Corrected source package for compression plugin ([#2013](https://github.com/smithy-lang/smithy-typescript/pull/2013))
+
+### Chores
+
+- Updated smithyVersion to 1.71.0 ([#2055](https://github.com/smithy-lang/smithy-typescript/pull/2055))
+- Consolidated event-streams packages ([#2003](https://github.com/smithy-lang/smithy-typescript/pull/2003))
+- Consolidated retry packages ([#2002](https://github.com/smithy-lang/smithy-typescript/pull/2002))
+- Moved checksums from serde to new submodule ([#2000](https://github.com/smithy-lang/smithy-typescript/pull/2000))
+- Consolidated protocols packages ([#1998](https://github.com/smithy-lang/smithy-typescript/pull/1998))
+- Consolidated config packages ([#1992](https://github.com/smithy-lang/smithy-typescript/pull/1992))
+- Consolidated client packages ([#1991](https://github.com/smithy-lang/smithy-typescript/pull/1991))
+- Consolidated serde packages ([#1985](https://github.com/smithy-lang/smithy-typescript/pull/1985))
+
 ## 0.49.1 (2026-04-30)
 
 ### Bug Fixes
