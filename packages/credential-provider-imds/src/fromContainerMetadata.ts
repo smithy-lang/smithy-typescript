@@ -1,5 +1,4 @@
 import type { RequestOptions } from "node:http";
-import { parse } from "node:url";
 import { CredentialsProviderError } from "@smithy/core/config";
 import type { AwsCredentialIdentityProvider, Logger } from "@smithy/types";
 
@@ -58,14 +57,8 @@ const requestFromEcsImds = async (timeout: number, options: RequestOptions): Pro
 };
 
 const CMDS_IP = "169.254.170.2";
-const GREENGRASS_HOSTS = {
-  localhost: true,
-  "127.0.0.1": true,
-};
-const GREENGRASS_PROTOCOLS = {
-  "http:": true,
-  "https:": true,
-};
+const GREENGRASS_HOSTS = new Set(["localhost", "127.0.0.1"]);
+const GREENGRASS_PROTOCOLS = new Set(["http:", "https:"]);
 
 const getCmdsUri = async ({ logger }: { logger?: Logger }): Promise<RequestOptions> => {
   if (process.env[ENV_CMDS_RELATIVE_URI]) {
@@ -76,15 +69,23 @@ const getCmdsUri = async ({ logger }: { logger?: Logger }): Promise<RequestOptio
   }
 
   if (process.env[ENV_CMDS_FULL_URI]) {
-    const parsed = parse(process.env[ENV_CMDS_FULL_URI]!);
-    if (!parsed.hostname || !(parsed.hostname in GREENGRASS_HOSTS)) {
+    let parsed: URL;
+    try {
+      parsed = new URL(process.env[ENV_CMDS_FULL_URI]!);
+    } catch {
+      throw new CredentialsProviderError(
+        `${process.env[ENV_CMDS_FULL_URI]} is not a valid container metadata service URL`,
+        { tryNextLink: false, logger }
+      );
+    }
+    if (!parsed.hostname || !GREENGRASS_HOSTS.has(parsed.hostname)) {
       throw new CredentialsProviderError(`${parsed.hostname} is not a valid container metadata service hostname`, {
         tryNextLink: false,
         logger,
       });
     }
 
-    if (!parsed.protocol || !(parsed.protocol in GREENGRASS_PROTOCOLS)) {
+    if (!parsed.protocol || !GREENGRASS_PROTOCOLS.has(parsed.protocol)) {
       throw new CredentialsProviderError(`${parsed.protocol} is not a valid container metadata service protocol`, {
         tryNextLink: false,
         logger,
@@ -92,7 +93,9 @@ const getCmdsUri = async ({ logger }: { logger?: Logger }): Promise<RequestOptio
     }
 
     return {
-      ...parsed,
+      protocol: parsed.protocol,
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
       port: parsed.port ? parseInt(parsed.port, 10) : undefined,
     };
   }
