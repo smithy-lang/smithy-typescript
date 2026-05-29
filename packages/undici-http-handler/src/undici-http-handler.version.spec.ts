@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { dependencies, engines, peerDependencies } from "../package.json";
 
-const EXPECTED_ENGINES_NODE = ">=18.17";
+const EXPECTED_ENGINES_NODE = ">=20.18.1";
 
 describe("undici version", () => {
   it("peerDependencies[undici] should accept dependencies[undici]", () => {

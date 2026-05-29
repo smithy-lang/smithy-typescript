@@ -1,7 +1,17 @@
-.PHONY: build sync api-snapshot ct cti cwt cwti
+.PHONY: build build-packages sync api-snapshot ct cti cwt cwti
 
 build:
 	./gradlew clean build publishToMavenLocal
+
+# @smithy/undici-http-handler depends on undici@7, which requires Node.js >= 20.
+# Skip building it on older Node versions so the rest of the workspace still builds.
+build-packages:
+	@NODE_MAJOR=$$(node -p "parseInt(process.versions.node.split('.')[0], 10)"); \
+	if [ "$$NODE_MAJOR" -lt 20 ]; then \
+		yarn turbo run build --filter='!@smithy/undici-http-handler'; \
+	else \
+		yarn turbo run build; \
+	fi
 
 sync:
 	gh repo sync $$GITHUB_USERNAME/smithy-typescript -b main
@@ -40,8 +50,15 @@ bgt:
 gt:
 	make generate-protocol-tests
 
+# @smithy/undici-http-handler depends on undici@7, which requires Node.js >= 20.
+# Skip its tests on older Node versions so the rest of the unit tests still run.
 test-unit:
-	yarn g:vitest run -c vitest.config.mts
+	@NODE_MAJOR=$$(node -p "parseInt(process.versions.node.split('.')[0], 10)"); \
+	if [ "$$NODE_MAJOR" -lt 20 ]; then \
+		yarn g:vitest run -c vitest.config.mts --exclude '**/packages/undici-http-handler/**'; \
+	else \
+		yarn g:vitest run -c vitest.config.mts; \
+	fi
 
 test-browser:
 	yarn g:vitest run -c vitest.config.browser.mts
