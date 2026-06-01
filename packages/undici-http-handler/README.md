@@ -113,21 +113,66 @@ The `NodeHttpHandler` is configured with top-level timeout fields and
 `http.Agent`/`https.Agent` instances, whereas `UndiciHttpHandler` is configured
 with a single undici `Dispatcher` (or `Agent.Options`).
 
-The table below maps each `NodeHttpHandler` option to its
-undici equivalent.
+### Option mapping
 
-| `NodeHttpHandler` option          | `UndiciHttpHandler` equivalent                         | Notes                                                                                                                                                                                                                  |
-| --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `connectionTimeout`               | `dispatcher.connect.timeout`                           | Time allowed for the connect (and TLS) phase.                                                                                                                                                                          |
-| `requestTimeout`                  | `dispatcher.headersTimeout` / `dispatcher.bodyTimeout` | undici splits this into time-to-headers and time-between-body-chunks. The per-request `requestTimeout` option also sets both.                                                                                          |
-| `socketTimeout`                   | `dispatcher.bodyTimeout` / `dispatcher.headersTimeout` | Node's `socketTimeout` fires on socket inactivity during an in-flight request. undici's `bodyTimeout` (time between body chunks) and `headersTimeout` (time waiting for headers) cover the same stalled-request cases. |
-| `httpAgent` / `httpsAgent`        | `dispatcher`                                           | A single undici `Dispatcher` handles both `http:` and `https:`; there is no separate agent per protocol.                                                                                                               |
-| `httpAgent.maxSockets`            | `dispatcher.connections`                               | Maximum connections undici opens per origin. undici defaults to unlimited; `NodeHttpHandler` defaults to `50`.                                                                                                         |
-| `httpAgent.keepAlive` (`true`)    | (default)                                              | undici pools and reuses connections by default. Set `dispatcher.pipelining: 0` to avoid reusing a connection for new requests.                                                                                         |
-| `httpAgent.keepAliveMsecs`        | `dispatcher.connect.keepAliveInitialDelay`             | TCP keep-alive probe delay (`socket.setKeepAlive`). Set `connect.keepAlive: true` to enable it on the undici connector.                                                                                                |
-| `throwOnRequestTimeout`           | (default)                                              | undici always throws on timeout; this handler surfaces it as a `TimeoutError`. There is no warning-only mode to opt out of.                                                                                            |
-| `socketAcquisitionWarningTimeout` | _no equivalent_                                        | undici manages its own connection pool queue and does not emit this warning.                                                                                                                                           |
-| `logger`                          | `logger`                                               | Passed at the top level, same as `NodeHttpHandler`.                                                                                                                                                                    |
+The sections below map each `NodeHttpHandler` option to its undici equivalent.
+When you pass plain options instead of a `Dispatcher` instance, the handler
+treats them as undici [`Agent.Options`][undici-agent-options], which extend
+[`Pool` options][undici-pool-options] and, in turn, [`Client`
+options][undici-client-options]; `connect.*` options come from
+[`ConnectOptions`][undici-connect-options].
+
+#### `connectionTimeout`
+
+Maps to [`dispatcher.connect.timeout`][undici-connect-options]. Time allowed for
+the connect (and TLS) phase.
+
+#### `requestTimeout`
+
+Maps to [`dispatcher.headersTimeout`][undici-client-options] and
+[`dispatcher.bodyTimeout`][undici-client-options]. undici splits this into
+time-to-headers and time-between-body-chunks. The per-request `requestTimeout`
+option also sets both.
+
+#### `socketTimeout`
+
+Maps to [`dispatcher.bodyTimeout`][undici-client-options] and
+[`dispatcher.headersTimeout`][undici-client-options]. Node's `socketTimeout`
+fires on socket inactivity during an in-flight request. undici's `bodyTimeout`
+(time between body chunks) and `headersTimeout` (time waiting for headers) cover
+the same stalled-request cases.
+
+#### `httpAgent` / `httpsAgent`
+
+Maps to `dispatcher`. A single undici `Dispatcher` handles both `http:` and
+`https:`; there is no separate agent per protocol. The nested agent options map
+as follows:
+
+- `keepAlive` (`true`) — default behavior. undici pools and reuses
+  connections by default. Set [`dispatcher.pipelining: 0`][undici-client-options]
+  to avoid reusing a connection for new requests.
+- `keepAliveMsecs` — maps to
+  [`dispatcher.connect.keepAliveInitialDelay`][undici-connect-options]. TCP
+  keep-alive probe delay (`socket.setKeepAlive`). Set `connect.keepAlive: true`
+  to enable it on the undici connector.
+- `maxSockets` — maps to
+  [`dispatcher.connections`][undici-pool-options]. Maximum connections undici
+  opens per origin. undici defaults to unlimited; `NodeHttpHandler` defaults to
+  `50`.
+
+#### `throwOnRequestTimeout`
+
+Default behavior. undici always throws on timeout; this handler surfaces it as a
+`TimeoutError`. There is no warning-only mode to opt out of.
+
+#### `socketAcquisitionWarningTimeout`
+
+No equivalent. undici manages its own connection pool queue and does not emit
+this warning.
+
+#### `logger`
+
+Maps to `logger`. Passed at the top level, same as `NodeHttpHandler`.
 
 > **Note:** undici also has a `keepAliveTimeout` option, but it has no
 > `NodeHttpHandler` counterpart. It controls how long an _idle_ pooled socket
@@ -188,3 +233,7 @@ results will vary depending on workload, network conditions, and environment.
 
 [undici]: https://undici.nodejs.org/
 [node-http-handler]: https://www.npmjs.com/package/@smithy/node-http-handler
+[undici-agent-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Agent.md#parameter-agentoptions
+[undici-pool-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Pool.md#parameter-pooloptions
+[undici-client-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Client.md#parameter-clientoptions
+[undici-connect-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Client.md#parameter-connectoptions
