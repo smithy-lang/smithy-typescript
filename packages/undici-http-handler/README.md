@@ -3,7 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/@smithy/undici-http-handler/latest.svg)](https://www.npmjs.com/package/@smithy/undici-http-handler)
 [![NPM downloads](https://img.shields.io/npm/dm/@smithy/undici-http-handler.svg)](https://www.npmjs.com/package/@smithy/undici-http-handler)
 
-Smithy-compatible HTTP handler backed by modern and high performance Node.js [undici][].
+Smithy-compatible HTTP handler backed by modern, high performance Node.js [undici][] client.
 
 ## Usage
 
@@ -104,6 +104,73 @@ client.listTables({}).then(console.log);
 > in your application — improvements in newer releases (HTTP parser, connection
 > pooling, etc.) will then apply to requests made through this handler.
 
+## Migrating from NodeHttpHandler
+
+`UndiciHttpHandler` does not accept the same options as
+[`NodeHttpHandler`][node-http-handler].
+
+The `NodeHttpHandler` is configured with top-level timeout fields and
+`http.Agent`/`https.Agent` instances, whereas `UndiciHttpHandler` is configured
+with a single undici `Dispatcher` (or `Agent.Options`).
+
+The table below maps each `NodeHttpHandler` option to its
+undici equivalent.
+
+| `NodeHttpHandler` option          | `UndiciHttpHandler` equivalent                         | Notes                                                                                                                                                                                                                  |
+| --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `connectionTimeout`               | `dispatcher.connect.timeout`                           | Time allowed for the connect (and TLS) phase.                                                                                                                                                                          |
+| `requestTimeout`                  | `dispatcher.headersTimeout` / `dispatcher.bodyTimeout` | undici splits this into time-to-headers and time-between-body-chunks. The per-request `requestTimeout` option also sets both.                                                                                          |
+| `socketTimeout`                   | `dispatcher.bodyTimeout` / `dispatcher.headersTimeout` | Node's `socketTimeout` fires on socket inactivity during an in-flight request. undici's `bodyTimeout` (time between body chunks) and `headersTimeout` (time waiting for headers) cover the same stalled-request cases. |
+| `httpAgent` / `httpsAgent`        | `dispatcher`                                           | A single undici `Dispatcher` handles both `http:` and `https:`; there is no separate agent per protocol.                                                                                                               |
+| `httpAgent.maxSockets`            | `dispatcher.connections`                               | Maximum connections undici opens per origin. undici defaults to unlimited; `NodeHttpHandler` defaults to `50`.                                                                                                         |
+| `httpAgent.keepAlive` (`true`)    | (default)                                              | undici pools and reuses connections by default. Set `dispatcher.pipelining: 0` to avoid reusing a connection for new requests.                                                                                         |
+| `httpAgent.keepAliveMsecs`        | `dispatcher.connect.keepAliveInitialDelay`             | TCP keep-alive probe delay (`socket.setKeepAlive`). Set `connect.keepAlive: true` to enable it on the undici connector.                                                                                                |
+| `throwOnRequestTimeout`           | (default)                                              | undici always throws on timeout; this handler surfaces it as a `TimeoutError`. There is no warning-only mode to opt out of.                                                                                            |
+| `socketAcquisitionWarningTimeout` | _no equivalent_                                        | undici manages its own connection pool queue and does not emit this warning.                                                                                                                                           |
+| `logger`                          | `logger`                                               | Passed at the top level, same as `NodeHttpHandler`.                                                                                                                                                                    |
+
+> **Note:** undici also has a `keepAliveTimeout` option, but it has no
+> `NodeHttpHandler` counterpart. It controls how long an _idle_ pooled socket
+> (with no active requests) is kept open for reuse — a different concept from
+> `socketTimeout`, which guards against inactivity during an in-flight request.
+
+### Before / after example
+
+```js
+// Before: NodeHttpHandler
+import { Agent as HttpsAgent } from "node:https";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
+
+new NodeHttpHandler({
+  connectionTimeout: 3000,
+  requestTimeout: 5000,
+  socketTimeout: 4000,
+  httpsAgent: new HttpsAgent({
+    maxSockets: 50,
+    keepAlive: true,
+    keepAliveMsecs: 1000,
+  }),
+});
+```
+
+```js
+// After: UndiciHttpHandler
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+
+new UndiciHttpHandler({
+  dispatcher: {
+    connections: 50,
+    headersTimeout: 5000, // requestTimeout
+    bodyTimeout: 4000, // socketTimeout (inactivity during a request)
+    connect: {
+      timeout: 3000, // connectionTimeout
+      keepAlive: true, // http(s)Agent.keepAlive
+      keepAliveInitialDelay: 1000, // http(s)Agent.keepAliveMsecs
+    },
+  },
+});
+```
+
 ## Benchmarks
 
 Our benchmark spin up a local HTTP server and runs two scenarios:
@@ -120,3 +187,4 @@ We recommend running benchmarks for your own use case on your own setup, as
 results will vary depending on workload, network conditions, and environment.
 
 [undici]: https://undici.nodejs.org/
+[node-http-handler]: https://www.npmjs.com/package/@smithy/node-http-handler
