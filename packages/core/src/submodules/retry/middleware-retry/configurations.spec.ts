@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest"
 import { AdaptiveRetryStrategy } from "../util-retry/AdaptiveRetryStrategy";
 import { StandardRetryStrategy } from "../util-retry/StandardRetryStrategy";
 import { DEFAULT_MAX_ATTEMPTS } from "../util-retry/config";
+import { Retry } from "../util-retry/retries-2026-config";
 import {
   CONFIG_MAX_ATTEMPTS,
   ENV_MAX_ATTEMPTS,
@@ -46,6 +47,55 @@ describe(resolveRetryConfig.name, () => {
       const output = await resolveRetryConfig({ retryMode }).maxAttempts();
       expect(output).toStrictEqual(DEFAULT_MAX_ATTEMPTS);
     });
+
+    it("uses defaultMaxAttempts from defaults parameter when maxAttempts not provided", async () => {
+      const output = await resolveRetryConfig({ retryMode }, { defaultMaxAttempts: 5 }).maxAttempts();
+      expect(output).toStrictEqual(5);
+    });
+
+    it("prefers input maxAttempts over defaultMaxAttempts", async () => {
+      const output = await resolveRetryConfig({ maxAttempts: 2, retryMode }, { defaultMaxAttempts: 5 }).maxAttempts();
+      expect(output).toStrictEqual(2);
+    });
+  });
+
+  describe("defaults parameter", () => {
+    it("passes defaultBaseDelay to StandardRetryStrategy", async () => {
+      const { retryStrategy } = resolveRetryConfig({ retryMode: "standard" }, { defaultBaseDelay: 200 });
+      await retryStrategy();
+      expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledWith({
+        maxAttempts: DEFAULT_MAX_ATTEMPTS,
+        baseDelay: 200,
+      });
+    });
+
+    it("passes defaultBaseDelay to AdaptiveRetryStrategy", async () => {
+      const { retryStrategy } = resolveRetryConfig({ retryMode: "adaptive" }, { defaultBaseDelay: 200 });
+      await retryStrategy();
+      const [, options] = vi.mocked(AdaptiveRetryStrategy).mock.calls[0];
+      expect(options).toEqual({ maxAttempts: DEFAULT_MAX_ATTEMPTS, baseDelay: 200 });
+    });
+
+    it("uses Retry.delay() as baseDelay when defaults not provided", async () => {
+      const { retryStrategy } = resolveRetryConfig({ retryMode: "standard" });
+      await retryStrategy();
+      expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledWith({
+        maxAttempts: DEFAULT_MAX_ATTEMPTS,
+        baseDelay: Retry.delay(),
+      });
+    });
+
+    it("uses both defaultMaxAttempts and defaultBaseDelay together", async () => {
+      const { retryStrategy } = resolveRetryConfig(
+        { retryMode: "standard" },
+        { defaultMaxAttempts: 10, defaultBaseDelay: 500 }
+      );
+      await retryStrategy();
+      expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledWith({
+        maxAttempts: 10,
+        baseDelay: 500,
+      });
+    });
   });
 
   describe("retryStrategy", () => {
@@ -63,7 +113,7 @@ describe(resolveRetryConfig.name, () => {
     describe("creates RetryStrategy if retryStrategy not present", () => {
       describe("StandardRetryStrategy", () => {
         describe("when retryMode=standard", () => {
-          describe("passes maxAttempts if present", () => {
+          describe("passes maxAttempts and baseDelay in options", () => {
             const retryMode = "standard";
             for (const maxAttempts of [1, 2, 3]) {
               it(`when maxAttempts=${maxAttempts}`, async () => {
@@ -71,15 +121,17 @@ describe(resolveRetryConfig.name, () => {
                 await retryStrategy();
                 expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(AdaptiveRetryStrategy)).not.toHaveBeenCalled();
-                const output = await vi.mocked(StandardRetryStrategy as any).mock.calls[0][0]();
-                expect(output).toStrictEqual(maxAttempts);
+                expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledWith({
+                  maxAttempts,
+                  baseDelay: Retry.delay(),
+                });
               });
             }
           });
         });
 
         describe("when retryMode returns 'standard'", () => {
-          describe("passes maxAttempts if present", () => {
+          describe("passes maxAttempts and baseDelay in options", () => {
             beforeEach(() => {
               retryMode.mockResolvedValueOnce("standard");
             });
@@ -90,8 +142,10 @@ describe(resolveRetryConfig.name, () => {
                 expect(retryMode).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(AdaptiveRetryStrategy)).not.toHaveBeenCalled();
-                const output = await vi.mocked(StandardRetryStrategy as any).mock.calls[0][0]();
-                expect(output).toStrictEqual(maxAttempts);
+                expect(vi.mocked(StandardRetryStrategy)).toHaveBeenCalledWith({
+                  maxAttempts,
+                  baseDelay: Retry.delay(),
+                });
               });
             }
           });
@@ -100,7 +154,7 @@ describe(resolveRetryConfig.name, () => {
 
       describe("AdaptiveRetryStrategy", () => {
         describe("when retryMode=adaptive", () => {
-          describe("passes maxAttempts if present", () => {
+          describe("passes maxAttemptsProvider and options", () => {
             const retryMode = "adaptive";
             for (const maxAttempts of [1, 2, 3]) {
               it(`when maxAttempts=${maxAttempts}`, async () => {
@@ -108,15 +162,16 @@ describe(resolveRetryConfig.name, () => {
                 await retryStrategy();
                 expect(vi.mocked(StandardRetryStrategy)).not.toHaveBeenCalled();
                 expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
-                const output = await vi.mocked(AdaptiveRetryStrategy as any).mock.calls[0][0]();
-                expect(output).toStrictEqual(maxAttempts);
+                const [provider, options] = vi.mocked(AdaptiveRetryStrategy).mock.calls[0];
+                expect(await (provider as Provider<number>)()).toStrictEqual(maxAttempts);
+                expect(options).toEqual({ maxAttempts, baseDelay: Retry.delay() });
               });
             }
           });
         });
 
         describe("when retryMode returns 'adaptive'", () => {
-          describe("passes maxAttempts if present", () => {
+          describe("passes maxAttemptsProvider and options", () => {
             beforeEach(() => {
               retryMode.mockResolvedValueOnce("adaptive");
             });
@@ -127,8 +182,9 @@ describe(resolveRetryConfig.name, () => {
                 expect(retryMode).toHaveBeenCalledTimes(1);
                 expect(vi.mocked(StandardRetryStrategy)).not.toHaveBeenCalled();
                 expect(vi.mocked(AdaptiveRetryStrategy)).toHaveBeenCalledTimes(1);
-                const output = await vi.mocked(AdaptiveRetryStrategy as any).mock.calls[0][0]();
-                expect(output).toStrictEqual(maxAttempts);
+                const [provider, options] = vi.mocked(AdaptiveRetryStrategy).mock.calls[0];
+                expect(await (provider as Provider<number>)()).toStrictEqual(maxAttempts);
+                expect(options).toEqual({ maxAttempts, baseDelay: Retry.delay() });
               });
             }
           });

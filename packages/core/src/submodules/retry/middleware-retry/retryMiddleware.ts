@@ -85,9 +85,6 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             try {
               retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
             } catch (refreshError) {
-              if (typeof refreshError.$backoff === "number") {
-                await cooldown(refreshError.$backoff);
-              }
               if (!lastError.$metadata) {
                 lastError.$metadata = {};
               }
@@ -97,8 +94,13 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             }
             attempts = retryToken.getRetryCount();
             const delay = retryToken.getRetryDelay();
-            totalRetryDelay += delay;
-            await cooldown(delay);
+            totalRetryDelay += (retryToken?.$retryLog?.acquisitionDelay ?? 0) + delay;
+            if (delay > 0) {
+              // for internal V2 (SRA) retryStrategies, delay should be zero going forward.
+              // This cooldown is for backwards compatibility with a user-implemented strategy
+              // which returns a token with delay.
+              await cooldown(delay);
+            }
           }
         }
       } else {

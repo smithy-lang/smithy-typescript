@@ -6,6 +6,9 @@ import { MAXIMUM_RETRY_DELAY } from "./constants";
  * @internal
  */
 export class DefaultRetryToken implements StandardRetryToken {
+  public $retryLog = {
+    acquisitionDelay: 0,
+  };
   public constructor(
     private readonly delay: number,
     private readonly count: number,

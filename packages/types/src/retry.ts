@@ -87,11 +87,25 @@ export interface RetryStrategyOptions {
  */
 export interface RetryToken {
   /**
+   * Starts at 0 for the initial request, which is not a "retry" by definition.
+   * 1 indicates the first retry.
+   *
    * @returns the current count of retry.
    */
   getRetryCount(): number;
 
   /**
+   * RetryStrategies implemented by `@smithy/core` will return tokens with a
+   * delay of zero.
+   *
+   * This is because the RetryStrategy token acquisition methods took over the
+   * task of idling for the delay period. If a user-implemented retry token
+   * contains a delay, the default Smithy retry middleware will still honor it.
+   *
+   * That is to say, you may either sleep within the RetryStrategy methods for acquiring
+   * the token, OR return a token with a retry delay that will cause the retry middleware
+   * to sleep.
+   *
    * @returns the number of milliseconds to wait before retrying an action.
    */
   getRetryDelay(): number;
@@ -100,6 +114,15 @@ export interface RetryToken {
    * @returns whether the operation which generated this token is long polling.
    */
   isLongPoll?(): boolean;
+
+  /**
+   * Delays that have already been executed by the time the token
+   * is accessible. This is needed for the token handler to understand what has happened.
+   * @internal
+   */
+  $retryLog?: {
+    acquisitionDelay?: number;
+  };
 }
 
 /**
@@ -133,6 +156,9 @@ export interface RetryStrategyV2 {
    * either choose to allow another retry and send a new or updated token,
    * or reject the retry attempt and report the error either in an exception
    * or returning an error.
+   *
+   * This method should either delay internally and return a token with 0 delay, OR
+   * do not sleep and return a token with the desired delay duration.
    */
   refreshRetryTokenForRetry(tokenToRenew: RetryToken, errorInfo: RetryErrorInfo): Promise<RetryToken>;
 

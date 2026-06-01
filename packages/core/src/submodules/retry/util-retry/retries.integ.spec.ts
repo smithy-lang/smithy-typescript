@@ -3,7 +3,7 @@ import { cbor } from "@smithy/core/cbor";
 import { HttpResponse } from "@smithy/protocol-http";
 import type { RetryErrorType, StandardRetryToken } from "@smithy/types";
 import { requireRequestsFrom } from "@smithy/util-test/src";
-import { afterAll, beforeAll, describe, expect, test as it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test as it, vi } from "vitest";
 import { XYZService } from "xyz";
 
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
@@ -160,10 +160,22 @@ describe("retries", () => {
 
 describe(StandardRetryStrategy.name, () => {
   const inline = (token: StandardRetryToken) => {
-    return [token.getRetryCount(), token.getRetryCost(), token.getRetryDelay(), token.isLongPoll?.()];
+    return [
+      token.getRetryCount(),
+      token.getRetryCost(),
+      token.$retryLog?.acquisitionDelay || token.getRetryDelay(),
+      token.isLongPoll?.(),
+    ];
   };
 
   describe("retry timings", () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
     const testCases: Array<{
       name: string;
       timings: [RetryErrorType, number, number | undefined, number, boolean][];
@@ -354,10 +366,11 @@ describe(StandardRetryStrategy.name, () => {
               const token = await retryStrategy.acquireInitialRetryToken(scope ?? "none");
               tokens.push(token);
             } else {
-              const token = await retryStrategy.refreshRetryTokenForRetry(tokens[i - 1], {
+              const retryTokenPromise = retryStrategy.refreshRetryTokenForRetry(tokens[i - 1], {
                 errorType: timings[i][0],
               });
-              tokens.push(token);
+              await vi.advanceTimersByTimeAsync(timings[i][3]);
+              tokens.push(await retryTokenPromise);
             }
 
             expect(inline(tokens[i])).toEqual(timings[i].slice(1));
@@ -500,6 +513,14 @@ describe("specification tests", () => {
   });
 
   describe("StandardRetryStrategy unit tests", () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
     for (const tc of specTestCases) {
       describe(tc.name, () => {
         let strategy: StandardRetryStrategy;
@@ -533,9 +554,11 @@ describe("specification tests", () => {
 
             if (outcome === "retry_request") {
               const errorType = errorTypeForResponse(step.response);
-              currentToken = await strategy.refreshRetryTokenForRetry(currentToken, { errorType });
+              const retryTokenPromise = strategy.refreshRetryTokenForRetry(currentToken, { errorType });
+              await vi.advanceTimersByTimeAsync(delay! * 1000);
+              currentToken = await retryTokenPromise;
               expect(strategy.getCapacity()).toEqual(retry_quota);
-              expect(currentToken.getRetryDelay()).toEqual(delay! * 1000);
+              expect(currentToken.$retryLog?.acquisitionDelay).toEqual(delay! * 1000);
               return;
             }
 

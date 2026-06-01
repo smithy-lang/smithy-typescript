@@ -56,8 +56,8 @@ const refusal = {
 export class StandardRetryStrategy implements RetryStrategyV2 {
   public readonly mode: string = RETRY_MODES.STANDARD;
 
+  protected readonly retryBackoffStrategy: StandardRetryBackoffStrategy;
   private capacity: number = INITIAL_RETRY_TOKENS;
-  private readonly retryBackoffStrategy: StandardRetryBackoffStrategy;
   private readonly maxAttemptsProvider: Provider<number>;
   private readonly baseDelay: number;
 
@@ -113,19 +113,25 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
          * that capacity is exhausted. Running out of attempts or having a
          * non-retryable error does *not* apply backoff.
          */
-        throw Object.assign(new Error("No retry token available"), {
-          $backoff: Retry.v2026 && retryCode === refusal.capacity && isLongPoll ? retryDelay : 0,
-        });
+        const longPollBackoff = Retry.v2026 && retryCode === refusal.capacity && isLongPoll ? retryDelay : 0;
+        if (longPollBackoff > 0) {
+          await new Promise((r) => setTimeout(r, longPollBackoff));
+        }
       } else {
         const capacityCost = this.getCapacityCost(errorType);
         this.capacity -= capacityCost;
 
-        return new DefaultRetryToken(
-          retryDelay,
+        const nextToken = new DefaultRetryToken(
+          0, // delay now happens in this method.
           token.getRetryCount() + 1,
           capacityCost,
           token.isLongPoll?.() ?? false
         );
+
+        await new Promise((r) => setTimeout(r, retryDelay));
+        nextToken.$retryLog.acquisitionDelay = retryDelay;
+
+        return nextToken;
       }
     }
 
