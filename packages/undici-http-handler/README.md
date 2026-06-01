@@ -145,8 +145,11 @@ the same stalled-request cases.
 #### `httpAgent` / `httpsAgent`
 
 Maps to `dispatcher`. A single undici `Dispatcher` handles both `http:` and
-`https:`; there is no separate agent per protocol. The nested agent options map
-as follows:
+`https:`; there is no separate agent per protocol.
+
+If you previously passed a third-party proxy agent (e.g. `proxy-agent`, `https-proxy-agent`) here, use undici's built-in `ProxyAgent` as the `dispatcher` instead — see [Proxies](#proxies).
+
+The nested agent options map as follows:
 
 - `keepAlive` (`true`) — default behavior. undici pools and reuses
   connections by default. Set [`dispatcher.pipelining: 0`][undici-client-options]
@@ -179,9 +182,17 @@ unavailable:
   by `keepAliveTimeout` / `keepAliveMaxTimeout` instead.
 - `scheduling` — undici uses its own pool scheduling and does not expose a
   free-socket ordering option (`'fifo'` / `'lifo'`).
+- `proxyEnv` — Node's built-in env-var proxy support (Node 24+, gated behind
+  `NODE_USE_ENV_PROXY`), not a classic `http.Agent` option. undici reads the
+  same `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` variables via its
+  `EnvHttpProxyAgent` dispatcher — see [Proxies](#proxies).
 - `defaultPort` / `protocol` — no per-dispatcher setting. undici derives the
   origin (scheme, host, port) from the request URL, so there is nothing to
   default.
+
+> **Note:** `proxyEnv`, `defaultPort`, and `protocol` are not classic
+> `http.Agent` options — they come from Node's built-in proxy support (Node 24+,
+> gated behind `NODE_USE_ENV_PROXY`) and are unavailable on older Node versions.
 
 #### `throwOnRequestTimeout`
 
@@ -197,10 +208,46 @@ this warning.
 
 Maps to `logger`. Passed at the top level, same as `NodeHttpHandler`.
 
-> **Note:** undici also has a `keepAliveTimeout` option, but it has no
-> `NodeHttpHandler` counterpart. It controls how long an _idle_ pooled socket
-> (with no active requests) is kept open for reuse — a different concept from
-> `socketTimeout`, which guards against inactivity during an in-flight request.
+### Proxies
+
+`NodeHttpHandler` has no built-in proxy support, so proxy use typically meant
+installing a third-party agent (e.g. `proxy-agent`, `https-proxy-agent`,
+`hpagent`) and passing it as `httpAgent`/`httpsAgent`:
+
+```js
+// Before: NodeHttpHandler with a third-party proxy agent
+import { NodeHttpHandler } from "@smithy/node-http-handler";
+import { HttpsProxyAgent } from "https-proxy-agent";
+
+const proxyAgent = new HttpsProxyAgent("http://localhost:8080");
+
+new NodeHttpHandler({
+  httpsAgent: proxyAgent,
+});
+```
+
+undici ships a `ProxyAgent` (a `Dispatcher`), so you no longer need a
+third-party dependency. Pass it as the `dispatcher`:
+
+```js
+// After: UndiciHttpHandler with undici's built-in ProxyAgent
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+import { ProxyAgent } from "undici";
+
+const dispatcher = new ProxyAgent("http://localhost:8080");
+
+new UndiciHttpHandler({ dispatcher });
+```
+
+To pick up the standard `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` environment
+variables automatically, use `EnvHttpProxyAgent` instead:
+
+```js
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+import { EnvHttpProxyAgent } from "undici";
+
+new UndiciHttpHandler({ dispatcher: new EnvHttpProxyAgent() });
+```
 
 ### Before / after example
 
