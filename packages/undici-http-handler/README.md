@@ -113,6 +113,45 @@ The `NodeHttpHandler` is configured with top-level timeout fields and
 `http.Agent`/`https.Agent` instances, whereas `UndiciHttpHandler` is configured
 with a single undici `Dispatcher` (or `Agent.Options`).
 
+### Before / After example
+
+This shows the most commonly configured options. See [Option mapping](#option-mapping) below for the complete list.
+
+```js
+// Before: NodeHttpHandler
+import { Agent as HttpsAgent } from "node:https";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
+
+new NodeHttpHandler({
+  connectionTimeout: 3000,
+  requestTimeout: 5000,
+  socketTimeout: 4000,
+  httpsAgent: new HttpsAgent({
+    maxSockets: 50,
+    keepAlive: true,
+    keepAliveMsecs: 1000,
+  }),
+});
+```
+
+```js
+// After: UndiciHttpHandler
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+
+new UndiciHttpHandler({
+  dispatcher: {
+    connections: 50, // maxSockets
+    headersTimeout: 5000, // requestTimeout
+    bodyTimeout: 4000, // socketTimeout (inactivity during a request)
+    connect: {
+      timeout: 3000, // connectionTimeout
+      keepAlive: true, // http(s)Agent.keepAlive
+      keepAliveInitialDelay: 1000, // http(s)Agent.keepAliveMsecs
+    },
+  },
+});
+```
+
 ### Option mapping
 
 The sections below map each `NodeHttpHandler` option to its undici equivalent.
@@ -247,43 +286,6 @@ import { UndiciHttpHandler } from "@smithy/undici-http-handler";
 import { EnvHttpProxyAgent } from "undici";
 
 new UndiciHttpHandler({ dispatcher: new EnvHttpProxyAgent() });
-```
-
-### Before / after example
-
-```js
-// Before: NodeHttpHandler
-import { Agent as HttpsAgent } from "node:https";
-import { NodeHttpHandler } from "@smithy/node-http-handler";
-
-new NodeHttpHandler({
-  connectionTimeout: 3000,
-  requestTimeout: 5000,
-  socketTimeout: 4000,
-  httpsAgent: new HttpsAgent({
-    maxSockets: 50,
-    keepAlive: true,
-    keepAliveMsecs: 1000,
-  }),
-});
-```
-
-```js
-// After: UndiciHttpHandler
-import { UndiciHttpHandler } from "@smithy/undici-http-handler";
-
-new UndiciHttpHandler({
-  dispatcher: {
-    connections: 50,
-    headersTimeout: 5000, // requestTimeout
-    bodyTimeout: 4000, // socketTimeout (inactivity during a request)
-    connect: {
-      timeout: 3000, // connectionTimeout
-      keepAlive: true, // http(s)Agent.keepAlive
-      keepAliveInitialDelay: 1000, // http(s)Agent.keepAliveMsecs
-    },
-  },
-});
 ```
 
 ## Benchmarks
