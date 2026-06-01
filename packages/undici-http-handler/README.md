@@ -159,6 +159,29 @@ as follows:
   [`dispatcher.connections`][undici-pool-options]. Maximum connections undici
   opens per origin. undici defaults to unlimited; `NodeHttpHandler` defaults to
   `50`.
+- `agentKeepAliveTimeoutBuffer` — maps to
+  [`dispatcher.keepAliveTimeoutThreshold`][undici-client-options]. Both subtract
+  a buffer (in ms) from the server's `keep-alive: timeout=...` hint so the client
+  closes the socket slightly before the server does. undici defaults to `2000`.
+- `timeout` — maps mainly to [`dispatcher.connect.timeout`][undici-connect-options]
+  for the connect phase. Node's Agent `timeout` is the default socket timeout for
+  created sockets; undici covers the in-flight side with `headersTimeout` /
+  `bodyTimeout` (see `requestTimeout` and `socketTimeout` above).
+
+The following agent options have no direct dispatcher equivalent. undici manages
+the connection pool differently, so these knobs are either unnecessary or
+unavailable:
+
+- `maxTotalSockets` — undici caps connections per origin (`connections`), not
+  globally. The closest option is [`dispatcher.maxOrigins`][undici-agent-options],
+  which limits how many origins receive requests, not the total socket count.
+- `maxFreeSockets` — undici has no idle-socket count cap. Idle sockets are reaped
+  by `keepAliveTimeout` / `keepAliveMaxTimeout` instead.
+- `scheduling` — undici uses its own pool scheduling and does not expose a
+  free-socket ordering option (`'fifo'` / `'lifo'`).
+- `defaultPort` / `protocol` — no per-dispatcher setting. undici derives the
+  origin (scheme, host, port) from the request URL, so there is nothing to
+  default.
 
 #### `throwOnRequestTimeout`
 
@@ -237,3 +260,5 @@ results will vary depending on workload, network conditions, and environment.
 [undici-pool-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Pool.md#parameter-pooloptions
 [undici-client-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Client.md#parameter-clientoptions
 [undici-connect-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Client.md#parameter-connectoptions
+[undici-env-proxy-agent]: https://github.com/nodejs/undici/blob/main/docs/docs/api/EnvHttpProxyAgent.md
+[undici-proxy-agent]: https://github.com/nodejs/undici/blob/main/docs/docs/api/ProxyAgent.md
