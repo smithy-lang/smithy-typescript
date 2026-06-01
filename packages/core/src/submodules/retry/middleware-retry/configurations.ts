@@ -5,6 +5,7 @@ import type { Logger, Provider, RetryStrategy, RetryStrategyV2 } from "@smithy/t
 import { AdaptiveRetryStrategy } from "../util-retry/AdaptiveRetryStrategy";
 import { StandardRetryStrategy } from "../util-retry/StandardRetryStrategy";
 import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE, RETRY_MODES } from "../util-retry/config";
+import { Retry } from "../util-retry/retries-2026-config";
 
 /**
  * @internal
@@ -86,21 +87,35 @@ export interface RetryResolvedConfig {
 /**
  * @internal
  */
-export const resolveRetryConfig = <T>(input: T & PreviouslyResolved & RetryInputConfig): T & RetryResolvedConfig => {
+export const resolveRetryConfig = <T>(
+  input: T & PreviouslyResolved & RetryInputConfig,
+  defaults?: { defaultMaxAttempts?: number; defaultBaseDelay?: number }
+): T & RetryResolvedConfig => {
   const { retryStrategy, retryMode } = input;
-  const maxAttempts = normalizeProvider(input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS);
+  const { defaultMaxAttempts = DEFAULT_MAX_ATTEMPTS, defaultBaseDelay = Retry.delay() } = defaults ?? {};
+  const maxAttemptsProvider = normalizeProvider(input.maxAttempts ?? defaultMaxAttempts);
 
   let controller: Promise<RetryStrategy | RetryStrategyV2> | undefined = retryStrategy
     ? Promise.resolve(retryStrategy)
     : undefined;
 
-  const getDefault = async () =>
-    (await normalizeProvider(retryMode)()) === RETRY_MODES.ADAPTIVE
-      ? new AdaptiveRetryStrategy(maxAttempts)
-      : new StandardRetryStrategy(maxAttempts);
+  const getDefault = async () => {
+    const maxAttempts = await maxAttemptsProvider();
+    const adaptive = (await normalizeProvider(retryMode)()) === RETRY_MODES.ADAPTIVE;
+    if (adaptive) {
+      return new AdaptiveRetryStrategy(maxAttemptsProvider, {
+        maxAttempts,
+        baseDelay: defaultBaseDelay,
+      });
+    }
+    return new StandardRetryStrategy({
+      maxAttempts,
+      baseDelay: defaultBaseDelay,
+    });
+  };
 
   return Object.assign(input, {
-    maxAttempts,
+    maxAttempts: maxAttemptsProvider,
     retryStrategy: () => (controller ??= getDefault()),
   });
 };

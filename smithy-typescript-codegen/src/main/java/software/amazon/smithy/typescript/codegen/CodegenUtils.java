@@ -299,6 +299,8 @@ public final class CodegenUtils {
                     }
                 } else if (value instanceof String) {
                     functionParametersList.add(String.format("%s: '%s'", key, value));
+                } else if (value instanceof Number) {
+                    functionParametersList.add(String.format("%s: %s", key, value));
                 } else if (value instanceof Boolean) {
                     functionParametersList.add(String.format("%s: %s", key, value));
                 } else if (value instanceof List) {

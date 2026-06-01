@@ -40,4 +40,17 @@ describe("defaultRetryToken", () => {
       });
     });
   });
+
+  describe("$retryLog", () => {
+    it("has acquisitionDelay initialized to 0", () => {
+      const retryToken = new DefaultRetryToken(0, 0, 0, false);
+      expect(retryToken.$retryLog.acquisitionDelay).toBe(0);
+    });
+
+    it("allows acquisitionDelay to be set", () => {
+      const retryToken = new DefaultRetryToken(0, 1, 10, false);
+      retryToken.$retryLog.acquisitionDelay = 500;
+      expect(retryToken.$retryLog.acquisitionDelay).toBe(500);
+    });
+  });
 });

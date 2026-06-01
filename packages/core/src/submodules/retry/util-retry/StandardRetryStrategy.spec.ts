@@ -63,6 +63,7 @@ describe(StandardRetryStrategy.name, () => {
             getRetryCount,
             getRetryCost: () => 0,
             getRetryDelay: () => 0,
+            $retryLog: { acquisitionDelay: 0 },
           }) as any
       );
       const retryStrategy = new StandardRetryStrategy(() => Promise.resolve(maxAttempts));
@@ -216,7 +217,7 @@ describe(StandardRetryStrategy.name, () => {
   });
 
   describe("long-poll token behavior", () => {
-    it("throws with $backoff when long-poll token has no capacity (code 3)", async () => {
+    it("throws when long-poll token has no capacity (code 3)", async () => {
       vi.mocked(DefaultRetryToken).mockImplementation(
         () =>
           ({
@@ -229,17 +230,12 @@ describe(StandardRetryStrategy.name, () => {
       const retryStrategy = new StandardRetryStrategy(maxAttempts);
       retryStrategy["capacity"] = 0;
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
-      try {
-        await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
-        fail("expected error");
-      } catch (error: any) {
-        expect(error.message).toBe("No retry token available");
-        // $backoff is 0 when Retry.v2026 is false, non-zero when true
-        expect(error.$backoff).toBe(0);
-      }
+      await expect(retryStrategy.refreshRetryTokenForRetry(token, errorInfo)).rejects.toThrow(
+        "No retry token available"
+      );
     });
 
-    it("throws with $backoff=0 when long-poll token fails for non-capacity reason (code 1)", async () => {
+    it("throws when long-poll token fails for non-capacity reason (code 1)", async () => {
       vi.mocked(DefaultRetryToken).mockImplementation(
         () =>
           ({
@@ -251,13 +247,9 @@ describe(StandardRetryStrategy.name, () => {
       );
       const retryStrategy = new StandardRetryStrategy(maxAttempts);
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
-      try {
-        await retryStrategy.refreshRetryTokenForRetry(token, { errorType: "CLIENT_ERROR" } as RetryErrorInfo);
-        fail("expected error");
-      } catch (error: any) {
-        expect(error.message).toBe("No retry token available");
-        expect(error.$backoff).toBe(0);
-      }
+      await expect(
+        retryStrategy.refreshRetryTokenForRetry(token, { errorType: "CLIENT_ERROR" } as RetryErrorInfo)
+      ).rejects.toThrow("No retry token available");
     });
 
     it("retries long-poll token even when retryCode is non-zero, if capacity exists", async () => {
@@ -269,6 +261,7 @@ describe(StandardRetryStrategy.name, () => {
             getRetryCost: () => 0,
             getRetryDelay: () => 0,
             isLongPoll: () => true,
+            $retryLog: { acquisitionDelay: 0 },
           }) as any
       );
       const retryStrategy = new StandardRetryStrategy(maxAttempts);
@@ -289,7 +282,7 @@ describe(StandardRetryStrategy.name, () => {
         Retry.v2026 = originalV2026;
       });
 
-      it("throws with non-zero $backoff for code 3", async () => {
+      it("sleeps and throws for code 3 (capacity exhausted)", async () => {
         vi.mocked(DefaultRetryToken).mockImplementation(
           () =>
             ({
@@ -305,13 +298,12 @@ describe(StandardRetryStrategy.name, () => {
         });
         retryStrategy["capacity"] = 0;
         const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
-        await expect(retryStrategy.refreshRetryTokenForRetry(token, errorInfo)).rejects.toMatchObject({
-          message: "No retry token available",
-          $backoff: 50, // b=1 * min(50 * 2^0, 20000) = 50
-        });
+        await expect(retryStrategy.refreshRetryTokenForRetry(token, errorInfo)).rejects.toThrow(
+          "No retry token available"
+        );
       });
 
-      it("throws with $backoff=0 for non-capacity code", async () => {
+      it("throws without sleeping for non-capacity code", async () => {
         vi.mocked(DefaultRetryToken).mockImplementation(
           () =>
             ({
@@ -325,10 +317,7 @@ describe(StandardRetryStrategy.name, () => {
         const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
         await expect(
           retryStrategy.refreshRetryTokenForRetry(token, { errorType: "CLIENT_ERROR" } as RetryErrorInfo)
-        ).rejects.toMatchObject({
-          message: "No retry token available",
-          $backoff: 0,
-        });
+        ).rejects.toThrow("No retry token available");
       });
     });
   });

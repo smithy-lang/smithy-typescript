@@ -1,10 +1,4 @@
-import type {
-  Provider,
-  RetryBackoffStrategy,
-  RetryErrorInfo,
-  RetryStrategyV2,
-  StandardRetryToken,
-} from "@smithy/types";
+import type { Provider, RetryBackoffStrategy, RetryStrategyV2 } from "@smithy/types";
 
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import { Retry } from "./retries-2026-config";
@@ -47,14 +41,11 @@ export class ConfiguredRetryStrategy extends StandardRetryStrategy implements Re
     } else {
       this.computeNextBackoffDelay = computeNextBackoffDelay;
     }
-  }
-
-  public async refreshRetryTokenForRetry(
-    tokenToRenew: StandardRetryToken,
-    errorInfo: RetryErrorInfo
-  ): Promise<StandardRetryToken> {
-    const token = await super.refreshRetryTokenForRetry(tokenToRenew, errorInfo);
-    token.getRetryDelay = () => this.computeNextBackoffDelay(token.getRetryCount());
-    return token;
+    this.retryBackoffStrategy.computeNextBackoffDelay = (completedAttempt: number): number => {
+      // Internally the computation is against the retry which had just completed.
+      // when calling the user-provided function we give the attempt number that will next occur.
+      const nextAttempt = completedAttempt + 1;
+      return this.computeNextBackoffDelay(nextAttempt);
+    };
   }
 }
