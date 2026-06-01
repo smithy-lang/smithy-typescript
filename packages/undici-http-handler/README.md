@@ -104,6 +104,21 @@ client.listTables({}).then(console.log);
 > in your application — improvements in newer releases (HTTP parser, connection
 > pooling, etc.) will then apply to requests made through this handler.
 
+## Benchmarks
+
+Our benchmark spin up a local HTTP server and runs two scenarios:
+
+- **10 sequential GETs** – measures per-request latency when requests are issued
+  one after another.
+- **50 concurrent GETs** – measures throughput under parallel load using
+  `Promise.all`.
+
+The results show UndiciHttpHandler spends **35%-45%** less time in request handling
+as compared to NodeHttpHandler from `@smithy/node-http-handler`.
+
+We recommend running benchmarks for your own use case on your own setup, as
+results will vary depending on workload, network conditions, and environment.
+
 ## Migrating from NodeHttpHandler
 
 `UndiciHttpHandler` does not accept the same options as
@@ -287,21 +302,6 @@ import { EnvHttpProxyAgent } from "undici";
 
 new UndiciHttpHandler({ dispatcher: new EnvHttpProxyAgent() });
 ```
-
-## Benchmarks
-
-Our benchmark spin up a local HTTP server and runs two scenarios:
-
-- **10 sequential GETs** – measures per-request latency when requests are issued
-  one after another.
-- **50 concurrent GETs** – measures throughput under parallel load using
-  `Promise.all`.
-
-The results show UndiciHttpHandler spends **35%-45%** less time in request handling
-as compared to NodeHttpHandler from `@smithy/node-http-handler`.
-
-We recommend running benchmarks for your own use case on your own setup, as
-results will vary depending on workload, network conditions, and environment.
 
 [undici]: https://undici.nodejs.org/
 [node-http-handler]: https://www.npmjs.com/package/@smithy/node-http-handler
