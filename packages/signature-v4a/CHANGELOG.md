@@ -1,5 +1,11 @@
 # @smithy/signature-v4a
 
+## 3.2.7
+
+### Patch Changes
+
+- 9655299: update stale package repository url
+
 ## 3.2.6
 
 ### Patch Changes
