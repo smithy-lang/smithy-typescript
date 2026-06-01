@@ -5,16 +5,16 @@
 ### Patch Changes
 
 - 9655299: update stale package repository url
+- (carried over from 3.2.6)
+  - Updated dependencies [776bc52]
+  - Updated dependencies [5b92a54]
+    - @smithy/types@4.14.3
+    - @smithy/core@3.24.6
+    - @smithy/signature-v4@5.4.6
 
 ## 3.2.6
 
-### Patch Changes
-
-- Updated dependencies [776bc52]
-- Updated dependencies [5b92a54]
-  - @smithy/types@4.14.3
-  - @smithy/core@3.24.6
-  - @smithy/signature-v4@5.4.6
+This version failed to publish, and changes were rolled into 3.2.7.
 
 ## 3.2.5
 
