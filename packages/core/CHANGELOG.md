@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.24.6
+
+### Patch Changes
+
+- 776bc52: update adaptive rate limiter to execute directly prior to outgoing requests & retries
+- 5b92a54: Treat the Node.js DNS error code EAI_AGAIN as a transient (retryable) error
+- Updated dependencies [776bc52]
+  - @smithy/types@4.14.3
+
 ## 3.24.5
 
 ### Patch Changes

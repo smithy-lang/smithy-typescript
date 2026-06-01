@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.14.3
+
+### Patch Changes
+
+- 776bc52: update adaptive rate limiter to execute directly prior to outgoing requests & retries
+
 ## 4.14.2
 
 ### Patch Changes

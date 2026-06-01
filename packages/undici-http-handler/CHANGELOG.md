@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [776bc52]
+- Updated dependencies [5b92a54]
+  - @smithy/types@4.14.3
+  - @smithy/core@3.24.6
+
 ## 2.0.0
 
 ### Major Changes
