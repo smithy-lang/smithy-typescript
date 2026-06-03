@@ -75,6 +75,7 @@ test-integration:
 	make static-analysis;
 	make api-snapshot;
 	make test-browser;
+	node ./packages/node-http-handler/test/node-http-handler.interception.mjs
 	yarn g:vitest run -c vitest.config.integ.mts;
 	make test-types;
 	make test-bundlers;

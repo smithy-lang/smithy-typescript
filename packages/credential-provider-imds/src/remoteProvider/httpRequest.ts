@@ -1,12 +1,14 @@
-import { request, type IncomingMessage, type RequestOptions } from "node:http";
+import type { IncomingMessage, RequestOptions } from "node:http";
 import { ProviderError } from "@smithy/core/config";
+
+import { node_http } from "./node-http";
 
 /**
  * @internal
  */
 export function httpRequest(options: RequestOptions): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const req = request({
+    const req = node_http.request({
       method: "GET",
       ...options,
       // Node.js http module doesn't accept hostname with square brackets

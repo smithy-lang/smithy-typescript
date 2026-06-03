@@ -1,11 +1,12 @@
 import type { Agent as hAgentType, request as hRequestType } from "node:http";
-import { Agent as hsAgent, request as hsRequest, type RequestOptions } from "node:https";
+import type { RequestOptions, Agent as hsAgentType } from "node:https";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 
 import { buildAbortError } from "./build-abort-error";
 import { NODEJS_TIMEOUT_ERROR_CODES } from "./constants";
 import { getTransformedHeaders } from "./get-transformed-headers";
+import { node_https } from "./node-https";
 import { setConnectionTimeout } from "./set-connection-timeout";
 import { setRequestTimeout } from "./set-request-timeout";
 import { setSocketKeepAlive } from "./set-socket-keep-alive";
@@ -18,7 +19,7 @@ export { NodeHttpHandlerOptions };
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
   httpAgentProvider: () => Promise<hAgentType>;
   httpAgent?: hAgentType;
-  httpsAgent: hsAgent;
+  httpsAgent: hsAgentType;
 }
 
 /**
@@ -69,7 +70,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
    * @returns timestamp of last emitted warning.
    */
   public static checkSocketUsage(
-    agent: hAgentType | hsAgent,
+    agent: hAgentType | hsAgentType,
     socketWarningTimestamp: number,
     logger: Logger = console
   ): number {
@@ -195,7 +196,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         // Because awaiting 100-continue desynchronizes the request and request body transmission,
         // such requests must be offloaded to a separate Agent instance.
         // Additional logic will exist on the client using this handler to determine whether to add the header at all.
-        agent = new (isSSL ? hsAgent : hAgent!)({
+        agent = new (isSSL ? node_https.Agent : hAgent!)({
           keepAlive: false,
           // This is an explicit value matching the default (Infinity).
           // This should allow the connection to close cleanly after making the single request.
@@ -249,7 +250,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       };
 
       // create the http request
-      const requestFunc = isSSL ? hsRequest : hRequest!;
+      const requestFunc = isSSL ? node_https.request : hRequest!;
 
       const req = requestFunc(nodeHttpsOptions, (res) => {
         const httpResponse = new HttpResponse({
@@ -356,7 +357,8 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       socketAcquisitionWarningTimeout,
       throwOnRequestTimeout,
       httpAgentProvider: async () => {
-        const { Agent, request } = await import("node:http");
+        const node_http = await import("node:http");
+        const { Agent, request } = node_http.default ?? node_http;
         hRequest = request;
         hAgent = Agent;
 
@@ -367,11 +369,11 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         return new hAgent({ keepAlive, maxSockets, ...httpAgent });
       },
       httpsAgent: (() => {
-        if (httpsAgent instanceof hsAgent || typeof (httpsAgent as hsAgent)?.destroy === "function") {
+        if (httpsAgent instanceof node_https.Agent || typeof (httpsAgent as hsAgentType)?.destroy === "function") {
           this.externalAgent = true;
-          return httpsAgent as hsAgent;
+          return httpsAgent as hsAgentType;
         }
-        return new hsAgent({ keepAlive, maxSockets, ...httpsAgent });
+        return new node_https.Agent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
       logger,
     };

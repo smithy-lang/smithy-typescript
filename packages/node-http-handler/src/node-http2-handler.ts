@@ -1,11 +1,14 @@
-import { constants, type ClientSessionOptions, type SecureClientSessionOptions } from "node:http2";
+import type { ClientSessionOptions, SecureClientSessionOptions } from "node:http2";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Provider, RequestContext } from "@smithy/types";
 
 import { buildAbortError } from "./build-abort-error";
 import { getTransformedHeaders } from "./get-transformed-headers";
+import { node_http2 } from "./node-http2";
 import { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
 import { writeRequestBody } from "./write-request-body";
+
+const { constants } = node_http2;
 
 /**
  * Represents the http2 options that can be passed to a node http2 client.

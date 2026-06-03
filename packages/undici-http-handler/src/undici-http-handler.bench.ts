@@ -1,4 +1,5 @@
 import { once } from "node:events";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { createServer } from "node:http";
 import { HttpRequest } from "@smithy/core/protocols";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
