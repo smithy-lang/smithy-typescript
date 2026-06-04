@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.7.7
+
+### Patch Changes
+
+- 9ea5ce5: import node:http,https,http2 using default export object (writable)
+
 ## 4.7.6
 
 ### Patch Changes
