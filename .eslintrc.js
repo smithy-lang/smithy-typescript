@@ -42,6 +42,49 @@ module.exports = {
       files: ["packages/*/src/**/*.ts"],
       excludedFiles: ["packages/*/src/**/*.spec.ts"],
       rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "http",
+                importNames: ["Agent", "ClientRequest", "CloseEvent", "IncomingMessage", "METHODS", "MessageEvent", "OutgoingMessage", "STATUS_CODES", "Server", "ServerResponse", "WebSocket", "_connectionListener", "createServer", "get", "globalAgent", "maxHeaderSize", "request", "setMaxIdleHTTPParsers", "validateHeaderName", "validateHeaderValue"],
+                allowTypeImports: true,
+                message: "Use a default import so runtime HTTP request interception keeps working.",
+              },
+              {
+                name: "node:http",
+                importNames: ["Agent", "ClientRequest", "CloseEvent", "IncomingMessage", "METHODS", "MessageEvent", "OutgoingMessage", "STATUS_CODES", "Server", "ServerResponse", "WebSocket", "_connectionListener", "createServer", "get", "globalAgent", "maxHeaderSize", "request", "setMaxIdleHTTPParsers", "validateHeaderName", "validateHeaderValue"],
+                allowTypeImports: true,
+                message: "Use a default import so runtime HTTP request interception keeps working.",
+              },
+              {
+                name: "https",
+                importNames: ["Agent", "Server", "createServer", "get", "globalAgent", "request"],
+                allowTypeImports: true,
+                message: "Use a default import so runtime HTTP request interception keeps working.",
+              },
+              {
+                name: "node:https",
+                importNames: ["Agent", "Server", "createServer", "get", "globalAgent", "request"],
+                allowTypeImports: true,
+                message: "Use a default import so runtime HTTP request interception keeps working.",
+              },
+              {
+                name: "http2",
+                importNames: ["Http2ServerRequest", "Http2ServerResponse", "connect", "constants", "createSecureServer", "createServer", "getDefaultSettings", "getPackedSettings", "getUnpackedSettings", "performServerHandshake", "sensitiveHeaders"],
+                allowTypeImports: true,
+                message: "Use a default import so runtime HTTP request interception keeps working.",
+              },
+              {
+                name: "node:http2",
+                importNames: ["Http2ServerRequest", "Http2ServerResponse", "connect", "constants", "createSecureServer", "createServer", "getDefaultSettings", "getPackedSettings", "getUnpackedSettings", "performServerHandshake", "sensitiveHeaders"],
+                allowTypeImports: true,
+                message: "Use a default import so runtime HTTP request interception keeps working.",
+              },
+            ],
+          },
+        ],
         "no-restricted-imports": [
           "error",
           {

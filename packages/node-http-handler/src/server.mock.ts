@@ -1,18 +1,17 @@
 import { readFileSync } from "node:fs";
-import { createServer as createHttp2Server, type Http2Server } from "node:http2";
-import {
-  createServer as createHttpServer,
-  type Server as HttpServer,
-  type IncomingMessage,
-  type ServerResponse,
-} from "node:http";
-import { createServer as createHttpsServer, type Server as HttpsServer } from "node:https";
+import type { Http2Server } from "node:http2";
+import type { Server as HttpServer, IncomingMessage, ServerResponse } from "node:http";
+import type { Server as HttpsServer } from "node:https";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import type { HeaderBag, HttpResponse, NodeJsRuntimeBlobTypes } from "@smithy/types";
 
+import { node_http2 } from "./node-http2";
+import { node_http } from "./node-http.spec";
+import { node_https } from "./node-https";
 import { timing } from "./timing";
 
+const { createServer: createHttpsServer } = node_https;
 const fixturesDir = join(__dirname, "..", "fixtures");
 
 const setResponseHeaders = (response: ServerResponse, headers: HeaderBag) => {
@@ -66,13 +65,11 @@ export const createMockHttpsServer = (): HttpsServer => {
 };
 
 export const createMockHttpServer = (): HttpServer => {
-  const server = createHttpServer();
-  return server;
+  return node_http.createServer();
 };
 
 export const createMockHttp2Server = (): Http2Server => {
-  const server = createHttp2Server();
-  return server;
+  return node_http2.createServer();
 };
 
 export const createMirrorResponseFunction =

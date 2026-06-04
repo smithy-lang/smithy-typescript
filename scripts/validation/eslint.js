@@ -35,7 +35,7 @@ function main() {
   }
 
   try {
-    const output = execFileSync("npx", ["eslint", "-c", eslintConfig, "--format", "json", ...globs], {
+    const output = execFileSync("npx", ["eslint", "--quiet", "-c", eslintConfig, "--format", "json", ...globs], {
       cwd: root,
       stdio: "pipe",
       encoding: "utf-8",
@@ -44,7 +44,7 @@ function main() {
     const errorCount = results.reduce((sum, r) => sum + r.errorCount, 0);
     if (errorCount > 0) {
       // Re-run with default formatter for readable output.
-      execFileSync("npx", ["eslint", "-c", eslintConfig, ...globs], {
+      execFileSync("npx", ["eslint", "--quiet", "-c", eslintConfig, ...globs], {
         cwd: root,
         stdio: "pipe",
         encoding: "utf-8",
@@ -64,7 +64,7 @@ function main() {
     } catch {}
     // Re-run with stylish output for readable errors.
     try {
-      execFileSync("npx", ["eslint", "-c", eslintConfig, ...globs], {
+      execFileSync("npx", ["eslint", "--quiet", "-c", eslintConfig, ...globs], {
         cwd: root,
         stdio: "pipe",
         encoding: "utf-8",
