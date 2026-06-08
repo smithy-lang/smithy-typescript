@@ -741,7 +741,7 @@ describe("UndiciHttpHandler", () => {
       await handler.handle(createMockRequest());
 
       expect(() => handler.updateHttpClientConfig("dispatcher", "invalid" as any)).toThrow(
-        "must be an instance of undici Dispatcher or Agent.Options"
+        "must be an instance of undici Dispatcher, Agent.Options, or a () => Dispatcher function."
       );
 
       // Handler should still work with its internal dispatcher
