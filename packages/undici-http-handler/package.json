@@ -14,6 +14,8 @@
     "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "yarn g:vitest run",
     "test:watch": "yarn g:vitest watch",
+    "test:integration": "yarn g:vitest run --config vitest.config.integ.mts",
+    "test:integration:watch": "yarn g:vitest watch --config vitest.config.integ.mts",
     "test:bench": "yarn g:vitest bench --config vitest.config.bench.mts"
   },
   "author": {
@@ -33,6 +35,7 @@
     "undici": "^7.0.0"
   },
   "devDependencies": {
+    "@metcoder95/https-pem": "^1.0.0",
     "@smithy/node-http-handler": "workspace:^",
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
