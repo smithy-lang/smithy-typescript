@@ -10,7 +10,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const walk = require("../utils/walk");
-const { NODE_BUILTINS, getPackageName, extractImports, getPackageDirs } = require("./validation-shared");
+const { NODE_BUILTINS, getPackageName, extractImports, getPackageDirs, summarizePackages } = require("./validation-shared");
 
 /**
  * @param packageDir - package root.
@@ -59,16 +59,16 @@ const ALLOWLIST = new Set(["@smithy/util-test"]);
 
 /**
  * @param packageDir - package root.
- * @returns aggregated errors from both dist directories.
+ * @returns aggregated errors from both dist directories, or null if skipped.
  */
 async function validate(packageDir) {
   const pkgJsonPath = path.join(packageDir, "package.json");
   if (!fs.existsSync(pkgJsonPath)) {
-    return [];
+    return null;
   }
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
   if (pkgJson.private && ALLOWLIST.has(pkgJson.name)) {
-    return [];
+    return null;
   }
   const errors = [];
   for (const dist of ["dist-cjs", "dist-es"]) {
@@ -79,15 +79,20 @@ async function validate(packageDir) {
 
 async function main() {
   const packages = getPackageDirs();
+  const validated = [];
   const errors = [];
-  for (const { dir } of packages) {
-    errors.push(...(await validate(dir)));
+  for (const pkg of packages) {
+    const pkgErrors = await validate(pkg.dir);
+    if (pkgErrors !== null) {
+      validated.push(pkg);
+      errors.push(...pkgErrors);
+    }
   }
   if (errors.length) {
     console.error(`❌ ${errors.length} undeclared import(s):\n  ${[...new Set(errors)].join("\n  ")}`);
     process.exit(1);
   }
-  console.log("✅ All absolute imports are declared in package.json.");
+  console.log(`✅ All absolute imports are declared in package.json. (${summarizePackages(validated)})`);
 }
 
 main();

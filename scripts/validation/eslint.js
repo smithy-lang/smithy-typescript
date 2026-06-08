@@ -10,7 +10,7 @@
 const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
-const { getPackageDirs } = require("./validation-shared");
+const { getPackageDirs, summarizePackages } = require("./validation-shared");
 
 const root = path.join(__dirname, "..", "..");
 const eslintConfig = path.join(root, ".eslintrc.js");
@@ -18,13 +18,15 @@ const eslintConfig = path.join(root, ".eslintrc.js");
 function main() {
   const packages = getPackageDirs();
 
+  const validated = [];
   const globs = [];
-  for (const { dir, generated } of packages) {
-    if (generated) {
+  for (const pkg of packages) {
+    if (pkg.generated) {
       continue;
     }
-    const srcDir = path.join(dir, "src");
+    const srcDir = path.join(pkg.dir, "src");
     if (fs.existsSync(srcDir)) {
+      validated.push(pkg);
       globs.push(`${srcDir}/**/*.ts`);
     }
   }
@@ -50,7 +52,7 @@ function main() {
         encoding: "utf-8",
       });
     }
-    console.log(`✅ ESLint passed (${results.length} files).`);
+    console.log(`✅ ESLint passed. (${summarizePackages(validated)})`);
   } catch (e) {
     // eslint exits non-zero on lint errors OR if --format json still outputs parseable JSON
     let output = e.stdout || "";
@@ -58,7 +60,7 @@ function main() {
       const results = JSON.parse(output);
       const errorCount = results.reduce((sum, r) => sum + r.errorCount, 0);
       if (errorCount === 0) {
-        console.log(`✅ ESLint passed (${results.length} files).`);
+        console.log(`✅ ESLint passed. (${summarizePackages(validated)})`);
         return;
       }
     } catch {}

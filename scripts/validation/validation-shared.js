@@ -132,6 +132,7 @@ function resolveRelative(fromFile, specifier) {
 
 const PACKAGE_ROOTS = ["packages", "private"];
 const GENERATED_ROOTS = new Set(["private"]);
+const NODE_MAJOR = parseInt(process.versions.node.split(".")[0], 10);
 
 /**
  * Returns package directories from argv, or all packages in ./packages/ and ./private/.
@@ -152,12 +153,32 @@ function getPackageDirs() {
     const generated = GENERATED_ROOTS.has(pkgRoot);
     for (const f of fs.readdirSync(dir)) {
       const pkgDir = path.join(dir, f);
-      if (fs.existsSync(path.join(pkgDir, "package.json"))) {
-        results.push({ dir: pkgDir, generated });
+      if (!fs.existsSync(path.join(pkgDir, "package.json"))) {
+        continue;
       }
+      // @smithy/undici-http-handler requires Node.js >= 20 (undici@7).
+      if (NODE_MAJOR < 20 && f === "undici-http-handler") {
+        continue;
+      }
+      results.push({ dir: pkgDir, generated });
     }
   }
   return results;
+}
+
+/**
+ * Returns a summary string of package counts by containing folder.
+ * e.g. "12 packages, 29 private"
+ */
+function summarizePackages(packages) {
+  const counts = {};
+  for (const { dir } of packages) {
+    const folder = path.basename(path.dirname(dir));
+    counts[folder] = (counts[folder] || 0) + 1;
+  }
+  return Object.entries(counts)
+    .map(([folder, count]) => `${count} ${folder}`)
+    .join(", ");
 }
 
 module.exports = {
@@ -167,4 +188,5 @@ module.exports = {
   extractImports,
   resolveRelative,
   getPackageDirs,
+  summarizePackages,
 };
