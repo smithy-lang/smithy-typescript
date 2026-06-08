@@ -1,6 +1,6 @@
-const { error } = require("console");
 const fs = require("fs");
 const path = require("path");
+const { sortScripts } = require("./utils/sort-scripts");
 
 /**
  * This enforcement is not here to prevent adoption of newer
@@ -27,7 +27,10 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
   const errors = [];
 
   const pkgJson = require(pkgJsonFilePath);
-  if (!pkgJson.name.endsWith("/core")) {
+  const pkgDirRoot = path.dirname(pkgJsonFilePath);
+  const isSubmoduleCarrier = fs.existsSync(path.join(pkgDirRoot, "src", "submodules")) && "exports" in pkgJson;
+
+  if (!isSubmoduleCarrier) {
     if ("exports" in pkgJson) {
       errors.push(`${pkgJson.name} must not have an 'exports' field.`);
       if (overwrite) {
@@ -62,9 +65,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
   if (typeof pkgJson.browser === "object" && typeof pkgJson["react-native"] === "object") {
     // Skip canonicalization for packages with submodules — they manage their own fields.
-    const pkgDirEarly = path.dirname(pkgJsonFilePath);
-    const hasSubmodulesEarly = fs.existsSync(path.join(pkgDirEarly, "src", "submodules"));
-    if (!hasSubmodulesEarly) {
+    if (!isSubmoduleCarrier) {
       const browserCanonical = Object.entries(pkgJson.browser).reduce((acc, [k, v]) => {
         if (!k.includes("dist-cjs/") || typeof v === "boolean") {
           acc[k] = v;
@@ -103,7 +104,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
       }
     } else {
       // For submodule packages, validate that index.browser.ts/index.native.ts are declared.
-      const submodulesDir = path.join(pkgDirEarly, "src", "submodules");
+      const submodulesDir = path.join(pkgDirRoot, "src", "submodules");
       const browserField = pkgJson.browser || {};
       const reactNativeField = pkgJson["react-native"] || {};
       let didModify = false;
@@ -231,10 +232,8 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
   // Validate variant replacement directives match source files.
   // Skip for packages with submodules — they use index-level variant files instead.
-  const pkgDir = path.dirname(pkgJsonFilePath);
-  const srcDir = path.join(pkgDir, "src");
-  const hasSubmodules = fs.existsSync(path.join(srcDir, "submodules"));
-  if (fs.existsSync(srcDir) && !hasSubmodules) {
+  const srcDir = path.join(pkgDirRoot, "src");
+  if (fs.existsSync(srcDir) && !isSubmoduleCarrier) {
     const browserField = pkgJson.browser || {};
     const reactNativeField = pkgJson["react-native"] || {};
     let didModify = false;
@@ -335,7 +334,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
           continue;
         }
         const variantSrcFile = path.join(
-          pkgDir,
+          pkgDirRoot,
           variant.replace(/^\.\/dist-(es|cjs)/, "src").replace(/(\.js)?$/, ".ts")
         );
         if (!fs.existsSync(variantSrcFile)) {
@@ -343,6 +342,114 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
             `${pkgJson.name} ${field}["${canonical}"] -> "${variant}" has no corresponding source file (expected ${variantSrcFile})`
           );
         }
+      }
+    }
+  }
+
+  // Enforce lint script and build integration for submodule carriers.
+  if (isSubmoduleCarrier) {
+    const relScripts = path.relative(pkgDirRoot, path.join(__dirname, "validation"));
+    const expectedLint = `node ${relScripts}/submodules-linter.js`;
+
+    if (!pkgJson.scripts?.lint || !pkgJson.scripts.lint.includes("submodules-linter")) {
+      errors.push(`${pkgJson.name} must have a "lint" script that calls the submodules-linter`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts.lint = expectedLint;
+      }
+    }
+
+    if (!pkgJson.scripts?.build || !pkgJson.scripts.build.includes("yarn lint")) {
+      errors.push(`${pkgJson.name} build script must include "yarn lint"`);
+      if (overwrite && pkgJson.scripts?.build) {
+        pkgJson.scripts.build = `yarn lint && ${pkgJson.scripts.build}`;
+      }
+    }
+  }
+
+  // Enforce clean script uses premove.
+  const expectedClean = "premove dist-cjs dist-es dist-types *.tsbuildinfo";
+  if (pkgJson.scripts?.clean !== expectedClean) {
+    errors.push(`${pkgJson.name} scripts["clean"] must be "${expectedClean}"`);
+    if (overwrite) {
+      pkgJson.scripts = pkgJson.scripts || {};
+      pkgJson.scripts.clean = expectedClean;
+    }
+  }
+
+  // Enforce stage-release script uses premove.
+  const expectedStageRelease =
+    "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz";
+  if (pkgJson.scripts?.["stage-release"] !== expectedStageRelease) {
+    errors.push(`${pkgJson.name} scripts["stage-release"] must be "${expectedStageRelease}"`);
+    if (overwrite) {
+      pkgJson.scripts = pkgJson.scripts || {};
+      pkgJson.scripts["stage-release"] = expectedStageRelease;
+    }
+  }
+
+  // Enforce premove devDependency.
+  if (pkgJson.devDependencies?.premove !== "4.0.0") {
+    errors.push(`${pkgJson.name} devDependencies["premove"] must be "4.0.0"`);
+    if (overwrite) {
+      pkgJson.devDependencies = pkgJson.devDependencies || {};
+      pkgJson.devDependencies.premove = "4.0.0";
+    }
+  }
+  if (pkgJson.dependencies?.premove) {
+    errors.push(`${pkgJson.name} premove must be in devDependencies, not dependencies`);
+    if (overwrite) {
+      delete pkgJson.dependencies.premove;
+    }
+  }
+
+  // Ensure :watch variants exist for vitest-based test scripts.
+  if (pkgJson.scripts) {
+    const watchPairs = [
+      ["test", "test:watch"],
+      ["test:integration", "test:integration:watch"],
+      ["test:e2e", "test:e2e:watch"],
+    ];
+    for (const [base, watch] of watchPairs) {
+      const cmd = pkgJson.scripts[base];
+      if (cmd && cmd.includes("vitest") && cmd.includes("run")) {
+        const isCompounded = cmd.includes("&&");
+        const expected = cmd.split("&&")[0].trim().replace("vitest run", "vitest watch");
+        if (!pkgJson.scripts[watch]) {
+          if (isCompounded) {
+            errors.push(
+              `${pkgJson.name} scripts["${watch}"] is missing and base command is compounded — resolve manually`
+            );
+          } else {
+            errors.push(`${pkgJson.name} ${watch} script was missing. Added automatically. Commit changes.`);
+            if (overwrite) {
+              pkgJson.scripts[watch] = expected;
+            }
+          }
+        } else if (pkgJson.scripts[watch].includes("vitest watch")) {
+          const afterWatch = pkgJson.scripts[watch].split("vitest watch")[1];
+          if (afterWatch.includes("&&")) {
+            errors.push(
+              `${pkgJson.name} scripts["${watch}"] has unreachable commands after vitest watch — resolve manually`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Alphabetize scripts when running locally (not in CodeBuild).
+  // Exception: "foo:watch" always immediately follows "foo".
+  if (!process.env.CODEBUILD_BUILD_ID && pkgJson.scripts) {
+    const sorted = Object.keys(pkgJson.scripts).sort(sortScripts);
+    if (JSON.stringify(Object.keys(pkgJson.scripts)) !== JSON.stringify(sorted)) {
+      const reordered = {};
+      for (const k of sorted) {
+        reordered[k] = pkgJson.scripts[k];
+      }
+      pkgJson.scripts = reordered;
+      if (overwrite) {
+        fs.writeFileSync(pkgJsonFilePath, JSON.stringify(pkgJson, null, 2) + "\n");
       }
     }
   }

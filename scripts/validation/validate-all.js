@@ -15,13 +15,13 @@
  */
 
 const { execFileSync } = require("node:child_process");
-const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.join(__dirname, "..", "..");
 const validationDir = __dirname;
 
 const VALIDATIONS = [
+  { name: "built", label: "all packages have build artifacts", script: "built.js" },
   { name: "imports-declared", label: "all package imports appear in package.json dependencies", script: "imports-declared.js" },
   { name: "relative-imports", label: "all relative imports are to paths that exist", script: "relative-imports.js" },
   { name: "deps-used", label: "all package.json dependencies are used", script: "deps-used.js" },
@@ -29,6 +29,7 @@ const VALIDATIONS = [
   { name: "no-dynamic-imports", label: "no dynamic imports with non-literal specifiers", script: "static-import-names.js" },
   { name: "no-cycles", label: "no cyclical file or package dependencies", script: "cycles.js" },
   { name: "eslint", label: "eslint passes on source", script: "eslint.js" },
+  { name: "banned-imports", label: "no banned imports in dist output", script: "banned-imports.js" },
 ];
 
 function parseArgs() {
@@ -47,17 +48,7 @@ function parseArgs() {
 function main() {
   const { skip } = parseArgs();
 
-  // Count packages for display.
-  const packageRoots = ["packages", "private"];
-  let count = 0;
-  for (const pkgRoot of packageRoots) {
-    const dir = path.join(root, pkgRoot);
-    if (fs.existsSync(dir)) {
-      count += fs.readdirSync(dir).filter((f) => fs.existsSync(path.join(dir, f, "package.json"))).length;
-    }
-  }
-
-  console.log(`Running validations on ${count} package(s)...\n`);
+  console.log(`Running validations...\n`);
 
   const failures = [];
   const warnings = [];
@@ -79,7 +70,9 @@ function main() {
         console.log(`⚠️  ${label}`);
         warnings.push({ label, output });
       } else {
-        console.log(`✅ ${label}`);
+        const countMatch = output.match(/\(([^)]+)\)\s*$/m);
+        const countInfo = countMatch ? ` (${countMatch[1]})` : "";
+        console.log(`✅ ${label}${countInfo}`);
       }
     } catch (e) {
       console.log(`❌ ${label}`);

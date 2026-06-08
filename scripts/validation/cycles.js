@@ -11,7 +11,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const walk = require("../utils/walk");
-const { extractImports, getPackageName, resolveRelative, getPackageDirs } = require("./validation-shared");
+const { extractImports, getPackageName, resolveRelative, getPackageDirs, summarizePackages } = require("./validation-shared");
 
 /**
  * Finds all cycles in a directed graph using Tarjan's algorithm.
@@ -286,12 +286,27 @@ async function validate(packageDirs) {
 async function main() {
   const packages = getPackageDirs();
   const packageDirs = packages.map((p) => p.dir);
+
+  // Determine which packages are actually validated:
+  // - module-level: only @smithy/* packages with dist dirs
+  // - file-level: only packages with dist dirs
+  const validated = [];
+  for (const pkg of packages) {
+    const pkgJsonPath = path.join(pkg.dir, "package.json");
+    if (!fs.existsSync(pkgJsonPath)) continue;
+    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+    const hasDist = fs.existsSync(path.join(pkg.dir, "dist-cjs")) || fs.existsSync(path.join(pkg.dir, "dist-es"));
+    if (hasDist && pkgJson.name && pkgJson.name.startsWith("@smithy/")) {
+      validated.push(pkg);
+    }
+  }
+
   const errors = await validate(packageDirs);
   if (errors.length) {
     console.error(`❌ ${errors.length} cycle(s) detected:\n  ${errors.join("\n  ")}`);
     process.exit(1);
   }
-  console.log("✅ No cyclical file or package dependencies.");
+  console.log(`✅ No cyclical file or package dependencies. (${summarizePackages(validated)})`);
 }
 
 main();
