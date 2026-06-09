@@ -254,7 +254,7 @@ describe("UndiciHttpHandler HTTP/2 integration", () => {
   });
 
   it("supports bidirectional streaming over HTTP/2", async () => {
-    const inputStream = Readable.from(["hello", "world"].map((s) => Buffer.from(s)));
+    const inputStream = Readable.from(["hello", "world"].map(Buffer.from));
     const { response } = await handler.handle(
       createRequest({
         method: "POST",
