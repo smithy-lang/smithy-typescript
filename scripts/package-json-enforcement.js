@@ -403,6 +403,53 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
     }
   }
 
+  // Enforce build scripts.
+  const isNonStub = "build:es:cjs" in (pkgJson.scripts || {});
+  const expectedBuildTypes = "yarn g:tsc -p tsconfig.types.json";
+  if (isNonStub) {
+    const expectedBuildEsCjs = "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline";
+    const lintPrefix = isSubmoduleCarrier ? "yarn lint && " : "";
+    const expectedBuild = `${lintPrefix}concurrently 'yarn:build:types' 'yarn:build:es:cjs'`;
+
+    if (pkgJson.scripts?.build !== expectedBuild) {
+      errors.push(`${pkgJson.name} scripts["build"] must be "${expectedBuild}"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts.build = expectedBuild;
+      }
+    }
+    if (pkgJson.scripts?.["build:es:cjs"] !== expectedBuildEsCjs) {
+      errors.push(`${pkgJson.name} scripts["build:es:cjs"] must be "${expectedBuildEsCjs}"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts["build:es:cjs"] = expectedBuildEsCjs;
+      }
+    }
+    if (pkgJson.scripts?.["build:types"] !== expectedBuildTypes) {
+      errors.push(`${pkgJson.name} scripts["build:types"] must be "${expectedBuildTypes}"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts["build:types"] = expectedBuildTypes;
+      }
+    }
+  } else {
+    const expectedBuild = "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json";
+    if (pkgJson.scripts?.build !== expectedBuild) {
+      errors.push(`${pkgJson.name} scripts["build"] must be "${expectedBuild}"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts.build = expectedBuild;
+      }
+    }
+    if (pkgJson.scripts?.["build:types"] !== expectedBuildTypes) {
+      errors.push(`${pkgJson.name} scripts["build:types"] must be "${expectedBuildTypes}"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts["build:types"] = expectedBuildTypes;
+      }
+    }
+  }
+
   // Ensure :watch variants exist for vitest-based test scripts.
   if (pkgJson.scripts) {
     const watchPairs = [
