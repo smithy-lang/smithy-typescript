@@ -76,7 +76,12 @@ test-integration:
 	make api-snapshot;
 	make test-browser;
 	node ./packages/node-http-handler/test/node-http-handler.interception.mjs
-	yarn g:vitest run -c vitest.config.integ.mts;
+	@NODE_MAJOR=$$(node -p "parseInt(process.versions.node.split('.')[0], 10)"); \
+	if [ "$$NODE_MAJOR" -lt 20 ]; then \
+		yarn g:vitest run -c vitest.config.integ.mts --exclude '**/packages/undici-http-handler/**'; \
+	else \
+		yarn g:vitest run -c vitest.config.integ.mts; \
+	fi
 	make test-types;
 	make test-bundlers;
 

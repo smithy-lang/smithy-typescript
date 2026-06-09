@@ -1587,6 +1587,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metcoder95/https-pem@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@metcoder95/https-pem@npm:1.0.0"
+  dependencies:
+    selfsigned: "npm:^3.0.1"
+  checksum: 10c0/99712210e5567680f241d43dc1e347b731a041e25567510c5c3866b6b43440872e48d05e63d5649742470d81ec17b72f08a70d890a9810c4d1d501265bd19afb
+  languageName: node
+  linkType: hard
+
 "@microsoft/api-extractor-model@npm:7.30.6":
   version: 7.30.6
   resolution: "@microsoft/api-extractor-model@npm:7.30.6"
@@ -2593,6 +2602,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/undici-http-handler@workspace:packages/undici-http-handler"
   dependencies:
+    "@metcoder95/https-pem": "npm:^1.0.0"
     "@smithy/core": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -8000,6 +8010,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-forge@npm:^1":
+  version: 1.4.0
+  resolution: "node-forge@npm:1.4.0"
+  checksum: 10c0/67330a5f1f95257a4c8a93b7d555abe87b5f15e350123aa396c97a21a8ca94f9c6549008eb2c73668a91e0d7e3a905785acbd8f8bd0751c29401292011f8f8e1
+  languageName: node
+  linkType: hard
+
 "node-gyp@npm:latest":
   version: 9.3.1
   resolution: "node-gyp@npm:9.3.1"
@@ -8999,6 +9016,15 @@ __metadata:
     ajv-formats: "npm:^2.1.1"
     ajv-keywords: "npm:^5.1.0"
   checksum: 10c0/1c8d2c480a026d7c02ab2ecbe5919133a096d6a721a3f201fa50663e4f30f6d6ba020dfddd93cb828b66b922e76b342e103edd19a62c95c8f60e9079cc403202
+  languageName: node
+  linkType: hard
+
+"selfsigned@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "selfsigned@npm:3.0.1"
+  dependencies:
+    node-forge: "npm:^1"
+  checksum: 10c0/57e266192299ad5230c46f4e40b662d563e3c15b37ecaadadc22966d2b153eea28ede3c7e465ad36e5f688ad97a0974bbaf47fbfbf616d8bc8420d03ee64ffd0
   languageName: node
   linkType: hard
 
