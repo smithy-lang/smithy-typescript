@@ -3,7 +3,7 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import { HttpRequest } from "@smithy/core/protocols";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
-import { Agent } from "undici";
+import { Agent, Client } from "undici";
 import { afterAll, beforeAll, bench, describe } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -69,6 +69,11 @@ const undiciDispatcher = new Agent({
 });
 const undiciHandler = new UndiciHttpHandler({ dispatcher: undiciDispatcher });
 
+// Client skips per-origin routing that Agent performs, giving lower overhead
+// when all requests go to the same origin.
+let undiciClientDispatcher: Client;
+let undiciClientHandler: UndiciHttpHandler;
+
 // ---------------------------------------------------------------------------
 // 4. Lifecycle
 // ---------------------------------------------------------------------------
@@ -79,15 +84,27 @@ beforeAll(async () => {
   const addr = server.address();
   port = typeof addr === "object" && addr !== null ? addr.port : 0;
 
-  // Warm up both handlers so first-request setup cost is excluded.
+  // Create Client after we know the port (Client requires a known origin).
+  undiciClientDispatcher = new Client(`http://127.0.0.1:${port}`, {
+    pipelining: 10,
+    bodyTimeout: 3000,
+    headersTimeout: 3000,
+    connect: { timeout: 3000 },
+  });
+  undiciClientHandler = new UndiciHttpHandler({ dispatcher: undiciClientDispatcher });
+
+  // Warm up all handlers so first-request setup cost is excluded.
   await drain((await nodeHandler.handle(makeRequest())).response);
   await drain((await undiciHandler.handle(makeRequest())).response);
+  await drain((await undiciClientHandler.handle(makeRequest())).response);
 });
 
 afterAll(() => {
   nodeHandler.destroy();
   undiciHandler.destroy();
+  undiciClientHandler.destroy();
   undiciDispatcher.destroy();
+  undiciClientDispatcher.destroy();
   server.close();
 });
 
@@ -109,6 +126,13 @@ describe("10 sequential GETs", () => {
       await drain(response);
     }
   });
+
+  bench("UndiciHttpHandler (Client)", async () => {
+    for (let i = 0; i < 10; i++) {
+      const { response } = await undiciClientHandler.handle(makeRequest());
+      await drain(response);
+    }
+  });
 });
 
 describe("50 concurrent GETs", () => {
@@ -123,6 +147,14 @@ describe("50 concurrent GETs", () => {
   bench("UndiciHttpHandler", async () => {
     const tasks = Array.from({ length: 50 }, async () => {
       const { response } = await undiciHandler.handle(makeRequest());
+      await drain(response);
+    });
+    await Promise.all(tasks);
+  });
+
+  bench("UndiciHttpHandler (Client)", async () => {
+    const tasks = Array.from({ length: 50 }, async () => {
+      const { response } = await undiciClientHandler.handle(makeRequest());
       await drain(response);
     });
     await Promise.all(tasks);

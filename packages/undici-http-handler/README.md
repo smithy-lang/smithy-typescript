@@ -106,15 +106,19 @@ client.listTables({}).then(console.log);
 
 ## Benchmarks
 
-Our benchmark spin up a local HTTP server and runs two scenarios:
+Our benchmark spins up a local HTTP server and runs two scenarios:
 
 - **10 sequential GETs** – measures per-request latency when requests are issued
   one after another.
 - **50 concurrent GETs** – measures throughput under parallel load using
   `Promise.all`.
 
-The results show UndiciHttpHandler spends **35%-45%** less time in request handling
+The results show UndiciHttpHandler spends **35%-50%** less time in request handling
 as compared to NodeHttpHandler from `@smithy/node-http-handler`.
+
+If your application only talks to a single origin, passing a `Client` as the
+dispatcher gives an additional **5%-20%** improvement over the default `Agent` by
+skipping per-origin routing.
 
 We recommend running benchmarks for your own use case on your own setup, as
 results will vary depending on workload, network conditions, and environment.
