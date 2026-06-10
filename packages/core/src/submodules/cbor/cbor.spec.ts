@@ -527,6 +527,36 @@ describe("cbor", () => {
   });
 });
 
+describe("nesting depth limit", () => {
+  it("should throw when nesting exceeds maximum depth", () => {
+    // 0x81 = array(1), repeated n times, then 0x00 = uint(0)
+    // Each 0x81 adds one level of nesting: [[[[....[0]...]]]]
+    const n = 101;
+    const payload = new Uint8Array(n + 1);
+    payload.fill(0x81, 0, n);
+    payload[n] = 0x00;
+    expect(() => cbor.deserialize(payload)).toThrow("nesting depth exceeded");
+  });
+
+  it("should succeed when nesting is at exactly the maximum depth", () => {
+    // 100 levels of array(1) + a value at the bottom
+    const n = 100;
+    const payload = new Uint8Array(n + 1);
+    payload.fill(0x81, 0, n);
+    payload[n] = 0x00;
+    expect(() => cbor.deserialize(payload)).not.toThrow();
+  });
+
+  it("should throw for deeply nested tags", () => {
+    // 0xc6 = tag(6), repeated n times, then 0x00 = uint(0)
+    const n = 101;
+    const payload = new Uint8Array(n + 1);
+    payload.fill(0xc6, 0, n);
+    payload[n] = 0x00;
+    expect(() => cbor.deserialize(payload)).toThrow("nesting depth exceeded");
+  });
+});
+
 describe("bytesToFloat16", () => {
   it("should convert two bytes to float16", () => {
     expect(bytesToFloat16(0b0_10100_00, 0b0101_0000)).toEqual(34.5);

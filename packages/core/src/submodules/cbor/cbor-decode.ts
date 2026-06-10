@@ -39,6 +39,8 @@ let payload = alloc(0);
 let dataView = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
 const textDecoder = USE_TEXT_DECODER ? new TextDecoder() : null;
 
+const MAX_NESTING_DEPTH = 100;
+
 /**
  * This number stores the last offset of any decoded segment.
  */
@@ -60,7 +62,10 @@ export function setPayload(bytes: Uint8Array) {
  *
  * @internal
  */
-export function decode(at: Uint32, to: Uint32): CborValueType {
+export function decode(at: Uint32, to: Uint32, depth: number = 0): CborValueType {
+  if (depth > MAX_NESTING_DEPTH) {
+    throw new Error(`cbor decode error: nesting depth exceeded maximum of ${MAX_NESTING_DEPTH}.`);
+  }
   if (at >= to) {
     throw new Error("unexpected end of (decode) payload.");
   }
@@ -136,7 +141,7 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
           _offset = offset + _offset + length;
           return minor === 3 ? -b - BigInt(1) : b;
         } else if (minor === 4) {
-          const decimalFraction = decode(at + offset, to);
+          const decimalFraction = decode(at + offset, to, depth + 1);
           const [exponent, mantissa] = decimalFraction;
           const normalizer = mantissa < 0 ? -1 : 1;
           const mantissaStr = "0".repeat(Math.abs(exponent) + 1) + String(BigInt(normalizer) * BigInt(mantissa));
@@ -163,7 +168,7 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
           _offset = offset + _offset;
           return nv(numericString);
         } else {
-          const value = decode(at + offset, to);
+          const value = decode(at + offset, to, depth + 1);
           const valueOffset = _offset;
 
           _offset = offset + valueOffset;
@@ -179,9 +184,9 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
           case majorUtf8String:
             return decodeUtf8StringIndefinite(at, to);
           case majorMap:
-            return decodeMapIndefinite(at, to);
+            return decodeMapIndefinite(at, to, depth);
           case majorList:
-            return decodeListIndefinite(at, to);
+            return decodeListIndefinite(at, to, depth);
           case majorUnstructuredByteString:
             return decodeUnstructuredByteStringIndefinite(at, to);
         }
@@ -190,9 +195,9 @@ export function decode(at: Uint32, to: Uint32): CborValueType {
           case majorUtf8String:
             return decodeUtf8String(at, to);
           case majorMap:
-            return decodeMap(at, to);
+            return decodeMap(at, to, depth);
           case majorList:
-            return decodeList(at, to);
+            return decodeList(at, to, depth);
           case majorUnstructuredByteString:
             return decodeUnstructuredByteString(at, to);
         }
@@ -383,7 +388,7 @@ function decodeUnstructuredByteStringIndefinite(at: Uint32, to: Uint32): CborUns
   throw new Error("expected break marker.");
 }
 
-function decodeList(at: Uint32, to: Uint32): CborListType {
+function decodeList(at: Uint32, to: Uint32, depth: number): CborListType {
   const listDataLength = decodeCount(at, to);
   const offset = _offset;
   at += offset;
@@ -391,7 +396,7 @@ function decodeList(at: Uint32, to: Uint32): CborListType {
   // perf: pre-allocate array length.
   const list = Array(listDataLength);
   for (let i = 0; i < listDataLength; ++i) {
-    const item = decode(at, to);
+    const item = decode(at, to, depth + 1);
     const itemOffset = _offset;
     list[i] = item;
     at += itemOffset;
@@ -400,7 +405,7 @@ function decodeList(at: Uint32, to: Uint32): CborListType {
   return list;
 }
 
-function decodeListIndefinite(at: Uint32, to: Uint32): CborListType {
+function decodeListIndefinite(at: Uint32, to: Uint32, depth: number): CborListType {
   at += 1;
   const list = [] as CborListType;
   for (const base = at; at < to; ) {
@@ -408,7 +413,7 @@ function decodeListIndefinite(at: Uint32, to: Uint32): CborListType {
       _offset = at - base + 2;
       return list;
     }
-    const item = decode(at, to);
+    const item = decode(at, to, depth + 1);
     const n = _offset;
     at += n;
     list.push(item);
@@ -416,7 +421,7 @@ function decodeListIndefinite(at: Uint32, to: Uint32): CborListType {
   throw new Error("expected break marker.");
 }
 
-function decodeMap(at: Uint32, to: Uint32): CborMapType {
+function decodeMap(at: Uint32, to: Uint32, depth: number): CborMapType {
   const mapDataLength = decodeCount(at, to);
   const offset = _offset;
   at += offset;
@@ -430,9 +435,9 @@ function decodeMap(at: Uint32, to: Uint32): CborMapType {
     if (major !== majorUtf8String) {
       throw new Error(`unexpected major type ${major} for map key at index ${at}.`);
     }
-    const key = decode(at, to);
+    const key = decode(at, to, depth + 1);
     at += _offset;
-    const value = decode(at, to);
+    const value = decode(at, to, depth + 1);
     at += _offset;
     map[key] = value;
   }
@@ -440,7 +445,7 @@ function decodeMap(at: Uint32, to: Uint32): CborMapType {
   return map;
 }
 
-function decodeMapIndefinite(at: Uint32, to: Uint32): CborMapType {
+function decodeMapIndefinite(at: Uint32, to: Uint32, depth: number): CborMapType {
   at += 1;
   const base = at;
   const map = {} as CborMapType;
@@ -456,9 +461,9 @@ function decodeMapIndefinite(at: Uint32, to: Uint32): CborMapType {
     if (major !== majorUtf8String) {
       throw new Error(`unexpected major type ${major} for map key.`);
     }
-    const key = decode(at, to);
+    const key = decode(at, to, depth + 1);
     at += _offset;
-    const value = decode(at, to);
+    const value = decode(at, to, depth + 1);
     at += _offset;
     map[key] = value;
   }
