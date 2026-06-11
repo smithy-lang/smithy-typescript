@@ -150,8 +150,8 @@ const getDelayFromRetryAfterHeader = (response: unknown): number | undefined => 
   const retryAfter = response.headers[retryAfterHeaderName];
 
   const retryAfterSeconds = Number(retryAfter);
-  if (!Number.isNaN(retryAfterSeconds)) return retryAfterSeconds * 1000;
+  if (!Number.isNaN(retryAfterSeconds)) return Math.min(retryAfterSeconds * 1000, 20_000);
 
   const retryAfterDate = new Date(retryAfter);
-  return retryAfterDate.getTime() - Date.now();
+  return Math.min(retryAfterDate.getTime() - Date.now(), 20_000);
 };
