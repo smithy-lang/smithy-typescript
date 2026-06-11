@@ -55,14 +55,19 @@ const toClientOptions = (options: Agent.Options): Client.Options => {
  */
 export interface UndiciHttpHandlerOptions {
   /**
-   * You can pass an existing undici Dispatcher (Agent, Pool, Client, etc.)
-   * or Agent.Options to have one created for you.
+   * You can pass an existing undici Dispatcher (Agent, Pool, Client, etc.),
+   * Agent.Options to have one created for you, or a function that returns a
+   * Dispatcher to be resolved per request.
    *
    * Passing your own Dispatcher lets you control the undici version at
    * runtime, independent of this package's bundled version. This lets
    * you pick up upstream performance improvements sooner.
+   *
+   * Passing a function `(() => Dispatcher)` allows dynamic dispatcher
+   * resolution per request, which is useful for scenarios like rotating
+   * proxies or connection pool selection based on runtime conditions.
    */
-  dispatcher?: Dispatcher | Agent.Options;
+  dispatcher?: Dispatcher | (() => Dispatcher) | Agent.Options;
 
   /**
    * Optional logger.
@@ -112,8 +117,19 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
    */
   private internalAgentOptions?: Agent.Options;
 
+  /**
+   * When the caller passes a `(() => Dispatcher)` function, it is stored here
+   * and invoked on each request to resolve the dispatcher dynamically.
+   */
+  private dispatcherFactory?: () => Dispatcher;
+
   constructor(options?: UndiciHttpHandlerOptions) {
-    if (options?.dispatcher && isDispatcher(options.dispatcher)) {
+    if (options?.dispatcher && typeof options.dispatcher === "function") {
+      this.dispatcherFactory = options.dispatcher;
+      this.isInternalDispatcher = false;
+      const { dispatcher: _ignored, ...rest } = options;
+      this.config = rest;
+    } else if (options?.dispatcher && isDispatcher(options.dispatcher)) {
       this.config = { ...options, dispatcher: options.dispatcher };
       this.isInternalDispatcher = false;
     } else if (options?.dispatcher) {
@@ -143,7 +159,8 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // and pool sizing decisions made by the caller are preserved.
     const useIsolatedClient = isEventStream && this.isInternalDispatcher;
     const isolatedClient = useIsolatedClient ? this.createIsolatedClient(request) : undefined;
-    const dispatcher = isolatedClient ?? this.getOrCreateDispatcher();
+    const dispatcher =
+      isolatedClient ?? (this.dispatcherFactory ? this.dispatcherFactory() : this.getOrCreateDispatcher());
 
     if (abortSignal?.aborted) {
       if (isolatedClient) {
@@ -292,6 +309,19 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return;
     }
 
+    if (typeof value === "function") {
+      const previousDispatcher = this.config.dispatcher;
+      if (previousDispatcher) {
+        previousDispatcher.close();
+      }
+
+      this.dispatcherFactory = value as () => Dispatcher;
+      this.config.dispatcher = undefined;
+      this.isInternalDispatcher = false;
+      this.internalAgentOptions = undefined;
+      return;
+    }
+
     if (isDispatcher(value)) {
       // No-op when the same dispatcher instance is reassigned.
       if (value === this.config.dispatcher) {
@@ -308,6 +338,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       this.config.dispatcher = value;
       this.isInternalDispatcher = false;
       this.internalAgentOptions = undefined;
+      this.dispatcherFactory = undefined;
       return;
     }
 
@@ -321,11 +352,12 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       this.internalAgentOptions = { allowH2: true, ...(value as Agent.Options) };
       this.config.dispatcher = undefined;
       this.isInternalDispatcher = true;
+      this.dispatcherFactory = undefined;
       return;
     }
 
     throw new Error(
-      "updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher or Agent.Options."
+      "updateHttpClientConfig: value for 'dispatcher' must be an instance of undici Dispatcher, Agent.Options, or a () => Dispatcher function."
     );
   }
 
