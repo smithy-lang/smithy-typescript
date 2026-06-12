@@ -4,8 +4,8 @@
  *
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 const Inliner = require("./compilation/Inliner");
 
 const root = path.join(__dirname, "..");
@@ -40,10 +40,9 @@ if (process.argv.includes("--setup")) {
   (async () => {
     const inliner = new Inliner(_package);
     await inliner.clean();
-    await inliner.tsc();
     await inliner.discoverVariants();
     await inliner.bundle();
-    await inliner.cleanupInlinedFiles();
+    await inliner.transformVariants();
     await inliner.fixVariantImportPaths();
     await inliner.validate();
   })();

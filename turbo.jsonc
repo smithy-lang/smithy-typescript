@@ -1,0 +1,57 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "turbo.jsonc",
+    "tsconfig.json",
+    "tsconfig.cjs.json",
+    "tsconfig.es.json",
+    "tsconfig.types.json",
+    "scripts/compilation/**"
+  ],
+  "tasks": {
+    "prebuild": {},
+    "build": {
+      "dependsOn": ["prebuild", "^build"],
+      "inputs": ["src/**/*", "package.json"],
+      "outputs": ["dist-types/**", "dist-cjs/**", "dist-es/**", "dist"]
+    },
+    "build:cjs": {
+      "outputs": ["dist-cjs/**"],
+      "dependsOn": ["build:es"]
+    },
+    "build:es": {
+      // ^build:types is critical: without upstream .d.ts files, tsc cannot
+      // distinguish type-only re-exports from values, causing undefined exports.
+      "outputs": ["dist-es/**"],
+      "dependsOn": ["prebuild", "^build:types"]
+    },
+    "build:types": {
+      "outputs": ["dist-types/**"],
+      "dependsOn": ["prebuild", "^build:types"]
+    },
+    "test": {
+      "dependsOn": ["build", "^build"],
+      "cache": false
+    },
+    "test:integration": {
+      "dependsOn": ["build", "^build"],
+      "cache": false
+    },
+    "lint": {
+      "outputs": []
+    },
+    "format": {
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "extract:docs": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "stage-release": {
+      "dependsOn": ["build"]
+    }
+  }
+}
