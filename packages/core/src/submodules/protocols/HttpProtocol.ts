@@ -1,6 +1,6 @@
 import type { EventStreamSerde } from "@smithy/core/event-streams";
 import { NormalizedSchema, TypeRegistry, translateTraits } from "@smithy/core/schema";
-import { HttpRequest, HttpResponse } from "@smithy/core/transport";
+import { HttpRequest, HttpResponse, isValidHostname } from "@smithy/core/transport";
 import type {
   ClientProtocol,
   Codec,
@@ -158,6 +158,9 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
           hostPrefix = hostPrefix.replace(`{${name}}`, replacement);
         }
         request.hostname = hostPrefix + request.hostname;
+        if (!isValidHostname(request.hostname)) {
+          throw new Error("ValidationError: prefixed hostname must be hostname compatible.");
+        }
       }
     }
   }
