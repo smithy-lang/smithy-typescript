@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.2.3
+
+### Patch Changes
+
+- 1e5bdd3: Update author URL in package.json to be more specific
+- bcbadbc: package json updates
+
 ## 4.2.2
 
 ### Patch Changes

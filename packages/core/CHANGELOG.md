@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.24.7
+
+### Patch Changes
+
+- 1e5bdd3: Update author URL in package.json to be more specific
+- 13e74d6: add upper bound for Retry-After delay in deprecated StandardRetryStrategy
+- 3bc3322: fix call to setTimeout in DefaultRateLimiter, browser compatibility
+- bcbadbc: package json updates
+- Updated dependencies [1e5bdd3]
+- Updated dependencies [bcbadbc]
+  - @smithy/types@4.14.4
+
 ## 3.24.6
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.2.17
+
+### Patch Changes
+
+- 1e5bdd3: Update author URL in package.json to be more specific
+- bcbadbc: package json updates
+- Updated dependencies [1e5bdd3]
+- Updated dependencies [bcbadbc]
+  - @smithy/types@4.14.4
+
 ## 4.2.16
 
 ### Patch Changes

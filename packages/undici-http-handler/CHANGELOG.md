@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.0.3
+
+### Patch Changes
+
+- af4381b: Add Client dispatcher benchmark
+- 1e5bdd3: Update author URL in package.json to be more specific
+- bcbadbc: package json updates
+- Updated dependencies [1e5bdd3]
+- Updated dependencies [13e74d6]
+- Updated dependencies [3bc3322]
+- Updated dependencies [bcbadbc]
+  - @smithy/core@3.24.7
+  - @smithy/types@4.14.4
+
 ## 2.0.2
 
 ### Patch Changes

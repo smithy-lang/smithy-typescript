@@ -1,5 +1,19 @@
 # Change Log
 
+## 0.6.7
+
+### Patch Changes
+
+- 1e5bdd3: Update author URL in package.json to be more specific
+- bcbadbc: package json updates
+- Updated dependencies [1e5bdd3]
+- Updated dependencies [13e74d6]
+- Updated dependencies [3bc3322]
+- Updated dependencies [bcbadbc]
+  - @smithy/core@3.24.7
+  - @smithy/signature-v4@5.4.7
+  - @smithy/types@4.14.4
+
 ## 0.6.6
 
 ### Patch Changes
