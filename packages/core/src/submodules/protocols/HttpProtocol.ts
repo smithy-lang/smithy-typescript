@@ -159,7 +159,7 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
         }
         request.hostname = hostPrefix + request.hostname;
         if (!isValidHostname(request.hostname)) {
-          throw new Error("ValidationError: prefixed hostname must be hostname compatible.");
+          throw new Error("ValidationError: hostname containing input prefix is invalid.");
         }
       }
     }

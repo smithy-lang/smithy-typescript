@@ -1,12 +1,18 @@
-import { map, struct } from "@smithy/core/schema";
+import { map, op, struct } from "@smithy/core/schema";
 import { HttpRequest } from "@smithy/protocol-http";
 import type {
+  Codec,
   EndpointV2,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
+  OperationSchema,
+  ResponseMetadata,
   Schema,
   SerdeFunctions,
+  ShapeDeserializer,
+  ShapeSerializer,
+  StaticStructureSchema,
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
@@ -14,7 +20,115 @@ import { describe, expect, test as it } from "vitest";
 import { HttpProtocol } from "./HttpProtocol";
 import { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 
+class TestHttpProtocol extends HttpProtocol {
+  protected serializer: ShapeSerializer<string | Uint8Array> = {} as ShapeSerializer<string | Uint8Array>;
+  protected deserializer: ShapeDeserializer<string | Uint8Array> = {} as ShapeDeserializer<string | Uint8Array>;
+
+  public constructor() {
+    super({ defaultNamespace: "test" });
+  }
+
+  public getShapeId(): string {
+    return "test#Test";
+  }
+
+  public getPayloadCodec(): Codec<any, any> {
+    throw new Error("Method not implemented.");
+  }
+
+  public async serializeRequest(): Promise<IHttpRequest> {
+    throw new Error("Method not implemented.");
+  }
+
+  public async deserializeResponse(): Promise<any> {
+    throw new Error("Method not implemented.");
+  }
+
+  protected async handleError(
+    operationSchema: OperationSchema,
+    context: HandlerExecutionContext & SerdeFunctions,
+    response: IHttpResponse,
+    dataObject: any,
+    metadata: ResponseMetadata
+  ): Promise<never> {
+    throw new Error("Method not implemented.");
+  }
+
+  public callSetHostPrefix(request: IHttpRequest, operationSchema: OperationSchema, input: any): void {
+    this.setHostPrefix(request, operationSchema, input);
+  }
+}
+
 describe(HttpProtocol.name, () => {
+  describe("setHostPrefix", () => {
+    const protocol = new TestHttpProtocol();
+
+    const makeOperationSchema = (hostPrefix: string) =>
+      op(
+        "",
+        "TestOp",
+        { endpoint: [hostPrefix] },
+        [3, "test", "Input", 0, ["AccountId"], [[0, { hostLabel: 1 }]]] satisfies StaticStructureSchema,
+        "unit"
+      );
+
+    it("should substitute valid hostLabel into hostname", () => {
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      protocol.callSetHostPrefix(request, schema, { AccountId: "123456789012" });
+      expect(request.hostname).toBe("12345789012.api.service.com");
+    });
+
+    it("should throw when hostLabel contains invalid characters (slash)", () => {
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/" })).toThrow(
+        "hostname containing input prefix is invalid"
+      );
+    });
+
+    it("should throw when hostLabel contains hash character", () => {
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/#" })).toThrow(
+        "hostname containing input prefix is invalid"
+      );
+    });
+
+    it("should throw when hostLabel contains query character", () => {
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/?x=" })).toThrow(
+        "hostname containing input prefix is invalid"
+      );
+    });
+
+    it("should throw when hostLabel contains @ character", () => {
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/x@" })).toThrow(
+        "hostname containing input prefix is invalid"
+      );
+    });
+
+    it("should throw when hostLabel input is not a string", () => {
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: 123 })).toThrow(
+        "must be a string as hostLabel"
+      );
+    });
+
+    it("should not set host prefix when disableHostPrefix is true", () => {
+      const p = new TestHttpProtocol();
+      (p as any).serdeContext = { disableHostPrefix: true };
+      const request = new HttpRequest({ hostname: "api.service.com" });
+      const schema = makeOperationSchema("{AccountId}.");
+      p.callSetHostPrefix(request, schema, { AccountId: "evil.com/#" });
+      expect(request.hostname).toBe("api.service.com");
+    });
+  });
+
   describe("updateServiceEndpoint", () => {
     it("applies endpoint-resolved headers to the request", () => {
       const request = new HttpRequest({ headers: { "content-type": "application/json" } });
