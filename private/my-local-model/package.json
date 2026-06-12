@@ -1,14 +1,14 @@
 {
   "name": "xyz",
   "description": "xyz client",
-  "version": "3.24.6",
+  "version": "3.24.7",
   "scripts": {
-    "build": "concurrently 'npm:build:cjs' 'npm:build:es' 'npm:build:types'",
+    "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:es": "tsc -p tsconfig.es.json",
-    "build:types": "tsc -p tsconfig.types.json",
+    "build:es": "premove dist-es && tsc -p tsconfig.es.json",
+    "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-    "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
+    "clean": "premove dist-cjs dist-es dist-types",
     "prepack": "npm run clean && npm run build",
     "test": "npx vitest run --passWithNoTests",
     "test:watch": "npx vitest watch --passWithNoTests",
@@ -55,6 +55,7 @@
     "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
   },
   "react-native": {
-    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native",
+    "./dist-cjs/runtimeConfig": "./dist-cjs/runtimeConfig.native"
   }
 }

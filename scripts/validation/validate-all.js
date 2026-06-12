@@ -30,6 +30,8 @@ const VALIDATIONS = [
   { name: "no-cycles", label: "no cyclical file or package dependencies", script: "cycles.js" },
   { name: "eslint", label: "eslint passes on source", script: "eslint.js" },
   { name: "banned-imports", label: "no banned imports in dist output", script: "banned-imports.js" },
+  { name: "export-names", label: "export function names match their keys", script: "export-names.js" },
+  { name: "esm-compat", label: "dist-cjs exports visible via ESM import()", script: "esm-compat.js" },
 ];
 
 function parseArgs() {

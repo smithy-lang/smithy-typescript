@@ -3,7 +3,6 @@
     "baseUrl": ".",
     "downlevelIteration": true,
     "esModuleInterop": true,
-    "incremental": true,
     "lib": ["es2015", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",

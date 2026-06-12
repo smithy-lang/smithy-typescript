@@ -359,16 +359,17 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
       }
     }
 
-    if (!pkgJson.scripts?.build || !pkgJson.scripts.build.includes("yarn lint")) {
-      errors.push(`${pkgJson.name} build script must include "yarn lint"`);
-      if (overwrite && pkgJson.scripts?.build) {
-        pkgJson.scripts.build = `yarn lint && ${pkgJson.scripts.build}`;
+    if (!pkgJson.scripts?.prebuild || !pkgJson.scripts.prebuild.includes("yarn lint")) {
+      errors.push(`${pkgJson.name} prebuild script must include "yarn lint"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts.prebuild = pkgJson.scripts.prebuild ? `${pkgJson.scripts.prebuild} && yarn lint` : "yarn lint";
       }
     }
   }
 
   // Enforce clean script uses premove.
-  const expectedClean = "premove dist-cjs dist-es dist-types *.tsbuildinfo";
+  const expectedClean = "premove dist-cjs dist-es dist-types";
   if (pkgJson.scripts?.clean !== expectedClean) {
     errors.push(`${pkgJson.name} scripts["clean"] must be "${expectedClean}"`);
     if (overwrite) {
@@ -377,14 +378,43 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
     }
   }
 
-  // Enforce stage-release script uses premove.
+  // Enforce build:es cleans dist-es before compiling.
+  if (pkgJson.scripts?.["build:es"] && pkgJson.scripts["build:es"] !== "exit 0") {
+    if (!pkgJson.scripts["build:es"].startsWith("premove dist-es")) {
+      errors.push(`${pkgJson.name} scripts["build:es"] must start with "premove dist-es"`);
+      if (overwrite) {
+        pkgJson.scripts["build:es"] = "premove dist-es && " + pkgJson.scripts["build:es"];
+      }
+    }
+  }
+
+  // Enforce build:types cleans dist-types before compiling.
+  if (pkgJson.scripts?.["build:types"] && pkgJson.scripts["build:types"] !== "exit 0") {
+    if (!pkgJson.scripts["build:types"].startsWith("premove dist-types")) {
+      errors.push(`${pkgJson.name} scripts["build:types"] must start with "premove dist-types"`);
+      if (overwrite) {
+        pkgJson.scripts["build:types"] = "premove dist-types && " + pkgJson.scripts["build:types"];
+      }
+    }
+  }
+
+  // Enforce stage-release script: must not exist for private packages, must exist for public.
   const expectedStageRelease =
     "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz";
-  if (pkgJson.scripts?.["stage-release"] !== expectedStageRelease) {
-    errors.push(`${pkgJson.name} scripts["stage-release"] must be "${expectedStageRelease}"`);
-    if (overwrite) {
-      pkgJson.scripts = pkgJson.scripts || {};
-      pkgJson.scripts["stage-release"] = expectedStageRelease;
+  if (pkgJson.private) {
+    if (pkgJson.scripts?.["stage-release"]) {
+      errors.push(`${pkgJson.name} is private and must not have a "stage-release" script`);
+      if (overwrite) {
+        delete pkgJson.scripts["stage-release"];
+      }
+    }
+  } else {
+    if (pkgJson.scripts?.["stage-release"] !== expectedStageRelease) {
+      errors.push(`${pkgJson.name} scripts["stage-release"] must be "${expectedStageRelease}"`);
+      if (overwrite) {
+        pkgJson.scripts = pkgJson.scripts || {};
+        pkgJson.scripts["stage-release"] = expectedStageRelease;
+      }
     }
   }
 
@@ -405,11 +435,10 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
   // Enforce build scripts.
   const isNonStub = "build:es:cjs" in (pkgJson.scripts || {});
-  const expectedBuildTypes = "yarn g:tsc -p tsconfig.types.json";
+  const expectedBuildTypes = "premove dist-types && yarn g:tsc -p tsconfig.types.json";
   if (isNonStub) {
-    const expectedBuildEsCjs = "yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline";
-    const lintPrefix = isSubmoduleCarrier ? "yarn lint && " : "";
-    const expectedBuild = `${lintPrefix}concurrently 'yarn:build:types' 'yarn:build:es:cjs'`;
+    const expectedBuildEsCjs = "premove dist-es && yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline";
+    const expectedBuild = `concurrently 'yarn:build:types' 'yarn:build:es:cjs'`;
 
     if (pkgJson.scripts?.build !== expectedBuild) {
       errors.push(`${pkgJson.name} scripts["build"] must be "${expectedBuild}"`);
