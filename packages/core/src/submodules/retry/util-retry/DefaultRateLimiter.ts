@@ -41,7 +41,9 @@ export class DefaultRateLimiter implements RateLimiter {
   /**
    * Only used in testing.
    */
-  private static setTimeoutFn = setTimeout;
+  // Wrapped in an arrow to preserve `this` binding — browsers throw
+  // "Illegal invocation" if setTimeout is called with our class as `this` instead of window or undefined.
+  private static setTimeoutFn = (fn: Function, delay: number) => setTimeout(fn, delay);
 
   // User configurable constants
   private readonly beta: number;
