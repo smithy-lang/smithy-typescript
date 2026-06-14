@@ -93,11 +93,47 @@ const submodulePackages = process.argv.includes("--all")
     }
 
     /**
+     * Root index.ts must not use relative imports — use canonical submodule paths instead.
+     * Relative imports bypass conditional exports (browser/react-native resolution).
+     */
+    const rootIndex = path.join(root, "src", "index.ts");
+    if (fs.existsSync(rootIndex)) {
+      const rootSource = fs.readFileSync(rootIndex, "utf-8");
+      const relImports = (rootSource.match(/from "(\.\.\/?[^"]+)"/g) || []).map((m) => m.match(/"([^"]+)"/)[1]);
+      for (const rel of relImports) {
+        errors.push(
+          `${submodulePackage}/src/index.ts has relative import "${rel}". ` +
+            `Use canonical submodule path (e.g. @smithy/${submodulePackage}/submodule) instead.`
+        );
+      }
+    }
+
+    /**
+     * If root index uses canonical submodule imports (no src/index.browser.ts),
+     * the react-native field should not map root index to a browser variant.
+     */
+    if (pkgJson["react-native"] && !fs.existsSync(path.join(root, "src", "index.browser.ts"))) {
+      let changed = false;
+      for (const key of Object.keys(pkgJson["react-native"])) {
+        if (key.match(/\.\/dist-(es|cjs)\/index(\.js)?$/)) {
+          delete pkgJson["react-native"][key];
+          changed = true;
+        }
+      }
+      if (changed) {
+        errors.push(`react-native field has stale root index mapping without src/index.browser.ts`);
+        fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
+      }
+    }
+
+    /**
      * Check that submodules with .browser.ts or .native.ts files have corresponding index variant files.
      */
     for (const submodule of submodules) {
       const submodulePath = path.join(root, "src", "submodules", submodule);
-      if (!fs.existsSync(submodulePath) || !fs.lstatSync(submodulePath).isDirectory()) continue;
+      if (!fs.existsSync(submodulePath) || !fs.lstatSync(submodulePath).isDirectory()) {
+        continue;
+      }
 
       let hasBrowserVariant = false;
       let hasNativeVariant = false;

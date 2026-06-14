@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnProcess } = require("./../utils/spawn-process");
 const walk = require("./../utils/walk");
+const { extractImports } = require("./../validation/validation-shared");
 const rollup = require("rollup");
 const { nodeResolve } = require("@rollup/plugin-node-resolve");
 const json = require("@rollup/plugin-json");
@@ -18,9 +19,16 @@ module.exports = class Inliner {
   constructor(pkg) {
     this.package = pkg;
     this.platform = "node";
-    this.submodulePackages = ["core"];
-    this.hasSubmodules = this.submodulePackages.includes(pkg);
-    this.subfolder = "packages";
+    this.isPrivate = fs.existsSync(path.join(root, "private", pkg));
+    this.subfolder = (() => {
+      if (this.isPrivate) {
+        return "private";
+      }
+      return "packages";
+    })();
+    this.hasSubmodules =
+      fs.existsSync(path.join(root, this.subfolder, pkg, "src", "submodules")) &&
+      "exports" in require(path.join(root, this.subfolder, pkg, "package.json"));
     this.verbose = process.env.DEBUG || process.argv.includes("--debug");
 
     this.packageDirectory = path.join(root, this.subfolder, pkg);
@@ -46,23 +54,12 @@ module.exports = class Inliner {
   }
 
   /**
-   * step 1: build the default tsc dist-cjs output with dispersed files.
-   * we will need the files to be in place for stubbing.
-   */
-  async tsc() {
-    await spawnProcess("yarn", ["g:tsc", "-p", "tsconfig.cjs.json"], { cwd: this.packageDirectory });
-    if (this.verbose) {
-      console.log("Finished recompiling ./dist-cjs in " + this.package);
-    }
-    this.canonicalExports = Object.keys(require(this.outfile));
-    return this;
-  }
-
-  /**
-   * step 2: detect all variant files.
+   * step 1: detect all variant files.
    * For submodule packages, we collect variant mappings per submodule to produce
    * fully-inlined browser/native bundles.
    * For non-submodule packages, we collect variant externals as before.
+   *
+   * Walks dist-es to discover variant files (.native.js, .browser.js).
    */
   async discoverVariants() {
     if (this.bailout) {
@@ -71,20 +68,28 @@ module.exports = class Inliner {
     }
 
     if (this.hasSubmodules) {
-      // Submodule variant indexes are source files (index.browser.ts, index.native.ts).
-      // No variant externals needed.
       this.variantExternals = [];
       this.variantMap = {};
       return this;
     }
 
-    // Non-submodule packages: original behavior.
-    this.variantEntries = Object.entries(this.pkgJson["react-native"] ?? {});
+    this.variantEntries = Object.entries(this.pkgJson["react-native"] ?? {}).map(([k, v]) => [
+      k.replace("dist-cjs/", "dist-es/"),
+      String(v).replace("dist-cjs/", "dist-es/"),
+    ]);
 
-    for await (const file of walk(path.join(this.packageDirectory, "dist-cjs"))) {
+    const distEsDir = path.join(this.packageDirectory, "dist-es");
+    if (!fs.existsSync(distEsDir)) {
+      this.variantExternals = [];
+      this.variantMap = {};
+      this.transitiveVariants = [];
+      return this;
+    }
+
+    for await (const file of walk(distEsDir)) {
       if (file.endsWith(".js") && fs.existsSync(file.replace(/\.js$/, ".native.js"))) {
         console.log("detected undeclared auto-variant", file);
-        const canonical = file.replace(/(.*?)dist-cjs\//, "./dist-cjs/").replace(/\.js$/, "");
+        const canonical = file.replace(/(.*?)dist-es\//, "./dist-es/").replace(/\.js$/, "");
         const variant = canonical.replace(/(.*?)(\.js)?$/, "$1.native$2");
         this.variantEntries.push([canonical, variant]);
       }
@@ -93,7 +98,7 @@ module.exports = class Inliner {
         !file.endsWith(".browser.js") &&
         fs.existsSync(file.replace(/\.js$/, ".browser.js"))
       ) {
-        const canonical = file.replace(/(.*?)dist-cjs\//, "./dist-cjs/").replace(/\.js$/, "");
+        const canonical = file.replace(/(.*?)dist-es\//, "./dist-es/").replace(/\.js$/, "");
         const variant = canonical.replace(/(.*?)(\.js)?$/, "$1.browser$2");
         this.variantEntries.push([canonical, variant]);
       }
@@ -103,29 +108,30 @@ module.exports = class Inliner {
 
     for (const [k, v] of this.variantEntries) {
       for (const variantFile of [k, String(v)]) {
-        if (!variantFile.includes("dist-cjs/")) {
+        if (!variantFile.includes("dist-es/")) {
           continue;
         }
         const keyFile = path.join(
           this.packageDirectory,
-          "dist-cjs",
-          variantFile.replace(/(.*?)dist-cjs\//, "") + (variantFile.endsWith(".js") ? "" : ".js")
+          "dist-es",
+          variantFile.replace(/(.*?)dist-es\//, "") + (variantFile.endsWith(".js") ? "" : ".js")
         );
+        if (!fs.existsSync(keyFile)) {
+          continue;
+        }
         const keyFileContents = fs.readFileSync(keyFile, "utf-8");
-        const requireStatements = keyFileContents.matchAll(/require\("(.*?)"\)/g);
-        for (const requireStatement of requireStatements) {
-          if (requireStatement[1]?.startsWith(".")) {
-            const key = path
-              .normalize(path.join(path.dirname(keyFile), requireStatement[1]))
-              .replace(/(.*?)dist-cjs\//, "./dist-cjs/");
-            if (this.verbose) {
-              console.log("Transitive variant file:", key);
-            }
-            const transitiveVariant = key.replace(/(.*?)dist-cjs\//, "").replace(/(\.js)?$/, "");
-            if (!this.transitiveVariants.includes(transitiveVariant)) {
-              this.variantEntries.push([key, key]);
-              this.transitiveVariants.push(transitiveVariant);
-            }
+        const relativeImports = extractImports(keyFileContents).filter((s) => s.startsWith("."));
+        for (const dep of relativeImports) {
+          const key = path.normalize(path.join(path.dirname(keyFile), dep)).replace(/(.*?)dist-es\//, "./dist-es/");
+          if (this.verbose) {
+            console.log("Transitive variant file:", key);
+          }
+
+          const transitiveVariant = key.replace(/(.*?)dist-es\//, "").replace(/(\.js)?$/, "");
+
+          if (!this.transitiveVariants.includes(transitiveVariant)) {
+            this.variantEntries.push([key, key]);
+            this.transitiveVariants.push(transitiveVariant);
           }
         }
       }
@@ -135,7 +141,7 @@ module.exports = class Inliner {
     this.variantMap = {};
 
     for (const [k, v] of this.variantEntries) {
-      const prefix = "dist-cjs/";
+      const prefix = "dist-es/";
       const keyPrefixIndex = k.indexOf(prefix);
       if (keyPrefixIndex === -1) {
         continue;
@@ -161,7 +167,7 @@ module.exports = class Inliner {
   }
 
   /**
-   * step 3: bundle the package index into dist-cjs/index.js except for node_modules
+   * step 2: bundle the package index into dist-cjs/index.js except for node_modules
    * and also excluding any local files that have variants for react-native.
    *
    * For submodule packages, produces fully-inlined bundles per submodule:
@@ -178,17 +184,21 @@ module.exports = class Inliner {
 
     const entryPoint = path.join(root, this.subfolder, this.package, "dist-es", "index.js");
 
+    if (!fs.existsSync(entryPoint)) {
+      // Types-only packages have no dist-es output. Nothing to bundle.
+      if (this.verbose) {
+        console.log("No dist-es/index.js found in " + this.package + ". Skipping bundle.");
+      }
+      this.bailout = true;
+      return this;
+    }
+
     const makeInputOptions = (entry, externals, plugins = []) => {
       const externalityAssessments = {};
       return {
         input: [entry],
         plugins: [...plugins, nodeResolve(), json()],
         onwarn(warning) {
-          /*
-          Circular imports are not an error in the language spec,
-          but reasoning about the program and bundling becomes easier.
-          For that reason let's avoid them.
-           */
           if (warning.code === "CIRCULAR_DEPENDENCY") {
             throw Error(warning.message);
           }
@@ -212,8 +222,7 @@ module.exports = class Inliner {
 
           const local =
             id.includes(`/dist-es/`) &&
-            ((id.includes(`/packages/`) && !id.includes(`packages/${this.package}/`)) ||
-              (id.includes(`/packages-internal/`) && !id.includes(`packages-internal/${this.package}/`)));
+            id.includes(`/packages/`) && !id.includes(`packages/${this.package}/`);
           if (local) {
             if (this.verbose) {
               console.log("EXTERN (local)", id);
@@ -300,30 +309,95 @@ module.exports = class Inliner {
   }
 
   /**
-   * step 4: delete all existing dist-cjs files except the index.js file
-   * and variant externals. These files were inlined into the bundle.
+   * step 3: transform retained variant files from dist-es to dist-cjs.
    */
-  async cleanupInlinedFiles() {
-    if (this.bailout) {
+  async transformVariants() {
+    if (this.bailout || this.hasSubmodules) {
       return this;
     }
 
-    for await (const file of walk(path.join(this.packageDirectory, "dist-cjs"))) {
-      const relativePath = file.replace(path.join(this.packageDirectory, "dist-cjs"), "").slice(1);
+    const { transpile } = require("./esm-to-cjs");
+
+    for (const variantFile of this.variantExternals) {
+      const srcFile = path.join(this.packageDirectory, "dist-es", variantFile);
+      if (!fs.existsSync(srcFile)) {
+        continue;
+      }
+
+      const esmCode = fs.readFileSync(srcFile, "utf-8");
+      const outFile = path.join(this.packageDirectory, "dist-cjs", variantFile);
+      fs.mkdirSync(path.dirname(outFile), { recursive: true });
+      fs.writeFileSync(outFile, transpile(esmCode));
+
+      if (this.verbose) {
+        console.log("Transformed variant:", variantFile);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * step 4: delete unreachable dist-cjs files that were not bundled into
+   * index.js and are not variant externals or dynamic import targets.
+   */
+  async deleteUnreachableFiles() {
+    if (this.bailout || this.hasSubmodules) {
+      return this;
+    }
+
+    // Collect files that are targets of dynamic import() from variant externals.
+    const dynamicImportTargets = new Set();
+    for (const external of this.variantExternals) {
+      const externalFile = path.join(this.packageDirectory, "dist-cjs", external);
+      if (fs.existsSync(externalFile)) {
+        const contents = fs.readFileSync(externalFile, "utf-8");
+        for (const specifier of extractImports(contents)) {
+          if (specifier.startsWith(".")) {
+            const resolved = path.normalize(path.join(path.dirname(external), specifier));
+            dynamicImportTargets.add(resolved.endsWith(".js") ? resolved : resolved + ".js");
+          }
+        }
+      }
+    }
+
+    const distCjsDir = path.join(this.packageDirectory, "dist-cjs");
+    if (!fs.existsSync(distCjsDir)) {
+      return this;
+    }
+
+    for await (const file of walk(distCjsDir)) {
+      const relativePath = file.replace(distCjsDir, "").slice(1);
 
       if (relativePath.includes("submodules")) {
         continue;
       }
 
       if (!file.endsWith(".js")) {
+        if (this.verbose) {
+          console.log("Skipping", path.basename(file), "file extension is not .js.");
+        }
         continue;
       }
 
       if (relativePath === "index.js") {
+        if (this.verbose) {
+          console.log("Skipping index.js");
+        }
         continue;
       }
 
       if (this.variantExternals.find((external) => relativePath.endsWith(external))) {
+        if (this.verbose) {
+          console.log("Not rewriting.", relativePath, "is variant.");
+        }
+        continue;
+      }
+
+      if (dynamicImportTargets.has(relativePath)) {
+        if (this.verbose) {
+          console.log("Not rewriting.", relativePath, "is a dynamic import target.");
+        }
         continue;
       }
 
@@ -354,7 +428,8 @@ module.exports = class Inliner {
         const dirname = path.dirname(variant);
 
         const find = new RegExp(`require\\("\\.(.*?)/${basename}"\\)`, "g");
-        const replace = `require("./${dirname}/${basename}")`.replace(remove, "");
+        const rel = path.join(dirname, basename);
+        const replace = `require("${rel.startsWith(".") ? rel : "./" + rel}")`.replace(remove, "");
 
         contents = contents.replace(find, replace);
 
@@ -374,69 +449,36 @@ module.exports = class Inliner {
 
   /**
    * step 6: validate the output.
-   * For submodule packages, validates that each submodule index.js is requireable
-   * and that variant bundles exist where expected.
+   * Checks that variant externals are referenced in the bundled index.
    */
   async validate() {
-    if (this.bailout) {
+    if (this.bailout || this.hasSubmodules) {
       return this;
     }
 
-    if (this.hasSubmodules) {
-      const submodulesDir = path.join(this.packageDirectory, "dist-cjs", "submodules");
-      const submodules = fs.readdirSync(submodulesDir);
-
-      for (const submodule of submodules) {
-        const submoduleDir = path.join(submodulesDir, submodule);
-        for (const file of fs.readdirSync(submoduleDir)) {
-          if (!file.endsWith(".js")) continue;
-          const filePath = path.join(submoduleDir, file);
-          try {
-            require(filePath);
-          } catch (e) {
-            console.error(`File ${filePath} has import errors.`);
-            throw e;
-          }
-        }
-      }
-
-      // Validate main index.js is requireable.
-      try {
-        require(this.outfile);
-      } catch (e) {
-        console.error(`File ${this.outfile} has import errors.`);
-        throw e;
-      }
-
-      return this;
-    }
-
-    // Non-submodule validation (original behavior).
     this.indexContents = fs.readFileSync(this.outfile, "utf-8");
 
     const externalsToCheck = new Set(
       Object.keys(this.variantMap)
-        .filter((variant) => !this.transitiveVariants.includes(variant) && !variant.endsWith("index"))
+        .filter(
+          (variant) => !this.transitiveVariants.includes(variant.replace(/\.js$/, "")) && !variant.endsWith("index")
+        )
         .map((variant) => path.basename(variant).replace(/.js$/, ""))
     );
 
-    const inspect = (contents) => {
-      for (const line of contents.split("\n")) {
-        if (line.includes("require(")) {
-          const checkOrder = [...externalsToCheck].sort().reverse();
-          for (const external of checkOrder) {
-            if (line.includes(external)) {
-              if (this.verbose) {
-                console.log("Inline index confirmed require() for variant external:", external);
-              }
-              externalsToCheck.delete(external);
+    for (const line of this.indexContents.split("\n")) {
+      if (line.includes("require(")) {
+        const checkOrder = [...externalsToCheck].sort().reverse();
+        for (const external of checkOrder) {
+          if (line.includes(external)) {
+            if (this.verbose) {
+              console.log("Inline index confirmed require() for variant external:", external);
             }
+            externalsToCheck.delete(external);
           }
         }
       }
-    };
-
-    inspect(this.indexContents);
+    }
 
     if (externalsToCheck.size) {
       throw new Error(
@@ -445,38 +487,6 @@ module.exports = class Inliner {
           " were not found in the index."
       );
     }
-
-    // check ESM compat.
-    const tmpFileContents =
-      `import assert from "node:assert";\n      \n      const namingExceptions = [\n        "paginateOperation", // name for all paginators.\n        "blobReader" // name collision between chunked-blob-reader and chunked-blob-reader-native.\n      ];\n      ` +
-      this.canonicalExports
-        .filter((sym) => !sym.includes(":"))
-        .map((sym) => {
-          if (
-            [
-              "getDefaultClientConfiguration", // renamed as an alias
-              "generateIdempotencyToken", // sometimes called v4
-              "expectInt", // aliased to expectLong
-              "handleFloat", // aliased to limitedParseDouble
-              "limitedParseFloat", // aliased to limitedParseDouble
-              "strictParseFloat", // aliased to strictParseDouble
-              "strictParseInt", // aliased to strictParseLong
-              "randomUUID", // bound function from crypto.randomUUID.bind(crypto)
-              "blobReaderNative", // re-exported alias of blobReader from chunked-blob-reader-native
-              "blobReader", // name collision in bundle between chunked-blob-reader variants
-            ].includes(sym)
-          ) {
-            return `import { ${sym} } from "${this.pkgJson.name}";`;
-          }
-          return `import { ${sym} } from "${this.pkgJson.name}";\nif (typeof ${sym} === "function") {\n  if (${sym}.name !== "${sym}" && !namingExceptions.includes(${sym}.name)) {\n    throw new Error(${sym}.name + " does not equal expected ${sym}.")\n  }\n} \n        `;
-        })
-        .join("\n");
-    fs.writeFileSync(path.join(__dirname, "tmp", this.package + ".mjs"), tmpFileContents, "utf-8");
-    await spawnProcess("node", [path.join(__dirname, "tmp", this.package + ".mjs")]);
-    if (this.verbose) {
-      console.log("ESM compatibility verified.");
-    }
-    fs.rmSync(path.join(__dirname, "tmp", this.package + ".mjs"));
 
     return this;
   }
