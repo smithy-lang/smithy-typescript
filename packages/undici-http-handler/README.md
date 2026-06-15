@@ -332,7 +332,7 @@ import { UndiciHttpHandler } from "@smithy/undici-http-handler";
 
 new UndiciHttpHandler({
   dispatcher: {
-    // allowH2 is enabled by default — no need to set it explicitly
+    allowH2: true, // opt in to HTTP/2
     headersTimeout: 5000, // requestTimeout (HTTP/1.1 only, ignored for HTTP/2)
     bodyTimeout: 5000, // requestTimeout
     keepAliveMaxTimeout: 30000, // sessionTimeout
@@ -384,9 +384,8 @@ options (e.g. `settings`, `createConnection`) have no undici equivalent.
 ### Key differences
 
 - **HTTP/2 is opt-in.** Unlike `NodeHttp2Handler` (which is always HTTP/2),
-  undici defaults to HTTP/1.1. This handler sets `allowH2: true` automatically
-  when you pass `Agent.Options`, so HTTP/2 is negotiated via ALPN without
-  additional configuration. If you pass your own `Dispatcher` instance, you
+  undici defaults to HTTP/1.1. Set `allowH2: true` in your `Agent.Options` to
+  negotiate HTTP/2 via ALPN. If you pass your own `Dispatcher` instance, you
   are responsible for enabling `allowH2` yourself.
 
 - **Protocol negotiation.** undici uses ALPN to negotiate HTTP/2 over TLS.
@@ -406,16 +405,14 @@ options (e.g. `settings`, `createConnection`) have no undici equivalent.
 
 ### Preferring HTTP/2 in ALPN negotiation
 
-By default, this handler sets `allowH2: true` so undici can negotiate HTTP/2
-via ALPN. However, the default ALPN offer order is `['http/1.1', 'h2']`
-(HTTP/1.1 first). Servers that select the protocol by client preference — such
-as some load balancers using OpenSSL's `SSL_select_next_proto` semantics — may
-negotiate HTTP/1.1 even though both sides support HTTP/2.
+When `allowH2: true` is set, undici can negotiate HTTP/2 via ALPN. However,
+the default ALPN offer order is `['http/1.1', 'h2']` (HTTP/1.1 first). Servers
+that select the protocol by client preference — such as some load balancers
+using OpenSSL's `SSL_select_next_proto` semantics — may negotiate HTTP/1.1
+even though both sides support HTTP/2.
 
 To offer HTTP/2 first in the ALPN list, use undici's `preferH2` connector
-option (available since undici v8.4.0). This requires passing your own
-`Dispatcher` instance because `preferH2` is a connector-level build option
-that cannot be set through plain `Agent.Options`:
+option (available since undici v8.4.0):
 
 ```js
 import { S3 } from "@aws-sdk/client-s3";
@@ -433,9 +430,9 @@ const client = new S3({
 });
 ```
 
-When `preferH2` is `true`, the TLS handshake offers `h2` before `http/1.1`.
-If the server does not support HTTP/2, ALPN transparently falls back to
-HTTP/1.1.
+When `preferH2` is `true`, the TLS handshake offers `h2` before `http/1.1`
+and `allowH2` is implicitly enabled. If the server does not support HTTP/2,
+ALPN transparently falls back to HTTP/1.1.
 
 ## Proxies
 
