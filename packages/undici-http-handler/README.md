@@ -358,9 +358,11 @@ options (e.g. `settings`, `createConnection`) have no undici equivalent.
 - **Protocol negotiation.** undici uses ALPN to negotiate HTTP/2 over TLS.
   `NodeHttp2Handler` uses Node's `http2.connect()` which always creates an
   HTTP/2 session.
+
 - **Connection model.** `NodeHttp2Handler` manages a pool of HTTP/2 sessions
   per authority. undici manages connections per origin and multiplexes HTTP/2
   streams when `allowH2` is enabled.
+
 - **Timeout behavior differs by protocol.** For HTTP/1.1, undici uses both
   `headersTimeout` (time waiting for response headers) and `bodyTimeout` (time
   between body chunks) separately. For HTTP/2, only `bodyTimeout` is used — it
