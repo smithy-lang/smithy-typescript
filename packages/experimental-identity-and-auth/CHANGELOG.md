@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.7.0
+
+### Minor Changes
+
+- 17e50e9: update dist-cjs output format to use plain require/exports statements
+
+### Patch Changes
+
+- Updated dependencies [17e50e9]
+  - @smithy/signature-v4@5.5.0
+  - @smithy/types@4.15.0
+  - @smithy/core@3.25.0
+
 ## 0.6.7
 
 ### Patch Changes

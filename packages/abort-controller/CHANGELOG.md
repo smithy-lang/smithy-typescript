@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 17e50e9: update dist-cjs output format to use plain require/exports statements
+
+### Patch Changes
+
+- Updated dependencies [17e50e9]
+  - @smithy/types@4.15.0
+
 ## 4.2.17
 
 ### Patch Changes

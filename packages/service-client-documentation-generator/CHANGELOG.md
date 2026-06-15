@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.0
+
+### Minor Changes
+
+- 17e50e9: update dist-cjs output format to use plain require/exports statements
+
 ## 4.2.3
 
 ### Patch Changes

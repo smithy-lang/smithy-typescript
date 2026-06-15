@@ -1,5 +1,16 @@
 # @smithy/uuid
 
+## 1.3.0
+
+### Minor Changes
+
+- 17e50e9: update dist-cjs output format to use plain require/exports statements
+
+### Patch Changes
+
+- Updated dependencies [17e50e9]
+  - @smithy/core@3.25.0
+
 ## 1.2.7
 
 ### Patch Changes

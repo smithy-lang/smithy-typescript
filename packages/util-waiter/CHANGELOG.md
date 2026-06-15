@@ -1,5 +1,16 @@
 # @smithy/util-waiter
 
+## 4.5.0
+
+### Minor Changes
+
+- 17e50e9: update dist-cjs output format to use plain require/exports statements
+
+### Patch Changes
+
+- Updated dependencies [17e50e9]
+  - @smithy/core@3.25.0
+
 ## 4.4.7
 
 ### Patch Changes
