@@ -1,4 +1,4 @@
-import { getSmithyContext } from "@smithy/core/client";
+import { getSmithyContext } from "@smithy/core/transport";
 import type {
   HandlerExecutionContext,
   HttpAuthScheme,
