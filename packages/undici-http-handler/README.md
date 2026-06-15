@@ -192,6 +192,12 @@ Maps to [`dispatcher.headersTimeout`][undici-client-options] and
 time-to-headers and time-between-body-chunks. The per-request `requestTimeout`
 option also sets both.
 
+> **Note:** For HTTP/2 connections (`allowH2: true`), undici only uses
+> `bodyTimeout` as a unified stream inactivity timeout — `headersTimeout` is
+> ignored. The `bodyTimeout` value is passed to `stream.setTimeout()` on the
+> HTTP/2 stream, covering both waiting for response headers and waiting for
+> body data. If you need a timeout that applies to HTTP/2, set `bodyTimeout`.
+
 #### `socketTimeout`
 
 Maps to [`dispatcher.bodyTimeout`][undici-client-options] and
@@ -199,6 +205,9 @@ Maps to [`dispatcher.bodyTimeout`][undici-client-options] and
 fires on socket inactivity during an in-flight request. undici's `bodyTimeout`
 (time between body chunks) and `headersTimeout` (time waiting for headers) cover
 the same stalled-request cases.
+
+> **Note:** For HTTP/2 connections (`allowH2: true`), only `bodyTimeout` is
+> used as a stream inactivity timeout — `headersTimeout` is ignored.
 
 #### `httpAgent` / `httpsAgent`
 
@@ -266,7 +275,135 @@ this warning.
 
 Maps to `logger`. Passed at the top level, same as `NodeHttpHandler`.
 
-### Proxies
+## Migrating from NodeHttp2Handler
+
+`UndiciHttpHandler` can replace [`NodeHttp2Handler`][node-http-handler] for HTTP/2 use cases.
+
+### Before / After example
+
+```js
+// Before: NodeHttp2Handler
+import { NodeHttp2Handler } from "@smithy/node-http-handler";
+
+new NodeHttp2Handler({
+  requestTimeout: 5000,
+  sessionTimeout: 30000,
+  maxConcurrentStreams: 100,
+});
+```
+
+```js
+// After: UndiciHttpHandler with HTTP/2
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+
+new UndiciHttpHandler({
+  dispatcher: {
+    // allowH2 is enabled by default — no need to set it explicitly
+    headersTimeout: 5000, // requestTimeout (HTTP/1.1 only, ignored for HTTP/2)
+    bodyTimeout: 5000, // requestTimeout
+    keepAliveMaxTimeout: 30000, // sessionTimeout
+  },
+});
+```
+
+### Option mapping
+
+#### `requestTimeout`
+
+Maps to [`dispatcher.bodyTimeout`][undici-client-options]. `NodeHttp2Handler`
+applies a single timeout to the entire stream; for HTTP/2, undici uses
+`bodyTimeout` as a unified stream inactivity timeout via `stream.setTimeout()`,
+covering both waiting for response headers and waiting for body data.
+
+> **Note:** `headersTimeout` is ignored for HTTP/2 connections in undici. The
+> example above sets both `headersTimeout` and `bodyTimeout` to the same value
+> so the configuration works consistently if the connection falls back to
+> HTTP/1.1 (where both timeouts apply separately).
+
+#### `sessionTimeout`
+
+Maps to [`dispatcher.keepAliveMaxTimeout`][undici-client-options]. In
+`NodeHttp2Handler`, this closes idle HTTP/2 sessions after the specified
+duration. undici's `keepAliveMaxTimeout` controls the maximum time a socket stays
+open between requests.
+
+#### `disableConcurrentStreams`
+
+No direct equivalent. With `allowH2: true`, undici multiplexes streams over a
+single HTTP/2 connection per origin by default. To force one stream per
+connection (mimicking `disableConcurrentStreams: true`), set
+[`dispatcher.pipelining: 0`][undici-client-options] and
+[`dispatcher.connections: 1`][undici-pool-options], though this sacrifices
+multiplexing benefits.
+
+#### `maxConcurrentStreams`
+
+No direct equivalent. undici respects the server's `SETTINGS_MAX_CONCURRENT_STREAMS`
+but does not expose a client-side cap for HTTP/2 stream concurrency.
+
+#### `nodeHttp2ConnectOptions`
+
+Maps partially to [`dispatcher.connect`][undici-connect-options] for TLS options
+(e.g. `ca`, `cert`, `key`, `rejectUnauthorized`). Node-specific HTTP/2 session
+options (e.g. `settings`, `createConnection`) have no undici equivalent.
+
+### Key differences
+
+- **HTTP/2 is opt-in.** Unlike `NodeHttp2Handler` (which is always HTTP/2),
+  undici defaults to HTTP/1.1. This handler sets `allowH2: true` automatically
+  when you pass `Agent.Options`, so HTTP/2 is negotiated via ALPN without
+  additional configuration. If you pass your own `Dispatcher` instance, you
+  are responsible for enabling `allowH2` yourself.
+
+- **Protocol negotiation.** undici uses ALPN to negotiate HTTP/2 over TLS.
+  `NodeHttp2Handler` uses Node's `http2.connect()` which always creates an
+  HTTP/2 session.
+
+- **Connection model.** `NodeHttp2Handler` manages a pool of HTTP/2 sessions
+  per authority. undici manages connections per origin and multiplexes HTTP/2
+  streams when `allowH2` is enabled.
+
+- **Timeout behavior differs by protocol.** For HTTP/1.1, undici uses both
+  `headersTimeout` (time waiting for response headers) and `bodyTimeout` (time
+  between body chunks) separately. For HTTP/2, only `bodyTimeout` is used — it
+  becomes a unified stream inactivity timeout via `stream.setTimeout()`,
+  covering both the header and body phases. `headersTimeout` is ignored for
+  HTTP/2 streams.
+
+### Preferring HTTP/2 in ALPN negotiation
+
+By default, this handler sets `allowH2: true` so undici can negotiate HTTP/2
+via ALPN. However, the default ALPN offer order is `['http/1.1', 'h2']`
+(HTTP/1.1 first). Servers that select the protocol by client preference — such
+as some load balancers using OpenSSL's `SSL_select_next_proto` semantics — may
+negotiate HTTP/1.1 even though both sides support HTTP/2.
+
+To offer HTTP/2 first in the ALPN list, use undici's `preferH2` connector
+option (available since undici v8.4.0). This requires passing your own
+`Dispatcher` instance because `preferH2` is a connector-level build option
+that cannot be set through plain `Agent.Options`:
+
+```js
+import { S3 } from "@aws-sdk/client-s3";
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+import { Agent } from "undici"; // >= v8.4.0
+
+const dispatcher = new Agent({
+  connect: {
+    preferH2: true, // ALPN offer: ['h2', 'http/1.1'] instead of ['http/1.1', 'h2']
+  },
+});
+
+const client = new S3({
+  requestHandler: new UndiciHttpHandler({ dispatcher }),
+});
+```
+
+When `preferH2` is `true`, the TLS handshake offers `h2` before `http/1.1`.
+If the server does not support HTTP/2, ALPN transparently falls back to
+HTTP/1.1.
+
+## Proxies
 
 `NodeHttpHandler` has no built-in proxy support, so proxy use typically meant
 installing a third-party agent (e.g. `proxy-agent`, `https-proxy-agent`,
