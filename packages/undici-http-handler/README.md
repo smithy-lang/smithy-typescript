@@ -73,31 +73,59 @@ const client = new S3({
 client.listBuckets().then(console.log);
 ```
 
-If your application only talks to a single origin (e.g. a Lambda function
-calling one service endpoint), you can pass a `Client` for lower overhead by
-skipping the per-origin routing that `Agent` performs.
+If every operation made by the SDK client using this handler is guaranteed to
+hit the exact same host (e.g. a Lambda function with a single client calling one
+fixed service endpoint), you can pass a `Client` for lower overhead by skipping
+the per-origin routing that `Agent` performs. Note that the dispatcher is scoped
+to the one SDK client this handler is attached to, not the whole application —
+other clients get their own handler.
 
 ```js
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { Lambda } from "@aws-sdk/client-lambda";
 import { UndiciHttpHandler } from "@smithy/undici-http-handler";
 import { Client } from "undici";
 
 const region = "us-east-1";
-const endpoint = `https://dynamodb.${region}.amazonaws.com`;
+const endpoint = `https://lambda.${region}.amazonaws.com`;
 
 const dispatcher = new Client(endpoint, {
   pipelining: 1,
   connect: { timeout: 3000 },
 });
 
-const client = new DynamoDB({
+const client = new Lambda({
   region,
   endpoint,
   requestHandler: new UndiciHttpHandler({ dispatcher }),
 });
 
-client.listTables({}).then(console.log);
+client.listFunctions({}).then(console.log);
 ```
+
+> **Warning:** A `Client` is pinned to exactly one origin, so it must not be
+> used with an SDK client whose operations may target multiple hosts. A client
+> that appears to use one endpoint often still routes individual operations to
+> different hosts:
+>
+> - **Host-prefixed operations.** Operations carrying `@endpoint(hostPrefix)`
+>   target a different host. e.g. CloudWatch Logs `StartLiveTail` uses prefix
+>   `stream-`, hitting `stream-logs.<region>.amazonaws.com` while other Logs
+>   operations use `logs.<region>.amazonaws.com`.
+> - **S3 virtual-hosted addressing.** `ListBuckets` hits
+>   `s3.<region>.amazonaws.com` but bucket-scoped operations hit
+>   `<bucket>.s3.<region>.amazonaws.com`.
+> - **DynamoDB account-based routing.** With `AccountIdEndpointMode=preferred`
+>   (the default) and an `accountId` on the resolved credentials, operations
+>   route to `<account-id>.ddb.<region>.amazonaws.com`. The host depends on the
+>   account ID resolved at request time, so it cannot be known when statically
+>   constructing a single-origin `Client`.
+> - **FIPS/dualstack variants** can also resolve to a different host.
+>
+> When a request is routed to a host other than the `Client`'s fixed origin, it
+> fails TLS validation (`ERR_TLS_CERT_ALTNAME_INVALID`) and wedges the
+> dispatcher, leaving every subsequent request unsettled. If multi-host routing
+> is possible, use the default `Agent` — or `Agent({ connections: 1 })` for a
+> single connection per origin.
 
 > **Tip:** When you pass your own `Dispatcher`, you control which version of
 > `undici` is used. For best performance, install the latest `undici` directly
@@ -116,9 +144,14 @@ Our benchmark spins up a local HTTP server and runs two scenarios:
 The results show UndiciHttpHandler spends **35%-50%** less time in request handling
 as compared to NodeHttpHandler from `@smithy/node-http-handler`.
 
-If your application only talks to a single origin, passing a `Client` as the
-dispatcher gives an additional **5%-20%** improvement over the default `Agent` by
-skipping per-origin routing.
+If every operation made by the SDK client hits the exact same host, passing a
+`Client` as the dispatcher gives an additional **5%-20%** improvement over the
+default `Agent` by skipping per-origin routing.
+
+> **Warning:** A single-origin `Client` breaks if any operation targets a
+> different host (e.g. host-prefixed endpoints, S3 virtual-hosted addressing,
+> DynamoDB account-based routing). See
+> [Configuring undici Dispatcher](#configuring-undici-dispatcher) for details.
 
 We recommend running benchmarks for your own use case on your own setup, as
 results will vary depending on workload, network conditions, and environment.
