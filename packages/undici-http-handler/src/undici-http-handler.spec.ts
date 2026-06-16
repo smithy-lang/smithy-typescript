@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
-import { Agent, Pool, buildConnector, type Dispatcher } from "undici";
+import { Agent, buildConnector, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -443,20 +443,20 @@ describe("UndiciHttpHandler", () => {
   });
 
   describe("event stream (isEventStream)", () => {
-    it("makes a successful request with an isolated client", async () => {
+    it("makes a successful request", async () => {
       handler = new UndiciHttpHandler();
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
     });
 
-    it("does not use the shared dispatcher for event stream requests", async () => {
+    it("routes event streams through the shared internal dispatcher", async () => {
       const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
       handler = new UndiciHttpHandler();
-      // Internal Agent is in use here, so the isolated client path applies.
-      // Event stream goes through an isolated Client instead of the shared Agent.
+      // Event streams are routed through the shared Agent like normal requests,
+      // rather than through a dedicated isolated Client.
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
-      expect(sharedAgentRequestSpy).not.toHaveBeenCalled();
+      expect(sharedAgentRequestSpy).toHaveBeenCalled();
     });
 
     it("routes event streams through caller-provided dispatcher", async () => {
@@ -495,12 +495,14 @@ describe("UndiciHttpHandler", () => {
       expect(mockDispatcher.request).toHaveBeenCalledOnce();
     });
 
-    it("uses isolated client for event streams when Agent.Options were provided", async () => {
-      // Agent.Options means the handler created the Agent internally, so
-      // an isolated client should still be used for event streams.
+    it("routes event streams through the shared Agent when Agent.Options were provided", async () => {
+      // Agent.Options means the handler created the Agent internally. The event
+      // stream still goes through that shared Agent.
+      const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
       handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
+      expect(sharedAgentRequestSpy).toHaveBeenCalled();
     });
 
     it("uses the shared dispatcher when isEventStream is false", async () => {
@@ -519,7 +521,7 @@ describe("UndiciHttpHandler", () => {
       expect(mockDispatcher.request).toHaveBeenCalledOnce();
     });
 
-    it("destroys isolated client when abort signal is already aborted", async () => {
+    it("throws AbortError for an event stream when the abort signal is already aborted", async () => {
       handler = new UndiciHttpHandler();
       const controller = new AbortController();
       controller.abort();
@@ -531,7 +533,7 @@ describe("UndiciHttpHandler", () => {
       ).rejects.toThrow("Request aborted");
     });
 
-    it("destroys isolated client on request error", async () => {
+    it("rejects an event stream request on connection error", async () => {
       handler = new UndiciHttpHandler();
       // Use a port that nothing is listening on to trigger a connection error.
       const badRequest = Object.assign(
@@ -547,7 +549,7 @@ describe("UndiciHttpHandler", () => {
       await expect(handler.handle(badRequest, { isEventStream: true })).rejects.toThrow();
     });
 
-    it("appends query string to path with isolated client", async () => {
+    it("appends query string to path for event streams", async () => {
       handler = new UndiciHttpHandler();
       const { response } = await handler.handle(
         createMockRequest({
@@ -560,7 +562,7 @@ describe("UndiciHttpHandler", () => {
       expect(response.headers["x-url"]).toContain("foo=bar");
     });
 
-    it("propagates Agent.Options 'connect' to the isolated Client for event streams", async () => {
+    it("applies Agent.Options 'connect' to event stream requests", async () => {
       const connect = vi.fn(((opts: any, cb: any) => {
         // Delegate to undici's default connector so the request still completes.
         const real = buildConnector({});
@@ -571,24 +573,6 @@ describe("UndiciHttpHandler", () => {
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
       expect(connect).toHaveBeenCalled();
-    });
-
-    it("strips Agent/Pool-only options ('connections', 'factory', 'maxRedirections', 'interceptors') from isolated Client", async () => {
-      // 'connections' would throw on Client.Options but is valid on Agent/Pool;
-      // verify the handler does not propagate it to the isolated Client.
-      handler = new UndiciHttpHandler({
-        dispatcher: {
-          connections: 4,
-          maxRedirections: 0,
-          factory: ((origin: any, opts: any) => {
-            // Should not be called for the isolated Client.
-            return new Pool(origin, opts);
-          }) as any,
-        } as any,
-      });
-
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
     });
   });
 
