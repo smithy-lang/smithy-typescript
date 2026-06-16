@@ -123,10 +123,10 @@ client.listFunctions({}).then(console.log);
 > - **FIPS/dualstack variants** can also resolve to a different host.
 >
 > When a request is routed to a host other than the `Client`'s fixed origin, it
-> fails TLS validation (`ERR_TLS_CERT_ALTNAME_INVALID`) and wedges the
-> dispatcher, leaving every subsequent request unsettled. If multi-host routing
-> is possible, use the default `Agent` — or `Agent({ connections: 1 })` for a
-> single connection per origin.
+> fails TLS validation (`ERR_TLS_CERT_ALTNAME_INVALID`) and leaves the
+> dispatcher stuck, so every subsequent request hangs without ever completing.
+> If multi-host routing is possible, use the default `Agent` — or
+> `Agent({ connections: 1 })` for a single connection per origin.
 
 > **Tip:** When you pass your own `Dispatcher`, you control which version of
 > `undici` is used. For best performance, install the latest `undici` directly
