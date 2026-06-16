@@ -270,6 +270,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return dispatcher;
     }
 
-    return (config.dispatcher = new Agent(this.internalAgentOptions ?? { allowH2: true }));
+    return (config.dispatcher = new Agent(this.internalAgentOptions ?? {}));
   }
 }
