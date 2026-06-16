@@ -274,9 +274,9 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return (config.dispatcher = new Agent(this.internalAgentOptions));
     }
 
-    // Use the global dispatcher if available (e.g. when the user has configured
-    // a ProxyAgent or MockAgent via setGlobalDispatcher). This avoids creating
-    // a redundant Agent and respects environment-level proxy/TLS configuration.
+    // Use the global dispatcher if available. This respects environment-level
+    // proxy/TLS configuration set via `setGlobalDispatcher` without creating
+    // a redundant `Agent` instance.
     return getGlobalDispatcher();
   }
 }
