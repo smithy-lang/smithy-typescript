@@ -444,19 +444,39 @@ describe("UndiciHttpHandler", () => {
 
   describe("event stream (isEventStream)", () => {
     it("makes a successful request with an isolated client", async () => {
-      handler = new UndiciHttpHandler();
+      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
     });
 
     it("does not use the shared dispatcher for event stream requests", async () => {
       const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
-      handler = new UndiciHttpHandler();
-      // Internal Agent is in use here, so the isolated client path applies.
-      // Event stream goes through an isolated Client instead of the shared Agent.
+      // Agent.Options were supplied, so the handler owns the dispatcher and
+      // the isolated client path applies. Event stream goes through an
+      // isolated Client instead of the shared Agent.
+      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
       const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
       expect(response.statusCode).toBe(200);
       expect(sharedAgentRequestSpy).not.toHaveBeenCalled();
+    });
+
+    it("routes event streams through the global dispatcher when no options are supplied", async () => {
+      // With no dispatcher/options, requests use the global dispatcher. A
+      // ProxyAgent/MockAgent installed via setGlobalDispatcher must be honored
+      // for event streams too, so they are NOT diverted to an isolated client.
+      const originalGlobal = getGlobalDispatcher();
+      const customAgent = new Agent();
+      const requestSpy = vi.spyOn(customAgent, "request");
+      setGlobalDispatcher(customAgent);
+      try {
+        handler = new UndiciHttpHandler();
+        const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
+        expect(response.statusCode).toBe(200);
+        expect(requestSpy).toHaveBeenCalledOnce();
+      } finally {
+        setGlobalDispatcher(originalGlobal);
+        customAgent.destroy();
+      }
     });
 
     it("routes event streams through caller-provided dispatcher", async () => {
@@ -520,7 +540,7 @@ describe("UndiciHttpHandler", () => {
     });
 
     it("destroys isolated client when abort signal is already aborted", async () => {
-      handler = new UndiciHttpHandler();
+      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
       const controller = new AbortController();
       controller.abort();
       await expect(
@@ -532,7 +552,7 @@ describe("UndiciHttpHandler", () => {
     });
 
     it("destroys isolated client on request error", async () => {
-      handler = new UndiciHttpHandler();
+      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
       // Use a port that nothing is listening on to trigger a connection error.
       const badRequest = Object.assign(
         new HttpRequest({
@@ -548,7 +568,7 @@ describe("UndiciHttpHandler", () => {
     });
 
     it("appends query string to path with isolated client", async () => {
-      handler = new UndiciHttpHandler();
+      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
       const { response } = await handler.handle(
         createMockRequest({
           path: "/echo",
