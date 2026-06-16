@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
-import { Agent, type Dispatcher } from "undici";
+import { Agent, getGlobalDispatcher, setGlobalDispatcher, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -507,6 +507,25 @@ describe("UndiciHttpHandler", () => {
         expect(callArgs.headers).not.toHaveProperty(transferEncodingHeader);
       }
     );
+  });
+
+  describe("global dispatcher", () => {
+    it("uses dispatcher set via setGlobalDispatcher", async () => {
+      const originalDispatcher = getGlobalDispatcher();
+      const customAgent = new Agent();
+      const requestSpy = vi.spyOn(customAgent, "request");
+
+      setGlobalDispatcher(customAgent);
+      try {
+        handler = new UndiciHttpHandler();
+        const { response } = await handler.handle(createMockRequest());
+        expect(response.statusCode).toBe(200);
+        expect(requestSpy).toHaveBeenCalledOnce();
+      } finally {
+        setGlobalDispatcher(originalDispatcher);
+        customAgent.destroy();
+      }
+    });
   });
 
   describe("destroy", () => {
