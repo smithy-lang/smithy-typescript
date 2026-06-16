@@ -74,8 +74,8 @@ client.listBuckets().then(console.log);
 ```
 
 If every operation made by the SDK client using this handler is guaranteed to
-hit the exact same host (e.g. a Lambda function with a single client calling one
-fixed service endpoint), you can pass a `Client` for lower overhead by skipping
+hit the exact same host (e.g. an AWS Lambda function with a single client calling
+one fixed service endpoint), you can pass a `Client` for lower overhead by skipping
 the per-origin routing that `Agent` performs. Note that the dispatcher is scoped
 to the one SDK client this handler is attached to, not the whole application —
 other clients get their own handler.
@@ -108,13 +108,13 @@ client.listFunctions({}).then(console.log);
 > different hosts:
 >
 > - **Host-prefixed operations.** Operations carrying `@endpoint(hostPrefix)`
->   target a different host. e.g. CloudWatch Logs `StartLiveTail` uses prefix
->   `stream-`, hitting `stream-logs.<region>.amazonaws.com` while other Logs
->   operations use `logs.<region>.amazonaws.com`.
-> - **S3 virtual-hosted addressing.** `ListBuckets` hits
+>   target a different host. e.g. Amazon CloudWatch Logs `StartLiveTail` uses
+>   prefix `stream-`, hitting `stream-logs.<region>.amazonaws.com` while other
+>   Logs operations use `logs.<region>.amazonaws.com`.
+> - **Amazon S3 virtual-hosted addressing.** `ListBuckets` hits
 >   `s3.<region>.amazonaws.com` but bucket-scoped operations hit
 >   `<bucket>.s3.<region>.amazonaws.com`.
-> - **DynamoDB account-based routing.** With `AccountIdEndpointMode=preferred`
+> - **Amazon DynamoDB account-based routing.** With `AccountIdEndpointMode=preferred`
 >   (the default) and an `accountId` on the resolved credentials, operations
 >   route to `<account-id>.ddb.<region>.amazonaws.com`. The host depends on the
 >   account ID resolved at request time, so it cannot be known when statically
@@ -149,8 +149,8 @@ If every operation made by the SDK client hits the exact same host, passing a
 default `Agent` by skipping per-origin routing.
 
 > **Warning:** A single-origin `Client` breaks if any operation targets a
-> different host (e.g. host-prefixed endpoints, S3 virtual-hosted addressing,
-> DynamoDB account-based routing). See
+> different host (e.g. host-prefixed endpoints, Amazon S3 virtual-hosted
+> addressing, Amazon DynamoDB account-based routing). See
 > [Configuring undici Dispatcher](#configuring-undici-dispatcher) for details.
 
 We recommend running benchmarks for your own use case on your own setup, as
