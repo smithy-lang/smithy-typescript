@@ -74,7 +74,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       // Caller passed Agent.Options — store them and defer Agent creation
       // until the first request, so we don't pay for an unused dispatcher
       // (e.g. when the handler is constructed but never invoked).
-      this.internalAgentOptions = options.dispatcher as Agent.Options;
+      this.internalAgentOptions = { ...(options.dispatcher as Agent.Options) };
       const { dispatcher: _ignored, ...rest } = options;
       this.config = rest;
     } else {
@@ -248,7 +248,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         previousDispatcher.close();
       }
 
-      this.internalAgentOptions = value as Agent.Options;
+      this.internalAgentOptions = { ...(value as Agent.Options) };
       this.config.dispatcher = undefined;
       return;
     }
