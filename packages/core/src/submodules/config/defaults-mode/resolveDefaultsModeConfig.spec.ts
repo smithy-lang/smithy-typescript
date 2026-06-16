@@ -8,7 +8,6 @@ import {
   AWS_REGION_ENV,
   DEFAULTS_MODE_OPTIONS,
   ENV_IMDS_DISABLED,
-  IMDS_REGION_PATH,
 } from "./constants";
 import { NODE_DEFAULTS_MODE_CONFIG_OPTIONS } from "./defaultsModeConfig";
 import { resolveDefaultsModeConfig } from "./resolveDefaultsModeConfig";
@@ -94,6 +93,7 @@ describe("resolveDefaultsModeConfig", () => {
 
     it("should return standard when IMDS is unreachable", async () => {
       // No env vars set, IMDS will fail (no server running), should fall back to standard
+      process.env.AWS_EC2_METADATA_DISABLED = "true";
       expect(await resolveDefaultsModeConfig({ region: "us-west-1", defaultsMode: "auto" })()).toBe("standard");
     });
   });

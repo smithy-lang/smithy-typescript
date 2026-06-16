@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "dependencies": {
+    "@smithy/core": "3.25.0"
+  }
+}
