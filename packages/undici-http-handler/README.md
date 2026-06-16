@@ -74,11 +74,12 @@ client.listBuckets().then(console.log);
 ```
 
 If every operation made by the SDK client using this handler is guaranteed to
-hit the exact same host (e.g. an AWS Lambda function with a single client calling
-one fixed service endpoint), you can pass a `Client` for lower overhead by skipping
-the per-origin routing that `Agent` performs. Note that the dispatcher is scoped
-to the one SDK client this handler is attached to, not the whole application —
-other clients get their own handler.
+hit the exact same origin (scheme + host + port), you can pass a `Client` for
+lower overhead by skipping the per-origin routing that `Agent` performs. A
+common case is an AWS Lambda function with a single client calling one fixed
+service endpoint. Note that the dispatcher is scoped to the one SDK client this
+handler is attached to, not the whole application — other clients get their own
+handler.
 
 ```js
 import { Lambda } from "@aws-sdk/client-lambda";
@@ -144,7 +145,7 @@ Our benchmark spins up a local HTTP server and runs two scenarios:
 The results show UndiciHttpHandler spends **35%-50%** less time in request handling
 as compared to NodeHttpHandler from `@smithy/node-http-handler`.
 
-If every operation made by the SDK client hits the exact same host, passing a
+If every operation made by the SDK client hits the exact same origin, passing a
 `Client` as the dispatcher gives an additional **5%-20%** improvement over the
 default `Agent` by skipping per-origin routing.
 
