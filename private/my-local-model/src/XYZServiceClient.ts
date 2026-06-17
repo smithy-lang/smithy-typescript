@@ -49,6 +49,10 @@ import type {
   CamelCaseOperationCommandOutput,
 } from "./commands/CamelCaseOperationCommand";
 import type { GetNumbersCommandInput, GetNumbersCommandOutput } from "./commands/GetNumbersCommand";
+import type {
+  HostPrefixOperationCommandInput,
+  HostPrefixOperationCommandOutput,
+} from "./commands/HostPrefixOperationCommand";
 import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "./commands/HttpLabelCommandCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import {
@@ -68,6 +72,7 @@ export { __Client };
 export type ServiceInputTypes =
   | CamelCaseOperationCommandInput
   | GetNumbersCommandInput
+  | HostPrefixOperationCommandInput
   | HttpLabelCommandCommandInput
   | TradeEventStreamCommandInput;
 
@@ -77,6 +82,7 @@ export type ServiceInputTypes =
 export type ServiceOutputTypes =
   | CamelCaseOperationCommandOutput
   | GetNumbersCommandOutput
+  | HostPrefixOperationCommandOutput
   | HttpLabelCommandCommandOutput
   | TradeEventStreamCommandOutput;
 

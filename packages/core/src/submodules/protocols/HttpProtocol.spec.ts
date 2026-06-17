@@ -76,38 +76,38 @@ describe(HttpProtocol.name, () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
       protocol.callSetHostPrefix(request, schema, { AccountId: "123456789012" });
-      expect(request.hostname).toBe("12345789012.api.service.com");
+      expect(request.hostname).toBe("123456789012.api.service.com");
     });
 
     it("should throw when hostLabel contains invalid characters (slash)", () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
-      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/" })).toThrow(
-        "hostname containing input prefix is invalid"
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "1234567abc/" })).toThrow(
+        "resolved hostname is not a valid hostname"
       );
     });
 
     it("should throw when hostLabel contains hash character", () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
-      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/#" })).toThrow(
-        "hostname containing input prefix is invalid"
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "987654321/#" })).toThrow(
+        "resolved hostname is not a valid hostname"
       );
     });
 
     it("should throw when hostLabel contains query character", () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
-      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/?x=" })).toThrow(
-        "hostname containing input prefix is invalid"
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "12345678/?x=" })).toThrow(
+        "resolved hostname is not a valid hostname"
       );
     });
 
     it("should throw when hostLabel contains @ character", () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
-      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "evil.com/x@" })).toThrow(
-        "hostname containing input prefix is invalid"
+      expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "123456789/x@" })).toThrow(
+        "resolved hostname is not a valid hostname"
       );
     });
 
@@ -124,7 +124,7 @@ describe(HttpProtocol.name, () => {
       (p as any).serdeContext = { disableHostPrefix: true };
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
-      p.callSetHostPrefix(request, schema, { AccountId: "evil.com/#" });
+      p.callSetHostPrefix(request, schema, { AccountId: "abc/#" });
       expect(request.hostname).toBe("api.service.com");
     });
   });

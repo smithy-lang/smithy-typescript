@@ -18,6 +18,11 @@ import {
   GetNumbersCommand,
 } from "./commands/GetNumbersCommand";
 import {
+  type HostPrefixOperationCommandInput,
+  type HostPrefixOperationCommandOutput,
+  HostPrefixOperationCommand,
+} from "./commands/HostPrefixOperationCommand";
+import {
   type HttpLabelCommandCommandInput,
   type HttpLabelCommandCommandOutput,
   HttpLabelCommandCommand,
@@ -40,6 +45,7 @@ const commands = {
   HttpLabelCommandCommand,
   CamelCaseOperationCommand,
   GetNumbersCommand,
+  HostPrefixOperationCommand,
   TradeEventStreamCommand,
 };
 const paginators = {
@@ -104,6 +110,23 @@ export interface XYZService {
     args: GetNumbersCommandInput,
     options: __HttpHandlerOptions,
     cb: (err: any, data?: GetNumbersCommandOutput) => void
+  ): void;
+
+  /**
+   * @see {@link HostPrefixOperationCommand}
+   */
+  hostPrefixOperation(
+    args: HostPrefixOperationCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<HostPrefixOperationCommandOutput>;
+  hostPrefixOperation(
+    args: HostPrefixOperationCommandInput,
+    cb: (err: any, data?: HostPrefixOperationCommandOutput) => void
+  ): void;
+  hostPrefixOperation(
+    args: HostPrefixOperationCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: HostPrefixOperationCommandOutput) => void
   ): void;
 
   /**

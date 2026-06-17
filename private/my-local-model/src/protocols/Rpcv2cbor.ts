@@ -18,6 +18,7 @@ import {
   type HttpRequest as __HttpRequest,
   type HttpResponse as __HttpResponse,
   collectBody,
+  isValidHostname as __isValidHostname,
 } from "@smithy/core/protocols";
 import {
   expectInt32 as __expectInt32,
@@ -41,6 +42,10 @@ import type {
   CamelCaseOperationCommandOutput,
 } from "../commands/CamelCaseOperationCommand";
 import type { GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
+import type {
+  HostPrefixOperationCommandInput,
+  HostPrefixOperationCommandOutput,
+} from "../commands/HostPrefixOperationCommand";
 import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "../commands/HttpLabelCommandCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import {
@@ -58,6 +63,7 @@ import {
   type DifferentShapeName,
   type GetNumbersRequest,
   type GetNumbersResponse,
+  type HostPrefixInput,
   type HttpLabelCommandInput,
   type Unit,
   TradeEvents,
@@ -101,6 +107,30 @@ export const se_GetNumbersCommand = async (
   let body: any;
   body = cbor.serialize(se_GetNumbersRequest(input, context));
   return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/GetNumbers", undefined, body);
+};
+
+/**
+ * serializeRpcv2cborHostPrefixOperationCommand
+ */
+export const se_HostPrefixOperationCommand = async (
+  input: HostPrefixOperationCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = SHARED_HEADERS;
+  let body: any;
+  body = cbor.serialize(_json(input));
+  let { hostname: resolvedHostname } = await context.endpoint();
+  if (context.disableHostPrefix !== true) {
+    resolvedHostname = "{AccountId}." + resolvedHostname;
+    if (input.AccountId === undefined) {
+      throw new Error('Empty value provided for input host prefix: AccountId.');
+    }
+    resolvedHostname = resolvedHostname.replace("{AccountId}", input.AccountId!)
+    if (!__isValidHostname(resolvedHostname)) {
+      throw new Error("ValidationError: prefixed hostname must be hostname compatible.");
+    }
+  }
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/HostPrefixOperation", resolvedHostname, body);
 };
 
 /**
@@ -181,6 +211,26 @@ export const de_GetNumbersCommand = async (
   contents = de_GetNumbersResponse(data, context);
   const response: GetNumbersCommandOutput = {
     $metadata: deserializeMetadata(output), ...contents,
+  };
+  return response;
+
+};
+
+/**
+ * deserializeRpcv2cborHostPrefixOperationCommand
+ */
+export const de_HostPrefixOperationCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<HostPrefixOperationCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  await collectBody(output.body, context);
+  const response: HostPrefixOperationCommandOutput = {
+    $metadata: deserializeMetadata(output),
   };
   return response;
 
@@ -500,6 +550,8 @@ const se_Alpha_event = (
           'startToken': [],
         });
       }
+
+      // se_HostPrefixInput omitted.
 
       // se_IntegerMap omitted.
 

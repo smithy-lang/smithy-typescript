@@ -134,6 +134,7 @@ service XYZService {
         TradeEventStream
         camelCaseOperation
         HttpLabelCommand
+        HostPrefixOperation
     ]
     errors: [
         MainServiceLinkedError
@@ -408,4 +409,16 @@ operation camelCaseOperation {
 
 list Blobs {
     member: Blob
+}
+
+@endpoint(hostPrefix: "{AccountId}.")
+operation HostPrefixOperation {
+    input: HostPrefixOperationInput
+    output: Unit
+}
+
+structure HostPrefixOperationInput {
+    @required
+    @hostLabel
+    AccountId: String
 }

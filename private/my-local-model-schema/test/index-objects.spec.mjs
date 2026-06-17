@@ -13,6 +13,9 @@ import {
   GetNumbersResponse$,
   HaltError,
   HaltError$,
+  HostPrefixInput$,
+  HostPrefixOperation$,
+  HostPrefixOperationCommand,
   HttpLabelCommand$,
   HttpLabelCommandCommand,
   HttpLabelCommandInput$,
@@ -53,6 +56,8 @@ assert(typeof CamelCaseOperationCommand === "function");
 assert(typeof camelCaseOperation$ === "object");
 assert(typeof GetNumbersCommand === "function");
 assert(typeof GetNumbers$ === "object");
+assert(typeof HostPrefixOperationCommand === "function");
+assert(typeof HostPrefixOperation$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
 assert(typeof TradeEventStream$ === "object");
 // structural schemas
@@ -64,6 +69,7 @@ assert(typeof camelCaseOperationOutput$ === "object");
 assert(typeof DifferentShapeName$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
 assert(typeof GetNumbersResponse$ === "object");
+assert(typeof HostPrefixInput$ === "object");
 assert(typeof TradeEvents$ === "object");
 assert(typeof TradeEventStreamRequest$ === "object");
 assert(typeof TradeEventStreamResponse$ === "object");

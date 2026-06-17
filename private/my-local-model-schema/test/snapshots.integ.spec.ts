@@ -10,6 +10,8 @@ import {
   GetNumbers$,
   GetNumbersCommand,
   HaltError$,
+  HostPrefixOperation$,
+  HostPrefixOperationCommand,
   HttpLabelCommand$,
   HttpLabelCommandCommand,
   MainServiceLinkedError$,
@@ -42,6 +44,7 @@ describe("XYZServiceClient" + ` (${mode})`, () => {
       [HttpLabelCommand$, HttpLabelCommandCommand],
       [camelCaseOperation$, CamelCaseOperationCommand],
       [GetNumbers$, GetNumbersCommand],
+      [HostPrefixOperation$, HostPrefixOperationCommand],
       [TradeEventStream$, TradeEventStreamCommand],
     ]),
     errors: [
