@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
-import { Agent, Client, Dispatcher } from "undici";
+import { Agent, Dispatcher } from "undici";
 
 import { buildAbortError } from "./build-abort-error";
 
@@ -30,25 +30,6 @@ const isDispatcher = (value: unknown): value is Dispatcher => {
 };
 
 /**
- * Keys present on Agent.Options or Pool.Options that are not valid on
- * Client.Options. We strip these when propagating the caller's options
- * to an isolated Client used for event streams.
- */
-const AGENT_AND_POOL_ONLY_OPTION_KEYS = ["factory", "maxRedirections", "connections", "interceptors"] as const;
-
-/**
- * Returns a Client.Options-compatible subset of the given Agent.Options by
- * removing keys that only apply to Agent or Pool.
- */
-const toClientOptions = (options: Agent.Options): Client.Options => {
-  const result: Record<string, unknown> = { ...options };
-  for (const key of AGENT_AND_POOL_ONLY_OPTION_KEYS) {
-    delete result[key];
-  }
-  return result as Client.Options;
-};
-
-/**
  * Options for the UndiciHttpHandler.
  *
  * @public
@@ -71,19 +52,6 @@ export interface UndiciHttpHandlerOptions {
 }
 
 /**
- * This is derived from the smithyContext object. This signals to the UndiciHttpHandler
- * that the shared connection pool should not be used. The event stream should
- * have its own dedicated connection.
- *
- * This does not apply to WebSocket event streams, since there is no pooling.
- *
- * @internal
- */
-type EventStreamSignal = {
-  isEventStream?: boolean;
-};
-
-/**
  * An HTTP handler that uses undici instead of Node.js native http/https modules.
  * Smithy-compatible request handler backed by undici.
  *
@@ -93,29 +61,15 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
   private config: { dispatcher?: Dispatcher; logger?: Logger };
 
   /**
-   * Tracks whether the current dispatcher was created internally by this
-   * handler (true) or supplied by the caller as a Dispatcher instance (false).
-   *
-   * When the caller supplied their own Dispatcher, event-stream requests
-   * are routed through it as well so that proxy settings, mock interceptors,
-   * and similar behaviors are honored. When we own the dispatcher, event
-   * streams get an isolated Client so a long-lived stream does not occupy
-   * a slot in the shared pool.
-   */
-  private isInternalDispatcher: boolean = true;
-
-  /**
-   * Options used to construct the internally-managed Agent, retained so they
-   * can be propagated to isolated Clients created for event streams. This
-   * preserves caller-configured TLS, connect, and timeout settings on the
-   * dedicated event-stream connection.
+   * Options used to construct the internally-managed Agent, retained so the
+   * Agent can be created lazily on the first request. This preserves
+   * caller-configured TLS, connect, and timeout settings.
    */
   private internalAgentOptions?: Agent.Options;
 
   constructor(options?: UndiciHttpHandlerOptions) {
     if (options?.dispatcher && isDispatcher(options.dispatcher)) {
       this.config = { ...options, dispatcher: options.dispatcher };
-      this.isInternalDispatcher = false;
     } else if (options?.dispatcher) {
       // Caller passed Agent.Options — store them and defer Agent creation
       // until the first request, so we don't pay for an unused dispatcher
@@ -135,20 +89,9 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public async handle(
     request: HttpRequest,
-    { abortSignal, requestTimeout, isEventStream }: HttpHandlerOptions & EventStreamSignal = {}
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
   ): Promise<{ response: HttpResponse }> {
-    // Use an isolated client for event streams only when the dispatcher is
-    // internally managed. If the caller supplied their own Dispatcher, route
-    // event streams through it as well so proxy settings, mock interceptors,
-    // and pool sizing decisions made by the caller are preserved.
-    const useIsolatedClient = isEventStream && this.isInternalDispatcher;
-    const isolatedClient = useIsolatedClient ? this.createIsolatedClient(request) : undefined;
-    const dispatcher = isolatedClient ?? this.getOrCreateDispatcher();
-
     if (abortSignal?.aborted) {
-      if (isolatedClient) {
-        isolatedClient.destroy();
-      }
       throw buildAbortError(abortSignal);
     }
 
@@ -198,7 +141,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         statusCode,
         headers: responseHeaders,
         body: responseBody,
-      } = await dispatcher.request({
+      } = await this.getOrCreateDispatcher().request({
         origin,
         path,
         method: request.method as Dispatcher.HttpMethod,
@@ -235,20 +178,8 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         body: responseBody,
       });
 
-      // Close the isolated client once the response body stream closes.
-      if (isolatedClient) {
-        (responseBody as Readable).once("close", () => {
-          isolatedClient.close();
-        });
-      }
-
       return { response: httpResponse };
     } catch (err: any) {
-      // Ensure the isolated client is cleaned up on errors.
-      if (isolatedClient) {
-        isolatedClient.destroy();
-      }
-
       if (err?.code === "UND_ERR_ABORTED") {
         // Preserve the abort reason from the signal as `cause` so callers can
         // distinguish user-provided abort reasons from undici's generic abort.
@@ -306,7 +237,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       }
 
       this.config.dispatcher = value;
-      this.isInternalDispatcher = false;
       this.internalAgentOptions = undefined;
       return;
     }
@@ -320,7 +250,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
       this.internalAgentOptions = { allowH2: true, ...(value as Agent.Options) };
       this.config.dispatcher = undefined;
-      this.isInternalDispatcher = true;
       return;
     }
 
@@ -331,36 +260,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public httpHandlerConfigs(): { dispatcher?: Dispatcher; logger?: Logger } {
     return { ...this.config };
-  }
-
-  /**
-   * Creates a one-off undici Client for an event stream request.
-   * This mirrors NodeHttp2Handler's isolated session behavior — the event stream
-   * gets its own dedicated connection that isn't shared with the connection pool.
-   *
-   * Caller-provided Agent.Options (TLS, connect, timeouts, etc.) are propagated
-   * to the isolated Client. Agent/Pool-only keys are stripped. `pipelining` is
-   * forced to 0 so the dedicated connection is not pipelined.
-   */
-  private createIsolatedClient(request: HttpRequest): Client {
-    const port = request.port ? `:${request.port}` : "";
-    let origin: string;
-    if (request.username != null || request.password != null) {
-      const username = request.username ?? "";
-      const password = request.password ?? "";
-      origin = `${request.protocol}//${username}:${password}@${request.hostname}${port}`;
-    } else {
-      origin = `${request.protocol}//${request.hostname}${port}`;
-    }
-
-    const baseOptions: Client.Options = this.internalAgentOptions
-      ? toClientOptions(this.internalAgentOptions)
-      : { allowH2: true };
-
-    return new Client(origin, {
-      ...baseOptions,
-      pipelining: 0, // no pipelining — dedicated connection
-    });
   }
 
   private getOrCreateDispatcher(): Dispatcher {

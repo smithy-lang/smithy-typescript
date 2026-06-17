@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
-import { Agent, Pool, buildConnector, type Dispatcher } from "undici";
+import { Agent, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -94,6 +94,7 @@ describe("UndiciHttpHandler", () => {
 
   afterEach(() => {
     handler?.destroy();
+    vi.restoreAllMocks();
   });
 
   describe("handle", () => {
@@ -439,156 +440,6 @@ describe("UndiciHttpHandler", () => {
       handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
       handler.destroy();
       expect(mockDispatcher.destroy).toHaveBeenCalled();
-    });
-  });
-
-  describe("event stream (isEventStream)", () => {
-    it("makes a successful request with an isolated client", async () => {
-      handler = new UndiciHttpHandler();
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-    });
-
-    it("does not use the shared dispatcher for event stream requests", async () => {
-      const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
-      handler = new UndiciHttpHandler();
-      // Internal Agent is in use here, so the isolated client path applies.
-      // Event stream goes through an isolated Client instead of the shared Agent.
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      expect(sharedAgentRequestSpy).not.toHaveBeenCalled();
-    });
-
-    it("routes event streams through caller-provided dispatcher", async () => {
-      const mockDispatcher = {
-        request: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          headers: {},
-          body: null,
-        }),
-        close: vi.fn(),
-        destroy: vi.fn(),
-      } as unknown as Dispatcher;
-
-      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      // When caller supplies a Dispatcher, event streams go through it so
-      // proxy / mock / pool-sizing decisions are honored.
-      expect(mockDispatcher.request).toHaveBeenCalledOnce();
-    });
-
-    it("routes event streams through caller-provided dispatcher set via updateHttpClientConfig", async () => {
-      const mockDispatcher = {
-        request: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          headers: {},
-          body: null,
-        }),
-        destroy: vi.fn(),
-        close: vi.fn().mockResolvedValue(undefined),
-      } as unknown as Dispatcher;
-
-      handler = new UndiciHttpHandler();
-      handler.updateHttpClientConfig("dispatcher", mockDispatcher);
-      await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(mockDispatcher.request).toHaveBeenCalledOnce();
-    });
-
-    it("uses isolated client for event streams when Agent.Options were provided", async () => {
-      // Agent.Options means the handler created the Agent internally, so
-      // an isolated client should still be used for event streams.
-      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-    });
-
-    it("uses the shared dispatcher when isEventStream is false", async () => {
-      const mockDispatcher = {
-        request: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          headers: {},
-          body: null,
-        }),
-        close: vi.fn(),
-        destroy: vi.fn(),
-      } as unknown as Dispatcher;
-
-      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
-      await handler.handle(createMockRequest(), { isEventStream: false });
-      expect(mockDispatcher.request).toHaveBeenCalledOnce();
-    });
-
-    it("destroys isolated client when abort signal is already aborted", async () => {
-      handler = new UndiciHttpHandler();
-      const controller = new AbortController();
-      controller.abort();
-      await expect(
-        handler.handle(createMockRequest(), {
-          abortSignal: controller.signal as any,
-          isEventStream: true,
-        })
-      ).rejects.toThrow("Request aborted");
-    });
-
-    it("destroys isolated client on request error", async () => {
-      handler = new UndiciHttpHandler();
-      // Use a port that nothing is listening on to trigger a connection error.
-      const badRequest = Object.assign(
-        new HttpRequest({
-          protocol: "http:",
-          hostname: "127.0.0.1",
-          port: 1,
-          method: "GET",
-          path: "/",
-          headers: {},
-        })
-      );
-      await expect(handler.handle(badRequest, { isEventStream: true })).rejects.toThrow();
-    });
-
-    it("appends query string to path with isolated client", async () => {
-      handler = new UndiciHttpHandler();
-      const { response } = await handler.handle(
-        createMockRequest({
-          path: "/echo",
-          query: { foo: "bar" },
-        }),
-        { isEventStream: true }
-      );
-      expect(response.statusCode).toBe(200);
-      expect(response.headers["x-url"]).toContain("foo=bar");
-    });
-
-    it("propagates Agent.Options 'connect' to the isolated Client for event streams", async () => {
-      const connect = vi.fn(((opts: any, cb: any) => {
-        // Delegate to undici's default connector so the request still completes.
-        const real = buildConnector({});
-        return real(opts, cb);
-      }) as any);
-
-      handler = new UndiciHttpHandler({ dispatcher: { connect } });
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      expect(connect).toHaveBeenCalled();
-    });
-
-    it("strips Agent/Pool-only options ('connections', 'factory', 'maxRedirections', 'interceptors') from isolated Client", async () => {
-      // 'connections' would throw on Client.Options but is valid on Agent/Pool;
-      // verify the handler does not propagate it to the isolated Client.
-      handler = new UndiciHttpHandler({
-        dispatcher: {
-          connections: 4,
-          maxRedirections: 0,
-          factory: ((origin: any, opts: any) => {
-            // Should not be called for the isolated Client.
-            return new Pool(origin, opts);
-          }) as any,
-        } as any,
-      });
-
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
     });
   });
 
