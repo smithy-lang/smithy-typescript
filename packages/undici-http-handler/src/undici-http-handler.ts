@@ -91,8 +91,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     request: HttpRequest,
     { abortSignal, requestTimeout }: HttpHandlerOptions = {}
   ): Promise<{ response: HttpResponse }> {
-    const dispatcher = this.getOrCreateDispatcher();
-
     if (abortSignal?.aborted) {
       throw buildAbortError(abortSignal);
     }
@@ -143,7 +141,7 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
         statusCode,
         headers: responseHeaders,
         body: responseBody,
-      } = await dispatcher.request({
+      } = await this.getOrCreateDispatcher().request({
         origin,
         path,
         method: request.method as Dispatcher.HttpMethod,
