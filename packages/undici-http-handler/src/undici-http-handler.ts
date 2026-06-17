@@ -52,25 +52,6 @@ export interface UndiciHttpHandlerOptions {
 }
 
 /**
- * This is derived from the smithyContext object. It signals to the
- * UndiciHttpHandler that the request carries an event stream.
- *
- * Event streams are routed through the shared dispatcher just like normal
- * requests. With HTTP/2 (`allowH2`, the default for the internally-managed
- * Agent) streams are multiplexed over a single connection, so a long-lived
- * event stream does not occupy a dedicated socket. With HTTP/1.1, undici's
- * Agent opens additional connections as needed (connections default to
- * unlimited), so concurrent requests are not blocked. Callers who cap
- * `connections` are making an explicit pool-sizing decision that is honored
- * for event streams as well.
- *
- * @internal
- */
-type EventStreamSignal = {
-  isEventStream?: boolean;
-};
-
-/**
  * An HTTP handler that uses undici instead of Node.js native http/https modules.
  * Smithy-compatible request handler backed by undici.
  *
@@ -108,12 +89,8 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
 
   public async handle(
     request: HttpRequest,
-    { abortSignal, requestTimeout }: HttpHandlerOptions & EventStreamSignal = {}
+    { abortSignal, requestTimeout }: HttpHandlerOptions = {}
   ): Promise<{ response: HttpResponse }> {
-    /**
-     * Event streams are routed through the shared dispatcher just like normal
-     * requests — see {@link EventStreamSignal} for the rationale.
-     */
     const dispatcher = this.getOrCreateDispatcher();
 
     if (abortSignal?.aborted) {
