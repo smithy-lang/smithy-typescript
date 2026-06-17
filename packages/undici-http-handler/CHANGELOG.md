@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.2
+
+### Patch Changes
+
+- 4ed3b90: Document that a single-origin undici `Client` dispatcher must not be used with an SDK client whose operations may route to multiple hosts
+
 ## 2.1.1
 
 ### Patch Changes
