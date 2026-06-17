@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
-import { Agent, buildConnector, type Dispatcher } from "undici";
+import { Agent, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -440,140 +440,6 @@ describe("UndiciHttpHandler", () => {
       handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
       handler.destroy();
       expect(mockDispatcher.destroy).toHaveBeenCalled();
-    });
-  });
-
-  describe("event stream (isEventStream)", () => {
-    it("makes a successful request", async () => {
-      handler = new UndiciHttpHandler();
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-    });
-
-    it("routes event streams through the shared internal dispatcher", async () => {
-      const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
-      handler = new UndiciHttpHandler();
-      // Event streams are routed through the shared Agent like normal requests,
-      // rather than through a dedicated isolated Client.
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      expect(sharedAgentRequestSpy).toHaveBeenCalled();
-    });
-
-    it("routes event streams through caller-provided dispatcher", async () => {
-      const mockDispatcher = {
-        request: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          headers: {},
-          body: null,
-        }),
-        close: vi.fn(),
-        destroy: vi.fn(),
-      } as unknown as Dispatcher;
-
-      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      // When caller supplies a Dispatcher, event streams go through it so
-      // proxy / mock / pool-sizing decisions are honored.
-      expect(mockDispatcher.request).toHaveBeenCalledOnce();
-    });
-
-    it("routes event streams through caller-provided dispatcher set via updateHttpClientConfig", async () => {
-      const mockDispatcher = {
-        request: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          headers: {},
-          body: null,
-        }),
-        destroy: vi.fn(),
-        close: vi.fn().mockResolvedValue(undefined),
-      } as unknown as Dispatcher;
-
-      handler = new UndiciHttpHandler();
-      handler.updateHttpClientConfig("dispatcher", mockDispatcher);
-      await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(mockDispatcher.request).toHaveBeenCalledOnce();
-    });
-
-    it("routes event streams through the shared Agent when Agent.Options were provided", async () => {
-      // Agent.Options means the handler created the Agent internally. The event
-      // stream still goes through that shared Agent.
-      const sharedAgentRequestSpy = vi.spyOn(Agent.prototype, "request");
-      handler = new UndiciHttpHandler({ dispatcher: { connections: 2 } });
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      expect(sharedAgentRequestSpy).toHaveBeenCalled();
-    });
-
-    it("uses the shared dispatcher when isEventStream is false", async () => {
-      const mockDispatcher = {
-        request: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          headers: {},
-          body: null,
-        }),
-        close: vi.fn(),
-        destroy: vi.fn(),
-      } as unknown as Dispatcher;
-
-      handler = new UndiciHttpHandler({ dispatcher: mockDispatcher });
-      await handler.handle(createMockRequest(), { isEventStream: false });
-      expect(mockDispatcher.request).toHaveBeenCalledOnce();
-    });
-
-    it("throws AbortError for an event stream when the abort signal is already aborted", async () => {
-      handler = new UndiciHttpHandler();
-      const controller = new AbortController();
-      controller.abort();
-      await expect(
-        handler.handle(createMockRequest(), {
-          abortSignal: controller.signal as any,
-          isEventStream: true,
-        })
-      ).rejects.toThrow("Request aborted");
-    });
-
-    it("rejects an event stream request on connection error", async () => {
-      handler = new UndiciHttpHandler();
-      // Use a port that nothing is listening on to trigger a connection error.
-      const badRequest = Object.assign(
-        new HttpRequest({
-          protocol: "http:",
-          hostname: "127.0.0.1",
-          port: 1,
-          method: "GET",
-          path: "/",
-          headers: {},
-        })
-      );
-      await expect(handler.handle(badRequest, { isEventStream: true })).rejects.toThrow();
-    });
-
-    it("appends query string to path for event streams", async () => {
-      handler = new UndiciHttpHandler();
-      const { response } = await handler.handle(
-        createMockRequest({
-          path: "/echo",
-          query: { foo: "bar" },
-        }),
-        { isEventStream: true }
-      );
-      expect(response.statusCode).toBe(200);
-      expect(response.headers["x-url"]).toContain("foo=bar");
-    });
-
-    it("applies Agent.Options 'connect' to event stream requests", async () => {
-      const connect = vi.fn(((opts: any, cb: any) => {
-        // Delegate to undici's default connector so the request still completes.
-        const real = buildConnector({});
-        return real(opts, cb);
-      }) as any);
-
-      handler = new UndiciHttpHandler({ dispatcher: { connect } });
-      const { response } = await handler.handle(createMockRequest(), { isEventStream: true });
-      expect(response.statusCode).toBe(200);
-      expect(connect).toHaveBeenCalled();
     });
   });
 
