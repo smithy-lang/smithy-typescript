@@ -94,6 +94,7 @@ describe("UndiciHttpHandler", () => {
 
   afterEach(() => {
     handler?.destroy();
+    vi.restoreAllMocks();
   });
 
   describe("handle", () => {
