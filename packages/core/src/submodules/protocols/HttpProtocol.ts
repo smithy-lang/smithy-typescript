@@ -9,6 +9,7 @@ import type {
   EndpointV2,
   EventStreamMarshaller,
   EventStreamSerdeContext,
+  EventStreamSerdeProvider,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
@@ -231,14 +232,28 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
    * Loads eventStream capability async (for chunking).
    */
   protected async loadEventStreamCapability(): Promise<EventStreamSerde> {
-    const { EventStreamSerde } = await import("@smithy/core/event-streams");
+    const { EventStreamSerde, eventStreamSerdeProvider } = await import("@smithy/core/event-streams");
+    const marshaller = this.resolveEventStreamMarshaller(eventStreamSerdeProvider);
     return new EventStreamSerde({
-      marshaller: this.getEventStreamMarshaller(),
+      marshaller,
       serializer: this.serializer,
       deserializer: this.deserializer,
       serdeContext: this.serdeContext,
       defaultContentType: this.getDefaultContentType(),
     });
+  }
+
+  /**
+   * Returns a platform-specific EventStreamMarshaller.
+   * Prefers user-injected marshaller from serdeContext (via client config),
+   * falls back to the dynamically imported provider.
+   */
+  private resolveEventStreamMarshaller(importedProvider: EventStreamSerdeProvider): EventStreamMarshaller {
+    const context = this.serdeContext as unknown as EventStreamSerdeContext;
+    if (context.eventStreamMarshaller) {
+      return context.eventStreamMarshaller;
+    }
+    return importedProvider(this.serdeContext as any);
   }
 
   /**
