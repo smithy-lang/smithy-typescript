@@ -1,5 +1,12 @@
 # @smithy/shared-ini-file-loader
 
+## 4.6.1
+
+### Patch Changes
+
+- Updated dependencies [63ddca4]
+  - @smithy/core@3.25.1
+
 ## 4.6.0
 
 ### Minor Changes

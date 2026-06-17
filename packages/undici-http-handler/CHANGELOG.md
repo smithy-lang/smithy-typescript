@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- b5a960e: Route event streams through the shared dispatcher instead of a dedicated isolated Client
+
+### Patch Changes
+
+- Updated dependencies [63ddca4]
+  - @smithy/core@3.25.1
+
 ## 2.1.2
 
 ### Patch Changes

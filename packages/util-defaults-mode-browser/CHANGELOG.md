@@ -1,5 +1,12 @@
 # @smithy/util-defaults-mode-browser
 
+## 4.5.1
+
+### Patch Changes
+
+- Updated dependencies [63ddca4]
+  - @smithy/core@3.25.1
+
 ## 4.5.0
 
 ### Minor Changes

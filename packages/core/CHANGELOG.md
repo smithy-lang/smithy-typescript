@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.25.1
+
+### Patch Changes
+
+- 63ddca4: deferred loading for core/event-streams for use in client config initializers
+
 ## 3.25.0
 
 ### Minor Changes
