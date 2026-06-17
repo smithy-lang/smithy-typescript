@@ -159,7 +159,7 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
         }
         request.hostname = hostPrefix + request.hostname;
         if (!isValidHostname(request.hostname)) {
-          throw new Error("ValidationError: resolved hostname is not a valid hostname.");
+          throw new Error(`[${request.hostname}] is not a valid hostname.`);
         }
       }
     }

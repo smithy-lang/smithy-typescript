@@ -83,7 +83,7 @@ describe(HttpProtocol.name, () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
       expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "1234567abc/" })).toThrow(
-        "resolved hostname is not a valid hostname"
+        "is not a valid hostname"
       );
     });
 
@@ -91,7 +91,7 @@ describe(HttpProtocol.name, () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
       expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "987654321/#" })).toThrow(
-        "resolved hostname is not a valid hostname"
+        "is not a valid hostname"
       );
     });
 
@@ -99,7 +99,7 @@ describe(HttpProtocol.name, () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
       expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "12345678/?x=" })).toThrow(
-        "resolved hostname is not a valid hostname"
+        "is not a valid hostname"
       );
     });
 
@@ -107,7 +107,7 @@ describe(HttpProtocol.name, () => {
       const request = new HttpRequest({ hostname: "api.service.com" });
       const schema = makeOperationSchema("{AccountId}.");
       expect(() => protocol.callSetHostPrefix(request, schema, { AccountId: "123456789/x@" })).toThrow(
-        "resolved hostname is not a valid hostname"
+        "is not a valid hostname"
       );
     });
 

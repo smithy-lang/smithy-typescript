@@ -25,7 +25,7 @@ describe("hostLabel validation", () => {
     });
 
     await expect(client.send(new HostPrefixOperationCommand({ AccountId: "1234567890/#" }))).rejects.toThrow(
-      "resolved hostname is not a valid hostname"
+      "is not a valid hostname"
     );
   });
 
@@ -36,7 +36,7 @@ describe("hostLabel validation", () => {
     });
 
     await expect(client.send(new HostPrefixOperationCommand({ AccountId: "123456789-/" }))).rejects.toThrow(
-      "resolved hostname is not a valid hostname"
+      "is not a valid hostname"
     );
   });
 });
