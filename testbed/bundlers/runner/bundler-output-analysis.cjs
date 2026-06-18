@@ -50,6 +50,7 @@ function findGlobalBufferRefs(code) {
 
   const polyfillRanges = collectPolyfillRanges(ast);
   const guardedRanges = collectGuardedRanges(ast);
+  addGuardedCallTargets(ast, guardedRanges);
   const typeofArgPositions = collectTypeofArgPositions(ast);
 
   // Scope-aware walk: track local declarations to distinguish global Buffer.
@@ -266,6 +267,62 @@ function collectTypeofArgPositions(ast) {
     },
   });
   return positions;
+}
+
+/**
+ * Finds functions for which every call site is within a guarded range,
+ * and adds their bodies to the guarded ranges array.
+ */
+function addGuardedCallTargets(ast, guardedRanges) {
+  // Map function name -> function node (body range)
+  const funcDefs = new Map();
+  // Map function name -> array of call site nodes
+  const callSites = new Map();
+
+  walk.simple(ast, {
+    FunctionDeclaration(node) {
+      if (node.id && node.id.type === IDENTIFIER) {
+        funcDefs.set(node.id.name, node);
+      }
+    },
+    VariableDeclarator(node) {
+      if (
+        node.id.type === IDENTIFIER &&
+        node.init &&
+        (node.init.type === FUNCTION_EXPRESSION || node.init.type === ARROW_FUNCTION_EXPRESSION)
+      ) {
+        funcDefs.set(node.id.name, node.init);
+      }
+    },
+    CallExpression(node) {
+      if (node.callee.type === IDENTIFIER) {
+        if (!callSites.has(node.callee.name)) {
+          callSites.set(node.callee.name, []);
+        }
+        callSites.get(node.callee.name).push(node);
+      }
+    },
+  });
+
+  function isInGuardedRange(node) {
+    for (let i = 0; i < guardedRanges.length; ++i) {
+      const r = guardedRanges[i];
+      if (node.start >= r.start && node.end <= r.end) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  for (const [name, fnNode] of funcDefs) {
+    const sites = callSites.get(name);
+    if (!sites || sites.length === 0) {
+      continue;
+    }
+    if (sites.every(isInGuardedRange)) {
+      guardedRanges.push({ start: fnNode.start, end: fnNode.end });
+    }
+  }
 }
 
 function extractBindings(pattern, scope) {

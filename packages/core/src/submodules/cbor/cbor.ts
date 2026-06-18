@@ -1,5 +1,5 @@
-import { decode, setPayload } from "./cbor-decode";
-import { encode, resize, toUint8Array } from "./cbor-encode";
+import { advanceDecodingEpoch, decode, setPayload } from "./cbor-decode";
+import { advanceEncodingEpoch, encode, resize, toUint8Array } from "./cbor-encode";
 
 /**
  * This implementation is synchronous and only implements the parts of CBOR
@@ -13,10 +13,12 @@ import { encode, resize, toUint8Array } from "./cbor-encode";
  */
 export const cbor = {
   deserialize(payload: Uint8Array): any {
+    advanceDecodingEpoch();
     setPayload(payload);
     return decode(0, payload.length);
   },
   serialize(input: any): Uint8Array {
+    advanceEncodingEpoch();
     try {
       encode(input);
       return toUint8Array();

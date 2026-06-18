@@ -51,4 +51,26 @@ describe("getValueFromTextNode", () => {
     expect(output.keyWithoutTextNodeAtAnyLevel).toBe(input.keyWithoutTextNodeAtAnyLevel);
     expect(output.keyWithTextNodeAtLevel2.keyWithTextNode).toBe(valueInsideTextNode);
   });
+
+  it("can be called on null proto objects", () => {
+    const nullObject = Object.create(null);
+
+    const keyWithTextNode = Object.create(null);
+    keyWithTextNode["#text"] = valueInsideTextNode;
+
+    const keyWithoutTextNode = Object.create(null);
+    keyWithoutTextNode.key = "value";
+
+    nullObject.key = "value";
+    nullObject.keyWithoutTextNode = keyWithoutTextNode;
+    nullObject.keyWithTextNode = keyWithTextNode;
+
+    expect(getValueFromTextNode(nullObject)).toEqual({
+      key: "value",
+      keyWithTextNode: "valueInsideTextNode",
+      keyWithoutTextNode: {
+        key: "value",
+      },
+    });
+  });
 });

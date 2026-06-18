@@ -7,3 +7,6 @@
 *.log
 package-lock.json
 !*.d.ts
+.cbor-perf-worker.cjs
+scripts/baseline/node_modules/
+scripts/baseline/package-lock.json
