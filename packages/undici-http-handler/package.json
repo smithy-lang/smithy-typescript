@@ -32,7 +32,7 @@
     "@smithy/core": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2",
-    "undici": "^7.28.0"
+    "undici": "^7.0.0"
   },
   "devDependencies": {
     "@metcoder95/https-pem": "^1.0.0",
