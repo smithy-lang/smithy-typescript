@@ -548,9 +548,11 @@
     "ENV_CMDS_RELATIVE_URI": "string",
     "fromContainerMetadata": "function",
     "fromInstanceMetadata": "function",
+    "fromInstanceMetadataRegion": "function",
     "getInstanceMetadataEndpoint": "function",
     "httpRequest": "function",
     "InstanceMetadataCredentials": "type(interface)",
+    "InstanceMetadataRegionInit": "type(interface)",
     "providerConfigFromInit": "function",
     "RemoteProviderConfig": "type(interface)",
     "RemoteProviderInit": "type(interface)"

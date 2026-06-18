@@ -7,6 +7,10 @@ export * from "./fromContainerMetadata";
  */
 export * from "./fromInstanceMetadata";
 /**
+ * @public
+ */
+export { fromInstanceMetadataRegion, type InstanceMetadataRegionInit } from "./fromInstanceMetadataRegion";
+/**
  * @internal
  */
 export * from "./remoteProvider/RemoteProviderInit";
