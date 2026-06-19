@@ -127,4 +127,17 @@ export class ChecksumStream extends Duplex {
     this.push(null);
     return callback();
   }
+
+  /**
+   * Destroy the upstream source for cleanup so it is not left dangling, then
+   * complete this stream's destruction. The error is intentionally not forwarded
+   * to the source as the source is typically internal and without an error listener
+   * The error still surfaces on this stream via the callback.
+   * Do not call this directly.
+   * @internal
+   */
+  _destroy(error: Error | null, callback: (error?: Error | null | undefined) => void) : void {
+    this.source?.destroy();
+    callback?.(error);
+  }
 }

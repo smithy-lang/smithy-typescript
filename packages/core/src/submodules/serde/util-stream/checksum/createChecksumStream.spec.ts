@@ -75,6 +75,46 @@ describe("Checksum streams", () => {
       }
     });
 
+    it("should destroy the upstream source when destroyed", async () => {
+      const stream = makeStream();
+      const checksumStream = createChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: stream,
+      });
+
+      checksumStream.destroy();
+
+      expect(checksumStream.destroyed).toBe(true);
+      expect(stream.destroyed).toBe(true);
+    });
+
+    it("should surface the error on itself, not the source, when destroyed with an error", async () => {
+      const stream = makeStream();
+      const checksumStream = createChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: stream,
+      });
+
+      const error = new Error("boom");
+
+      const streamError = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
+      let sourceErrored = false;
+      stream.once("error", () => {
+        sourceErrored = true;
+      });
+
+      checksumStream.destroy(error);
+
+      expect(await streamError).toBe(error);
+      expect(sourceErrored).toBe(false);
+      expect(checksumStream.destroyed).toBe(true);
+      expect(stream.destroyed).toBe(true);
+    });
+
     it("should handle backpressure", async () => {
       // for Node.js 22+ increased default highwater mark.
       Readable.setDefaultHighWaterMark(false, 16_384);
