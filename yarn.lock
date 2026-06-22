@@ -9253,6 +9253,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "smithy-typescript@workspace:."
   dependencies:
+    "@aws-crypto/crc32": "npm:5.2.0"
+    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@changesets/cli": "npm:^2.27.5"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.7.1"
     "@microsoft/api-extractor": "npm:7.52.7"

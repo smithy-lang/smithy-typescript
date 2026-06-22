@@ -1,2 +1,7 @@
-export * from "./fetch-http-handler";
-export * from "./stream-collector";
+export {
+  type AdditionalRequestParameters,
+  FetchHttpHandler,
+  type FetchHttpHandlerOptions,
+  keepAliveSupport,
+} from "./fetch-http-handler";
+export { streamCollector } from "@smithy/core/serde";

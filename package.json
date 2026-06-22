@@ -36,6 +36,8 @@
     "premove": "4.0.0"
   },
   "devDependencies": {
+    "@aws-crypto/crc32": "5.2.0",
+    "@aws-crypto/sha256-js": "5.2.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@microsoft/api-extractor": "7.52.7",
     "@rollup/plugin-json": "^6.1.0",

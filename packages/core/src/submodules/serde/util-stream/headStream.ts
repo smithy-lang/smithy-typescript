@@ -1,5 +1,6 @@
 import { Writable, type Readable } from "node:stream";
 
+import { concatBytes } from "../concatBytes";
 import { headStream as headWebStream } from "./headStream.browser";
 import { isReadableStream } from "./stream-type-check";
 
@@ -24,7 +25,7 @@ export const headStream = (stream: Readable | ReadableStream, bytes: number): Pr
     });
     collector.on("error", reject);
     collector.on("finish", function (this: Collector) {
-      const bytes = new Uint8Array(Buffer.concat(this.buffers));
+      const bytes = concatBytes(this.buffers);
       resolve(bytes);
     });
   });
