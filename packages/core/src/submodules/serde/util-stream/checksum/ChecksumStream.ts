@@ -136,8 +136,8 @@ export class ChecksumStream extends Duplex {
    * Do not call this directly.
    * @internal
    */
-  _destroy(error: Error | null, callback: (error?: Error | null | undefined) => void) : void {
+  public _destroy(error: Error | null, callback: (error?: Error | null | undefined) => void): void {
     this.source?.destroy();
-    callback?.(error);
+    callback(error);
   }
 }
