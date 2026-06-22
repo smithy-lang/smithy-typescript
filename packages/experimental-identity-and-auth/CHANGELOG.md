@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies [3cfda3b]
+  - @smithy/core@3.26.0
+  - @smithy/signature-v4@5.5.2
+
 ## 0.7.1
 
 ### Patch Changes

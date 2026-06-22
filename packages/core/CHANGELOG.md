@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.26.0
+
+### Minor Changes
+
+- 3cfda3b: CBOR performance improvements
+
 ## 3.25.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.2.2
+
+### Patch Changes
+
+- Updated dependencies [3cfda3b]
+  - @smithy/core@3.26.0
+
 ## 1.2.1
 
 ### Patch Changes

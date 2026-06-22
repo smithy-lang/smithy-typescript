@@ -1,5 +1,12 @@
 # @smithy/smithy-client
 
+## 4.14.2
+
+### Patch Changes
+
+- Updated dependencies [3cfda3b]
+  - @smithy/core@3.26.0
+
 ## 4.14.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @smithy/eventstream-serde-config-resolver
 
+## 4.5.2
+
+### Patch Changes
+
+- Updated dependencies [3cfda3b]
+  - @smithy/core@3.26.0
+
 ## 4.5.1
 
 ### Patch Changes

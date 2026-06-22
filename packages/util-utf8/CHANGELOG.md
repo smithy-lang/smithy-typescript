@@ -1,5 +1,12 @@
 # @smithy/util-utf8
 
+## 4.4.2
+
+### Patch Changes
+
+- Updated dependencies [3cfda3b]
+  - @smithy/core@3.26.0
+
 ## 4.4.1
 
 ### Patch Changes
