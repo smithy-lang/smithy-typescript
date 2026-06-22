@@ -54,18 +54,9 @@ jobs:
           git add .
           git commit -m 'Version NPM packages'
           git push
-      - name: Fetch NPM token
-        id: token
-        if: steps.commit.outcome == 'success'
-        run: |
-          aws configure --profile token set role_arn ${{ secrets.JS_TEAM_TOKEN_ROLE }}
-          aws configure --profile token set credential_source Environment
-          npm_token=$(aws secretsmanager get-secret-value --region us-west-2 --secret-id=smithy-typescript-npm-token --query SecretString --output text --profile token)
-          echo "::add-mask::$npm_token"
-          echo "NPM_TOKEN=$npm_token" >> $GITHUB_ENV
       - name: Stage Release
         id: stage
-        if: steps.token.outcome == 'success'
+        if: steps.commit.outcome == 'success'
         run: |
           yarn stage-release --concurrency=1
       - name: Release
@@ -75,7 +66,6 @@ jobs:
         with:
           publish: yarn release
         env:
-          NPM_TOKEN: ${{ env.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Failure Nofitication
         if: ${{ failure() }}
