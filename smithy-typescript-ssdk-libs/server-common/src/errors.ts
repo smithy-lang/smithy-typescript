@@ -32,9 +32,13 @@ export type SmithyFrameworkException =
   | UnknownOperationException
   | SerializationException
   | UnsupportedMediaTypeException
-  | NotAcceptableException;
+  | NotAcceptableException
+  | UnauthenticatedException;
 
 export const isFrameworkException = (error: any): error is SmithyFrameworkException => {
+  if (error == null || (typeof error !== "object" && typeof error !== "function")) {
+    return false;
+  }
   if (!error.hasOwnProperty("$frameworkError")) {
     return false;
   }
@@ -73,5 +77,12 @@ export class NotAcceptableException {
   readonly name = "NotAcceptableException";
   readonly $fault = "client";
   readonly statusCode = 406;
+  readonly $frameworkError = true;
+}
+
+export class UnauthenticatedException {
+  readonly name = "UnauthenticatedException";
+  readonly $fault = "client";
+  readonly statusCode = 401;
   readonly $frameworkError = true;
 }

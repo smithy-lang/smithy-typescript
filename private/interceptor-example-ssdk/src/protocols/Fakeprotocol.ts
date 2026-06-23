@@ -184,6 +184,18 @@ export const serializeFrameworkException = async (
         statusCode,
       });
     }
+    case "UnauthenticatedException": {
+      const statusCode: number = 401
+      let headers: any = map({}, isSerializableHeaderValue, {
+        'content-type': 'application/json',
+      });
+      let body: any;
+      return new __HttpResponse({
+        headers,
+        body,
+        statusCode,
+      });
+    }
     case "UnknownOperationException": {
       const statusCode: number = 404
       let headers: any = map({}, isSerializableHeaderValue, {

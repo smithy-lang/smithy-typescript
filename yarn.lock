@@ -111,6 +111,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@aws-smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common"
   dependencies:
+    "@smithy/core": "workspace:^"
     "@smithy/protocol-http": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
@@ -6507,11 +6508,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "interceptor-example-ssdk@workspace:private/interceptor-example-ssdk"
   dependencies:
-    "@aws-crypto/sha256-browser": "npm:5.2.0"
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@aws-smithy/server-common": "workspace:^"
     "@smithy/core": "workspace:^"
-    "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
     "@smithy/types": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"

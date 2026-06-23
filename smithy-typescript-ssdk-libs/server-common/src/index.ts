@@ -21,6 +21,18 @@ import type { ServiceException } from "./errors";
 export * as httpbinding from "./httpbinding";
 export * from "./accept";
 export * from "./errors";
+export type {
+  AuthHook,
+  AuthScheme,
+  Caller,
+  ExecutionHook,
+  FrameworkSteps,
+  InputHook,
+  OutputHook,
+  RequestHook,
+  ResponseHook,
+  ServerInterceptor,
+} from "./interceptors";
 export * from "./validation";
 export * from "./unique";
 
