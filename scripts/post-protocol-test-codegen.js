@@ -14,17 +14,19 @@ const private = path.join(root, "private");
 
 const privatePackages = fs.readdirSync(private);
 
+const isWorkspaceDep = (dep) => dep.startsWith("@smithy/") || dep.startsWith("@aws-smithy/");
+
 for (const dir of privatePackages) {
   const pkgJsonPath = path.join(private, dir, "package.json");
   if (fs.existsSync(pkgJsonPath)) {
     const pkgJson = require(pkgJsonPath);
     for (const dep in pkgJson.dependencies ?? {}) {
-      if (dep.startsWith("@smithy/")) {
+      if (isWorkspaceDep(dep)) {
         pkgJson.dependencies[dep] = "workspace:^";
       }
     }
     for (const dep in pkgJson.devDependencies ?? {}) {
-      if (dep.startsWith("@smithy/")) {
+      if (isWorkspaceDep(dep)) {
         pkgJson.devDependencies[dep] = "workspace:^";
       }
     }

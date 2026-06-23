@@ -65,6 +65,17 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
       );
     }
 
+    const serverCommonDir = path.join(__dirname, "..", "smithy-typescript-ssdk-libs", "server-common");
+    const serverCommonTarget = path.join(node_modules, "@aws-smithy", "server-common");
+    if (fs.existsSync(path.join(serverCommonDir, "dist")) && fs.existsSync(serverCommonTarget)) {
+      await spawnProcess("rm", ["-rf", path.join(serverCommonTarget, "dist")]);
+      await Promise.all(
+        ["dist", "package.json"].map((entry) =>
+          spawnProcess("cp", ["-r", path.join(serverCommonDir, entry), serverCommonTarget])
+        )
+      );
+    }
+
     await spawnProcess("yarn", ["build"], { cwd: codegenDir });
 
     // Optionally, after building the package, it's packed and copied to node_modules so that

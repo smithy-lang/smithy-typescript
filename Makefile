@@ -33,6 +33,15 @@ generate-protocol-tests:
 	yarn turbo run build -F="./private/*" --only
 	make test-protocols;
 
+generate-server-tests:
+	rm -rf ./smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test
+	./gradlew :smithy-typescript-codegen-test:build
+	rm -rf ./private/interceptor-example-ssdk
+	cp -r ./smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/interceptor-example/typescript-server-codegen/ ./private/interceptor-example-ssdk
+	node ./scripts/post-protocol-test-codegen
+	yarn
+	yarn turbo run build -F="./private/interceptor-example-ssdk"
+
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals && yarn test:index)
 	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals && yarn test:index)
