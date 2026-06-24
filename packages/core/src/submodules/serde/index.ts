@@ -67,6 +67,8 @@ export { calculateBodyLength } from "./util-body-length/calculateBodyLength";
 export { toUint8Array } from "./util-utf8/toUint8Array";
 export { toUtf8, fromUtf8 };
 
+export { concatBytes } from "./concatBytes";
+
 // @smithy/util-buffer-from
 export { fromArrayBuffer, fromString, type StringEncoding } from "./util-buffer-from/buffer-from";
 
@@ -96,6 +98,7 @@ export { headStream } from "./util-stream/headStream";
 export { sdkStreamMixin } from "./util-stream/sdk-stream-mixin";
 export { splitStream } from "./util-stream/splitStream";
 export { isReadableStream, isBlob } from "./util-stream/stream-type-check";
+export { streamCollector } from "./util-stream/stream-collector";
 
 // @smithy/uuid
 const _getRandomValues = getRandomValues as (array: Uint8Array) => Uint8Array;

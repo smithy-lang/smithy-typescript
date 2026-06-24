@@ -29,6 +29,7 @@ const NAMING_EXCEPTIONS = new Set([
   "paginateOperation",
   "readableStreamToIterable", // readableStreamtoIterable (typo alias)
   "fromValue", // fromStatic is aliased from fromValue
+  "Md5Node", // exported as Md5 from @smithy/md5-js, internal class name
 ]);
 
 // Exports that are intentionally undefined at runtime.

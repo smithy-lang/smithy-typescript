@@ -67,6 +67,8 @@ export { calculateBodyLength } from "./util-body-length/calculateBodyLength.brow
 export { toUint8Array } from "./util-utf8/toUint8Array.browser";
 export { toUtf8, fromUtf8 };
 
+export { concatBytes } from "./concatBytes";
+
 // @smithy/util-buffer-from
 export { type StringEncoding } from "./util-buffer-from/buffer-from";
 export const fromArrayBuffer = no;
@@ -98,6 +100,7 @@ export { headStream } from "./util-stream/headStream.browser";
 export { sdkStreamMixin } from "./util-stream/sdk-stream-mixin.browser";
 export { splitStream } from "./util-stream/splitStream.browser";
 export { isReadableStream, isBlob } from "./util-stream/stream-type-check";
+export { streamCollector } from "./util-stream/stream-collector.browser";
 
 // @smithy/uuid
 const _getRandomValues = (array: Uint8Array) => crypto.getRandomValues(array);

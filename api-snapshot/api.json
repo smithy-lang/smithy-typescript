@@ -87,9 +87,18 @@
   "@smithy/core/checksum": {
     "blobHasher": "function",
     "blobReader": "function",
+    "Crc32": "function",
+    "Crc32Js": "function",
+    "Crc32Node": "function(node-only)",
     "fileStreamHasher": "function(node-only)",
     "Md5": "function",
-    "readableStreamHasher": "function(node-only)"
+    "Md5Js": "function",
+    "Md5Node": "function(node-only)",
+    "readableStreamHasher": "function(node-only)",
+    "Sha256": "function",
+    "Sha256Js": "function",
+    "Sha256Node": "function(node-only)",
+    "Sha256WebCrypto": "function"
   },
   "@smithy/core/client": {
     "_json": "function",
@@ -458,6 +467,7 @@
     "calculateBodyLength": "function",
     "ChecksumStream": "function",
     "ChecksumStreamInit": "type(interface)",
+    "concatBytes": "function",
     "copyDocumentWithTransform": "function",
     "createBufferedReadable": "function",
     "createChecksumStream": "function",
@@ -510,6 +520,7 @@
     "splitEvery": "function",
     "splitHeader": "function",
     "splitStream": "function",
+    "streamCollector": "function",
     "strictParseByte": "function",
     "strictParseDouble": "function",
     "strictParseFloat": "function",

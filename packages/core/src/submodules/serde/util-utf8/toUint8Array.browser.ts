@@ -4,6 +4,10 @@ import { fromUtf8 } from "./fromUtf8.browser";
  * @internal
  */
 export const toUint8Array = (data: string | ArrayBuffer | ArrayBufferView): Uint8Array => {
+  if (data instanceof Uint8Array) {
+    return data;
+  }
+
   if (typeof data === "string") {
     return fromUtf8(data);
   }
