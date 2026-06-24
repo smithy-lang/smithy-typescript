@@ -6,7 +6,8 @@ export { fileStreamHasher } from "./hash-stream-node/fileStreamHasher";
 export { readableStreamHasher } from "./hash-stream-node/readableStreamHasher";
 
 // @smithy/md5-js
-export { Md5 } from "./md5-js/md5";
+export { Md5Js } from "./md5/Md5Js";
+export { Md5Node, Md5Node as Md5 } from "./md5/Md5Node";
 
 // crc32
 export { Crc32Js } from "./crc32/Crc32Js";

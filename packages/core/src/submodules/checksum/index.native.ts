@@ -8,7 +8,8 @@ export const fileStreamHasher = no;
 export const readableStreamHasher = no;
 
 // @smithy/md5-js
-export { Md5 } from "./md5-js/md5";
+export { Md5Js, Md5Js as Md5 } from "./md5/Md5Js";
+export const Md5Node = no;
 
 // crc32
 export { Crc32Js, Crc32Js as Crc32 } from "./crc32/Crc32Js";

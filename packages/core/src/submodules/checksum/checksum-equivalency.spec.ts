@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import { Crc32Js } from "./crc32/Crc32Js";
 import { Crc32Node } from "./crc32/Crc32Node";
+import { Md5Js } from "./md5/Md5Js";
+import { Md5Node } from "./md5/Md5Node";
 import { Sha256Js } from "./sha256/Sha256Js";
 import { Sha256Node } from "./sha256/Sha256Node";
 import { Sha256WebCrypto } from "./sha256/Sha256WebCrypto";
@@ -119,6 +121,18 @@ describe("SHA-256 HMAC equivalency", () => {
         { name: "Sha256Node", create: () => new Sha256Node(secret) },
         { name: "Sha256WebCrypto", create: () => new Sha256WebCrypto(secret) },
         { name: "@aws-crypto/sha256-js", create: () => new AwsSha256(secret) },
+      ]),
+    30_000
+  );
+});
+
+describe("MD5 equivalency", () => {
+  it(
+    "all implementations produce identical digests at every chunk boundary",
+    () =>
+      assertStrictIncrementalEquivalence("MD5", [
+        { name: "Md5Js", create: () => new Md5Js() },
+        { name: "Md5Node", create: () => new Md5Node() },
       ]),
     30_000
   );

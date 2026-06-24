@@ -8,18 +8,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const coreDir = resolve(__dirname, "..");
 const outputPath = resolve(coreDir, "planning", "checksums.md");
 
-// Import all implementations from the CJS Node.js index (the actual runtime path).
 const require = createRequire(import.meta.url);
 const checksum = require(resolve(coreDir, "dist-cjs/submodules/checksum/index.js"));
-const { Crc32Js, Crc32Node, Sha256Js, Sha256Node } = checksum;
-
-// Import aws-crypto reference implementations.
+const { Crc32Js, Crc32Node, Sha256Js, Sha256Node, Md5Js, Md5Node } = checksum;
 const { AwsCrc32 } = require("@aws-crypto/crc32");
 const { Sha256: AwsSha256 } = require("@aws-crypto/sha256-js");
 
-const SIZES = [32, 256, 1024, 64 * 1024, 1024 * 1024];
-const WARMUP = 50;
-const ITERATIONS = 500;
+const SIZES =      [32,    256,   1024,  64 * 1024, 1024 * 1024, 10 * 1024 * 1024, 50 * 1024 * 1024];
+const ITERATIONS = [10000, 5000,  2000,  200,       20,          5,                3              ];
 
 function generateData(size) {
   const buf = new Uint8Array(size);
@@ -29,16 +25,34 @@ function generateData(size) {
   return buf;
 }
 
+const WARMUP_DATA = generateData(64 * 1024);
+
+/**
+ * Runs algo on 64KB data for 1 second to ensure V8 optimization.
+ */
+async function warmup(Impl, ...ctorArgs) {
+  const deadline = performance.now() + 1000;
+  while (performance.now() < deadline) {
+    const h = new Impl(...ctorArgs);
+    h.update(WARMUP_DATA);
+    await h.digest();
+  }
+}
+
+async function bench(Impl, data, iterations, ...ctorArgs) {
+  const start = performance.now();
+  for (let i = 0; i < iterations; ++i) {
+    const h = new Impl(...ctorArgs);
+    h.update(data);
+    await h.digest();
+  }
+  return performance.now() - start;
+}
+
 function formatSize(bytes) {
   if (bytes >= 1024 * 1024) return `${bytes / (1024 * 1024)}MB`;
   if (bytes >= 1024) return `${bytes / 1024}KB`;
   return `${bytes}B`;
-}
-
-function formatOps(ops) {
-  if (ops >= 1_000_000) return `${(ops / 1_000_000).toFixed(2)}M ops/sec`;
-  if (ops >= 1_000) return `${(ops / 1_000).toFixed(1)}K ops/sec`;
-  return `${ops.toFixed(0)} ops/sec`;
 }
 
 function formatThroughput(bytesPerSec) {
@@ -46,152 +60,6 @@ function formatThroughput(bytesPerSec) {
   if (bytesPerSec >= 1024 * 1024) return `${(bytesPerSec / (1024 * 1024)).toFixed(1)} MB/s`;
   return `${(bytesPerSec / 1024).toFixed(1)} KB/s`;
 }
-
-async function benchCrc32JS(data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new Crc32Js();
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new Crc32Js();
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchSha256JS(data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new Sha256Js();
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new Sha256Js();
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchSha256HMAC_JS(key, data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new Sha256Js(key);
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new Sha256Js(key);
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchCrc32Node(data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new Crc32Node();
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new Crc32Node();
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchSha256Node(data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new Sha256Node();
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new Sha256Node();
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchSha256HMAC_Node(key, data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new Sha256Node(key);
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new Sha256Node(key);
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchCrc32AwsCrypto(data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new AwsCrc32();
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new AwsCrc32();
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchSha256AwsCrypto(data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new AwsSha256();
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new AwsSha256();
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-async function benchSha256HMAC_AwsCrypto(key, data, iterations) {
-  for (let i = 0; i < WARMUP; ++i) {
-    const h = new AwsSha256(key);
-    h.update(data);
-    await h.digest();
-  }
-  const start = performance.now();
-  for (let i = 0; i < iterations; ++i) {
-    const h = new AwsSha256(key);
-    h.update(data);
-    await h.digest();
-  }
-  return performance.now() - start;
-}
-
-// --- Run benchmarks ---
-
-console.log("Running checksum benchmarks...\n");
-
-const lines = [];
-
-lines.push("# Checksum Benchmarks\n");
-lines.push(`Platform: Node.js ${process.version} (${process.platform} ${process.arch})\n`);
-lines.push(`Date: ${new Date().toISOString()}\n`);
-lines.push(`Iterations: ${ITERATIONS}, Warmup: ${WARMUP}\n`);
 
 function alignedTable(headers, rows) {
   const widths = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)));
@@ -206,68 +74,94 @@ function alignedTable(headers, rows) {
   return out;
 }
 
-// CRC-32
-lines.push("\n## CRC-32\n");
-{
+async function runSection(label, impls, extraCtorArgs) {
   const rows = [];
-  for (const size of SIZES) {
+  for (let si = 0; si < SIZES.length; ++si) {
+    const size = SIZES[si];
     const data = generateData(size);
-    const iters = size >= 64 * 1024 ? 100 : ITERATIONS;
-    const jsMs = await benchCrc32JS(data, iters);
-    const nodeMs = await benchCrc32Node(data, iters);
-    const awsMs = await benchCrc32AwsCrypto(data, iters);
-    const jsThroughput = formatThroughput((size * iters * 1000) / jsMs);
-    const nodeThroughput = formatThroughput((size * iters * 1000) / nodeMs);
-    const awsThroughput = formatThroughput((size * iters * 1000) / awsMs);
-    rows.push([formatSize(size), jsThroughput, nodeThroughput, awsThroughput]);
-    console.log(
-      `  CRC-32 ${formatSize(size)}: Crc32Js=${jsThroughput}, Crc32Node=${nodeThroughput}, aws-crypto=${awsThroughput}`
-    );
+    const iters = ITERATIONS[si];
+    const row = [formatSize(size)];
+    const parts = [];
+    for (const { name, Impl, ctorArgs } of impls) {
+      const ms = await bench(Impl, data, iters, ...(ctorArgs || []));
+      const tp = formatThroughput((size * iters * 1000) / ms);
+      row.push(tp);
+      parts.push(`${name}=${tp}`);
+    }
+    rows.push(row);
+    console.log(`  ${label} ${formatSize(size)}: ${parts.join(", ")}`);
   }
-  lines.push(...alignedTable(["Size", "Crc32Js (JS)", "Crc32Node (node:zlib)", "@aws-crypto/crc32"], rows));
+  return rows;
 }
 
-// SHA-256 hash
-lines.push("\n## SHA-256 (hash)\n");
-{
-  const rows = [];
-  for (const size of SIZES) {
-    const data = generateData(size);
-    const iters = size >= 64 * 1024 ? 100 : ITERATIONS;
-    const jsMs = await benchSha256JS(data, iters);
-    const nodeMs = await benchSha256Node(data, iters);
-    const awsMs = await benchSha256AwsCrypto(data, iters);
-    const jsThroughput = formatThroughput((size * iters * 1000) / jsMs);
-    const nodeThroughput = formatThroughput((size * iters * 1000) / nodeMs);
-    const awsThroughput = formatThroughput((size * iters * 1000) / awsMs);
-    rows.push([formatSize(size), jsThroughput, nodeThroughput, awsThroughput]);
-    console.log(
-      `  SHA-256 ${formatSize(size)}: Sha256Js=${jsThroughput}, Sha256Node=${nodeThroughput}, aws-crypto=${awsThroughput}`
-    );
-  }
-  lines.push(...alignedTable(["Size", "Sha256Js (JS)", "Sha256Node (node:crypto)", "@aws-crypto/sha256-js"], rows));
-}
+// --- Benchmark definitions ---
 
-// SHA-256 HMAC
-lines.push("\n## SHA-256 (HMAC)\n");
-{
-  const rows = [];
-  const hmacKey = generateData(32);
-  for (const size of SIZES) {
-    const data = generateData(size);
-    const iters = size >= 64 * 1024 ? 100 : ITERATIONS;
-    const jsMs = await benchSha256HMAC_JS(hmacKey, data, iters);
-    const nodeMs = await benchSha256HMAC_Node(hmacKey, data, iters);
-    const awsMs = await benchSha256HMAC_AwsCrypto(hmacKey, data, iters);
-    const jsThroughput = formatThroughput((size * iters * 1000) / jsMs);
-    const nodeThroughput = formatThroughput((size * iters * 1000) / nodeMs);
-    const awsThroughput = formatThroughput((size * iters * 1000) / awsMs);
-    rows.push([formatSize(size), jsThroughput, nodeThroughput, awsThroughput]);
-    console.log(
-      `  HMAC-SHA-256 ${formatSize(size)}: Sha256Js=${jsThroughput}, Sha256Node=${nodeThroughput}, aws-crypto=${awsThroughput}`
-    );
+const sections = [
+  {
+    title: "CRC-32",
+    headers: ["Size", "Crc32Js (JS)", "Crc32Node (node:zlib)", "@aws-crypto/crc32"],
+    impls: [
+      { name: "Crc32Js", Impl: Crc32Js },
+      { name: "Crc32Node", Impl: Crc32Node },
+      { name: "@aws-crypto/crc32", Impl: AwsCrc32 },
+    ],
+  },
+  {
+    title: "SHA-256 (hash)",
+    headers: ["Size", "Sha256Js (JS)", "Sha256Node (node:crypto)", "@aws-crypto/sha256-js"],
+    impls: [
+      { name: "Sha256Js", Impl: Sha256Js },
+      { name: "Sha256Node", Impl: Sha256Node },
+      { name: "@aws-crypto/sha256-js", Impl: AwsSha256 },
+    ],
+  },
+  {
+    title: "SHA-256 (HMAC)",
+    headers: ["Size", "Sha256Js (JS)", "Sha256Node (node:crypto)", "@aws-crypto/sha256-js"],
+    impls: [
+      { name: "Sha256Js", Impl: Sha256Js, ctorArgs: [generateData(32)] },
+      { name: "Sha256Node", Impl: Sha256Node, ctorArgs: [generateData(32)] },
+      { name: "@aws-crypto/sha256-js", Impl: AwsSha256, ctorArgs: [generateData(32)] },
+    ],
+  },
+  {
+    title: "MD5",
+    note: "Md5Js vs old @smithy/md5-js (unrolled rounds): 0.9x (32B), 2.2x (256B), 2.2x (1KB), 2.1x (64KB), 2.1x (1MB)",
+    headers: ["Size", "Md5Js (JS)", "Md5Node (node:crypto)"],
+    impls: [
+      { name: "Md5Js", Impl: Md5Js },
+      { name: "Md5Node", Impl: Md5Node },
+    ],
+  },
+];
+
+// --- Run ---
+
+console.log("Warming up...");
+const allImpls = sections.flatMap((s) => s.impls);
+for (const { name, Impl, ctorArgs } of allImpls) {
+  process.stdout.write(`  ${name}...`);
+  await warmup(Impl, ...(ctorArgs || []));
+  console.log(" done");
+}
+await new Promise((r) => setTimeout(r, 1000));
+
+console.log("Running checksum benchmarks...\n");
+
+const lines = [
+  "# Checksum Benchmarks\n",
+  `Platform: Node.js ${process.version} (${process.platform} ${process.arch})\n`,
+  `Date: ${new Date().toISOString()}\n`,
+  `Iterations per size: [${ITERATIONS.join(", ")}], Warmup: 1s per algo\n`,
+];
+
+for (const { title, headers, impls, note } of sections) {
+  lines.push(`\n## ${title}\n`);
+  if (note) {
+    lines.push(`${note}\n`);
   }
-  lines.push(...alignedTable(["Size", "Sha256Js (JS)", "Sha256Node (node:crypto)", "@aws-crypto/sha256-js"], rows));
+  const rows = await runSection(title, impls);
+  lines.push(...alignedTable(headers, rows));
 }
 
 const md = lines.join("\n") + "\n";
