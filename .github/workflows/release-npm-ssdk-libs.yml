@@ -18,6 +18,11 @@ jobs:
           cache: "yarn"
       - name: Install dependencies
         run: yarn install
+      - name: Version
+        id: version
+        run: |
+          node scripts/bump-ssdk-alpha.js
+          echo "porcelain=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
       - name: Configure AWS Credentials
         id: credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -26,6 +31,29 @@ jobs:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           role-session-name: SmithyTypeScriptGitHubRelease
           audience: sts.amazonaws.com
+      - name: Configure deploy key for push
+        if: steps.version.outputs.porcelain != '0'
+        run: |
+          deploy_key=$(aws secretsmanager get-secret-value \
+            --region us-west-2 \
+            --secret-id ${{ secrets.DEPLOY_KEY_SECRET_ARN }} \
+            --query SecretString --output text)
+          echo "::add-mask::$deploy_key"
+          mkdir -p ~/.ssh
+          echo "$deploy_key" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          git remote set-url origin git@github.com:smithy-lang/smithy-typescript.git
+          git config core.sshCommand "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes"
+      - name: Commit
+        id: commit
+        if: steps.version.outputs.porcelain != '0'
+        run: |
+          git config --global user.email "github-aws-smithy-automation@amazon.com"
+          git config --global user.name "Smithy Automation"
+          git add .
+          git commit -m 'Version SSDK lib packages'
+          git push
       - name: Fetch NPM token
         id: token
         run: |
