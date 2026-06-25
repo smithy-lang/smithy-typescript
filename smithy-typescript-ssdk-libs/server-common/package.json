@@ -27,6 +27,7 @@
   "author": "AWS Smithy Team",
   "license": "Apache-2.0",
   "dependencies": {
+    "@smithy/core": "workspace:^",
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
     "re2-wasm": "^1.0.2",

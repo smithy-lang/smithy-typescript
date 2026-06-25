@@ -19,3 +19,7 @@ structure UnsupportedMediaTypeException {}
 @error("client")
 @httpError(406)
 structure NotAcceptableException {}
+
+@error("client")
+@httpError(401)
+structure UnauthenticatedException {}
