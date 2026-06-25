@@ -1,4 +1,4 @@
-import { describe, expect, test as it } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
   NODE_REGION_CONFIG_FILE_OPTIONS,
@@ -6,6 +6,9 @@ import {
   REGION_ENV_NAME,
   REGION_INI_NAME,
 } from "./config";
+import { getInstanceMetadataRegion } from "./getInstanceMetadataRegion";
+
+vi.mock("./getInstanceMetadataRegion");
 
 describe("config", () => {
   describe("NODE_REGION_CONFIG_OPTIONS", () => {
@@ -23,11 +26,26 @@ describe("config", () => {
       });
     });
 
-    it("default throws error", () => {
-      const { default: defaultKey } = NODE_REGION_CONFIG_OPTIONS;
-      expect(() => {
-        (defaultKey as any)();
-      }).toThrowError(new Error("Region is missing"));
+    describe("default", () => {
+      beforeEach(() => {
+        vi.mocked(getInstanceMetadataRegion).mockReset();
+      });
+
+      afterEach(() => {
+        vi.resetAllMocks();
+      });
+
+      it("returns IMDS region when available", async () => {
+        vi.mocked(getInstanceMetadataRegion).mockResolvedValue("us-west-2");
+        const { default: defaultKey } = NODE_REGION_CONFIG_OPTIONS;
+        await expect((defaultKey as () => Promise<string>)()).resolves.toBe("us-west-2");
+      });
+
+      it("throws Region is missing when IMDS returns undefined", async () => {
+        vi.mocked(getInstanceMetadataRegion).mockResolvedValue(undefined);
+        const { default: defaultKey } = NODE_REGION_CONFIG_OPTIONS;
+        await expect((defaultKey as () => Promise<string>)()).rejects.toThrowError(new Error("Region is missing"));
+      });
     });
   });
 
