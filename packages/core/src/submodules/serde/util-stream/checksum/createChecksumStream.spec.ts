@@ -9,7 +9,17 @@ import { ChecksumStream } from "./ChecksumStream";
 import { ChecksumStream as ChecksumStreamWeb } from "./ChecksumStream.browser";
 import { createChecksumStream } from "./createChecksumStream";
 
-describe("Checksum streams", () => {
+/**
+ * createChecksumStream is a thin factory whose own responsibility is selecting
+ * the correct implementation based on the source type and forwarding the init.
+ *
+ * - For a Node.js Readable source it constructs the {@link ChecksumStream} class,
+ *   whose behavior is tested in ChecksumStream.spec.ts.
+ * - For a web ReadableStream source the behavior is implemented in
+ *   createChecksumStream.browser.ts, so those behavioral cases live here (and in
+ *   createChecksumStream.browser.spec.ts) because there is no separate class.
+ */
+describe(createChecksumStream.name, () => {
   /**
    * Hash "algorithm" that appends all data together.
    */
@@ -31,13 +41,9 @@ describe("Checksum streams", () => {
   const canonicalUtf8 = toUtf8(canonicalData);
   const canonicalBase64 = toBase64(canonicalUtf8);
 
-  describe(createChecksumStream.name, () => {
-    const makeStream = () => {
-      return Readable.from(Buffer.from(canonicalData.buffer, 0, 26));
-    };
-
-    it("should extend a Readable stream", async () => {
-      const stream = makeStream();
+  describe("source type selection", () => {
+    it("should select the Node.js ChecksumStream for a Readable source and forward the init", async () => {
+      const stream = Readable.from(Buffer.from(canonicalData.buffer, 0, 26));
       const checksumStream = createChecksumStream({
         expectedChecksum: canonicalBase64,
         checksum: new Appender(),
@@ -48,141 +54,16 @@ describe("Checksum streams", () => {
       expect(checksumStream).toBeInstanceOf(Readable);
       expect(checksumStream).toBeInstanceOf(ChecksumStream);
 
+      // Smoke test: the wired-up stream reads through to completion, which only
+      // succeeds if the init values were forwarded to the implementation.
       const collected = toUtf8(await headStream(checksumStream, Infinity));
       expect(collected).toEqual(canonicalUtf8);
       expect(stream.readableEnded).toEqual(true);
       expect(checksumStream.readableEnded).toEqual(true);
     });
-
-    it("should throw during stream read if the checksum does not match", async () => {
-      const stream = makeStream();
-      const checksumStream = createChecksumStream({
-        expectedChecksum: "different-expected-checksum",
-        checksum: new Appender(),
-        checksumSourceLocation: "my-header",
-        source: stream,
-      });
-
-      try {
-        toUtf8(await headStream(checksumStream, Infinity));
-        throw new Error("stream was read successfully");
-      } catch (e: unknown) {
-        expect(String(e)).toEqual(
-          `Error: Checksum mismatch: expected "different-expected-checksum" but` +
-            ` received "${canonicalBase64}"` +
-            ` in response header "my-header".`
-        );
-      }
-    });
-
-    it("should destroy the upstream source when destroyed", async () => {
-      const stream = makeStream();
-      const checksumStream = createChecksumStream({
-        expectedChecksum: canonicalBase64,
-        checksum: new Appender(),
-        checksumSourceLocation: "my-header",
-        source: stream,
-      });
-
-      checksumStream.destroy();
-
-      expect(checksumStream.destroyed).toBe(true);
-      expect(stream.destroyed).toBe(true);
-    });
-
-    it("should surface the error on itself, not the source, when destroyed with an error", async () => {
-      const stream = makeStream();
-      const checksumStream = createChecksumStream({
-        expectedChecksum: canonicalBase64,
-        checksum: new Appender(),
-        checksumSourceLocation: "my-header",
-        source: stream,
-      });
-
-      const error = new Error("boom");
-
-      const streamError = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
-      let sourceErrored = false;
-      stream.once("error", () => {
-        sourceErrored = true;
-      });
-
-      checksumStream.destroy(error);
-
-      expect(await streamError).toBe(error);
-      expect(sourceErrored).toBe(false);
-      expect(checksumStream.destroyed).toBe(true);
-      expect(stream.destroyed).toBe(true);
-    });
-
-    it("should handle backpressure", async () => {
-      // for Node.js 22+ increased default highwater mark.
-      Readable.setDefaultHighWaterMark(false, 16_384);
-      let originalStreamBuffered = 0;
-      const stream = Readable.from(
-        {
-          async *[Symbol.asyncIterator]() {
-            for (let i = 0; i < 100; ++i) {
-              const chunk = new Uint8Array(16_384);
-              originalStreamBuffered += chunk.byteLength;
-              yield chunk;
-            }
-          },
-        },
-        {
-          highWaterMark: 1,
-        }
-      );
-      const checksumStream = createChecksumStream({
-        expectedChecksum: toBase64(new Uint8Array()),
-        checksum: {
-          async digest() {
-            return new Uint8Array();
-          },
-          update: () => {},
-          reset: () => {},
-        },
-        checksumSourceLocation: "my-header",
-        source: stream,
-      });
-
-      const ait = checksumStream[Symbol.asyncIterator]();
-
-      const c1 = await ait.next();
-      expect(c1.done).toBe(false);
-      expect(c1.value.byteLength).toEqual(16_384);
-      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 2);
-
-      await new Promise((r) => setTimeout(r, 200));
-      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 3);
-
-      const c2 = await ait.next();
-      expect(c2.done).toBe(false);
-      expect(c2.value.byteLength).toEqual(16_384);
-      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
-
-      await new Promise((r) => setTimeout(r, 200));
-      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
-
-      await new Promise((r) => setTimeout(r, 200));
-      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
-
-      // the stream yields at the rate at which we read it.
-      let i = 5;
-      while (true) {
-        const { done } = await ait.next();
-        await new Promise((r) => setTimeout(r, 5));
-        expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * i++);
-        if (done) {
-          break;
-        }
-      }
-
-      expect(originalStreamBuffered).toEqual(16_384 * 100);
-    });
   });
 
-  describe(createChecksumStream.name + " webstreams API", () => {
+  describe("webstreams API", () => {
     if (typeof ReadableStream !== "function") {
       it.skip("Skipped when ReadableStream is not globally available.", () => {});
       // test not applicable to Node.js 16.
@@ -200,7 +81,7 @@ describe("Checksum streams", () => {
       });
     };
 
-    it("should extend a ReadableStream", async () => {
+    it("should select the web ChecksumStream for a ReadableStream source", async () => {
       const stream = makeStream();
       const checksumStream = createChecksumStream({
         expectedChecksum: canonicalBase64,
