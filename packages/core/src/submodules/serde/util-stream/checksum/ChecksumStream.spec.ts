@@ -230,40 +230,70 @@ describe(ChecksumStream.name, () => {
   });
 
   describe("backpressure", () => {
-    it("should propagate backpressure and still pass through all data", async () => {
-      const chunkSize = 16_384;
-      const chunkCount = 32;
-
+    it("should only read from the source at the rate it is consumed", async () => {
+      // for Node.js 22+ increased default highwater mark.
+      Readable.setDefaultHighWaterMark(false, 16_384);
+      let originalStreamBuffered = 0;
       const source = Readable.from(
-        (async function* () {
-          for (let i = 0; i < chunkCount; i++) {
-            yield new Uint8Array(chunkSize);
-          }
-        })(),
-        { highWaterMark: 1 }
+        {
+          async *[Symbol.asyncIterator]() {
+            for (let i = 0; i < 100; ++i) {
+              const chunk = new Uint8Array(16_384);
+              originalStreamBuffered += chunk.byteLength;
+              yield chunk;
+            }
+          },
+        },
+        {
+          highWaterMark: 1,
+        }
       );
-
       const checksumStream = new ChecksumStream({
         expectedChecksum: toBase64(new Uint8Array()),
         checksum: {
           async digest() {
             return new Uint8Array();
           },
-          update() {},
-          reset() {},
+          update: () => {},
+          reset: () => {},
         },
         checksumSourceLocation: "my-header",
         source,
       });
 
-      let consumed = 0;
-      for await (const chunk of checksumStream) {
-        consumed += chunk.byteLength;
-        // Read slowly to force the source to buffer and trigger backpressure.
-        await new Promise((r) => setTimeout(r, 1));
+      const ait = checksumStream[Symbol.asyncIterator]();
+
+      const c1 = await ait.next();
+      expect(c1.done).toBe(false);
+      expect(c1.value.byteLength).toEqual(16_384);
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 2);
+
+      await new Promise((r) => setTimeout(r, 200));
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 3);
+
+      const c2 = await ait.next();
+      expect(c2.done).toBe(false);
+      expect(c2.value.byteLength).toEqual(16_384);
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
+
+      await new Promise((r) => setTimeout(r, 200));
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
+
+      await new Promise((r) => setTimeout(r, 200));
+      expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * 4);
+
+      // the stream yields at the rate at which we read it.
+      let i = 5;
+      while (true) {
+        const { done } = await ait.next();
+        await new Promise((r) => setTimeout(r, 5));
+        expect(originalStreamBuffered).toBeLessThanOrEqual(16_384 * i++);
+        if (done) {
+          break;
+        }
       }
 
-      expect(consumed).toEqual(chunkSize * chunkCount);
+      expect(originalStreamBuffered).toEqual(16_384 * 100);
     });
   });
 });
