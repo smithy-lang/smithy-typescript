@@ -3,8 +3,8 @@
 // of the changesets flow (they are listed under "ignore" in
 // .changeset/config.json) so that the GA @smithy/* release process is never
 // affected. This script is the dedicated version step for the SSDK release.
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const SSDK_DIR = path.join(__dirname, "..", "smithy-typescript-ssdk-libs");
 
