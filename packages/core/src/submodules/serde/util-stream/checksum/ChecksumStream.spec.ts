@@ -186,6 +186,51 @@ describe(ChecksumStream.name, () => {
 
       await expect(collect(checksumStream)).rejects.toThrow("digest failed");
     });
+
+    it("should surface an error emitted by the source", async () => {
+      const source = makeSource();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+      });
+
+      const sourceError = new Error("source failure");
+      const streamError = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
+
+      source.emit("error", sourceError);
+
+      expect(await streamError).toBe(sourceError);
+      expect(checksumStream.destroyed).toBe(true);
+      expect(source.destroyed).toBe(true);
+    });
+  });
+
+  describe("lazy start", () => {
+    it("should not read from the source until the stream is consumed", async () => {
+      const checksum = new Appender();
+      const updateSpy = vi.spyOn(checksum, "update");
+      const source = makeSource();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum,
+        checksumSourceLocation: "my-header",
+        source,
+      });
+
+      // The source is paused on construction and no chunk is processed until read.
+      expect(source.isPaused()).toBe(true);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(updateSpy).not.toHaveBeenCalled();
+
+      // Reading the stream is what drives consumption of the source.
+      const ait = checksumStream[Symbol.asyncIterator]();
+      await ait.next();
+      expect(updateSpy).toHaveBeenCalled();
+
+      checksumStream.destroy();
+    });
   });
 
   describe("_destroy", () => {
