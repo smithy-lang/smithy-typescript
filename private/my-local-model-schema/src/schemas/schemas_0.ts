@@ -9,8 +9,8 @@ const _HE = "HaltError";
 const _HLC = "HttpLabelCommand";
 const _HLCI = "HttpLabelCommandInput";
 const _HLCO = "HttpLabelCommandOutput";
-const _HPI = "HostPrefixInput";
 const _HPO = "HostPrefixOperation";
+const _HPOI = "HostPrefixOperationInput";
 const _LDNATRP = "LabelDoesNotApplyToRpcProtocol";
 const _MSLE = "MainServiceLinkedError";
 const _MTE = "MysteryThrottlingError";
@@ -174,7 +174,7 @@ export var GetNumbersResponse$: StaticStructureSchema = [3, n0, _GNRe,
   [_bD, _bI, _num, _sN, _nT, _dN, _dNWE, _dNWC, _iDN],
   [19, 17, 64 | 1, [() => SparseIntegerList, 0], 0, 64 | 1, 64 | 1, 64 | 1, 64 | 1]
 ];
-export var HostPrefixInput$: StaticStructureSchema = [3, n0, _HPI,
+export var HostPrefixOperationInput$: StaticStructureSchema = [3, n0, _HPOI,
   0,
   [_AI],
   [[0, { [_hL]: 1 }]], 1
@@ -214,7 +214,7 @@ export var GetNumbers$: StaticOperationSchema = [9, n0, _GN,
   { [_h]: ["POST", "/get-numbers", 200] }, () => GetNumbersRequest$, () => GetNumbersResponse$
 ];
 export var HostPrefixOperation$: StaticOperationSchema = [9, n0, _HPO,
-  { [_en]: ["{AccountId}."], [_h]: ["POST", "/host-prefix", 200] }, () => HostPrefixInput$, () => __Unit
+  { [_en]: ["{AccountId}."] }, () => HostPrefixOperationInput$, () => __Unit
 ];
 export var TradeEventStream$: StaticOperationSchema = [9, n0, _TES,
   { [_h]: ["POST", "/trade-event-stream", 200] }, () => TradeEventStreamRequest$, () => TradeEventStreamResponse$

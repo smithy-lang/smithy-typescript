@@ -25,7 +25,7 @@ export type {
   DifferentShapeName,
   GetNumbersRequest,
   GetNumbersResponse,
-  HostPrefixInput,
+  HostPrefixOperationInput,
   TradeEvents,
   TradeEventStreamRequest,
   TradeEventStreamResponse,

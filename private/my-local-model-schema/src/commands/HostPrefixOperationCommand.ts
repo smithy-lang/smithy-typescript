@@ -4,7 +4,7 @@ import { getEndpointPlugin } from "@smithy/core/endpoints";
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
 import { commonParams } from "../endpoint/EndpointParameters";
-import type { HostPrefixInput } from "../models/models_0";
+import type { HostPrefixOperationInput } from "../models/models_0";
 import { HostPrefixOperation$ } from "../schemas/schemas_0";
 import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
@@ -18,7 +18,7 @@ export { $Command };
  *
  * The input for {@link HostPrefixOperationCommand}.
  */
-export interface HostPrefixOperationCommandInput extends HostPrefixInput {}
+export interface HostPrefixOperationCommandInput extends HostPrefixOperationInput {}
 /**
  * @public
  *
@@ -37,7 +37,7 @@ export interface HostPrefixOperationCommandOutput extends __MetadataBearer {}
  * // import type { XYZServiceClientConfig } from "xyz-schema";
  * const config = {}; // type is XYZServiceClientConfig
  * const client = new XYZServiceClient(config);
- * const input = { // HostPrefixInput
+ * const input = { // HostPrefixOperationInput
  *   AccountId: "STRING_VALUE", // required
  * };
  * const command = new HostPrefixOperationCommand(input);
@@ -78,7 +78,7 @@ export class HostPrefixOperationCommand extends $Command
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {
     api: {
-      input: HostPrefixInput;
+      input: HostPrefixOperationInput;
       output: {};
     };
     sdk: {

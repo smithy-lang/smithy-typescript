@@ -26,22 +26,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/sha256-browser@npm:5.2.0":
-  version: 5.2.0
-  resolution: "@aws-crypto/sha256-browser@npm:5.2.0"
-  dependencies:
-    "@aws-crypto/sha256-js": "npm:^5.2.0"
-    "@aws-crypto/supports-web-crypto": "npm:^5.2.0"
-    "@aws-crypto/util": "npm:^5.2.0"
-    "@aws-sdk/types": "npm:^3.222.0"
-    "@aws-sdk/util-locate-window": "npm:^3.0.0"
-    "@smithy/util-utf8": "npm:^2.0.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/05f6d256794df800fe9aef5f52f2ac7415f7f3117d461f85a6aecaa4e29e91527b6fd503681a17136fa89e9dd3d916e9c7e4cfb5eba222875cb6c077bdc1d00d
-  languageName: node
-  linkType: hard
-
-"@aws-crypto/sha256-js@npm:5.2.0, @aws-crypto/sha256-js@npm:^5.2.0":
+"@aws-crypto/sha256-js@npm:5.2.0":
   version: 5.2.0
   resolution: "@aws-crypto/sha256-js@npm:5.2.0"
   dependencies:
@@ -49,15 +34,6 @@ __metadata:
     "@aws-sdk/types": "npm:^3.222.0"
     tslib: "npm:^2.6.2"
   checksum: 10c0/6c48701f8336341bb104dfde3d0050c89c288051f6b5e9bdfeb8091cf3ffc86efcd5c9e6ff2a4a134406b019c07aca9db608128f8d9267c952578a3108db9fd1
-  languageName: node
-  linkType: hard
-
-"@aws-crypto/supports-web-crypto@npm:^5.2.0":
-  version: 5.2.0
-  resolution: "@aws-crypto/supports-web-crypto@npm:5.2.0"
-  dependencies:
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/4d2118e29d68ca3f5947f1e37ce1fbb3239a0c569cc938cdc8ab8390d595609b5caf51a07c9e0535105b17bf5c52ea256fed705a07e9681118120ab64ee73af2
   languageName: node
   linkType: hard
 
@@ -78,15 +54,6 @@ __metadata:
   dependencies:
     tslib: "npm:^2.5.0"
   checksum: 10c0/5ab07bf2dbc7bfb615af8a7bda503a0f01b3e7ae9c04df2eb40f402810eb34b5b71b38b6d65d6bddb5e731205670feb67b72c8af4829113a99094a0dbebffac5
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/util-locate-window@npm:^3.0.0":
-  version: 3.568.0
-  resolution: "@aws-sdk/util-locate-window@npm:3.568.0"
-  dependencies:
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/cb1d0919498206fe266542a635cd05909456a06f007a6a550ff897a01390b239e51c2a50e47509e23c179f8df8001bd5fecd900045da5ec989c3f934c3fd3d56
   languageName: node
   linkType: hard
 
@@ -2118,7 +2085,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
-    "@aws-crypto/crc32": "npm:5.2.0"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
@@ -2479,7 +2445,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
     concurrently: "npm:7.0.0"
@@ -2494,7 +2459,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/signature-v4a@workspace:packages/signature-v4a"
   dependencies:
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/signature-v4": "workspace:^"
     "@smithy/types": "workspace:^"
@@ -2521,8 +2485,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-rpcv2-cbor-schema@workspace:private/smithy-rpcv2-cbor-schema"
   dependencies:
-    "@aws-crypto/sha256-browser": "npm:5.2.0"
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -2543,8 +2505,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/smithy-rpcv2-cbor@workspace:private/smithy-rpcv2-cbor"
   dependencies:
-    "@aws-crypto/sha256-browser": "npm:5.2.0"
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -10829,8 +10789,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xyz-schema@workspace:private/my-local-model-schema"
   dependencies:
-    "@aws-crypto/sha256-browser": "npm:5.2.0"
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
@@ -10851,8 +10809,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xyz@workspace:private/my-local-model"
   dependencies:
-    "@aws-crypto/sha256-browser": "npm:5.2.0"
-    "@aws-crypto/sha256-js": "npm:5.2.0"
     "@smithy/core": "workspace:^"
     "@smithy/fetch-http-handler": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"

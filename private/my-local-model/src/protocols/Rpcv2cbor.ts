@@ -63,7 +63,7 @@ import {
   type DifferentShapeName,
   type GetNumbersRequest,
   type GetNumbersResponse,
-  type HostPrefixInput,
+  type HostPrefixOperationInput,
   type HttpLabelCommandInput,
   type Unit,
   TradeEvents,
@@ -551,7 +551,7 @@ const se_Alpha_event = (
         });
       }
 
-      // se_HostPrefixInput omitted.
+      // se_HostPrefixOperationInput omitted.
 
       // se_IntegerMap omitted.
 
