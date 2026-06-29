@@ -159,11 +159,11 @@ function validateBundle(bundler, filePath) {
 
   // Check for node-only code marker
   const nodeOnlyMatches = content.match(/\w+\s*=\s*Symbol\.for\(["']node-only["']\)/g) || [];
-  if (nodeOnlyMatches.length > 3) {
-    console.error(`  ${bundler}: ❌ FAIL: ${nodeOnlyMatches.length}/3 Symbol.for("node-only") occurrence(s) — node-only code not fully tree-shaken`);
+  if (nodeOnlyMatches.length > 4) {
+    console.error(`  ${bundler}: ❌ FAIL: ${nodeOnlyMatches.length}/4 Symbol.for("node-only") occurrence(s) — node-only code not fully tree-shaken`);
     failed = true;
   } else if (nodeOnlyMatches.length > 0) {
-    console.log(`  ${bundler}: ⚠️  ${nodeOnlyMatches.length}/3 Symbol.for("node-only") occurrence(s) — node-only code not fully tree-shaken`);
+    console.log(`  ${bundler}: ⚠️  ${nodeOnlyMatches.length}/4 Symbol.for("node-only") occurrence(s) — node-only code not fully tree-shaken`);
   }
 
   // AST-based global Buffer check

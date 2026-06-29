@@ -1,4 +1,4 @@
-import { Crc32 } from "@aws-crypto/crc32";
+import { Crc32 } from "@smithy/core/checksum";
 
 // All prelude components are unsigned, 32-bit integers
 const PRELUDE_MEMBER_LENGTH = 4;
@@ -37,19 +37,20 @@ export function splitMessage({ byteLength, byteOffset, buffer }: ArrayBufferView
   const expectedPreludeChecksum = view.getUint32(PRELUDE_LENGTH, false);
   const expectedMessageChecksum = view.getUint32(byteLength - CHECKSUM_LENGTH, false);
 
-  const checksummer = new Crc32().update(new Uint8Array(buffer, byteOffset, PRELUDE_LENGTH));
-  if (expectedPreludeChecksum !== checksummer.digest()) {
+  const checksummer = new Crc32();
+  checksummer.update(new Uint8Array(buffer, byteOffset, PRELUDE_LENGTH));
+  if (expectedPreludeChecksum !== checksummer.digestSync()) {
     throw new Error(
-      `The prelude checksum specified in the message (${expectedPreludeChecksum}) does not match the calculated CRC32 checksum (${checksummer.digest()})`
+      `The prelude checksum specified in the message (${expectedPreludeChecksum}) does not match the calculated CRC32 checksum (${checksummer.digestSync()})`
     );
   }
 
   checksummer.update(
     new Uint8Array(buffer, byteOffset + PRELUDE_LENGTH, byteLength - (PRELUDE_LENGTH + CHECKSUM_LENGTH))
   );
-  if (expectedMessageChecksum !== checksummer.digest()) {
+  if (expectedMessageChecksum !== checksummer.digestSync()) {
     throw new Error(
-      `The message checksum (${checksummer.digest()}) did not match the expected value of ${expectedMessageChecksum}`
+      `The message checksum (${checksummer.digestSync()}) did not match the expected value of ${expectedMessageChecksum}`
     );
   }
 

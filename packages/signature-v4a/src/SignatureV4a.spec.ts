@@ -1,4 +1,4 @@
-import { Sha256 } from "@aws-crypto/sha256-js";
+import { Sha256 } from "@smithy/core/checksum";
 import type { AwsCredentialIdentity, HttpRequest } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 

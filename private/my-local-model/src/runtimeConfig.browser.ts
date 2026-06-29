@@ -1,5 +1,4 @@
 // smithy-typescript generated code
-import { Sha256 } from "@aws-crypto/sha256-browser";
 import { loadConfigsForDefaultMode } from "@smithy/core/client";
 import { resolveDefaultsModeConfig } from "@smithy/core/config";
 import { eventStreamSerdeProvider } from "@smithy/core/event-streams";
@@ -27,7 +26,6 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
     requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
     retryMode: config?.retryMode ?? (async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE),
-    sha256: config?.sha256 ?? Sha256,
     streamCollector: config?.streamCollector ?? streamCollector,
   };
 };

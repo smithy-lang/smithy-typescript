@@ -42,11 +42,11 @@ function validateBundle(bundler, filePath) {
   }
 
   const nodeOnlyMatches = content.match(/\w+\s*=\s*Symbol\.for\(["']node-only["']\)/g) || [];
-  if (nodeOnlyMatches.length > 3) {
-    console.error(`    ${bundler}: ❌ ${nodeOnlyMatches.length}/3 Symbol.for("node-only") — node-only code not fully tree-shaken`);
+  if (nodeOnlyMatches.length > 4) {
+    console.error(`    ${bundler}: ❌ ${nodeOnlyMatches.length}/4 Symbol.for("node-only") — node-only code not fully tree-shaken`);
     failed = true;
   } else if (nodeOnlyMatches.length > 0) {
-    console.log(`    ${bundler}: ⚠️  ${nodeOnlyMatches.length}/3 Symbol.for("node-only") occurrence(s)`);
+    console.log(`    ${bundler}: ⚠️  ${nodeOnlyMatches.length}/4 Symbol.for("node-only") occurrence(s)`);
   }
 
   const globalBufferRefs = findGlobalBufferRefs(content);

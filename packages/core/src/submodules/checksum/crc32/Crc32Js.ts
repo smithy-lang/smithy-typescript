@@ -27,8 +27,16 @@ export class Crc32Js implements Checksum {
     }
   }
 
+  /**
+   * Used by EventStreamCodec.
+   * @internal
+   */
+  public digestSync(): number {
+    return (this.checksum ^ ONES) >>> 0;
+  }
+
   public async digest(): Promise<Uint8Array> {
-    const value = (this.checksum ^ ONES) >>> 0; // final XOR, coerce unsigned
+    const value = this.digestSync();
     const out = new Uint8Array(4);
     new DataView(out.buffer).setUint32(0, value, false);
     return out;

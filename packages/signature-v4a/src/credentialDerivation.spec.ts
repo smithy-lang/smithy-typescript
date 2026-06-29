@@ -1,4 +1,4 @@
-import { Sha256 } from "@aws-crypto/sha256-js";
+import { Sha256 } from "@smithy/core/checksum";
 import { describe, expect, it, vi } from "vitest";
 
 import { N_MINUS_TWO } from "./constants";

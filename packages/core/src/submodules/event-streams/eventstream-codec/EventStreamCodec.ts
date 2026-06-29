@@ -1,4 +1,4 @@
-import { Crc32 } from "@aws-crypto/crc32";
+import { Crc32 } from "@smithy/core/checksum";
 import type {
   AvailableMessage,
   AvailableMessages,
@@ -81,12 +81,14 @@ export class EventStreamCodec implements MessageEncoder, MessageDecoder {
     // Format message
     view.setUint32(0, length, false);
     view.setUint32(4, headers.byteLength, false);
-    view.setUint32(8, checksum.update(out.subarray(0, 8)).digest(), false);
+    checksum.update(out.subarray(0, 8));
+    view.setUint32(8, checksum.digestSync(), false);
     out.set(headers, 12);
     out.set(body, headers.byteLength + 12);
 
     // Write trailing message checksum
-    view.setUint32(length - 4, checksum.update(out.subarray(8, length - 4)).digest(), false);
+    checksum.update(out.subarray(8, length - 4));
+    view.setUint32(length - 4, checksum.digestSync(), false);
 
     return out;
   }

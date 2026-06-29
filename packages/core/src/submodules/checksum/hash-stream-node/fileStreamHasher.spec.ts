@@ -2,10 +2,10 @@ import { createReadStream, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import { Sha256 } from "@aws-crypto/sha256-js";
 import { toHex } from "@smithy/core/serde";
 import { describe, expect, test as it, vi } from "vitest";
 
+import { Sha256Node as Sha256 } from "../sha256/Sha256Node";
 import { fileStreamHasher } from "./fileStreamHasher";
 
 function createTemporaryFile(contents: string): string {

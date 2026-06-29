@@ -13,9 +13,9 @@ import {
   GetNumbersResponse$,
   HaltError,
   HaltError$,
-  HostPrefixInput$,
   HostPrefixOperation$,
   HostPrefixOperationCommand,
+  HostPrefixOperationInput$,
   HttpLabelCommand$,
   HttpLabelCommandCommand,
   HttpLabelCommandInput$,
@@ -69,7 +69,7 @@ assert(typeof camelCaseOperationOutput$ === "object");
 assert(typeof DifferentShapeName$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
 assert(typeof GetNumbersResponse$ === "object");
-assert(typeof HostPrefixInput$ === "object");
+assert(typeof HostPrefixOperationInput$ === "object");
 assert(typeof TradeEvents$ === "object");
 assert(typeof TradeEventStreamRequest$ === "object");
 assert(typeof TradeEventStreamResponse$ === "object");

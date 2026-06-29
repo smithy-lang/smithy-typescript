@@ -40,4 +40,31 @@ describe("Crc32Node", () => {
     node.update(data);
     expect(await node.digest()).toEqual(await js.digest());
   });
+
+  describe("digestSync", () => {
+    for (const [input, expected] of crc32Vectors) {
+      it(`should return 0x${expected.toString(16)} for ${input.length} bytes`, () => {
+        const hash = new Crc32Node();
+        hash.update(input);
+        expect(hash.digestSync()).toBe(expected);
+      });
+    }
+
+    it("should support incremental updates", () => {
+      const hash = new Crc32Node();
+      for (const [chunk, expected] of crc32IncrementalChunks) {
+        hash.update(chunk);
+        expect(hash.digestSync()).toBe(expected);
+      }
+    });
+
+    it("should match Crc32Js.digestSync()", () => {
+      const data = utf8("cross-implementation consistency check");
+      const js = new Crc32Js();
+      js.update(data);
+      const node = new Crc32Node();
+      node.update(data);
+      expect(node.digestSync()).toBe(js.digestSync());
+    });
+  });
 });
