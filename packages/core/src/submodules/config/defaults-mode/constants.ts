@@ -22,3 +22,15 @@ export const DEFAULTS_MODE_OPTIONS = ["in-region", "cross-region", "mobile", "st
  * @internal
  */
 export const IMDS_REGION_PATH = "/latest/meta-data/placement/region";
+/**
+ * @internal
+ */
+export const IMDS_TOKEN_PATH = "/latest/api/token";
+/**
+ * @internal
+ */
+export const X_AWS_EC2_METADATA_TOKEN = "x-aws-ec2-metadata-token";
+/**
+ * @internal
+ */
+export const X_AWS_EC2_METADATA_TOKEN_TTL = "x-aws-ec2-metadata-token-ttl-seconds";

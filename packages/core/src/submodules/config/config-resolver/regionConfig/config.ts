@@ -1,4 +1,5 @@
 import type { LoadedConfigSelectors, LocalConfigOptions } from "../../node-config-provider/configLoader";
+import { getInstanceMetadataRegion } from "./getInstanceMetadataRegion";
 
 /**
  * @internal
@@ -15,7 +16,11 @@ export const REGION_INI_NAME = "region";
 export const NODE_REGION_CONFIG_OPTIONS: LoadedConfigSelectors<string> = {
   environmentVariableSelector: (env) => env[REGION_ENV_NAME],
   configFileSelector: (profile) => profile[REGION_INI_NAME],
-  default: () => {
+  default: async () => {
+    const region = await getInstanceMetadataRegion();
+    if (region) {
+      return region;
+    }
     throw new Error("Region is missing");
   },
 };
