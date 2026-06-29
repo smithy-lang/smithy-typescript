@@ -1,12 +1,11 @@
 {
   "name": "@aws-smithy/server-apigateway",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.10",
   "description": "Base components for Smithy services behind APIGateway",
   "main": "./dist/cjs/index.js",
   "module": "./dist/es/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "prepublishOnly": "yarn build",
     "pretest": "yarn build",
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
