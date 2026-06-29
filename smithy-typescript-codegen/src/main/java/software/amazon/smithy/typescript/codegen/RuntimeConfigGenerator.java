@@ -76,11 +76,6 @@ final class RuntimeConfigGenerator {
             writer.addImport("FetchHttpHandler", "RequestHandler", TypeScriptDependency.AWS_SDK_FETCH_HTTP_HANDLER);
             writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
         },
-        "sha256",
-        writer -> {
-            writer.addImport("Sha256", null, TypeScriptDependency.AWS_CRYPTO_SHA256_BROWSER);
-            writer.write("Sha256");
-        },
         "bodyLengthChecker",
         writer -> {
             writer.addImportSubmodule(
@@ -97,13 +92,7 @@ final class RuntimeConfigGenerator {
             writer.write("streamCollector");
         }
     );
-    private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of(
-        "sha256",
-        writer -> {
-            writer.addImport("Sha256", null, TypeScriptDependency.AWS_CRYPTO_SHA256_JS);
-            writer.write("Sha256");
-        }
-    );
+    private final Map<String, Consumer<TypeScriptWriter>> reactNativeRuntimeConfigDefaults = MapUtils.of();
     private final Map<String, Consumer<TypeScriptWriter>> sharedRuntimeConfigDefaults = MapUtils.of(
         "base64Decoder",
         writer -> {
@@ -114,6 +103,11 @@ final class RuntimeConfigGenerator {
         writer -> {
             writer.addImportSubmodule("toBase64", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
             writer.write("toBase64");
+        },
+        "sha256",
+        writer -> {
+            writer.addImportSubmodule("Sha256", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.CHECKSUM);
+            writer.write("Sha256");
         },
         "disableHostPrefix",
         writer -> {

@@ -29,7 +29,9 @@ public enum TypeScriptDependency implements Dependency {
     SMITHY_TYPES("dependencies", "@smithy/types", true),
     SMITHY_CORE("dependencies", "@smithy/core", false),
 
+    @Deprecated
     AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", true),
+    @Deprecated
     AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", true),
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", false),

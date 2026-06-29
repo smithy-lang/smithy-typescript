@@ -13,6 +13,12 @@ const zlibCrc32: ((data: Uint8Array, value?: number) => number) | undefined =
  */
 export interface Crc32Node extends Checksum {
   readonly digestLength: 4;
+
+  /**
+   * Used by EventStreamCodec.
+   * @internal
+   */
+  digestSync(): number;
 }
 
 /**
@@ -29,9 +35,17 @@ function buildNativeClass(nativeCrc32: (data: Uint8Array, value?: number) => num
       this.value = nativeCrc32(data, this.value);
     }
 
+    /**
+     * Used by EventStreamCodec.
+     * @internal
+     */
+    public digestSync(): number {
+      return this.value >>> 0;
+    }
+
     public async digest(): Promise<Uint8Array> {
       const out = new Uint8Array(4);
-      new DataView(out.buffer).setUint32(0, this.value >>> 0, false);
+      new DataView(out.buffer).setUint32(0, this.digestSync(), false);
       return out;
     }
 
