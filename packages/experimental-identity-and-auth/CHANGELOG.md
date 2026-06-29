@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [c9575e1]
+- Updated dependencies [2dcefdb]
+- Updated dependencies [91280a5]
+  - @smithy/core@3.27.0
+  - @smithy/signature-v4@5.5.3
+
 ## 0.7.2
 
 ### Patch Changes

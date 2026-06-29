@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.9.0
+
+### Minor Changes
+
+- c9575e1: use streamCollector from core/serde
+
+### Patch Changes
+
+- Updated dependencies [c9575e1]
+- Updated dependencies [2dcefdb]
+- Updated dependencies [91280a5]
+  - @smithy/core@3.27.0
+
 ## 4.8.2
 
 ### Patch Changes

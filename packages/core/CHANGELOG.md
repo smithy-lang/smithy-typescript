@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.27.0
+
+### Minor Changes
+
+- c9575e1: add crc32 and sha256 checksum impls
+
+### Patch Changes
+
+- 2dcefdb: Clean up ChecksumStream's source stream when destroyed.
+- 91280a5: validates hostLabel input
+
 ## 3.26.0
 
 ### Minor Changes

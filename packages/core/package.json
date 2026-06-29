@@ -1,6 +1,6 @@
 {
   "name": "@smithy/core",
-  "version": "3.26.0",
+  "version": "3.27.0",
   "scripts": {
     "benchmark:cbor": "node ./scripts/cbor-perf.mjs",
     "benchmark:checksum": "node ./scripts/checksum-perf.mjs",
