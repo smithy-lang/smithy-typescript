@@ -134,46 +134,55 @@ final class ServerGenerator {
                 writer,
                 () -> {
                     writer.write("route: (request) => this.mux.match(request)?.operation,");
-                    writer.openBlock("deserialize: async (operation, request) => {", "},", () -> {
-                        writer.openBlock("try {", "} catch (error: unknown) {", () -> {
-                            writer.write(
-                                "return await this.serializerFactory(operation as $L).deserialize(request, "
-                                    + "{ endpoint: () => Promise.resolve(request), ...serdeContextBase });",
-                                operationsType.getName()
-                            );
-                        });
-                        writer.indent();
-                        writer.openBlock("if (__isFrameworkException(error)) {", "}", () -> {
-                            writer.write("throw error;");
-                        });
-                        writer.write("throw new __SerializationException();");
-                        writer.closeBlock("}");
-                    });
-                    writer.openBlock("validate: (operation, input) => {", "},", () -> {
-                        writer.write(
-                            "const validationFailures = $LValidators[operation as $L](input);",
-                            handlerSymbol.getName(),
-                            operationsType.getName()
-                        );
-                        writer.openBlock("if (validationFailures && validationFailures.length > 0) {", "}", () -> {
-                            writer.write(
-                                "const validationException = this.validationCustomizer("
-                                    + "{ operation: operation as $L }, validationFailures);",
-                                operationsType.getName()
-                            );
-                            writer.openBlock("if (validationException) {", "}", () -> {
-                                writer.write("throw validationException;");
+                    writer.openBlock(
+                        "deserialize: (operation, request) => timed(\"DeserializationTime\", async () => {",
+                        "}),",
+                        () -> {
+                            writer.openBlock("try {", "} catch (error: unknown) {", () -> {
+                                writer.write(
+                                    "return await this.serializerFactory(operation as $L).deserialize(request, "
+                                        + "{ endpoint: () => Promise.resolve(request), ...serdeContextBase });",
+                                    operationsType.getName()
+                                );
                             });
-                        });
-                    });
+                            writer.indent();
+                            writer.openBlock("if (__isFrameworkException(error)) {", "}", () -> {
+                                writer.write("throw error;");
+                            });
+                            writer.write("throw new __SerializationException();");
+                            writer.closeBlock("}");
+                        }
+                    );
+                    writer.openBlock(
+                        "validate: (operation, input) => timedSync(\"ValidationTime\", () => {",
+                        "}),",
+                        () -> {
+                            writer.write(
+                                "const validationFailures = $LValidators[operation as $L](input);",
+                                handlerSymbol.getName(),
+                                operationsType.getName()
+                            );
+                            writer.openBlock("if (validationFailures && validationFailures.length > 0) {", "}", () -> {
+                                writer.write(
+                                    "const validationException = this.validationCustomizer("
+                                        + "{ operation: operation as $L }, validationFailures);",
+                                    operationsType.getName()
+                                );
+                                writer.openBlock("if (validationException) {", "}", () -> {
+                                    writer.write("throw validationException;");
+                                });
+                            });
+                        }
+                    );
                     writer.write(
                         "invoke: (operation, input, context) => "
-                            + "(this.service[operation as $L] as any)(input, context),",
+                            + "timed(\"ActivityTime\", () => (this.service[operation as $L] as any)(input, context)),",
                         operationsType.getName()
                     );
                     writer.write(
                         "serialize: (operation, output) => "
-                            + "this.serializerFactory(operation as $L).serialize(output as any, serdeContextBase),",
+                            + "timed(\"SerializationTime\", () => "
+                            + "this.serializerFactory(operation as $L).serialize(output as any, serdeContextBase)),",
                         operationsType.getName()
                     );
                     writer.openBlock("serializeError: (operation, error) => {", "},", () -> {
@@ -289,21 +298,25 @@ final class ServerGenerator {
                         "route: (request) => this.mux.match(request) !== undefined ? $S : undefined,",
                         operationName
                     );
-                    writer.openBlock("deserialize: async (_op, request) => {", "},", () -> {
-                        writer.openBlock("try {", "} catch (error: unknown) {", () -> {
-                            writer.write(
-                                "return await this.serializer.deserialize(request, "
-                                    + "{ endpoint: () => Promise.resolve(request), ...serdeContextBase });"
-                            );
-                        });
-                        writer.indent();
-                        writer.openBlock("if (__isFrameworkException(error)) {", "}", () -> {
-                            writer.write("throw error;");
-                        });
-                        writer.write("throw new __SerializationException();");
-                        writer.closeBlock("}");
-                    });
-                    writer.openBlock("validate: (_op, input) => {", "},", () -> {
+                    writer.openBlock(
+                        "deserialize: (_op, request) => timed(\"DeserializationTime\", async () => {",
+                        "}),",
+                        () -> {
+                            writer.openBlock("try {", "} catch (error: unknown) {", () -> {
+                                writer.write(
+                                    "return await this.serializer.deserialize(request, "
+                                        + "{ endpoint: () => Promise.resolve(request), ...serdeContextBase });"
+                                );
+                            });
+                            writer.indent();
+                            writer.openBlock("if (__isFrameworkException(error)) {", "}", () -> {
+                                writer.write("throw error;");
+                            });
+                            writer.write("throw new __SerializationException();");
+                            writer.closeBlock("}");
+                        }
+                    );
+                    writer.openBlock("validate: (_op, input) => timedSync(\"ValidationTime\", () => {", "}),", () -> {
                         writer.write(
                             "const validationFailures = ($T.validate as (input: any) => "
                                 + "__ValidationFailure[])(input);",
@@ -320,10 +333,15 @@ final class ServerGenerator {
                             });
                         });
                     });
-                    writer.write("invoke: (_op, input, context) => this.operation(input as $T, context),", inputSymbol);
+                    writer.write(
+                        "invoke: (_op, input, context) => "
+                            + "timed(\"ActivityTime\", () => this.operation(input as $T, context)),",
+                        inputSymbol
+                    );
                     writer.write(
                         "serialize: (_op, output) => "
-                            + "this.serializer.serialize(output as $T, serdeContextBase),",
+                            + "timed(\"SerializationTime\", () => "
+                            + "this.serializer.serialize(output as $T, serdeContextBase)),",
                         outputSymbol
                     );
                     writer.write(
@@ -340,10 +358,11 @@ final class ServerGenerator {
         });
     }
 
-    /** Per-handler interceptor and auth-scheme state. */
+    /** Per-handler interceptor, auth-scheme, and metrics state. */
     private static void writeInterceptorState(TypeScriptWriter writer) {
         writer.write("private readonly interceptors: __ServerInterceptor<Context>[] = [];");
         writer.write("private readonly authSchemes: __AuthScheme<Context>[] = [];");
+        writer.write("private metricsRecorderFactory?: __MetricsRecorderFactory<any>;");
     }
 
     /**
@@ -351,6 +370,14 @@ final class ServerGenerator {
      * mirror the opt-in registration surface so interceptors and auth are additive.
      */
     private static void writeInterceptorRegistration(TypeScriptWriter writer) {
+        writer.openBlock(
+            "withMetrics<Native>(metricsRecorderFactory: __MetricsRecorderFactory<Native>): this {",
+            "}",
+            () -> {
+                writer.write("this.metricsRecorderFactory = metricsRecorderFactory;");
+                writer.write("return this;");
+            }
+        );
         writer.openBlock("withAuth(...schemes: __AuthScheme<Context>[]): this {", "}", () -> {
             writer.write("this.authSchemes.push(...schemes);");
             writer.write("return this;");
@@ -382,17 +409,40 @@ final class ServerGenerator {
             "async handle(request: __HttpRequest, context: Context): Promise<__HttpResponse> {",
             "}",
             () -> {
+                writer.write(
+                    "const recorder: __MetricsRecorder<any> | undefined = this.metricsRecorderFactory?.create();"
+                );
+                writer.write(
+                    "const safeRecord = (fn: (recorder: __MetricsRecorder<any>) => void): void => "
+                        + "__recordSafely(recorder, fn);"
+                );
+                writer.write(
+                    "const timed = <T>(name: string, fn: () => Promise<T>): Promise<T> => "
+                        + "__recordTimed(recorder, name, fn);"
+                );
+                writer.write(
+                    "const timedSync = <T>(name: string, fn: () => T): T => "
+                        + "__recordTimedSync(recorder, name, fn);"
+                );
+                writer.write("");
+
                 writer.openBlock("const steps: __FrameworkSteps<Context> = {", "};", stepsBody);
                 writer.write("");
+                writer.write("let metricsErrorClass: \"Error\" | \"Fault\" | \"Failure\" | undefined;");
                 writer.openBlock(
                     "const convertError = (op: string | undefined, caught: unknown): Promise<__HttpResponse> => {",
                     "};",
                     () -> {
                         writer.write("const modeled = steps.serializeError(op, caught);");
-                        writer.openBlock("if (modeled) {", "}", () -> writer.write("return modeled;"));
+                        writer.openBlock("if (modeled) {", "}", () -> {
+                            writer.write("metricsErrorClass = \"Error\";");
+                            writer.write("return modeled;");
+                        });
                         writer.openBlock("if (__isFrameworkException(caught)) {", "}", () -> {
+                            writer.write("metricsErrorClass = \"Fault\";");
                             writer.write("return steps.serializeFrameworkException(caught);");
                         });
+                        writer.write("metricsErrorClass = \"Failure\";");
                         writer.write("return steps.serializeFrameworkException(new __InternalFailureException());");
                     }
                 );
@@ -408,109 +458,144 @@ final class ServerGenerator {
                 writer.write("const entered = new Set<__ServerInterceptor<Context>>();");
                 writer.write("");
 
-                writer.openBlock("try {", "} catch (caught: unknown) {", () -> {
-                    writer.openBlock("for (const interceptor of this.interceptors) {", "}", () -> {
-                        writer.openBlock("if (interceptor.readBeforeExecution) {", "}", () -> {
-                            writer.write("interceptor.readBeforeExecution(base);");
-                        });
-                        writer.write("entered.add(interceptor);");
-                    });
-                    writer.write("");
-                    writer.write("let authScheme: string | undefined;");
-                    writer.openBlock("if (this.authSchemes.length > 0) {", "}", () -> {
-                        writer.openBlock("for (const scheme of this.authSchemes) {", "}", () -> {
-                            writer.write("const result = await scheme.authenticate(request, context);");
-                            writer.openBlock("if (result) {", "}", () -> {
-                                writer.write("caller = result;");
-                                writer.write("authScheme = scheme.name;");
-                                writer.write("break;");
+                writer.write("safeRecord((r) => r.begin());");
+                writer.write(
+                    "// TODO: expose metricsRecorder via a typed server context instead of casting."
+                );
+                writer.write(
+                    "(context as { metricsRecorder?: __MetricsRecorder<any> }).metricsRecorder = recorder;"
+                );
+                writer.write("const __metricsStart = performance.now();");
+                writer.write("");
+
+                writer.openBlock("const runPipeline = async (): Promise<__HttpResponse> => {", "};", () -> {
+                    writer.openBlock("try {", "} catch (caught: unknown) {", () -> {
+                        writer.openBlock("for (const interceptor of this.interceptors) {", "}", () -> {
+                            writer.openBlock("if (interceptor.readBeforeExecution) {", "}", () -> {
+                                writer.write("interceptor.readBeforeExecution(base);");
                             });
+                            writer.write("entered.add(interceptor);");
                         });
-                        writer.openBlock("if (!caller) {", "}", () -> {
-                            writer.write("throw new __UnauthenticatedException();");
+                        writer.write("");
+                        writer.write("let authScheme: string | undefined;");
+                        writer.openBlock("if (this.authSchemes.length > 0) {", "}", () -> {
+                            writer.openBlock("for (const scheme of this.authSchemes) {", "}", () -> {
+                                writer.write("const result = await scheme.authenticate(request, context);");
+                                writer.openBlock("if (result) {", "}", () -> {
+                                    writer.write("caller = result;");
+                                    writer.write("authScheme = scheme.name;");
+                                    writer.write("break;");
+                                });
+                            });
+                            writer.openBlock("if (!caller) {", "}", () -> {
+                                writer.write("throw new __UnauthenticatedException();");
+                            });
+                            writer.write(
+                                "this.fireRead(\"readAfterAuthentication\", () => "
+                                    + "({ ...base, authScheme: authScheme!, caller: caller! }));"
+                            );
                         });
+                        writer.write("");
                         writer.write(
-                            "this.fireRead(\"readAfterAuthentication\", () => "
-                                + "({ ...base, authScheme: authScheme!, caller: caller! }));"
+                            "const req = this.fireModify<__HttpRequest, typeof base>("
+                                + "\"modifyBeforeDeserialization\", request, (r) => ({ ...base, request: r }));"
+                        );
+                        writer.write("");
+                        writer.write("operation = steps.route(req);");
+                        writer.openBlock("if (!operation) {", "}", () -> {
+                            writer.write("throw new __UnknownOperationException();");
+                        });
+                        writer.write("");
+                        writer.write("input = await steps.deserialize(operation, req);");
+                        writer.write("const inputHook = () => ({ ...base, operation: operation!, input });");
+                        writer.write("this.fireRead(\"readAfterDeserialization\", inputHook);");
+                        writer.write(
+                            "input = this.fireModify(\"modifyBeforeValidation\", input, (v) => "
+                                + "({ ...base, operation: operation!, input: v }));"
+                        );
+                        writer.write("steps.validate(operation, input);");
+                        writer.write("this.fireRead(\"readAfterValidation\", inputHook);");
+                        writer.write("this.fireRead(\"readBeforeInvocation\", inputHook);");
+                        writer.write("output = await steps.invoke(operation, input, context);");
+                        writer.write(
+                            "this.fireRead(\"readAfterInvocation\", () => "
+                                + "({ ...base, operation: operation!, input, output }));"
+                        );
+                        writer.write(
+                            "output = this.fireModify(\"modifyBeforeSerialization\", output, (v) => "
+                                + "({ ...base, operation: operation!, input, output: v }));"
+                        );
+                        writer.write("response = await steps.serialize(operation, output);");
+                        writer.write(
+                            "this.fireRead(\"readAfterSerialization\", () => "
+                                + "({ ...base, operation: operation!, input, output, response: response! }));"
+                        );
+                    });
+                    writer.indent();
+                    writer.write("error = caught;");
+                    writer.write("response = await convertError(operation, caught);");
+                    writer.closeBlock("}");
+
+                    writer.write("");
+                    writer.openBlock("try {", "} catch (caught: unknown) {", () -> {
+                        writer.write(
+                            "response = this.fireModify(\"modifyBeforeCompletion\", response!, (v) => "
+                                + "({ ...base, operation: operation!, input, output, response: v }));"
+                        );
+                    });
+                    writer.indent();
+                    writer.write("error = caught;");
+                    writer.write("response = await convertError(operation, caught);");
+                    writer.closeBlock("}");
+
+                    writer.write("");
+                    writer.write(
+                        "const execHook: __ExecutionHook<Context> = "
+                            + "{ request, context, operation, input, output, response, error };"
+                    );
+                    writer.openBlock("for (const interceptor of this.interceptors) {", "}", () -> {
+                        writer.openBlock(
+                            "if (entered.has(interceptor) && interceptor.readAfterExecution) {",
+                            "}",
+                            () -> {
+                                writer.openBlock("try {", "} catch (e) {", () -> {
+                                    writer.write("interceptor.readAfterExecution(execHook);");
+                                });
+                                writer.indent();
+                                writer.write(
+                                    "// readAfterExecution is best-effort and must not mask the response; "
+                                        + "ignore hook failures."
+                                );
+                                writer.closeBlock("}");
+                            }
                         );
                     });
                     writer.write("");
-                    writer.write(
-                        "const req = this.fireModify<__HttpRequest, typeof base>("
-                            + "\"modifyBeforeDeserialization\", request, (r) => ({ ...base, request: r }));"
-                    );
-                    writer.write("");
-                    writer.write("operation = steps.route(req);");
-                    writer.openBlock("if (!operation) {", "}", () -> {
-                        writer.write("throw new __UnknownOperationException();");
-                    });
-                    writer.write("");
-                    writer.write("input = await steps.deserialize(operation, req);");
-                    writer.write("const inputHook = () => ({ ...base, operation: operation!, input });");
-                    writer.write("this.fireRead(\"readAfterDeserialization\", inputHook);");
-                    writer.write(
-                        "input = this.fireModify(\"modifyBeforeValidation\", input, (v) => "
-                            + "({ ...base, operation: operation!, input: v }));"
-                    );
-                    writer.write("steps.validate(operation, input);");
-                    writer.write("this.fireRead(\"readAfterValidation\", inputHook);");
-                    writer.write("this.fireRead(\"readBeforeInvocation\", inputHook);");
-                    writer.write("output = await steps.invoke(operation, input, context);");
-                    writer.write(
-                        "this.fireRead(\"readAfterInvocation\", () => "
-                            + "({ ...base, operation: operation!, input, output }));"
-                    );
-                    writer.write(
-                        "output = this.fireModify(\"modifyBeforeSerialization\", output, (v) => "
-                            + "({ ...base, operation: operation!, input, output: v }));"
-                    );
-                    writer.write("response = await steps.serialize(operation, output);");
-                    writer.write(
-                        "this.fireRead(\"readAfterSerialization\", () => "
-                            + "({ ...base, operation: operation!, input, output, response: response! }));"
-                    );
+                    writer.write("return response!;");
                 });
-                writer.indent();
-                writer.write("error = caught;");
-                writer.write("response = await convertError(operation, caught);");
-                writer.closeBlock("}");
 
                 writer.write("");
-                writer.openBlock("try {", "} catch (caught: unknown) {", () -> {
-                    writer.write(
-                        "response = this.fireModify(\"modifyBeforeCompletion\", response!, (v) => "
-                            + "({ ...base, operation: operation!, input, output, response: v }));"
-                    );
+                writer.openBlock("try {", "} finally {", () -> {
+                    writer.write("return await runPipeline();");
                 });
                 writer.indent();
-                writer.write("error = caught;");
-                writer.write("response = await convertError(operation, caught);");
-                writer.closeBlock("}");
-
-                writer.write("");
+                writer.openBlock("if (operation) {", "}", () -> {
+                    writer.write("safeRecord((r) => r.setProperty(\"Operation\", operation!));");
+                });
                 writer.write(
-                    "const execHook: __ExecutionHook<Context> = "
-                        + "{ request, context, operation, input, output, response, error };"
+                    "safeRecord((r) => r.recordRequestOutcome("
+                        + "error === undefined ? \"Success\" : \"Fault\", performance.now() - __metricsStart));"
                 );
-                writer.openBlock("for (const interceptor of this.interceptors) {", "}", () -> {
-                    writer.openBlock(
-                        "if (entered.has(interceptor) && interceptor.readAfterExecution) {",
-                        "}",
-                        () -> {
-                            writer.openBlock("try {", "} catch (e) {", () -> {
-                                writer.write("interceptor.readAfterExecution(execHook);");
-                            });
-                            writer.indent();
-                            writer.write(
-                                "// readAfterExecution is best-effort and must not mask the response; "
-                                    + "ignore hook failures."
-                            );
-                            writer.closeBlock("}");
-                        }
-                    );
-                });
-                writer.write("");
-                writer.write("return response!;");
+                writer.write("safeRecord((r) => r.addCount(\"Error\", metricsErrorClass === \"Error\" ? 1 : 0));");
+                writer.write(
+                    "safeRecord((r) => r.addCount(\"Fault\", "
+                        + "metricsErrorClass === \"Fault\" || metricsErrorClass === \"Failure\" ? 1 : 0));"
+                );
+                writer.write(
+                    "safeRecord((r) => r.addCount(\"Failure\", metricsErrorClass === \"Failure\" ? 1 : 0));"
+                );
+                writer.write("safeRecord((r) => r.end());");
+                writer.closeBlock("}");
             }
         );
 
@@ -564,6 +649,9 @@ final class ServerGenerator {
         writer.addImport("SmithyFrameworkException", "__SmithyFrameworkException", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("ValidationFailure", "__ValidationFailure", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("isFrameworkException", "__isFrameworkException", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("recordSafely", "__recordSafely", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("recordTimed", "__recordTimed", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("recordTimedSync", "__recordTimedSync", TypeScriptDependency.SERVER_COMMON);
         writer.addImportSubmodule(
             "HttpRequest",
             "__HttpRequest",
@@ -578,6 +666,8 @@ final class ServerGenerator {
         );
         writer.addImport("ServiceException", "__ServiceException", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("ValidationCustomizer", "__ValidationCustomizer", TypeScriptDependency.SERVER_COMMON);
+        writer.addImport("MetricsRecorder", "__MetricsRecorder", TypeScriptDependency.SMITHY_TYPES);
+        writer.addImport("MetricsRecorderFactory", "__MetricsRecorderFactory", TypeScriptDependency.SMITHY_TYPES);
     }
 
     private static void writeSerdeContextBase(TypeScriptWriter writer) {
