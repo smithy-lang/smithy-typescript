@@ -1,5 +1,13 @@
 # Change Log
 
+## 5.6.1
+
+### Patch Changes
+
+- Updated dependencies [d366537]
+- Updated dependencies [c0d7f5d]
+  - @smithy/core@3.28.0
+
 ## 5.6.0
 
 ### Minor Changes

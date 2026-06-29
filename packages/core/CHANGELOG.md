@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.28.0
+
+### Minor Changes
+
+- d366537: Add IMDSv2 region fallback to NODE_REGION_CONFIG_OPTIONS default, consolidated with defaults-mode region inference.
+- c0d7f5d: use internal checksum implementations
+
 ## 3.27.0
 
 ### Minor Changes

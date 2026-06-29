@@ -1,5 +1,18 @@
 # @smithy/signature-v4a
 
+## 3.4.0
+
+### Minor Changes
+
+- c0d7f5d: use internal checksum implementations
+
+### Patch Changes
+
+- Updated dependencies [d366537]
+- Updated dependencies [c0d7f5d]
+  - @smithy/core@3.28.0
+  - @smithy/signature-v4@5.6.0
+
 ## 3.3.3
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.2.4
+
+### Patch Changes
+
+- Updated dependencies [d366537]
+- Updated dependencies [c0d7f5d]
+  - @smithy/core@3.28.0
+
 ## 1.2.3
 
 ### Patch Changes
