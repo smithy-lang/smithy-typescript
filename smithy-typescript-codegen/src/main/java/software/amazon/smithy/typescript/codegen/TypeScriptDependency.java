@@ -33,12 +33,12 @@ public enum TypeScriptDependency implements Dependency {
      * @deprecated Use {@code @smithy/core/checksum} via {@link SmithyCoreSubmodules#CHECKSUM} instead.
      */
     @Deprecated
-    AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", true),
+    AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", false),
     /**
      * @deprecated Use {@code @smithy/core/checksum} via {@link SmithyCoreSubmodules#CHECKSUM} instead.
      */
     @Deprecated
-    AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", true),
+    AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", false),
     AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", false),
