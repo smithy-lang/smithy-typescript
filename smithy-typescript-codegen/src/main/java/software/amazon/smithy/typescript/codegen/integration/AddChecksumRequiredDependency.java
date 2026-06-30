@@ -76,6 +76,20 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
         }
 
         switch (target) {
+            case SHARED:
+                return MapUtils.of(
+                    "md5",
+                    writer -> {
+                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
+                        writer.addImportSubmodule(
+                            "Md5",
+                            null,
+                            TypeScriptDependency.SMITHY_CORE,
+                            SmithyCoreSubmodules.CHECKSUM
+                        );
+                        writer.write("Md5");
+                    }
+                );
             case NODE:
                 return MapUtils.of(
                     "streamHasher",
@@ -88,17 +102,6 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                             SmithyCoreSubmodules.CHECKSUM
                         );
                         writer.write("streamHasher");
-                    },
-                    "md5",
-                    writer -> {
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        writer.addImportSubmodule(
-                            "Hash",
-                            null,
-                            TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.SERDE
-                        );
-                        writer.write("Hash.bind(null, \"md5\")");
                     }
                 );
             case BROWSER:
@@ -113,17 +116,6 @@ public final class AddChecksumRequiredDependency implements TypeScriptIntegratio
                             SmithyCoreSubmodules.CHECKSUM
                         );
                         writer.write("streamHasher");
-                    },
-                    "md5",
-                    writer -> {
-                        writer.addDependency(TypeScriptDependency.SMITHY_CORE);
-                        writer.addImportSubmodule(
-                            "Md5",
-                            null,
-                            TypeScriptDependency.SMITHY_CORE,
-                            SmithyCoreSubmodules.CHECKSUM
-                        );
-                        writer.write("Md5");
                     }
                 );
             default:
