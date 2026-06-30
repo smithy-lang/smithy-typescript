@@ -135,6 +135,7 @@
     "isSerializableHeaderValue": "function",
     "LazyValueInstruction": "type(object)",
     "loadConfigsForDefaultMode": "function",
+    "makeBuilder": "function",
     "map": "function",
     "NoOpLogger": "function",
     "normalizeProvider": "function",

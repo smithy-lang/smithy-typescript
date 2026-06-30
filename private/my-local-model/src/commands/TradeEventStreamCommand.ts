@@ -18,7 +18,6 @@ import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedCon
  * @public
  */
 export type { __MetadataBearer };
-export { $Command };
 /**
  * @public
  *

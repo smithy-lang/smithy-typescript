@@ -656,10 +656,27 @@ final class DirectedTypeScriptCodegen
             ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
         }
 
+        // Generate commandBuilder.ts with deduplicated params and middleware (schema mode only).
+        CommandBuilderGenerator commandBuilderGenerator = null;
+        if (
+            settings.generateClient()
+                && SchemaGenerationAllowlist.allows(service.getId(), settings)
+        ) {
+            commandBuilderGenerator = new CommandBuilderGenerator(
+                settings,
+                model,
+                symbolProvider,
+                runtimePlugins
+            );
+            commandBuilderGenerator.collectOperations();
+            commandBuilderGenerator.generate(delegator);
+        }
+
         // Generate each operation for the service.
         for (OperationShape operation : directive.operations()) {
             // Right now this only generates stubs
             if (settings.generateClient()) {
+                final CommandBuilderGenerator builderGen = commandBuilderGenerator;
                 delegator.useShapeWriter(
                     operation,
                     commandWriter -> new CommandGenerator(
@@ -670,7 +687,8 @@ final class DirectedTypeScriptCodegen
                         commandWriter,
                         runtimePlugins,
                         protocolGenerator,
-                        applicationProtocol
+                        applicationProtocol,
+                        builderGen
                     ).run()
                 );
             }

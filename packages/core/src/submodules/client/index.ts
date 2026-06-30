@@ -85,3 +85,4 @@ export {
 export { schemaLogFilter } from "./smithy-client/schemaLogFilter";
 export { serializeFloat, serializeDateTime } from "./smithy-client/ser-utils";
 export { _json } from "./smithy-client/serde-json";
+export { makeBuilder } from "./smithy-client/client-command-builder";

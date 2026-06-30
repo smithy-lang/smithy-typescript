@@ -1,18 +1,14 @@
 // smithy-typescript generated code
-import { Command as $Command } from "@smithy/core/client";
-import { getEndpointPlugin } from "@smithy/core/endpoints";
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { commonParams } from "../endpoint/EndpointParameters";
+import { _ep0, _mw0, command } from "../commandBuilder";
 import type { CamelCaseOperationInput, CamelCaseOperationOutput } from "../models/models_0";
 import { camelCaseOperation$ } from "../schemas/schemas_0";
-import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
 /**
  * @public
  */
 export type { __MetadataBearer };
-export { $Command };
 /**
  * @public
  *
@@ -64,22 +60,12 @@ export interface CamelCaseOperationCommandOutput extends CamelCaseOperationOutpu
  *
  *
  */
-export class CamelCaseOperationCommand extends $Command
-  .classBuilder<
-    CamelCaseOperationCommandInput,
-    CamelCaseOperationCommandOutput,
-    XYZServiceClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
-  .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
-  })
-  .s("XYZService", "camelCaseOperation", {})
-  .n("XYZServiceClient", "CamelCaseOperationCommand")
-  .sc(camelCaseOperation$)
-  .build() {
+export class CamelCaseOperationCommand extends command<CamelCaseOperationCommandInput, CamelCaseOperationCommandOutput>(
+  _ep0,
+  _mw0,
+  "camelCaseOperation",
+  camelCaseOperation$
+) {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {
     api: {

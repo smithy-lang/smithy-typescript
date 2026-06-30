@@ -84,6 +84,7 @@ final class CommandGenerator implements Runnable {
     private final ApplicationProtocol applicationProtocol;
     private final SensitiveDataFinder sensitiveDataFinder;
     private final ServiceClosure closure;
+    private final CommandBuilderGenerator commandBuilderGenerator;
 
     CommandGenerator(
         TypeScriptSettings settings,
@@ -94,6 +95,30 @@ final class CommandGenerator implements Runnable {
         List<RuntimeClientPlugin> runtimePlugins,
         ProtocolGenerator protocolGenerator,
         ApplicationProtocol applicationProtocol
+    ) {
+        this(
+            settings,
+            model,
+            operation,
+            symbolProvider,
+            writer,
+            runtimePlugins,
+            protocolGenerator,
+            applicationProtocol,
+            null
+        );
+    }
+
+    CommandGenerator(
+        TypeScriptSettings settings,
+        Model model,
+        OperationShape operation,
+        SymbolProvider symbolProvider,
+        TypeScriptWriter writer,
+        List<RuntimeClientPlugin> runtimePlugins,
+        ProtocolGenerator protocolGenerator,
+        ApplicationProtocol applicationProtocol,
+        CommandBuilderGenerator commandBuilderGenerator
     ) {
         this.settings = settings;
         this.model = model;
@@ -107,6 +132,7 @@ final class CommandGenerator implements Runnable {
             .collect(Collectors.toList());
         this.protocolGenerator = protocolGenerator;
         this.applicationProtocol = applicationProtocol;
+        this.commandBuilderGenerator = commandBuilderGenerator;
         this.closure = ServiceClosure.of(model, service);
         sensitiveDataFinder = new SensitiveDataFinder(model);
 
@@ -119,7 +145,11 @@ final class CommandGenerator implements Runnable {
     @Override
     public void run() {
         addInputAndOutputTypes();
-        generateClientCommand();
+        if (commandBuilderGenerator != null && SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+            generateClientCommandWithBuilder();
+        } else {
+            generateClientCommand();
+        }
     }
 
     private void generateClientCommand() {
@@ -282,6 +312,152 @@ final class CommandGenerator implements Runnable {
         }
 
         writer.write("}"); // class close bracket.
+    }
+
+    private void generateClientCommandWithBuilder() {
+        Symbol serviceSymbol = symbolProvider.toSymbol(service);
+        String configType = ServiceBareBonesClientGenerator.getResolvedConfigTypeName(serviceSymbol);
+
+        // Import from commandBuilder.ts
+        String epVar = commandBuilderGenerator.getEndpointParamVar(operation);
+        String mwVar = commandBuilderGenerator.getMiddlewareVar(operation);
+
+        writer.addRelativeImport(
+            "command",
+            null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "commandBuilder")
+        );
+        writer.addRelativeImport(
+            epVar,
+            null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "commandBuilder")
+        );
+        writer.addRelativeImport(
+            mwVar,
+            null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, "commandBuilder")
+        );
+
+        // Import the operation schema
+        String operationSchema = closure.getShapeSchemaVariableName(operation, null);
+        writer.addRelativeImport(
+            operationSchema,
+            null,
+            Paths.get(".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0")
+        );
+
+        String name = symbol.getName();
+        String operationShapeName = operation.toShapeId().getName();
+
+        // Documentation
+        StringBuilder additionalDocs = new StringBuilder()
+            .append("\n")
+            .append(
+                getCommandExample(
+                    serviceSymbol.getName(),
+                    configType,
+                    name,
+                    inputType.getName(),
+                    outputType.getName()
+                )
+            )
+            .append("\n")
+            .append(getThrownExceptions())
+            .append("\n")
+            .append(getCuratedExamples(name));
+
+        boolean operationHasDocumentation = operation.hasTrait(DocumentationTrait.class);
+
+        if (operationHasDocumentation) {
+            writer.writeShapeDocs(operation, shapeDoc -> shapeDoc + additionalDocs);
+        } else {
+            boolean isPublic = !operation.hasTrait(InternalTrait.class);
+            boolean isDeprecated = operation.hasTrait(DeprecatedTrait.class);
+
+            String deprecatedTag = "";
+            if (isDeprecated) {
+                DeprecatedTrait deprecatedTrait = operation.expectTrait(DeprecatedTrait.class);
+                deprecatedTag = TypeScriptWriter.buildDeprecationAnnotation(deprecatedTrait) + "\n";
+            }
+
+            writer.writeDocs(
+                (isPublic ? "@public\n" : "@internal\n") + deprecatedTag + additionalDocs
+            );
+        }
+
+        // Section of items like TypeScript @ts-ignore
+        writer.injectSection(
+            PreCommandClassCodeSection.builder()
+                .settings(settings)
+                .model(model)
+                .service(service)
+                .operation(operation)
+                .symbolProvider(symbolProvider)
+                .runtimeClientPlugins(runtimePlugins)
+                .protocolGenerator(protocolGenerator)
+                .applicationProtocol(applicationProtocol)
+                .build()
+        );
+
+        // Generate: class XXXCommand extends command<I, O>(_epN, _mwN, "OpName", $schema) {}
+        writer.pushState()
+            .putContext("inputType", inputType)
+            .putContext("outputType", outputType);
+        writer.openBlock(
+            """
+            export class $L extends command<$inputType:T, $outputType:T>(
+              $L,
+              $L,
+              $S,
+              $L
+            ) {""",
+            "}",
+            name,
+            epVar,
+            mwVar,
+            operationShapeName,
+            operationSchema,
+            () -> {
+                // Type navigation helper
+                Shape operationInputShape = model.expectShape(operation.getInputShape());
+                Symbol baseInput = symbolProvider.toSymbol(operationInputShape);
+                Shape operationOutputShape = model.expectShape(operation.getOutputShape());
+                Symbol baseOutput = symbolProvider.toSymbol(operationOutputShape);
+
+                if (!operationInputShape.getAllMembers().isEmpty()) {
+                    writer.addRelativeTypeImport(baseInput.getName(), null, Path.of(baseInput.getNamespace()));
+                }
+                if (!operationOutputShape.getAllMembers().isEmpty()) {
+                    writer.addRelativeTypeImport(baseOutput.getName(), null, Path.of(baseOutput.getNamespace()));
+                }
+
+                String baseInputStr = operationInputShape.getAllMembers().isEmpty() ? "{}" : baseInput.getName();
+                String baseOutputStr = operationOutputShape.getAllMembers().isEmpty() ? "{}" : baseOutput.getName();
+
+                writer.write("/** @internal type navigation helper, not in runtime. */");
+                writer.openBlock("protected declare static __types: {", "};", () -> {
+                    writer.write(
+                        """
+                        api: {
+                          input: $L;
+                          output: $L;
+                        };""",
+                        baseInputStr,
+                        baseOutputStr
+                    );
+                    writer.write(
+                        """
+                        sdk: {
+                          input: $T;
+                          output: $T;
+                        };""",
+                        inputType,
+                        outputType
+                    );
+                });
+            }
+        );
+        writer.popState();
     }
 
     private String getCommandExample(
@@ -622,7 +798,6 @@ final class CommandGenerator implements Runnable {
     private void addInputAndOutputTypes() {
         writer.writeDocs("@public");
         writer.write("export type { __MetadataBearer };");
-        writer.write("export { $$Command };");
 
         writeInputType(inputType.getName(), operationIndex.getInput(operation), symbol.getName());
         writeOutputType(outputType.getName(), operationIndex.getOutput(operation), symbol.getName());
