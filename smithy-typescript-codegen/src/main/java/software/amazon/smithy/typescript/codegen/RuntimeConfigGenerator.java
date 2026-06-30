@@ -49,11 +49,6 @@ final class RuntimeConfigGenerator {
             writer.addImport("NodeHttpHandler", "RequestHandler", TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
             writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
         },
-        "sha256",
-        writer -> {
-            writer.addImportSubmodule("Hash", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
-            writer.write("Hash.bind(null, \"sha256\")");
-        },
         "bodyLengthChecker",
         writer -> {
             writer.addImportSubmodule(
