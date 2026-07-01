@@ -1,4 +1,5 @@
 import type {
+  EndpointParameterInstructions,
   Logger,
   MetadataBearer,
   OptionalParameter,
@@ -26,7 +27,7 @@ export function makeBuilder<
   SI extends object,
   SO extends MetadataBearer,
 >(
-  common: Record<string, unknown>,
+  common: EndpointParameterInstructions,
   service: string,
   name: string,
   ep: (config: any, instructions: any) => Pluggable<any, any>
@@ -40,7 +41,7 @@ export function makeBuilder<
    * @internal
    */
   return function makeCommand<I extends SI, O extends SO>(
-    added: typeof common,
+    added: EndpointParameterInstructions,
     plugins: (CommandCtor: any, clientStack: any, config: any, options: any) => Pluggable<any, any>[],
     op: string,
     $: StaticOperationSchema,
@@ -48,9 +49,9 @@ export function makeBuilder<
   ): {
     new (input: I): CommandImpl<I, O, C, SI, SO>;
     new (...[input]: OptionalParameter<I>): CommandImpl<I, O, C, SI, SO>;
-    getEndpointParameterInstructions(): Record<string, unknown>;
+    getEndpointParameterInstructions(): EndpointParameterInstructions;
   } {
-    const epMerged = Object.assign({}, common, added);
+    const epMerged: EndpointParameterInstructions = Object.assign({}, common, added);
     return Command.classBuilder<I, O, C, SI, SO>()
       .ep(epMerged)
       .m(function (this: any, CommandCtor: any, clientStack: any, config: any, options: any) {
@@ -61,6 +62,6 @@ export function makeBuilder<
       .s(service, op, smithyContext)
       .n(name, op.charAt(0).toUpperCase() + op.slice(1) + "Command")
       .sc($)
-      .build() as any;
+      .build();
   };
 }

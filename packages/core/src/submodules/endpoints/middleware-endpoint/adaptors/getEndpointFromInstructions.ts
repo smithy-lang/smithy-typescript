@@ -1,8 +1,12 @@
-import type { EndpointParameters, EndpointV2, HandlerExecutionContext } from "@smithy/types";
+import type {
+  EndpointParameterInstructions,
+  EndpointParameters,
+  EndpointV2,
+  HandlerExecutionContext,
+} from "@smithy/types";
 
 import type { EndpointResolvedConfig } from "../resolveEndpointConfig";
 import { resolveParamsForS3 } from "../service-customizations";
-import type { EndpointParameterInstructions } from "../types";
 import { createConfigValueProvider } from "./createConfigValueProvider";
 import { toEndpointV1 } from "./toEndpointV1";
 
@@ -36,11 +40,7 @@ export function bindGetEndpointFromInstructions(getEndpointFromConfig: GetEndpoi
    * @param clientConfig         - config of the service client.
    * @param context              - optional context.
    */
-  return async <
-    T extends EndpointParameters,
-    CommandInput extends Record<string, unknown>,
-    Config extends Record<string, unknown>,
-  >(
+  return async <T extends EndpointParameters, CommandInput extends object, Config extends object>(
     commandInput: CommandInput,
     instructionsSupplier: EndpointParameterInstructionsSupplier,
     clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
@@ -89,11 +89,7 @@ export function bindGetEndpointFromInstructions(getEndpointFromConfig: GetEndpoi
 /**
  * @internal
  */
-export const resolveParams = async <
-  T extends EndpointParameters,
-  CommandInput extends Record<string, unknown>,
-  Config extends Record<string, unknown>,
->(
+export const resolveParams = async <T extends EndpointParameters, CommandInput, Config>(
   commandInput: CommandInput,
   instructionsSupplier: EndpointParameterInstructionsSupplier,
   clientConfig: Partial<EndpointResolvedConfig<T>> & Config
@@ -107,11 +103,11 @@ export const resolveParams = async <
         endpointParams[name] = instruction.value;
         break;
       case "contextParams":
-        endpointParams[name] = commandInput[instruction.name] as string | boolean;
+        endpointParams[name] = (commandInput as any)[instruction.name] as string | boolean;
         break;
       case "clientContextParams":
       case "builtInParams":
-        endpointParams[name] = await createConfigValueProvider<Config>(
+        endpointParams[name] = await createConfigValueProvider<Config & Record<string, unknown>>(
           instruction.name,
           name,
           clientConfig,

@@ -1,9 +1,14 @@
-import type { EndpointParameters, Pluggable, RelativeMiddlewareOptions, SerializeHandlerOptions } from "@smithy/types";
+import type {
+  EndpointParameterInstructions,
+  EndpointParameters,
+  Pluggable,
+  RelativeMiddlewareOptions,
+  SerializeHandlerOptions,
+} from "@smithy/types";
 
 import type { GetEndpointFromConfig } from "./adaptors/getEndpointFromInstructions";
 import { bindEndpointMiddleware } from "./endpointMiddleware";
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
-import type { EndpointParameterInstructions } from "./types";
 
 /**
  * Inlined from @smithy/core/serde to avoid cross-submodule CJS resolution issue.

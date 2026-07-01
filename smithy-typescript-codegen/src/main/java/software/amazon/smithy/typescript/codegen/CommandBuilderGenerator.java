@@ -146,6 +146,8 @@ public final class CommandBuilderGenerator {
         writer.addRelativeTypeImport("ServiceInputTypes", null, servicePath);
         writer.addRelativeTypeImport("ServiceOutputTypes", null, servicePath);
 
+        writer.addTypeImport("EndpointParameterInstructions", null, TypeScriptDependency.SMITHY_TYPES);
+
         collectPluginImports(writer);
 
         writer.write("");
@@ -161,7 +163,11 @@ public final class CommandBuilderGenerator {
         writer.write("");
         for (Map.Entry<String, String> entry : uniqueEndpointParams.entrySet()) {
             writer.writeDocs("@internal");
-            writer.write("export const $L = $L;", entry.getValue(), entry.getKey());
+            writer.write(
+                "export const $L: EndpointParameterInstructions = $L;",
+                entry.getValue(),
+                entry.getKey()
+            );
             writer.write("");
         }
 

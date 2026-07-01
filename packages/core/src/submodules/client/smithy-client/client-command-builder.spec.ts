@@ -1,11 +1,16 @@
-import { SMITHY_CONTEXT_KEY, type MetadataBearer, type StaticOperationSchema } from "@smithy/types";
+import {
+  SMITHY_CONTEXT_KEY,
+  type EndpointParameterInstructions,
+  type MetadataBearer,
+  type StaticOperationSchema,
+} from "@smithy/types";
 import { describe, expect, test as it, vi } from "vitest";
 
 import { makeBuilder } from "./client-command-builder";
 import { Command } from "./command";
 
 describe(makeBuilder.name, () => {
-  const commonParams = {
+  const commonParams: EndpointParameterInstructions = {
     Region: { type: "builtInParams", name: "region" },
     Endpoint: { type: "builtInParams", name: "endpoint" },
   };
@@ -32,7 +37,7 @@ describe(makeBuilder.name, () => {
 
   it("merges commonParams and operation-specific params in endpoint parameter instructions", () => {
     const command = makeBuilder(commonParams, serviceShapeName, sdkClientName, mockEndpointPlugin);
-    const operationParams = {
+    const operationParams: EndpointParameterInstructions = {
       BucketName: { type: "contextParams", name: "Bucket" },
     };
 
@@ -47,7 +52,7 @@ describe(makeBuilder.name, () => {
 
   it("operation-specific params override common params", () => {
     const command = makeBuilder(commonParams, serviceShapeName, sdkClientName, mockEndpointPlugin);
-    const operationParams = {
+    const operationParams: EndpointParameterInstructions = {
       Region: { type: "contextParams", name: "overrideRegion" },
     };
 

@@ -1,6 +1,7 @@
 // smithy-typescript generated code
 import { makeBuilder } from "@smithy/core/client";
 import { getEndpointPlugin } from "@smithy/core/endpoints";
+import type { EndpointParameterInstructions } from "@smithy/types";
 
 import { commonParams } from "./endpoint/EndpointParameters";
 import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "./XYZServiceClient";
@@ -14,12 +15,12 @@ export const command = makeBuilder<XYZServiceClientResolvedConfig, ServiceInputT
 /**
  * @internal
  */
-export const _ep0 = {};
+export const _ep0: EndpointParameterInstructions = {};
 
 /**
  * @internal
  */
-export const _ep1 = {
+export const _ep1: EndpointParameterInstructions = {
   CustomHeaderValue: { type: "contextParams", name: "customHeaderInput" },
 };
 
