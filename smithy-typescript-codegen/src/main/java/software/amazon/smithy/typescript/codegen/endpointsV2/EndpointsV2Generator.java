@@ -212,36 +212,45 @@ public final class EndpointsV2Generator implements Runnable {
 
                 writer.write("");
 
+                writer.addTypeImport(
+                    "EndpointParameterInstructions",
+                    null,
+                    TypeScriptDependency.SMITHY_TYPES
+                );
                 writer.writeDocs("@internal");
-                writer.openBlock("export const commonParams = {", "} as const;", () -> {
-                    Set<String> paramNames = new HashSet<>();
+                writer.openBlock(
+                    "export const commonParams = {",
+                    "} as const satisfies EndpointParameterInstructions;",
+                    () -> {
+                        Set<String> paramNames = new HashSet<>();
 
-                    ruleSetParameterFinder
-                        .getClientContextParams()
-                        .forEach((name, type) -> {
-                            if (!paramNames.contains(name)) {
-                                writer.write(
-                                    "$L: { type: \"clientContextParams\", name: \"$L\" },",
-                                    name,
-                                    EndpointsParamNameMap.getLocalName(name)
-                                );
-                            }
-                            paramNames.add(name);
-                        });
+                        ruleSetParameterFinder
+                            .getClientContextParams()
+                            .forEach((name, type) -> {
+                                if (!paramNames.contains(name)) {
+                                    writer.write(
+                                        "$L: { type: \"clientContextParams\", name: \"$L\" },",
+                                        name,
+                                        EndpointsParamNameMap.getLocalName(name)
+                                    );
+                                }
+                                paramNames.add(name);
+                            });
 
-                    ruleSetParameterFinder
-                        .getBuiltInParams()
-                        .forEach((name, type) -> {
-                            if (!paramNames.contains(name)) {
-                                writer.write(
-                                    "$L: { type: \"builtInParams\", name: \"$L\" },",
-                                    name,
-                                    EndpointsParamNameMap.getLocalName(name)
-                                );
-                            }
-                            paramNames.add(name);
-                        });
-                });
+                        ruleSetParameterFinder
+                            .getBuiltInParams()
+                            .forEach((name, type) -> {
+                                if (!paramNames.contains(name)) {
+                                    writer.write(
+                                        "$L: { type: \"builtInParams\", name: \"$L\" },",
+                                        name,
+                                        EndpointsParamNameMap.getLocalName(name)
+                                    );
+                                }
+                                paramNames.add(name);
+                            });
+                    }
+                );
 
                 writer.write("");
                 writer.writeDocs("@internal");

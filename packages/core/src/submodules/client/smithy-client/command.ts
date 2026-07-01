@@ -1,6 +1,7 @@
 import type { HttpRequest } from "@smithy/core/transport";
 import {
   SMITHY_CONTEXT_KEY,
+  type EndpointParameterInstructions,
   type FinalizeHandlerArguments,
   type Handler,
   type HandlerExecutionContext,
@@ -21,9 +22,6 @@ import {
 
 import { constructStack } from "../middleware-stack/MiddlewareStack";
 import { schemaLogFilter } from "./schemaLogFilter";
-
-// EndpointParameterInstructions inlined to avoid circular dependency with @smithy/middleware-endpoint.
-type EndpointParameterInstructions = Record<string, unknown>;
 
 /**
  * @public

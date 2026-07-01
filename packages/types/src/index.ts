@@ -9,6 +9,14 @@ export * from "./crypto";
 export * from "./encode";
 export * from "./endpoint";
 export * from "./endpoints";
+export type {
+  EndpointParameterInstructions,
+  BuiltInParamInstruction,
+  ClientContextParamInstruction,
+  StaticContextParamInstruction,
+  ContextParamInstruction,
+  OperationContextParamInstruction,
+} from "./endpoints/EndpointParameterInstructions";
 export * from "./eventStream";
 export * from "./extensions";
 export * from "./feature-ids";

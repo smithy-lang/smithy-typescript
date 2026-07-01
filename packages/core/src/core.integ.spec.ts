@@ -1,7 +1,12 @@
 import { SmithyRpcV2CborProtocol, cbor } from "@smithy/core/cbor";
+import { getEndpointFromInstructions } from "@smithy/core/endpoints";
 import type { HttpProtocol } from "@smithy/core/protocols";
 import { HttpResponse } from "@smithy/protocol-http";
-import { RpcV2ProtocolClient } from "@smithy/smithy-rpcv2-cbor-schema";
+import {
+  EmptyInputOutputCommand,
+  RpcV2ProtocolClient,
+  SimpleScalarPropertiesCommand,
+} from "@smithy/smithy-rpcv2-cbor-schema";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";
 import { GetNumbersCommand, XYZService, type GetNumbersCommandOutput } from "xyz-schema";
@@ -178,3 +183,22 @@ describe("aggregated clients", () => {
     expect.assertions(29);
   });
 }, 30_000);
+
+describe("endpoint resolution", () => {
+  it("should resolve an operation endpoint using the internal API", async () => {
+    const client = new RpcV2ProtocolClient({ endpoint: "https://localhost" });
+    const endpoint = await getEndpointFromInstructions({}, SimpleScalarPropertiesCommand, client.config, {});
+    expect(endpoint).toEqual({
+      headers: {},
+      properties: {},
+      url: new URL("https://localhost"),
+    });
+  });
+});
+
+describe("types", () => {
+  it("empty input may be instantiated without parameters", () => {
+    new EmptyInputOutputCommand();
+    new SimpleScalarPropertiesCommand();
+  });
+});

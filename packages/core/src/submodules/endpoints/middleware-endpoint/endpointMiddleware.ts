@@ -1,6 +1,7 @@
 import { getSmithyContext } from "@smithy/core/transport";
 import type {
   AuthScheme,
+  EndpointParameterInstructions,
   EndpointParameters,
   EndpointV2,
   HandlerExecutionContext,
@@ -15,7 +16,6 @@ import type {
 
 import { bindGetEndpointFromInstructions, type GetEndpointFromConfig } from "./adaptors/getEndpointFromInstructions";
 import type { EndpointResolvedConfig } from "./resolveEndpointConfig";
-import type { EndpointParameterInstructions } from "./types";
 
 function setFeature<F extends keyof SmithyFeatures>(
   context: HandlerExecutionContext,

@@ -34,11 +34,11 @@ export type {
   EndpointRequiredInputConfig,
   EndpointRequiredResolvedConfig,
 } from "./middleware-endpoint/resolveEndpointRequiredConfig";
-export type { EndpointParameterInstructions } from "./middleware-endpoint/types";
 export type {
+  EndpointParameterInstructions,
   BuiltInParamInstruction,
   ClientContextParamInstruction,
   ContextParamInstruction,
   OperationContextParamInstruction,
   StaticContextParamInstruction,
-} from "./middleware-endpoint/types";
+} from "@smithy/types";
