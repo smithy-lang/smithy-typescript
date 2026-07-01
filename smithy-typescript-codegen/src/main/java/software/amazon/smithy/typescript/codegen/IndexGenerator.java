@@ -117,6 +117,7 @@ final class IndexGenerator {
             """
             export * from "./commands";"""
         );
+        writer.write("export { Command as $$Command } from \"@smithy/core/client\";");
         if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
             writer.write(
                 """

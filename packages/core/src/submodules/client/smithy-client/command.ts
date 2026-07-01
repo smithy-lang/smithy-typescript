@@ -47,7 +47,7 @@ export abstract class Command<
   public static classBuilder<
     I extends SI,
     O extends SO,
-    C extends { logger: Logger; requestHandler: RequestHandler<any, any, any> },
+    C extends { logger?: Logger; requestHandler: RequestHandler<any, any, any> },
     SI extends object = any,
     SO extends MetadataBearer = any,
   >() {
@@ -65,7 +65,7 @@ export abstract class Command<
    */
   public resolveMiddlewareWithContext(
     clientStack: IMiddlewareStack<any, any>,
-    configuration: { logger: Logger; requestHandler: RequestHandler<any, any, any> },
+    configuration: { logger?: Logger; requestHandler: RequestHandler<any, any, any> },
     options: any,
     {
       middlewareFn,
@@ -130,7 +130,7 @@ type ResolveMiddlewareContextArgs = {
 class ClassBuilder<
   I extends SI,
   O extends SO,
-  C extends { logger: Logger; requestHandler: RequestHandler<any, any, any> },
+  C extends { logger?: Logger; requestHandler: RequestHandler<any, any, any> },
   SI extends object = any,
   SO extends MetadataBearer = any,
 > {
@@ -315,7 +315,7 @@ class ClassBuilder<
 export interface CommandImpl<
   I extends SI,
   O extends SO,
-  C extends { logger: Logger; requestHandler: RequestHandler<any, any, any> },
+  C extends { logger?: Logger; requestHandler: RequestHandler<any, any, any> },
   SI extends object = any,
   SO extends MetadataBearer = any,
 > extends Command<I, O, C, SI, SO> {

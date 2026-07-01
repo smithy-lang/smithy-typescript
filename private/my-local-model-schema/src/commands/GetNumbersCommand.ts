@@ -1,18 +1,14 @@
 // smithy-typescript generated code
-import { Command as $Command } from "@smithy/core/client";
-import { getEndpointPlugin } from "@smithy/core/endpoints";
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { commonParams } from "../endpoint/EndpointParameters";
+import { _ep1, _mw0, command } from "../commandBuilder";
 import type { GetNumbersRequest, GetNumbersResponse } from "../models/models_0";
 import { GetNumbers$ } from "../schemas/schemas_0";
-import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
 /**
  * @public
  */
 export type { __MetadataBearer };
-export { $Command };
 /**
  * @public
  *
@@ -103,25 +99,12 @@ export interface GetNumbersCommandOutput extends GetNumbersResponse, __MetadataB
  *
  *
  */
-export class GetNumbersCommand extends $Command
-  .classBuilder<
-    GetNumbersCommandInput,
-    GetNumbersCommandOutput,
-    XYZServiceClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
-  .ep({
-    ...commonParams,
-    CustomHeaderValue: { type: "contextParams", name: "customHeaderInput" },
-  })
-  .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
-  })
-  .s("XYZService", "GetNumbers", {})
-  .n("XYZServiceClient", "GetNumbersCommand")
-  .sc(GetNumbers$)
-  .build() {
+export class GetNumbersCommand extends command<GetNumbersCommandInput, GetNumbersCommandOutput>(
+  _ep1,
+  _mw0,
+  "GetNumbers",
+  GetNumbers$
+) {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {
     api: {

@@ -1,18 +1,14 @@
 // smithy-typescript generated code
-import { Command as $Command } from "@smithy/core/client";
-import { getEndpointPlugin } from "@smithy/core/endpoints";
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { commonParams } from "../endpoint/EndpointParameters";
+import { _ep0, _mw0, command } from "../commandBuilder";
 import type { HttpLabelCommandInput, HttpLabelCommandOutput } from "../models/models_0";
 import { HttpLabelCommand$ } from "../schemas/schemas_0";
-import type { ServiceInputTypes, ServiceOutputTypes, XYZServiceClientResolvedConfig } from "../XYZServiceClient";
 
 /**
  * @public
  */
 export type { __MetadataBearer };
-export { $Command };
 /**
  * @public
  *
@@ -59,22 +55,12 @@ export interface HttpLabelCommandCommandOutput extends HttpLabelCommandOutput, _
  *
  *
  */
-export class HttpLabelCommandCommand extends $Command
-  .classBuilder<
-    HttpLabelCommandCommandInput,
-    HttpLabelCommandCommandOutput,
-    XYZServiceClientResolvedConfig,
-    ServiceInputTypes,
-    ServiceOutputTypes
-  >()
-  .ep(commonParams)
-  .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
-    return [getEndpointPlugin(config, Command.getEndpointParameterInstructions())];
-  })
-  .s("XYZService", "HttpLabelCommand", {})
-  .n("XYZServiceClient", "HttpLabelCommandCommand")
-  .sc(HttpLabelCommand$)
-  .build() {
+export class HttpLabelCommandCommand extends command<HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput>(
+  _ep0,
+  _mw0,
+  "HttpLabelCommand",
+  HttpLabelCommand$
+) {
   /** @internal type navigation helper, not in runtime. */
   protected declare static __types: {
     api: {

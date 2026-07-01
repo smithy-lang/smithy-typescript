@@ -30,12 +30,14 @@ public class IndexGeneratorTest {
         );
         SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
         TypeScriptWriter writer = new TypeScriptWriter("");
+        TypeScriptWriter modelIndexer = new TypeScriptWriter("");
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer, writer);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer, modelIndexer);
 
         String contents = writer.toString();
         assertThat(contents, containsString("export * from \"./Example\";"));
         assertThat(contents, containsString("export * from \"./ExampleClient\";"));
         assertThat(contents, containsString("export * from \"./commands\";"));
+        assertThat(contents, containsString("export { Command as $Command } from \"@smithy/core/client\";"));
     }
 }
