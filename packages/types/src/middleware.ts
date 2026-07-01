@@ -4,6 +4,7 @@ import type { Command } from "./command";
 import type { EndpointV2 } from "./endpoint";
 import type { SmithyFeatures } from "./feature-ids";
 import type { Logger } from "./logger";
+import type { MetricsRecorder } from "./metrics";
 import type { UserAgent } from "./util";
 
 /**
@@ -583,6 +584,14 @@ export interface HandlerExecutionContext {
      */
     [key: string]: unknown;
   };
+
+  /**
+   * A per-request {@link MetricsRecorder} supplied at the `client.send(command, { recorder })`
+   * call site. When present, a metrics middleware records into this recorder instead of one
+   * minted from a factory, letting a caller (e.g. a server handler) fold the client's request
+   * metrics into its own.
+   */
+  recorder?: MetricsRecorder<any>;
 
   /**
    * Set by some operations which instructs the retry behavior to backoff
