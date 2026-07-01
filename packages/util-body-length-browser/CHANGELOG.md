@@ -1,5 +1,13 @@
 # @smithy/util-body-length-browser
 
+## 4.4.5
+
+### Patch Changes
+
+- Updated dependencies [12bceb2]
+- Updated dependencies [4395dad]
+  - @smithy/core@3.29.0
+
 ## 4.4.4
 
 ### Patch Changes

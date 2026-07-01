@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.29.0
+
+### Minor Changes
+
+- 12bceb2: add internal higher order factory for Command classes
+
+### Patch Changes
+
+- 4395dad: move endpoint instructions types from core to types to fix the type of the instruction supplier static method of Command classes
+- Updated dependencies [4395dad]
+  - @smithy/types@4.15.1
+
 ## 3.28.0
 
 ### Minor Changes

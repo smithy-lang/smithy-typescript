@@ -1,5 +1,13 @@
 # @smithy/uuid
 
+## 1.3.5
+
+### Patch Changes
+
+- Updated dependencies [12bceb2]
+- Updated dependencies [4395dad]
+  - @smithy/core@3.29.0
+
 ## 1.3.4
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @smithy/middleware-endpoint
 
+## 4.6.5
+
+### Patch Changes
+
+- Updated dependencies [12bceb2]
+- Updated dependencies [4395dad]
+  - @smithy/core@3.29.0
+
 ## 4.6.4
 
 ### Patch Changes

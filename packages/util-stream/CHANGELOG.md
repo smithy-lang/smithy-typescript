@@ -1,5 +1,13 @@
 # @smithy/util-stream
 
+## 4.7.5
+
+### Patch Changes
+
+- Updated dependencies [12bceb2]
+- Updated dependencies [4395dad]
+  - @smithy/core@3.29.0
+
 ## 4.7.4
 
 ### Patch Changes

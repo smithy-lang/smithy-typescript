@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.5
+
+### Patch Changes
+
+- Updated dependencies [12bceb2]
+- Updated dependencies [4395dad]
+  - @smithy/core@3.29.0
+  - @smithy/types@4.15.1
+  - @smithy/node-http-handler@4.9.2
+
 ## 2.2.4
 
 ### Patch Changes

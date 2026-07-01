@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.15.1
+
+### Patch Changes
+
+- 4395dad: move endpoint instructions types from core to types to fix the type of the instruction supplier static method of Command classes
+
 ## 4.15.0
 
 ### Minor Changes
