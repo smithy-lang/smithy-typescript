@@ -24,6 +24,7 @@ export * from "./http";
 export * from "./http/httpHandlerInitialization";
 export * from "./identity";
 export * from "./logger";
+export type { MetricsRecorder, MetricsRecorderFactory, MetricUnit, RequestOutcome } from "./metrics";
 export * from "./middleware";
 export * from "./pagination";
 export * from "./profile";

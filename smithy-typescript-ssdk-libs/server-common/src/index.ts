@@ -21,6 +21,7 @@ import type { ServiceException } from "./errors";
 export * as httpbinding from "./httpbinding";
 export * from "./accept";
 export * from "./errors";
+export { recordSafely, recordTimed, recordTimedSync } from "./metrics";
 export type {
   AuthHook,
   AuthScheme,
