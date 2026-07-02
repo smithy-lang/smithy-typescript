@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.29.1
+
+### Patch Changes
+
+- 1fac409: Make ChecksumStream a Readable that consumes its source directly
+
 ## 3.29.0
 
 ### Minor Changes
