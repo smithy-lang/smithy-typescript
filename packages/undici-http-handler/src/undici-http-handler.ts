@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
-import { Agent, Dispatcher } from "undici";
+import { Agent, Dispatcher, getGlobalDispatcher } from "undici";
 
 import { buildAbortError } from "./build-abort-error";
 
@@ -270,6 +270,13 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       return dispatcher;
     }
 
-    return (config.dispatcher = new Agent(this.internalAgentOptions ?? { allowH2: true }));
+    if (this.internalAgentOptions) {
+      return (config.dispatcher = new Agent(this.internalAgentOptions));
+    }
+
+    // Use the global dispatcher. This respects environment-level proxy/TLS
+    // configuration set via `setGlobalDispatcher` without creating a redundant
+    // `Agent` instance.
+    return getGlobalDispatcher();
   }
 }
