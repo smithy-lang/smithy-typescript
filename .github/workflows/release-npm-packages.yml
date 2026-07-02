@@ -1,11 +1,19 @@
 name: release-npm-packages
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch: # on button click
 
 jobs:
   release:
     name: Release TypeScript packages to NPM
+    # Only publish when the "Version NPM packages" PR is merged into main
+    # (or when triggered manually via the Run workflow button).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.head_commit.message, 'Version NPM packages')
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -18,11 +26,6 @@ jobs:
           cache: "yarn"
       - name: Install dependencies
         run: yarn install
-      - name: Version
-        id: version
-        run: |
-          yarn changeset version
-          echo "porcelain=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
       - name: Configure AWS Credentials
         id: credentials
         uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
@@ -31,32 +34,8 @@ jobs:
           role-to-assume: ${{ secrets.JS_TEAM_ROLE_TO_ASSUME }}
           role-session-name: SmithyTypeScriptGitHubRelease
           audience: sts.amazonaws.com
-      - name: Configure deploy key for push
-        if: steps.version.outputs.porcelain != '0'
-        run: |
-          deploy_key=$(aws secretsmanager get-secret-value \
-            --region us-west-2 \
-            --secret-id ${{ secrets.DEPLOY_KEY_SECRET_ARN }} \
-            --query SecretString --output text)
-          echo "::add-mask::$deploy_key"
-          mkdir -p ~/.ssh
-          echo "$deploy_key" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          git remote set-url origin git@github.com:smithy-lang/smithy-typescript.git
-          git config core.sshCommand "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes"
-      - name: Commit
-        id: commit
-        if: steps.version.outputs.porcelain != '0'
-        run: |
-          git config --global user.email "github-aws-smithy-automation@amazon.com"
-          git config --global user.name "Smithy Automation"
-          git add .
-          git commit -m 'Version NPM packages'
-          git push
       - name: Stage Release
         id: stage
-        if: steps.commit.outcome == 'success'
         run: |
           yarn stage-release --concurrency=1
       - name: Release
