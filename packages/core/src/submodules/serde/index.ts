@@ -92,6 +92,8 @@ export { Hash } from "./hash-node/hash-node";
 export class Uint8ArrayBlobAdapter extends bindUint8ArrayBlobAdapter(toUtf8, fromUtf8, toBase64, fromBase64) {}
 export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream";
+export { WireChecksumStream, type WireChecksumStreamInit } from "./util-stream/checksum/wire/WireChecksumStream";
+export { createWireChecksumStream } from "./util-stream/checksum/wire/createWireChecksumStream";
 export { createBufferedReadable } from "./util-stream/createBufferedReadable";
 export { getAwsChunkedEncodingStream } from "./util-stream/getAwsChunkedEncodingStream";
 export { headStream } from "./util-stream/headStream";
