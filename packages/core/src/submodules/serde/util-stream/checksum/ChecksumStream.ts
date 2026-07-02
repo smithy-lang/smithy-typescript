@@ -34,6 +34,14 @@ export interface ChecksumStreamInit<T extends Readable | ReadableStream> {
  * Wrapper for throwing checksum errors for streams without
  * buffering the stream.
  *
+ * Note: this effectively behaves as a duplex, reading from the source on one
+ * side and forwarding chunks to its own readable side on the other. It should
+ * not be rewritten back into a Duplex (or Transform). The source is observed
+ * and driven manually (pause/resume in onSourceData/_read) so data is pulled
+ * at the rate it is consumed and never buffered twice; this manual control is
+ * used deliberately for performance and would be lost with the built-in duplex
+ * machinery.
+ *
  * @internal
  */
 export class ChecksumStream extends Readable {
