@@ -1,5 +1,12 @@
 # @smithy/node-config-provider
 
+## 4.5.6
+
+### Patch Changes
+
+- Updated dependencies [1fac409]
+  - @smithy/core@3.29.1
+
 ## 4.5.5
 
 ### Patch Changes

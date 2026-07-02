@@ -1,5 +1,12 @@
 # @smithy/util-middleware
 
+## 4.4.6
+
+### Patch Changes
+
+- Updated dependencies [1fac409]
+  - @smithy/core@3.29.1
+
 ## 4.4.5
 
 ### Patch Changes
