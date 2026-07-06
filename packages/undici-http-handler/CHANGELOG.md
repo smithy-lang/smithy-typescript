@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 6076716: HTTP/2 is no longer enabled by default. Set `allowH2: true` in your dispatcher options to opt in to HTTP/2 negotiation via ALPN.
+- 4b6b90a: Use the undici global dispatcher as the default fallback when no custom `Agent` options are provided. This respects environment-level proxy/TLS configuration set via `setGlobalDispatcher` without creating a redundant `Agent` instance.
+
 ## 2.2.5
 
 ### Patch Changes
