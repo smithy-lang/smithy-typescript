@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
-import { Agent, type Dispatcher } from "undici";
+import { Agent, getGlobalDispatcher, setGlobalDispatcher, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
@@ -509,6 +509,25 @@ describe("UndiciHttpHandler", () => {
     );
   });
 
+  describe("global dispatcher", () => {
+    it("uses dispatcher set via setGlobalDispatcher", async () => {
+      const originalDispatcher = getGlobalDispatcher();
+      const customAgent = new Agent();
+      const requestSpy = vi.spyOn(customAgent, "request");
+
+      setGlobalDispatcher(customAgent);
+      try {
+        handler = new UndiciHttpHandler();
+        const { response } = await handler.handle(createMockRequest());
+        expect(response.statusCode).toBe(200);
+        expect(requestSpy).toHaveBeenCalledOnce();
+      } finally {
+        setGlobalDispatcher(originalDispatcher);
+        customAgent.destroy();
+      }
+    });
+  });
+
   describe("destroy", () => {
     it("destroys internal dispatcher", async () => {
       handler = new UndiciHttpHandler();
@@ -613,22 +632,17 @@ describe("UndiciHttpHandler", () => {
       expect(handler.httpHandlerConfigs().dispatcher).toBeUndefined();
     });
 
-    it("closes previous internal dispatcher when updating with a new Dispatcher", async () => {
+    it("does not close the global dispatcher when updating with a new Dispatcher", async () => {
       handler = new UndiciHttpHandler();
-      // Trigger internal dispatcher creation
+      // Trigger a request — uses the global dispatcher (not stored internally)
       await handler.handle(createMockRequest());
 
-      // Capture the internal dispatcher and spy on its close method
-      const previousDispatcher = handler.httpHandlerConfigs().dispatcher!;
-      const closeSpy = vi.spyOn(previousDispatcher, "close");
+      // No internal dispatcher should be cached
+      expect(handler.httpHandlerConfigs().dispatcher).toBeUndefined();
 
       const newDispatcher = new Agent();
 
       handler.updateHttpClientConfig("dispatcher", newDispatcher);
-
-      // Assert the previous internal dispatcher's close was called (fire-and-forget)
-      expect(closeSpy).toHaveBeenCalled();
-      closeSpy.mockRestore();
 
       // The new dispatcher should be used for subsequent requests
       const { response } = await handler.handle(createMockRequest());

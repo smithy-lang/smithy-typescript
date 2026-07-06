@@ -26,8 +26,65 @@ client.listBuckets().then(console.log);
 
 ### Configuring undici Dispatcher
 
+By default the handler uses undici's global dispatcher. You can override this
+per handler by populating the `dispatcher` configuration — either with
+`Agent.Options` or with any undici `Dispatcher` instance (`Agent`, `Pool`,
+`Client`, `ProxyAgent`, etc.).
+
+#### Default `Agent` (no configuration)
+
+You don't need to import or configure undici to use this handler. When you
+construct it without populating the `dispatcher` configuration, it uses undici's
+global dispatcher, which is a default `Agent` out of the box.
+
+```js
+import { S3 } from "@aws-sdk/client-s3";
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+
+// Uses undici's default Agent — no dispatcher configuration needed.
+const client = new S3({
+  requestHandler: new UndiciHttpHandler(),
+});
+
+client.listBuckets().then(console.log);
+```
+
+Because the handler reads the global dispatcher, it picks up any dispatcher you
+install application-wide with `setGlobalDispatcher`. This is optional.
+
+```js
+import { Agent, setGlobalDispatcher } from "undici";
+
+const dispatcher = new Agent({
+  connections: 50,
+  connect: { timeout: 3000 },
+});
+
+// Call once at app startup (anywhere); applies process-wide.
+setGlobalDispatcher(dispatcher);
+```
+
+```js
+import { S3 } from "@aws-sdk/client-s3";
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+
+const client = new S3({
+  // Uses the `dispatcher` set via setGlobalDispatcher in app startup.
+  requestHandler: new UndiciHttpHandler(),
+});
+
+client.listBuckets().then(console.log);
+```
+
+Passing a `dispatcher` or `Agent.Options` to the handler takes precedence over
+the global dispatcher for that handler.
+
+#### Passing Agent.Options
+
 You can pass `Agent.Options` to configure transport behavior such as connection
-pooling and timeouts. The handler creates an `Agent` internally for you.
+pooling and timeouts. The handler creates an `Agent` internally for you, so you
+don't need a direct dependency on `undici` or to import anything from it. Just
+pass a plain options object.
 
 ```js
 import { S3 } from "@aws-sdk/client-s3";
@@ -48,6 +105,8 @@ const client = new S3({
 
 client.listBuckets().then(console.log);
 ```
+
+#### Passing a Dispatcher instance
 
 Alternatively, pass an existing undici `Dispatcher` instance (Agent, Pool,
 Client, etc.) directly if you need full control over its lifecycle.
@@ -72,6 +131,13 @@ const client = new S3({
 
 client.listBuckets().then(console.log);
 ```
+
+> **Tip:** When you pass your own `Dispatcher`, you control which version of
+> `undici` is used. For best performance, install the latest `undici` directly
+> in your application — improvements in newer releases (HTTP parser, connection
+> pooling, etc.) will then apply to requests made through this handler.
+
+#### Single-origin Client
 
 If every operation made by the SDK client using this handler is guaranteed to
 hit the exact same origin (scheme + host + port), you can pass a `Client` for
@@ -103,10 +169,9 @@ const client = new Lambda({
 client.listFunctions({}).then(console.log);
 ```
 
-> **Warning:** A `Client` is pinned to exactly one origin, so it must not be
-> used with an SDK client whose operations may target multiple hosts. A client
-> that appears to use one endpoint often still routes individual operations to
-> different hosts:
+> **Warning:** An undici `Client` is pinned to exactly one origin, so it must not
+> be used with an SDK client whose operations may target multiple hosts. An SDK
+> client may route to different hosts for several reasons:
 >
 > - **Host-prefixed operations.** Operations carrying `@endpoint(hostPrefix)`
 >   target a different host. e.g. Amazon CloudWatch Logs `StartLiveTail` uses
@@ -127,11 +192,6 @@ client.listFunctions({}).then(console.log);
 > dispatcher stuck, so every subsequent request hangs without ever completing.
 > If multi-host routing is possible, use the default `Agent` or
 > `Agent({ connections: 1 })` for a single connection per origin.
-
-> **Tip:** When you pass your own `Dispatcher`, you control which version of
-> `undici` is used. For best performance, install the latest `undici` directly
-> in your application — improvements in newer releases (HTTP parser, connection
-> pooling, etc.) will then apply to requests made through this handler.
 
 ## Benchmarks
 
@@ -473,6 +533,21 @@ import { UndiciHttpHandler } from "@smithy/undici-http-handler";
 import { EnvHttpProxyAgent } from "undici";
 
 new UndiciHttpHandler({ dispatcher: new EnvHttpProxyAgent() });
+```
+
+You can also install a proxy dispatcher globally with `setGlobalDispatcher`.
+Handlers constructed without an explicit `dispatcher` fall back to the global
+dispatcher, so the proxy applies app-wide without threading a dispatcher into
+each handler:
+
+```js
+import { UndiciHttpHandler } from "@smithy/undici-http-handler";
+import { EnvHttpProxyAgent, setGlobalDispatcher } from "undici";
+
+setGlobalDispatcher(new EnvHttpProxyAgent());
+
+// Picks up the global ProxyAgent above.
+new UndiciHttpHandler();
 ```
 
 [undici]: https://undici.nodejs.org/
