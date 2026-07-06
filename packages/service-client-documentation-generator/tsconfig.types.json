@@ -4,8 +4,11 @@
     "declarationDir": "dist-types",
     "experimentalDecorators": true,
     "rootDir": "src",
-    "strict": false
+    "strict": false,
+    "isolatedModules": true
   },
   "extends": "../../tsconfig.types.json",
-  "include": ["src/"]
+  "include": [
+    "src/"
+  ]
 }

@@ -2,8 +2,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "declarationDir": "dist-types",
-    "rootDir": "src"
+    "rootDir": "src",
+    "isolatedModules": true
   },
   "extends": "../../tsconfig.types.json",
-  "include": ["src/"]
+  "include": [
+    "src/"
+  ]
 }

@@ -3,9 +3,15 @@
     "baseUrl": ".",
     "declarationDir": "dist-types",
     "rootDir": "src",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "isolatedModules": true
   },
   "extends": "../../tsconfig.types.json",
-  "include": ["src/"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.bench.ts"]
+  "include": [
+    "src/"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.bench.ts"
+  ]
 }

@@ -4,6 +4,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "removeComments": false,
-    "strict": true
+    "strict": true,
+    "isolatedModules": true
   }
 }
