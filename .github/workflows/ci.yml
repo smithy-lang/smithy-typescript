@@ -180,4 +180,7 @@ jobs:
       - name: Install
         run: yarn
       - name: Ensure changesets exist for each changed package
+        # Skip on the release PR opened by the changesets action, where
+        # changesets have already been consumed by `changeset version`.
+        if: github.head_ref != 'changeset-release/main'
         run: yarn changeset status --since=origin/main
