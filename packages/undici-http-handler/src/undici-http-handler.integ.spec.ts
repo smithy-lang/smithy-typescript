@@ -203,7 +203,7 @@ describe("UndiciHttpHandler HTTP/2 integration", () => {
       });
     });
 
-    handler = new UndiciHttpHandler({ dispatcher: { connect: { rejectUnauthorized: false } } });
+    handler = new UndiciHttpHandler({ dispatcher: { allowH2: true, connect: { rejectUnauthorized: false } } });
   });
 
   afterAll(async () => {
