@@ -1,14 +1,18 @@
-export * from "./deref";
-export * from "./middleware/getSchemaSerdePlugin";
-export * from "./schemas/ListSchema";
-export * from "./schemas/MapSchema";
-export * from "./schemas/OperationSchema";
-export * from "./schemas/operation";
-export * from "./schemas/ErrorSchema";
-export * from "./schemas/NormalizedSchema";
-export * from "./schemas/Schema";
-export * from "./schemas/SimpleSchema";
-export * from "./schemas/StructureSchema";
-export * from "./schemas/sentinels";
-export * from "./schemas/translateTraits";
-export * from "./TypeRegistry";
+export { deref } from "./deref";
+export {
+  deserializerMiddlewareOption,
+  getSchemaSerdePlugin,
+  serializerMiddlewareOption,
+} from "./middleware/getSchemaSerdePlugin";
+export { ListSchema, list } from "./schemas/ListSchema";
+export { MapSchema, map } from "./schemas/MapSchema";
+export { OperationSchema, op } from "./schemas/OperationSchema";
+export { operation } from "./schemas/operation";
+export { ErrorSchema, error } from "./schemas/ErrorSchema";
+export { NormalizedSchema, isStaticSchema, simpleSchemaCacheN, simpleSchemaCacheS } from "./schemas/NormalizedSchema";
+export { Schema } from "./schemas/Schema";
+export { SimpleSchema, sim, simAdapter } from "./schemas/SimpleSchema";
+export { StructureSchema, struct } from "./schemas/StructureSchema";
+export { SCHEMA } from "./schemas/sentinels";
+export { traitsCache, translateTraits } from "./schemas/translateTraits";
+export { TypeRegistry } from "./TypeRegistry";

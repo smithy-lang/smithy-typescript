@@ -14,7 +14,30 @@ export { isIpAddress } from "./util-endpoints/lib/isIpAddress";
 export { isValidHostLabel } from "@smithy/core/transport";
 export { customEndpointFunctions } from "./util-endpoints/utils/customEndpointFunctions";
 export { resolveEndpoint } from "./util-endpoints/resolveEndpoint";
-export * from "./util-endpoints/types";
+export { EndpointError } from "./util-endpoints/types";
+export type {
+  ConditionObject,
+  DeprecatedObject,
+  EndpointFunctions,
+  EndpointObject,
+  EndpointObjectHeaders,
+  EndpointObjectProperties,
+  EndpointParams,
+  EndpointResolverOptions,
+  EndpointRuleObject,
+  ErrorRuleObject,
+  EvaluateOptions,
+  Expression,
+  FunctionArgv,
+  FunctionObject,
+  FunctionReturn,
+  ParameterObject,
+  ReferenceObject,
+  ReferenceRecord,
+  RuleSetObject,
+  RuleSetRules,
+  TreeRuleObject,
+} from "./util-endpoints/types";
 
 // @smithy/middleware-endpoint
 export const getEndpointFromInstructions = bindGetEndpointFromInstructions(getEndpointFromConfig);

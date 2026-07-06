@@ -1,3 +1,3 @@
-export * from "./getRuntimeTypecheckPlugin";
-export * from "./types";
-export * from "./validateSchema";
+export { getRuntimeTypecheckPlugin } from "./getRuntimeTypecheckPlugin";
+export type { RuntimeTypecheckBehavior, RuntimeTypecheckOptions } from "./types";
+export { validateSchema } from "./validateSchema";

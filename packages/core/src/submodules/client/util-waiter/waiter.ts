@@ -2,7 +2,7 @@ import type { WaiterConfiguration } from "@smithy/types";
 
 import { getCircularReplacer } from "./circularReplacer";
 
-export { WaiterConfiguration };
+export type { WaiterConfiguration };
 
 /**
  * @internal

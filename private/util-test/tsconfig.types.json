@@ -3,11 +3,8 @@
     "baseUrl": ".",
     "declarationDir": "dist-types",
     "rootDir": "src",
-    "skipLibCheck": true,
-    "isolatedModules": true
+    "skipLibCheck": true
   },
   "extends": "../../tsconfig.types.json",
-  "include": [
-    "src/"
-  ]
+  "include": ["src/"]
 }

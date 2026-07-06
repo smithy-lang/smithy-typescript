@@ -42,6 +42,13 @@ module.exports = {
       files: ["packages/*/src/**/*.ts"],
       excludedFiles: ["packages/*/src/**/*.spec.ts"],
       rules: {
+        "no-restricted-syntax": [
+          "error",
+          {
+            selector: "ExportAllDeclaration",
+            message: "Use explicit named exports (export { X } or export type { X }) instead of 'export *'.",
+          },
+        ],
         "@typescript-eslint/no-restricted-imports": [
           "error",
           {

@@ -1,2 +1,2 @@
-export * from "./debugId";
-export * from "./toDebugString";
+export { debugId } from "./debugId";
+export { toDebugString } from "./toDebugString";

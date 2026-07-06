@@ -5,5 +5,7 @@
  * @deprecated Use standard implementations in [Browsers](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) and [Node.js](https://nodejs.org/docs/latest/api/globals.html#class-abortcontroller)
  * @packageDocumentation
  */
-export * from "./AbortController";
-export * from "./AbortSignal";
+export { AbortController } from "./AbortController";
+export type { IAbortController } from "./AbortController";
+export { AbortSignal } from "./AbortSignal";
+export type { AbortHandler, IAbortSignal } from "./AbortSignal";

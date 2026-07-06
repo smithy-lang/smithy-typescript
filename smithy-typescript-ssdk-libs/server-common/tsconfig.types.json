@@ -7,8 +7,5 @@
     "emitDeclarationOnly": true,
     "isolatedModules": true
   },
-  "exclude": [
-    "test/**/*",
-    "dist/types/**/*"
-  ]
+  "exclude": ["test/**/*", "dist/types/**/*"]
 }

@@ -1,16 +1,16 @@
-export * from "./collect-stream-body";
-export * from "./extended-encode-uri-component";
-export * from "./HttpBindingProtocol";
-export * from "./HttpProtocol";
-export * from "./RpcProtocol";
-export * from "./requestBuilder";
-export * from "./resolve-path";
-export * from "./serde/FromStringShapeDeserializer";
-export * from "./serde/HttpInterceptingShapeDeserializer";
-export * from "./serde/HttpInterceptingShapeSerializer";
-export * from "./serde/ToStringShapeSerializer";
-export * from "./serde/determineTimestampFormat";
-export * from "./SerdeContext";
+export { collectBody } from "./collect-stream-body";
+export { extendedEncodeURIComponent } from "./extended-encode-uri-component";
+export { HttpBindingProtocol } from "./HttpBindingProtocol";
+export { HttpProtocol } from "./HttpProtocol";
+export { RpcProtocol } from "./RpcProtocol";
+export { RequestBuilder, requestBuilder } from "./requestBuilder";
+export { resolvedPath } from "./resolve-path";
+export { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
+export { HttpInterceptingShapeDeserializer } from "./serde/HttpInterceptingShapeDeserializer";
+export { HttpInterceptingShapeSerializer } from "./serde/HttpInterceptingShapeSerializer";
+export { ToStringShapeSerializer } from "./serde/ToStringShapeSerializer";
+export { determineTimestampFormat } from "./serde/determineTimestampFormat";
+export { SerdeContext } from "./SerdeContext";
 
 // @smithy/protocol-http
 export { Field } from "./protocol-http/Field";

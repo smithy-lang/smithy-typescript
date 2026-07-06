@@ -1,19 +1,25 @@
 /**
  * @internal
  */
-export * from "./fromContainerMetadata";
+export {
+  ENV_CMDS_AUTH_TOKEN,
+  ENV_CMDS_FULL_URI,
+  ENV_CMDS_RELATIVE_URI,
+  fromContainerMetadata,
+} from "./fromContainerMetadata";
 /**
  * @internal
  */
-export * from "./fromInstanceMetadata";
+export { fromInstanceMetadata } from "./fromInstanceMetadata";
 /**
  * @internal
  */
-export * from "./remoteProvider/RemoteProviderInit";
+export { DEFAULT_MAX_RETRIES, DEFAULT_TIMEOUT, providerConfigFromInit } from "./remoteProvider/RemoteProviderInit";
+export type { RemoteProviderConfig, RemoteProviderInit } from "./remoteProvider/RemoteProviderInit";
 /**
  * @internal
  */
-export * from "./types";
+export type { InstanceMetadataCredentials } from "./types";
 /**
  * @internal
  */

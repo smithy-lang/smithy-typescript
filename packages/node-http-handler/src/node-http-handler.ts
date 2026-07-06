@@ -14,7 +14,7 @@ import { setSocketTimeout } from "./set-socket-timeout";
 import { timing } from "./timing";
 import { writeRequestBody } from "./write-request-body";
 
-export { NodeHttpHandlerOptions };
+export type { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
   httpAgentProvider: () => Promise<hAgentType>;
