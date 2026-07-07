@@ -85,17 +85,18 @@ export class ChecksumStream extends Readable {
    * Update the checksum and forward each source chunk to the readable side,
    * pausing the source when the readable side signals backpressure.
    */
-  private onSourceData = (chunk: Buffer): void => {
+  private onSourceData = (chunk: Buffer | string): void => {
     if (this.destroyed) {
       return;
     }
+    const data = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
     try {
-      this.checksum.update(chunk);
+      this.checksum.update(data);
     } catch (e: unknown) {
       this.destroy(e as Error);
       return;
     }
-    if (!this.push(chunk)) {
+    if (!this.push(data)) {
       this.source.pause();
     }
   };
