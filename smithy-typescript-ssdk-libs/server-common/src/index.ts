@@ -1,7 +1,8 @@
 import type { HttpRequest, HttpResponse } from "@smithy/protocol-http";
-import type { SerdeContext } from "@smithy/types";
+import type { MetricsRecorderFactory, SerdeContext } from "@smithy/types";
 
 import type { ServiceException } from "./errors";
+import type { AuthScheme, ServerInterceptor } from "./interceptors";
 
 /*
  *  Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -51,6 +52,27 @@ export interface OperationSerializer<T, K extends keyof T, E extends ServiceExce
 
 export interface ServiceHandler<Context = {}, RequestType = HttpRequest, ResponseType = HttpResponse> {
   handle(request: RequestType, context: Context): Promise<ResponseType>;
+
+  /**
+   * Register a metrics recorder factory. The framework creates one recorder per request and
+   * records the request lifecycle and phase timings into it.
+   */
+  withMetrics<Native>(metricsRecorderFactory: MetricsRecorderFactory<Native>): this;
+
+  /**
+   * Register auth schemes.
+   */
+  withAuth(...schemes: AuthScheme<Context>[]): this;
+
+  /**
+   * Register a single interceptor. Later registrations run before earlier ones.
+   */
+  addInterceptor(interceptor: ServerInterceptor<Context>): this;
+
+  /**
+   * Register multiple interceptors. Later registrations run before earlier ones.
+   */
+  addInterceptors(...interceptors: ServerInterceptor<Context>[]): this;
 }
 
 export interface ServiceCoordinate<S extends string, O extends string> {
