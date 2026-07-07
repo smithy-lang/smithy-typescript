@@ -89,14 +89,13 @@ export class ChecksumStream extends Readable {
     if (this.destroyed) {
       return;
     }
-    const data = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
     try {
-      this.checksum.update(data);
+      this.checksum.update(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
     } catch (e: unknown) {
       this.destroy(e as Error);
       return;
     }
-    if (!this.push(data)) {
+    if (!this.push(chunk)) {
       this.source.pause();
     }
   };
