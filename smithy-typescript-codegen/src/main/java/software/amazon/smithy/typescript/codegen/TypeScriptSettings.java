@@ -64,6 +64,7 @@ public final class TypeScriptSettings {
     private static final String GENERATE_SCHEMAS = "generateSchemas";
     private static final String GENERATE_ENDPOINT_BDD = "generateEndpointBdd";
     private static final String VERSIONING_SCHEME = "versioningScheme";
+    private static final String TSCONFIG = "tsconfig";
 
     private String packageName;
     private String packageDescription = "";
@@ -88,6 +89,7 @@ public final class TypeScriptSettings {
     private boolean generateIndexTests = false;
     private boolean generateSnapshotTests = false;
     private String versioningScheme = "";
+    private boolean isolatedModules = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -160,6 +162,14 @@ public final class TypeScriptSettings {
         settings.setGenerateIndexTests(config.getBooleanMemberOrDefault(GENERATE_INDEX_TESTS, false));
         settings.setGenerateSnapshotTests(config.getBooleanMemberOrDefault(GENERATE_SNAPSHOT_TESTS, false));
         settings.setVersioningScheme(config.getStringMemberOrDefault(VERSIONING_SCHEME, ""));
+        settings.setIsolatedModules(
+            config.getObjectMember("tsconfig")
+                .flatMap(tsconfig -> tsconfig.getObjectMember("types"))
+                .flatMap(types -> types.getObjectMember("compilerOptions"))
+                .flatMap(opts -> opts.getBooleanMember("isolatedModules"))
+                .map(node -> node.getValue())
+                .orElse(false)
+        );
 
         return settings;
     }
@@ -309,6 +319,14 @@ public final class TypeScriptSettings {
 
     public String getVersioningScheme() {
         return this.versioningScheme;
+    }
+
+    public void setIsolatedModules(boolean isolatedModules) {
+        this.isolatedModules = isolatedModules;
+    }
+
+    public boolean isolatedModules() {
+        return isolatedModules;
     }
 
     /**
@@ -644,7 +662,8 @@ public final class TypeScriptSettings {
                 BIG_NUMBER_MODE,
                 GENERATE_SCHEMAS,
                 GENERATE_ENDPOINT_BDD,
-                VERSIONING_SCHEME
+                VERSIONING_SCHEME,
+                TSCONFIG
             )
         ),
         SSDK(
@@ -667,7 +686,8 @@ public final class TypeScriptSettings {
                 BIG_NUMBER_MODE,
                 GENERATE_SCHEMAS,
                 GENERATE_ENDPOINT_BDD,
-                VERSIONING_SCHEME
+                VERSIONING_SCHEME,
+                TSCONFIG
             )
         );
 

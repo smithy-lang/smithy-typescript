@@ -326,6 +326,50 @@ public class TypeScriptSettingsTest {
     }
 
     @Test
+    public void isolatedModulesDefaultsToFalse() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build()
+        );
+
+        assertEquals(false, settings.isolatedModules());
+    }
+
+    @Test
+    public void isolatedModulesCanBeSetToTrue() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember(
+                    "tsconfig",
+                    Node.objectNodeBuilder()
+                        .withMember(
+                            "types",
+                            Node.objectNodeBuilder()
+                                .withMember(
+                                    "compilerOptions",
+                                    Node.objectNodeBuilder()
+                                        .withMember("isolatedModules", Node.from(true))
+                                        .build()
+                                )
+                                .build()
+                        )
+                        .build()
+                )
+                .build()
+        );
+
+        assertEquals(true, settings.isolatedModules());
+    }
+
+    @Test
     public void resolvesSupportProtocols() {
         // TODO
     }
