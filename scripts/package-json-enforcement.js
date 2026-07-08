@@ -437,7 +437,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
   const isNonStub = "build:es:cjs" in (pkgJson.scripts || {});
   const expectedBuildTypes = "premove dist-types && yarn g:tsc -p tsconfig.types.json";
   if (isNonStub) {
-    const expectedBuildEsCjs = "premove dist-es && yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline";
+    const expectedBuildEsCjs = "node ../../scripts/compilation/es_cjs.js";
     const expectedBuild = `concurrently 'yarn:build:types' 'yarn:build:es:cjs'`;
 
     if (pkgJson.scripts?.build !== expectedBuild) {

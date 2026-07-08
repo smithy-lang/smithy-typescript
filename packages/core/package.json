@@ -5,7 +5,7 @@
     "benchmark:cbor": "node ./scripts/cbor-perf.mjs",
     "benchmark:checksum": "node ./scripts/checksum-perf.mjs",
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
-    "build:es:cjs": "premove dist-es && yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline",
+    "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types",

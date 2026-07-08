@@ -2,8 +2,9 @@
   "name": "@smithy/service-client-documentation-generator",
   "version": "4.3.1",
   "scripts": {
-    "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
-    "build:es:cjs": "premove dist-es && yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline",
+    "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
+    "build:cjs": "premove dist-cjs && yarn g:tsc -p tsconfig.cjs.json",
+    "build:es": "premove dist-es && yarn g:tsc -p tsconfig.es.json",
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types",

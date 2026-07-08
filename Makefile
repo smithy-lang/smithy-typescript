@@ -1,4 +1,7 @@
-.PHONY: build build-packages sync api-snapshot ct cti cwt cwti
+.PHONY: build build-packages sync api-snapshot ct cti cwt cwti dist
+
+dist:
+	node scripts/compilation/build-es-cjs-batch.js --all
 
 build:
 	./gradlew clean build publishToMavenLocal

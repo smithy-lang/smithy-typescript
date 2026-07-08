@@ -32,6 +32,7 @@ const VALIDATIONS = [
   { name: "banned-imports", label: "no banned imports in dist output", script: "banned-imports.js" },
   { name: "export-names", label: "export function names match their keys", script: "export-names.js" },
   { name: "esm-compat", label: "dist-cjs exports visible via ESM import()", script: "esm-compat.js" },
+  { name: "filenames", label: "no suspicious multi-dot filenames in dist output", script: "filenames.js" },
 ];
 
 function parseArgs() {

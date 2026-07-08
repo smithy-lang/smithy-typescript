@@ -47,7 +47,8 @@ module.exports = class Inliner {
    * step 0: delete the dist-cjs folder.
    */
   async clean() {
-    await spawnProcess("yarn", ["premove", "./dist-cjs", "tsconfig.cjs.tsbuildinfo"], { cwd: this.packageDirectory });
+    fs.rmSync(path.join(this.packageDirectory, "dist-cjs"), { recursive: true, force: true });
+    fs.rmSync(path.join(this.packageDirectory, "tsconfig.cjs.tsbuildinfo"), { force: true });
     if (this.verbose) {
       console.log("Deleted ./dist-cjs in " + this.package);
     }
