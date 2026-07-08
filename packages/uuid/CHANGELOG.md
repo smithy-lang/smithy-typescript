@@ -1,5 +1,13 @@
 # @smithy/uuid
 
+## 1.3.7
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+- Updated dependencies [273e480]
+  - @smithy/core@3.29.2
+
 ## 1.3.6
 
 ### Patch Changes

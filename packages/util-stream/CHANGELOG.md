@@ -1,5 +1,13 @@
 # @smithy/util-stream
 
+## 4.7.7
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+- Updated dependencies [273e480]
+  - @smithy/core@3.29.2
+
 ## 4.7.6
 
 ### Patch Changes

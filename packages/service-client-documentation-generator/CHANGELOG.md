@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.3.1
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+
 ## 4.3.0
 
 ### Minor Changes

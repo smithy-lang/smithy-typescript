@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.16.0
+
+### Minor Changes
+
+- 74b3d45: add MetricsRecorder and MetricsRecorderFactory interfaces for SSDK metrics
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+
 ## 4.15.1
 
 ### Patch Changes

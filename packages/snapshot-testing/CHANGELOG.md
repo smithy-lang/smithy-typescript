@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.2.7
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+- Updated dependencies [273e480]
+- Updated dependencies [74b3d45]
+  - @smithy/node-http-handler@4.9.4
+  - @smithy/types@4.16.0
+  - @smithy/core@3.29.2
+
 ## 2.2.6
 
 ### Patch Changes
