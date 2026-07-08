@@ -1,5 +1,15 @@
 # Change Log
 
+## 5.6.3
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+- Updated dependencies [273e480]
+- Updated dependencies [74b3d45]
+  - @smithy/types@4.16.0
+  - @smithy/core@3.29.2
+
 ## 5.6.2
 
 ### Patch Changes

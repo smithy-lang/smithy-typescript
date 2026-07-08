@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-base64",
-  "version": "4.5.6",
+  "version": "4.5.7",
   "description": "A Base64 <-> UInt8Array converter",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",

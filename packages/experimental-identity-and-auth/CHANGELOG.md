@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.7.7
+
+### Patch Changes
+
+- 273e480: types updates for isolatedModules=true
+- Updated dependencies [273e480]
+- Updated dependencies [74b3d45]
+  - @smithy/signature-v4@5.6.3
+  - @smithy/types@4.16.0
+  - @smithy/core@3.29.2
+
 ## 0.7.6
 
 ### Patch Changes
