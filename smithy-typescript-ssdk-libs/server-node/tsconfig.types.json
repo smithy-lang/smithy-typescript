@@ -4,7 +4,8 @@
     "removeComments": false,
     "declaration": true,
     "declarationDir": "dist/types",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "isolatedModules": true
   },
   "exclude": ["test/**/*", "dist/types/**/*"]
 }

@@ -1,2 +1,2 @@
-export * from "./httpSigningMiddleware";
-export * from "./getHttpSigningMiddleware";
+export { httpSigningMiddleware } from "./httpSigningMiddleware";
+export { getHttpSigningPlugin, httpSigningMiddlewareOptions } from "./getHttpSigningMiddleware";

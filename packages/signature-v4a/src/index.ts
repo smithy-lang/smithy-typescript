@@ -4,4 +4,4 @@ import { SignatureV4a } from "./SignatureV4a";
 
 signatureV4aContainer.SignatureV4a = SignatureV4a;
 
-export * from "./SignatureV4a";
+export { SignatureV4a } from "./SignatureV4a";

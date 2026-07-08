@@ -1,2 +1,2 @@
-export * from "./customEndpointFunctions";
-export * from "./evaluateRules";
+export { customEndpointFunctions } from "./customEndpointFunctions";
+export { evaluateRules, evaluateTreeRule, group } from "./evaluateRules";

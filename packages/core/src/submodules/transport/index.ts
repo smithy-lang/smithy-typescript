@@ -3,7 +3,8 @@
  */
 
 export { getSmithyContext } from "./getSmithyContext";
-export { HttpRequest, IHttpRequest } from "./httpRequest";
+export { HttpRequest } from "./httpRequest";
+export type { IHttpRequest } from "./httpRequest";
 export { HttpResponse } from "./httpResponse";
 export { isValidHostLabel } from "./isValidHostLabel";
 export { isValidHostname } from "./isValidHostname";

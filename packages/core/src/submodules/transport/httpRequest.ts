@@ -1,11 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-import {
-  HttpRequest as IHttpRequest,
-  type HeaderBag,
-  type HttpMessage,
-  type QueryParameterBag,
-  type URI,
-} from "@smithy/types";
+import type { HeaderBag, HttpMessage, HttpRequest as IHttpRequest, QueryParameterBag, URI } from "@smithy/types";
 
 type HttpRequestOptions = Partial<HttpMessage> & Partial<URI> & { method?: string };
 
@@ -19,16 +12,18 @@ type HttpRequestOptions = Partial<HttpMessage> & Partial<URI> & { method?: strin
  *
  * @internal
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface HttpRequest extends IHttpRequest {}
 
 /**
  * @public
  */
-export { IHttpRequest };
+export type { IHttpRequest };
 
 /**
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class HttpRequest implements HttpMessage, URI {
   public method: string;
   public protocol: string;

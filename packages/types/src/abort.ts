@@ -3,7 +3,7 @@ import type { AbortHandler } from "./abort-handler";
 /**
  * @public
  */
-export { AbortHandler };
+export type { AbortHandler };
 
 /**
  * Holders of an AbortSignal object may query if the associated operation has

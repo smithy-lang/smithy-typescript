@@ -1,9 +1,9 @@
-import { AbortHandler, AbortSignal as DeprecatedAbortSignal } from "@smithy/types";
+import type { AbortHandler, AbortSignal as DeprecatedAbortSignal } from "@smithy/types";
 
 /**
  * @public
  */
-export { AbortHandler, DeprecatedAbortSignal as IAbortSignal };
+export type { AbortHandler, DeprecatedAbortSignal as IAbortSignal };
 
 /**
  * @public
