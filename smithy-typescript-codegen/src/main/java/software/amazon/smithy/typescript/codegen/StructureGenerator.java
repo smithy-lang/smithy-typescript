@@ -18,7 +18,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
 import software.amazon.smithy.typescript.codegen.integration.HttpProtocolGeneratorUtils;
-import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -65,7 +64,6 @@ final class StructureGenerator implements Runnable {
     private final RequiredMemberMode requiredMemberMode;
     private final SensitiveDataFinder sensitiveDataFinder;
     private final boolean schemaMode;
-    private final ServiceClosure closure;
 
     /**
      * sets 'includeValidation' to 'false' and requiredMemberMode
@@ -73,17 +71,15 @@ final class StructureGenerator implements Runnable {
      */
     StructureGenerator(
         Model model,
-        TypeScriptSettings settings,
         SymbolProvider symbolProvider,
         TypeScriptWriter writer,
         StructureShape shape
     ) {
-        this(model, settings, symbolProvider, writer, shape, false, RequiredMemberMode.NULLABLE, false);
+        this(model, symbolProvider, writer, shape, false, RequiredMemberMode.NULLABLE, false);
     }
 
     StructureGenerator(
         Model model,
-        TypeScriptSettings settings,
         SymbolProvider symbolProvider,
         TypeScriptWriter writer,
         StructureShape shape,
@@ -99,7 +95,6 @@ final class StructureGenerator implements Runnable {
         this.requiredMemberMode = requiredMemberMode;
         sensitiveDataFinder = new SensitiveDataFinder(model);
         this.schemaMode = schemaMode;
-        closure = ServiceClosure.of(model, settings.getService(model));
     }
 
     @Override
@@ -175,7 +170,6 @@ final class StructureGenerator implements Runnable {
 
         StructuredMemberWriter config = new StructuredMemberWriter(
             model,
-            closure,
             symbolProvider,
             shape.getAllMembers().values(),
             this.requiredMemberMode,
@@ -298,7 +292,6 @@ final class StructureGenerator implements Runnable {
         }
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
             model,
-            closure,
             symbolProvider,
             shape.getAllMembers().values(),
             this.requiredMemberMode,

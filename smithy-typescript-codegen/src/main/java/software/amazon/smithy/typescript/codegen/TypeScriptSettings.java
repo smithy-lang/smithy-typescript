@@ -7,7 +7,9 @@ package software.amazon.smithy.typescript.codegen;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,8 @@ public final class TypeScriptSettings {
     private static final String GENERATE_ENDPOINT_BDD = "generateEndpointBdd";
     private static final String VERSIONING_SCHEME = "versioningScheme";
     private static final String TSCONFIG = "tsconfig";
+    private static final String MODES = "modes";
+    private static final String CLOSURE = "closure";
 
     private String packageName;
     private String packageDescription = "";
@@ -75,7 +79,8 @@ public final class TypeScriptSettings {
     private ShapeId protocol;
     private String defaultSigningName = "";
     private boolean isPrivate;
-    private ArtifactType artifactType = ArtifactType.CLIENT;
+    private Set<ArtifactType> artifactTypes = Set.of(ArtifactType.CLIENT);
+    private String closure;
     private boolean disableDefaultValidation = false;
     private RequiredMemberMode requiredMemberMode = RequiredMemberMode.NULLABLE;
     private PackageManager packageManager = PackageManager.YARN;
@@ -97,25 +102,70 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * Create a settings object from a configuration object node.
+     * Create a settings object for a fixed artifact type.
      *
      * @param model Model to infer the service to generate if not explicitly provided.
      * @param config Config object to load.
-     * @param artifactType The type of artifact being generated.
+     * @param artifactType The fixed artifact type to generate.
      * @return Returns the extracted settings.
      */
     public static TypeScriptSettings from(Model model, ObjectNode config, ArtifactType artifactType) {
-        TypeScriptSettings settings = new TypeScriptSettings();
-        settings.setArtifactType(artifactType);
-        config.warnIfAdditionalProperties(artifactType.configProperties);
+        if (config.getMember(MODES).isPresent()) {
+            throw new CodegenException(
+                "The 'modes' setting is only supported by the unified 'typescript-codegen' plugin."
+            );
+        }
+        return from(model, config, EnumSet.of(artifactType), false);
+    }
 
-        // Get the service from the settings or infer one from the given model.
-        settings.setService(
-            config
-                .getStringMember(SERVICE)
-                .map(StringNode::expectShapeId)
-                .orElseGet(() -> inferService(model))
-        );
+    /**
+     * Create settings for the unified plugin, which owns interpretation of the {@code modes} setting.
+     *
+     * @param model Model to infer the service to generate if not explicitly provided.
+     * @param config Config object to load.
+     * @return Returns the extracted settings.
+     */
+    public static TypeScriptSettings fromWithModes(Model model, ObjectNode config) {
+        return from(model, config, resolveArtifactTypes(config), true);
+    }
+
+    private static TypeScriptSettings from(
+        Model model,
+        ObjectNode config,
+        Set<ArtifactType> artifactTypes,
+        boolean allowModesSetting
+    ) {
+        TypeScriptSettings settings = new TypeScriptSettings();
+        settings.setArtifactTypes(artifactTypes);
+        config.warnIfAdditionalProperties(getConfigProperties(artifactTypes, allowModesSetting));
+
+        // Parse the shape closure ID if present (used in types mode).
+        settings.closure = config.getStringMemberOrDefault(CLOSURE, null);
+        if (settings.closure != null && !settings.generateTypes()) {
+            // Client and server generation is driven by the service closure, so a shape
+            // closure would be silently ignored. Fail instead of generating something
+            // other than what the user asked for.
+            throw new CodegenException(
+                "The 'closure' setting can only be used in types mode (modes: [\"types\"])."
+            );
+        }
+
+        if (settings.isTypesOnly() && config.getMember(SERVICE).isPresent()) {
+            throw new CodegenException(
+                "The 'service' setting cannot be used in types-only mode."
+            );
+        }
+
+        // A service is required for client and server codegen. A future combined mode can
+        // retain both a service and a closure without changing the settings representation.
+        if (settings.generateClient() || settings.generateServerSdk()) {
+            settings.setService(
+                config
+                    .getStringMember(SERVICE)
+                    .map(StringNode::expectShapeId)
+                    .orElseGet(() -> inferService(model))
+            );
+        }
 
         settings.setPackageName(config.expectStringMember(PACKAGE).getValue());
         settings.setPackageVersion(config.expectStringMember(PACKAGE_VERSION).getValue());
@@ -123,12 +173,22 @@ public final class TypeScriptSettings {
             config.getStringMemberOrDefault(PACKAGE_DESCRIPTION, settings.getDefaultDescription())
         );
         settings.packageJson = config.getObjectMember(PACKAGE_JSON).orElse(Node.objectNode());
-        config.getStringMember(PROTOCOL).map(StringNode::getValue).map(ShapeId::from).ifPresent(settings::setProtocol);
+        if (!settings.isTypesOnly()) {
+            config
+                .getStringMember(PROTOCOL)
+                .map(StringNode::getValue)
+                .map(ShapeId::from)
+                .ifPresent(settings::setProtocol);
+        }
         settings.setPrivate(config.getBooleanMember(PRIVATE).map(BooleanNode::getValue).orElse(false));
-        settings.setCreateDefaultReadme(
-            config.getBooleanMember(CREATE_DEFAULT_README).map(BooleanNode::getValue).orElse(false)
-        );
-        settings.useLegacyAuth(config.getBooleanMemberOrDefault(USE_LEGACY_AUTH, false));
+        if (!settings.isTypesOnly()) {
+            settings.setCreateDefaultReadme(
+                config.getBooleanMember(CREATE_DEFAULT_README).map(BooleanNode::getValue).orElse(false)
+            );
+        }
+        if (settings.generateClient()) {
+            settings.useLegacyAuth(config.getBooleanMemberOrDefault(USE_LEGACY_AUTH, false));
+        }
         settings.setGenerateTypeDoc(config.getBooleanMember(GENERATE_TYPEDOC).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
             config
@@ -137,7 +197,7 @@ public final class TypeScriptSettings {
                 .orElse(PackageManager.YARN)
         );
 
-        if (artifactType == ArtifactType.SSDK) {
+        if (settings.generateServerSdk()) {
             settings.setDisableDefaultValidation(config.getBooleanMemberOrDefault(DISABLE_DEFAULT_VALIDATION));
         }
         settings.setRequiredMemberMode(
@@ -148,7 +208,9 @@ public final class TypeScriptSettings {
         );
 
         settings.setPluginSettings(config);
-        settings.readProtocolPriorityConfiguration(config);
+        if (!settings.isTypesOnly()) {
+            settings.readProtocolPriorityConfiguration(config);
+        }
         settings.setBigNumberMode(config.getStringMemberOrDefault(BIG_NUMBER_MODE, "native"));
 
         // Internal undocumented configuration used to control rollout of schemas.
@@ -174,14 +236,55 @@ public final class TypeScriptSettings {
         return settings;
     }
 
+    /**
+     * Resolves the modes requested from the unified plugin. The unified plugin retains its
+     * historical client default when {@code modes} is absent.
+     */
+    private static EnumSet<ArtifactType> resolveArtifactTypes(ObjectNode config) {
+        Optional<ArrayNode> modesNode = config.getArrayMember(MODES);
+        if (modesNode.isEmpty()) {
+            return EnumSet.of(ArtifactType.CLIENT);
+        }
+
+        EnumSet<ArtifactType> artifactTypes = EnumSet.noneOf(ArtifactType.class);
+        for (StringNode node : modesNode.get().getElementsAs(StringNode.class)) {
+            artifactTypes.add(ArtifactType.fromModeString(node.getValue()));
+        }
+
+        if (artifactTypes.isEmpty()) {
+            throw new CodegenException("At least one codegen mode must be specified.");
+        }
+        if (artifactTypes.contains(ArtifactType.CLIENT) && artifactTypes.contains(ArtifactType.SSDK)) {
+            throw new CodegenException(
+                "The 'client' and 'server' modes cannot be combined in a single plugin invocation."
+            );
+        }
+
+        return artifactTypes;
+    }
+
+    private static Set<String> getConfigProperties(Set<ArtifactType> artifactTypes, boolean includeModes) {
+        Set<String> properties = new LinkedHashSet<>();
+        for (ArtifactType artifactType : artifactTypes) {
+            properties.addAll(artifactType.configProperties);
+        }
+        if (includeModes) {
+            properties.add(MODES);
+        }
+        return properties;
+    }
+
     private String getDefaultDescription() {
         String description = getPackageName();
-        switch (artifactType) {
+        switch (getArtifactType()) {
             case CLIENT:
                 description += " client";
                 break;
             case SSDK:
                 description += " server";
+                break;
+            case TYPES:
+                description += " types";
                 break;
             default:
         }
@@ -367,6 +470,30 @@ public final class TypeScriptSettings {
     }
 
     /**
+     * Gets the optional service shape ID.
+     *
+     * <p>In types mode, no service is present and this returns empty.
+     *
+     * @return An optional containing the service ShapeId, or empty if not set.
+     */
+    public Optional<ShapeId> getOptionalService() {
+        return Optional.ofNullable(service);
+    }
+
+    /**
+     * Gets the shape closure ID used in types mode.
+     *
+     * @return The closure ID, or null if not configured.
+     */
+    public String getClosure() {
+        return closure;
+    }
+
+    public void setClosure(String closure) {
+        this.closure = closure;
+    }
+
+    /**
      * Gets additional plugin settings.
      *
      * <p>This value will never throw or return {@code null}.
@@ -408,7 +535,7 @@ public final class TypeScriptSettings {
      * @return If the package will include a client.
      */
     public boolean generateClient() {
-        return artifactType.equals(ArtifactType.CLIENT);
+        return artifactTypes.contains(ArtifactType.CLIENT);
     }
 
     /**
@@ -417,7 +544,26 @@ public final class TypeScriptSettings {
      * @return If the package will include a server sdk.
      */
     public boolean generateServerSdk() {
-        return artifactType.equals(ArtifactType.SSDK);
+        return artifactTypes.contains(ArtifactType.SSDK);
+    }
+
+    /**
+     * Returns if data types and their schemas are requested.
+     *
+     * @return If types generation is enabled.
+     */
+    public boolean generateTypes() {
+        return artifactTypes.contains(ArtifactType.TYPES);
+    }
+
+    /**
+     * Returns if the generated package will contain only data shapes (types) and their schemas,
+     * with no service, client, or server artifacts.
+     *
+     * @return If the package is a types-only package.
+     */
+    public boolean isTypesOnly() {
+        return artifactTypes.size() == 1 && generateTypes();
     }
 
     /**
@@ -426,11 +572,23 @@ public final class TypeScriptSettings {
      * @return The artifact type.
      */
     public ArtifactType getArtifactType() {
-        return artifactType;
+        if (generateClient()) {
+            return ArtifactType.CLIENT;
+        } else if (generateServerSdk()) {
+            return ArtifactType.SSDK;
+        }
+        return ArtifactType.TYPES;
     }
 
     public void setArtifactType(ArtifactType artifactType) {
-        this.artifactType = artifactType;
+        setArtifactTypes(EnumSet.of(artifactType));
+    }
+
+    private void setArtifactTypes(Set<ArtifactType> artifactTypes) {
+        if (artifactTypes.isEmpty()) {
+            throw new IllegalArgumentException("At least one codegen mode must be specified.");
+        }
+        this.artifactTypes = Collections.unmodifiableSet(EnumSet.copyOf(artifactTypes));
     }
 
     /**
@@ -639,10 +797,11 @@ public final class TypeScriptSettings {
     }
 
     /**
-     * An enum indicating the type of artifact the code generator will produce.
+     * An enum indicating the primary type of artifact the code generator will produce.
      */
     public enum ArtifactType {
         CLIENT(
+            "client",
             SymbolVisitor::new,
             Arrays.asList(
                 PACKAGE,
@@ -663,10 +822,13 @@ public final class TypeScriptSettings {
                 GENERATE_SCHEMAS,
                 GENERATE_ENDPOINT_BDD,
                 VERSIONING_SCHEME,
-                TSCONFIG
+                TSCONFIG,
+                SERVICE_PROTOCOL_PRIORITY,
+                DEFAULT_PROTOCOL_PRIORITY
             )
         ),
         SSDK(
+            "server",
             (m, s) -> new ServerSymbolVisitor(m, new SymbolVisitor(m, s)),
             Arrays.asList(
                 PACKAGE,
@@ -687,19 +849,64 @@ public final class TypeScriptSettings {
                 GENERATE_SCHEMAS,
                 GENERATE_ENDPOINT_BDD,
                 VERSIONING_SCHEME,
-                TSCONFIG
+                TSCONFIG,
+                SERVICE_PROTOCOL_PRIORITY,
+                DEFAULT_PROTOCOL_PRIORITY
+            )
+        ),
+        TYPES(
+            "types",
+            SymbolVisitor::new,
+            Arrays.asList(
+                PACKAGE,
+                PACKAGE_DESCRIPTION,
+                PACKAGE_JSON,
+                PACKAGE_VERSION,
+                PACKAGE_MANAGER,
+                PRIVATE,
+                REQUIRED_MEMBER_MODE,
+                GENERATE_TYPEDOC,
+                BIG_NUMBER_MODE,
+                GENERATE_SCHEMAS,
+                VERSIONING_SCHEME,
+                TSCONFIG,
+                CLOSURE
             )
         );
 
+        private final String modeName;
         private final BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory;
         private final List<String> configProperties;
 
         ArtifactType(
+            String modeName,
             BiFunction<Model, TypeScriptSettings, SymbolProvider> symbolProviderFactory,
             List<String> configProperties
         ) {
+            this.modeName = modeName;
             this.symbolProviderFactory = symbolProviderFactory;
             this.configProperties = Collections.unmodifiableList(configProperties);
+        }
+
+        /**
+         * Resolves the artifact type from a {@code modes} string (e.g. "client", "server", "types").
+         *
+         * @param mode The mode string (case-insensitive).
+         * @return The corresponding artifact type.
+         * @throws CodegenException if the value does not match a known mode.
+         */
+        public static ArtifactType fromModeString(String mode) {
+            for (ArtifactType artifactType : values()) {
+                if (artifactType.modeName.equalsIgnoreCase(mode)) {
+                    return artifactType;
+                }
+            }
+            throw new CodegenException(
+                String.format(
+                    "Unsupported codegen mode: '%s'. Expected one of: client, server, types",
+                    mode
+                )
+            );
         }
 
         /**

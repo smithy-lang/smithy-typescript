@@ -12,7 +12,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings.RequiredMemberMode;
-import software.amazon.smithy.typescript.codegen.knowledge.ServiceClosure;
 import software.amazon.smithy.typescript.codegen.validation.SensitiveDataFinder;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -133,24 +132,21 @@ final class UnionGenerator implements Runnable {
     private final boolean includeValidation;
     private final SensitiveDataFinder sensitiveDataFinder;
     private final boolean schemaMode;
-    private final ServiceClosure closure;
 
     /**
      * sets 'includeValidation' to 'false' for backwards compatibility.
      */
     UnionGenerator(
         Model model,
-        TypeScriptSettings settings,
         SymbolProvider symbolProvider,
         TypeScriptWriter writer,
         UnionShape shape
     ) {
-        this(model, settings, symbolProvider, writer, shape, false, false);
+        this(model, symbolProvider, writer, shape, false, false);
     }
 
     UnionGenerator(
         Model model,
-        TypeScriptSettings settings,
         SymbolProvider symbolProvider,
         TypeScriptWriter writer,
         UnionShape shape,
@@ -171,7 +167,6 @@ final class UnionGenerator implements Runnable {
             variantMap.put(member.getMemberName(), variant);
         }
         this.schemaMode = schemaMode;
-        this.closure = ServiceClosure.of(model, settings.getService(model));
     }
 
     @Override
@@ -286,7 +281,6 @@ final class UnionGenerator implements Runnable {
                         String memberName = symbolProvider.toMemberName(member);
                         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
                             model,
-                            closure,
                             symbolProvider,
                             shape.getAllMembers().values(),
                             RequiredMemberMode.NULLABLE,
@@ -321,7 +315,6 @@ final class UnionGenerator implements Runnable {
     private void writeValidate() {
         StructuredMemberWriter structuredMemberWriter = new StructuredMemberWriter(
             model,
-            closure,
             symbolProvider,
             shape.getAllMembers().values(),
             RequiredMemberMode.NULLABLE,

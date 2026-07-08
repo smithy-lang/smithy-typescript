@@ -37,11 +37,11 @@ public final class AddHttpApiKeyAuthPlugin implements TypeScriptIntegration {
     public static final String INTEGRATION_NAME = "HttpApiKeyAuth";
 
     /**
-     * Integration should be used only if the `useLegacyAuth` flag is true.
+     * Integration should be used only for service codegen when the `useLegacyAuth` flag is true.
      */
     @Override
     public boolean matchesSettings(TypeScriptSettings settings) {
-        return settings.useLegacyAuth();
+        return settings.useLegacyAuth() && settings.getOptionalService().isPresent();
     }
 
     /**

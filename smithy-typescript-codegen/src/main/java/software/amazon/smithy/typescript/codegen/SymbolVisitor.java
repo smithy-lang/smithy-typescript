@@ -7,6 +7,7 @@ package software.amazon.smithy.typescript.codegen;
 import static java.lang.String.format;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
@@ -78,6 +80,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     private final Model model;
     private final TypeScriptSettings settings;
+    private final Map<ShapeId, String> renames;
     private final ReservedWordSymbolProvider.Escaper escaper;
     private final Set<StructureShape> errorShapes = new HashSet<>();
     private final ModuleNameDelegator moduleNameDelegator;
@@ -88,9 +91,18 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     SymbolVisitor(Model model, TypeScriptSettings settings, int shapeChunkSize) {
+        this(model, settings, shapeChunkSize, Collections.emptyMap());
+    }
+
+    SymbolVisitor(Model model, TypeScriptSettings settings, Map<ShapeId, String> renames) {
+        this(model, settings, ModuleNameDelegator.DEFAULT_CHUNK_SIZE, renames);
+    }
+
+    SymbolVisitor(Model model, TypeScriptSettings settings, int shapeChunkSize, Map<ShapeId, String> renames) {
         this.model = model;
         this.settings = settings;
-        createTypeOnlySymbols = settings.generateClient();
+        this.renames = renames;
+        createTypeOnlySymbols = settings.generateClient() || settings.isTypesOnly();
 
         // Load reserved words from a new-line delimited file.
         ReservedWords reservedWords = new ReservedWordsBuilder()
@@ -109,12 +121,19 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             .buildEscaper();
 
         // Get each structure that's used an error.
-        OperationIndex operationIndex = OperationIndex.of(model);
-        model
-            .shapes(OperationShape.class)
-            .forEach(operationShape -> {
-                errorShapes.addAll(operationIndex.getErrors(operationShape, settings.getService()));
-            });
+        if (settings.getOptionalService().isPresent()) {
+            OperationIndex operationIndex = OperationIndex.of(model);
+            model
+                .shapes(OperationShape.class)
+                .forEach(operationShape -> {
+                    errorShapes.addAll(operationIndex.getErrors(operationShape, settings.getService()));
+                });
+        } else {
+            model
+                .shapes(StructureShape.class)
+                .filter(s -> s.hasTrait(ErrorTrait.class))
+                .forEach(errorShapes::add);
+        }
 
         moduleNameDelegator = new ModuleNameDelegator(shapeChunkSize);
     }
@@ -447,8 +466,13 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private String flattenShapeName(ToShapeId id) {
+        ShapeId shapeId = id.toShapeId();
+        if (!renames.isEmpty() || settings.getOptionalService().isEmpty()) {
+            String renamed = renames.get(shapeId);
+            return StringUtils.capitalize(renamed != null ? renamed : shapeId.getName());
+        }
         ServiceShape serviceShape = model.expectShape(settings.getService(), ServiceShape.class);
-        return StringUtils.capitalize(id.toShapeId().getName(serviceShape));
+        return StringUtils.capitalize(shapeId.getName(serviceShape));
     }
 
     private Symbol.Builder createObjectSymbolBuilder(Shape shape) {
