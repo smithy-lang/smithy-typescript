@@ -4,6 +4,7 @@
  */
 package software.amazon.smithy.typescript.codegen;
 
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,8 @@ import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.node.Node;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -48,6 +51,7 @@ import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlis
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerator;
 import software.amazon.smithy.typescript.codegen.validation.LongValidator;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
+import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.waiters.WaitableTrait;
@@ -76,9 +80,7 @@ final class DirectedTypeScriptCodegen
         "tsconfig.cjs.json",
         "tsconfig.cjs.json",
         "tsconfig.es.json",
-        "tsconfig.es.json",
-        "tsconfig.types.json",
-        "tsconfig.types.json"
+        "tsconfig.es.json"
     );
     private static final ShapeId VALIDATION_EXCEPTION_SHAPE = ShapeId.fromParts(
         "smithy.framework",
@@ -362,6 +364,13 @@ final class DirectedTypeScriptCodegen
             LOGGER.fine(() -> "Writing contents of `" + from + "` to `" + to + "`");
             directive.fileManifest().writeFile(from, getClass(), to);
         });
+
+        // Generate tsconfig.types.json with optional isolatedModules.
+        directive.fileManifest()
+            .writeFile(
+                "tsconfig.types.json",
+                generateTsconfigTypes(directive.settings())
+            );
 
         TypeScriptWriter modelIndexer = SymbolVisitor.modelIndexer(
             directive.connectedShapes().values(),
@@ -729,5 +738,28 @@ final class DirectedTypeScriptCodegen
                 ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
                 ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
             });
+    }
+
+    private static String generateTsconfigTypes(TypeScriptSettings settings) {
+        InputStream resource = DirectedTypeScriptCodegen.class.getResourceAsStream("tsconfig.types.json");
+        ObjectNode node = Node.parse(IoUtils.toUtf8String(resource)).expectObjectNode();
+
+        if (settings.isolatedModules()) {
+            ObjectNode compilerOptions = node.expectObjectMember("compilerOptions");
+            compilerOptions = compilerOptions.withMember("isolatedModules", Node.from(true));
+            node = node.withMember("compilerOptions", compilerOptions);
+        }
+
+        // Node.prettyPrintJson uses 4-space indent; convert to 2-space for tsconfig convention.
+        String json = Node.prettyPrintJson(node);
+        StringBuilder result = new StringBuilder();
+        for (String line : json.split("\n")) {
+            int spaces = 0;
+            while (spaces < line.length() && line.charAt(spaces) == ' ') {
+                spaces++;
+            }
+            result.append(" ".repeat(spaces / 2)).append(line.substring(spaces)).append("\n");
+        }
+        return result.toString();
     }
 }
