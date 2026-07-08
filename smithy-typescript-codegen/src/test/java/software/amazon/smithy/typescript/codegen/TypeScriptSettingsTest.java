@@ -5,8 +5,12 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.node.Node;
@@ -56,6 +61,146 @@ public class TypeScriptSettingsTest {
         );
 
         assertThat(settings.getService(), equalTo(ShapeId.from("smithy.example#Example")));
+    }
+
+    @Test
+    public void resolvesServerModeToSsdkArtifactType() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.fromWithModes(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("modes", Node.fromStrings("server"))
+                .build()
+        );
+
+        assertEquals(TypeScriptSettings.ArtifactType.SSDK, settings.getArtifactType());
+    }
+
+    @Test
+    public void modeStringsAreCaseInsensitive() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.fromWithModes(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("modes", Node.fromStrings("CLIENT"))
+                .build()
+        );
+
+        assertEquals(TypeScriptSettings.ArtifactType.CLIENT, settings.getArtifactType());
+    }
+
+    @Test
+    public void rejectsUnknownModeString() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        ObjectNode config = Node.objectNodeBuilder()
+            .withMember("package", Node.from("example"))
+            .withMember("packageVersion", Node.from("1.0.0"))
+            .withMember("modes", Node.fromStrings("browser"))
+            .build();
+
+        CodegenException e = assertThrows(
+            CodegenException.class,
+            () -> TypeScriptSettings.fromWithModes(model, config)
+        );
+        assertThat(e.getMessage(), containsString("Unsupported codegen mode"));
+    }
+
+    @Test
+    public void rejectsEmptyModesArray() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        ObjectNode config = Node.objectNodeBuilder()
+            .withMember("package", Node.from("example"))
+            .withMember("packageVersion", Node.from("1.0.0"))
+            .withMember("modes", Node.arrayNode())
+            .build();
+
+        CodegenException e = assertThrows(
+            CodegenException.class,
+            () -> TypeScriptSettings.fromWithModes(model, config)
+        );
+        assertThat(e.getMessage(), containsString("At least one codegen mode"));
+    }
+
+    @Test
+    public void fixedArtifactSettingsRejectModes() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        ObjectNode config = Node.objectNodeBuilder()
+            .withMember("package", Node.from("example"))
+            .withMember("packageVersion", Node.from("1.0.0"))
+            .withMember("modes", Node.fromStrings("client"))
+            .build();
+
+        CodegenException e = assertThrows(
+            CodegenException.class,
+            () -> TypeScriptSettings.from(model, config, TypeScriptSettings.ArtifactType.CLIENT)
+        );
+        assertThat(e.getMessage(), containsString("only supported by the unified"));
+    }
+
+    @Test
+    public void retainsCombinedModesUntilPluginDispatch() {
+        Model model = Model.assembler()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.fromWithModes(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("service", Node.from("smithy.example#Example"))
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("modes", Node.fromStrings("client", "types"))
+                .withMember("closure", Node.from("smithy.example#types"))
+                .build()
+        );
+
+        assertTrue(settings.generateClient());
+        assertTrue(settings.generateTypes());
+        assertFalse(settings.isTypesOnly());
+        assertEquals(TypeScriptSettings.ArtifactType.CLIENT, settings.getArtifactType());
+    }
+
+    @Test
+    public void typesModeRejectsServiceSetting() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        ObjectNode config = Node.objectNodeBuilder()
+            .withMember("service", Node.from("smithy.example#Example"))
+            .withMember("package", Node.from("example"))
+            .withMember("packageVersion", Node.from("1.0.0"))
+            .withMember("modes", Node.fromStrings("types"))
+            .withMember("closure", Node.from("smithy.example#types"))
+            .build();
+
+        CodegenException e = assertThrows(
+            CodegenException.class,
+            () -> TypeScriptSettings.fromWithModes(model, config)
+        );
+        assertThat(e.getMessage(), containsString("'service' setting cannot be used"));
+    }
+
+    @Test
+    public void typesModeReadsTypeSettingsButNotServiceSettings() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.fromWithModes(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("modes", Node.fromStrings("types"))
+                .withMember("closure", Node.from("smithy.example#types"))
+                .withMember("requiredMemberMode", Node.from("strict"))
+                .withMember("createDefaultReadme", Node.from(true))
+                .withMember("useLegacyAuth", Node.from(true))
+                .build()
+        );
+
+        assertEquals(TypeScriptSettings.RequiredMemberMode.STRICT, settings.getRequiredMemberMode());
+        assertFalse(settings.createDefaultReadme());
+        assertFalse(settings.useLegacyAuth());
     }
 
     @Test

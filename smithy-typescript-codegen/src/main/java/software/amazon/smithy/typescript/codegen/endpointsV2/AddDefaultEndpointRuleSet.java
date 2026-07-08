@@ -114,6 +114,11 @@ public class AddDefaultEndpointRuleSet implements TypeScriptIntegration {
 
     @Override
     public Model preprocessModel(Model model, TypeScriptSettings settings) {
+        // Endpoint rulesets are a service concern; types-only generation has no service.
+        if (settings.getOptionalService().isEmpty()) {
+            return model;
+        }
+
         Model.Builder modelBuilder = model.toBuilder();
 
         ServiceShape serviceShape = settings.getService(model);

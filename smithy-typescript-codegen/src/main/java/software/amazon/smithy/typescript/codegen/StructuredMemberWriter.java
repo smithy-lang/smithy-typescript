@@ -58,30 +58,22 @@ final class StructuredMemberWriter {
     RequiredMemberMode requiredMemberMode;
     final Set<String> skipMembers = new HashSet<>();
     private final SensitiveDataFinder sensitiveDataFinder;
-    private final ServiceClosure closure;
 
-    StructuredMemberWriter(
-        Model model,
-        ServiceClosure closure,
-        SymbolProvider symbolProvider,
-        Collection<MemberShape> members
-    ) {
-        this(model, closure, symbolProvider, members, RequiredMemberMode.NULLABLE);
+    StructuredMemberWriter(Model model, SymbolProvider symbolProvider, Collection<MemberShape> members) {
+        this(model, symbolProvider, members, RequiredMemberMode.NULLABLE);
     }
 
     StructuredMemberWriter(
         Model model,
-        ServiceClosure closure,
         SymbolProvider symbolProvider,
         Collection<MemberShape> members,
         RequiredMemberMode requiredMemberMode
     ) {
-        this(model, closure, symbolProvider, members, requiredMemberMode, new SensitiveDataFinder(model));
+        this(model, symbolProvider, members, requiredMemberMode, new SensitiveDataFinder(model));
     }
 
     StructuredMemberWriter(
         Model model,
-        ServiceClosure closure,
         SymbolProvider symbolProvider,
         Collection<MemberShape> members,
         RequiredMemberMode requiredMemberMode,
@@ -92,7 +84,6 @@ final class StructuredMemberWriter {
         this.members = new LinkedHashSet<>(members);
         this.requiredMemberMode = requiredMemberMode;
         this.sensitiveDataFinder = sensitiveDataFinder;
-        this.closure = closure;
     }
 
     void writeMembers(TypeScriptWriter writer, Shape shape) {
@@ -105,9 +96,10 @@ final class StructuredMemberWriter {
             position++;
             boolean wroteDocs = !noDocs && writer.writeMemberDocs(model, member);
             String memberName = getSanitizedMemberName(member);
-            String optionalSuffix = shape.isUnionShape() || !closure.isMemberRequiredInClient(member) ? "?" : "";
+            String optionalSuffix =
+                shape.isUnionShape() || !ServiceClosure.isMemberRequiredInClient(member) ? "?" : "";
             String typeSuffix =
-                requiredMemberMode == RequiredMemberMode.NULLABLE && closure.isMemberRequiredInClient(member)
+                requiredMemberMode == RequiredMemberMode.NULLABLE && ServiceClosure.isMemberRequiredInClient(member)
                     ? " | undefined"
                     : "";
             if (optionalSuffix.equals("?")) {

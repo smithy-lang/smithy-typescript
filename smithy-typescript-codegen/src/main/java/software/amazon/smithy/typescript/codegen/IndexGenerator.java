@@ -40,8 +40,9 @@ final class IndexGenerator {
     ) {
         writer.write("/* eslint-disable */");
         settings
-            .getService(model)
-            .getTrait(DocumentationTrait.class)
+            .getOptionalService()
+            .map(id -> model.expectShape(id, ServiceShape.class))
+            .flatMap(service -> service.getTrait(DocumentationTrait.class))
             .ifPresent(trait -> writer.writeDocs(trait.getValue() + "\n\n" + "@packageDocumentation"));
 
         if (settings.generateClient()) {
@@ -51,6 +52,18 @@ final class IndexGenerator {
         if (settings.generateServerSdk() && protocolGenerator != null) {
             writeProtocolExports(protocolGenerator, writer);
             writer.write("export * from \"./server/index\";");
+        }
+
+        if (
+            SchemaGenerationAllowlist.allows(
+                settings.getOptionalService().orElse(null),
+                settings
+            )
+        ) {
+            writer.write(
+                """
+                export * from "./schemas/schemas_0";"""
+            );
         }
 
         // write export statement for models
@@ -118,12 +131,6 @@ final class IndexGenerator {
             export * from "./commands";"""
         );
         writer.write("export { Command as $$Command } from \"@smithy/core/client\";");
-        if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-            writer.write(
-                """
-                export * from "./schemas/schemas_0";"""
-            );
-        }
 
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         List<OperationShape> operations = new ArrayList<OperationShape>();

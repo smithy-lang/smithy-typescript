@@ -36,6 +36,9 @@ const httpBearerAuthClientDir = path.join(
   "typescript-client-codegen"
 );
 
+// Build types-only package to verify types-mode output compiles
+const typesExampleDir = path.join(codegenTestDir, "types-example", "typescript-codegen");
+
 const nodeModulesDir = path.join(root, "node_modules");
 
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
@@ -115,6 +118,7 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     httpBearerAuthClientDir,
     nodeModulesDir
   );
+  await buildAndCopyToNodeModules("@smithy/types-example", typesExampleDir, nodeModulesDir);
 
   // TODO(released-version-test): Test released version of smithy-typescript codegenerators, but currently is not working
   /*
