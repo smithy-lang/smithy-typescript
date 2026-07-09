@@ -7,7 +7,7 @@
   "types": "./dist-types/index.d.ts",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
-    "build:elliptic": "node ./scripts/esbuild.mjs",
+    "build:elliptic": "node ./scripts/bundle-elliptic.mjs",
     "build:es:cjs": "premove dist-es && yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline",
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
@@ -32,9 +32,9 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
+    "@noble/curves": "2.2.0",
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
-    "elliptic": "6.5.5",
     "premove": "4.0.0"
   },
   "engines": {
