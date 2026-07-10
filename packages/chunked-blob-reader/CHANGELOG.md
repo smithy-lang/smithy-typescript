@@ -1,5 +1,11 @@
 # @smithy/chunked-blob-reader
 
+## 5.4.8
+
+### Patch Changes
+
+- @smithy/core@3.29.3
+
 ## 5.4.7
 
 ### Patch Changes

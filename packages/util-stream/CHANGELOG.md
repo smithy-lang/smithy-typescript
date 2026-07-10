@@ -1,5 +1,11 @@
 # @smithy/util-stream
 
+## 4.7.8
+
+### Patch Changes
+
+- @smithy/core@3.29.3
+
 ## 4.7.7
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # @smithy/signature-v4a
 
+## 3.5.0
+
+### Minor Changes
+
+- 81303fb: use noble/curves for p256
+
+### Patch Changes
+
+- Updated dependencies [a97abc3]
+  - @smithy/types@4.16.1
+  - @smithy/core@3.29.3
+  - @smithy/signature-v4@5.6.4
+
 ## 3.4.3
 
 ### Patch Changes

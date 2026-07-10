@@ -1,5 +1,11 @@
 # @smithy/hash-blob-browser
 
+## 4.4.8
+
+### Patch Changes
+
+- @smithy/core@3.29.3
+
 ## 4.4.7
 
 ### Patch Changes
