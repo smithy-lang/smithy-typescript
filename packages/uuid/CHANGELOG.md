@@ -1,5 +1,11 @@
 # @smithy/uuid
 
+## 1.3.8
+
+### Patch Changes
+
+- @smithy/core@3.29.3
+
 ## 1.3.7
 
 ### Patch Changes

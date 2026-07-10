@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.8
+
+### Patch Changes
+
+- a97abc3: Set downlevel types to be used in typescript@'<4.5'
+- Updated dependencies [a97abc3]
+  - @smithy/types@4.16.1
+  - @smithy/core@3.29.3
+  - @smithy/node-http-handler@4.9.5
+
 ## 2.2.7
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @smithy/node-config-provider
 
+## 4.5.8
+
+### Patch Changes
+
+- @smithy/core@3.29.3
+
 ## 4.5.7
 
 ### Patch Changes
