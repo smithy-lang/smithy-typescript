@@ -29,6 +29,10 @@
       "outputs": ["dist-types/**"],
       "dependsOn": ["prebuild", "^build:types"]
     },
+    "build:types:downlevel": {
+      "outputs": ["dist-types/ts3.4/**"],
+      "dependsOn": ["build:types"]
+    },
     "test": {
       "dependsOn": ["build", "^build"],
       "cache": false
@@ -51,7 +55,7 @@
       "cache": false
     },
     "stage-release": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build", "build:types:downlevel"]
     }
   }
 }
