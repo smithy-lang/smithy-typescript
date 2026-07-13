@@ -48,7 +48,7 @@
     "@types/jsdom": "20.0.1",
     "@typescript-eslint/eslint-plugin": "8.32.0",
     "@typescript-eslint/parser": "8.32.0",
-    "esbuild": "^0.25.9",
+    "esbuild": "^0.28.1",
     "eslint": "8.57.0",
     "eslint-plugin-n": "^17.24.0",
     "eslint-plugin-tsdoc": "0.2.17",
