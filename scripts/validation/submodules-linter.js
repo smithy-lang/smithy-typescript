@@ -58,6 +58,25 @@ const submodulePackages = process.argv.includes("--all")
           pkgJson.files = [...new Set(pkgJson.files)].sort();
           pushPkgJson();
         }
+
+        // typesVersions metadata for downlevel (TypeScript <4.5) resolution.
+        const expectedTypesVersion = `dist-types/ts3.4/submodules/${submodule}/index.d.ts`;
+        pkgJson.typesVersions = pkgJson.typesVersions ?? {};
+        pkgJson.typesVersions["<4.5"] = pkgJson.typesVersions["<4.5"] ?? {
+          "dist-types/*": ["dist-types/ts3.4/*"],
+        };
+
+        const submoduleTypesVersion = pkgJson.typesVersions["<4.5"][submodule];
+        if (
+          !Array.isArray(submoduleTypesVersion) ||
+          submoduleTypesVersion.length !== 1 ||
+          submoduleTypesVersion[0] !== expectedTypesVersion
+        ) {
+          errors.push(`${submodule} submodule is missing typesVersions entry in package.json`);
+          pkgJson.typesVersions["<4.5"][submodule] = [expectedTypesVersion];
+          pushPkgJson();
+        }
+
         // tsconfig metadata.
         for (const [kind, tsconfig] of Object.entries(tsconfigs)) {
           if (!tsconfig.compilerOptions?.paths?.[`@smithy/${submodulePackage}/${submodule}`]) {

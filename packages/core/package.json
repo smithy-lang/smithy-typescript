@@ -189,6 +189,39 @@
     "<4.5": {
       "dist-types/*": [
         "dist-types/ts3.4/*"
+      ],
+      "cbor": [
+        "dist-types/ts3.4/submodules/cbor/index.d.ts"
+      ],
+      "checksum": [
+        "dist-types/ts3.4/submodules/checksum/index.d.ts"
+      ],
+      "client": [
+        "dist-types/ts3.4/submodules/client/index.d.ts"
+      ],
+      "config": [
+        "dist-types/ts3.4/submodules/config/index.d.ts"
+      ],
+      "endpoints": [
+        "dist-types/ts3.4/submodules/endpoints/index.d.ts"
+      ],
+      "event-streams": [
+        "dist-types/ts3.4/submodules/event-streams/index.d.ts"
+      ],
+      "protocols": [
+        "dist-types/ts3.4/submodules/protocols/index.d.ts"
+      ],
+      "retry": [
+        "dist-types/ts3.4/submodules/retry/index.d.ts"
+      ],
+      "schema": [
+        "dist-types/ts3.4/submodules/schema/index.d.ts"
+      ],
+      "serde": [
+        "dist-types/ts3.4/submodules/serde/index.d.ts"
+      ],
+      "transport": [
+        "dist-types/ts3.4/submodules/transport/index.d.ts"
       ]
     }
   },
