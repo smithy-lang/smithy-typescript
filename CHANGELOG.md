@@ -2,6 +2,24 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.51.0 (2026-07-13)
+
+### Features
+
+- Made tsconfig.types.json `isolatedModules` configurable for clients ([#2131](https://github.com/smithy-lang/smithy-typescript/pull/2131))
+- Generated thinner command classes ([#2115](https://github.com/smithy-lang/smithy-typescript/pull/2115))
+
+### Bug Fixes
+
+- Corrected type interface of Command.getEndpointParameterInstructions() ([#2119](https://github.com/smithy-lang/smithy-typescript/pull/2119))
+- Added support for numeric literal values in generated function parameters ([#2061](https://github.com/smithy-lang/smithy-typescript/pull/2061))
+
+### Chores
+
+- Updated smithyVersion to 1.72.0 ([#2128](https://github.com/smithy-lang/smithy-typescript/pull/2128))
+- Set sha256 deprecated pacakages to conditional inclusion ([#2114](https://github.com/smithy-lang/smithy-typescript/pull/2114))
+- Set checksums in shared config ([#2113](https://github.com/smithy-lang/smithy-typescript/pull/2113))
+
 ## 0.50.0 (2026-05-29)
 
 ### Bug Fixes
