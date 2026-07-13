@@ -550,11 +550,11 @@ setGlobalDispatcher(new EnvHttpProxyAgent());
 new UndiciHttpHandler();
 ```
 
-[undici]: https://undici.nodejs.org/
+[undici]: https://undici.nodejs.org/v7.x
 [node-http-handler]: https://www.npmjs.com/package/@smithy/node-http-handler
-[undici-agent-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Agent.md#parameter-agentoptions
-[undici-pool-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Pool.md#parameter-pooloptions
-[undici-client-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Client.md#parameter-clientoptions
-[undici-connect-options]: https://github.com/nodejs/undici/blob/main/docs/docs/api/Client.md#parameter-connectoptions
-[undici-env-proxy-agent]: https://github.com/nodejs/undici/blob/main/docs/docs/api/EnvHttpProxyAgent.md
-[undici-proxy-agent]: https://github.com/nodejs/undici/blob/main/docs/docs/api/ProxyAgent.md
+[undici-agent-options]: https://undici.nodejs.org/v7.x/api/Agent
+[undici-pool-options]: https://undici.nodejs.org/v7.x/api/Pool
+[undici-client-options]: https://undici.nodejs.org/v7.x/api/Client
+[undici-connect-options]: https://undici.nodejs.org/v7.x/api/Connector
+[undici-env-proxy-agent]: https://undici.nodejs.org/v7.x/api/EnvHttpProxyAgent
+[undici-proxy-agent]: https://undici.nodejs.org/v7.x/api/ProxyAgent
