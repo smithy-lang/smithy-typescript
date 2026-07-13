@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import http2, { type Http2SecureServer, type ServerHttp2Stream } from "node:http2";
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import http, { type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { Readable } from "node:stream";
 import { generate as generatePem } from "@metcoder95/https-pem";
@@ -8,6 +8,8 @@ import { HttpRequest } from "@smithy/core/protocols";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
+
+const { createServer } = http;
 
 /**
  * Reads a length-prefixed framed stream and returns parsed JSON events.

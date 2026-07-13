@@ -1,12 +1,5 @@
 import { rejects } from "node:assert";
-import http2, {
-  constants,
-  type ClientHttp2Session,
-  type ClientHttp2Stream,
-  type Http2Server,
-  type Http2Session,
-  type Http2Stream,
-} from "node:http2";
+import http2, { type ClientHttp2Session, type ClientHttp2Stream, type Http2Server, type Http2Stream } from "node:http2";
 import { Duplex } from "node:stream";
 import { promisify } from "node:util";
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
@@ -21,6 +14,8 @@ import { NodeHttp2ConnectionPool } from "./node-http2-connection-pool";
 import { NodeHttp2Handler, type NodeHttp2HandlerOptions } from "./node-http2-handler";
 import { createMockHttp2Server, createResponseFunction, createResponseFunctionWithDelay } from "./server.mock";
 import { timing } from "./timing";
+
+const { constants } = http2;
 
 const getConnectionManager = (handler: NodeHttp2Handler) =>
   (handler as any).connectionManager as NodeHttp2ConnectionManager;
@@ -41,7 +36,6 @@ describe(NodeHttp2Handler.name, () => {
   let port1: number = 0;
   let port2: number = 0;
   let port3: number = 0;
-  let port4: number = 0;
 
   let mockH2Server: any = undefined;
   const mockH2Servers: Record<string, Http2Server> = {};
@@ -63,12 +57,12 @@ describe(NodeHttp2Handler.name, () => {
   };
 
   beforeEach(async () => {
-    for (let i = 0; i < 4; ++i) {
+    for (let i = 0; i < 3; ++i) {
       const port = await getPort({ port: portNumbers(45_341, 50_000) });
       mockH2Servers[port] = createMockHttp2Server().listen(port);
     }
 
-    [port1, port2, port3, port4] = Object.keys(mockH2Servers).map(Number);
+    [port1, port2, port3] = Object.keys(mockH2Servers).map(Number);
     authority = `${protocol}//${hostname}:${port1}/`;
 
     mockH2Server = mockH2Servers[port1];

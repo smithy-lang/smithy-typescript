@@ -24,7 +24,7 @@ export abstract class RpcProtocol extends HttpProtocol {
   /**
    * @override
    */
-  protected declare compositeErrorRegistry: TypeRegistry;
+  declare protected compositeErrorRegistry: TypeRegistry;
 
   public async serializeRequest<Input extends object>(
     operationSchema: OperationSchema,

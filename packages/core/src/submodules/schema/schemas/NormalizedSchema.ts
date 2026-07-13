@@ -382,7 +382,7 @@ export class NormalizedSchema implements INormalizedSchema {
     const schema = this.getSchema();
     const memberSchema = isDoc
       ? (15 satisfies DocumentSchema)
-      : (schema as StaticMapSchema)[4] ?? (0 satisfies StringSchema);
+      : ((schema as StaticMapSchema)[4] ?? (0 satisfies StringSchema));
     return member([memberSchema, 0], "key");
   }
 

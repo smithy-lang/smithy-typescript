@@ -128,6 +128,8 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
     for (const [url, connectionPool] of this.connectionPools) {
       // copy pool array to avoid potential synchronous mutation from
       // call to session.destroy().
+
+      // oxlint-disable-next-line unicorn/no-useless-spread
       for (const session of [...connectionPool]) {
         session.destroy();
       }

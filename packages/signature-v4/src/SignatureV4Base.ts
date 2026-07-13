@@ -166,7 +166,7 @@ ${toHex(hashedRequest)}`;
   }
 
   protected formatDate(now: DateInput): { longDate: string; shortDate: string } {
-    const longDate = iso8601(now).replace(/[\-:]/g, "");
+    const longDate = iso8601(now).replace(/[-:]/g, "");
     return {
       longDate,
       shortDate: longDate.slice(0, 8),

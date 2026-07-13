@@ -32,8 +32,7 @@ export abstract class Command<
   ResolvedClientConfiguration,
   ClientInput extends object = any,
   ClientOutput extends MetadataBearer = any,
-> implements ICommand<ClientInput, Input, ClientOutput, Output, ResolvedClientConfiguration>
-{
+> implements ICommand<ClientInput, Input, ClientOutput, Output, ResolvedClientConfiguration> {
   public abstract input: Input;
   public readonly middlewareStack: IMiddlewareStack<Input, Output> = constructStack<Input, Output>();
   public readonly schema?: OperationSchema | StaticOperationSchema;

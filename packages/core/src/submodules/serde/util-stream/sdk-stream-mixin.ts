@@ -19,7 +19,7 @@ export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob
        * If the stream is not node:stream::Readable, it may be a web stream within Node.js.
        */
       return sdkStreamMixinReadableStream(stream);
-    } catch (e: unknown) {
+    } catch (ignored: unknown) {
       // @ts-ignore
       const name = stream?.__proto__?.constructor?.name || stream;
       throw new Error(`Unexpected stream implementation, expect Stream.Readable instance, got ${name}`);

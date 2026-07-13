@@ -4,7 +4,6 @@ import { booleanSelector } from "../../util-config-provider/booleanSelector";
 import { SelectorType } from "../../util-config-provider/types";
 import {
   CONFIG_USE_FIPS_ENDPOINT,
-  DEFAULT_USE_FIPS_ENDPOINT,
   ENV_USE_FIPS_ENDPOINT,
   NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS,
   nodeFipsConfigSelectors,

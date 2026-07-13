@@ -5,15 +5,13 @@ export interface MiddlewareEntry<Input extends object, Output extends object> ex
 }
 
 export interface AbsoluteMiddlewareEntry<Input extends object, Output extends object>
-  extends MiddlewareEntry<Input, Output>,
-    AbsoluteLocation {
+  extends MiddlewareEntry<Input, Output>, AbsoluteLocation {
   step: Step;
   priority: Priority;
 }
 
 export interface RelativeMiddlewareEntry<Input extends object, Output extends object>
-  extends MiddlewareEntry<Input, Output>,
-    RelativeLocation {}
+  extends MiddlewareEntry<Input, Output>, RelativeLocation {}
 
 export type Normalized<
   T extends MiddlewareEntry<Input, Output>,

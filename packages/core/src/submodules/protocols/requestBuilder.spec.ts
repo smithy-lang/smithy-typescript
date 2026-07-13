@@ -1,4 +1,4 @@
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "./index";
 import { describe, expect, test as it } from "vitest";
 
 import { requestBuilder } from "./requestBuilder";

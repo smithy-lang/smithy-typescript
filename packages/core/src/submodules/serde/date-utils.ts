@@ -75,7 +75,7 @@ export const parseRfc3339DateTime = (value: unknown): Date | undefined => {
 };
 
 const RFC3339_WITH_OFFSET = new RegExp(
-  /^(\d{4})-(\d{2})-(\d{2})[tT](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(([-+]\d{2}\:\d{2})|[zZ])$/
+  /^(\d{4})-(\d{2})-(\d{2})[tT](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(([-+]\d{2}:\d{2})|[zZ])$/
 );
 
 /**

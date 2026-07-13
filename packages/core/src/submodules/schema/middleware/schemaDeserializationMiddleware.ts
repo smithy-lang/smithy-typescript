@@ -52,7 +52,7 @@ export const schemaDeserializationMiddleware =
         const hint = `Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object.`;
         try {
           error.message += "\n  " + hint;
-        } catch (e) {
+        } catch (ignored) {
           // Error with an unwritable message (strict mode getter with no setter).
           if (!context.logger || context.logger?.constructor?.name === "NoOpLogger") {
             console.warn(hint);
@@ -82,7 +82,7 @@ export const schemaDeserializationMiddleware =
               cfId: findHeader(/^x-[\w-]+-cf-id$/, headerEntries),
             };
           }
-        } catch (e) {
+        } catch (ignored) {
           // ignored, error object was not writable.
         }
       }

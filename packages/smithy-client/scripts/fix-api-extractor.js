@@ -1,5 +1,5 @@
 const fs = require("node:fs");
-const path = require("path");
+const path = require("node:path");
 
 const file = path.join(__dirname, "..", "dist-types", "index.d.ts");
 

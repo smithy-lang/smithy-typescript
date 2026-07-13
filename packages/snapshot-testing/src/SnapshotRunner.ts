@@ -168,7 +168,7 @@ export class SnapshotRunner {
 
     // responses
     for (const [schema, CommandCtor] of schemas) {
-      const [, namespace, name, traits, input, output] = schema;
+      const [, , , , /*namespace*/ /*name*/ /*traits*/ input, output] = schema;
       const operationName = CommandCtor.name.replace(/Command$/, "");
 
       const testCaseExec = testCase(operationName + " (response)", async () => {
@@ -260,7 +260,18 @@ export class SnapshotRunner {
       [-3, ns, "UnmodeledServiceException", { error: "server" }, ["Message"], [0]] satisfies StaticErrorSchema,
       ...errors,
     ]) {
-      const [, namespace, name, traits, memberNames, members, requiredMemberCount] = $error;
+      const [
+        ,
+        ,
+        /*namespace*/ name,
+        /*traits*/
+        /*memberNames*/
+        /*members*/
+        /*requiredMemberCount*/
+        ,
+        ,
+        ,
+      ] = $error;
       const $errorNormalized = NormalizedSchema.of($error);
       const qualifiedName = $errorNormalized.getName(true);
 
@@ -372,7 +383,7 @@ export class SnapshotRunner {
     endpoint?: string;
   }) {
     const client = this.initClient(Client, { endpoint, logger });
-    const [, namespace, name, traits, input, output] = schema;
+    const [, , , , /*namespace*/ /*name*/ /*traits*/ input /*output*/] = schema;
     const command = new CommandCtor(createFromSchema(input));
 
     const $ = NormalizedSchema.of(input);

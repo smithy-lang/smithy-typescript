@@ -25,7 +25,7 @@ export const parseURL = (value: string | URL | Endpoint): EndpointURL | null => 
         return url;
       }
       return new URL(value);
-    } catch (error) {
+    } catch (ignored) {
       return null;
     }
   })();

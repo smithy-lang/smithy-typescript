@@ -1,7 +1,5 @@
 import type { SchemaTraits, TraitsSchema } from "@smithy/types";
 
-import { TypeRegistry } from "../TypeRegistry";
-
 /**
  * Abstract base for class-based Schema except NormalizedSchema.
  *

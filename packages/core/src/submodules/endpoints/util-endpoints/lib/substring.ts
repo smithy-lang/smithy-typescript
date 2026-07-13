@@ -5,6 +5,7 @@
  * The length of the returned string will always be stop-start.
  */
 export const substring = (input: string, start: number, stop: number, reverse: boolean): string | null => {
+  // eslint-disable-next-line no-control-regex
   if (input == null || start >= stop || input.length < stop || /[^\u0000-\u007f]/.test(input)) {
     return null;
   }

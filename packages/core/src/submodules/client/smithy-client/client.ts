@@ -96,8 +96,7 @@ export class Client<
   ClientInput extends object,
   ClientOutput extends MetadataBearer,
   ResolvedClientConfiguration extends SmithyResolvedConfiguration<HandlerOptions>,
-> implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration>
-{
+> implements IClient<ClientInput, ClientOutput, ResolvedClientConfiguration> {
   public middlewareStack: MiddlewareStack<ClientInput, ClientOutput> = constructStack<ClientInput, ClientOutput>();
 
   /**

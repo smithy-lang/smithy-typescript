@@ -1,9 +1,11 @@
 import EventEmitter from "node:events";
-import { request } from "node:http";
+import http from "node:http";
 import { ProviderError } from "@smithy/core/config";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
 import { httpRequest } from "./httpRequest";
+
+const { request } = http;
 
 vi.mock("http", async () => {
   const actual: any = vi.importActual("http");

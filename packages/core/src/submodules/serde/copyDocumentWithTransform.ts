@@ -6,6 +6,6 @@ import type { SchemaRef } from "@smithy/types";
  */
 export const copyDocumentWithTransform = (
   source: any,
-  schemaRef: SchemaRef,
-  transform: (_: any, schemaRef: SchemaRef) => any = (_) => _
+  _schemaRef: SchemaRef,
+  _transform: (_: any, schemaRef: SchemaRef) => any = (_) => _
 ): any => source;

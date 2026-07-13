@@ -1,5 +1,5 @@
 import { op, type TypeRegistry } from "@smithy/core/schema";
-import { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type {
   $SchemaRef,
   BlobSchema,

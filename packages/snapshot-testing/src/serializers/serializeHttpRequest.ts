@@ -9,7 +9,7 @@ import { SnapshotPayloadSerializer } from "./SnapshotPayloadSerializer";
  * @internal
  */
 export async function serializeHttpRequest(request: IHttpRequest): Promise<string> {
-  const { method, protocol, hostname, port, path, query, headers, username, password, fragment, body } = request;
+  const { method, protocol, hostname, port, path, query, headers, username, password, fragment /*body*/ } = request;
   const defaultPort = protocol === "https:" || protocol === "wss:" ? 443 : 80;
 
   let slug = `${path}`;

@@ -73,7 +73,7 @@ describe(Command.name, () => {
 
     const cmd = new MyEventStreamCommand({});
     const handler = cmd.resolveMiddleware(
-      { concat: () => ({ resolve: (fn: any, ctx: any) => fn }) } as any,
+      { concat: () => ({ resolve: (fn: any, _ctx: any) => fn }) } as any,
       {
         logger: {} as any,
         requestHandler: { handle: handleFn },

@@ -37,14 +37,14 @@ export class ContentTypeDetection {
       if (this.isJson()) {
         try {
           return ["json", JSON.stringify(JSON.parse(s), null, 2)];
-        } catch (e) {}
+        } catch (ignored) {}
         return ["json", s];
       } else if (this.isXml()) {
         return ["xml", simpleFormatXml(s)];
       } else if (this.isQuery()) {
         return ["query", formatQuery(s)];
       }
-    } catch (e) {}
+    } catch (ignored) {}
     if (s.length === 0) {
       return ["empty", s];
     }
@@ -53,7 +53,7 @@ export class ContentTypeDetection {
     }
     try {
       return ["unrecognized format as base64", toBase64(fromUtf8(s))];
-    } catch (e) {}
+    } catch (ignored) {}
     return ["??", s];
   }
 
@@ -62,7 +62,7 @@ export class ContentTypeDetection {
       try {
         cbor.deserialize(bytes);
         return ["cbor object view", serializeBytes(bytes)];
-      } catch (e) {}
+      } catch (ignored) {}
     }
     return this.formatStringBody(toUtf8(bytes));
   }
@@ -110,5 +110,6 @@ function formatQuery(q: string): string {
 }
 
 function isAscii(str: string) {
+  // eslint-disable-next-line no-control-regex
   return /^[\x00-\x7F]*$/.test(str);
 }

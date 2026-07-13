@@ -1,5 +1,4 @@
-import { HttpResponse } from "@smithy/protocol-http";
-import type { SchemaRef } from "@smithy/types";
+import { HttpResponse } from "@smithy/core/protocols";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { schemaDeserializationMiddleware } from "./schemaDeserializationMiddleware";

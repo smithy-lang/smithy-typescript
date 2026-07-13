@@ -13,7 +13,7 @@ export function getSelectorName(functionString: string): string {
     constants.delete("CONFIG_PREFIX_SEPARATOR");
     constants.delete("ENV");
     return [...constants].join(", ");
-  } catch (e) {
+  } catch (ignored) {
     return functionString;
   }
 }

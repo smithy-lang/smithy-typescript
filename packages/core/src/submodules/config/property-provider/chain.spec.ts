@@ -21,12 +21,8 @@ describe("chain", () => {
       resolveStatic(expectedOutput),
     ];
 
-    try {
-      const result = await chain(...providers)();
-      expect(result).toBe(expectedOutput);
-    } catch (error) {
-      throw error;
-    }
+    const result = await chain(...providers)();
+    expect(result).toBe(expectedOutput);
 
     expect(providers[0]).toHaveBeenCalledTimes(1);
     expect(providers[1]).toHaveBeenCalledTimes(1);
@@ -41,12 +37,8 @@ describe("chain", () => {
       rejectWithProviderError("This provider should not be invoked"),
     ];
 
-    try {
-      const result = await chain(...providers)();
-      expect(result).toBe(expectedOutput);
-    } catch (error) {
-      throw error;
-    }
+    const result = await chain(...providers)();
+    expect(result).toBe(expectedOutput);
 
     expect(providers[0]).toHaveBeenCalledTimes(1);
     expect(providers[1]).toHaveBeenCalledTimes(1);

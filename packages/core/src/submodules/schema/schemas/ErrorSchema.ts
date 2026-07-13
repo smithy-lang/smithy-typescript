@@ -32,7 +32,7 @@ export class ErrorSchema extends StructureSchema {
  * @param traits - shape level serde traits.
  * @param memberNames - list of member names.
  * @param memberList - list of schemaRef corresponding to each
- * @param ctor - class reference for the existing Error extending class.
+ * @param _ctor - class reference for the existing Error extending class.
  */
 export const error = (
   namespace: string,
@@ -43,7 +43,7 @@ export const error = (
   /**
    * @deprecated - field unused.
    */
-  ctor?: any
+  _ctor?: any
 ): ErrorSchema =>
   Schema.assign(new ErrorSchema(), {
     name,

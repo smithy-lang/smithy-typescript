@@ -32,7 +32,7 @@ export class SnapshotEventStreamSerializer extends ContentTypeDetection {
     this.headerLength = String(headersByteLength);
     this.preludeCrc = String(preludeCrc);
 
-    const [headers, payload, messageCrc] = [
+    const [_headers, payload, messageCrc] = [
       message.subarray(12, 12 + headersByteLength),
       message.subarray(12 + headersByteLength, totalByteLength - 4),
       dv.getUint32(totalByteLength - 4),

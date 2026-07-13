@@ -9,8 +9,6 @@
     "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types",
     "extract:docs": "api-extractor run --local",
-    "format": "prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\"",
     "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "yarn g:vitest run",
     "test:watch": "yarn g:vitest watch",

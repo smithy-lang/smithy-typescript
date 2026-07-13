@@ -1,5 +1,5 @@
 import { map, op, struct } from "@smithy/core/schema";
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "./index";
 import type {
   Codec,
   EndpointV2,
@@ -45,11 +45,11 @@ class TestHttpProtocol extends HttpProtocol {
   }
 
   protected async handleError(
-    operationSchema: OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
-    response: IHttpResponse,
-    dataObject: any,
-    metadata: ResponseMetadata
+    _operationSchema: OperationSchema,
+    _context: HandlerExecutionContext & SerdeFunctions,
+    _response: IHttpResponse,
+    _dataObject: any,
+    _metadata: ResponseMetadata
   ): Promise<never> {
     throw new Error("Method not implemented.");
   }

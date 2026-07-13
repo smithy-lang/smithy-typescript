@@ -1,5 +1,5 @@
 import { AbortController } from "@smithy/abort-controller";
-import { HttpRequest } from "@smithy/protocol-http";
+import { HttpRequest } from "@smithy/core/protocols";
 import { afterAll, afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { FetchHttpHandler, keepAliveSupport } from "./fetch-http-handler";

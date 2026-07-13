@@ -25,7 +25,7 @@ class ThrottlingHandler implements HttpHandler {
     this.lastRefillMs = performance.now();
   }
 
-  public updateHttpClientConfig(key: never, value: never): void {
+  public updateHttpClientConfig(_key: never, _value: never): void {
     throw new Error("Method not implemented.");
   }
 

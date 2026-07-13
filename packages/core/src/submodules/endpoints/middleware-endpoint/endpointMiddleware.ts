@@ -51,9 +51,9 @@ export function bindEndpointMiddleware(getEndpointFromConfig: GetEndpointFromCon
     instructions: EndpointParameterInstructions;
   }): SerializeMiddleware<any, any> => {
     return <Output extends MetadataBearer>(
-        next: SerializeHandler<any, Output>,
-        context: HandlerExecutionContext
-      ): SerializeHandler<any, Output> =>
+      next: SerializeHandler<any, Output>,
+      context: HandlerExecutionContext
+    ): SerializeHandler<any, Output> =>
       async (args: SerializeHandlerArguments<any>): Promise<SerializeHandlerOutput<Output>> => {
         if (config.isCustomEndpoint) {
           setFeature(context, "ENDPOINT_OVERRIDE", "N");

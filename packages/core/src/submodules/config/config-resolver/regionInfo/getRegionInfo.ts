@@ -34,7 +34,7 @@ export const getRegionInfo = (
   }: GetRegionInfoOptions
 ): RegionInfo => {
   const partition = getResolvedPartition(region, { partitionHash });
-  const resolvedRegion = region in regionHash ? region : partitionHash[partition]?.endpoint ?? region;
+  const resolvedRegion = region in regionHash ? region : (partitionHash[partition]?.endpoint ?? region);
 
   const hostnameOptions = { useFipsEndpoint, useDualstackEndpoint };
   const regionHostname = getHostnameFromVariants(regionHash[resolvedRegion]?.variants, hostnameOptions);

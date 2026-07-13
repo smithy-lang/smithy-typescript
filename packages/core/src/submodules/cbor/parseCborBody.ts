@@ -129,7 +129,7 @@ export const buildHttpRpcRequest = async (
     contents.body = body;
     try {
       contents.headers["content-length"] = String(calculateBodyLength(body));
-    } catch (e) {}
+    } catch (ignored) {}
   }
   return new __HttpRequest(contents);
 };

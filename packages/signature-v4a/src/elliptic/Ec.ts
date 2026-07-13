@@ -460,7 +460,7 @@ class HashMD {
     abytes$1(data);
     const { view, buffer, blockLen } = this;
     const len = data.length;
-    for (let pos = 0; pos < len; ) {
+    for (let pos = 0; pos < len;) {
       const take = Math.min(blockLen - this.pos, len - pos);
       // Fast path only when there is no buffered partial block: `take === blockLen` implies
       // `this.pos === 0`, so we can process full blocks directly from the input view.

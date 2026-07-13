@@ -19,7 +19,6 @@ import {
   specialTrue,
   specialUndefined,
   tag,
-  type CborArgumentLength,
   type CborArgumentLengthOffset,
   type CborListType,
   type CborMapType,
@@ -492,7 +491,7 @@ function decodeMapIndefinite(at: Uint32, to: Uint32): CborMapType {
   at += 1;
   const base = at;
   const map = {} as CborMapType;
-  for (; at < to; ) {
+  for (; at < to;) {
     if (payload[at] === 0b1111_1111) {
       _offset = at - base + 2;
       return map;
@@ -508,7 +507,7 @@ function decodeMapIndefinite(at: Uint32, to: Uint32): CborMapType {
 function decodeListIndefinite(at: Uint32, to: Uint32): CborListType {
   at += 1;
   const list = [] as CborListType;
-  for (const base = at; at < to; ) {
+  for (const base = at; at < to;) {
     if (payload[at] === 0b1111_1111) {
       _offset = at - base + 2;
       return list;
@@ -522,7 +521,7 @@ function decodeListIndefinite(at: Uint32, to: Uint32): CborListType {
 function decodeUtf8StringIndefinite(at: Uint32, to: Uint32): string {
   at += 1;
   const vector = [];
-  for (const base = at; at < to; ) {
+  for (const base = at; at < to;) {
     if (payload[at] === 0b1111_1111) {
       const data = alloc(vector.length);
       data.set(vector, 0);
@@ -554,7 +553,7 @@ function decodeUnstructuredByteStringIndefinite(at: Uint32, to: Uint32): CborUns
   at += 1;
   const vector = [];
 
-  for (const base = at; at < to; ) {
+  for (const base = at; at < to;) {
     if (payload[at] === 0b1111_1111) {
       const data = alloc(vector.length);
       data.set(vector, 0);

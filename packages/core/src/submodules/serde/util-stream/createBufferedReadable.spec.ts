@@ -74,7 +74,7 @@ describe("Buffered Readable stream", () => {
   }
 
   for (const [dataSize, chunkSize, bufferSize] of [
-    [10 * KB, 1 * KB, 0 * KB],
+    [10 * KB, 1 * KB, 0],
     [10 * KB, 1 * KB, 1 * KB],
     [10 * KB, 1 * KB, 2.1 * KB],
     [10 * KB, 1 * KB, 4 * KB],

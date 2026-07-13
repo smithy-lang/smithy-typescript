@@ -7,10 +7,22 @@
  *
  * Can also be required and called as buildEs(packageDir).
  */
-const { transformSync } = require("oxc-transform");
-const { parseSync } = require("oxc-parser");
 const { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync } = require("node:fs");
 const path = require("node:path");
+
+/**
+ * Toggle between oxc-transform and tsc (transpileModule) for type stripping.
+ * tsc preserves source formatting; oxc reformats from AST.
+ */
+const USE_TSC = true;
+
+let transformSync, parseSync, ts;
+if (USE_TSC) {
+  ts = require("typescript");
+} else {
+  ({ transformSync } = require("oxc-transform"));
+  ({ parseSync } = require("oxc-parser"));
+}
 
 /**
  * Collect all TemplateLiteral span ranges [start, end] from an AST node.
@@ -80,7 +92,7 @@ function stripComments(code) {
 /**
  * Maximum line length for inlining object/array literals.
  */
-const INLINE_LIMIT = 300;
+const INLINE_LIMIT = 999;
 
 /**
  * Collect span ranges for string-like AST nodes (strings, templates, regex)
@@ -109,14 +121,12 @@ function collectProtectedSpans(node, spans) {
 }
 
 /**
- * Collect spans of ObjectExpression and ArrayExpression nodes.
+ * Collect spans of ObjectExpression and ArrayExpression nodes (leaf-first).
  */
 function collectLiteralSpans(node, spans) {
   if (!node || typeof node !== "object") return;
   const t = node.type;
-  if (t === "ObjectExpression" || t === "ArrayExpression") {
-    spans.push([node.start, node.end, t]);
-  }
+  // Recurse first so children appear before parents (processed in reverse = parents first).
   for (const key of Object.keys(node)) {
     if (key === "type" || key === "start" || key === "end") continue;
     const val = node[key];
@@ -126,6 +136,9 @@ function collectLiteralSpans(node, spans) {
       collectLiteralSpans(val, spans);
     }
   }
+  if (t === "ObjectExpression" || t === "ArrayExpression") {
+    spans.push(node);
+  }
 }
 
 /**
@@ -133,35 +146,35 @@ function collectLiteralSpans(node, spans) {
  * then minify whitespace on each line (preserving indentation and protected spans).
  */
 function minifyFormat(code) {
-  const { program } = parseSync("file.js", code);
+  // Phase 1: inline literals that fit within INLINE_LIMIT.
+  // Iterate until no more inlining is possible (handles nested literals
+  // whose parents become inlineable after children are inlined).
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const { program } = parseSync("file.js", code);
+    const literalNodes = [];
+    collectLiteralSpans(program, literalNodes);
+    literalNodes.sort((a, b) => b.start - a.start);
 
-  // Phase 1: inline short object/array literals.
-  const literalSpans = [];
-  collectLiteralSpans(program, literalSpans);
-  // Sort by start descending so replacements don't shift earlier positions.
-  literalSpans.sort((a, b) => b[0] - a[0]);
+    for (const node of literalNodes) {
+      const { start, end } = node;
+      const fragment = code.slice(start, end);
+      if (!fragment.includes("\n")) continue;
 
-  for (const [start, end] of literalSpans) {
-    const fragment = code.slice(start, end);
-    if (!fragment.includes("\n")) continue;
-    // Compute the column where this literal starts (for line-length check).
-    let lineStart = code.lastIndexOf("\n", start - 1) + 1;
-    const indent = start - lineStart;
-    // Collapse: replace newlines and surrounding whitespace with a single space,
-    // then collapse internal runs of whitespace.
-    const inlined = fragment
-      .replace(/\s*\n\s*/g, " ")
-      .replace(/\s{2,}/g, " ");
-    // Check if the line (indent + content before literal + inlined literal) fits.
-    // Approximate: indent + distance from lineStart to end of inlined.
-    const lineContent = code.slice(lineStart, start) + inlined;
-    // Find end of line after the literal.
-    let lineEnd = code.indexOf("\n", end);
-    if (lineEnd === -1) lineEnd = code.length;
-    const fullLine = lineContent + code.slice(end, lineEnd);
-    // Use tab=1 for length calculation (tabs are single indentation units).
-    if (fullLine.length <= INLINE_LIMIT) {
-      code = code.slice(0, start) + inlined + code.slice(end);
+      const lineStart = code.lastIndexOf("\n", start - 1) + 1;
+      const linePrefix = code.slice(lineStart, start);
+      const inlined = fragment
+        .replace(/\s*\n\s*/g, " ")
+        .replace(/\s{2,}/g, " ");
+      let lineEnd = code.indexOf("\n", end);
+      if (lineEnd === -1) lineEnd = code.length;
+      const fullLine = linePrefix + inlined + code.slice(end, lineEnd);
+
+      if (fullLine.length <= INLINE_LIMIT) {
+        code = code.slice(0, start) + inlined + code.slice(end);
+        changed = true;
+      }
     }
   }
 
@@ -206,7 +219,7 @@ function minifyFormat(code) {
         continue;
       }
       const ch = content[j];
-      if (ch === " ") {
+      if (ch === " " || ch === "\t") {
         // Determine if this space is necessary.
         // Keep space between two identifier/keyword characters (alnum, _, $).
         const prev = minified[minified.length - 1];
@@ -224,7 +237,86 @@ function minifyFormat(code) {
     lines[i] = indentation + minified;
     offset = lineEnd + 1;
   }
-  return lines.join("\n");
+  code = lines.join("\n");
+
+  // Phase 3: ensure semicolons that end statements produce a newline.
+  // Re-parse and collect positions of statement starts that share a line with
+  // a previous statement's semicolon.
+  {
+    const { program: ast3 } = parseSync("file.js", code);
+    const splits = []; // positions where a newline + indent should be inserted.
+    collectStatementSplits(ast3, code, splits);
+    // Apply splits in reverse order.
+    splits.sort((a, b) => b.pos - a.pos);
+    for (const { pos, indent } of splits) {
+      code = code.slice(0, pos) + "\n" + indent + code.slice(pos);
+    }
+  }
+
+  return code;
+}
+
+/**
+ * Walk the AST to find consecutive statements on the same line.
+ * When a statement follows a semicolon on the same line, record a split point.
+ */
+function collectStatementSplits(node, code, splits) {
+  if (!node || typeof node !== "object") return;
+  // Process statement lists (Program.body, BlockStatement.body, SwitchCase.consequent).
+  const bodies = [];
+  if (node.type === "Program" || node.type === "BlockStatement" || node.type === "StaticBlock") {
+    bodies.push(node.body);
+  }
+  if (node.type === "SwitchCase" && node.consequent) {
+    bodies.push(node.consequent);
+  }
+
+  for (const stmts of bodies) {
+    if (!Array.isArray(stmts)) continue;
+    // Determine the block's indentation from the first statement that starts at column 0
+    // of its line (i.e., the line contains only indentation before the statement).
+    let blockIndent = null;
+    for (const stmt of stmts) {
+      if (!stmt) continue;
+      const ls = code.lastIndexOf("\n", stmt.start - 1) + 1;
+      const before = code.slice(ls, stmt.start);
+      if (/^\t*$/.test(before)) {
+        blockIndent = before;
+        break;
+      }
+    }
+    if (blockIndent === null) {
+      // Fallback: use parent node indentation.
+      if (node.type === "Program") {
+        blockIndent = "";
+      } else {
+        const ls = code.lastIndexOf("\n", node.start - 1) + 1;
+        const before = code.slice(ls, node.start);
+        blockIndent = (before.match(/^(\t*)/)[1]) + "\t";
+      }
+    }
+
+    for (let i = 1; i < stmts.length; ++i) {
+      const prev = stmts[i - 1];
+      const curr = stmts[i];
+      if (!prev || !curr) continue;
+      // Check if they're on the same line (no newline between prev.end and curr.start).
+      const between = code.slice(prev.end, curr.start);
+      if (between.includes("\n")) continue;
+      splits.push({ pos: curr.start, indent: blockIndent });
+    }
+  }
+
+  // Recurse into child nodes.
+  for (const key of Object.keys(node)) {
+    if (key === "type" || key === "start" || key === "end") continue;
+    const val = node[key];
+    if (Array.isArray(val)) {
+      for (const item of val) collectStatementSplits(item, code, splits);
+    } else if (val && typeof val === "object" && val.type) {
+      collectStatementSplits(val, code, splits);
+    }
+  }
 }
 
 function isIdentChar(ch) {
@@ -251,12 +343,12 @@ function findProtectedSpan(spans, pos) {
   return null;
 }
 
-function processDir(dir, srcDir, outDir) {
+function processDir(dir, srcDir, outDir, compilerOptions) {
   let count = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      count += processDir(fullPath, srcDir, outDir);
+      count += processDir(fullPath, srcDir, outDir, compilerOptions);
     } else if (
       entry.name.endsWith(".ts") &&
       !entry.name.endsWith(".d.ts") &&
@@ -270,12 +362,24 @@ function processDir(dir, srcDir, outDir) {
       const outPath = path.join(outDir, relPath.replace(/\.ts$/, ".js"));
       mkdirSync(path.dirname(outPath), { recursive: true });
       const source = readFileSync(fullPath, "utf-8");
-      const { code, errors } = transformSync(fullPath, source, { sourcemap: false });
-      if (errors.length) {
-        console.error(`Errors in ${fullPath}:`, errors);
-        process.exit(1);
+
+      let code;
+      if (USE_TSC) {
+        const result = ts.transpileModule(source, {
+          fileName: fullPath,
+          compilerOptions,
+        });
+        code = result.outputText;
+      } else {
+        const result = transformSync(fullPath, source, { sourcemap: false });
+        if (result.errors.length) {
+          console.error(`Errors in ${fullPath}:`, result.errors);
+          process.exit(1);
+        }
+        code = result.code;
       }
-      writeFileSync(outPath, minifyFormat(stripComments(code)));
+
+      writeFileSync(outPath, USE_TSC ? code : minifyFormat(stripComments(code)));
       count++;
     }
   }
@@ -295,7 +399,14 @@ function buildEs(packageDir) {
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
 
-  return processDir(srcDir, srcDir, outDir);
+  let compilerOptions;
+  if (USE_TSC) {
+    const configPath = ts.findConfigFile(packageDir, ts.sys.fileExists, "tsconfig.es.json");
+    const { config } = ts.readConfigFile(configPath, ts.sys.readFile);
+    ({ options: compilerOptions } = ts.parseJsonConfigFileContent(config, ts.sys, packageDir));
+  }
+
+  return processDir(srcDir, srcDir, outDir, compilerOptions);
 }
 
 module.exports = buildEs;

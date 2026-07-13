@@ -84,7 +84,7 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
 
             try {
               retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
-            } catch (refreshError) {
+            } catch (ignoredRefreshError) {
               if (!lastError.$metadata) {
                 lastError.$metadata = {};
               }

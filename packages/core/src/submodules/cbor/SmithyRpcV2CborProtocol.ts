@@ -25,7 +25,7 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
   /**
    * @override
    */
-  protected declare compositeErrorRegistry: TypeRegistry;
+  declare protected compositeErrorRegistry: TypeRegistry;
   private codec = new CborCodec();
   protected serializer = this.codec.createSerializer();
   protected deserializer = this.codec.createDeserializer();
@@ -69,7 +69,7 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
       }
       try {
         request.headers["content-length"] = String((request.body as Uint8Array).byteLength);
-      } catch (e) {}
+      } catch (ignored) {}
     }
     const { service, operation } = getSmithyContext(context) as {
       service: string;
@@ -121,7 +121,7 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     let errorSchema: StaticErrorSchema;
     try {
       errorSchema = registry.getSchema(errorName) as StaticErrorSchema;
-    } catch (e) {
+    } catch (ignored) {
       if (dataObject.Message) {
         dataObject.message = dataObject.Message;
       }
