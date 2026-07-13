@@ -5,7 +5,6 @@
  * These errors are retryable, assuming the SDK has enabled clock skew
  * correction.
  *
- * @see https://smithy.io/2.0/aws/aws-auth.html
  */
 export const CLOCK_SKEW_ERROR_CODES = [
   "AccessDeniedException",
