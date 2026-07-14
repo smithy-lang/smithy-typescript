@@ -1,6 +1,6 @@
 {
   "name": "@smithy/middleware-apply-body-checksum",
-  "version": "4.5.8",
+  "version": "4.5.9",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",

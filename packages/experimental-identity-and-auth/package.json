@@ -1,6 +1,6 @@
 {
   "name": "@smithy/experimental-identity-and-auth",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",

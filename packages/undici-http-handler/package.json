@@ -1,6 +1,6 @@
 {
   "name": "@smithy/undici-http-handler",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Smithy-compatible HTTP handler backed by modern, high performance Node.js undici client",
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
