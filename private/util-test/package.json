@@ -11,9 +11,7 @@
     "build:es": "premove dist-es && tsc -p tsconfig.es.json",
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-    "clean": "premove dist-cjs dist-es dist-types",
-    "format": "prettier --config ../../prettier.config.js --ignore-path ../.prettierignore --write \"**/*.{ts,md,json}\"",
-    "lint": "eslint -c ../../.eslintrc.js \"src/**/*.ts\""
+    "clean": "premove dist-cjs dist-es dist-types"
   },
   "dependencies": {
     "@smithy/core": "workspace:^",
