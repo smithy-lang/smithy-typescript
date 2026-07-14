@@ -14,8 +14,8 @@ const { Crc32Js, Crc32Node, Sha256Js, Sha256Node, Md5Js, Md5Node } = checksum;
 const { AwsCrc32 } = require("@aws-crypto/crc32");
 const { Sha256: AwsSha256 } = require("@aws-crypto/sha256-js");
 
-const SIZES =      [32,    256,   1024,  64 * 1024, 1024 * 1024, 10 * 1024 * 1024, 50 * 1024 * 1024];
-const ITERATIONS = [10000, 5000,  2000,  200,       20,          5,                3              ];
+const SIZES = [32, 256, 1024, 64 * 1024, 1024 * 1024, 10 * 1024 * 1024, 50 * 1024 * 1024];
+const ITERATIONS = [10000, 5000, 2000, 200, 20, 5, 3];
 
 function generateData(size) {
   const buf = new Uint8Array(size);
@@ -74,7 +74,7 @@ function alignedTable(headers, rows) {
   return out;
 }
 
-async function runSection(label, impls, extraCtorArgs) {
+async function runSection(label, impls) {
   const rows = [];
   for (let si = 0; si < SIZES.length; ++si) {
     const size = SIZES[si];

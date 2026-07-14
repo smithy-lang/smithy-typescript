@@ -1,5 +1,5 @@
-import http, { request as hRequest, type Server as HttpServer } from "node:http";
-import https, { request as hsRequest, type Server as HttpsServer } from "node:https";
+import http, { type Server as HttpServer } from "node:http";
+import https, { type Server as HttpsServer } from "node:https";
 import type { AddressInfo } from "node:net";
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/core/protocols";
@@ -15,6 +15,9 @@ import {
   createResponseFunction,
   getResponseBody,
 } from "./server.mock";
+
+const { request: hRequest } = http;
+const { request: hsRequest } = https;
 
 vi.mock("http", async () => {
   const actual = (await vi.importActual("http")) as any;

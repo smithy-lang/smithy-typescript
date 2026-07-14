@@ -132,7 +132,7 @@ async function validateDist(packageDir, pkgJson, distName) {
     }
     // Type-only files compile to just "export {};".
     const content = fs.readFileSync(file, "utf-8").trim();
-    if (content === "export {};" || content === '"use strict";') {
+    if (content === "export {};" || content === "export{};" || content === '"use strict";') {
       continue;
     }
     allFiles.push(file);
@@ -160,6 +160,33 @@ async function validate(packageDir) {
 }
 
 async function main() {
+  // Known unreachable files confirmed not erroneous. New additions will cause an error.
+  const KNOWN_UNREACHABLE = new Set([
+    "[@smithy/core] dist-es/submodules/cbor/byte-printer.js",
+    "[@smithy/core] dist-es/submodules/endpoints/util-endpoints/getEndpointUrlConfig.js",
+    "[@smithy/core] dist-es/submodules/endpoints/util-endpoints/utils/evaluateTreeRule.js",
+    "[@smithy/core] dist-es/submodules/endpoints/util-endpoints/utils/getEndpointProperty.js",
+    "[@smithy/core] dist-es/submodules/retry/middleware-retry/longPollMiddleware.js",
+    "[interceptor-example-ssdk] dist-cjs/endpoint/EndpointParameters.js",
+    "[interceptor-example-ssdk] dist-cjs/endpoint/bdd.js",
+    "[interceptor-example-ssdk] dist-cjs/endpoint/endpointResolver.js",
+    "[interceptor-example-ssdk] dist-es/endpoint/EndpointParameters.js",
+    "[interceptor-example-ssdk] dist-es/endpoint/bdd.js",
+    "[interceptor-example-ssdk] dist-es/endpoint/endpointResolver.js",
+    "[xyz] dist-cjs/extensionConfiguration.js",
+    "[xyz] dist-cjs/runtimeConfig.browser.js",
+    "[xyz] dist-cjs/runtimeConfig.native.js",
+    "[xyz-schema] dist-cjs/extensionConfiguration.js",
+    "[xyz-schema] dist-cjs/runtimeConfig.browser.js",
+    "[xyz-schema] dist-cjs/runtimeConfig.native.js",
+    "[@smithy/smithy-rpcv2-cbor] dist-cjs/extensionConfiguration.js",
+    "[@smithy/smithy-rpcv2-cbor] dist-cjs/runtimeConfig.browser.js",
+    "[@smithy/smithy-rpcv2-cbor] dist-cjs/runtimeConfig.native.js",
+    "[@smithy/smithy-rpcv2-cbor-schema] dist-cjs/extensionConfiguration.js",
+    "[@smithy/smithy-rpcv2-cbor-schema] dist-cjs/runtimeConfig.browser.js",
+    "[@smithy/smithy-rpcv2-cbor-schema] dist-cjs/runtimeConfig.native.js",
+  ]);
+
   const packages = getPackageDirs();
   const validated = [];
   const errors = [];
@@ -170,9 +197,21 @@ async function main() {
       errors.push(...pkgErrors);
     }
   }
-  if (errors.length) {
-    console.log(`⚠️  ${errors.length} unreachable file(s):\n  ${errors.join("\n  ")}`);
-  } else {
+
+  const knownErrors = errors.filter((e) => {
+    const key = e.replace(/unreachable file: /, "");
+    return KNOWN_UNREACHABLE.has(key);
+  });
+  const newErrors = errors.filter((e) => {
+    const key = e.replace(/unreachable file: /, "");
+    return !KNOWN_UNREACHABLE.has(key);
+  });
+
+  if (newErrors.length) {
+    console.error(`\n❌ ${newErrors.length} NEW unreachable file(s):\n  ${newErrors.join("\n  ")}`);
+    process.exit(1);
+  }
+  if (!errors.length) {
     console.log(`✅ All dist files are reachable from entry points. (${summarizePackages(validated)})`);
   }
 }

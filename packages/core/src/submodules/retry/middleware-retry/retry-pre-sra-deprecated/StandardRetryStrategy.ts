@@ -62,7 +62,7 @@ export class StandardRetryStrategy implements RetryStrategy {
     let maxAttempts: number;
     try {
       maxAttempts = await this.maxAttemptsProvider();
-    } catch (error) {
+    } catch (ignored) {
       maxAttempts = DEFAULT_MAX_ATTEMPTS;
     }
     return maxAttempts;

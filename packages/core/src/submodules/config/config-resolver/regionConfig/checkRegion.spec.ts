@@ -1,4 +1,4 @@
-import { isValidHostLabel } from "@smithy/util-endpoints";
+import { isValidHostLabel } from "@smithy/core/endpoints";
 import { describe, expect, test as it, vi } from "vitest";
 
 import { checkRegion } from "./checkRegion";

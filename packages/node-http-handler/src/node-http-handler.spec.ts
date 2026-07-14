@@ -1,5 +1,5 @@
-import http, { request as hRequest } from "node:http";
-import https, { request as hsRequest } from "node:https";
+import http from "node:http";
+import https from "node:https";
 import { HttpRequest } from "@smithy/core/protocols";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
@@ -8,6 +8,9 @@ import * as setConnectionTimeoutModule from "./set-connection-timeout";
 import * as setRequestTimeoutModule from "./set-request-timeout";
 import * as setSocketTimeoutModule from "./set-socket-timeout";
 import { timing } from "./timing";
+
+let { request: hRequest } = http;
+let { request: hsRequest } = https;
 
 vi.mock("node:http", async () => {
   const actual = (await vi.importActual("node:http")) as any;

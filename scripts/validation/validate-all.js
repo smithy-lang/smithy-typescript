@@ -28,10 +28,12 @@ const VALIDATIONS = [
   { name: "no-unreachable-files", label: "no unreachable files", script: "unreachable-files.js" },
   { name: "no-dynamic-imports", label: "no dynamic imports with non-literal specifiers", script: "static-import-names.js" },
   { name: "no-cycles", label: "no cyclical file or package dependencies", script: "cycles.js" },
-  { name: "eslint", label: "eslint passes on source", script: "eslint.js" },
+  { name: "eslint", label: "oxlint passes on source", script: "oxlint.js" },
+  { name: "no-export-star", label: "no 'export *' in source", script: "no-export-star.js" },
   { name: "banned-imports", label: "no banned imports in dist output", script: "banned-imports.js" },
   { name: "export-names", label: "export function names match their keys", script: "export-names.js" },
   { name: "esm-compat", label: "dist-cjs exports visible via ESM import()", script: "esm-compat.js" },
+  { name: "filenames", label: "no suspicious multi-dot filenames in dist output", script: "filenames.js" },
 ];
 
 function parseArgs() {

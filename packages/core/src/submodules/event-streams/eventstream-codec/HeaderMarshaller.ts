@@ -78,7 +78,7 @@ export class HeaderMarshaller {
 
         const uuidBytes = new Uint8Array(17);
         uuidBytes[0] = HEADER_VALUE_TYPE.uuid;
-        uuidBytes.set(fromHex(header.value.replace(/\-/g, "")), 1);
+        uuidBytes.set(fromHex(header.value.replace(/-/g, "")), 1);
         return uuidBytes;
     }
   }

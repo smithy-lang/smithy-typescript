@@ -1,4 +1,7 @@
-.PHONY: build build-packages sync api-snapshot ct cti cwt cwti
+.PHONY: build build-packages sync api-snapshot ct cti cwt cwti dist lint format
+
+dist:
+	node scripts/compilation/build-es-cjs-batch.js --all
 
 build:
 	./gradlew clean build publishToMavenLocal
@@ -126,3 +129,9 @@ cwti:
 # swallow extra positional args (e.g. make ct endpoints)
 %:
 	@:
+
+lint:
+	yarn lint
+
+format:
+	yarn format

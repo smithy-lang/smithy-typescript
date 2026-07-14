@@ -161,7 +161,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
   private async getMaxAttempts() {
     try {
       return await this.maxAttemptsProvider();
-    } catch (error) {
+    } catch (ignored) {
       console.warn(`Max attempts provider could not resolve. Using default of ${DEFAULT_MAX_ATTEMPTS}`);
       return DEFAULT_MAX_ATTEMPTS;
     }

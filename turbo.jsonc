@@ -25,6 +25,9 @@
       "outputs": ["dist-es/**"],
       "dependsOn": ["prebuild", "^build:types"]
     },
+    "build:es:cjs": {
+      "outputs": ["dist-cjs/**", "dist-es/**"]
+    },
     "build:types": {
       "outputs": ["dist-types/**"],
       "dependsOn": ["prebuild", "^build:types"]

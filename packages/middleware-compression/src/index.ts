@@ -12,6 +12,10 @@ export {
 } from "./NODE_REQUEST_MIN_COMPRESSION_SIZE_BYTES_CONFIG_OPTIONS";
 export { compressionMiddleware, compressionMiddlewareOptions } from "./compressionMiddleware";
 export type { CompressionMiddlewareConfig } from "./compressionMiddleware";
-export type { CompressionInputConfig, CompressionPreviouslyResolved, CompressionResolvedConfig } from "./configurations";
+export type {
+  CompressionInputConfig,
+  CompressionPreviouslyResolved,
+  CompressionResolvedConfig,
+} from "./configurations";
 export { getCompressionPlugin } from "./getCompressionPlugin";
 export { resolveCompressionConfig } from "./resolveCompressionConfig";

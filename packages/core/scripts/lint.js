@@ -40,9 +40,11 @@ for (const submodule of submodules) {
       const expectedEs = hasNative ? nativeEs : browserEs;
       const expectedCjs = hasNative ? nativeCjs : browserCjs;
       const expected = { import: expectedEs, require: expectedCjs };
-      if (!exportEntry["react-native"] ||
-          exportEntry["react-native"].import !== expectedEs ||
-          exportEntry["react-native"].require !== expectedCjs) {
+      if (
+        !exportEntry["react-native"] ||
+        exportEntry["react-native"].import !== expectedEs ||
+        exportEntry["react-native"].require !== expectedCjs
+      ) {
         errors.push(
           `${submodule} exports "react-native" condition must point to ${hasNative ? ".native.js" : ".browser.js"}`
         );
@@ -81,7 +83,7 @@ for (const submodule of submodules) {
     }
     fs.writeFileSync(
       compatibilityRedirectFile,
-`/**
+      `/**
  * Do not edit:
  * This is a compatibility redirect for contexts that do not understand package.json exports field.
  */
@@ -95,7 +97,7 @@ module.exports = require("./dist-cjs/submodules/${submodule}/index.js");
     }
     fs.writeFileSync(
       compatibilityTypesFile,
-`/**
+      `/**
  * Do not edit:
  * This is a compatibility redirect for contexts that do not understand package.json exports field.
  */
@@ -169,7 +171,7 @@ const walk = require("../../../scripts/utils/walk");
 
     const subModuleImports = [
       ...new Set(
-        (sourceCode.toString().match(/(from |import\()"\@smithy\/core\/(.*?)";/g) || []).map(
+        (sourceCode.toString().match(/(from |import\()"@smithy\/core\/(.*?)";/g) || []).map(
           (_) => _.match(/@smithy\/core\/(.*?)"/)[1]
         )
       ),

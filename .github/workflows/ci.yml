@@ -86,8 +86,8 @@ jobs:
           cache: "yarn"
       - name: Install dependencies
         run: yarn
-      - name: Run eslint
-        run: yarn lint --concurrency=3
+      - name: Run linter
+        run: yarn lint
 
   test-typescript:
     runs-on: smithy-typescript_ubuntu-latest_8-core

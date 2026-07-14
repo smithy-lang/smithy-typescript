@@ -368,6 +368,33 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
     }
   }
 
+  // Ban per-package "lint" and "format" scripts that invoke linters/formatters.
+  // These tools run at the repo root level only (yarn lint / yarn format).
+  const bannedLintPatterns = ["eslint", "oxlint", "tslint"];
+  const bannedFormatPatterns = ["prettier", "oxfmt"];
+  if (pkgJson.scripts?.lint && !isSubmoduleCarrier) {
+    for (const pattern of bannedLintPatterns) {
+      if (pkgJson.scripts.lint.includes(pattern)) {
+        errors.push(`${pkgJson.name} scripts["lint"] must not call ${pattern}. Run "yarn lint" from the repo root.`);
+        if (overwrite) {
+          delete pkgJson.scripts.lint;
+        }
+        break;
+      }
+    }
+  }
+  if (pkgJson.scripts?.format) {
+    for (const pattern of bannedFormatPatterns) {
+      if (pkgJson.scripts.format.includes(pattern)) {
+        errors.push(`${pkgJson.name} scripts["format"] must not call ${pattern}. Run "yarn format" from the repo root.`);
+        if (overwrite) {
+          delete pkgJson.scripts.format;
+        }
+        break;
+      }
+    }
+  }
+
   // Enforce clean script uses premove.
   const expectedClean = "premove dist-cjs dist-es dist-types";
   if (pkgJson.scripts?.clean !== expectedClean) {
@@ -437,7 +464,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
   const isNonStub = "build:es:cjs" in (pkgJson.scripts || {});
   const expectedBuildTypes = "premove dist-types && yarn g:tsc -p tsconfig.types.json";
   if (isNonStub) {
-    const expectedBuildEsCjs = "premove dist-es && yarn g:tsc -p tsconfig.es.json && node ../../scripts/inline";
+    const expectedBuildEsCjs = "node ../../scripts/compilation/es_cjs.js";
     const expectedBuild = `concurrently 'yarn:build:types' 'yarn:build:es:cjs'`;
 
     if (pkgJson.scripts?.build !== expectedBuild) {

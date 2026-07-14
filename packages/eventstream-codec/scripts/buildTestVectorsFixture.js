@@ -1,6 +1,6 @@
-const { Buffer } = require("buffer");
-const { readdirSync, readFileSync, writeFileSync } = require("fs");
-const { dirname, join } = require("path");
+const { Buffer } = require("node:buffer");
+const { readdirSync, readFileSync, writeFileSync } = require("node:fs");
+const { dirname, join } = require("node:path");
 
 const HEADER_TYPES = ["boolean", "byte", "short", "integer", "long", "binary", "string", "timestamp", "uuid"];
 

@@ -1,7 +1,7 @@
 import { SmithyRpcV2CborProtocol, cbor } from "@smithy/core/cbor";
 import { getEndpointFromInstructions } from "@smithy/core/endpoints";
 import type { HttpProtocol } from "@smithy/core/protocols";
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/core/protocols";
 import {
   EmptyInputOutputCommand,
   RpcV2ProtocolClient,

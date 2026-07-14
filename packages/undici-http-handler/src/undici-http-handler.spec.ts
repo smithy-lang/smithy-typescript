@@ -1,10 +1,12 @@
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import http, { type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { HttpRequest } from "@smithy/core/protocols";
 import { Agent, getGlobalDispatcher, setGlobalDispatcher, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { UndiciHttpHandler } from "./undici-http-handler";
+
+const { createServer } = http;
 
 let server: Server;
 let port: number;

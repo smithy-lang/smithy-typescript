@@ -21,8 +21,6 @@ import {
 } from "./constants";
 import { iso8601 } from "./utilDate";
 
-import Spy = jasmine.Spy;
-
 const signerInit = {
   service: "foo",
   region: "us-bar-1",
@@ -930,12 +928,12 @@ describe("SignatureV4", () => {
 
     it("should use the current date for presigning if no signing date was supplied", async () => {
       const { query } = await signer.presign(minimalRequest);
-      expect((query as any)[AMZ_DATE_QUERY_PARAM]).toBe(iso8601(mockDate).replace(/[\-:]/g, ""));
+      expect((query as any)[AMZ_DATE_QUERY_PARAM]).toBe(iso8601(mockDate).replace(/[-:]/g, ""));
     });
 
     it("should use the current date for signing if no signing date supplied", async () => {
       const { headers } = await signer.sign(minimalRequest);
-      expect(headers[AMZ_DATE_HEADER]).toBe(iso8601(mockDate).replace(/[\-:]/g, ""));
+      expect(headers[AMZ_DATE_HEADER]).toBe(iso8601(mockDate).replace(/[-:]/g, ""));
     });
   });
 });

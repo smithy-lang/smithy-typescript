@@ -75,7 +75,7 @@ const useMobileConfiguration = (): boolean => {
   if (navigator?.connection) {
     // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/effectiveType
     // The maximum will report as 4g, regardless of 5g or further developments.
-    const { effectiveType, rtt, downlink } = navigator?.connection;
+    const { effectiveType, rtt, downlink } = navigator.connection;
     const slow =
       (typeof effectiveType === "string" && effectiveType !== "4g") || Number(rtt) > 100 || Number(downlink) < 10;
     if (slow) {

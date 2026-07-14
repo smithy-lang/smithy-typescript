@@ -32,7 +32,7 @@ export const resolveParamsForS3 = async (endpointParams: EndpointParameters) => 
   return endpointParams;
 };
 
-const DOMAIN_PATTERN = /^[a-z0-9][a-z0-9\.\-]{1,61}[a-z0-9]$/;
+const DOMAIN_PATTERN = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/;
 const IP_ADDRESS_PATTERN = /(\d+\.){3}\d+/;
 const DOTS_PATTERN = /\.\./;
 /**

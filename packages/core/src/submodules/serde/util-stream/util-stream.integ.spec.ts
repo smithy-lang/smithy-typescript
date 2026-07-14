@@ -1,5 +1,5 @@
 import { Readable } from "node:stream";
-import { HttpResponse, type HttpHandler } from "@smithy/protocol-http";
+import { HttpResponse, type HttpHandler } from "@smithy/core/protocols";
 import type { HttpRequest as IHttpRequest } from "@smithy/types";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";

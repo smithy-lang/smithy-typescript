@@ -165,7 +165,7 @@ export class SdkClientTocPlugin {
     // Group commands and input/output interface of each command.
     commands.children.sort((childA, childB) => childA.name.localeCompare(childB.name));
 
-    categories.push(...[clients, commands, paginators, waiters]);
+    categories.push(clients, commands, paginators, waiters);
     return categories;
   }
 

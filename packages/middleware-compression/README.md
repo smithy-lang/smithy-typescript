@@ -14,4 +14,4 @@
 > e.g. `npm up @scope/package` or equivalent command in another
 > package manager, rather than taking a direct dependency.
 
-----
+---

@@ -12,7 +12,7 @@ import type {
   ShapeSerializer,
   StaticStructureSchema,
 } from "@smithy/types";
-import { parseUrl } from "@smithy/url-parser";
+import { parseUrl } from "./index";
 import { describe, expect, test as it } from "vitest";
 
 import { RpcProtocol } from "./RpcProtocol";
@@ -37,7 +37,7 @@ describe(RpcProtocol.name, () => {
       const ns = NormalizedSchema.of(schema);
       if (typeof value === "object" && value !== null && !Array.isArray(value)) {
         const entries: string[] = [];
-        for (const [k, memberSchema] of ns.structIterator()) {
+        for (const [k, _memberSchema] of ns.structIterator()) {
           const v = (value as any)[k];
           if (v != null) {
             entries.push(`"${k}":"${v}"`);

@@ -1,3 +1,4 @@
+// oxlint-disable no-useless-spread
 import { Readable } from "node:stream";
 import { cbor, dateToTag } from "@smithy/core/cbor";
 import { HttpResponse } from "@smithy/core/protocols";

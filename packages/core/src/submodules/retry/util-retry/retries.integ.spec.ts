@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import { cbor } from "@smithy/core/cbor";
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpResponse } from "@smithy/core/protocols";
 import type { RetryErrorType, StandardRetryToken } from "@smithy/types";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { afterAll, beforeAll, describe, expect, test as it, vi } from "vitest";

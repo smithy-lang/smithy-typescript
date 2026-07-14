@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 import { NormalizedSchema, op, type TypeRegistry } from "@smithy/core/schema";
 import { LazyJsonString, dateToUtcString, generateIdempotencyToken, quoteHeader, toBase64 } from "@smithy/core/serde";
 import { streamCollector } from "@smithy/node-http-handler";
-import { HttpResponse } from "@smithy/protocol-http";
+import { HttpResponse } from "./index";
 import type {
   $Schema,
   $ShapeSerializer,
@@ -26,7 +26,7 @@ import type {
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
 } from "@smithy/types";
-import { parseUrl } from "@smithy/url-parser";
+import { parseUrl } from "./index";
 import { describe, expect, test as it } from "vitest";
 
 import { HttpBindingProtocol } from "./HttpBindingProtocol";

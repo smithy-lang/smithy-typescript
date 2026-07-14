@@ -30,7 +30,7 @@ export function contentLengthMiddleware(bodyLengthChecker: BodyLengthCalculator)
               ...request.headers,
               [CONTENT_LENGTH_HEADER]: String(length),
             };
-          } catch (error) {
+          } catch (ignored) {
             // ToDo: Add 'transfer-encoding' as chunked only for HTTP/1.1 request
             // Refs: https://github.com/aws/aws-sdk-js-v3/pull/3403
           }

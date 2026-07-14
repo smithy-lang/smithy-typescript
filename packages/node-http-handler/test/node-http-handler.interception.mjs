@@ -15,7 +15,7 @@ let failures = 0;
 // Test http interception
 {
   let called = false;
-  http.request = function (...args) {
+  http.request = function (..._args) {
     called = true;
     throw new Error("intercepted");
   };
@@ -40,7 +40,7 @@ let failures = 0;
 // Test https interception
 {
   let called = false;
-  https.request = function (...args) {
+  https.request = function (..._args) {
     called = true;
     throw new Error("intercepted");
   };

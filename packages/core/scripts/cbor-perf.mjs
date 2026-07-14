@@ -145,7 +145,8 @@ function mdTable(headers, rows) {
     return cols[i].align === "r" ? " ".repeat(diff) + str : str + " ".repeat(diff);
   };
   const line = (cells) => "| " + cells.map((c, i) => pad(c, i)).join(" | ") + " |";
-  const sep = "| " + cols.map((c) => (c.align === "r" ? "-".repeat(c.width - 1) + ":" : "-".repeat(c.width))).join(" | ") + " |";
+  const sep =
+    "| " + cols.map((c) => (c.align === "r" ? "-".repeat(c.width - 1) + ":" : "-".repeat(c.width))).join(" | ") + " |";
   return [line(headers), sep, ...rows.map((r) => line(r))].join("\n");
 }
 
@@ -181,8 +182,12 @@ function buildBenchmarkTable(label, results) {
     (r.cborDecMs / r.jsonDecMs).toFixed(2),
   ]);
 
-  return `### ${label}\n\n` + mdTable(perfHeaders, perfRows) +
-    `\n\nCBOR timing ratio (lower is better):\n\n` + mdTable(ratioHeaders, ratioRows);
+  return (
+    `### ${label}\n\n` +
+    mdTable(perfHeaders, perfRows) +
+    `\n\nCBOR timing ratio (lower is better):\n\n` +
+    mdTable(ratioHeaders, ratioRows)
+  );
 }
 
 // Run JSON once as control
