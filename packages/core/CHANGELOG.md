@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.29.4
+
+### Patch Changes
+
+- 5fca3a0: Add typesVersions entries for submodules so TypeScript <4.5 consumers resolve submodule types
+
 ## 3.29.3
 
 ### Patch Changes

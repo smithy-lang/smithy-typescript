@@ -1,5 +1,12 @@
 # @smithy/util-buffer-from
 
+## 4.4.9
+
+### Patch Changes
+
+- Updated dependencies [5fca3a0]
+  - @smithy/core@3.29.4
+
 ## 4.4.8
 
 ### Patch Changes
