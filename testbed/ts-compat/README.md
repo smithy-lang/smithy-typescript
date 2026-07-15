@@ -46,8 +46,13 @@ You can also run it directly:
 cd testbed/ts-compat && node ./run.mjs
 ```
 
+`run.mjs` first runs `npx turbo run build:types:downlevel` itself: TypeScript
+`<= 4.5` resolves to the `dist-types/ts3.4` declarations via each package's
+`typesVersions`, and the default build does not produce them. turbo caches the
+task, so this is cheap on repeat runs.
+
 Either way assumes the generated clients are already built (their `dist-types`
-are present). `run.mjs` errors with guidance if they are not - run
+are present). `run.mjs` errors with guidance if the clients are missing - run
 `make generate-protocol-tests` (and `make build-packages`) first.
 
 ## Codegen coverage

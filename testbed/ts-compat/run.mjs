@@ -16,11 +16,16 @@
  * install is needed here - only the TypeScript compiler is installed per
  * version (see worker.mjs).
  *
+ * Before running, this script generates the dist-types/ts3.4 declarations that
+ * TypeScript <= 4.5 resolves to (via each package's `typesVersions`) by running
+ * `npx turbo run build:types:downlevel`.
+ *
  * Work is parallelized across a pool of worker threads sized to the number of
  * available processors (os.cpus().length).
  *
  * Usage: node ./run.mjs
  */
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -86,6 +91,26 @@ function ensureClientsReady() {
 }
 
 /**
+ * Generate the dist-types/ts3.4 declarations. TypeScript <= 4.5 resolves to
+ * these via each package's `typesVersions`, and the default build does not
+ * produce them, so without this the older versions fail with "Could not find a
+ * declaration file". turbo caches `build:types:downlevel`, so this is cheap on
+ * repeat runs.
+ */
+function generateDownlevelTypes() {
+  console.log("Generating downlevel (dist-types/ts3.4) declarations ...");
+  try {
+    execFileSync("npx", ["turbo", "run", "build:types:downlevel"], { cwd: workspaceRoot, stdio: "inherit" });
+  } catch {
+    console.error(
+      `\nFailed to generate downlevel declarations via 'npx turbo run build:types:downlevel'.\n` +
+        `Run it manually from the workspace root to see the error.\n`
+    );
+    process.exit(1);
+  }
+}
+
+/**
  * Run all compile jobs across a worker pool.
  * @param {{ version: string, tscArgs: string[] }[]} versions
  */
@@ -133,6 +158,7 @@ async function runPool(versions) {
 }
 
 ensureClientsReady();
+generateDownlevelTypes();
 const versions = loadVersions();
 const results = await runPool(versions);
 
