@@ -2,10 +2,10 @@ import { EndpointURLScheme, type Endpoint, type EndpointURL } from "@smithy/type
 
 import { isIpAddress } from "./isIpAddress";
 
-const DEFAULT_PORTS: Record<EndpointURLScheme, number> = {
+const DEFAULT_PORTS = {
   [EndpointURLScheme.HTTP]: 80,
   [EndpointURLScheme.HTTPS]: 443,
-};
+} satisfies Record<EndpointURLScheme, number>;
 
 /**
  * Parses a string, URL, or Endpoint into it’s Endpoint URL components.

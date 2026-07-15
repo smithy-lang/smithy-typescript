@@ -13,7 +13,7 @@ export const REGION_INI_NAME = "region";
 /**
  * @internal
  */
-export const NODE_REGION_CONFIG_OPTIONS: LoadedConfigSelectors<string> = {
+export const NODE_REGION_CONFIG_OPTIONS = {
   environmentVariableSelector: (env) => env[REGION_ENV_NAME],
   configFileSelector: (profile) => profile[REGION_INI_NAME],
   default: async () => {
@@ -23,11 +23,11 @@ export const NODE_REGION_CONFIG_OPTIONS: LoadedConfigSelectors<string> = {
     }
     throw new Error("Region is missing");
   },
-};
+} satisfies LoadedConfigSelectors<string>;
 
 /**
  * @internal
  */
-export const NODE_REGION_CONFIG_FILE_OPTIONS: LocalConfigOptions = {
+export const NODE_REGION_CONFIG_FILE_OPTIONS = {
   preferredFile: "credentials",
-};
+} satisfies LocalConfigOptions;

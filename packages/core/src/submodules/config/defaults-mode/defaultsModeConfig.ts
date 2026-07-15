@@ -8,7 +8,7 @@ const AWS_DEFAULTS_MODE_CONFIG = "defaults_mode";
 /**
  * @internal
  */
-export const NODE_DEFAULTS_MODE_CONFIG_OPTIONS: LoadedConfigSelectors<DefaultsMode> = {
+export const NODE_DEFAULTS_MODE_CONFIG_OPTIONS = {
   environmentVariableSelector: (env) => {
     return env[AWS_DEFAULTS_MODE_ENV] as DefaultsMode;
   },
@@ -16,4 +16,4 @@ export const NODE_DEFAULTS_MODE_CONFIG_OPTIONS: LoadedConfigSelectors<DefaultsMo
     return profile[AWS_DEFAULTS_MODE_CONFIG] as DefaultsMode;
   },
   default: "legacy",
-};
+} satisfies LoadedConfigSelectors<DefaultsMode>;

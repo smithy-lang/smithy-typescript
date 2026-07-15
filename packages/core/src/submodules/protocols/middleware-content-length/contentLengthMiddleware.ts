@@ -44,12 +44,12 @@ export function contentLengthMiddleware(bodyLengthChecker: BodyLengthCalculator)
     };
 }
 
-export const contentLengthMiddlewareOptions: BuildHandlerOptions = {
+export const contentLengthMiddlewareOptions = {
   step: "build",
   tags: ["SET_CONTENT_LENGTH", "CONTENT_LENGTH"],
   name: "contentLengthMiddleware",
   override: true,
-};
+} satisfies BuildHandlerOptions;
 
 export const getContentLengthPlugin = (options: { bodyLengthChecker: BodyLengthCalculator }): Pluggable<any, any> => ({
   applyToStack: (clientStack) => {

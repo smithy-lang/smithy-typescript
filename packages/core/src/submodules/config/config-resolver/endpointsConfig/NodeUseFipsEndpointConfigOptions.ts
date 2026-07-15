@@ -20,19 +20,19 @@ export const DEFAULT_USE_FIPS_ENDPOINT = false;
  * @deprecated replaced by nodeFipsConfigSelectors in newer clients.
  * @internal
  */
-export const NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS: LoadedConfigSelectors<boolean> = {
+export const NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS = {
   environmentVariableSelector: (env: NodeJS.ProcessEnv) =>
     booleanSelector(env, ENV_USE_FIPS_ENDPOINT, SelectorType.ENV),
   configFileSelector: (profile) => booleanSelector(profile, CONFIG_USE_FIPS_ENDPOINT, SelectorType.CONFIG),
   default: false,
-};
+} satisfies LoadedConfigSelectors<boolean>;
 
 /**
  * @internal
  */
-export const nodeFipsConfigSelectors: LoadedConfigSelectors<boolean | undefined> = {
+export const nodeFipsConfigSelectors = {
   environmentVariableSelector: (env: NodeJS.ProcessEnv) =>
     booleanSelector(env, ENV_USE_FIPS_ENDPOINT, SelectorType.ENV),
   configFileSelector: (profile) => booleanSelector(profile, CONFIG_USE_FIPS_ENDPOINT, SelectorType.CONFIG),
   default: undefined,
-};
+} satisfies LoadedConfigSelectors<boolean | undefined>;

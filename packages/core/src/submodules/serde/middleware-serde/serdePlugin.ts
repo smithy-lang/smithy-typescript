@@ -19,22 +19,22 @@ import { serializerMiddleware } from "./serializerMiddleware";
 /**
  * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
-export const deserializerMiddlewareOption: DeserializeHandlerOptions = {
+export const deserializerMiddlewareOption = {
   name: "deserializerMiddleware",
   step: "deserialize",
   tags: ["DESERIALIZER"],
   override: true,
-};
+} satisfies DeserializeHandlerOptions;
 
 /**
  * @deprecated will be replaced by schemaSerdePlugin from core/schema.
  */
-export const serializerMiddlewareOption: SerializeHandlerOptions = {
+export const serializerMiddlewareOption = {
   name: "serializerMiddleware",
   step: "serialize",
   tags: ["SERIALIZER"],
   override: true,
-};
+} satisfies SerializeHandlerOptions;
 
 /**
  * Modifies the EndpointBearer to make it compatible with Endpoints 2.0 change.

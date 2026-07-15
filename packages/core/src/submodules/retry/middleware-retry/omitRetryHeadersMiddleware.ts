@@ -30,13 +30,13 @@ export const omitRetryHeadersMiddleware =
 /**
  * @internal
  */
-export const omitRetryHeadersMiddlewareOptions: RelativeMiddlewareOptions = {
+export const omitRetryHeadersMiddlewareOptions = {
   name: "omitRetryHeadersMiddleware",
   tags: ["RETRY", "HEADERS", "OMIT_RETRY_HEADERS"],
   relation: "before",
   toMiddleware: "awsAuthMiddleware",
   override: true,
-};
+} satisfies RelativeMiddlewareOptions;
 
 /**
  * @internal

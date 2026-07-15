@@ -19,7 +19,7 @@ export const CONFIG_MAX_ATTEMPTS = "max_attempts";
 /**
  * @internal
  */
-export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS: LoadedConfigSelectors<number> = {
+export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS = {
   environmentVariableSelector: (env) => {
     const value = env[ENV_MAX_ATTEMPTS];
     if (!value) return undefined;
@@ -39,7 +39,7 @@ export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS: LoadedConfigSelectors<number> = {
     return maxAttempt;
   },
   default: DEFAULT_MAX_ATTEMPTS,
-};
+} satisfies LoadedConfigSelectors<number>;
 
 /**
  * @public
@@ -133,8 +133,8 @@ export const CONFIG_RETRY_MODE = "retry_mode";
 /**
  * @internal
  */
-export const NODE_RETRY_MODE_CONFIG_OPTIONS: LoadedConfigSelectors<string> = {
+export const NODE_RETRY_MODE_CONFIG_OPTIONS = {
   environmentVariableSelector: (env) => env[ENV_RETRY_MODE],
   configFileSelector: (profile) => profile[CONFIG_RETRY_MODE],
   default: DEFAULT_RETRY_MODE,
-};
+} satisfies LoadedConfigSelectors<string>;

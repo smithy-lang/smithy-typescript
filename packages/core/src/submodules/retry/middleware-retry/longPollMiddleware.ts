@@ -28,12 +28,12 @@ export const longPollMiddleware =
 /**
  * @internal
  */
-export const longPollMiddlewareOptions: InitializeHandlerOptions = {
+export const longPollMiddlewareOptions = {
   name: "longPollMiddleware",
   tags: ["RETRY"],
   step: "initialize",
   override: true,
-};
+} satisfies InitializeHandlerOptions;
 
 /**
  * @internal

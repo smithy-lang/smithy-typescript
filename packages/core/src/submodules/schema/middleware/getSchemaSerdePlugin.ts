@@ -14,22 +14,22 @@ import { schemaSerializationMiddleware } from "./schemaSerializationMiddleware";
 /**
  * @internal
  */
-export const deserializerMiddlewareOption: DeserializeHandlerOptions = {
+export const deserializerMiddlewareOption = {
   name: "deserializerMiddleware",
   step: "deserialize",
   tags: ["DESERIALIZER"],
   override: true,
-};
+} satisfies DeserializeHandlerOptions;
 
 /**
  * @internal
  */
-export const serializerMiddlewareOption: SerializeHandlerOptions = {
+export const serializerMiddlewareOption = {
   name: "serializerMiddleware",
   step: "serialize",
   tags: ["SERIALIZER"],
   override: true,
-};
+} satisfies SerializeHandlerOptions;
 
 /**
  * @internal

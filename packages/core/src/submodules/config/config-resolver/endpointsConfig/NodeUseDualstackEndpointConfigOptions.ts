@@ -20,19 +20,19 @@ export const DEFAULT_USE_DUALSTACK_ENDPOINT = false;
  * @deprecated replaced by nodeDualstackConfigSelectors in newer clients.
  * @internal
  */
-export const NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS: LoadedConfigSelectors<boolean> = {
+export const NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS = {
   environmentVariableSelector: (env: NodeJS.ProcessEnv) =>
     booleanSelector(env, ENV_USE_DUALSTACK_ENDPOINT, SelectorType.ENV),
   configFileSelector: (profile) => booleanSelector(profile, CONFIG_USE_DUALSTACK_ENDPOINT, SelectorType.CONFIG),
   default: false,
-};
+} satisfies LoadedConfigSelectors<boolean>;
 
 /**
  * @internal
  */
-export const nodeDualstackConfigSelectors: LoadedConfigSelectors<boolean | undefined> = {
+export const nodeDualstackConfigSelectors = {
   environmentVariableSelector: (env: NodeJS.ProcessEnv) =>
     booleanSelector(env, ENV_USE_DUALSTACK_ENDPOINT, SelectorType.ENV),
   configFileSelector: (profile) => booleanSelector(profile, CONFIG_USE_DUALSTACK_ENDPOINT, SelectorType.CONFIG),
   default: undefined,
-};
+} satisfies LoadedConfigSelectors<boolean | undefined>;
