@@ -274,6 +274,28 @@ describe(ChecksumStream.name, () => {
     });
   });
 
+  describe("string chunks", () => {
+    it("should handle string chunks from the source by converting them to Buffer", async () => {
+      const source = new Readable({
+        read() {
+          this.push("abcdefghijklm");
+          this.push("nopqrstuvwxyz");
+          this.push(null);
+        },
+      });
+
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+      });
+
+      const collected = toUtf8(await collect(checksumStream));
+      expect(collected).toEqual(canonicalUtf8);
+    });
+  });
+
   describe("backpressure", () => {
     it("should only read from the source at the rate it is consumed", async () => {
       // for Node.js 22+ increased default highwater mark.
