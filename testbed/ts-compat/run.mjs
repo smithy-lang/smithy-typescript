@@ -24,9 +24,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Worker } from "node:worker_threads";
 
-const root = import.meta.dirname;
+// import.meta.dirname is only available on Node 20.11+, so derive it from the
+// module URL to keep the runner working on older Node versions in CI.
+const root = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(root, "..", "..");
 
 // The versions under test live in typescript-versions.json (oldest -> newest)
