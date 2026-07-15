@@ -1,4 +1,4 @@
-.PHONY: build build-packages sync api-snapshot ct cti cwt cwti dist lint format
+.PHONY: build build-packages sync api-snapshot ct cti cwt cwti dist lint format test-typescript-versions
 
 build:
 	./gradlew clean build publishToMavenLocal
@@ -83,6 +83,10 @@ test-bundlers:
 test-types:
 	npx tsc -p tsconfig.test.json
 
+# verify generated clients compile across supported TypeScript versions (see testbed/ts-compat/README.md).
+test-typescript-versions:
+	(cd ./testbed/ts-compat && make run)
+
 test-integration:
 	make static-analysis;
 	make api-snapshot;
@@ -95,6 +99,7 @@ test-integration:
 		yarn g:vitest run -c vitest.config.integ.mts; \
 	fi
 	make test-types;
+	make test-typescript-versions;
 	make test-bundlers;
 
 static-analysis:
