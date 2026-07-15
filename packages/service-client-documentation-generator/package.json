@@ -30,7 +30,7 @@
   "devDependencies": {
     "@types/node": "^18.11.9",
     "concurrently": "7.0.0",
-    "downlevel-dts": "0.10.1",
+    "downlevel-dts": "0.11.0",
     "premove": "4.0.0"
   },
   "typedoc": {
