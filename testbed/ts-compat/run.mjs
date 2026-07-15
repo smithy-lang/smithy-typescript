@@ -134,12 +134,27 @@ async function runPool(versions) {
       active++;
       const worker = new Worker(workerPath, { workerData: { root, job } });
 
+      // Each worker is expected to post exactly one result message (worker.mjs
+      // catches its own exceptions and reports them as a failure result). If a
+      // worker instead exits before reporting - e.g. it was OOM-killed, crashed
+      // natively, or called process.exit - the version would otherwise vanish
+      // from the summary. Track whether a result was seen and synthesize a
+      // failure on such an exit so the gap surfaces as a FAIL.
+      let settled = false;
       worker.once("message", (res) => {
+        settled = true;
         results.push(res);
         worker.terminate();
       });
       worker.once("error", reject);
-      worker.once("exit", () => {
+      worker.once("exit", (code) => {
+        if (!settled) {
+          results.push({
+            version: job.version,
+            ok: false,
+            output: `Worker for typescript@${job.version} exited (code ${code}) before reporting a result.`,
+          });
+        }
         active--;
         if (queue.length > 0) {
           spawnWorker();
