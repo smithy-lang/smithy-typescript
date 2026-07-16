@@ -1,5 +1,12 @@
 # @smithy/util-endpoints
 
+## 3.6.10
+
+### Patch Changes
+
+- Updated dependencies [b44cb0a]
+  - @smithy/core@3.29.5
+
 ## 3.6.9
 
 ### Patch Changes
