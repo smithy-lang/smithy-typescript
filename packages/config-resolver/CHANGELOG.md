@@ -1,5 +1,12 @@
 # @smithy/config-resolver
 
+## 4.6.10
+
+### Patch Changes
+
+- Updated dependencies [b44cb0a]
+  - @smithy/core@3.29.5
+
 ## 4.6.9
 
 ### Patch Changes
