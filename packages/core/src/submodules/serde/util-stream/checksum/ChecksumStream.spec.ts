@@ -274,6 +274,64 @@ describe(ChecksumStream.name, () => {
     });
   });
 
+  describe("premature close propagation", () => {
+    it("should error when the source is destroyed mid-transfer (dropped connection)", async () => {
+      const source = new Readable({
+        read() {
+          this.push(Buffer.from("partial"));
+          this.destroy();
+        },
+      });
+
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+      });
+
+      await expect(collect(checksumStream)).rejects.toThrow(
+        "Connection lost or stream closed before all data was received."
+      );
+    });
+
+    it("should error when the source is destroyed by external caller", async () => {
+      const manualSource = new Readable({ read() {} });
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: manualSource,
+      });
+
+      const errorPromise = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
+
+      manualSource.push(Buffer.from("partial-data"));
+      manualSource.destroy();
+
+      const error = await errorPromise;
+      expect(error.message).toContain("Connection lost or stream closed before all data was received.");
+      expect(checksumStream.destroyed).toBe(true);
+    });
+
+    it("should error when the source is destroyed by external caller (async)", async () => {
+      const manualSource = new Readable({ read() {} });
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: manualSource,
+      });
+
+      manualSource.push(Buffer.from("some-data"));
+      setTimeout(() => manualSource.destroy(), 50);
+
+      await expect(collect(checksumStream)).rejects.toThrow(
+        "Connection lost or stream closed before all data was received."
+      );
+    });
+  });
+
   describe("backpressure", () => {
     it("should only read from the source at the rate it is consumed", async () => {
       // for Node.js 22+ increased default highwater mark.
