@@ -15,18 +15,18 @@ implementations to have equivalent API surfaces. Exported runtime symbols and ty
 - For any usage of the `node:` modules or functionality not present in browsers, an alternate implementation must be
   provided for browsers. The native implementation defaults to the browser one unless a separate `index.native.ts` is
   implemented.
-    - In some cases, there is no alternate in browsers. This must be clearly indicated at the `index.ts` level by the
-      symbol `Symbol.for("node-only")` when implementing export symbol matching. Examples may be found in `@smithy/core`
-      submodule indexes.
+  - In some cases, there is no alternate in browsers. This must be clearly indicated at the `index.ts` level by the
+    symbol `Symbol.for("node-only")` when implementing export symbol matching. Examples may be found in `@smithy/core`
+    submodule indexes.
 
 ### Language Target Level
 
 - The runtime code must be understood by the
   stated [minimum supported language level](https://aws.amazon.com/blogs/developer/aws-sdk-for-javascript-aligns-with-node-js-release-schedule/).
 - We do not use experimental language features that require polyfills or transform steps to run in Node.js.
-    - caveat: our 3rd supported runtime environment, react-native, may require polyfills. The react-native runtime has
-      historically been non-standard to the point that we should not let it influence the default Node.js
-      implementation.
+  - caveat: our 3rd supported runtime environment, react-native, may require polyfills. The react-native runtime has
+    historically been non-standard to the point that we should not let it influence the default Node.js
+    implementation.
 
 ### Code priorities
 
@@ -65,8 +65,8 @@ integration testing.
 - `export *` statements are banned for new code. `export *` creates an API surface that
   is not diff-visible between changes, and leads to leaking implementation details.
 - Things of interest to the reader must appear closer to the top.
-    - One concrete implementation for this is that in classes, `public` methods must come before `protected`. `private`
-      comes last. For non-classes, apply the same reasoning with your own judgment.
+  - One concrete implementation for this is that in classes, `public` methods must come before `protected`. `private`
+    comes last. For non-classes, apply the same reasoning with your own judgment.
 
 ```ts
 /**
@@ -78,33 +78,27 @@ integration testing.
  * @public
  */
 export class Impl {
-    public prop1;
-    private prop2;
+  public prop1;
+  private prop2;
 
-    public constructor() {
-    }
+  public constructor() {}
 
-    /**
-     * Static factory.
-     */
-    public static method1() {
-    }
+  /**
+   * Static factory.
+   */
+  public static method1() {}
 
-    /**
-     * @returns something.
-     */
-    public method2() {
-    }
+  /**
+   * @returns something.
+   */
+  public method2() {}
 
-    private static method3() {
-    }
+  private static method3() {}
 
-    private method4() {
-    }
+  private method4() {}
 }
 
-const moduleInternal = () => {
-};
+const moduleInternal = () => {};
 ```
 
 ### Code comment block documentation (tsdoc)
@@ -113,7 +107,7 @@ We write code comments to the https://tsdoc.org/ specification.
 
 - The free-form description (optional) of a symbol must come first. All annotations must come below this description.
 - For any symbol exported from a package, it must have an access level annotation, `@public` or `@internal`.
-    - In limited circumstances `@alpha` and `@beta` may be used.
+  - In limited circumstances `@alpha` and `@beta` may be used.
 - For non-exported symbols, you do not need to write comments for all symbols. Use your judgment here.
 - You may opt to write a free-form description of a method in lieu of writing the API annotations `@param` and
   `@returns` etc.

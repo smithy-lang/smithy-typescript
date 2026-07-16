@@ -1,6 +1,6 @@
 {
-  "private": true,
   "name": "@smithy/ts-compat-test",
+  "private": true,
   "description": "Verifies that generated clients compile against every supported TypeScript minor version.",
   "type": "module",
   "scripts": {

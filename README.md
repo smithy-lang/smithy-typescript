@@ -1,8 +1,8 @@
 # <img alt="Smithy" src="https://github.com/smithy-lang/smithy/blob/main/docs/_static/smithy-anvil.svg?raw=true" width="32"> Smithy TypeScript
 
 > **WARNING: Smithy TypeScript is currently
-in [Developer Preview](https://aws.amazon.com/blogs/devops/smithy-server-and-client-generator-for-typescript). All
-interfaces and supported JavaScript platforms are subject to change.**
+> in [Developer Preview](https://aws.amazon.com/blogs/devops/smithy-server-and-client-generator-for-typescript). All
+> interfaces and supported JavaScript platforms are subject to change.**
 
 `smithy-typescript` includes the reference implementations of the [Smithy](https://smithy.io/) code generators
 for [TypeScript](https://www.typescriptlang.org/).
@@ -60,14 +60,10 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
 // smithy-build.json
 {
   "version": "1.0",
-  "sources": [
-    "models"
-  ],
+  "sources": ["models"],
   // Add the Smithy TypeScript code generator dependency
   "maven": {
-    "dependencies": [
-      "software.amazon.smithy.typescript:smithy-typescript-codegen:0.51.0"
-    ]
+    "dependencies": ["software.amazon.smithy.typescript:smithy-typescript-codegen:0.51.0"]
   },
   "plugins": {
     // Add the Smithy TypeScript client plugin
@@ -130,9 +126,7 @@ To add a minimal `typescript-client-codegen` plugin, add the following to `smith
 // smithy-build.json
 {
   "version": "1.0",
-  "sources": [
-    "models"
-  ],
+  "sources": ["models"],
   "plugins": {
     // Add the Smithy TypeScript client plugin
     "typescript-client-codegen": {
@@ -238,7 +232,7 @@ contains all of the settings enabled from `smithy-build.json` and helper methods
 top-level properties enabled for `typescript-client-codegen` can be found in `TypeScriptSettings.ArtifactType.CLIENT`.
 
 | Setting                   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-|---------------------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `package`                 | Yes      | Name of the package in `package.json`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `packageVersion`          | Yes      | Version of the package in `package.json`. Will be overwritten if using `versioningScheme` and the scheme is recognized, but is required as a fallback value.                                                                                                                                                                                                                                                                                                                                                              |
 | `versioningScheme`        | No       | Default="". Overwrites `packageVersion`. Applies automatic versioning to the generated package. "@smithy/core" will use the version of `@smithy/core` contemporary to the code generator. If the `versioningScheme` value is not recognized, then `packageVersion` will be used. `@aws-sdk/client` is recognized only when this code generator is used in conjunction with `smithy-aws-typescript-codegen`, in which case the highest contemporary AWS SDK client version will be used.                                   |
@@ -446,7 +440,7 @@ See [the section on customizations via
 
 > Note: [AWS SDK for JavaScript v3](https://github.com/aws/aws-sdk-js-v3), a customer of Smithy TypeScript, implements
 > the [AWS protocols](https://smithy.io/2.0/aws/protocols/index.html) and can be consumed by adding the
-`software.amazon.smithy.typescript:smithy-aws-typescript-codegen` package.
+> `software.amazon.smithy.typescript:smithy-aws-typescript-codegen` package.
 
 ##### Handling endpoint resolution
 
@@ -507,12 +501,12 @@ endpoint:
 Customers can then pass in an endpoint to the client configuration:
 
 ```typescript
-import {$SERVICEClient} from "..."; // example client package
+import { $SERVICEClient } from "..."; // example client package
 
 // Without providing the endpoint, a "No valid endpoint provider available." error will be thrown
 const individualClient = new $SERVICEClient({
-    // string
-    endpoint: "https://www.example.com",
+  // string
+  endpoint: "https://www.example.com",
 });
 ```
 
@@ -523,7 +517,7 @@ See [the section on customizations via
 
 > Note: There is no prescribed way to publish NPM packages since there are many ways to maintain SDKs. Some publishing
 > tools include using [`npm publish`](https://docs.npmjs.com/cli/v8/commands/npm-publish) or [
-`yarn publish`](https://classic.yarnpkg.com/lang/en/docs/cli/publish/) directly, or managing a monorepo with tools
+> `yarn publish`](https://classic.yarnpkg.com/lang/en/docs/cli/publish/) directly, or managing a monorepo with tools
 > like [`turbo`](https://turbo.build/repo/docs/handbook/publishing-packages). This section provides tips for how a general
 > publishing workflow could work.
 
@@ -553,7 +547,7 @@ contains all of the settings enabled from `smithy-build.json` and helper methods
 top-level properties enabled for `typescript-server-codegen` can be found in `TypeScriptSettings.ArtifactType.SSDK`.
 
 | Setting                    | Required | Description                                                                                                                                                                                                                                                                                                                                                      |
-|----------------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `package`                  | Yes      | Name of the package in `package.json`.                                                                                                                                                                                                                                                                                                                           |
 | `packageVersion`           | Yes      | Version of the package in `package.json`.                                                                                                                                                                                                                                                                                                                        |
 | `packageDescription`       | No       | Description of the package in `package.json`. The default value is `${package} server`.                                                                                                                                                                                                                                                                          |
@@ -635,7 +629,7 @@ used in the code generation process is by searching by usage at a given Smithy T
 subject to change.
 
 > Note: if an existing integration point does not exist on `TypeScriptIntegration` or `SmithyIntegration`, check if [the
-`RuntimeClientPlugin` abstraction](smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/integration/RuntimeClientPlugin.java)
+> `RuntimeClientPlugin` abstraction](smithy-typescript-codegen/src/main/java/software/amazon/smithy/typescript/codegen/integration/RuntimeClientPlugin.java)
 > has an integration point. If
 > not, [create a feature request](https://github.com/smithy-lang/smithy-typescript/issues/new) with the incompatible use
 > case.
@@ -660,25 +654,25 @@ and publish a `RuntimeExtension` that provides the configuration values needed t
 ```typescript
 // Http2HandlerRuntimeExtension.ts published in package @example/weather-http-2-runtime-extension
 
-import {RuntimeExtension, WeatherExtensionConfiguration} from "@example/weather";
-import {NodeHttp2Handler} from "@smithy/node-http-handler";
+import { RuntimeExtension, WeatherExtensionConfiguration } from "@example/weather";
+import { NodeHttp2Handler } from "@smithy/node-http-handler";
 
 export class Http2HandlerRuntimeExtension implements RuntimeExtension {
-    configure(extensionConfiguration: WeatherExtensionConfiguration): void {
-        console.log("Enabling HTTP/2");
-        extensionConfiguration.setHttpHandler(new NodeHttp2Handler());
-    }
+  configure(extensionConfiguration: WeatherExtensionConfiguration): void {
+    console.log("Enabling HTTP/2");
+    extensionConfiguration.setHttpHandler(new NodeHttp2Handler());
+  }
 }
 ```
 
 Then customers can opt-in to using the extension at runtime using the `extensions` configuration property:
 
 ```typescript
-import {WeatherClient} from "@example/weather";
-import {Http2HandlerRuntimeExtension} from "@example/weather-http-2-runtime-extension";
+import { WeatherClient } from "@example/weather";
+import { Http2HandlerRuntimeExtension } from "@example/weather-http-2-runtime-extension";
 
 const client = new WeatherClient({
-    extensions: [new Http2HandlerRuntimeExtension()],
+  extensions: [new Http2HandlerRuntimeExtension()],
 });
 ```
 

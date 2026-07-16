@@ -1,8 +1,19 @@
 {
   "name": "smithy-typescript",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "description": "Smithy TypeScript packages",
+  "license": "UNLICENSED",
+  "author": "AWS Smithy Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript/tree/main"
+  },
+  "workspaces": [
+    "packages/*",
+    "smithy-typescript-ssdk-libs/*",
+    "private/*"
+  ],
   "main": "index.js",
   "scripts": {
     "clean": "turbo run clean --force --parallel",
@@ -10,13 +21,13 @@
     "test": "make test-unit",
     "test:integration": "yarn build-test-packages && make test-integration",
     "test:protocols": "make generate-protocol-tests test-protocols benchmark",
-    "lint": "oxlint -c .oxlintrc.json packages/",
-    "lint-fix": "oxlint -c .oxlintrc.json --fix packages/",
+    "lint": "make lint",
+    "lint-fix": "make lint",
     "lint:pkgJson": "yarn lint:dependencies",
     "lint:dependencies": "node scripts/check-dependencies.js",
     "lint:versions": "node scripts/runtime-dep-version-check.js",
     "lint:api": "node scripts/validation/api-snapshot.js",
-    "format": "oxfmt --write packages/",
+    "format": "make format",
     "stage-release": "turbo run stage-release",
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",
     "release": "yarn changeset publish",
@@ -24,12 +35,6 @@
     "g:tsc": "cd $INIT_CWD && tsc",
     "g:vitest": "cd $INIT_CWD && vitest"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript/tree/main"
-  },
-  "author": "AWS Smithy Team",
-  "license": "UNLICENSED",
   "dependencies": {
     "@changesets/cli": "^2.27.5",
     "glob": "^7.1.6",
@@ -66,15 +71,10 @@
     "webpack-cli": "^6.0.1"
   },
   "overrides": {},
-  "workspaces": [
-    "packages/*",
-    "smithy-typescript-ssdk-libs/*",
-    "private/*"
-  ],
-  "packageManager": "yarn@4.17.1",
   "husky": {
     "hooks": {
       "pre-commit": "yarn lint:dependencies && yarn lint:versions"
     }
-  }
+  },
+  "packageManager": "yarn@4.17.1"
 }

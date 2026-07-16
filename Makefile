@@ -136,10 +136,10 @@ cwti:
 	@:
 
 lint:
-	yarn lint
+	npx oxlint -c .oxlintrc.json --fix packages
 
 format:
-	yarn format
+	npx oxfmt packages scripts testbed
 
 test-e2e:
 	(cd ./testbed/aws/s3 && make run)

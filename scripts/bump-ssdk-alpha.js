@@ -14,9 +14,7 @@ function bumpFile(pkgJsonPath) {
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
   const match = ALPHA_RE.exec(pkg.version);
   if (!match) {
-    throw new Error(
-      `${pkg.name} version "${pkg.version}" is not in the expected x.y.z-alpha.N form`
-    );
+    throw new Error(`${pkg.name} version "${pkg.version}" is not in the expected x.y.z-alpha.N form`);
   }
   const [, base, n] = match;
   const next = `${base}-alpha.${Number(n) + 1}`;

@@ -267,7 +267,7 @@ if (missing.length) {
       "After that one-time setup, re-run this check. Every subsequent release",
       "will publish automatically via OIDC.",
       "",
-      "Refer internal runbook for npm credentials."
+      "Refer internal runbook for npm credentials.",
     ].join("\n")
   );
 }

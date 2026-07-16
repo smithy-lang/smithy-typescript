@@ -1,160 +1,160 @@
 {
-    "version": "1.0",
-    "projections": {
-        "interceptor-example": {
-            "transforms": [
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["example.interceptors#InterceptorExample"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-server-codegen": {
-                    "service": "example.interceptors#InterceptorExample",
-                    "package": "interceptor-example-ssdk",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    },
-                    "disableDefaultValidation": true
-                },
-                "typescript-client-codegen": {
-                    "service": "example.interceptors#InterceptorExample",
-                    "package": "interceptor-example",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    }
-                }
-            }
-        },
-        "ssdk-test": {
-            "transforms": [
-                {
-                    "name": "excludeShapesByTag",
-                    "args": {
-                        "tags": ["client-only"]
-                    }
-                },
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["example.weather#Weather"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-server-codegen": {
-                    "service": "example.weather#Weather",
-                    "package": "weather-ssdk",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    },
-                    "disableDefaultValidation": true
-                }
-            }
-        },
-        "client-identity-and-auth": {
-            "transforms": [
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["example.weather#Weather"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-client-codegen": {
-                    "service": "example.weather#Weather",
-                    "package": "weather",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    }
-                }
-            }
-        },
-        "client-legacy-auth": {
-            "transforms": [
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["example.weather#Weather"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-client-codegen": {
-                    "service": "example.weather#Weather",
-                    "package": "@smithy/weather-legacy-auth",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    },
-                    "useLegacyAuth": true
-                }
-            }
-        },
-        "identity-and-auth-http-api-key-auth": {
-            "transforms": [
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["identity.auth.httpApiKeyAuth#HttpApiKeyAuthService"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-client-codegen": {
-                    "service": "identity.auth.httpApiKeyAuth#HttpApiKeyAuthService",
-                    "package": "@smithy/identity-and-auth-http-api-key-auth-service",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    }
-                }
-            }
-        },
-        "identity-and-auth-http-bearer-auth": {
-            "transforms": [
-                {
-                    "name": "includeServices",
-                    "args": {
-                        "services": ["identity.auth.httpBearerAuth#HttpBearerAuthService"]
-                    }
-                }
-            ],
-            "plugins": {
-                "typescript-client-codegen": {
-                    "service": "identity.auth.httpBearerAuth#HttpBearerAuthService",
-                    "package": "@smithy/identity-and-auth-http-bearer-auth-service",
-                    "packageVersion": "0.0.1",
-                    "packageJson": {
-                        "license": "Apache-2.0",
-                        "private": true
-                    }
-                }
-            }
+  "version": "1.0",
+  "projections": {
+    "interceptor-example": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["example.interceptors#InterceptorExample"]
+          }
         }
-    },
-    "plugins": {
+      ],
+      "plugins": {
+        "typescript-server-codegen": {
+          "service": "example.interceptors#InterceptorExample",
+          "package": "interceptor-example-ssdk",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          },
+          "disableDefaultValidation": true
+        },
         "typescript-client-codegen": {
-            "service": "example.weather#Weather",
-            "package": "weather",
-            "packageVersion": "0.0.1",
-            "packageJson": {
-                "license": "Apache-2.0",
-                "private": true
-            }
+          "service": "example.interceptors#InterceptorExample",
+          "package": "interceptor-example",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          }
         }
+      }
+    },
+    "ssdk-test": {
+      "transforms": [
+        {
+          "name": "excludeShapesByTag",
+          "args": {
+            "tags": ["client-only"]
+          }
+        },
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["example.weather#Weather"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-server-codegen": {
+          "service": "example.weather#Weather",
+          "package": "weather-ssdk",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          },
+          "disableDefaultValidation": true
+        }
+      }
+    },
+    "client-identity-and-auth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["example.weather#Weather"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "example.weather#Weather",
+          "package": "weather",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          }
+        }
+      }
+    },
+    "client-legacy-auth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["example.weather#Weather"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "example.weather#Weather",
+          "package": "@smithy/weather-legacy-auth",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          },
+          "useLegacyAuth": true
+        }
+      }
+    },
+    "identity-and-auth-http-api-key-auth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["identity.auth.httpApiKeyAuth#HttpApiKeyAuthService"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "identity.auth.httpApiKeyAuth#HttpApiKeyAuthService",
+          "package": "@smithy/identity-and-auth-http-api-key-auth-service",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          }
+        }
+      }
+    },
+    "identity-and-auth-http-bearer-auth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["identity.auth.httpBearerAuth#HttpBearerAuthService"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "identity.auth.httpBearerAuth#HttpBearerAuthService",
+          "package": "@smithy/identity-and-auth-http-bearer-auth-service",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          }
+        }
+      }
     }
+  },
+  "plugins": {
+    "typescript-client-codegen": {
+      "service": "example.weather#Weather",
+      "package": "weather",
+      "packageVersion": "0.0.1",
+      "packageJson": {
+        "license": "Apache-2.0",
+        "private": true
+      }
+    }
+  }
 }
