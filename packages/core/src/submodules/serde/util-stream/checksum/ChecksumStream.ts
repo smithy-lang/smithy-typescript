@@ -45,11 +45,11 @@ export interface ChecksumStreamInit<T extends Readable | ReadableStream> {
  * @internal
  */
 export class ChecksumStream extends Readable {
-  private expectedChecksum: string;
-  private checksumSourceLocation: string;
+  private readonly expectedChecksum: string;
+  private readonly checksumSourceLocation: string;
   private checksum: Checksum;
   private source: Readable;
-  private base64Encoder: Encoder;
+  private readonly base64Encoder: Encoder;
 
   public constructor({
     expectedChecksum,
@@ -78,6 +78,7 @@ export class ChecksumStream extends Readable {
     this.source.on("data", this.onSourceData);
     this.source.on("end", this.onSourceEnd);
     this.source.on("error", this.onSourceError);
+    this.source.on("close", this.onSourceClose);
     this.source.pause();
   }
 
@@ -134,14 +135,21 @@ export class ChecksumStream extends Readable {
   };
 
   /**
+   * If the source stream closes without having ended,
+   * this is considered an error.
+   */
+  private onSourceClose = (): void => {
+    if (!this.destroyed && !this.source.readableEnded) {
+      this.destroy(new Error("Connection lost or stream closed before all data was received."));
+    }
+  };
+
+  /**
    * Resume the source so it flows at the rate this stream is consumed.
    * Do not call this directly.
    * @internal
    */
-  public _read(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    size: number
-  ): void {
+  public _read(_size: number): void {
     this.source.resume();
   }
 
@@ -154,6 +162,10 @@ export class ChecksumStream extends Readable {
    * @internal
    */
   public _destroy(error: Error | null, callback: (error?: Error | null | undefined) => void): void {
+    this.source?.removeListener("data", this.onSourceData);
+    this.source?.removeListener("end", this.onSourceEnd);
+    this.source?.removeListener("error", this.onSourceError);
+    this.source?.removeListener("close", this.onSourceClose);
     this.source?.destroy();
     callback(error);
   }
