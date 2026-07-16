@@ -2,22 +2,19 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "printWidth": 120,
   "trailingComma": "es5",
-  "importOrder": [
-    "<THIRD_PARTY_MODULES>",
-    "",
-    "^[.]"
-  ],
+  "importOrder": ["<THIRD_PARTY_MODULES>", "", "^[.]"],
   "importOrderTypeScriptVersion": "5.0.0",
   "importOrderCaseSensitive": true,
-  "sortPackageJson": false,
+  "sortPackageJson": { "sortScripts": false },
   "ignorePatterns": [
-    "./packages/**/dist/*",
-    "./packages/**/dist-types/*",
-    "./packages/**/dist-es/*",
-    "./packages/**/dist-cjs/*",
-    "**/dist/*",
-    "**/dist-types/*",
-    "**/dist-es/*",
-    "**/dist-cjs/*"
+    "./private/**",
+    "./packages/**/dist/**",
+    "./packages/**/dist-types/**",
+    "./packages/**/dist-es/**",
+    "./packages/**/dist-cjs/**",
+    "**/dist/**",
+    "**/dist-types/**",
+    "**/dist-es/**",
+    "**/dist-cjs/**"
   ]
 }

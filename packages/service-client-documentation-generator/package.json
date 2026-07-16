@@ -1,6 +1,37 @@
 {
   "name": "@smithy/service-client-documentation-generator",
   "version": "4.3.1",
+  "keywords": [
+    "typedocplugin"
+  ],
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/client-documentation-generator",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS SDK for JavaScript Team",
+    "url": "https://aws.amazon.com/sdk-for-javascript/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/client-documentation-generator"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
     "build:cjs": "premove dist-cjs && yarn g:tsc -p tsconfig.cjs.json",
@@ -11,18 +42,6 @@
     "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "exit 0"
   },
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
-  "types": "./dist-types/index.d.ts",
-  "author": {
-    "name": "AWS SDK for JavaScript Team",
-    "url": "https://aws.amazon.com/sdk-for-javascript/"
-  },
-  "license": "Apache-2.0",
-  "sideEffects": false,
-  "keywords": [
-    "typedocplugin"
-  ],
   "dependencies": {
     "tslib": "^2.6.2",
     "typedoc": "0.23.23"
@@ -35,25 +54,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "typesVersions": {
-    "<4.5": {
-      "dist-types/*": [
-        "dist-types/ts3.4/*"
-      ]
-    }
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/client-documentation-generator",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "packages/client-documentation-generator"
-  },
-  "publishConfig": {
-    "directory": ".release/package"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -57,11 +57,11 @@ are present). `run.mjs` errors with guidance if the clients are missing - run
 
 ## Codegen coverage
 
-| Protocol / service | Codegen | Client                             |
-| ------------------ | ------- | ---------------------------------- |
-| rpcv2Cbor          | classic | `@smithy/smithy-rpcv2-cbor`        |
-| rpcv2Cbor          | schema  | `@smithy/smithy-rpcv2-cbor-schema` |
-| XYZService         | classic | `xyz` (private/my-local-model)     |
+| Protocol / service | Codegen | Client                                       |
+| ------------------ | ------- | -------------------------------------------- |
+| rpcv2Cbor          | classic | `@smithy/smithy-rpcv2-cbor`                  |
+| rpcv2Cbor          | schema  | `@smithy/smithy-rpcv2-cbor-schema`           |
+| XYZService         | classic | `xyz` (private/my-local-model)               |
 | XYZService         | schema  | `xyz-schema` (private/my-local-model-schema) |
 
 Add more clients to the fixture as new protocols or codegen paths are covered by
@@ -75,4 +75,4 @@ Edit `typescript-versions.json`. Each entry is `{ version, tscArgs? }`:
 - `version` — any spec npm accepts (a bare minor like `"5.4"` installs its latest patch).
 - `tscArgs` — optional compiler flags for that version, passed on the command line
   to override `tsconfig.json` when an option changed. For example, `moduleResolution:
-  node` (node10) became a deprecation error in TS 6.0 and was removed in TS 7.0.
+node` (node10) became a deprecation error in TS 6.0 and was removed in TS 7.0.

@@ -7,4 +7,4 @@ const compareEquivalentJsonBodies = (expectedBody: string, generatedBody: string
   const generatedParts = JSON.parse(generatedBody);
 
   return compareParts(expectedParts, generatedParts);
-}
+};

@@ -164,9 +164,7 @@ function minifyFormat(code) {
 
       const lineStart = code.lastIndexOf("\n", start - 1) + 1;
       const linePrefix = code.slice(lineStart, start);
-      const inlined = fragment
-        .replace(/\s*\n\s*/g, " ")
-        .replace(/\s{2,}/g, " ");
+      const inlined = fragment.replace(/\s*\n\s*/g, " ").replace(/\s{2,}/g, " ");
       let lineEnd = code.indexOf("\n", end);
       if (lineEnd === -1) lineEnd = code.length;
       const fullLine = linePrefix + inlined + code.slice(end, lineEnd);
@@ -292,7 +290,7 @@ function collectStatementSplits(node, code, splits) {
       } else {
         const ls = code.lastIndexOf("\n", node.start - 1) + 1;
         const before = code.slice(ls, node.start);
-        blockIndent = (before.match(/^(\t*)/)[1]) + "\t";
+        blockIndent = before.match(/^(\t*)/)[1] + "\t";
       }
     }
 
@@ -329,7 +327,8 @@ function isIdentChar(ch) {
  * Binary search for a protected span containing the given position.
  */
 function findProtectedSpan(spans, pos) {
-  let lo = 0, hi = spans.length - 1;
+  let lo = 0,
+    hi = spans.length - 1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
     if (spans[mid][1] <= pos) {

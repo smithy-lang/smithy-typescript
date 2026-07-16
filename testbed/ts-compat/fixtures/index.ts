@@ -18,10 +18,7 @@
  *   - XYZService, classic codegen -> xyz            (private/my-local-model)
  *   - XYZService, schema codegen  -> xyz-schema     (private/my-local-model-schema)
  */
-import {
-  EmptyInputOutputCommand as RpcEmptyInputOutputCommand,
-  RpcV2ProtocolClient,
-} from "@smithy/smithy-rpcv2-cbor";
+import { EmptyInputOutputCommand as RpcEmptyInputOutputCommand, RpcV2ProtocolClient } from "@smithy/smithy-rpcv2-cbor";
 import {
   EmptyInputOutputCommand as RpcSchemaEmptyInputOutputCommand,
   RpcV2ProtocolClient as RpcV2ProtocolSchemaClient,

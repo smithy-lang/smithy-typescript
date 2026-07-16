@@ -43,7 +43,9 @@ function validateBundle(bundler, filePath) {
 
   const nodeOnlyMatches = content.match(/\w+\s*=\s*Symbol\.for\(["']node-only["']\)/g) || [];
   if (nodeOnlyMatches.length > 4) {
-    console.error(`    ${bundler}: ❌ ${nodeOnlyMatches.length}/4 Symbol.for("node-only") — node-only code not fully tree-shaken`);
+    console.error(
+      `    ${bundler}: ❌ ${nodeOnlyMatches.length}/4 Symbol.for("node-only") — node-only code not fully tree-shaken`
+    );
     failed = true;
   } else if (nodeOnlyMatches.length > 0) {
     console.log(`    ${bundler}: ⚠️  ${nodeOnlyMatches.length}/4 Symbol.for("node-only") occurrence(s)`);
@@ -67,11 +69,14 @@ console.log("tsup");
 console.log("=".repeat(60));
 
 run("JS bundle (ESM)", () => {
-  execSync("npx tsup src/sample-app.ts --format esm --platform browser --outDir dist/js --silent --tsconfig tsconfig.json", {
-    cwd: root,
-    stdio: "pipe",
-    env: { ...process.env, NODE_OPTIONS: "" },
-  });
+  execSync(
+    "npx tsup src/sample-app.ts --format esm --platform browser --outDir dist/js --silent --tsconfig tsconfig.json",
+    {
+      cwd: root,
+      stdio: "pipe",
+      env: { ...process.env, NODE_OPTIONS: "" },
+    }
+  );
   const out = path.join(root, "dist/js/sample-app.js");
   if (!fs.existsSync(out)) throw new Error("output file not created");
   if (fs.statSync(out).size === 0) throw new Error("output file is empty");
@@ -79,10 +84,7 @@ run("JS bundle (ESM)", () => {
 });
 
 run("DTS bundle (all types inlined, #2037)", () => {
-  execSync(
-    "npx tsup --config tsup-dts.config.ts --silent",
-    { cwd: root, stdio: "pipe" }
-  );
+  execSync("npx tsup --config tsup-dts.config.ts --silent", { cwd: root, stdio: "pipe" });
   const out = path.join(root, "dist/dts/sample-app.d.ts");
   if (!fs.existsSync(out)) throw new Error("output .d.ts not created");
   if (fs.statSync(out).size === 0) throw new Error("output .d.ts is empty");

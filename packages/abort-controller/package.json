@@ -2,9 +2,34 @@
   "name": "@smithy/abort-controller",
   "version": "4.3.3",
   "description": "A simple abort controller library",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/abort-controller",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS SDK for JavaScript Team",
+    "url": "https://aws.amazon.com/sdk-for-javascript/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/abort-controller"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
   "types": "./dist-types/index.d.ts",
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
@@ -16,12 +41,6 @@
     "test": "yarn g:vitest run",
     "test:watch": "yarn g:vitest watch"
   },
-  "author": {
-    "name": "AWS SDK for JavaScript Team",
-    "url": "https://aws.amazon.com/sdk-for-javascript/"
-  },
-  "license": "Apache-2.0",
-  "sideEffects": false,
   "dependencies": {
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
@@ -32,29 +51,10 @@
     "premove": "4.0.0",
     "typedoc": "0.23.23"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "typesVersions": {
-    "<4.5": {
-      "dist-types/*": [
-        "dist-types/ts3.4/*"
-      ]
-    }
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/abort-controller",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "packages/abort-controller"
-  },
   "typedoc": {
     "entryPoint": "src/index.ts"
   },
-  "publishConfig": {
-    "directory": ".release/package"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -22,11 +22,19 @@ const validationDir = __dirname;
 
 const VALIDATIONS = [
   { name: "built", label: "all packages have build artifacts", script: "built.js" },
-  { name: "imports-declared", label: "all package imports appear in package.json dependencies", script: "imports-declared.js" },
+  {
+    name: "imports-declared",
+    label: "all package imports appear in package.json dependencies",
+    script: "imports-declared.js",
+  },
   { name: "relative-imports", label: "all relative imports are to paths that exist", script: "relative-imports.js" },
   { name: "deps-used", label: "all package.json dependencies are used", script: "deps-used.js" },
   { name: "no-unreachable-files", label: "no unreachable files", script: "unreachable-files.js" },
-  { name: "no-dynamic-imports", label: "no dynamic imports with non-literal specifiers", script: "static-import-names.js" },
+  {
+    name: "no-dynamic-imports",
+    label: "no dynamic imports with non-literal specifiers",
+    script: "static-import-names.js",
+  },
   { name: "no-cycles", label: "no cyclical file or package dependencies", script: "cycles.js" },
   { name: "eslint", label: "oxlint passes on source", script: "oxlint.js" },
   { name: "no-export-star", label: "no 'export *' in source", script: "no-export-star.js" },

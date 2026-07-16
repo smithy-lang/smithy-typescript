@@ -1,6 +1,34 @@
 {
   "name": "@smithy/middleware-apply-body-checksum",
   "version": "4.5.10",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-apply-body-checksum",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS SDK for JavaScript Team",
+    "url": "https://aws.amazon.com/sdk-for-javascript/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/middleware-apply-body-checksum"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
@@ -13,15 +41,6 @@
     "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
     "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
   },
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
-  "types": "./dist-types/index.d.ts",
-  "author": {
-    "name": "AWS SDK for JavaScript Team",
-    "url": "https://aws.amazon.com/sdk-for-javascript/"
-  },
-  "license": "Apache-2.0",
-  "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
     "@smithy/types": "workspace:^",
@@ -34,29 +53,10 @@
     "premove": "4.0.0",
     "typedoc": "0.23.23"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "typesVersions": {
-    "<4.5": {
-      "dist-types/*": [
-        "dist-types/ts3.4/*"
-      ]
-    }
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-apply-body-checksum",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "packages/middleware-apply-body-checksum"
-  },
   "typedoc": {
     "entryPoint": "src/index.ts"
   },
-  "publishConfig": {
-    "directory": ".release/package"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

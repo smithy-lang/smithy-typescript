@@ -2,9 +2,36 @@
   "name": "@aws-smithy/server-apigateway",
   "version": "1.0.0-alpha.10",
   "description": "Base components for Smithy services behind APIGateway",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript#readme",
+  "bugs": {
+    "url": "https://github.com/smithy-lang/smithy-typescript/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "AWS Smithy Team",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "smithy-typescript-ssdk-libs/server-apigateway"
+  },
+  "files": [
+    "dist/cjs/**/*.js",
+    "dist/es/**/*.js",
+    "dist/types/**/*.d.ts",
+    "!**/*.spec.*"
+  ],
   "main": "./dist/cjs/index.js",
   "module": "./dist/es/index.js",
   "types": "./dist/types/index.d.ts",
+  "typesVersions": {
+    "<4.0": {
+      "dist/types/*": [
+        "dist/types/ts3.4/*"
+      ]
+    }
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "pretest": "yarn build",
     "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
@@ -16,13 +43,6 @@
     "test": "jest --passWithNoTests",
     "clean": "premove dist"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "smithy-typescript-ssdk-libs/server-apigateway"
-  },
-  "author": "AWS Smithy Team",
-  "license": "Apache-2.0",
   "dependencies": {
     "@smithy/protocol-http": "workspace:^",
     "@smithy/types": "workspace:^",
@@ -37,27 +57,7 @@
     "premove": "4.0.0",
     "typescript": "~5.8.3"
   },
-  "files": [
-    "dist/cjs/**/*.js",
-    "dist/es/**/*.js",
-    "dist/types/**/*.d.ts",
-    "!**/*.spec.*"
-  ],
   "engines": {
     "node": ">=18.0.0"
-  },
-  "typesVersions": {
-    "<4.0": {
-      "dist/types/*": [
-        "dist/types/ts3.4/*"
-      ]
-    }
-  },
-  "bugs": {
-    "url": "https://github.com/smithy-lang/smithy-typescript/issues"
-  },
-  "homepage": "https://github.com/smithy-lang/smithy-typescript#readme",
-  "publishConfig": {
-    "directory": ".release/package"
   }
 }

@@ -258,9 +258,12 @@ for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
 const sorted = Object.fromEntries(
   Object.entries(api)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) =>
-      [k, typeof v === "object" && v !== null ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v]
-    )
+    .map(([k, v]) => [
+      k,
+      typeof v === "object" && v !== null
+        ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)))
+        : v,
+    ])
 );
 
 fs.writeFileSync(dataPath, JSON.stringify(sorted, null, 2));

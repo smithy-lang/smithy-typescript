@@ -6,59 +6,59 @@
     "tsconfig.cjs.json",
     "tsconfig.es.json",
     "tsconfig.types.json",
-    "scripts/compilation/**"
+    "scripts/compilation/**",
   ],
   "tasks": {
     "prebuild": {},
     "build": {
       "dependsOn": ["prebuild", "^build"],
       "inputs": ["src/**/*", "package.json"],
-      "outputs": ["dist-types/**", "dist-cjs/**", "dist-es/**", "dist"]
+      "outputs": ["dist-types/**", "dist-cjs/**", "dist-es/**", "dist"],
     },
     "build:cjs": {
       "outputs": ["dist-cjs/**"],
-      "dependsOn": ["build:es"]
+      "dependsOn": ["build:es"],
     },
     "build:es": {
       // ^build:types is critical: without upstream .d.ts files, tsc cannot
       // distinguish type-only re-exports from values, causing undefined exports.
       "outputs": ["dist-es/**"],
-      "dependsOn": ["prebuild", "^build:types"]
+      "dependsOn": ["prebuild", "^build:types"],
     },
     "build:es:cjs": {
-      "outputs": ["dist-cjs/**", "dist-es/**"]
+      "outputs": ["dist-cjs/**", "dist-es/**"],
     },
     "build:types": {
       "outputs": ["dist-types/**"],
-      "dependsOn": ["prebuild", "^build:types"]
+      "dependsOn": ["prebuild", "^build:types"],
     },
     "build:types:downlevel": {
       "outputs": ["dist-types/ts3.4/**"],
-      "dependsOn": ["build:types"]
+      "dependsOn": ["build:types"],
     },
     "test": {
       "dependsOn": ["build", "^build"],
-      "cache": false
+      "cache": false,
     },
     "test:integration": {
       "dependsOn": ["build", "^build"],
-      "cache": false
+      "cache": false,
     },
     "lint": {
-      "outputs": []
+      "outputs": [],
     },
     "format": {
-      "outputs": []
+      "outputs": [],
     },
     "clean": {
-      "cache": false
+      "cache": false,
     },
     "extract:docs": {
       "dependsOn": ["build"],
-      "cache": false
+      "cache": false,
     },
     "stage-release": {
-      "dependsOn": ["build", "build:types:downlevel"]
-    }
-  }
+      "dependsOn": ["build", "build:types:downlevel"],
+    },
+  },
 }

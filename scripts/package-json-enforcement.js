@@ -144,13 +144,13 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
             }
             // react-native condition: native variant if exists, otherwise browser fallback.
             const hasNative = fs.existsSync(path.join(subPath, "index.native.ts"));
-            const esRn = hasNative
-              ? `./dist-es/submodules/${sub}/index.native.js`
-              : esBrowser;
+            const esRn = hasNative ? `./dist-es/submodules/${sub}/index.native.js` : esBrowser;
             const cjsRn = esRn.replace("dist-es", "dist-cjs");
             const expectedRn = { import: esRn, require: cjsRn };
             if (JSON.stringify(exportEntry["react-native"]) !== JSON.stringify(expectedRn)) {
-              errors.push(`${pkgJson.name} exports["./${sub}"]["react-native"] should be ${JSON.stringify(expectedRn)}`);
+              errors.push(
+                `${pkgJson.name} exports["./${sub}"]["react-native"] should be ${JSON.stringify(expectedRn)}`
+              );
               if (overwrite) {
                 exportEntry["react-native"] = expectedRn;
               }
@@ -183,14 +183,18 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
           const cjsBrowserExpected = `./dist-cjs/submodules/${sub}/index.browser.js`;
 
           if (reactNativeField[esIndex] !== esBrowserExpected) {
-            errors.push(`${pkgJson.name} react-native["${esIndex}"] should be "${esBrowserExpected}" (fallback to browser)`);
+            errors.push(
+              `${pkgJson.name} react-native["${esIndex}"] should be "${esBrowserExpected}" (fallback to browser)`
+            );
             if (overwrite) {
               reactNativeField[esIndex] = esBrowserExpected;
               didModify = true;
             }
           }
           if (reactNativeField[cjsIndex] !== cjsBrowserExpected) {
-            errors.push(`${pkgJson.name} react-native["${cjsIndex}"] should be "${cjsBrowserExpected}" (fallback to browser)`);
+            errors.push(
+              `${pkgJson.name} react-native["${cjsIndex}"] should be "${cjsBrowserExpected}" (fallback to browser)`
+            );
             if (overwrite) {
               reactNativeField[cjsIndex] = cjsBrowserExpected;
               didModify = true;
@@ -386,7 +390,9 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
   if (pkgJson.scripts?.format) {
     for (const pattern of bannedFormatPatterns) {
       if (pkgJson.scripts.format.includes(pattern)) {
-        errors.push(`${pkgJson.name} scripts["format"] must not call ${pattern}. Run "yarn format" from the repo root.`);
+        errors.push(
+          `${pkgJson.name} scripts["format"] must not call ${pattern}. Run "yarn format" from the repo root.`
+        );
         if (overwrite) {
           delete pkgJson.scripts.format;
         }
@@ -489,7 +495,8 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
       }
     }
   } else {
-    const expectedBuild = "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json";
+    const expectedBuild =
+      "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json";
     if (pkgJson.scripts?.build !== expectedBuild) {
       errors.push(`${pkgJson.name} scripts["build"] must be "${expectedBuild}"`);
       if (overwrite) {
