@@ -57,57 +57,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway":
-  version: 0.0.0-use.local
-  resolution: "@aws-smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway"
-  dependencies:
-    "@smithy/protocol-http": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/aws-lambda": "npm:^8.10.72"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:^0.7.0"
-    jest: "npm:29.7.0"
-    premove: "npm:4.0.0"
-    tslib: "npm:^1.8.0"
-    typescript: "npm:~5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@aws-smithy/server-common@workspace:^, @aws-smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common":
-  version: 0.0.0-use.local
-  resolution: "@aws-smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common"
-  dependencies:
-    "@smithy/core": "workspace:^"
-    "@smithy/protocol-http": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:^0.7.0"
-    jest: "npm:29.7.0"
-    premove: "npm:4.0.0"
-    re2-wasm: "npm:^1.0.2"
-    tslib: "npm:^1.8.0"
-    typescript: "npm:~5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@aws-smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node":
-  version: 0.0.0-use.local
-  resolution: "@aws-smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node"
-  dependencies:
-    "@smithy/protocol-http": "workspace:^"
-    "@smithy/types": "workspace:^"
-    "@types/node": "npm:^18.11.9"
-    concurrently: "npm:7.0.0"
-    downlevel-dts: "npm:^0.7.0"
-    jest: "npm:29.7.0"
-    premove: "npm:4.0.0"
-    tslib: "npm:^1.8.0"
-    typescript: "npm:~5.8.3"
-  languageName: unknown
-  linkType: soft
-
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.24.2, @babel/code-frame@npm:^7.28.6, @babel/code-frame@npm:^7.29.0":
   version: 7.29.0
   resolution: "@babel/code-frame@npm:7.29.0"
@@ -2908,6 +2857,57 @@ __metadata:
     "@smithy/core": "workspace:^"
     premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
+  languageName: unknown
+  linkType: soft
+
+"@smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway":
+  version: 0.0.0-use.local
+  resolution: "@smithy/server-apigateway@workspace:smithy-typescript-ssdk-libs/server-apigateway"
+  dependencies:
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@types/aws-lambda": "npm:^8.10.72"
+    "@types/node": "npm:^18.11.9"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:^0.7.0"
+    jest: "npm:29.7.0"
+    premove: "npm:4.0.0"
+    tslib: "npm:^1.8.0"
+    typescript: "npm:~5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@smithy/server-common@workspace:^, @smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common":
+  version: 0.0.0-use.local
+  resolution: "@smithy/server-common@workspace:smithy-typescript-ssdk-libs/server-common"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@types/node": "npm:^18.11.9"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:^0.7.0"
+    jest: "npm:29.7.0"
+    premove: "npm:4.0.0"
+    re2-wasm: "npm:^1.0.2"
+    tslib: "npm:^1.8.0"
+    typescript: "npm:~5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node":
+  version: 0.0.0-use.local
+  resolution: "@smithy/server-node@workspace:smithy-typescript-ssdk-libs/server-node"
+  dependencies:
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@types/node": "npm:^18.11.9"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:^0.7.0"
+    jest: "npm:29.7.0"
+    premove: "npm:4.0.0"
+    tslib: "npm:^1.8.0"
+    typescript: "npm:~5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -6543,9 +6543,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "interceptor-example-ssdk@workspace:private/interceptor-example-ssdk"
   dependencies:
-    "@aws-smithy/server-common": "workspace:^"
     "@smithy/core": "workspace:^"
     "@smithy/node-http-handler": "workspace:^"
+    "@smithy/server-common": "workspace:^"
     "@smithy/types": "workspace:^"
     "@tsconfig/node20": "npm:20.1.8"
     "@types/node": "npm:^20.14.8"

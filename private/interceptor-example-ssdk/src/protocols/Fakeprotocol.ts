@@ -5,7 +5,7 @@ import {
   ServerSerdeContext,
   SmithyFrameworkException as __SmithyFrameworkException,
   UnsupportedMediaTypeException as __UnsupportedMediaTypeException,
-} from "@aws-smithy/server-common";
+} from "@smithy/server-common";
 import { isSerializableHeaderValue, map } from "@smithy/core/client";
 import { collectBody, HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/core/protocols";
 import {

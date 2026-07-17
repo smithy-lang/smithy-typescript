@@ -45,6 +45,20 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     // top-level package.json. Adding an empty lock file allows it to be treated
     // as its own package.
     await spawnProcess("touch", ["yarn.lock"], { cwd: codegenDir });
+
+    // Rewrite the generated `@smithy/server-common` dependency to point at the
+    // local workspace copy via yarn's `link:` protocol so we use the local
+    // artifact instead of resolving from npm. `link:` symlinks the folder without
+    // installing its own dependencies; its transitive `@smithy/*` deps are
+    // satisfied by the packages copied into node_modules below.
+    const serverCommonDir = path.join(__dirname, "..", "smithy-typescript-ssdk-libs", "server-common");
+    const packageJsonPath = path.join(codegenDir, "package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    if (packageJson.dependencies && packageJson.dependencies["@smithy/server-common"]) {
+      packageJson.dependencies["@smithy/server-common"] = `link:${path.relative(codegenDir, serverCommonDir)}`;
+      fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+    }
+
     await spawnProcess("yarn", { cwd: codegenDir });
     const smithyPackages = path.join(__dirname, "..", "packages");
     const node_modules = path.join(codegenDir, "node_modules");
@@ -61,17 +75,6 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
             path.join(smithyPackages, smithyPkg, folder),
             path.join(node_modules, "@smithy", smithyPkg),
           ])
-        )
-      );
-    }
-
-    const serverCommonDir = path.join(__dirname, "..", "smithy-typescript-ssdk-libs", "server-common");
-    const serverCommonTarget = path.join(node_modules, "@aws-smithy", "server-common");
-    if (fs.existsSync(path.join(serverCommonDir, "dist")) && fs.existsSync(serverCommonTarget)) {
-      await spawnProcess("rm", ["-rf", path.join(serverCommonTarget, "dist")]);
-      await Promise.all(
-        ["dist", "package.json"].map((entry) =>
-          spawnProcess("cp", ["-r", path.join(serverCommonDir, entry), serverCommonTarget])
         )
       );
     }
