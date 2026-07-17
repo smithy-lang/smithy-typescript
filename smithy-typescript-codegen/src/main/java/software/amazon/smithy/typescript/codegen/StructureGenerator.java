@@ -266,7 +266,7 @@ final class StructureGenerator implements Runnable {
      * import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";
      * import { FooServiceException as __BaseException } from "./FooServiceException";
      * // In server SDK:
-     * // import { ServiceException as __BaseException } from "@aws-smithy/server-common";
+     * // import { ServiceException as __BaseException } from "@smithy/server-common";
      *
      * export class NoSuchResource extends __BaseException {
      *   name: "NoSuchResource";

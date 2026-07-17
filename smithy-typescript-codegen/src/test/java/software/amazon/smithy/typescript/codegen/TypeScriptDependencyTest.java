@@ -46,6 +46,6 @@ public class TypeScriptDependencyTest {
 
         assertThat(serverCommon.size(), equalTo(1));
         assertThat(serverCommon.get(0).getVersion(), not(startsWith("^")));
-        assertThat(serverCommon.get(0).getPackageName(), equalTo("@aws-smithy/server-common"));
+        assertThat(serverCommon.get(0).getPackageName(), equalTo("@smithy/server-common"));
     }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@aws-smithy/server-apigateway",
+  "name": "@smithy/server-apigateway",
   "version": "1.0.0-alpha.10",
   "description": "Base components for Smithy services behind APIGateway",
   "homepage": "https://github.com/smithy-lang/smithy-typescript#readme",

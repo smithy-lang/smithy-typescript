@@ -8,7 +8,7 @@ apigateway.
 ### Example
 
 ```typescript
-import { convertEvent, convertResponse } from "@aws-smithy/server-apigateway";
+import { convertEvent, convertResponse } from "@smithy/server-apigateway";
 import {
   SayHelloInput,
   SayHelloOutput,
