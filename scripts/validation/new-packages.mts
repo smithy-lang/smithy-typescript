@@ -81,29 +81,10 @@ function getBaseRef(): string | null {
 const BASE_REF = getBaseRef();
 
 /**
- * Builds matchers from the changesets `ignore` globs (e.g. "@aws-smithy/*").
- * These packages are not versioned or published by the release workflow.
- */
-function getIgnoreMatchers(): RegExp[] {
-  const configPath = path.join(root, ".changeset", "config.json");
-  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  const globs: string[] = Array.isArray(config.ignore) ? config.ignore : [];
-  return globs.map((glob) => {
-    const pattern = "^" + glob.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") + "$";
-    return new RegExp(pattern);
-  });
-}
-
-const ignoreMatchers = getIgnoreMatchers();
-
-/**
- * A package is publishable if it is not private and not excluded by the
- * changesets ignore globs.
+ * A package is publishable if it has a name and is not private.
  */
 function isPublishable(pkgJson: PackageJson): boolean {
-  return (
-    Boolean(pkgJson.name) && pkgJson.private !== true && !ignoreMatchers.some((re) => re.test(pkgJson.name as string))
-  );
+  return Boolean(pkgJson.name) && pkgJson.private !== true;
 }
 
 /**
