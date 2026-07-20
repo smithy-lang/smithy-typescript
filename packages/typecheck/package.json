@@ -1,6 +1,6 @@
 {
   "name": "@smithy/typecheck",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/typecheck",
   "license": "Apache-2.0",
   "author": {

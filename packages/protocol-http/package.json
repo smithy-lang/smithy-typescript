@@ -1,6 +1,6 @@
 {
   "name": "@smithy/protocol-http",
-  "version": "5.5.10",
+  "version": "5.5.11",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/protocol-http",
   "license": "Apache-2.0",
   "author": {

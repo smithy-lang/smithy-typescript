@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.29.6
+
+### Patch Changes
+
+- 3248fbd: add missing service-specific endpoint features
+
 ## 3.29.5
 
 ### Patch Changes

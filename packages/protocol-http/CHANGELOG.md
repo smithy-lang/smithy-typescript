@@ -1,5 +1,12 @@
 # @smithy/protocol-http
 
+## 5.5.11
+
+### Patch Changes
+
+- Updated dependencies [3248fbd]
+  - @smithy/core@3.29.6
+
 ## 5.5.10
 
 ### Patch Changes
