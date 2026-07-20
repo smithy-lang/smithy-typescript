@@ -1,6 +1,6 @@
 {
   "name": "@smithy/server-apigateway",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Base components for Smithy services behind APIGateway",
   "homepage": "https://github.com/smithy-lang/smithy-typescript#readme",
   "bugs": {

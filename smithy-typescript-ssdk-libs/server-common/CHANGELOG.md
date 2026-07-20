@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 3c08e0b: Publish server packages through changesets
+
 ## 0.1.0 (2026-07-20)
 
 ### Features
