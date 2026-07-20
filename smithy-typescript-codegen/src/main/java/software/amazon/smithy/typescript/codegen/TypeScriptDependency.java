@@ -167,7 +167,9 @@ public enum TypeScriptDependency implements Dependency {
             version = "latest";
         }
 
-        if (name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) {
+        // @smithy/server-* packages are pinned exactly rather than vended as caret ranges.
+        boolean isSmithyServerPackage = name.startsWith("@smithy/server-");
+        if ((name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) && !isSmithyServerPackage) {
             if (!version.startsWith("^") && version.matches("^\\d+\\.\\d+\\.\\d+$")) {
                 version = "^" + version;
             }
