@@ -1,5 +1,12 @@
 # @smithy/middleware-stack
 
+## 4.4.11
+
+### Patch Changes
+
+- Updated dependencies [3248fbd]
+  - @smithy/core@3.29.6
+
 ## 4.4.10
 
 ### Patch Changes

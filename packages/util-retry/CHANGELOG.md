@@ -1,5 +1,12 @@
 # @smithy/util-retry
 
+## 4.5.11
+
+### Patch Changes
+
+- Updated dependencies [3248fbd]
+  - @smithy/core@3.29.6
+
 ## 4.5.10
 
 ### Patch Changes

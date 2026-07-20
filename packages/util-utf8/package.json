@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-utf8",
-  "version": "4.4.10",
+  "version": "4.4.11",
   "description": "A UTF-8 string <-> UInt8Array converter",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-utf8",
   "license": "Apache-2.0",

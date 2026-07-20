@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-body-length-browser",
-  "version": "4.4.10",
+  "version": "4.4.11",
   "description": "Determines the length of a request body in browsers",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-body-length-browser",
   "license": "Apache-2.0",
