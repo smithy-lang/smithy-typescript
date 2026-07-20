@@ -8,8 +8,7 @@
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@aws-smithy/*": ["smithy-typescript-ssdk-libs/*/src"],
-      "@smithy/*": ["packages/*/src"]
+      "@smithy/*": ["packages/*/src", "smithy-typescript-ssdk-libs/*/src"]
     },
     "preserveConstEnums": true,
     "removeComments": true,
