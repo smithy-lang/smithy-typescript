@@ -1,4 +1,5 @@
 import type { NormalizedSchema } from "@smithy/core/schema";
+import { TypeRegistry } from "@smithy/core/schema";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type {
   DocumentSchema,
@@ -12,6 +13,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticErrorSchema,
   StaticStructureSchema,
 } from "@smithy/types";
 
@@ -228,7 +230,7 @@ export class EventStreamSerde {
         }
 
         return {
-          [unionMember]: await this.deserializer.read(eventStreamSchema, body),
+          [unionMember]: await this.readEventMember(eventStreamSchema, body),
         };
       } else {
         // todo(schema): This union convention is ignored by the event stream marshaller.
@@ -276,6 +278,29 @@ export class EventStreamSerde {
         }
       },
     };
+  }
+
+  /**
+   * Reads and returns an event member. For error schemas, resolves the registered
+   * error constructor from the TypeRegistry and wraps the deserialized value
+   * so that it can be thrown as a typed exception instance by the caller.
+   */
+  private async readEventMember(memberSchema: NormalizedSchema, body: Uint8Array): Promise<any> {
+    const deserialized = await this.deserializer.read(memberSchema, body);
+    const schema = memberSchema.getSchema() as any;
+
+    // Check if this is an error schema (StaticSchemaIdError = -3)
+    if (Array.isArray(schema) && schema[0] === -3) {
+      const namespace = schema[1] as string;
+      const registry = TypeRegistry.for(namespace);
+      const ErrorCtor = registry.getErrorCtor(schema as StaticErrorSchema);
+      if (ErrorCtor) {
+        const message = deserialized.message ?? deserialized.Message ?? "";
+        return Object.assign(new ErrorCtor({ message }), { $fault: memberSchema.getMergedTraits().error }, deserialized);
+      }
+    }
+
+    return deserialized;
   }
 
   /**
