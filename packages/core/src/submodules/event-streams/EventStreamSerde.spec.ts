@@ -1,12 +1,13 @@
 import { CborCodec, cbor, dateToTag } from "@smithy/core/cbor";
 import { HttpResponse } from "@smithy/core/protocols";
-import { NormalizedSchema } from "@smithy/core/schema";
+import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type {
   BlobSchema,
   BooleanSchema,
   Message as EventMessage,
   NumericSchema,
+  StaticErrorSchema,
   StaticSimpleSchema,
   StaticStructureSchema,
   StringSchema,
@@ -486,6 +487,279 @@ describe(EventStreamSerde.name, () => {
           dateMember: new Date(0),
           blobMember: new Uint8Array([0, 1, 2, 3]),
         });
+      });
+
+      it("throws modeled exceptions as proper Error instances (not plain objects)", async () => {
+        // This test demonstrates the bug described in https://github.com/smithy-lang/smithy-typescript/issues/2169
+        // Event-stream modeled exceptions are thrown as plain objects instead of
+        // instances of the registered error class, breaking `instanceof` checks.
+
+        const errorNamespace = "ns.eventstream.test";
+
+        // Define and register an error class (mimics codegen output)
+        class MyStreamError extends Error {
+          public readonly $fault = "client" as const;
+          public reason: string = "";
+          constructor(opts: { message?: string } = {}) {
+            super(opts.message);
+            this.name = "MyStreamError";
+            Object.setPrototypeOf(this, MyStreamError.prototype);
+          }
+        }
+
+        const myStreamErrorSchema = [
+          -3,
+          errorNamespace,
+          "MyStreamError",
+          { error: "client" },
+          ["message", "reason"],
+          [0, 0],
+        ] satisfies StaticErrorSchema;
+
+        const registry = TypeRegistry.for(errorNamespace);
+        registry.registerError(myStreamErrorSchema, MyStreamError);
+
+        // Build a union schema that contains both a normal event and an error member
+        const errorUnionSchema = [
+          3,
+          errorNamespace,
+          "EventStreamWithErrors",
+          { streaming: 1 },
+          ["DataEvent", "MyStreamError"],
+          [[3, errorNamespace, "DataEvent", 0, ["value"], [0]] satisfies StaticStructureSchema, myStreamErrorSchema],
+        ] satisfies StaticStructureSchema;
+
+        const errorContainerSchema = [
+          3,
+          errorNamespace,
+          "ErrorEventStreamContainer",
+          0,
+          ["events"],
+          [errorUnionSchema],
+        ] satisfies StaticStructureSchema;
+
+        // Create a wire message with :message-type "exception"
+        // This is how the event stream codec delivers modeled exceptions.
+        function exceptionMessageSerializer(event: any): EventMessage {
+          const eventType = Object.keys(event)[0];
+          const data = event[eventType];
+
+          if (eventType === "__exception__") {
+            // Produce an exception frame
+            return {
+              headers: {
+                ":message-type": { type: "string", value: "exception" },
+                ":exception-type": { type: "string", value: data.type },
+                ":content-type": { type: "string", value: "application/cbor" },
+              },
+              body: cbor.serialize(data.body),
+            };
+          }
+
+          return {
+            headers: {
+              ":message-type": { type: "string", value: "event" },
+              ":event-type": { type: "string", value: eventType },
+              ":content-type": { type: "string", value: "application/cbor" },
+            },
+            body: cbor.serialize(data),
+          };
+        }
+
+        const eventsWithException = {
+          async *[Symbol.asyncIterator]() {
+            yield { DataEvent: { value: "hello" } };
+            yield {
+              __exception__: { type: "MyStreamError", body: { message: "something went wrong", reason: "timeout" } },
+            };
+          },
+        };
+
+        const response = new HttpResponse({
+          statusCode: 200,
+          body: eventStreamMarshaller.serialize(eventsWithException, exceptionMessageSerializer),
+        });
+
+        const asyncIterable = await eventStreamSerde.deserializeEventStream({
+          response,
+          responseSchema: NormalizedSchema.of(errorContainerSchema),
+        });
+
+        const collected: any[] = [];
+        let thrown: unknown;
+
+        try {
+          for await (const event of asyncIterable) {
+            collected.push(event);
+          }
+        } catch (e) {
+          thrown = e;
+        }
+
+        // The first event should have been yielded successfully
+        expect(collected).toEqual([{ DataEvent: { value: "hello" } }]);
+
+        // Verify something was thrown
+        expect(thrown).toBeDefined();
+
+        // The thrown value must be an instance of the registered error class.
+        expect(thrown).toBeInstanceOf(Error);
+        expect(thrown).toBeInstanceOf(MyStreamError);
+        expect((thrown as MyStreamError).message).toBe("something went wrong");
+        expect((thrown as MyStreamError).reason).toBe("timeout");
+        expect((thrown as MyStreamError).$fault).toBe("client");
+      });
+    });
+
+    describe("exception deserialization", () => {
+      it("throws modeled exceptions as instances of the registered error constructor", async () => {
+        // Define a modeled exception schema (StaticSchemaIdError = -3)
+        const modeledExceptionSchema = [
+          -3, // StaticSchemaIdError
+          "ns",
+          "ModeledException",
+          { error: "client" },
+          ["message", "code"],
+          [0, 0], // string schemas for members
+        ] as const;
+
+        // Define a union schema that includes the error member
+        const eventStreamUnionWithError = [
+          3,
+          "ns",
+          "EventStreamWithError",
+          { streaming: 1 },
+          ["DataEvent", "ModeledException"],
+          [[3, "ns", "DataEvent", 0, ["value"], [0]] as const, modeledExceptionSchema],
+        ] as const;
+
+        const containerSchema = [3, "ns", "Container", 0, ["stream"], [eventStreamUnionWithError]] as const;
+
+        // Create a modeled exception class
+        class ModeledException extends Error {
+          readonly code?: string;
+          constructor(opts: any = {}) {
+            super(opts.message ?? "");
+            this.name = "ModeledException";
+          }
+        }
+
+        // Register the exception in the TypeRegistry
+        const registry = TypeRegistry.for("ns");
+        registry.registerError(modeledExceptionSchema as any, ModeledException);
+
+        try {
+          // Serialize an exception event (message-type: exception, exception-type: ModeledException)
+          const exceptionBody = cbor.serialize({ message: "something went wrong", code: "LIMIT_EXCEEDED" });
+
+          const eventStreamMarshaller = impl.getEventStreamMarshaller();
+
+          // Create a raw event stream with an exception message
+          const exceptionEvent: any = {
+            async *[Symbol.asyncIterator]() {
+              yield {
+                headers: {
+                  ":message-type": { type: "string", value: "exception" },
+                  ":exception-type": { type: "string", value: "ModeledException" },
+                  ":content-type": { type: "string", value: "application/cbor" },
+                },
+                body: exceptionBody,
+              };
+            },
+          };
+
+          // Serialize and feed through the event stream serde
+          const serializedBody = eventStreamMarshaller.serialize(exceptionEvent, (event: any) => event);
+
+          const response = new HttpResponse({
+            statusCode: 200,
+            body: serializedBody,
+          });
+
+          const asyncIterable = await eventStreamSerde.deserializeEventStream({
+            response,
+            responseSchema: NormalizedSchema.of(containerSchema as any),
+          });
+
+          // Attempt to consume the stream — should throw
+          for await (const _event of asyncIterable) {
+            // should not reach here
+            expect.unreachable("Expected an exception to be thrown");
+          }
+          expect.unreachable("Expected an exception to be thrown");
+        } catch (thrown: any) {
+          // The thrown value should be an instance of the registered error constructor
+          expect(thrown).toBeInstanceOf(ModeledException);
+          expect(thrown).toBeInstanceOf(Error);
+          expect(thrown.name).toBe("ModeledException");
+          expect(thrown.message).toBe("something went wrong");
+          expect(thrown.code).toBe("LIMIT_EXCEEDED");
+          expect(thrown.$fault).toBe("client");
+        } finally {
+          // Clean up registry to avoid test pollution
+          registry.clear();
+        }
+      });
+
+      it("falls back to current behavior for unknown/unregistered exception types", async () => {
+        // Define a union schema WITHOUT the error member registered
+        const eventStreamUnionNoError = [
+          3,
+          "ns.fallback",
+          "EventStreamNoError",
+          { streaming: 1 },
+          ["DataEvent"],
+          [[3, "ns.fallback", "DataEvent", 0, ["value"], [0]] as const],
+        ] as const;
+
+        const containerSchema = [
+          3,
+          "ns.fallback",
+          "ContainerNoError",
+          0,
+          ["stream"],
+          [eventStreamUnionNoError],
+        ] as const;
+
+        // Serialize an exception event for an unknown exception type
+        const exceptionBody = cbor.serialize({ message: "unknown error occurred" });
+        const eventStreamMarshaller = impl.getEventStreamMarshaller();
+
+        const exceptionEvent: any = {
+          async *[Symbol.asyncIterator]() {
+            yield {
+              headers: {
+                ":message-type": { type: "string", value: "exception" },
+                ":exception-type": { type: "string", value: "UnknownException" },
+                ":content-type": { type: "string", value: "application/cbor" },
+              },
+              body: exceptionBody,
+            };
+          },
+        };
+
+        const serializedBody = eventStreamMarshaller.serialize(exceptionEvent, (event: any) => event);
+
+        const response = new HttpResponse({
+          statusCode: 200,
+          body: serializedBody,
+        });
+
+        try {
+          const asyncIterable = await eventStreamSerde.deserializeEventStream({
+            response,
+            responseSchema: NormalizedSchema.of(containerSchema as any),
+          });
+
+          for await (const _event of asyncIterable) {
+            expect.unreachable("Expected an exception to be thrown");
+          }
+          expect.unreachable("Expected an exception to be thrown");
+        } catch (thrown: any) {
+          // Unknown exceptions should still be thrown as Error instances with name set
+          expect(thrown).toBeInstanceOf(Error);
+          expect(thrown.name).toBe("UnknownException");
+        }
       });
     });
   });
