@@ -326,7 +326,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
       if (key === "logger") {
-        return { ...config, logger: config.logger ?? value };
+        return { ...config, logger: config.logger ?? (value as NodeHttpHandlerOptions["logger"]) };
       }
       return {
         ...config,
