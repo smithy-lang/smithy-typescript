@@ -243,6 +243,7 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       deserializer: this.deserializer,
       serdeContext: this.serdeContext,
       defaultContentType: this.getDefaultContentType(),
+      compositeErrorRegistry: this.compositeErrorRegistry,
     });
   }
 
