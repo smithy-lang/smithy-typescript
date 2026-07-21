@@ -1,21 +1,33 @@
 {
   "name": "@smithy/util-defaults-mode-node",
-  "version": "4.4.9",
+  "version": "4.4.11",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-defaults-mode-node",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS SDK for JavaScript Team",
+    "url": "https://aws.amazon.com/sdk-for-javascript/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/util-defaults-mode-node"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "clean": "premove dist-cjs dist-es dist-types",
     "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz"
   },
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
-  "types": "./dist-types/index.d.ts",
-  "author": {
-    "name": "AWS SDK for JavaScript Team",
-    "url": "https://aws.amazon.com/sdk-for-javascript/"
-  },
-  "license": "Apache-2.0",
-  "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
     "tslib": "^2.6.2"
@@ -23,22 +35,10 @@
   "devDependencies": {
     "premove": "4.0.0"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-defaults-mode-node",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "packages/util-defaults-mode-node"
-  },
   "typedoc": {
     "entryPoint": "src/index.ts"
   },
-  "publishConfig": {
-    "directory": ".release/package"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

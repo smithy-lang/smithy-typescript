@@ -141,7 +141,10 @@ async function validate(packageDir) {
           while (queue.length && !foundDynamic) {
             const n = queue.pop();
             if (!n || typeof n !== "object") continue;
-            if (Array.isArray(n)) { queue.push(...n); continue; }
+            if (Array.isArray(n)) {
+              queue.push(...n);
+              continue;
+            }
             if (n.type === "ImportExpression") {
               errors.push(
                 `[${pkgJson.name}] ESM including dynamic import is not allowed in dist-cjs (${path.relative(packageDir, file)}:${n.loc?.start?.line ?? 1})`

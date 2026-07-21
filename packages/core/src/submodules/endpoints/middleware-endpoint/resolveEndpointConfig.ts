@@ -45,6 +45,15 @@ export interface EndpointInputConfig<T extends EndpointParameters = EndpointPara
   useFipsEndpoint?: boolean | Provider<boolean | undefined>;
 
   /**
+   * When true, endpoint URLs from environment variables and the shared
+   * configuration file are not used. Does not affect endpoints set
+   * via code (e.g. client constructor endpoint option).
+   *
+   * Default false.
+   */
+  ignoreConfiguredEndpointUrls?: boolean;
+
+  /**
    * This field is used internally so you should not fill any value to this field.
    *
    * @internal
@@ -111,6 +120,11 @@ export interface EndpointResolvedConfig<T extends EndpointParameters = EndpointP
   serviceId?: string;
 
   /**
+   * Whether configured endpoint URLs should be ignored.
+   */
+  ignoreConfiguredEndpointUrls: boolean;
+
+  /**
    * A configured endpoint global or specific to the service from ENV or AWS SDK configuration files.
    * @internal
    */
@@ -138,6 +152,7 @@ export function bindResolveEndpointConfig(getEndpointFromConfig: GetEndpointFrom
       isCustomEndpoint,
       useDualstackEndpoint: normalizeProvider(useDualstackEndpoint ?? false),
       useFipsEndpoint: normalizeProvider(useFipsEndpoint ?? false),
+      ignoreConfiguredEndpointUrls: !!input.ignoreConfiguredEndpointUrls,
     }) as T & EndpointResolvedConfig<P>;
 
     let configuredEndpointPromise: undefined | Promise<string | undefined> = undefined;

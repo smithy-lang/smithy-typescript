@@ -1,4 +1,4 @@
-.PHONY: build build-packages sync api-snapshot ct cti cwt cwti dist lint format test-typescript-versions
+.PHONY: build build-packages sync api-snapshot ct cti cwt cwti dist lint format test-typescript-versions test-e2e
 
 build:
 	./gradlew clean build publishToMavenLocal
@@ -136,7 +136,10 @@ cwti:
 	@:
 
 lint:
-	yarn lint
+	npx oxlint -c .oxlintrc.json --fix packages
 
 format:
-	yarn format
+	npx oxfmt packages scripts testbed
+
+test-e2e:
+	(cd ./testbed/aws/s3 && make run)

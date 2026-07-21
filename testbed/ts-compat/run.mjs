@@ -52,12 +52,7 @@ const VERSIONS_FILE = path.join(root, "typescript-versions.json");
 // Generated clients imported by the fixture, mapped to the node_modules path
 // their types resolve through. They must be built (dist-types present) for the
 // fixture to type-check.
-const CLIENTS = [
-  "@smithy/smithy-rpcv2-cbor",
-  "@smithy/smithy-rpcv2-cbor-schema",
-  "xyz",
-  "xyz-schema",
-];
+const CLIENTS = ["@smithy/smithy-rpcv2-cbor", "@smithy/smithy-rpcv2-cbor-schema", "xyz", "xyz-schema"];
 
 /**
  * Load the version specs under test.
@@ -76,8 +71,7 @@ function loadVersions() {
  */
 function ensureClientsReady() {
   const missing = CLIENTS.filter(
-    (name) =>
-      !existsSync(path.join(workspaceRoot, "node_modules", ...name.split("/"), "dist-types", "index.d.ts"))
+    (name) => !existsSync(path.join(workspaceRoot, "node_modules", ...name.split("/"), "dist-types", "index.d.ts"))
   );
   if (missing.length > 0) {
     console.error(

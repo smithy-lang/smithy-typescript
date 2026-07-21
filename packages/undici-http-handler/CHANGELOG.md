@@ -1,5 +1,19 @@
 # Change Log
 
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [3248fbd]
+  - @smithy/core@3.29.6
+
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [b44cb0a]
+  - @smithy/core@3.29.5
+
 ## 3.0.3
 
 ### Patch Changes

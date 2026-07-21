@@ -7,4 +7,4 @@ const matchMessageInJsonBody = (body: string, messageRegex: string): Object => {
     return false;
   }
   return new RegExp(messageRegex).test(parsedBody["message"]);
-}
+};

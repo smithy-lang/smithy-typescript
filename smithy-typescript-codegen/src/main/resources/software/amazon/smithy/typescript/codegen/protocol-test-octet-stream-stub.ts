@@ -7,8 +7,8 @@ const compareEquivalentOctetStreamBodies = (
   expectedBody: string,
   generatedBody: Uint8Array
 ): Object => {
-  const expectedParts = {Value: expectedBody};
-  const generatedParts = {Value: utf8Encoder(generatedBody)};
+  const expectedParts = { Value: expectedBody };
+  const generatedParts = { Value: utf8Encoder(generatedBody) };
 
   return compareParts(expectedParts, generatedParts);
-}
+};

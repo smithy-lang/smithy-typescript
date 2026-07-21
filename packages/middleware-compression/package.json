@@ -1,7 +1,46 @@
 {
   "name": "@smithy/middleware-compression",
-  "version": "4.5.9",
+  "version": "4.5.11",
   "description": "Middleware and Plugin for request compression.",
+  "keywords": [
+    "compression",
+    "gzip",
+    "middleware"
+  ],
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-compression",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/middleware-compression"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "browser": {
+    "./dist-es/compressStream": "./dist-es/compressStream.browser",
+    "./dist-es/compressString": "./dist-es/compressString.browser"
+  },
+  "types": "./dist-types/index.d.ts",
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "react-native": {
+    "./dist-es/compressStream": "./dist-es/compressStream.browser",
+    "./dist-cjs/compressStream": "./dist-cjs/compressStream.browser",
+    "./dist-es/compressString": "./dist-es/compressString.browser",
+    "./dist-cjs/compressString": "./dist-cjs/compressString.browser"
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
@@ -12,8 +51,6 @@
     "test": "yarn g:vitest run",
     "test:watch": "yarn g:vitest watch"
   },
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
   "dependencies": {
     "@smithy/core": "workspace:^",
     "@smithy/types": "workspace:^",
@@ -26,44 +63,7 @@
     "premove": "4.0.0",
     "web-streams-polyfill": "3.2.1"
   },
-  "types": "./dist-types/index.d.ts",
   "engines": {
     "node": ">=18.0.0"
-  },
-  "typesVersions": {
-    "<4.5": {
-      "dist-types/*": [
-        "dist-types/ts3.4/*"
-      ]
-    }
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "keywords": [
-    "middleware",
-    "compression",
-    "gzip"
-  ],
-  "license": "Apache-2.0",
-  "sideEffects": false,
-  "browser": {
-    "./dist-es/compressStream": "./dist-es/compressStream.browser",
-    "./dist-es/compressString": "./dist-es/compressString.browser"
-  },
-  "react-native": {
-    "./dist-es/compressStream": "./dist-es/compressStream.browser",
-    "./dist-cjs/compressStream": "./dist-cjs/compressStream.browser",
-    "./dist-es/compressString": "./dist-es/compressString.browser",
-    "./dist-cjs/compressString": "./dist-cjs/compressString.browser"
-  },
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/middleware-compression",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "packages/middleware-compression"
-  },
-  "publishConfig": {
-    "directory": ".release/package"
   }
 }

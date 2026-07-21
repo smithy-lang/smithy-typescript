@@ -1,5 +1,19 @@
 # @smithy/querystring-parser
 
+## 4.4.11
+
+### Patch Changes
+
+- Updated dependencies [3248fbd]
+  - @smithy/core@3.29.6
+
+## 4.4.10
+
+### Patch Changes
+
+- Updated dependencies [b44cb0a]
+  - @smithy/core@3.29.5
+
 ## 4.4.9
 
 ### Patch Changes

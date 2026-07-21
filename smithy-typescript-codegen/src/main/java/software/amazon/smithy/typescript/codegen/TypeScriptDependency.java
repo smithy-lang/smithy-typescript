@@ -66,7 +66,7 @@ public enum TypeScriptDependency implements Dependency {
     // devtools
     @Deprecated
     EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
-    SERVER_COMMON("dependencies", "@aws-smithy/server-common", false),
+    SERVER_COMMON("dependencies", "@smithy/server-common", false),
     SNAPSHOTS("devDependencies", "@smithy/snapshot-testing", false),
     TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
     VITEST("devDependencies", "vitest", "^4.0.17", false),
@@ -167,7 +167,9 @@ public enum TypeScriptDependency implements Dependency {
             version = "latest";
         }
 
-        if (name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) {
+        // @smithy/server-* packages are pinned exactly rather than vended as caret ranges.
+        boolean isSmithyServerPackage = name.startsWith("@smithy/server-");
+        if ((name.startsWith("@smithy/") || name.startsWith("@aws-sdk/")) && !isSmithyServerPackage) {
             if (!version.startsWith("^") && version.matches("^\\d+\\.\\d+\\.\\d+$")) {
                 version = "^" + version;
             }

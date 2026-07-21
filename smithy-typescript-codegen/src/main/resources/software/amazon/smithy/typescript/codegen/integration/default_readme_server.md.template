@@ -28,7 +28,7 @@ import {
   ${commandName}Output,
   get${serviceId}ServiceHandler
 } from "${packageName}";
-import { convertEvent, convertResponse } from "@aws-smithy/server-node";
+import { convertEvent, convertResponse } from "@smithy/server-node";
 
 class ${serviceId}Service implements __${serviceId}Service {
   ${commandName}(input: ${commandName}Input, request: HttpRequest): ${commandName}Output {

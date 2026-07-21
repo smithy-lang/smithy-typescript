@@ -5,7 +5,7 @@ import {
   NoOpValidator as __NoOpValidator,
   RequiredValidator as __RequiredValidator,
   ValidationFailure as __ValidationFailure,
-} from "@aws-smithy/server-common";
+} from "@smithy/server-common";
 
 /**
  * @public

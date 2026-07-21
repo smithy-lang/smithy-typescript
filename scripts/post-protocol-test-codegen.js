@@ -17,7 +17,7 @@ const private = path.join(root, "private");
 
 const privatePackages = fs.readdirSync(private);
 
-const isWorkspaceDep = (dep) => dep.startsWith("@smithy/") || dep.startsWith("@aws-smithy/");
+const isWorkspaceDep = (dep) => dep.startsWith("@smithy/");
 
 // Dependencies the deps-used validation always treats as used.
 const IMPLICIT_DEPS = new Set(["tslib"]);

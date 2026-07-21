@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.29.6
+
+### Patch Changes
+
+- 3248fbd: add missing service-specific endpoint features
+
+## 3.29.5
+
+### Patch Changes
+
+- b44cb0a: handle early closure of underlying stream in ChecksumStream
+
 ## 3.29.4
 
 ### Patch Changes

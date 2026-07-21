@@ -3,8 +3,8 @@
  * discrepancies between the components.
  */
 const compareEquivalentTextBodies = (expectedBody: string, generatedBody: string): Object => {
-  const expectedParts = {Value: expectedBody};
-  const generatedParts = {Value: generatedBody};
+  const expectedParts = { Value: expectedBody };
+  const generatedParts = { Value: generatedBody };
 
   return compareParts(expectedParts, generatedParts);
-}
+};

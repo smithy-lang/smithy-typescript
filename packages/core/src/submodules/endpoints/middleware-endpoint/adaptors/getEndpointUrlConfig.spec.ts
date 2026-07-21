@@ -82,6 +82,27 @@ describe(getEndpointUrlConfig.name, () => {
     it("returns undefined, if endpoint not available in config", () => {
       expect(endpointUrlConfig.environmentVariableSelector({})).toBeUndefined();
     });
+
+    it("throws if profile references a services section that does not exist", () => {
+      const profile = { services: "nonexistent-services" };
+      const config = {};
+      expect(() => endpointUrlConfig.configFileSelector(profile, config)).toThrow(
+        'The services section "nonexistent-services" specified in the profile is not present in the shared configuration file.'
+      );
+    });
+
+    it("throws if profile references a services section and config is undefined", () => {
+      const profile = { services: "nonexistent-services" };
+      expect(() => endpointUrlConfig.configFileSelector(profile, undefined)).toThrow(
+        'The services section "nonexistent-services" specified in the profile is not present in the shared configuration file.'
+      );
+    });
+
+    it("does not throw if profile has no services key", () => {
+      const profile = {};
+      const config = {};
+      expect(endpointUrlConfig.configFileSelector(profile, config)).toBeUndefined();
+    });
   });
 
   it("returns undefined by default", () => {

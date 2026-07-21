@@ -1,6 +1,35 @@
 {
   "name": "@smithy/experimental-identity-and-auth",
-  "version": "0.7.9",
+  "version": "0.7.11",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/experimental-identity-and-auth",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS Smithy Team",
+    "email": "",
+    "url": "https://smithy.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/experimental-identity-and-auth"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "publishConfig": {
+    "directory": ".release/package"
+  },
   "scripts": {
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
@@ -13,16 +42,6 @@
     "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
     "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
   },
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
-  "types": "./dist-types/index.d.ts",
-  "author": {
-    "name": "AWS Smithy Team",
-    "email": "",
-    "url": "https://smithy.io"
-  },
-  "license": "Apache-2.0",
-  "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
     "@smithy/signature-v4": "workspace:^",
@@ -36,29 +55,10 @@
     "premove": "4.0.0",
     "typedoc": "0.23.23"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "typesVersions": {
-    "<4.5": {
-      "dist-types/*": [
-        "dist-types/ts3.4/*"
-      ]
-    }
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/experimental-identity-and-auth",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/smithy-lang/smithy-typescript.git",
-    "directory": "packages/experimental-identity-and-auth"
-  },
   "typedoc": {
     "entryPoint": "src/index.ts"
   },
-  "publishConfig": {
-    "directory": ".release/package"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

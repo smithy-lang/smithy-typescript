@@ -1,38 +1,32 @@
 {
   "name": "@smithy/service-error-classification",
-  "version": "4.5.9",
-  "scripts": {
-    "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
-    "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
-    "clean": "premove dist-cjs dist-es dist-types",
-    "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz"
-  },
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
-  "types": "./dist-types/index.d.ts",
+  "version": "4.5.11",
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/service-error-classification",
+  "license": "Apache-2.0",
   "author": {
     "name": "AWS SDK for JavaScript Team",
     "url": "https://aws.amazon.com/sdk-for-javascript/"
   },
-  "license": "Apache-2.0",
-  "sideEffects": false,
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "files": [
-    "dist-*/**"
-  ],
-  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/service-error-classification",
   "repository": {
     "type": "git",
     "url": "https://github.com/smithy-lang/smithy-typescript.git",
     "directory": "packages/service-error-classification"
   },
-  "typedoc": {
-    "entryPoint": "src/index.ts"
-  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
   "publishConfig": {
     "directory": ".release/package"
+  },
+  "scripts": {
+    "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
+    "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
+    "clean": "premove dist-cjs dist-es dist-types",
+    "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz"
   },
   "dependencies": {
     "@smithy/core": "workspace:^",
@@ -40,5 +34,11 @@
   },
   "devDependencies": {
     "premove": "4.0.0"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

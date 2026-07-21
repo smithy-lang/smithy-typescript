@@ -77,7 +77,9 @@ async function runBatch(packages, concurrency) {
       await inline(pkg);
     } catch (e) {
       completed++;
-      console.log(`[${completed}/${total}] ${pkg} (${fileCount} files, inline SKIPPED: ${e.message.split("\n")[0]}, ${Date.now() - t0}ms)`);
+      console.log(
+        `[${completed}/${total}] ${pkg} (${fileCount} files, inline SKIPPED: ${e.message.split("\n")[0]}, ${Date.now() - t0}ms)`
+      );
       return;
     }
     completed++;

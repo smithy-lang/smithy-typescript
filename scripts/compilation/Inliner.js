@@ -223,8 +223,7 @@ module.exports = class Inliner {
           }
 
           const local =
-            id.includes(`/dist-es/`) &&
-            id.includes(`/packages/`) && !id.includes(`packages/${this.package}/`);
+            id.includes(`/dist-es/`) && id.includes(`/packages/`) && !id.includes(`packages/${this.package}/`);
           if (local) {
             if (this.verbose) {
               console.log("EXTERN (local)", id);

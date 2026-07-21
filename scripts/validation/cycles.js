@@ -11,7 +11,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const walk = require("../utils/walk");
-const { extractImports, getPackageName, resolveRelative, getPackageDirs, summarizePackages } = require("./validation-shared");
+const {
+  extractImports,
+  getPackageName,
+  resolveRelative,
+  getPackageDirs,
+  summarizePackages,
+} = require("./validation-shared");
 
 /**
  * Finds all cycles in a directed graph using Tarjan's algorithm.

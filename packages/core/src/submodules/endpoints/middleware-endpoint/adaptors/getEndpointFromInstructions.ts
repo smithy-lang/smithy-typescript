@@ -46,7 +46,7 @@ export function bindGetEndpointFromInstructions(getEndpointFromConfig: GetEndpoi
     clientConfig: Partial<EndpointResolvedConfig<T>> & Config,
     context?: HandlerExecutionContext
   ): Promise<EndpointV2> => {
-    if (!clientConfig.isCustomEndpoint) {
+    if (!clientConfig.isCustomEndpoint && !clientConfig.ignoreConfiguredEndpointUrls) {
       let endpointFromConfig: string | undefined;
 
       // This field is guaranteed by the type indicated by the config resolver, but is new
@@ -61,6 +61,7 @@ export function bindGetEndpointFromInstructions(getEndpointFromConfig: GetEndpoi
       if (endpointFromConfig) {
         clientConfig.endpoint = () => Promise.resolve(toEndpointV1(endpointFromConfig!));
         clientConfig.isCustomEndpoint = true;
+        context?.logger?.debug?.(`@smithy/core/endpoints - resolved endpoint from config: ${endpointFromConfig}`);
       }
     }
 
