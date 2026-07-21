@@ -10,6 +10,8 @@ export const CLOCK_SKEW_ERROR_CODES = [
   "AccessDeniedException",
   "AuthFailure",
   "InvalidSignatureException",
+  "RequestExpired",
+  "RequestInTheFuture",
   "RequestTimeTooSkewed",
   "SignatureDoesNotMatch",
 ];
