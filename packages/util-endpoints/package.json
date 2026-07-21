@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-endpoints",
-  "version": "3.6.11",
+  "version": "3.6.12",
   "description": "Utilities to help with endpoint resolution.",
   "keywords": [
     "endpoint"
