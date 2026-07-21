@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-stream",
-  "version": "4.7.11",
+  "version": "4.7.12",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-stream",
   "license": "Apache-2.0",
   "author": {

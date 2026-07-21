@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.29.7
+
+### Patch Changes
+
+- 44b21e6: fix for event stream events - throw the specific modeled error class instead of a generic Error
+
 ## 3.29.6
 
 ### Patch Changes

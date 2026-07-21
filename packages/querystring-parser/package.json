@@ -1,6 +1,6 @@
 {
   "name": "@smithy/querystring-parser",
-  "version": "4.4.11",
+  "version": "4.4.12",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/querystring-parser",
   "license": "Apache-2.0",
   "author": {
