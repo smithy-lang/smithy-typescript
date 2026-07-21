@@ -214,7 +214,11 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     value: UndiciHttpHandlerOptions[K]
   ): void {
     if (key !== "dispatcher") {
-      (this.config as any)[key] = value;
+      if (key === "logger") {
+        (this.config as any)[key] ??= value;
+      } else {
+        (this.config as any)[key] = value;
+      }
       return;
     }
 
