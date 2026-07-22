@@ -203,7 +203,7 @@ export function bytesToFloat16(a: Uint8, b: Uint8): Float32 {
  */
 function decodeMap(at: Uint32, to: Uint32): CborMapType {
   const mapDataLength = decodeCount(at, to);
-  if (mapDataLength < 15) {
+  if (mapDataLength < 25) {
     return decodeMapSmall(at, to, mapDataLength);
   }
   return decodeMapLarge(at, to, mapDataLength);
