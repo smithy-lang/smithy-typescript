@@ -39,7 +39,8 @@ final class ServerGenerator {
         SymbolProvider symbolProvider,
         Shape serviceShape,
         Set<OperationShape> operations,
-        TypeScriptWriter writer
+        TypeScriptWriter writer,
+        boolean hasEventStream
     ) {
         addCommonHandlerImports(writer);
 
@@ -47,7 +48,7 @@ final class ServerGenerator {
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsType = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writeSerdeContextBase(writer);
+        writeSerdeContextBase(writer, hasEventStream);
 
         writer.openBlock(
             "const $LValidators: { [K in $T]: (input: any) => __ValidationFailure[] } = {",
@@ -211,12 +212,13 @@ final class ServerGenerator {
         SymbolProvider symbolProvider,
         Shape serviceShape,
         OperationShape operation,
-        TypeScriptWriter writer
+        TypeScriptWriter writer,
+        boolean hasEventStream
     ) {
         addCommonHandlerImports(writer);
         writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
 
-        writeSerdeContextBase(writer);
+        writeSerdeContextBase(writer, hasEventStream);
 
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
@@ -670,7 +672,7 @@ final class ServerGenerator {
         writer.addImport("MetricsRecorderFactory", "__MetricsRecorderFactory", TypeScriptDependency.SMITHY_TYPES);
     }
 
-    private static void writeSerdeContextBase(TypeScriptWriter writer) {
+    private static void writeSerdeContextBase(TypeScriptWriter writer, boolean hasEventStream) {
         writer.addImport("ServerSerdeContext", "__ServerSerdeContext", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("NodeHttpHandler", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
         writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
@@ -678,6 +680,14 @@ final class ServerGenerator {
         writer.addImportSubmodule("toBase64", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
         writer.addImportSubmodule("fromUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
         writer.addImportSubmodule("toUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
+        if (hasEventStream) {
+            writer.addImportSubmodule(
+                "eventStreamSerdeProvider",
+                null,
+                TypeScriptDependency.SMITHY_CORE,
+                SmithyCoreSubmodules.EVENT_STREAMS
+            );
+        }
 
         writer.openBlock("const serdeContextBase = {", "};", () -> {
             writer.write("base64Encoder: toBase64,");
@@ -685,6 +695,12 @@ final class ServerGenerator {
             writer.write("utf8Encoder: toUtf8,");
             writer.write("utf8Decoder: fromUtf8,");
             writer.write("streamCollector: streamCollector,");
+            if (hasEventStream) {
+                writer.write(
+                    "eventStreamMarshaller: eventStreamSerdeProvider("
+                        + "{ utf8Encoder: toUtf8, utf8Decoder: fromUtf8 }),"
+                );
+            }
             writer.write("requestHandler: new NodeHttpHandler(),");
             writer.write("disableHostPrefix: true");
         });
