@@ -40,7 +40,8 @@ final class ServerGenerator {
         Shape serviceShape,
         Set<OperationShape> operations,
         TypeScriptWriter writer,
-        boolean hasEventStream
+        boolean hasEventStream,
+        String eventStreamSerdeProviderName
     ) {
         addCommonHandlerImports(writer);
 
@@ -48,7 +49,7 @@ final class ServerGenerator {
         Symbol handlerSymbol = serviceSymbol.expectProperty("handler", Symbol.class);
         Symbol operationsType = serviceSymbol.expectProperty("operations", Symbol.class);
 
-        writeSerdeContextBase(writer, hasEventStream);
+        writeSerdeContextBase(writer, hasEventStream, eventStreamSerdeProviderName);
 
         writer.openBlock(
             "const $LValidators: { [K in $T]: (input: any) => __ValidationFailure[] } = {",
@@ -213,12 +214,13 @@ final class ServerGenerator {
         Shape serviceShape,
         OperationShape operation,
         TypeScriptWriter writer,
-        boolean hasEventStream
+        boolean hasEventStream,
+        String eventStreamSerdeProviderName
     ) {
         addCommonHandlerImports(writer);
         writer.addImport("Operation", "__Operation", TypeScriptDependency.SERVER_COMMON);
 
-        writeSerdeContextBase(writer, hasEventStream);
+        writeSerdeContextBase(writer, hasEventStream, eventStreamSerdeProviderName);
 
         Symbol serviceSymbol = symbolProvider.toSymbol(serviceShape);
         Symbol operationSymbol = symbolProvider.toSymbol(operation);
@@ -672,7 +674,11 @@ final class ServerGenerator {
         writer.addImport("MetricsRecorderFactory", "__MetricsRecorderFactory", TypeScriptDependency.SMITHY_TYPES);
     }
 
-    private static void writeSerdeContextBase(TypeScriptWriter writer, boolean hasEventStream) {
+    private static void writeSerdeContextBase(
+        TypeScriptWriter writer,
+        boolean hasEventStream,
+        String eventStreamSerdeProviderName
+    ) {
         writer.addImport("ServerSerdeContext", "__ServerSerdeContext", TypeScriptDependency.SERVER_COMMON);
         writer.addImport("NodeHttpHandler", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
         writer.addImport("streamCollector", null, TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
@@ -682,7 +688,7 @@ final class ServerGenerator {
         writer.addImportSubmodule("toUtf8", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
         if (hasEventStream) {
             writer.addImportSubmodule(
-                "eventStreamSerdeProvider",
+                eventStreamSerdeProviderName,
                 null,
                 TypeScriptDependency.SMITHY_CORE,
                 SmithyCoreSubmodules.EVENT_STREAMS
@@ -697,8 +703,8 @@ final class ServerGenerator {
             writer.write("streamCollector: streamCollector,");
             if (hasEventStream) {
                 writer.write(
-                    "eventStreamMarshaller: eventStreamSerdeProvider("
-                        + "{ utf8Encoder: toUtf8, utf8Decoder: fromUtf8 }),"
+                    "eventStreamMarshaller: $L({ utf8Encoder: toUtf8, utf8Decoder: fromUtf8 }),",
+                    eventStreamSerdeProviderName
                 );
             }
             writer.write("requestHandler: new NodeHttpHandler(),");

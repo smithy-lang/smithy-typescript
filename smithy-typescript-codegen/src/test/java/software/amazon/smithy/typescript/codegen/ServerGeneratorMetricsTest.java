@@ -43,13 +43,21 @@ public class ServerGeneratorMetricsTest {
     private String generateOperationHandler() {
         OperationShape operation = model.expectShape(ShapeId.from("smithy.example#GetFoo"), OperationShape.class);
         TypeScriptWriter writer = new TypeScriptWriter("./GetFoo");
-        ServerGenerator.generateOperationHandler(symbolProvider, service, operation, writer, false);
+        ServerGenerator
+            .generateOperationHandler(symbolProvider, service, operation, writer, false, "eventStreamSerdeProvider");
         return writer.toString();
     }
 
     private String generateServiceHandler() {
         TypeScriptWriter writer = new TypeScriptWriter("./Example");
-        ServerGenerator.generateServiceHandler(symbolProvider, service, model.getOperationShapes(), writer, false);
+        ServerGenerator.generateServiceHandler(
+            symbolProvider,
+            service,
+            model.getOperationShapes(),
+            writer,
+            false,
+            "eventStreamSerdeProvider"
+        );
         return writer.toString();
     }
 
