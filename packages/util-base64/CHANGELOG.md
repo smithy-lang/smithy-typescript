@@ -1,5 +1,12 @@
 # @smithy/util-base64
 
+## 4.5.13
+
+### Patch Changes
+
+- Updated dependencies [d6e6f8b]
+  - @smithy/core@3.29.8
+
 ## 4.5.12
 
 ### Patch Changes

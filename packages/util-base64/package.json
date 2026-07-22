@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-base64",
-  "version": "4.5.12",
+  "version": "4.5.13",
   "description": "A Base64 <-> UInt8Array converter",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-base64",
   "license": "Apache-2.0",

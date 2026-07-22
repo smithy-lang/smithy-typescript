@@ -1,5 +1,12 @@
 # @smithy/property-provider
 
+## 4.4.13
+
+### Patch Changes
+
+- Updated dependencies [d6e6f8b]
+  - @smithy/core@3.29.8
+
 ## 4.4.12
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/undici-http-handler",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "Smithy-compatible HTTP handler backed by modern, high performance Node.js undici client",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/undici-http-handler",
   "license": "Apache-2.0",
