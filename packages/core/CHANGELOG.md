@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.29.8
+
+### Patch Changes
+
+- d6e6f8b: update large map threshold in cbor
+
 ## 3.29.7
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-uri-escape",
-  "version": "4.4.12",
+  "version": "4.4.13",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-uri-escape",
   "license": "Apache-2.0",
   "author": {

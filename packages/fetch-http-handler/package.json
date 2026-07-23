@@ -1,6 +1,6 @@
 {
   "name": "@smithy/fetch-http-handler",
-  "version": "5.6.9",
+  "version": "5.6.10",
   "description": "Provides a way to make requests",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/fetch-http-handler",
   "license": "Apache-2.0",

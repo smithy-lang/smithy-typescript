@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-body-length-node",
-  "version": "4.4.12",
+  "version": "4.4.13",
   "description": "Determines the length of a request body in node.js",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-body-length-node",
   "license": "Apache-2.0",

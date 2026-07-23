@@ -1,6 +1,6 @@
 {
   "name": "@smithy/shared-ini-file-loader",
-  "version": "4.6.12",
+  "version": "4.6.13",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/shared-ini-file-loader",
   "license": "Apache-2.0",
   "author": {
