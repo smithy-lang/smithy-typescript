@@ -4,8 +4,10 @@
  *
  * These errors are retryable, assuming the SDK has enabled clock skew
  * correction.
+ *
  */
 export const CLOCK_SKEW_ERROR_CODES = [
+  "AccessDeniedException",
   "AuthFailure",
   "InvalidSignatureException",
   "RequestExpired",
