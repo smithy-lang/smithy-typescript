@@ -1,6 +1,6 @@
 {
   "name": "@smithy/snapshot-testing",
-  "version": "2.2.11",
+  "version": "2.2.13",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/snapshot-testing",
   "license": "Apache-2.0",
   "author": {

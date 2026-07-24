@@ -1,6 +1,6 @@
 {
   "name": "@smithy/signature-v4",
-  "version": "5.6.7",
+  "version": "5.6.9",
   "description": "A standalone implementation of the AWS Signature V4 request signing algorithm",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/signature-v4",
   "license": "Apache-2.0",

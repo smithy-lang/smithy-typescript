@@ -1,4 +1,4 @@
-import type { NormalizedSchema } from "@smithy/core/schema";
+import { type NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type {
   DocumentSchema,
@@ -12,6 +12,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticErrorSchema,
   StaticStructureSchema,
 } from "@smithy/types";
 
@@ -27,6 +28,7 @@ export class EventStreamSerde {
   private readonly deserializer: ShapeDeserializer<string | Uint8Array>;
   private readonly serdeContext?: SerdeFunctions;
   private readonly defaultContentType: string;
+  private readonly compositeErrorRegistry?: TypeRegistry;
 
   /**
    * Properties are injected by the HttpProtocol.
@@ -37,18 +39,21 @@ export class EventStreamSerde {
     deserializer,
     serdeContext,
     defaultContentType,
+    compositeErrorRegistry,
   }: {
     marshaller: EventStreamMarshaller;
     serializer: ShapeSerializer<string | Uint8Array>;
     deserializer: ShapeDeserializer<string | Uint8Array>;
     serdeContext?: SerdeFunctions;
     defaultContentType: string;
+    compositeErrorRegistry?: TypeRegistry;
   }) {
     this.marshaller = marshaller;
     this.serializer = serializer;
     this.deserializer = deserializer;
     this.serdeContext = serdeContext;
     this.defaultContentType = defaultContentType;
+    this.compositeErrorRegistry = compositeErrorRegistry;
   }
 
   /**
@@ -212,19 +217,9 @@ export class EventStreamSerde {
             }
           }
 
-          if (hasBindings) {
-            return {
-              [unionMember]: out,
-            };
-          }
-          if (body.byteLength === 0) {
-            // This isn't correct w.r.t. the content-type,
-            // since 0-length data is neither valid JSON nor CBOR,
-            // but handles an existing compatibility issue in server-side implementations.
-            return {
-              [unionMember]: {},
-            };
-          }
+          return {
+            [unionMember]: await this.readEventMember(eventStreamSchema, body, hasBindings, out),
+          };
         }
 
         return {
@@ -276,6 +271,56 @@ export class EventStreamSerde {
         }
       },
     };
+  }
+
+  /**
+   * Reads and returns an event member. For error schemas, resolves the registered
+   * error constructor from the TypeRegistry and wraps the deserialized value
+   * so that it can be thrown as a typed exception instance by the caller.
+   */
+  private async readEventMember(
+    eventStreamSchema: NormalizedSchema,
+    body: Uint8Array,
+    hasBindings?: boolean,
+    out?: any
+  ): Promise<any> {
+    let ErrCtor: any;
+    const staticStructuralSchema = eventStreamSchema.getSchema() as StaticStructureSchema | StaticErrorSchema;
+    if (Array.isArray(staticStructuralSchema) && staticStructuralSchema[0] === -3) {
+      const namespace = staticStructuralSchema[1];
+      const nsRegistry = TypeRegistry.for(namespace);
+      this.compositeErrorRegistry?.copyFrom(nsRegistry);
+      ErrCtor = (this.compositeErrorRegistry ?? nsRegistry)?.getErrorCtor(staticStructuralSchema);
+    }
+
+    const dataObject = hasBindings
+      ? out
+      : body.byteLength === 0
+        ? {}
+        : await this.deserializer.read(eventStreamSchema, body);
+
+    // re: bytelength=0, this isn't correct w.r.t. the content-type,
+    // since 0-length data is neither valid JSON nor CBOR,
+    // but handles an existing compatibility issue in server-side implementations.
+
+    if (ErrCtor) {
+      const message = dataObject.message ?? dataObject.Message ?? "Unknown";
+      const metadata = {} as { $fault?: string };
+      const $fault = eventStreamSchema.getMergedTraits().error;
+      if ($fault) {
+        metadata.$fault = $fault;
+      }
+      return Object.assign(
+        new ErrCtor({}),
+        metadata,
+        {
+          message,
+        },
+        dataObject
+      );
+    }
+
+    return dataObject;
   }
 
   /**

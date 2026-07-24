@@ -1,6 +1,6 @@
 {
   "name": "@smithy/core",
-  "version": "3.29.6",
+  "version": "3.29.8",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/core",
   "license": "Apache-2.0",
   "author": {

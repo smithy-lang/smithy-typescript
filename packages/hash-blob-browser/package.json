@@ -1,6 +1,6 @@
 {
   "name": "@smithy/hash-blob-browser",
-  "version": "4.4.11",
+  "version": "4.4.13",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/hash-blob-browser",
   "license": "Apache-2.0",
   "author": {
