@@ -1,5 +1,13 @@
 # @smithy/chunked-blob-reader
 
+## 5.4.14
+
+### Patch Changes
+
+- Updated dependencies [54040ef]
+- Updated dependencies [155bb56]
+  - @smithy/core@3.30.0
+
 ## 5.4.13
 
 ### Patch Changes
