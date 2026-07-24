@@ -404,6 +404,22 @@ describe("NodeHttpHandler", () => {
 
       expect(result.httpHandlerConfigs().requestTimeout).toBe(randomRequestTimeout);
     });
+
+    it("passes client logger to the handler as fallback", async () => {
+      const clientLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+      const result = NodeHttpHandler.create({}, clientLogger);
+      expect(result).toBeInstanceOf(NodeHttpHandler);
+      await result.handle({} as any);
+      expect((result as NodeHttpHandler).httpHandlerConfigs().logger).toBe(clientLogger);
+    });
+
+    it("does not override handler-level logger with client logger", async () => {
+      const handlerLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+      const clientLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+      const result = NodeHttpHandler.create({ logger: handlerLogger }, clientLogger);
+      await result.handle({} as any);
+      expect((result as NodeHttpHandler).httpHandlerConfigs().logger).toBe(handlerLogger);
+    });
   });
 
   describe("#destroy", () => {
