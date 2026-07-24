@@ -44,6 +44,7 @@ import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
+import software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
@@ -258,9 +259,10 @@ final class DirectedTypeScriptCodegen
         }
 
         if (settings.generateServerSdk()) {
+            boolean hasEventStream = AddEventStreamDependency.hasEventStream(directive.model(), service);
             for (OperationShape operation : directive.operations()) {
                 delegator.useShapeWriter(operation, w -> {
-                    ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
+                    ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w, hasEventStream);
                 });
             }
         }
@@ -736,7 +738,13 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(service, writer -> {
                 ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
                 ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
-                ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
+                ServerGenerator.generateServiceHandler(
+                    symbolProvider,
+                    service,
+                    operations,
+                    writer,
+                    AddEventStreamDependency.hasEventStream(directive.model(), service)
+                );
             });
     }
 
