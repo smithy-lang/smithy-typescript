@@ -561,22 +561,14 @@ describe("UndiciHttpHandler", () => {
       expect(configs.logger).toBe(logger);
     });
 
-    it("does not overwrite an existing logger via updateHttpClientConfig", async () => {
+    it("updates logger via updateHttpClientConfig", async () => {
       const logger = createMockLogger();
       const updatedLogger = createMockLogger();
       handler = new UndiciHttpHandler({ logger });
       await handler.handle(createMockRequest());
       handler.updateHttpClientConfig("logger", updatedLogger);
       await handler.handle(createMockRequest());
-      expect(handler.httpHandlerConfigs().logger).toBe(logger);
-    });
-
-    it("sets logger via updateHttpClientConfig when none was provided", async () => {
-      handler = new UndiciHttpHandler();
-      const clientLogger = createMockLogger();
-      handler.updateHttpClientConfig("logger", clientLogger);
-      await handler.handle(createMockRequest());
-      expect(handler.httpHandlerConfigs().logger).toBe(clientLogger);
+      expect(handler.httpHandlerConfigs().logger).toBe(updatedLogger);
     });
 
     it("retains existing dispatcher if undefined is passed", () => {

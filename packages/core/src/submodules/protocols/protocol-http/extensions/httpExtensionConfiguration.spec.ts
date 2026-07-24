@@ -28,19 +28,19 @@ describe("getHttpHandlerExtensionConfiguration", () => {
       expect(handler.updateHttpClientConfig).toHaveBeenCalledWith("logger", logger);
     });
 
+    it("does not call updateHttpClientConfig when logger is not set", () => {
+      const handler = createMockHandler();
+
+      getHttpHandlerExtensionConfiguration({ httpHandler: handler } as any);
+
+      expect(handler.updateHttpClientConfig).not.toHaveBeenCalled();
+    });
+
     it("does not throw when no handler is present", () => {
       const logger = createMockLogger();
 
       // should not throw
       getHttpHandlerExtensionConfiguration({ logger } as any);
-    });
-
-    it("does not throw when no logger is provided", () => {
-      const handler = createMockHandler();
-
-      getHttpHandlerExtensionConfiguration({ httpHandler: handler } as any);
-
-      expect(handler.updateHttpClientConfig).toHaveBeenCalledWith("logger", undefined);
     });
   });
 });

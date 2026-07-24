@@ -486,26 +486,7 @@ describe("NodeHttpHandler", () => {
   });
 
   describe("updateHttpClientConfig", () => {
-    it("uses nullish assignment for the logger key", async () => {
-      const handlerLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
-      const handler = new NodeHttpHandler({ logger: handlerLogger });
-
-      const clientLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
-      handler.updateHttpClientConfig("logger", clientLogger);
-
-      // trigger config resolution
-      const request = new HttpRequest({ hostname: "localhost", method: "GET", protocol: "https:", path: "/" });
-      try {
-        await handler.handle(request);
-      } catch {
-        // ignore request errors, we just need config to resolve
-      }
-
-      const configs = handler.httpHandlerConfigs();
-      expect(configs.logger).toBe(handlerLogger);
-    });
-
-    it("sets the logger when none was provided in handler options", async () => {
+    it("updates the logger", async () => {
       const handler = new NodeHttpHandler();
 
       const clientLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
@@ -522,7 +503,7 @@ describe("NodeHttpHandler", () => {
       expect(configs.logger).toBe(clientLogger);
     });
 
-    it("overwrites for non-logger keys", async () => {
+    it("updates non-logger keys", async () => {
       const handler = new NodeHttpHandler({ requestTimeout: 1000 });
       handler.updateHttpClientConfig("requestTimeout", 5000);
 
