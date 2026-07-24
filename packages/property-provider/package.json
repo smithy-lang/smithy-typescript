@@ -1,6 +1,6 @@
 {
   "name": "@smithy/property-provider",
-  "version": "4.4.13",
+  "version": "4.4.14",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/property-provider",
   "license": "Apache-2.0",
   "author": {

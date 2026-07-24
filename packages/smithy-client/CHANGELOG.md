@@ -1,5 +1,13 @@
 # @smithy/smithy-client
 
+## 4.14.14
+
+### Patch Changes
+
+- Updated dependencies [54040ef]
+- Updated dependencies [155bb56]
+  - @smithy/core@3.30.0
+
 ## 4.14.13
 
 ### Patch Changes

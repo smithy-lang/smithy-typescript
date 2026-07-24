@@ -1,6 +1,6 @@
 {
   "name": "@smithy/util-hex-encoding",
-  "version": "4.4.13",
+  "version": "4.4.14",
   "description": "Converts binary buffers to and from lowercase hexadecimal encoding",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/util-hex-encoding",
   "license": "Apache-2.0",
