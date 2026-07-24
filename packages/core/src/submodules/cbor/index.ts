@@ -10,3 +10,5 @@ export {
 } from "./parseCborBody";
 export { SmithyRpcV2CborProtocol } from "./SmithyRpcV2CborProtocol";
 export { CborCodec, CborShapeDeserializer, CborShapeSerializer } from "./CborCodec";
+export { SinglePassCborShapeSerializer } from "./SinglePassCborShapeSerializer";
+export { SinglePassCborShapeDeserializer } from "./SinglePassCborShapeDeserializer";
