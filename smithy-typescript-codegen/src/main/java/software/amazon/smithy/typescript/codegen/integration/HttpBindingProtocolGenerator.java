@@ -698,12 +698,23 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         Symbol outputType = symbol.expectProperty("outputType", Symbol.class);
         writer.addImport("ServerSerdeContext", null, TypeScriptDependency.SERVER_COMMON);
 
+        String ctxType = "ServerSerdeContext";
+        if (EventStreamGenerator.hasEventStreamOutput(context, operation)) {
+            writer.addTypeImport(
+                "EventStreamSerdeContext",
+                "__EventStreamSerdeContext",
+                TypeScriptDependency.SMITHY_TYPES
+            );
+            ctxType += " & __EventStreamSerdeContext";
+        }
+
         writer.openBlock(
-            "export const $L = async (\n" + "  input: $T,\n" + "  ctx: ServerSerdeContext\n"
+            "export const $L = async (\n" + "  input: $T,\n" + "  ctx: $L\n"
                 + "): Promise<$T> => {",
             "};",
             methodName,
             outputType,
+            ctxType,
             responseType,
             () -> {
                 writeEmptyEndpoint(context, operation);
@@ -834,8 +845,13 @@ public abstract class HttpBindingProtocolGenerator implements ProtocolGenerator 
         String contextType = "__SerdeContext";
         boolean hasEventStreamResponse = EventStreamGenerator.hasEventStreamOutput(context, operation);
         if (hasEventStreamResponse) {
-            // todo: unsupported SSDK feature.
-            contextType += "& any /*event stream context unsupported in ssdk*/";
+            context.getWriter()
+                .addTypeImport(
+                    "EventStreamSerdeContext",
+                    "__EventStreamSerdeContext",
+                    TypeScriptDependency.SMITHY_TYPES
+                );
+            contextType += " & __EventStreamSerdeContext";
         }
         context
             .getWriter()

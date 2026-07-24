@@ -47,5 +47,9 @@ export type {
   EventStreamSerdeResolvedConfig,
 } from "./eventstream-serde-config-resolver/EventStreamSerdeConfig";
 
+// SSE (text/event-stream) event stream serde
+export { SseEventStreamMarshaller, sseEventStreamSerdeProvider } from "./eventstream-serde-sse/SseEventStreamMarshaller";
+export type { SseEventStreamMarshallerOptions } from "./eventstream-serde-sse/SseEventStreamMarshaller";
+
 // EventStreamSerde
 export { EventStreamSerde } from "./EventStreamSerde";

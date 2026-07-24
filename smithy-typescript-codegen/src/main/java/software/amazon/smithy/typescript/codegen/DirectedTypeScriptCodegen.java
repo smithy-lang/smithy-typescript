@@ -44,9 +44,11 @@ import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.model.validation.ValidationEvent;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeProviderGenerator;
 import software.amazon.smithy.typescript.codegen.endpointsV2.EndpointsV2Generator;
+import software.amazon.smithy.typescript.codegen.integration.AddEventStreamDependency;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.typescript.codegen.integration.TypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.protocols.sse.SseJsonTrait;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerator;
 import software.amazon.smithy.typescript.codegen.validation.LongValidator;
@@ -169,6 +171,9 @@ final class DirectedTypeScriptCodegen
 
         for (TypeScriptIntegration integration : integrations) {
             for (ProtocolGenerator generator : integration.getProtocolGenerators()) {
+                if (generator.getProtocol().equals(SseJsonTrait.ID) && !settings.experimentalSseProtocol()) {
+                    continue;
+                }
                 // allow overrides of the same protocol ShapeId to change the order.
                 generators.remove(generator.getProtocol());
                 generators.put(generator.getProtocol(), generator);
@@ -258,9 +263,18 @@ final class DirectedTypeScriptCodegen
         }
 
         if (settings.generateServerSdk()) {
+            boolean hasEventStream = AddEventStreamDependency.hasEventStream(directive.model(), service);
+            String eventStreamSerdeProviderName = eventStreamSerdeProviderName(directive);
             for (OperationShape operation : directive.operations()) {
                 delegator.useShapeWriter(operation, w -> {
-                    ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
+                    ServerGenerator.generateOperationHandler(
+                        symbolProvider,
+                        service,
+                        operation,
+                        w,
+                        hasEventStream,
+                        eventStreamSerdeProviderName
+                    );
                 });
             }
         }
@@ -736,8 +750,24 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(service, writer -> {
                 ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
                 ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
-                ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
+                ServerGenerator.generateServiceHandler(
+                    symbolProvider,
+                    service,
+                    operations,
+                    writer,
+                    AddEventStreamDependency.hasEventStream(directive.model(), service),
+                    eventStreamSerdeProviderName(directive)
+                );
             });
+    }
+
+    private static String eventStreamSerdeProviderName(
+        GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive
+    ) {
+        ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
+        return protocolGenerator == null
+            ? "eventStreamSerdeProvider"
+            : protocolGenerator.getEventStreamSerdeProviderName();
     }
 
     private static String generateTsconfigTypes(TypeScriptSettings settings) {
