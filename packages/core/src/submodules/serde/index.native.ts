@@ -96,6 +96,11 @@ export const Hash = no;
 export class Uint8ArrayBlobAdapter extends bindUint8ArrayBlobAdapter(toUtf8, fromUtf8, toBase64, fromBase64) {}
 export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream.browser";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream.browser";
+export {
+  WireChecksumStream,
+  type WireChecksumStreamInit,
+} from "./util-stream/checksum/wire/WireChecksumStream.browser";
+export { createWireChecksumStream } from "./util-stream/checksum/wire/createWireChecksumStream.browser";
 export { createBufferedReadable } from "./util-stream/createBufferedReadable.browser";
 export { getAwsChunkedEncodingStream } from "./util-stream/getAwsChunkedEncodingStream.browser";
 export { headStream } from "./util-stream/headStream.browser";
