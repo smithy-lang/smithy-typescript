@@ -121,3 +121,44 @@ Blank deltas are <5% diff.
 | list\<struct> PutMetricData-like  |             +51% |  142ms -> 94ms |            +92% |  281ms -> 146ms |
 | struct PutMetricData realistic    |             +45% | 581ms -> 398ms |            +78% | 1144ms -> 643ms |
 | list\<struct> non-ASCII keys      |            +126% |  188ms -> 83ms |                 |                 |
+
+## July 2026 CBOR vs JSON Schema-Serde
+
+The previous benchmarks use general-object serde, JSON.stringify / JSON.parse native API vs the general purpose `cbor` codec.
+This test is for the respective schema-aware (Smithy) Shape serializers and deserializers.
+
+The following is a baseline comparison between the multi-pass CBOR and multi-pass JSON implementations,
+which prepare objects for general-purpose serialization and then retraverse for that serialization.
+Later benchmarks will use the single-pass implementations to be released later.
+
+## Serialization Results
+
+| Test Case                         | CBOR Size | JSON Size | CBOR ms | JSON ms | CBOR/JSON |
+| --------------------------------- | --------: | --------: | ------: | ------: | --------: |
+| `list<string(0,180)>`             |    472 kb |    475 kb |   63 ms |   50 ms |     1.28x |
+| `list<float>`                     |    270 kb |    675 kb |  295 ms |  345 ms |     0.86x |
+| `list<int>`                       |    253 kb |    458 kb |  746 ms |  298 ms |     2.50x |
+| `list<long int>`                  |    250 kb |    549 kb |  383 ms |  231 ms |     1.66x |
+| `map<string, string>`             |    451 kb |    449 kb |   58 ms |   55 ms |     1.05x |
+| `map<string, long int>`           |     37 kb |     50 kb |   26 ms |   20 ms |     1.28x |
+| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  504 ms |  460 ms |     1.10x |
+| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 1895 ms | 1659 ms |     1.14x |
+| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  354 ms |  316 ms |     1.12x |
+| `list<struct> with blobs`         |    263 kb |    353 kb |  176 ms |  157 ms |     1.12x |
+| `list<struct> with timestamps`    |    229 kb |    345 kb |  302 ms |  242 ms |     1.25x |
+
+## Deserialization Results
+
+| Test Case                         | CBOR Size | JSON Size | CBOR ms | JSON ms | CBOR/JSON |
+| --------------------------------- | --------: | --------: | ------: | ------: | --------: |
+| `list<string(0,180)>`             |    469 kb |    472 kb |   34 ms |   30 ms |     1.15x |
+| `list<float>`                     |    270 kb |    675 kb |   74 ms |  257 ms |     0.29x |
+| `list<int>`                       |    253 kb |    458 kb |  254 ms |  319 ms |     0.80x |
+| `list<long int>`                  |    250 kb |    549 kb |  131 ms |  214 ms |     0.61x |
+| `map<string, string>`             |    445 kb |    449 kb |   39 ms |   34 ms |     1.14x |
+| `map<string, long int>`           |     38 kb |     50 kb |   28 ms |   26 ms |     1.07x |
+| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  429 ms |  481 ms |     0.89x |
+| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 2160 ms | 2044 ms |     1.06x |
+| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  474 ms |  381 ms |     1.24x |
+| `list<struct> with blobs`         |    263 kb |    353 kb |  101 ms |  235 ms |     0.43x |
+| `list<struct> with timestamps`    |    229 kb |    345 kb |  222 ms |  286 ms |     0.78x |
