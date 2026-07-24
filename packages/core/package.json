@@ -220,6 +220,7 @@
   "scripts": {
     "benchmark:cbor": "node ./scripts/cbor-perf.mjs",
     "benchmark:checksum": "node ./scripts/checksum-perf.mjs",
+    "benchmark:schema:cbor": "node ./scripts/cbor-shape-perf.mjs",
     "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
     "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",

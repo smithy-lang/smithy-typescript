@@ -48,12 +48,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@aws-sdk/core@npm:3.977.0":
+  version: 3.977.0
+  resolution: "@aws-sdk/core@npm:3.977.0"
+  dependencies:
+    "@aws-sdk/types": "npm:^3.974.2"
+    "@aws-sdk/xml-builder": "npm:^3.972.37"
+    "@aws/lambda-invoke-store": "npm:^0.3.0"
+    "@smithy/core": "npm:^3.29.8"
+    "@smithy/signature-v4": "npm:^5.6.9"
+    "@smithy/types": "npm:^4.16.1"
+    bowser: "npm:^2.11.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/e6f6303a9823c185a3ef91926fcb5e4a7e45133a5a46e65daa457f8bc769d3ec59835be59d849c37f5acb0af1f5523c264892e96968aeb80fe7a78dc22687998
+  languageName: node
+  linkType: hard
+
 "@aws-sdk/types@npm:^3.222.0":
   version: 3.347.0
   resolution: "@aws-sdk/types@npm:3.347.0"
   dependencies:
     tslib: "npm:^2.5.0"
   checksum: 10c0/5ab07bf2dbc7bfb615af8a7bda503a0f01b3e7ae9c04df2eb40f402810eb34b5b71b38b6d65d6bddb5e731205670feb67b72c8af4829113a99094a0dbebffac5
+  languageName: node
+  linkType: hard
+
+"@aws-sdk/types@npm:^3.974.2":
+  version: 3.974.2
+  resolution: "@aws-sdk/types@npm:3.974.2"
+  dependencies:
+    "@smithy/types": "npm:^4.16.1"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/b5ce05e8a4160c545edce1e8527e8ac490be7a6651c736f6811190b5d31d5682699889d51186ab0600df756679bebd2df9d650a17f577523441df803c4fb5777
+  languageName: node
+  linkType: hard
+
+"@aws-sdk/xml-builder@npm:^3.972.37":
+  version: 3.972.37
+  resolution: "@aws-sdk/xml-builder@npm:3.972.37"
+  dependencies:
+    "@smithy/types": "npm:^4.16.1"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/738f9302f495b3b95602641166a4182244add6e9e079201dba7e8994657dd442df0e4cea3355aa8c7d7f08efb385decaaf0b543f03efdb291c118536f36ac1a1
+  languageName: node
+  linkType: hard
+
+"@aws/lambda-invoke-store@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@aws/lambda-invoke-store@npm:0.3.0"
+  checksum: 10c0/b4a2e6b3b5397bc606053e64270d26dc5c886336f88a98cad587b1592eec17058f8fb172f1827a9f0e591f3595cf8f01575c8c9b36cde38c06456f8a65204046
   languageName: node
   linkType: hard
 
@@ -2533,7 +2576,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/core@workspace:^, @smithy/core@workspace:packages/core":
+"@smithy/core@npm:^3.29.8, @smithy/core@workspace:^, @smithy/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
@@ -2944,7 +2987,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/signature-v4@workspace:^, @smithy/signature-v4@workspace:packages/signature-v4":
+"@smithy/signature-v4@npm:^5.6.9, @smithy/signature-v4@workspace:^, @smithy/signature-v4@workspace:packages/signature-v4":
   version: 0.0.0-use.local
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:
@@ -3050,7 +3093,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/types@workspace:^, @smithy/types@workspace:packages/types":
+"@smithy/types@npm:^4.16.1, @smithy/types@workspace:^, @smithy/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@smithy/types@workspace:packages/types"
   dependencies:
@@ -4435,6 +4478,13 @@ __metadata:
     inherits: "npm:^2.0.4"
     readable-stream: "npm:^3.4.0"
   checksum: 10c0/02847e1d2cb089c9dc6958add42e3cdeaf07d13f575973963335ac0fdece563a50ac770ac4c8fa06492d2dd276f6cc3b7f08c7cd9c7a7ad0f8d388b2a28def5f
+  languageName: node
+  linkType: hard
+
+"bowser@npm:^2.11.0":
+  version: 2.14.1
+  resolution: "bowser@npm:2.14.1"
+  checksum: 10c0/bb69b55ba7f0456e3dc07d0cfd9467f985581f640ba8fd426b08754a6737ee0d6cf3b50607941e5255f04c83075b952ece0599f978dd4d20f1e95461104c5ffd
   languageName: node
   linkType: hard
 
@@ -9490,6 +9540,7 @@ __metadata:
   dependencies:
     "@aws-crypto/crc32": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
+    "@aws-sdk/core": "npm:3.977.0"
     "@changesets/cli": "npm:^2.27.5"
     "@microsoft/api-extractor": "npm:7.52.7"
     "@rollup/plugin-json": "npm:^6.1.0"
