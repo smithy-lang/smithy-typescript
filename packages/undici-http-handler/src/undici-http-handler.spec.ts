@@ -561,13 +561,12 @@ describe("UndiciHttpHandler", () => {
       expect(configs.logger).toBe(logger);
     });
 
-    it("updates config", async () => {
+    it("updates logger via updateHttpClientConfig", async () => {
       const logger = createMockLogger();
       const updatedLogger = createMockLogger();
       handler = new UndiciHttpHandler({ logger });
       await handler.handle(createMockRequest());
       handler.updateHttpClientConfig("logger", updatedLogger);
-      // Config is reset, need another request to resolve
       await handler.handle(createMockRequest());
       expect(handler.httpHandlerConfigs().logger).toBe(updatedLogger);
     });

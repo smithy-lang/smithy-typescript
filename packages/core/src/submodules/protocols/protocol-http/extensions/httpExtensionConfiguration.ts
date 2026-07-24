@@ -1,3 +1,5 @@
+import type { Logger } from "@smithy/types";
+
 import type { HttpHandler } from "../httpHandler";
 
 /**
@@ -22,9 +24,13 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
  *
  * @internal
  */
-export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends object = {}>(
+export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { logger?: Logger }>(
   runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig>
 ) => {
+  if ((runtimeConfig as any).logger) {
+    runtimeConfig.httpHandler?.updateHttpClientConfig("logger" as keyof HandlerConfig, (runtimeConfig as any).logger);
+  }
+
   return {
     setHttpHandler(handler: HttpHandler<HandlerConfig>): void {
       runtimeConfig.httpHandler = handler;
