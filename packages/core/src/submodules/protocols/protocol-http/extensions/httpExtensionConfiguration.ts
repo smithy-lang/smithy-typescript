@@ -1,5 +1,3 @@
-import type { Logger } from "@smithy/types";
-
 import type { HttpHandler } from "../httpHandler";
 
 /**
@@ -20,16 +18,6 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
 }>;
 
 /**
- * @internal
- *
- * Returns true if the logger is a no-op (all methods are empty),
- * indicating the customer never explicitly configured one.
- */
-const isNoOpLogger = (logger: Logger): boolean => {
-  return logger.constructor?.name === "NoOpLogger";
-};
-
-/**
  * Helper function to resolve default extension configuration from runtime config
  *
  * @internal
@@ -37,14 +25,7 @@ const isNoOpLogger = (logger: Logger): boolean => {
 export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends object = {}>(
   runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig>
 ) => {
-  const rc = runtimeConfig as HttpHandlerExtensionConfigType<HandlerConfig> & {
-    requestHandler?: HttpHandler<HandlerConfig>;
-    logger?: Logger;
-  };
-  const handler = rc.httpHandler ?? rc.requestHandler;
-  if (handler && rc.logger && !isNoOpLogger(rc.logger)) {
-    handler.updateHttpClientConfig("logger" as keyof HandlerConfig, rc.logger as HandlerConfig[keyof HandlerConfig]);
-  }
+  runtimeConfig.httpHandler?.updateHttpClientConfig("logger" as keyof HandlerConfig, (runtimeConfig as any).logger);
 
   return {
     setHttpHandler(handler: HttpHandler<HandlerConfig>): void {

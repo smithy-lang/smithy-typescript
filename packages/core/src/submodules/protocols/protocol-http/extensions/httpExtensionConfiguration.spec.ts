@@ -19,16 +19,7 @@ describe("getHttpHandlerExtensionConfiguration", () => {
   });
 
   describe("client logger injection", () => {
-    it("injects logger into requestHandler when logger is explicitly set", () => {
-      const handler = createMockHandler();
-      const logger = createMockLogger();
-
-      getHttpHandlerExtensionConfiguration({ requestHandler: handler, logger } as any);
-
-      expect(handler.updateHttpClientConfig).toHaveBeenCalledWith("logger", logger);
-    });
-
-    it("injects logger into httpHandler when requestHandler is absent", () => {
+    it("passes logger to httpHandler via updateHttpClientConfig", () => {
       const handler = createMockHandler();
       const logger = createMockLogger();
 
@@ -37,46 +28,19 @@ describe("getHttpHandlerExtensionConfiguration", () => {
       expect(handler.updateHttpClientConfig).toHaveBeenCalledWith("logger", logger);
     });
 
-    it("prefers httpHandler over requestHandler", () => {
-      const httpHandler = createMockHandler();
-      const requestHandler = createMockHandler();
-      const logger = createMockLogger();
-
-      getHttpHandlerExtensionConfiguration({ httpHandler, requestHandler, logger } as any);
-
-      expect(httpHandler.updateHttpClientConfig).toHaveBeenCalledWith("logger", logger);
-      expect(requestHandler.updateHttpClientConfig).not.toHaveBeenCalled();
-    });
-
-    it("does not inject NoOpLogger", () => {
-      const handler = createMockHandler();
-
-      class NoOpLogger {
-        trace() {}
-        debug() {}
-        info() {}
-        warn() {}
-        error() {}
-      }
-
-      getHttpHandlerExtensionConfiguration({ requestHandler: handler, logger: new NoOpLogger() } as any);
-
-      expect(handler.updateHttpClientConfig).not.toHaveBeenCalled();
-    });
-
-    it("does not inject when no logger is provided", () => {
-      const handler = createMockHandler();
-
-      getHttpHandlerExtensionConfiguration({ requestHandler: handler } as any);
-
-      expect(handler.updateHttpClientConfig).not.toHaveBeenCalled();
-    });
-
-    it("does not inject when no handler is present", () => {
+    it("does not throw when no handler is present", () => {
       const logger = createMockLogger();
 
       // should not throw
       getHttpHandlerExtensionConfiguration({ logger } as any);
+    });
+
+    it("does not throw when no logger is provided", () => {
+      const handler = createMockHandler();
+
+      getHttpHandlerExtensionConfiguration({ httpHandler: handler } as any);
+
+      expect(handler.updateHttpClientConfig).toHaveBeenCalledWith("logger", undefined);
     });
   });
 });
