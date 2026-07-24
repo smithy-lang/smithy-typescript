@@ -26,6 +26,16 @@ public final class DefaultReadmeGenerator implements TypeScriptIntegration {
     public static final String DEFAULT_CLIENT_README_TEMPLATE = "default_readme_client.md.template";
     public static final String DEFAULT_SERVER_README_TEMPLATE = "default_readme_server.md.template";
 
+    /**
+     * The default README is derived from the service (its name, documentation, and first
+     * operation), so it only applies to service modes. Types-only mode has no service and must
+     * skip this integration.
+     */
+    @Override
+    public boolean matchesSettings(TypeScriptSettings settings) {
+        return settings.getOptionalService().isPresent();
+    }
+
     @Override
     public void customize(TypeScriptCodegenContext codegenContext) {
         TypeScriptSettings settings = codegenContext.settings();

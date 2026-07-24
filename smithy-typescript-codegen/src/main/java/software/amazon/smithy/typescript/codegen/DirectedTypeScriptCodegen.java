@@ -89,6 +89,9 @@ final class DirectedTypeScriptCodegen
 
     @Override
     public SymbolProvider createSymbolProvider(CreateSymbolProviderDirective<TypeScriptSettings> directive) {
+        if (directive.settings().isTypesOnly()) {
+            return new SymbolVisitor(directive.model(), directive.settings(), directive.getRenames());
+        }
         return directive.settings().getArtifactType().createSymbolProvider(directive.model(), directive.settings());
     }
 
@@ -97,52 +100,57 @@ final class DirectedTypeScriptCodegen
         CreateContextDirective<TypeScriptSettings, TypeScriptIntegration> directive
     ) {
         List<RuntimeClientPlugin> runtimePlugins = new ArrayList<>();
-        directive
-            .integrations()
-            .forEach(integration -> {
-                LOGGER.fine(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
-                integration
-                    .getClientPlugins()
-                    .forEach(runtimePlugin -> {
-                        if (
-                            runtimePlugin.matchesSettings(
-                                directive.model(),
-                                directive.service(),
-                                directive.settings()
-                            )
-                        ) {
-                            LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
-                            runtimePlugins.add(runtimePlugin);
-                        } else {
-                            LOGGER.fine(
-                                () -> "Skipping TypeScript runtime plugin based on settings: "
-                                    + runtimePlugin
-                            );
-                        }
-                    });
-            });
+        ProtocolGenerator protocolGenerator = null;
 
-        directive
-            .integrations()
-            .forEach(integration -> {
-                LOGGER.fine(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
-                integration.mutateClientPlugins(runtimePlugins);
-            });
+        if (!directive.settings().isTypesOnly()) {
+            ServiceShape service = directive.service();
+            directive
+                .integrations()
+                .forEach(integration -> {
+                    LOGGER.fine(() -> "Adding TypeScriptIntegration: " + integration.getClass().getName());
+                    integration
+                        .getClientPlugins()
+                        .forEach(runtimePlugin -> {
+                            if (
+                                runtimePlugin.matchesSettings(
+                                    directive.model(),
+                                    service,
+                                    directive.settings()
+                                )
+                            ) {
+                                LOGGER.fine(() -> "Adding TypeScript runtime plugin: " + runtimePlugin);
+                                runtimePlugins.add(runtimePlugin);
+                            } else {
+                                LOGGER.fine(
+                                    () -> "Skipping TypeScript runtime plugin based on settings: "
+                                        + runtimePlugin
+                                );
+                            }
+                        });
+                });
 
-        ProtocolGenerator protocolGenerator = resolveProtocolGenerator(
-            directive.integrations(),
-            directive.model(),
-            directive.service(),
-            directive.settings()
-        );
+            directive
+                .integrations()
+                .forEach(integration -> {
+                    LOGGER.fine(() -> "Mutating plugins from TypeScriptIntegration: " + integration.name());
+                    integration.mutateClientPlugins(runtimePlugins);
+                });
+
+            protocolGenerator = resolveProtocolGenerator(
+                directive.integrations(),
+                directive.model(),
+                service,
+                directive.settings()
+            );
+
+            if (null != protocolGenerator) {
+                directive.settings().setProtocol(protocolGenerator.getProtocol());
+            }
+        }
 
         ApplicationProtocol applicationProtocol = protocolGenerator == null
             ? ApplicationProtocol.createDefaultHttpApplicationProtocol()
             : protocolGenerator.getApplicationProtocol();
-
-        if (null != protocolGenerator) {
-            directive.settings().setProtocol(protocolGenerator.getProtocol());
-        }
 
         return TypeScriptCodegenContext.builder()
             .model(directive.model())
@@ -274,13 +282,12 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(directive.shape(), writer -> {
                 StructureGenerator generator = new StructureGenerator(
                     directive.model(),
-                    directive.settings(),
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
                     directive.settings().generateServerSdk(),
                     directive.settings().getRequiredMemberMode(),
-                    SchemaGenerationAllowlist.allows(directive.settings().getService(), directive.settings())
+                    allowsSchemaGeneration(directive.settings())
                 );
                 generator.run();
             });
@@ -294,13 +301,12 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(directive.shape(), writer -> {
                 StructureGenerator generator = new StructureGenerator(
                     directive.model(),
-                    directive.settings(),
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
                     directive.settings().generateServerSdk(),
                     directive.settings().getRequiredMemberMode(),
-                    SchemaGenerationAllowlist.allows(directive.settings().getService(), directive.settings())
+                    allowsSchemaGeneration(directive.settings())
                 );
                 generator.run();
             });
@@ -314,12 +320,11 @@ final class DirectedTypeScriptCodegen
             .useShapeWriter(directive.shape(), writer -> {
                 UnionGenerator generator = new UnionGenerator(
                     directive.model(),
-                    directive.settings(),
                     directive.symbolProvider(),
                     writer,
                     directive.shape(),
                     directive.settings().generateServerSdk(),
-                    SchemaGenerationAllowlist.allows(directive.settings().getService(), directive.settings())
+                    allowsSchemaGeneration(directive.settings())
                 );
                 generator.run();
             });
@@ -376,6 +381,11 @@ final class DirectedTypeScriptCodegen
             directive.connectedShapes().values(),
             directive.symbolProvider()
         );
+
+        if (directive.settings().isTypesOnly()) {
+            customizeTypesMode(directive, modelIndexer);
+            return;
+        }
 
         // Generate the client Node and Browser configuration files. These
         // files are switched between in package.json based on the targeted
@@ -452,10 +462,7 @@ final class DirectedTypeScriptCodegen
         if (
             directive.settings().generateClient()
                 && directive.settings().generateSnapshotTests()
-                && SchemaGenerationAllowlist.allows(
-                    directive.settings().getService(),
-                    directive.settings()
-                )
+                && allowsSchemaGeneration(directive.settings())
         ) {
             writerFactory.accept(Paths.get(CodegenUtils.TEST_FOLDER, "snapshots.integ.spec.ts").toString(), writer -> {
                 new PackageApiValidationGenerator(
@@ -491,6 +498,36 @@ final class DirectedTypeScriptCodegen
         }
     }
 
+    private void customizeTypesMode(
+        CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive,
+        TypeScriptWriter modelIndexer
+    ) {
+        BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory = directive
+            .context()
+            .writerDelegator()::useFileWriter;
+
+        writerFactory.accept(Paths.get(CodegenUtils.SOURCE_FOLDER, "index.ts").toString(), writer -> {
+            IndexGenerator.writeIndex(
+                directive.settings(),
+                directive.model(),
+                directive.symbolProvider(),
+                null,
+                writer,
+                modelIndexer
+            );
+        });
+
+        if (allowsSchemaGeneration(directive.settings())) {
+            new SchemaGenerator(
+                directive.model(),
+                directive.fileManifest(),
+                directive.settings(),
+                directive.symbolProvider(),
+                directive.connectedShapes().values()
+            ).run();
+        }
+    }
+
     @Override
     public void customizeAfterIntegrations(CustomizeDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         LOGGER.fine("Generating package.json files");
@@ -498,6 +535,13 @@ final class DirectedTypeScriptCodegen
             directive.settings(),
             directive.fileManifest(),
             SymbolDependency.gatherDependencies(directive.context().writerDelegator().getDependencies().stream())
+        );
+    }
+
+    private static boolean allowsSchemaGeneration(TypeScriptSettings settings) {
+        return SchemaGenerationAllowlist.allows(
+            settings.getOptionalService().orElse(null),
+            settings
         );
     }
 

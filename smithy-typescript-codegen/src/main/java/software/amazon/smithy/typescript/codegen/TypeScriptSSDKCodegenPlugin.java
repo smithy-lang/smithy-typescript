@@ -4,6 +4,8 @@
  */
 package software.amazon.smithy.typescript.codegen;
 
+import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -13,10 +15,15 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 @SmithyInternalApi
 @Deprecated
 @SuppressWarnings("AbbreviationAsWordInName")
-public class TypeScriptSSDKCodegenPlugin extends TypeScriptServerCodegenPlugin {
+public class TypeScriptSSDKCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public String getName() {
         return "typescript-ssdk-codegen";
+    }
+
+    @Override
+    public void execute(PluginContext context) {
+        new TypeScriptCodegenPlugin().execute(context, TypeScriptSettings.ArtifactType.SSDK);
     }
 }

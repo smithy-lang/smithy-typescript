@@ -120,8 +120,21 @@ public final class ServiceClosure implements KnowledgeIndex {
         deconflictSchemaVarNames();
     }
 
+    private ServiceClosure(Model model, Collection<Shape> shapes) {
+        this.model = model;
+        this.service = null;
+        elision = SchemaReferenceIndex.of(model);
+        scan(shapes);
+        scanned.clear();
+        deconflictSchemaVarNames();
+    }
+
     public static ServiceClosure of(Model model, ServiceShape service) {
         return model.getKnowledge(ServiceClosure.class, (Model m) -> new ServiceClosure(m, service));
+    }
+
+    public static ServiceClosure ofShapes(Model model, Collection<Shape> shapes) {
+        return new ServiceClosure(model, shapes);
     }
 
     public TreeSet<Shape> getStructuralNonErrorShapes() {
@@ -242,7 +255,7 @@ public final class ServiceClosure implements KnowledgeIndex {
      * This differs from the structure member optionality specification in
      * <a href="https://smithy.io/2.0/spec/aggregate-types.html#structure-member-optionality">spec point 3.3.3</a>
      */
-    public boolean isMemberRequiredInClient(MemberShape member) {
+    public static boolean isMemberRequiredInClient(MemberShape member) {
         // Currently the client only generates a default for idempotency tokens.
         // No default is generated for values with a default value trait.
         boolean clientGeneratesValue = member.hasTrait(IdempotencyTokenTrait.class);
@@ -343,11 +356,19 @@ public final class ServiceClosure implements KnowledgeIndex {
                     } else {
                         scan(model.expectShape(UNIT));
                     }
-                    operation
-                        .getErrors(service)
-                        .forEach(error -> {
-                            scan(model.expectShape(error));
-                        });
+                    if (service != null) {
+                        operation
+                            .getErrors(service)
+                            .forEach(error -> {
+                                scan(model.expectShape(error));
+                            });
+                    } else {
+                        operation
+                            .getErrors()
+                            .forEach(error -> {
+                                scan(model.expectShape(error));
+                            });
+                    }
                     operations.add(operation);
                     existsAsSchema.add(operation);
                 }

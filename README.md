@@ -219,6 +219,61 @@ code generation and TypeScript that either need to be implemented or consumed fr
 - Operation handler implementations (servers): The server code generator provides the scaffolding for operations. The
   operation handlers defining the business logic of the Smithy service need to be implemented manually.
 
+### Unified and types-only code generation: `typescript-codegen` plugin
+
+The `typescript-codegen` plugin is the unified entry point that interprets the
+`modes` setting. It supports `["client"]`, `["server"]`, and `["types"]`; when
+`modes` is omitted, it defaults to client generation for backward compatibility.
+The specialized `typescript-client-codegen`, `typescript-server-codegen`, and
+deprecated `typescript-ssdk-codegen` plugins retain their fixed historical modes
+and do not accept `modes`.
+
+Types-only generation is driven by a named
+[shape closure](https://smithy.io/2.0/spec/model.html#shape-closures) rather than a
+service. Define the closure in model metadata:
+
+```smithy
+metadata shapeClosures = [
+    {
+        id: "com.example#sharedTypes"
+        includeNamespaces: ["com.example.types"]
+    }
+]
+```
+
+Then reference it from the unified plugin:
+
+```json
+{
+  "plugins": {
+    "typescript-codegen": {
+      "package": "@example/shared-types",
+      "packageVersion": "1.0.0",
+      "modes": ["types"],
+      "closure": "com.example#sharedTypes"
+    }
+  }
+}
+```
+
+Types-only mode generates data shapes and their schemas without requiring a
+service. A model may still contain service shapes. Shapes outside the selected
+closure are ignored. Combining `types` with `client` or `server` is not yet
+supported.
+
+| Setting              | Required | Description |
+| -------------------- | -------- | ----------- |
+| `package`            | Yes      | Name of the generated package. |
+| `packageVersion`     | Yes      | Version of the generated package. |
+| `modes`              | Yes      | Must be `["types"]` for types-only generation. |
+| `closure`            | Yes      | ID of a `shapeClosures` metadata entry that selects the generated shapes. |
+| `packageDescription` | No       | Package description. Defaults to `${package} types`. |
+| `packageJson`        | No       | Custom properties merged into the generated `package.json`. |
+| `packageManager`     | No       | Package manager to configure. Defaults to `yarn`. |
+| `private`            | No       | Whether the generated package is private. Defaults to `false`. |
+| `requiredMemberMode` | No       | Controls whether required members may be `undefined`. Defaults to `nullable`. |
+| `bigNumberMode`      | No       | Uses `native` or `big.js` representations for big numbers. Defaults to `native`. |
+
 ### Client SDK code generation: `typescript-client-codegen` plugin
 
 #### `typescript-client-codegen` plugin configuration
