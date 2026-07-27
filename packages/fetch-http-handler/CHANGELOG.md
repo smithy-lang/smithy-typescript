@@ -1,5 +1,12 @@
 # Change Log
 
+## 5.6.12
+
+### Patch Changes
+
+- Updated dependencies [a14bb71]
+  - @smithy/core@3.31.0
+
 ## 5.6.11
 
 ### Patch Changes

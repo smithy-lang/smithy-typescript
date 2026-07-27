@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+### Patch Changes
+
+- @smithy/protocol-http@5.5.15
+
 ## 0.1.4
 
 ### Patch Changes

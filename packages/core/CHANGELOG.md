@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.31.0
+
+### Minor Changes
+
+- a14bb71: add single pass cbor serializer and deserializers
+
 ## 3.30.0
 
 ### Minor Changes

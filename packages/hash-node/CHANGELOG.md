@@ -1,5 +1,12 @@
 # @smithy/hash-node
 
+## 4.4.15
+
+### Patch Changes
+
+- Updated dependencies [a14bb71]
+  - @smithy/core@3.31.0
+
 ## 4.4.14
 
 ### Patch Changes
