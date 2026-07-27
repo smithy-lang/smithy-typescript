@@ -472,6 +472,7 @@
     "copyDocumentWithTransform": "function",
     "createBufferedReadable": "function",
     "createChecksumStream": "function",
+    "createWireChecksumStream": "function",
     "dateToUtcString": "function",
     "deserializerMiddleware": "function",
     "deserializerMiddlewareOption": "object",
@@ -537,7 +538,9 @@
     "toUtf8": "function",
     "Uint8ArrayBlobAdapter": "function",
     "V1OrV2Endpoint": "type(object)",
-    "v4": "function"
+    "v4": "function",
+    "WireChecksumStream": "function",
+    "WireChecksumStreamInit": "type(interface)"
   },
   "@smithy/core/transport": {
     "getSmithyContext": "function",
