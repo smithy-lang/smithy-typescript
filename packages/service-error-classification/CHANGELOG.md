@@ -1,5 +1,12 @@
 # @smithy/service-error-classification
 
+## 4.5.15
+
+### Patch Changes
+
+- Updated dependencies [a14bb71]
+  - @smithy/core@3.31.0
+
 ## 4.5.14
 
 ### Patch Changes
