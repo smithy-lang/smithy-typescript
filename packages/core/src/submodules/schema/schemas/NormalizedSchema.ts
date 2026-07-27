@@ -504,6 +504,17 @@ export class NormalizedSchema implements INormalizedSchema {
     // cache the iterator only if all uncached items were iterated successfully.
     struct[anno.it] = it;
   }
+
+  /**
+   * CBOR-optimized struct iteration. Returns a cache of parallel arrays
+   * (memberNames, memberSchemas, encodedKeys) for direct indexed iteration.
+   * Implementation is patched by the cbor submodule on load.
+   *
+   * @internal
+   */
+  public structIteratorCbor(): { memberNames: string[]; memberSchemas: NormalizedSchema[]; encodedKeys: Uint8Array[] } {
+    throw new Error("@smithy/core/schema - structIteratorCbor not loaded.");
+  }
 }
 
 /**

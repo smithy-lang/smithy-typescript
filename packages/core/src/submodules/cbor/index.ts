@@ -9,4 +9,6 @@ export {
   parseCborErrorBody,
 } from "./parseCborBody";
 export { SmithyRpcV2CborProtocol } from "./SmithyRpcV2CborProtocol";
-export { CborCodec, CborShapeDeserializer, CborShapeSerializer } from "./CborCodec";
+export { CborCodec } from "./CborCodec";
+export { CborShapeSerializer } from "./codec-v1/CborShapeSerializer";
+export { CborShapeDeserializer } from "./codec-v1/CborShapeDeserializer";
