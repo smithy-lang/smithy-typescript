@@ -37,6 +37,9 @@ import { fileURLToPath } from "node:url";
 
 type ExistStatus = "exists" | "missing" | "unknown";
 
+/** A missing name and a missing version are different problems, so kept apart. */
+type CheckStatus = "exists" | "missingName" | "missingVersion" | "unknown";
+
 export interface PackageJson {
   name?: string;
   version?: string;
@@ -47,6 +50,16 @@ export interface PackageJson {
 export interface PackageVersion {
   name: string;
   version: string;
+}
+
+/**
+ * What to ask the registry about one package: whether that exact version is
+ * published or, when version is null, only whether the name exists at all, in any
+ * version.
+ */
+export interface PackageCheck {
+  name: string;
+  version: string | null;
 }
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -61,19 +74,37 @@ export function fail(message: string): never {
   process.exit(1);
 }
 
-/** Renders a package version the way npm does, e.g. @smithy/core@3.31.0. */
-export function formatPackageVersion({ name, version }: PackageVersion): string {
-  return `${name}@${version}`;
+/**
+ * Renders a package version the way npm does, e.g. @smithy/core@3.31.0, or the
+ * name alone when there is no version in question.
+ */
+export function formatPackageVersion({ name, version }: PackageCheck): string {
+  return version === null ? name : `${name}@${version}`;
 }
 
 /**
- * A package is publishable if it has a name and is not private. Private
- * packages are never released: .changeset/config.json sets
+ * The name and version a manifest declares, or null when its package is private.
+ * Private packages are never released: .changeset/config.json sets
  * privatePackages.version to false, so changesets neither versions nor
  * publishes them.
+ *
+ * A manifest that is not private must declare both, since changesets versions and
+ * publishes every non-private workspace package: skipping one that does not would
+ * silently drop it from every check here.
  */
-export function isPublishable(pkgJson: PackageJson): boolean {
-  return Boolean(pkgJson.name) && pkgJson.private !== true;
+export function readPublishablePackage(pkgJsonPath: string): PackageVersion | null {
+  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8")) as PackageJson;
+  if (pkgJson.private === true) {
+    return null;
+  }
+  if (!pkgJson.name || !pkgJson.version) {
+    fail(
+      `${path.relative(root, pkgJsonPath)} is not private but declares no ${!pkgJson.name ? "name" : "version"}, ` +
+        `so it cannot be checked against the npm registry. Add the missing field, or mark the package private if ` +
+        `it is not meant to be released.`
+    );
+  }
+  return { name: pkgJson.name, version: pkgJson.version };
 }
 
 /**
@@ -102,8 +133,8 @@ export const WORKSPACE_ROOTS = getWorkspaceRoots();
 
 /**
  * Returns every publishable package in every workspace root, at the version it
- * currently declares. A manifest without a version is skipped: there is nothing
- * to look up on the registry for it.
+ * currently declares. A workspace root also holds entries that are not packages,
+ * such as a README, which have no manifest to read.
  */
 export function getAllPublishablePackages(): PackageVersion[] {
   const packages: PackageVersion[] = [];
@@ -114,9 +145,9 @@ export function getAllPublishablePackages(): PackageVersion[] {
       if (!fs.existsSync(pkgJsonPath)) {
         continue;
       }
-      const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8")) as PackageJson;
-      if (isPublishable(pkgJson) && pkgJson.version) {
-        packages.push({ name: pkgJson.name as string, version: pkgJson.version });
+      const pkg = readPublishablePackage(pkgJsonPath);
+      if (pkg) {
+        packages.push(pkg);
       }
     }
   }
@@ -153,35 +184,40 @@ function packageUrl(name: string): string {
   return `${REGISTRY}/${name.replace("/", "%2F")}`;
 }
 
-/** Whether the package name exists on npm, in any version. */
-function checkExists(name: string): Promise<ExistStatus> {
-  return probe(packageUrl(name));
-}
-
-/** Whether that exact version of the package is published on npm. */
-function checkVersionExists({ name, version }: PackageVersion): Promise<ExistStatus> {
-  return probe(`${packageUrl(name)}/${encodeURIComponent(version)}`);
-}
-
-async function partition<T>(items: T[], check: (item: T) => Promise<ExistStatus>) {
-  const results = await Promise.all(items.map(async (item) => ({ item, status: await check(item) })));
-  const withStatus = (status: ExistStatus) => results.filter((r) => r.status === status).map((r) => r.item);
-  return { exists: withStatus("exists"), missing: withStatus("missing"), unknown: withStatus("unknown") };
+/**
+ * Resolves one check against the registry. A published version implies a
+ * published name, so probing the version answers both questions whenever it finds
+ * it. The name is probed on its own only when there is no version to ask about,
+ * or when the version is absent and the two problems have to be told apart - and
+ * a name probe the registry cannot answer counts as a missing version, since the
+ * 404 on the version is definitive either way.
+ */
+async function check({ name, version }: PackageCheck): Promise<CheckStatus> {
+  if (version === null) {
+    const nameOnly = await probe(packageUrl(name));
+    return nameOnly === "missing" ? "missingName" : nameOnly;
+  }
+  const status = await probe(`${packageUrl(name)}/${encodeURIComponent(version)}`);
+  if (status !== "missing") {
+    return status;
+  }
+  return (await probe(packageUrl(name))) === "missing" ? "missingName" : "missingVersion";
 }
 
 /**
- * Queries the registry for the given package names and splits them by existence.
+ * Queries the registry for the given checks and splits them by what it found:
+ * names that do not exist at all, versions that are not published under a name
+ * that does, and checks the registry could not answer.
  */
-export function partitionByExistence(names: string[]) {
-  return partition(names, checkExists);
-}
-
-/**
- * Queries the registry for the given package versions and splits them by
- * existence.
- */
-export function partitionVersionsByExistence(versions: PackageVersion[]) {
-  return partition(versions, checkVersionExists);
+export async function partitionByExistence<T extends PackageCheck>(checks: T[]) {
+  const results = await Promise.all(checks.map(async (item) => ({ item, status: await check(item) })));
+  const withStatus = (status: CheckStatus) => results.filter((r) => r.status === status).map((r) => r.item);
+  return {
+    exists: withStatus("exists"),
+    missingNames: withStatus("missingName"),
+    missingVersions: withStatus("missingVersion"),
+    unknown: withStatus("unknown"),
+  };
 }
 
 /** Warns about entries the registry could not answer for. */
