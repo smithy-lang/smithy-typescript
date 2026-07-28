@@ -1,24 +1,30 @@
 /**
- * Shared helpers for the two npm package existence entrypoints in this folder:
- * ensure-packages-exist-on-npm.mts (release PR check) and
- * refresh-npm-package-record.mts (cache refresh on main).
+ * Shared helpers for the two npm registry entrypoints in this folder:
  *
- * Both answer the same question - which of this repository's package names
- * already exist on the npm registry - so the registry probe, the record format
- * and the workspace enumeration live here.
+ * - ensure-packages-exist-on-npm.mts - release PR check: the package names it
+ *                                      will publish, and the versions it bumps
+ *                                      past, already exist on npm.
+ * - refresh-npm-package-record.mts   - refreshes the cached record on main.
  *
- * The record is a list of package names confirmed to exist on npm. npm
- * publishes are immutable (a published name can never be unpublished or
- * reused), so a recorded name is guaranteed to still exist and its registry
- * check can be skipped. Its location comes from PUBLISHED_PACKAGES_RECORD; in
- * CI that file is a GitHub Actions cache entry (see
- * .github/workflows/npm-package-existence.yml): the refresh run on main writes
- * it and release PRs restore it read-only. It is only an optimization, so a
- * cache miss just means every package is verified against the registry.
+ * Both answer variations of one question - which of this repository's package
+ * names and versions exist on the npm registry - so the registry probe, the record
+ * format and the workspace enumeration live here. What each entrypoint does with
+ * those - which packages it looks at, and what it does when one is missing - stays
+ * in the entrypoint.
  *
- * Only names the registry confirmed present are ever recorded. A missing or
- * unreachable package must never be written to the record, otherwise a real
- * check would be skipped later.
+ * The record maps a package name confirmed to exist on npm to the version of it
+ * most recently confirmed published. npm publishes are immutable (neither a name
+ * nor a version can ever be unpublished or reused), so anything recorded is
+ * guaranteed to still exist and its registry check can be skipped. The record's
+ * location comes from PUBLISHED_PACKAGES_RECORD; in CI that file is a GitHub
+ * Actions cache entry (see
+ * .github/workflows/npm-package-existence.yml): the refresh run on main writes it
+ * and release PRs restore it read-only. It is only an optimization, so a cache
+ * miss just means everything is verified against the registry.
+ *
+ * Only what the registry confirmed present is ever recorded. A missing or
+ * unreachable package or version must never be written to the record, otherwise a
+ * real check would be skipped later.
  *
  * These files run directly via Node type stripping (Node >= 24, no build step)
  * and use top-level await, hence the .mts extension.
@@ -29,12 +35,18 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export type ExistStatus = "exists" | "missing" | "unknown";
+type ExistStatus = "exists" | "missing" | "unknown";
 
 export interface PackageJson {
   name?: string;
   version?: string;
   private?: boolean;
+}
+
+/** One version of one package, as probed against the registry and reported. */
+export interface PackageVersion {
+  name: string;
+  version: string;
 }
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -49,14 +61,10 @@ export function fail(message: string): never {
   process.exit(1);
 }
 
-// Not checked in: CI restores it from (and refreshes it into) the GitHub Actions
-// cache, and a local run without PUBLISHED_PACKAGES_RECORD just starts from an
-// empty record.
-const RECORD_PATH =
-  process.env.PUBLISHED_PACKAGES_RECORD || path.join(os.tmpdir(), "smithy-typescript", "published-packages.json");
-
-/** The record location, relative to the repository root when it is inside it. */
-export const RECORD_DISPLAY = RECORD_PATH.startsWith(root + path.sep) ? path.relative(root, RECORD_PATH) : RECORD_PATH;
+/** Renders a package version the way npm does, e.g. @smithy/core@3.31.0. */
+export function formatPackageVersion({ name, version }: PackageVersion): string {
+  return `${name}@${version}`;
+}
 
 /**
  * A package is publishable if it has a name and is not private. Private
@@ -93,10 +101,12 @@ function getWorkspaceRoots(): string[] {
 export const WORKSPACE_ROOTS = getWorkspaceRoots();
 
 /**
- * Returns the names of every publishable package in every workspace root.
+ * Returns every publishable package in every workspace root, at the version it
+ * currently declares. A manifest without a version is skipped: there is nothing
+ * to look up on the registry for it.
  */
-export function getAllPublishablePackageNames(): string[] {
-  const names: string[] = [];
+export function getAllPublishablePackages(): PackageVersion[] {
+  const packages: PackageVersion[] = [];
   for (const workspaceRoot of WORKSPACE_ROOTS) {
     const workspaceDir = path.join(root, workspaceRoot);
     for (const dir of fs.readdirSync(workspaceDir)) {
@@ -105,20 +115,20 @@ export function getAllPublishablePackageNames(): string[] {
         continue;
       }
       const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8")) as PackageJson;
-      if (isPublishable(pkgJson)) {
-        names.push(pkgJson.name as string);
+      if (isPublishable(pkgJson) && pkgJson.version) {
+        packages.push({ name: pkgJson.name as string, version: pkgJson.version });
       }
     }
   }
-  return names;
+  return packages;
 }
 
 /**
  * Resolves to "exists", "missing", or "unknown" (network/registry error).
  */
-async function checkExists(name: string, attempt = 0): Promise<ExistStatus> {
+async function probe(url: string, attempt = 0): Promise<ExistStatus> {
   try {
-    const res = await fetch(`${REGISTRY}/${name.replace("/", "%2F")}`, { method: "HEAD" });
+    const res = await fetch(url, { method: "HEAD" });
     if (res.status === 404) {
       return "missing";
     }
@@ -127,30 +137,54 @@ async function checkExists(name: string, attempt = 0): Promise<ExistStatus> {
     }
     // Unexpected status: retry before giving up.
     if (attempt < 2) {
-      return checkExists(name, attempt + 1);
+      return probe(url, attempt + 1);
     }
     return "unknown";
   } catch {
     if (attempt < 2) {
-      return checkExists(name, attempt + 1);
+      return probe(url, attempt + 1);
     }
     return "unknown";
   }
 }
 
-/**
- * Queries the registry for the given names and splits them by existence.
- */
-export async function partitionByExistence(names: string[]) {
-  const results = await Promise.all(names.map(async (name) => ({ name, status: await checkExists(name) })));
-  return {
-    exists: results.filter((r) => r.status === "exists").map((r) => r.name),
-    missing: results.filter((r) => r.status === "missing").map((r) => r.name),
-    unknown: results.filter((r) => r.status === "unknown").map((r) => r.name),
-  };
+/** The registry URL of a package, i.e. its packument. */
+function packageUrl(name: string): string {
+  return `${REGISTRY}/${name.replace("/", "%2F")}`;
 }
 
-/** Warns about names the registry could not answer for. */
+/** Whether the package name exists on npm, in any version. */
+function checkExists(name: string): Promise<ExistStatus> {
+  return probe(packageUrl(name));
+}
+
+/** Whether that exact version of the package is published on npm. */
+function checkVersionExists({ name, version }: PackageVersion): Promise<ExistStatus> {
+  return probe(`${packageUrl(name)}/${encodeURIComponent(version)}`);
+}
+
+async function partition<T>(items: T[], check: (item: T) => Promise<ExistStatus>) {
+  const results = await Promise.all(items.map(async (item) => ({ item, status: await check(item) })));
+  const withStatus = (status: ExistStatus) => results.filter((r) => r.status === status).map((r) => r.item);
+  return { exists: withStatus("exists"), missing: withStatus("missing"), unknown: withStatus("unknown") };
+}
+
+/**
+ * Queries the registry for the given package names and splits them by existence.
+ */
+export function partitionByExistence(names: string[]) {
+  return partition(names, checkExists);
+}
+
+/**
+ * Queries the registry for the given package versions and splits them by
+ * existence.
+ */
+export function partitionVersionsByExistence(versions: PackageVersion[]) {
+  return partition(versions, checkVersionExists);
+}
+
+/** Warns about entries the registry could not answer for. */
 export function warnUnknown(unknown: string[]): void {
   if (unknown.length) {
     console.warn(
@@ -161,23 +195,52 @@ export function warnUnknown(unknown: string[]): void {
 }
 
 /**
- * Loads the set of package names already confirmed published. Returns an empty
- * set if the record is absent or unreadable, in which case every package is
- * verified against the registry.
+ * Package names confirmed to exist on npm, mapped to the version of them most
+ * recently confirmed published. One version per package is enough: the only
+ * version ever looked up is the one a release PR bumps past, which is the version
+ * on main that the last refresh recorded. A recorded name implies the name exists
+ * on npm, whether or not the recorded version is the one being looked up.
  */
-export function loadRecord(): Set<string> {
+export type PublishedRecord = Map<string, string>;
+
+// Not checked in: CI restores it from (and refreshes it into) the GitHub Actions
+// cache, and a local run without PUBLISHED_PACKAGES_RECORD just starts from an
+// empty record.
+const RECORD_PATH =
+  process.env.PUBLISHED_PACKAGES_RECORD || path.join(os.tmpdir(), "smithy-typescript", "published-packages.json");
+
+/** The record location, relative to the repository root when it is inside it. */
+export const RECORD_DISPLAY = RECORD_PATH.startsWith(root + path.sep) ? path.relative(root, RECORD_PATH) : RECORD_PATH;
+
+/**
+ * Loads the record. Returns an empty record if it is absent, unreadable or not
+ * in the expected shape, in which case everything is verified against the
+ * registry.
+ */
+export function loadRecord(): PublishedRecord {
   try {
-    const data = JSON.parse(fs.readFileSync(RECORD_PATH, "utf-8"));
-    return new Set<string>(Array.isArray(data.packages) ? data.packages : []);
+    const { packages } = JSON.parse(fs.readFileSync(RECORD_PATH, "utf-8")) as {
+      packages?: Record<string, string>;
+    };
+    if (!packages || typeof packages !== "object" || Array.isArray(packages)) {
+      return new Map();
+    }
+    return new Map(Object.entries(packages).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
   } catch {
-    return new Set<string>();
+    return new Map();
   }
 }
 
 /**
  * Writes the record so the workflow can store it in the GitHub Actions cache.
+ * Paired with loadRecord, which must read back what this writes; how the record
+ * is filled in between is up to its only writer, refresh-npm-package-record.mts.
  */
-export function saveRecord(names: Iterable<string>): void {
+export function saveRecord(record: PublishedRecord): void {
+  const packages: Record<string, string> = {};
+  for (const name of [...record.keys()].sort()) {
+    packages[name] = record.get(name) as string;
+  }
   fs.mkdirSync(path.dirname(RECORD_PATH), { recursive: true });
   fs.writeFileSync(
     RECORD_PATH,
@@ -185,9 +248,10 @@ export function saveRecord(names: Iterable<string>): void {
       {
         "//":
           "Generated by scripts/npm-packages/refresh-npm-package-record.mts and cached by " +
-          ".github/workflows/npm-package-existence.yml. Packages confirmed published to npm; " +
-          "their registry existence check is skipped, since npm publishes are immutable. Do not edit by hand.",
-        packages: [...names].sort(),
+          ".github/workflows/npm-package-existence.yml. Package names confirmed published to npm, mapped to " +
+          "the version of them most recently confirmed published; their registry checks are skipped, since " +
+          "npm publishes are immutable. Do not edit by hand.",
+        packages,
       },
       null,
       2
