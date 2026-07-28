@@ -14,12 +14,12 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import { CborCodec } from "../CborCodec";
-import { SinglePassCborShapeSerializer } from "./SinglePassCborShapeSerializer";
-import { SinglePassCborShapeDeserializer } from "./SinglePassCborShapeDeserializer";
+import { CborShapeSerializer2 } from "./CborShapeSerializer2";
+import { CborShapeDeserializer2 } from "./CborShapeDeserializer2";
 import { cbor } from "../cbor";
 
-describe("SinglePassCborShapeSerializer", () => {
-  const singlePass = new SinglePassCborShapeSerializer();
+describe("CborShapeSerializer2", () => {
+  const singlePass = new CborShapeSerializer2();
   const codec = new CborCodec();
   const multiPass = codec.createSerializer();
 
@@ -275,11 +275,11 @@ describe("SinglePassCborShapeSerializer", () => {
   });
 });
 
-describe("SinglePassCborShapeDeserializer", () => {
-  const singlePassDe = new SinglePassCborShapeDeserializer();
+describe("CborShapeDeserializer2", () => {
+  const singlePassDe = new CborShapeDeserializer2();
   const codec = new CborCodec();
   const multiPassDe = codec.createDeserializer();
-  const singlePassSer = new SinglePassCborShapeSerializer();
+  const singlePassSer = new CborShapeSerializer2();
 
   const dateSchema = [
     3,

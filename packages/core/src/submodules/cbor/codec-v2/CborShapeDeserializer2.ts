@@ -23,7 +23,7 @@ import {
   specialUndefined,
   type Uint8,
 } from "../cbor-types";
-import { activateCborStructIterator } from "./SinglePassCborShapeSerializer";
+import { loadCborStructIterator } from "./CborShapeSerializer2";
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -33,12 +33,7 @@ import { activateCborStructIterator } from "./SinglePassCborShapeSerializer";
  *
  * @internal
  */
-export class SinglePassCborShapeDeserializer extends SerdeContext implements ShapeDeserializer<Uint8Array> {
-  public constructor() {
-    super();
-    activateCborStructIterator();
-  }
-
+export class CborShapeDeserializer2 extends SerdeContext implements ShapeDeserializer<Uint8Array> {
   public read(schema: Schema, bytes: Uint8Array): any {
     payload = bytes;
     isBuffer = USE_BUFFER && bytes instanceof Buffer;
@@ -126,7 +121,8 @@ function readMap(ns: NormalizedSchema): any {
   const count = decodeCount();
 
   if (ns.isStructSchema()) {
-    return readStruct(ns, count);
+    const startPos = pos;
+    return readStruct(ns, count, startPos);
   }
 
   const valueSchema = ns.isMapSchema() ? ns.getValueSchema() : ns;
@@ -138,15 +134,16 @@ function readMap(ns: NormalizedSchema): any {
   return map;
 }
 
-function readStruct(ns: NormalizedSchema, count: number): any {
+function readStruct(ns: NormalizedSchema, count: number, startPos: number): any {
   const isUnion = ns.isUnionSchema();
-  const cache = ns.structIteratorCbor!();
+  const cache = loadCborStructIterator(ns);
   const { memberSchemas, encodedKeys, memberNames } = cache;
   const z = encodedKeys.length;
   const result: Record<string, any> = {};
   let unknownKey: string | undefined;
   let unknownValue: any;
   let unknownCount = 0;
+  let hasType = false;
   let hint = 0;
 
   for (let i = 0; i < count; ++i) {
@@ -163,7 +160,9 @@ function readStruct(ns: NormalizedSchema, count: number): any {
     } else {
       const key = readUtf8String();
       const val = readValue(NormalizedSchema.of(15 satisfies DocumentSchema));
-      if (key !== "__type") {
+      if (key === "__type" && typeof val === "string") {
+        hasType = true;
+      } else {
         unknownKey = key;
         unknownValue = val;
         ++unknownCount;
@@ -179,6 +178,19 @@ function readStruct(ns: NormalizedSchema, count: number): any {
     }
     if (resultEmpty && unknownCount === 1) {
       result.$unknown = [unknownKey!, unknownValue];
+    }
+  } else if (hasType) {
+    // __type is a string: error deserialization backward compat.
+    // Re-read the struct as a plain map from the saved position.
+    // This path is only hit for unknown error types, never on the hot path.
+    pos = startPos;
+    const docSchema = NormalizedSchema.of(15 satisfies DocumentSchema);
+    for (let i = 0; i < count; ++i) {
+      const key = readUtf8String();
+      const val = readValue(docSchema);
+      if (!(key in result)) {
+        result[key] = val;
+      }
     }
   }
 
@@ -320,7 +332,7 @@ function readMapIndefinite(ns: NormalizedSchema): any {
   pos += 1;
 
   if (ns.isStructSchema()) {
-    const cache = ns.structIteratorCbor!();
+    const cache = loadCborStructIterator(ns);
     const { memberSchemas, encodedKeys, memberNames } = cache;
     const z = encodedKeys.length;
     const isUnion = ns.isUnionSchema();

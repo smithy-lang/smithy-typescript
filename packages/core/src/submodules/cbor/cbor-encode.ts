@@ -91,7 +91,7 @@ export function encode(_input: any): void {
     }
 
     if (typeof input === "number") {
-      if (Number.isInteger(input)) {
+      if (Number.isInteger(input) && input >= -0x20000000000000 && input <= 0x1fffffffffffff) {
         const nonNegative = input >= 0;
         const major = nonNegative ? majorUint64 : majorNegativeInt64;
         const value = nonNegative ? input : -input - 1;

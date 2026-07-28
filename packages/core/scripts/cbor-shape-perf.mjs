@@ -7,8 +7,10 @@
  * Usage:
  *   node scripts/cbor-shape-perf.mjs
  *   node scripts/cbor-shape-perf.mjs --variant=cbor-ser
+ *   node scripts/cbor-shape-perf.mjs --variant=cbor2-ser
  *   node scripts/cbor-shape-perf.mjs --variant=json-ser
  *   node scripts/cbor-shape-perf.mjs --variant=cbor-de
+ *   node scripts/cbor-shape-perf.mjs --variant=cbor2-de
  *   node scripts/cbor-shape-perf.mjs --variant=json-de
  */
 
@@ -16,7 +18,13 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { JsonCodec } from "@aws-sdk/core/protocols";
-import { cbor, CborShapeDeserializer, CborShapeSerializer } from "@smithy/core/cbor";
+import {
+  cbor,
+  CborShapeDeserializer,
+  CborShapeSerializer,
+  CborShapeSerializer2,
+  CborShapeDeserializer2,
+} from "@smithy/core/cbor";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -278,6 +286,22 @@ function runVariant(variant) {
         results.push({ name, ms: performance.now() - start, bytes });
         break;
       }
+      case "cbor2-ser": {
+        const serializer = new CborShapeSerializer2();
+        for (let i = 0; i < WARMUP; ++i) {
+          serializer.write(schema, data);
+          serializer.flush();
+        }
+
+        const start = performance.now();
+        let bytes = 0;
+        for (let i = 0; i < SCALE; ++i) {
+          serializer.write(schema, data);
+          bytes = serializer.flush().byteLength;
+        }
+        results.push({ name, ms: performance.now() - start, bytes });
+        break;
+      }
       case "json-ser": {
         const serializer = jsonCodec.createSerializer();
         for (let i = 0; i < WARMUP; ++i) {
@@ -303,6 +327,24 @@ function runVariant(variant) {
         const bytes = cborBytes.byteLength;
 
         const deserializer = new CborShapeDeserializer();
+        for (let i = 0; i < WARMUP; ++i) {
+          deserializer.read(schema, cborBytes);
+        }
+
+        const start = performance.now();
+        for (let i = 0; i < SCALE; ++i) {
+          deserializer.read(schema, cborBytes);
+        }
+        results.push({ name, ms: performance.now() - start, bytes });
+        break;
+      }
+      case "cbor2-de": {
+        const ser = new CborShapeSerializer2();
+        ser.write(schema, data);
+        const cborBytes = ser.flush();
+        const bytes = cborBytes.byteLength;
+
+        const deserializer = new CborShapeDeserializer2();
         for (let i = 0; i < WARMUP; ++i) {
           deserializer.read(schema, cborBytes);
         }
@@ -367,6 +409,10 @@ if (variantArg) {
   const cborSerResults = runChild("cbor-ser");
   console.log("done.");
 
+  process.stdout.write("CBOR2 ser...");
+  const cbor2SerResults = runChild("cbor2-ser");
+  console.log("done.");
+
   process.stdout.write("JSON ser...");
   const jsonSerResults = runChild("json-ser");
   console.log("done.");
@@ -375,17 +421,20 @@ if (variantArg) {
   console.log("## Serialization Results\n");
   console.log(
     mdTable(
-      ["Test Case", "CBOR Size", "JSON Size", "CBOR ms", "JSON ms", "CBOR/JSON"],
+      ["Test Case", "CBOR Size", "JSON Size", "CBOR ms", "CBOR2 ms", "JSON ms", "CBOR2/CBOR", "CBOR2/JSON"],
       getScenarios().map((_, i) => {
         const cb = cborSerResults[i],
+          cb2 = cbor2SerResults[i],
           js = jsonSerResults[i];
         return [
           "`" + cb.name + "`",
           fmtSize(cb.bytes),
           fmtSize(js.bytes),
           cb.ms.toFixed(0) + " ms",
+          cb2.ms.toFixed(0) + " ms",
           js.ms.toFixed(0) + " ms",
-          (cb.ms / js.ms).toFixed(2) + "x",
+          (cb2.ms / cb.ms).toFixed(2) + "x",
+          (cb2.ms / js.ms).toFixed(2) + "x",
         ];
       })
     )
@@ -399,6 +448,10 @@ if (variantArg) {
   const cborDeResults = runChild("cbor-de");
   console.log("done.");
 
+  process.stdout.write("CBOR2 de...");
+  const cbor2DeResults = runChild("cbor2-de");
+  console.log("done.");
+
   process.stdout.write("JSON de...");
   const jsonDeResults = runChild("json-de");
   console.log("done.");
@@ -407,17 +460,20 @@ if (variantArg) {
   console.log("## Deserialization Results\n");
   console.log(
     mdTable(
-      ["Test Case", "CBOR Size", "JSON Size", "CBOR ms", "JSON ms", "CBOR/JSON"],
+      ["Test Case", "CBOR Size", "JSON Size", "CBOR ms", "CBOR2 ms", "JSON ms", "CBOR2/CBOR", "CBOR2/JSON"],
       getScenarios().map((_, i) => {
         const cb = cborDeResults[i],
+          cb2 = cbor2DeResults[i],
           js = jsonDeResults[i];
         return [
           "`" + cb.name + "`",
           fmtSize(cb.bytes),
           fmtSize(js.bytes),
           cb.ms.toFixed(0) + " ms",
+          cb2.ms.toFixed(0) + " ms",
           js.ms.toFixed(0) + " ms",
-          (cb.ms / js.ms).toFixed(2) + "x",
+          (cb2.ms / cb.ms).toFixed(2) + "x",
+          (cb2.ms / js.ms).toFixed(2) + "x",
         ];
       })
     )
