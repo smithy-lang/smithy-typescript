@@ -1,0 +1,85 @@
+name: approve-release-pr-workflows
+
+# The release PR ("Version NPM packages") is opened by github-actions[bot],
+# which is not an organization member. Under the repository's "Approval for
+# running fork pull request workflows from contributors" policy, that means
+# every run on the release PR sits in `action_required` until a maintainer
+# clicks "Approve and run". This workflow approves those runs automatically.
+#
+# `pull_request_target` is used deliberately: it runs in the context of the
+# base branch and therefore always runs, regardless of the approval policy.
+#
+# SECURITY: `pull_request_target` runs with repository secrets and a
+# write-capable token, and it is triggered by pull requests from forks. This
+# workflow is only safe because it does not trust anything from the pull
+# request:
+#   * It never checks out the head ref and never executes any code from the
+#     pull request. Do not add an `actions/checkout` step to this file.
+#   * The only expression values used are `github.repository` and the head
+#     SHA, and both are passed via `env:` rather than interpolated into the
+#     shell script, so attacker-controlled text cannot be injected.
+#   * The job is gated to a same-repository head, the exact
+#     `changeset-release/main` branch, and `github-actions[bot]` as author.
+#     Because GitHub always loads this file from the base branch, a fork
+#     pull request cannot weaken that gate.
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  actions: write
+
+jobs:
+  approve:
+    name: Approve pending runs on the release PR
+    # Only the changesets release PR: same repository, known branch, bot author.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'changeset-release/main' &&
+      github.event.pull_request.user.login == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Approve workflow runs awaiting approval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          approved=0
+          # Runs are created around the same time as this workflow, so poll for
+          # a couple of minutes to catch any that show up late.
+          for _ in $(seq 1 12); do
+            # Match on the head repository and branch as well as the SHA, so a
+            # fork pull request that happens to share a commit with the release
+            # branch can never pick up an approval from this workflow.
+            ids="$(gh api \
+              --method GET "repos/$REPO/actions/runs" \
+              -f "head_sha=$HEAD_SHA" \
+              -f "status=action_required" \
+              -f "per_page=100" \
+              --jq ".workflow_runs[]
+                    | select(.event == \"pull_request\")
+                    | select(.head_branch == \"changeset-release/main\")
+                    | select(.head_repository.full_name == \"$REPO\")
+                    | .id")"
+
+            if [ -z "$ids" ] && [ "$approved" -gt 0 ]; then
+              echo "No further runs awaiting approval."
+              break
+            fi
+
+            for id in $ids; do
+              echo "Approving run $id"
+              gh api --method POST "repos/$REPO/actions/runs/$id/approve"
+              approved=$((approved + 1))
+            done
+
+            sleep 10
+          done
+          echo "Approved $approved run(s) for $HEAD_SHA."
