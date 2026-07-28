@@ -1,5 +1,12 @@
 # @smithy/uuid
 
+## 1.3.16
+
+### Patch Changes
+
+- Updated dependencies [fcf1366]
+  - @smithy/core@3.31.1
+
 ## 1.3.15
 
 ### Patch Changes

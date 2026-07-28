@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [fcf1366]
+  - @smithy/core@3.31.1
+  - @smithy/protocol-http@5.5.16
+
 ## 0.1.5
 
 ### Patch Changes
