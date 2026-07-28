@@ -133,32 +133,32 @@ Later benchmarks will use the single-pass implementations to be released later.
 
 ## Serialization Results
 
-| Test Case                         | CBOR Size | JSON Size | CBOR ms | JSON ms | CBOR/JSON |
-| --------------------------------- | --------: | --------: | ------: | ------: | --------: |
-| `list<string(0,180)>`             |    472 kb |    475 kb |   63 ms |   50 ms |     1.28x |
-| `list<float>`                     |    270 kb |    675 kb |  295 ms |  345 ms |     0.86x |
-| `list<int>`                       |    253 kb |    458 kb |  746 ms |  298 ms |     2.50x |
-| `list<long int>`                  |    250 kb |    549 kb |  383 ms |  231 ms |     1.66x |
-| `map<string, string>`             |    451 kb |    449 kb |   58 ms |   55 ms |     1.05x |
-| `map<string, long int>`           |     37 kb |     50 kb |   26 ms |   20 ms |     1.28x |
-| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  504 ms |  460 ms |     1.10x |
-| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 1895 ms | 1659 ms |     1.14x |
-| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  354 ms |  316 ms |     1.12x |
-| `list<struct> with blobs`         |    263 kb |    353 kb |  176 ms |  157 ms |     1.12x |
-| `list<struct> with timestamps`    |    229 kb |    345 kb |  302 ms |  242 ms |     1.25x |
+| Test Case                         | CBOR Size | JSON Size | CBOR ms | CBOR2 ms | JSON ms | CBOR2/CBOR | CBOR2/JSON |
+| --------------------------------- | --------: | --------: | ------: | -------: | ------: | ---------: | ---------: |
+| `list<string(0,180)>`             |    472 kb |    467 kb |   69 ms |    61 ms |   51 ms |      0.88x |      1.20x |
+| `list<float>`                     |    270 kb |    675 kb |  305 ms |    27 ms |  349 ms |      0.09x |      0.08x |
+| `list<int>`                       |    253 kb |    458 kb |  760 ms |   102 ms |  308 ms |      0.13x |      0.33x |
+| `list<long int>`                  |    250 kb |    549 kb |  384 ms |    58 ms |  238 ms |      0.15x |      0.24x |
+| `map<string, string>`             |    448 kb |    450 kb |   58 ms |    31 ms |   57 ms |      0.53x |      0.54x |
+| `map<string, long int>`           |     37 kb |     50 kb |   27 ms |    15 ms |   21 ms |      0.58x |      0.75x |
+| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  503 ms |   291 ms |  457 ms |      0.58x |      0.64x |
+| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 1710 ms |  1165 ms | 1643 ms |      0.68x |      0.71x |
+| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  328 ms |   246 ms |  345 ms |      0.75x |      0.71x |
+| `list<struct> with blobs`         |    263 kb |    353 kb |  170 ms |   103 ms |  159 ms |      0.60x |      0.65x |
+| `list<struct> with timestamps`    |    229 kb |    345 kb |  283 ms |   118 ms |  241 ms |      0.42x |      0.49x |
 
 ## Deserialization Results
 
-| Test Case                         | CBOR Size | JSON Size | CBOR ms | JSON ms | CBOR/JSON |
-| --------------------------------- | --------: | --------: | ------: | ------: | --------: |
-| `list<string(0,180)>`             |    469 kb |    472 kb |   34 ms |   30 ms |     1.15x |
-| `list<float>`                     |    270 kb |    675 kb |   74 ms |  257 ms |     0.29x |
-| `list<int>`                       |    253 kb |    458 kb |  254 ms |  319 ms |     0.80x |
-| `list<long int>`                  |    250 kb |    549 kb |  131 ms |  214 ms |     0.61x |
-| `map<string, string>`             |    445 kb |    449 kb |   39 ms |   34 ms |     1.14x |
-| `map<string, long int>`           |     38 kb |     50 kb |   28 ms |   26 ms |     1.07x |
-| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  429 ms |  481 ms |     0.89x |
-| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 2160 ms | 2044 ms |     1.06x |
-| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  474 ms |  381 ms |     1.24x |
-| `list<struct> with blobs`         |    263 kb |    353 kb |  101 ms |  235 ms |     0.43x |
-| `list<struct> with timestamps`    |    229 kb |    345 kb |  222 ms |  286 ms |     0.78x |
+| Test Case                         | CBOR Size | JSON Size | CBOR ms | CBOR2 ms | JSON ms | CBOR2/CBOR | CBOR2/JSON |
+| --------------------------------- | --------: | --------: | ------: | -------: | ------: | ---------: | ---------: |
+| `list<string(0,180)>`             |    464 kb |    470 kb |   28 ms |    24 ms |   31 ms |      0.85x |      0.78x |
+| `list<float>`                     |    270 kb |    675 kb |   78 ms |    34 ms |  249 ms |      0.44x |      0.14x |
+| `list<int>`                       |    253 kb |    458 kb |  260 ms |   101 ms |  321 ms |      0.39x |      0.31x |
+| `list<long int>`                  |    250 kb |    549 kb |  134 ms |    60 ms |  216 ms |      0.44x |      0.28x |
+| `map<string, string>`             |    442 kb |    436 kb |   38 ms |    29 ms |   34 ms |      0.76x |      0.85x |
+| `map<string, long int>`           |     37 kb |     49 kb |   28 ms |    19 ms |   26 ms |      0.67x |      0.71x |
+| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  427 ms |   169 ms |  574 ms |      0.40x |      0.29x |
+| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 2112 ms |   630 ms | 2114 ms |      0.30x |      0.30x |
+| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  479 ms |   136 ms |  391 ms |      0.28x |      0.35x |
+| `list<struct> with blobs`         |    263 kb |    353 kb |  104 ms |    55 ms |  239 ms |      0.53x |      0.23x |
+| `list<struct> with timestamps`    |    229 kb |    345 kb |  227 ms |   100 ms |  284 ms |      0.44x |      0.35x |

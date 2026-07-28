@@ -1,22 +1,21 @@
 import { SerdeContext } from "@smithy/core/protocols";
-import { _parseEpochTimestamp } from "@smithy/core/serde";
 import type { Codec } from "@smithy/types";
 
-import { CborShapeSerializer } from "./codec-v1/CborShapeSerializer";
-import { CborShapeDeserializer } from "./codec-v1/CborShapeDeserializer";
+import { CborShapeSerializer2 } from "./codec-v2/CborShapeSerializer2";
+import { CborShapeDeserializer2 } from "./codec-v2/CborShapeDeserializer2";
 
 /**
  * @public
  */
 export class CborCodec extends SerdeContext implements Codec<Uint8Array, Uint8Array> {
-  public createSerializer(): CborShapeSerializer {
-    const serializer = new CborShapeSerializer();
+  public createSerializer(): CborShapeSerializer2 {
+    const serializer = new CborShapeSerializer2();
     serializer.setSerdeContext(this.serdeContext!);
     return serializer;
   }
 
-  public createDeserializer(): CborShapeDeserializer {
-    const deserializer = new CborShapeDeserializer();
+  public createDeserializer(): CborShapeDeserializer2 {
+    const deserializer = new CborShapeDeserializer2();
     deserializer.setSerdeContext(this.serdeContext!);
     return deserializer;
   }

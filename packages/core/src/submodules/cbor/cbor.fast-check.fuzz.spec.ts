@@ -16,17 +16,17 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import { cbor } from "./cbor";
-import { CborCodec } from "./CborCodec";
-import { SinglePassCborShapeDeserializer } from "./codec-v2/SinglePassCborShapeDeserializer";
-import { SinglePassCborShapeSerializer } from "./codec-v2/SinglePassCborShapeSerializer";
+import { CborShapeDeserializer } from "./codec-v1/CborShapeDeserializer";
+import { CborShapeSerializer } from "./codec-v1/CborShapeSerializer";
+import { CborShapeDeserializer2 } from "./codec-v2/CborShapeDeserializer2";
+import { CborShapeSerializer2 } from "./codec-v2/CborShapeSerializer2";
 
 // ─── Reference (multi-pass) and candidate (single-pass) implementations ─────
 
-const codec = new CborCodec();
-const refSerializer = codec.createSerializer();
-const refDeserializer = codec.createDeserializer();
-const singlePassSer = new SinglePassCborShapeSerializer();
-const singlePassDe = new SinglePassCborShapeDeserializer();
+const refSerializer = new CborShapeSerializer();
+const refDeserializer = new CborShapeDeserializer();
+const singlePassSer = new CborShapeSerializer2();
+const singlePassDe = new CborShapeDeserializer2();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -213,7 +213,7 @@ const allTypesData: fc.Arbitrary<any> = fc.letrec((tie) => ({
 // ─── Fuzz Tests ──────────────────────────────────────────────────────────────
 
 describe("CBOR serde fuzz: SinglePass matches MultiPass", () => {
-  describe("Serializer: SinglePassCborShapeSerializer matches CborShapeSerializer", () => {
+  describe("Serializer: CborShapeSerializer2 matches CborShapeSerializer", () => {
     it("string maps", { timeout: 30_000 }, () => {
       fc.assert(
         fc.property(stringMap, (tags) => {
@@ -335,7 +335,7 @@ describe("CBOR serde fuzz: SinglePass matches MultiPass", () => {
     });
   });
 
-  describe("Deserializer: SinglePassCborShapeDeserializer matches CborShapeDeserializer", () => {
+  describe("Deserializer: CborShapeDeserializer2 matches CborShapeDeserializer", () => {
     it("string maps", { timeout: 30_000 }, () => {
       fc.assert(
         fc.property(stringMap, (tags) => {

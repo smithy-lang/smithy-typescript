@@ -31,12 +31,7 @@ import {
  *
  * @internal
  */
-export class SinglePassCborShapeSerializer extends SerdeContext implements ShapeSerializer<Uint8Array> {
-  public constructor() {
-    super();
-    activateCborStructIterator();
-  }
-
+export class CborShapeSerializer2 extends SerdeContext implements ShapeSerializer<Uint8Array> {
   public write(schema: Schema, value: unknown): void {
     cursor = 0;
     const ns = NormalizedSchema.of(schema);
@@ -65,12 +60,6 @@ export function advanceSinglePassEncodingEpoch(): void {
 
 // ─── Struct cache infrastructure ──────────────────────────────────────────────
 
-export function activateCborStructIterator() {
-  NormalizedSchema.prototype.structIteratorCbor = function (this: NormalizedSchema): CborStructCache {
-    return loadCborStructIterator(this);
-  };
-}
-
 /**
  * Symbol key for the CBOR-specific struct cache attached to static schemas.
  */
@@ -79,7 +68,7 @@ const CBOR_STRUCT_CACHE = Symbol.for("@smithy/cbor-struct-cache");
 /**
  * Cached CBOR struct iteration data: parallel arrays for direct indexed access.
  */
-interface CborStructCache {
+export interface CborStructCache {
   memberNames: string[];
   memberSchemas: NormalizedSchema[];
   encodedKeys: Uint8Array[];
@@ -90,7 +79,7 @@ interface CborStructCache {
  * On first call, iterates structIterator() to populate NormalizedSchema's own cache,
  * then builds pre-encoded CBOR key bytes for each member.
  */
-function loadCborStructIterator(ns: NormalizedSchema): CborStructCache {
+export function loadCborStructIterator(ns: NormalizedSchema): CborStructCache {
   const schema = ns.getSchema() as any;
   const existing = schema[CBOR_STRUCT_CACHE] as CborStructCache | undefined;
   if (existing) {
@@ -182,13 +171,18 @@ function writeValue(
       writeString(generateIdempotencyToken());
       return;
     }
-    if (value === undefined) {
-      ensure(1);
-      buf[cursor++] = (majorSpecial << 5) | specialNull;
-      return;
-    }
     ensure(1);
     buf[cursor++] = (majorSpecial << 5) | specialNull;
+    return;
+  }
+
+  if (ns.isUnitSchema()) {
+    // Unit is always an empty map.
+    // If this is for a top level input/output struct,
+    // the Protocol must handle replacing this wil 0-byte
+    // body and removing content-type header.
+    ensure(1);
+    encodeHeader(majorMap, 0);
     return;
   }
 
@@ -326,7 +320,7 @@ function writeStruct(ns: NormalizedSchema, value: Record<string, unknown>, serde
     return;
   }
 
-  const cache = ns.structIteratorCbor!();
+  const cache = loadCborStructIterator(ns);
   const { memberNames, memberSchemas, encodedKeys } = cache;
   const z = memberNames.length;
 

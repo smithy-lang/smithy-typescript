@@ -93,6 +93,14 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
           }
         }
       } else if (ns.isDocumentSchema()) {
+        if (Array.isArray(sourceObject)) {
+          const newArray = [];
+          let i = 0;
+          for (const item of sourceObject) {
+            newArray[i++] = this.serialize(ns.getValueSchema(), item);
+          }
+          return newArray;
+        }
         for (const key in sourceObject) {
           newObject[key] = this.serialize(ns.getValueSchema(), sourceObject[key]);
         }
