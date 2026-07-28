@@ -29,7 +29,7 @@ import {
   formatPackageVersion,
   getAllPublishablePackages,
   loadRecord,
-  partitionVersionsByExistence,
+  partitionByExistence,
   type PublishedRecord,
   RECORD_DISPLAY,
   saveRecord,
@@ -57,7 +57,9 @@ if (toVerify.length === 0) {
   process.exit(0);
 }
 
-const { exists, missing, unknown } = await partitionVersionsByExistence(toVerify);
+const { exists, missingNames, missingVersions, unknown } = await partitionByExistence(toVerify);
+// Why a version is absent does not matter here: either way it is left unrecorded.
+const missing = [...missingNames, ...missingVersions];
 for (const { name, version } of exists) {
   // The newest confirmed version replaces the previous one, since it is the
   // version a release PR forked from main will look up.

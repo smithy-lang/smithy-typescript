@@ -33,9 +33,10 @@
  * the one being superseded; a package the branch adds supersedes nothing, so only
  * its name is checked.
  *
- * Packages and versions already recorded as published (see shared.mts) skip their
- * registry check; the rest are queried. Runs directly via Node type stripping
- * (Node >= 24, no build step).
+ * Each package costs one registry check: the version it supersedes, since a
+ * published version implies a published name. Checks already answered by the
+ * record (see shared.mts) are skipped; the rest are queried. Runs directly via
+ * Node type stripping (Node >= 24, no build step).
  *
  * Usage:
  *   node ensure-packages-exist-on-npm.mts [compareRef]   # defaults to origin/main
@@ -48,12 +49,11 @@ import path from "node:path";
 import {
   fail,
   formatPackageVersion,
-  isPublishable,
   loadRecord,
+  type PackageCheck,
   type PackageJson,
-  type PackageVersion,
   partitionByExistence,
-  partitionVersionsByExistence,
+  readPublishablePackage,
   root,
   warnUnknown,
   WORKSPACE_ROOTS,
@@ -155,13 +155,13 @@ function getPackagesToPublish(): PackageToPublish[] {
     if (!fs.existsSync(abs)) {
       continue; // package.json deleted in this PR.
     }
-    const pkgJson = JSON.parse(fs.readFileSync(abs, "utf-8")) as PackageJson;
-    if (!isPublishable(pkgJson)) {
+    const pkg = readPublishablePackage(abs);
+    if (!pkg) {
       continue;
     }
     const previousVersion = getBaseVersion(baseRef, relPath);
-    if (pkgJson.version !== previousVersion) {
-      toPublish.push({ name: pkgJson.name as string, previousVersion });
+    if (pkg.version !== previousVersion) {
+      toPublish.push({ name: pkg.name, previousVersion });
     }
   }
   return toPublish;
@@ -184,28 +184,23 @@ if (packages.length === 0) {
 
 const record = loadRecord();
 
-// Do the package names exist on npm at all? Nothing can be published under a name
-// the registry does not have.
-const namesToVerify = packages.map((pkg) => pkg.name).filter((name) => !record.has(name));
-const names = await partitionByExistence(namesToVerify);
-warnUnknown(names.unknown);
-const neverPublished = new Set(names.missing);
+// One check per package: the version it supersedes, or - for a package this PR
+// adds, which supersedes nothing - its name alone. Verifying the superseded version
+// covers the name too, since nothing can be published under a name the registry
+// does not have. What the record already confirms needs no check at all.
+const toVerify: PackageCheck[] = packages
+  .map(({ name, previousVersion }) => ({ name, version: previousVersion }))
+  .filter(({ name, version }) => (version === null ? !record.has(name) : record.get(name) !== version));
 
-// Are the versions being superseded published? A package whose name is missing
-// entirely has nothing published to supersede, so it is left to the check above.
-const supersededVersions: PackageVersion[] = packages
-  .filter((pkg) => pkg.previousVersion !== null && !neverPublished.has(pkg.name))
-  .map((pkg) => ({ name: pkg.name, version: pkg.previousVersion as string }));
-const versionsToVerify = supersededVersions.filter(({ name, version }) => record.get(name) !== version);
-const versions = await partitionVersionsByExistence(versionsToVerify);
-warnUnknown(versions.unknown.map(formatPackageVersion));
+const { missingNames, missingVersions, unknown } = await partitionByExistence(toVerify);
+warnUnknown(unknown.map(formatPackageVersion));
 
-if (names.missing.length || versions.missing.length) {
+if (missingNames.length || missingVersions.length) {
   const report: string[] = [];
-  if (names.missing.length) {
+  if (missingNames.length) {
     report.push(
-      `${names.missing.length} package(s) this PR will publish have never been published to npm:`,
-      ...names.missing.map((n) => `  - ${n}`),
+      `${missingNames.length} package(s) this PR will publish have never been published to npm:`,
+      ...missingNames.map(({ name }) => `  - ${name}`),
       "",
       "npm trusted publishing (OIDC) only works for packages that already",
       "exist on the registry, so the automated release workflow cannot",
@@ -223,13 +218,13 @@ if (names.missing.length || versions.missing.length) {
       "Refer internal runbook for npm credentials."
     );
   }
-  if (versions.missing.length) {
+  if (missingVersions.length) {
     if (report.length) {
       report.push("", "");
     }
     report.push(
-      `${versions.missing.length} version(s) this PR supersedes are not published on npm:`,
-      ...versions.missing.map((v) => `  - ${formatPackageVersion(v)}`),
+      `${missingVersions.length} version(s) this PR supersedes are not published on npm:`,
+      ...missingVersions.map((v) => `  - ${formatPackageVersion(v)}`),
       "",
       "A previous release PR versioned these, but the release that should have",
       "published them did not complete. Merging this PR bumps past them, and no",
@@ -245,12 +240,10 @@ if (names.missing.length || versions.missing.length) {
   fail(report.join("\n"));
 }
 
-const queried = namesToVerify.length + versionsToVerify.length;
-const fromRecord = packages.length - namesToVerify.length + supersededVersions.length - versionsToVerify.length;
-const newPackages = packages.length - supersededVersions.length;
+const newPackages = packages.filter((pkg) => pkg.previousVersion === null).length;
 console.log(
-  `✅ All ${packages.length} package(s) to publish exist on npm, and the ${supersededVersions.length} version(s) ` +
+  `✅ All ${packages.length} package(s) to publish exist on npm, and the ${packages.length - newPackages} version(s) ` +
     `they supersede are published` +
     (newPackages ? ` (${newPackages} package(s) are new in this PR and supersede nothing)` : "") +
-    `: ${fromRecord} check(s) from the cached record, ${queried} verified via registry.`
+    `: ${packages.length - toVerify.length} check(s) from the cached record, ${toVerify.length} verified via registry.`
 );
