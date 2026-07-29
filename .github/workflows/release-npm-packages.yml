@@ -55,6 +55,20 @@ jobs:
           publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Hand off to npm-package-existence.yml, which records the versions just
+      # published so the next release PR's check can skip the registry for them.
+      # It must list this event type; see the rationale for the hand-off there.
+      #
+      # Nothing to record if the publish did not happen, and best-effort because
+      # failing here would fire the notification below for a release that
+      # succeeded, while the record is only an optimization.
+      - name: Refresh record of published packages
+        if: steps.release.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # $GITHUB_REPOSITORY, not a ${{ }} expansion, to keep interpolation out of the shell command.
+        run: gh api "repos/$GITHUB_REPOSITORY/dispatches" -f event_type=npm-release-published
       - name: Failure Nofitication
         if: ${{ failure() }}
         run: aws cloudwatch put-metric-data --namespace SmithyTypeScriptPublish --metric-name NpmPackagePublishFailure --value 1
