@@ -72,17 +72,23 @@ jobs:
           for attempt in $(seq 1 "$attempts"); do
             # Match on the head repository and branch as well as the SHA, so a
             # fork pull request that happens to share a commit with the release
-            # branch can never pick up an approval from this workflow. A run
-            # awaiting approval reports status "completed" with conclusion
-            # "action_required", so both fields decide `pending`.
+            # branch can never pick up an approval from this workflow. The SHA is
+            # re-checked here rather than left to the query parameter alone: if
+            # that filter ever stopped applying, the response would also carry
+            # this branch's runs for earlier commits, and an already-approved run
+            # among them could satisfy the wait below while the runs for this
+            # commit stayed stuck. A run awaiting approval reports status
+            # "completed" with conclusion "action_required", so both fields
+            # decide `pending`.
             runs="$(
               gh api \
                 --method GET "repos/$REPO/actions/runs" \
                 -f "head_sha=$HEAD_SHA" \
                 -f "per_page=100" \
-                | jq --arg repo "$REPO" --arg branch "$RELEASE_BRANCH" '
+                | jq --arg repo "$REPO" --arg branch "$RELEASE_BRANCH" --arg sha "$HEAD_SHA" '
                     [ .workflow_runs[]
                       | select(.event == "pull_request")
+                      | select(.head_sha == $sha)
                       | select(.head_branch == $branch)
                       | select(.head_repository.full_name == $repo)
                       | {
