@@ -13,16 +13,19 @@ on:
   # on the registry by the time they are probed. Refreshing on push to main instead
   # would race that release and record its versions as absent.
   #
-  # workflow_run also happens to be the trigger this needs for cache access: it
-  # runs in the context of the default branch, and only trusted triggers like it
-  # may write to the default branch's cache scope, which is the scope pull request
-  # runs restore from. The record is therefore always written from main and never
-  # from a pull request.
-  workflow_run:
-    workflows:
-      - release-npm-packages
+  # release-npm-packages.yml raises this event, rather than this workflow listening
+  # for it to complete, for cache access: only a trusted trigger may write to the
+  # default branch's cache scope, which is what pull request runs restore from, and
+  # workflow_run is untrusted - a fork pull request can cascade into it - so its
+  # save is denied. repository_dispatch is trusted, GITHUB_TOKEN may raise it, and
+  # it always runs the default branch. See
+  # https://github.blog/changelog/2026-06-26-read-only-actions-cache-for-untrusted-triggers/.
+  #
+  # A dispatch of a type not listed below starts no run and reports no error, so
+  # keep the type in step with the step that raises it.
+  repository_dispatch:
     types:
-      - completed
+      - npm-release-published
 
 permissions:
   contents: read
@@ -92,17 +95,15 @@ jobs:
   refresh-npm-package-record:
     runs-on: ubuntu-latest
     name: Refresh record of published packages
-    # A release that failed, was cancelled or published nothing leaves the versions
-    # on main absent from the registry, which is what the next release PR's check
-    # must discover for itself - so there is nothing to record.
-    if: github.event.workflow_run.conclusion == 'success'
+    # The release raises the event only once it has published, so a release that
+    # failed, was cancelled or published nothing never gets here: those versions
+    # stay absent from the registry, which is what the next release PR's check must
+    # discover for itself - so there is nothing to record.
+    if: github.event_name == 'repository_dispatch'
     steps:
+      # main, which is what repository_dispatch always runs, and the branch whose
+      # cache scope the record below is stored under.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        # workflow_run checks out the default branch by default, but the release was
-        # triggered by a merged pull request, so name main explicitly to be sure the
-        # versions read here are the ones that were just published.
-        with:
-          ref: main
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           # Node >= 24 runs the .mts script directly via native type stripping.
