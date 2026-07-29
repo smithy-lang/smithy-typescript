@@ -34,6 +34,14 @@ on:
 permissions:
   actions: write
 
+env:
+  RELEASE_BRANCH: changeset-release/main
+  # The workflows that must be cleared before this one is done. Both trigger on
+  # `pull_request` to main with no path filters, so both always produce a run on
+  # the release PR. Keep this in step with the workflows that do; any other
+  # pending run is still approved, but only these are waited for.
+  EXPECTED_WORKFLOWS: ci npm-package-existence
+
 jobs:
   approve:
     name: Approve pending runs on the release PR
@@ -51,35 +59,68 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
+
+          attempts=18
+          interval=10
           approved=0
-          # Runs are created around the same time as this workflow, so poll for
-          # a couple of minutes to catch any that show up late.
-          for _ in $(seq 1 12); do
+
+          # Runs are created around the same time as this workflow, so poll until
+          # every expected workflow has left the approval queue rather than for a
+          # fixed window. A run that has just been approved only shows up as no
+          # longer pending on a later poll, so this always takes at least one poll
+          # more than the last approval.
+          for attempt in $(seq 1 "$attempts"); do
             # Match on the head repository and branch as well as the SHA, so a
             # fork pull request that happens to share a commit with the release
-            # branch can never pick up an approval from this workflow.
-            ids="$(gh api \
-              --method GET "repos/$REPO/actions/runs" \
-              -f "head_sha=$HEAD_SHA" \
-              -f "status=action_required" \
-              -f "per_page=100" \
-              --jq ".workflow_runs[]
-                    | select(.event == \"pull_request\")
-                    | select(.head_branch == \"changeset-release/main\")
-                    | select(.head_repository.full_name == \"$REPO\")
-                    | .id")"
+            # branch can never pick up an approval from this workflow. A run
+            # awaiting approval reports status "completed" with conclusion
+            # "action_required", so both fields decide `pending`.
+            runs="$(
+              gh api \
+                --method GET "repos/$REPO/actions/runs" \
+                -f "head_sha=$HEAD_SHA" \
+                -f "per_page=100" \
+                | jq --arg repo "$REPO" --arg branch "$RELEASE_BRANCH" '
+                    [ .workflow_runs[]
+                      | select(.event == "pull_request")
+                      | select(.head_branch == $branch)
+                      | select(.head_repository.full_name == $repo)
+                      | {
+                          id,
+                          name,
+                          pending: (.status == "action_required"
+                                    or .conclusion == "action_required"),
+                        } ]'
+            )"
 
-            if [ -z "$ids" ] && [ "$approved" -gt 0 ]; then
-              echo "No further runs awaiting approval."
-              break
-            fi
-
-            for id in $ids; do
+            for id in $(jq -r '.[] | select(.pending) | .id' <<< "$runs"); do
               echo "Approving run $id"
               gh api --method POST "repos/$REPO/actions/runs/$id/approve"
               approved=$((approved + 1))
             done
 
-            sleep 10
+            # A workflow is cleared once one of its runs is no longer pending,
+            # rather than once this job has approved it, so a run a maintainer
+            # approved first - or one that starts on its own, should the policy
+            # change - counts too.
+            missing=""
+            for workflow in $EXPECTED_WORKFLOWS; do
+              jq -e --arg workflow "$workflow" \
+                'any(.[]; .name == $workflow and (.pending | not))' > /dev/null <<< "$runs" \
+                || missing="$missing $workflow"
+            done
+
+            if [ -z "$missing" ]; then
+              echo "All expected workflows are running for $HEAD_SHA." \
+                   "Approved $approved run(s)."
+              exit 0
+            fi
+
+            echo "Attempt $attempt/$attempts," \
+                 "waiting for these workflows to leave the approval queue:$missing"
+            sleep "$interval"
           done
-          echo "Approved $approved run(s) for $HEAD_SHA."
+
+          echo "::error::Timed out after approving $approved run(s);" \
+               "these workflows never left the approval queue for $HEAD_SHA:$missing"
+          exit 1
