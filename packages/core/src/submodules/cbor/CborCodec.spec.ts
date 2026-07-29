@@ -10,7 +10,8 @@ import type {
 } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
-import { CborCodec, CborShapeSerializer } from "./CborCodec";
+import { CborCodec } from "./CborCodec";
+import { CborShapeSerializer } from "./codec-v1/CborShapeSerializer";
 import { cbor } from "./cbor";
 import { tagSymbol } from "./cbor-types";
 

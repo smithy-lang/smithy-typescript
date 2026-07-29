@@ -9,9 +9,16 @@
 export type NumericType = "bigDecimal";
 
 /**
+ * Matches Smithy's bigDecimal string format (ABNF):
+ *   big-decimal = big-integer ["." fraction-part] [exponent]
+ *   big-integer = ["-"] ("0" / NON-ZERO-DIGIT *DIGIT)
+ *   fraction-part = 1*DIGIT
+ *   exponent = ("e" / "E") ["+" / "-"] 1*DIGIT
+ *
+ * Also allows leading-dot form (e.g. "-.5", ".5") for backwards compatibility.
  * @internal
  */
-const format = /^-?\d*(\.\d+)?$/;
+const format = /^-?((0|[1-9]\d*)(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/;
 
 /**
  * Serialization container for Smithy simple types that do not have a
@@ -32,7 +39,7 @@ export class NumericValue {
   ) {
     if (!format.test(string)) {
       throw new Error(
-        `@smithy/core/serde - NumericValue must only contain [0-9], at most one decimal point ".", and an optional negation prefix "-".`
+        `@smithy/core/serde - NumericValue string must conform to the Smithy bigDecimal format. Received: "${string}"`
       );
     }
   }

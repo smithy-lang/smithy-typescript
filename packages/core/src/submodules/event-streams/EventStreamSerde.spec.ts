@@ -440,7 +440,7 @@ describe(EventStreamSerde.name, () => {
             {
               async *[Symbol.asyncIterator]() {
                 yield {
-                  "initial-response": { dateMember: 0, blobMember: "AAECAw==" },
+                  "initial-response": { dateMember: dateToTag(new Date(0)), blobMember: new Uint8Array([0, 1, 2, 3]) },
                 };
                 for await (const it of canonicalEvents) {
                   yield it;

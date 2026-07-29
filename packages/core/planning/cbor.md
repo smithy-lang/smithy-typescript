@@ -121,3 +121,44 @@ Blank deltas are <5% diff.
 | list\<struct> PutMetricData-like  |             +51% |  142ms -> 94ms |            +92% |  281ms -> 146ms |
 | struct PutMetricData realistic    |             +45% | 581ms -> 398ms |            +78% | 1144ms -> 643ms |
 | list\<struct> non-ASCII keys      |            +126% |  188ms -> 83ms |                 |                 |
+
+## July 2026 CBOR vs JSON Schema-Serde
+
+The previous benchmarks use general-object serde, JSON.stringify / JSON.parse native API vs the general purpose `cbor` codec.
+This test is for the respective schema-aware (Smithy) Shape serializers and deserializers.
+
+The following is a baseline comparison between the multi-pass CBOR and multi-pass JSON implementations,
+which prepare objects for general-purpose serialization and then retraverse for that serialization.
+Later benchmarks will use the single-pass implementations to be released later.
+
+## Serialization Results
+
+| Test Case                         | CBOR Size | JSON Size | CBOR ms | CBOR2 ms | JSON ms | CBOR2/CBOR | CBOR2/JSON |
+| --------------------------------- | --------: | --------: | ------: | -------: | ------: | ---------: | ---------: |
+| `list<string(0,180)>`             |    472 kb |    467 kb |   69 ms |    61 ms |   51 ms |      0.88x |      1.20x |
+| `list<float>`                     |    270 kb |    675 kb |  305 ms |    27 ms |  349 ms |      0.09x |      0.08x |
+| `list<int>`                       |    253 kb |    458 kb |  760 ms |   102 ms |  308 ms |      0.13x |      0.33x |
+| `list<long int>`                  |    250 kb |    549 kb |  384 ms |    58 ms |  238 ms |      0.15x |      0.24x |
+| `map<string, string>`             |    448 kb |    450 kb |   58 ms |    31 ms |   57 ms |      0.53x |      0.54x |
+| `map<string, long int>`           |     37 kb |     50 kb |   27 ms |    15 ms |   21 ms |      0.58x |      0.75x |
+| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  503 ms |   291 ms |  457 ms |      0.58x |      0.64x |
+| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 1710 ms |  1165 ms | 1643 ms |      0.68x |      0.71x |
+| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  328 ms |   246 ms |  345 ms |      0.75x |      0.71x |
+| `list<struct> with blobs`         |    263 kb |    353 kb |  170 ms |   103 ms |  159 ms |      0.60x |      0.65x |
+| `list<struct> with timestamps`    |    229 kb |    345 kb |  283 ms |   118 ms |  241 ms |      0.42x |      0.49x |
+
+## Deserialization Results
+
+| Test Case                         | CBOR Size | JSON Size | CBOR ms | CBOR2 ms | JSON ms | CBOR2/CBOR | CBOR2/JSON |
+| --------------------------------- | --------: | --------: | ------: | -------: | ------: | ---------: | ---------: |
+| `list<string(0,180)>`             |    464 kb |    470 kb |   28 ms |    24 ms |   31 ms |      0.85x |      0.78x |
+| `list<float>`                     |    270 kb |    675 kb |   78 ms |    34 ms |  249 ms |      0.44x |      0.14x |
+| `list<int>`                       |    253 kb |    458 kb |  260 ms |   101 ms |  321 ms |      0.39x |      0.31x |
+| `list<long int>`                  |    250 kb |    549 kb |  134 ms |    60 ms |  216 ms |      0.44x |      0.28x |
+| `map<string, string>`             |    442 kb |    436 kb |   38 ms |    29 ms |   34 ms |      0.76x |      0.85x |
+| `map<string, long int>`           |     37 kb |     49 kb |   28 ms |    19 ms |   26 ms |      0.67x |      0.71x |
+| `list<struct> PutMetricData-like` |    363 kb |    459 kb |  427 ms |   169 ms |  574 ms |      0.40x |      0.29x |
+| `struct PutMetricData realistic`  |    1.7 mb |    2.2 mb | 2112 ms |   630 ms | 2114 ms |      0.30x |      0.30x |
+| `list<struct> non-ASCII keys`     |    399 kb |    483 kb |  479 ms |   136 ms |  391 ms |      0.28x |      0.35x |
+| `list<struct> with blobs`         |    263 kb |    353 kb |  104 ms |    55 ms |  239 ms |      0.53x |      0.23x |
+| `list<struct> with timestamps`    |    229 kb |    345 kb |  227 ms |   100 ms |  284 ms |      0.44x |      0.35x |
