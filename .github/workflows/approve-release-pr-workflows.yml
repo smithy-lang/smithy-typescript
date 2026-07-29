@@ -78,8 +78,8 @@ jobs:
             # this branch's runs for earlier commits, and an already-approved run
             # among them could satisfy the wait below while the runs for this
             # commit stayed stuck. A run awaiting approval reports status
-            # "completed" with conclusion "action_required", so both fields
-            # decide `pending`.
+            # "completed" with conclusion "action_required", so the conclusion
+            # alone decides `pending`.
             runs="$(
               gh api \
                 --method GET "repos/$REPO/actions/runs" \
@@ -94,8 +94,7 @@ jobs:
                       | {
                           id,
                           name,
-                          pending: (.status == "action_required"
-                                    or .conclusion == "action_required"),
+                          pending: (.conclusion == "action_required"),
                         } ]'
             )"
 
