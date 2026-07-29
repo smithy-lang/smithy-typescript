@@ -1,27 +1,23 @@
 name: approve-release-pr-workflows
 
-# The release PR ("Version NPM packages") is opened by github-actions[bot],
-# which is not an organization member. Under the repository's "Approval for
-# running fork pull request workflows from contributors" policy, that means
-# every run on the release PR sits in `action_required` until a maintainer
-# clicks "Approve and run". This workflow approves those runs automatically.
+# The release PR ("Version NPM packages") is opened by github-actions[bot], which
+# is not an organization member, so under the repository's fork-workflow approval
+# policy every run on that PR waits in `action_required` for a maintainer. This
+# workflow approves those runs automatically.
 #
-# `pull_request_target` is used deliberately: it runs in the context of the
-# base branch and therefore always runs, regardless of the approval policy.
+# `pull_request_target` is required: it runs in the base branch context, so it is
+# not itself subject to the approval policy.
 #
-# SECURITY: `pull_request_target` runs with repository secrets and a
-# write-capable token, and it is triggered by pull requests from forks. This
-# workflow is only safe because it does not trust anything from the pull
-# request:
-#   * It never checks out the head ref and never executes any code from the
-#     pull request. Do not add an `actions/checkout` step to this file.
-#   * The only expression values used are `github.repository` and the head
-#     SHA, and both are passed via `env:` rather than interpolated into the
-#     shell script, so attacker-controlled text cannot be injected.
-#   * The job is gated to a same-repository head, the exact
-#     `changeset-release/main` branch, and `github-actions[bot]` as author.
-#     Because GitHub always loads this file from the base branch, a fork
-#     pull request cannot weaken that gate.
+# SECURITY: `pull_request_target` gives a fork-triggered workflow repository
+# secrets and a write-capable token. This one is safe only because it trusts
+# nothing from the pull request:
+#   * It never checks out the head ref or runs PR code. Do not add an
+#     `actions/checkout` step to this file.
+#   * The only expressions used are `github.repository` and the head SHA, both
+#     passed via `env:` rather than interpolated into the shell script.
+#   * The job is gated to a same-repository head, the `changeset-release/main`
+#     branch, and `github-actions[bot]` as author. GitHub always loads this file
+#     from the base branch, so a fork PR cannot weaken that gate.
 on:
   pull_request_target:
     branches:
@@ -36,10 +32,10 @@ permissions:
 
 env:
   RELEASE_BRANCH: changeset-release/main
-  # The workflows that must be cleared before this one is done. Both trigger on
-  # `pull_request` to main with no path filters, so both always produce a run on
-  # the release PR. Keep this in step with the workflows that do; any other
-  # pending run is still approved, but only these are waited for.
+  # Workflows that must leave the approval queue before this job is done. Both
+  # trigger on `pull_request` to main with no path filters, so both always run on
+  # the release PR; keep this list in step with them. Other pending runs are still
+  # approved, just not waited for.
   EXPECTED_WORKFLOWS: ci npm-package-existence
 
 jobs:
@@ -64,22 +60,19 @@ jobs:
           interval=10
           approved=0
 
-          # Runs are created around the same time as this workflow, so poll until
-          # every expected workflow has left the approval queue rather than for a
-          # fixed window. A run that has just been approved only shows up as no
-          # longer pending on a later poll, so this always takes at least one poll
-          # more than the last approval.
+          # Runs appear around the same time as this one, so poll until every
+          # expected workflow has left the approval queue instead of waiting a
+          # fixed window. A just-approved run only reads as non-pending on a later
+          # poll, so this always costs one poll more than the last approval.
           for attempt in $(seq 1 "$attempts"); do
-            # Match on the head repository and branch as well as the SHA, so a
-            # fork pull request that happens to share a commit with the release
-            # branch can never pick up an approval from this workflow. The SHA is
-            # re-checked here rather than left to the query parameter alone: if
-            # that filter ever stopped applying, the response would also carry
-            # this branch's runs for earlier commits, and an already-approved run
-            # among them could satisfy the wait below while the runs for this
-            # commit stayed stuck. A run awaiting approval reports status
-            # "completed" with conclusion "action_required", so the conclusion
-            # alone decides `pending`.
+            # Match head repository and branch as well as SHA, so a fork PR that
+            # happens to share a commit with the release branch can never pick up
+            # an approval here. The SHA is re-checked rather than left to the query
+            # parameter alone: if that filter ever stopped applying, an
+            # already-approved run from an earlier commit on this branch could
+            # satisfy the wait below while this commit's runs stayed stuck. A run
+            # awaiting approval reports status "completed" with conclusion
+            # "action_required", so the conclusion alone decides `pending`.
             runs="$(
               gh api \
                 --method GET "repos/$REPO/actions/runs" \
@@ -104,10 +97,9 @@ jobs:
               approved=$((approved + 1))
             done
 
-            # A workflow is cleared once one of its runs is no longer pending,
-            # rather than once this job has approved it, so a run a maintainer
-            # approved first - or one that starts on its own, should the policy
-            # change - counts too.
+            # A workflow counts as cleared once any of its runs is no longer
+            # pending, not only when this job approved it, so a run a maintainer
+            # approved first - or one that started on its own - counts too.
             missing=""
             for workflow in $EXPECTED_WORKFLOWS; do
               jq -e --arg workflow "$workflow" \
