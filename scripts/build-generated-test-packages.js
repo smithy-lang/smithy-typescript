@@ -38,6 +38,81 @@ const httpBearerAuthClientDir = path.join(
 
 const nodeModulesDir = path.join(root, "node_modules");
 
+const smithyPackages = path.join(root, "packages");
+
+const smithyTsSsdkLibs = path.join(root, "smithy-typescript-ssdk-libs");
+
+/**
+ * Map of package name to its directory, for every package that lives in this
+ * repository. Codegen writes the local workspace versions into the generated
+ * `package.json`, so these are the dependencies that cannot be resolved from
+ * npm on a release PR, where the bumped versions are not published yet.
+ *
+ * @returns {Map<string, string>} package name to absolute package directory.
+ */
+const getLocalPackageDirs = () => {
+  const localPackageDirs = new Map();
+  for (const packagesDir of [smithyPackages, smithyTsSsdkLibs]) {
+    for (const entry of fs.readdirSync(packagesDir)) {
+      const packageDir = path.join(packagesDir, entry);
+      const packageJsonPath = path.join(packageDir, "package.json");
+      if (!fs.existsSync(packageJsonPath)) {
+        continue;
+      }
+      const { name } = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      if (name) {
+        localPackageDirs.set(name, packageDir);
+      }
+    }
+  }
+  return localPackageDirs;
+};
+
+const localPackageDirs = getLocalPackageDirs();
+
+/**
+ * Rewrites the generated dependencies that are published from this repository to
+ * point at the local copy via yarn's `link:` protocol, so the install uses the
+ * local artifacts instead of resolving from npm. Without this, the install fails
+ * on release PRs, because codegen writes the not-yet-published versions into the
+ * generated `package.json`.
+ *
+ * `link:` symlinks the folder without installing its own dependencies, which is
+ * what we want here: the local packages declare their dependencies as
+ * `workspace:^`, which cannot be resolved outside of this repository's
+ * workspaces. Their transitive dependencies resolve through the top-level
+ * `node_modules` instead.
+ *
+ * @param {string} codegenDir - directory of the generated package.
+ * @returns {Set<string>} directories of the packages that were linked.
+ */
+const linkLocalDependencies = (codegenDir) => {
+  const packageJsonPath = path.join(codegenDir, "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  const linkedPackageDirs = new Set();
+
+  for (const dependencyType of ["dependencies", "devDependencies"]) {
+    const dependencies = packageJson[dependencyType];
+    if (!dependencies) {
+      continue;
+    }
+    for (const dependency of Object.keys(dependencies)) {
+      const localPackageDir = localPackageDirs.get(dependency);
+      if (!localPackageDir) {
+        continue;
+      }
+      dependencies[dependency] = `link:${path.relative(codegenDir, localPackageDir)}`;
+      linkedPackageDirs.add(localPackageDir);
+    }
+  }
+
+  if (linkedPackageDirs.size > 0) {
+    fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+  }
+
+  return linkedPackageDirs;
+};
+
 const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir) => {
   try {
     console.log(`Building and copying package \`${packageName}\` in \`${codegenDir}\` to \`${nodeModulesDir}\``);
@@ -46,26 +121,22 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
     // as its own package.
     await spawnProcess("touch", ["yarn.lock"], { cwd: codegenDir });
 
-    // Rewrite the generated `@smithy/server-common` dependency to point at the
-    // local workspace copy via yarn's `link:` protocol so we use the local
-    // artifact instead of resolving from npm. `link:` symlinks the folder without
-    // installing its own dependencies; its transitive `@smithy/*` deps are
-    // satisfied by the packages copied into node_modules below.
-    const serverCommonDir = path.join(__dirname, "..", "smithy-typescript-ssdk-libs", "server-common");
-    const packageJsonPath = path.join(codegenDir, "package.json");
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-    if (packageJson.dependencies && packageJson.dependencies["@smithy/server-common"]) {
-      packageJson.dependencies["@smithy/server-common"] = `link:${path.relative(codegenDir, serverCommonDir)}`;
-      fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
-    }
+    const linkedPackageDirs = linkLocalDependencies(codegenDir);
 
     await spawnProcess("yarn", { cwd: codegenDir });
-    const smithyPackages = path.join(__dirname, "..", "packages");
     const node_modules = path.join(codegenDir, "node_modules");
     const localSmithyPkgs = fs.readdirSync(smithyPackages);
 
+    // Copy the local build artifacts of the packages that were not linked above,
+    // so that transitive dependencies of the linked packages are available.
+    // Linked packages are skipped, because their node_modules entry is a symlink
+    // back into `packages/`, so copying into it would write to the source.
     for (const smithyPkg of localSmithyPkgs) {
-      if (!fs.existsSync(path.join(smithyPackages, smithyPkg, "dist-cjs"))) {
+      const localPackageDir = path.join(smithyPackages, smithyPkg);
+      if (!fs.existsSync(path.join(localPackageDir, "dist-cjs"))) {
+        continue;
+      }
+      if (linkedPackageDirs.has(localPackageDir)) {
         continue;
       }
       await Promise.all(
