@@ -30,6 +30,13 @@ public abstract class SchemaGenerationAllowlist {
     }
 
     public static boolean allows(ShapeId serviceShapeId, TypeScriptSettings settings) {
+        if (settings.isTypesOnly()) {
+            return settings.generateSchemas();
+        }
+        if (serviceShapeId == null) {
+            // Outside types mode a service is required to check the allowlist.
+            return false;
+        }
         boolean generateClient = settings.generateClient();
         boolean allowedByProtocol = PROTOCOLS.contains(settings.getProtocol());
         boolean allowedByName = ALLOWED.contains(serviceShapeId);

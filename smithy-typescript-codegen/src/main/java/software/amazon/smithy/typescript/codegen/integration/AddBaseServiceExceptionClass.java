@@ -103,7 +103,9 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
      * For any error shape, add the reference of the base error class to the
      * error symbol's references. In client SDK, the base error class is the
      * service-specific service exception class. In server SDK, the base error
-     * class is the ServiceException class from server-common package.
+     * class is the ServiceException class from server-common package. In
+     * types-only mode there is no service, so error shapes extend the generic
+     * {@code ServiceException} base from {@code @smithy/core}.
      */
     @Override
     public SymbolProvider decorateSymbolProvider(
@@ -113,33 +115,37 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
     ) {
         return shape -> {
             Symbol symbol = symbolProvider.toSymbol(shape);
-            if (shape.hasTrait(ErrorTrait.class)) {
-                String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
-                String baseExceptionAlias = "__BaseException";
-                SymbolReference reference;
-                if (settings.generateClient()) {
-                    String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
-                    String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
-                    Symbol serviceExceptionSymbol = Symbol.builder()
-                        .name(serviceExceptionName)
-                        .namespace(namespace, "/")
-                        .definitionFile(namespace + ".ts")
-                        .build();
-                    reference = SymbolReference.builder()
-                        .options(SymbolReference.ContextOption.USE)
-                        .alias(baseExceptionAlias)
-                        .symbol(serviceExceptionSymbol)
-                        .build();
-                } else {
-                    reference = SymbolReference.builder()
-                        .options(SymbolReference.ContextOption.USE)
-                        .alias(baseExceptionAlias)
-                        .symbol(TypeScriptDependency.SERVER_COMMON.createSymbol("ServiceException"))
-                        .build();
-                }
-                return symbol.toBuilder().addReference(reference).build();
+            if (!shape.hasTrait(ErrorTrait.class)) {
+                return symbol;
             }
-            return symbol;
+            String baseExceptionAlias = "__BaseException";
+            Symbol baseExceptionSymbol;
+            if (settings.getOptionalService().isEmpty()) {
+                // Types-only mode: no service-specific base exists, so reference the generic
+                // ServiceException from the @smithy/core client submodule.
+                baseExceptionSymbol = Symbol.builder()
+                    .name("ServiceException")
+                    .namespace(TypeScriptDependency.SMITHY_CORE.getPackageName() + SmithyCoreSubmodules.CLIENT, "/")
+                    .addDependency(TypeScriptDependency.SMITHY_CORE)
+                    .build();
+            } else if (settings.generateClient()) {
+                String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
+                String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
+                String namespace = Paths.get(".", "src", "models", serviceExceptionName).toString();
+                baseExceptionSymbol = Symbol.builder()
+                    .name(serviceExceptionName)
+                    .namespace(namespace, "/")
+                    .definitionFile(namespace + ".ts")
+                    .build();
+            } else {
+                baseExceptionSymbol = TypeScriptDependency.SERVER_COMMON.createSymbol("ServiceException");
+            }
+            SymbolReference reference = SymbolReference.builder()
+                .options(SymbolReference.ContextOption.USE)
+                .alias(baseExceptionAlias)
+                .symbol(baseExceptionSymbol)
+                .build();
+            return symbol.toBuilder().addReference(reference).build();
         };
     }
 }

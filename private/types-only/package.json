@@ -1,7 +1,7 @@
 {
-  "name": "xyz",
-  "description": "xyz client",
-  "version": "3.31.1",
+  "name": "@smithy/types-only",
+  "description": "@smithy/types-only types",
+  "version": "0.0.1",
   "scripts": {
     "build": "concurrently 'npm:build:cjs' 'npm:build:es' 'npm:build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
@@ -9,11 +9,7 @@
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
-    "prepack": "npm run clean && npm run build",
-    "test": "npx vitest run --passWithNoTests",
-    "test:watch": "npx vitest watch --passWithNoTests",
-    "test:integration": "npx vitest run --passWithNoTests -c vitest.config.integ.mts",
-    "test:integration:watch": "npx vitest watch --passWithNoTests -c vitest.config.integ.mts"
+    "prepack": "npm run clean && npm run build"
   },
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",
@@ -21,8 +17,6 @@
   "sideEffects": false,
   "dependencies": {
     "@smithy/core": "workspace:^",
-    "@smithy/fetch-http-handler": "workspace:^",
-    "@smithy/node-http-handler": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },
@@ -32,8 +26,7 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
-    "typescript": "~5.8.3",
-    "vitest": "^4.0.17"
+    "typescript": "~5.8.3"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -48,11 +41,5 @@
   "files": [
     "dist-*/**"
   ],
-  "private": true,
-  "browser": {
-    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-  },
-  "react-native": {
-    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
-  }
+  "private": true
 }

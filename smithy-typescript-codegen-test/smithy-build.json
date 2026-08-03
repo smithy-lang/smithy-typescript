@@ -144,6 +144,20 @@
           }
         }
       }
+    },
+    "types-example": {
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@smithy/types-example",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          },
+          "modes": ["types"],
+          "closure": "example.types#typesClosure"
+        }
+      }
     }
   },
   "plugins": {
