@@ -4,14 +4,8 @@
  */
 
 import { mkdtemp } from "node:fs/promises";
-import {
-  createServer,
-  request,
-  type IncomingMessage,
-  type RequestOptions,
-  type Server,
-  type ServerResponse,
-} from "node:http";
+import http, { type IncomingMessage, type RequestOptions, type Server, type ServerResponse } from "node:http";
+const { createServer, request } = http;
 import * as os from "node:os";
 import * as path from "node:path";
 import type { Readable } from "node:stream";

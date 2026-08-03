@@ -1,4 +1,4 @@
-#  Changelog (legacy)
+# Changelog (legacy)
 
 > This file contains the release history published under the previous package
 > name `@aws-smithy/server-node`. Newer releases of `@smithy/server-node` are
