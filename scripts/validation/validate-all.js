@@ -42,6 +42,11 @@ const VALIDATIONS = [
   { name: "export-names", label: "export function names match their keys", script: "export-names.js" },
   { name: "esm-compat", label: "dist-cjs exports visible via ESM import()", script: "esm-compat.js" },
   { name: "filenames", label: "no suspicious multi-dot filenames in dist output", script: "filenames.js" },
+  {
+    name: "api-extractor-config",
+    label: "packages with @public symbols are configured for API docs",
+    script: "api-extractor-config.js",
+  },
 ];
 
 function parseArgs() {
