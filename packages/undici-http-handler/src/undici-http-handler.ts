@@ -1,5 +1,11 @@
 import type { Readable } from "node:stream";
-import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
+import {
+  FALLBACK_LOGGER,
+  HttpResponse,
+  buildQueryString,
+  type HttpHandler,
+  type HttpRequest,
+} from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
 import { Agent, Dispatcher, getGlobalDispatcher } from "undici";
 
@@ -66,6 +72,11 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
    * caller-configured TLS, connect, and timeout settings.
    */
   private internalAgentOptions?: Agent.Options;
+
+  /**
+   * Client logger, used only when this handler has no logger of its own.
+   */
+  private fallbackLogger?: Logger;
 
   constructor(options?: UndiciHttpHandlerOptions) {
     if (options?.dispatcher && isDispatcher(options.dispatcher)) {
@@ -209,10 +220,20 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
   }
 
+  public updateHttpClientConfig(key: typeof FALLBACK_LOGGER, value: Logger): void;
   public updateHttpClientConfig<K extends keyof UndiciHttpHandlerOptions>(
     key: K,
     value: UndiciHttpHandlerOptions[K]
+  ): void;
+  public updateHttpClientConfig(
+    key: keyof UndiciHttpHandlerOptions | typeof FALLBACK_LOGGER,
+    value: UndiciHttpHandlerOptions[keyof UndiciHttpHandlerOptions] | Logger
   ): void {
+    if (key === FALLBACK_LOGGER) {
+      this.fallbackLogger = value as Logger;
+      return;
+    }
+
     if (key !== "dispatcher") {
       (this.config as any)[key] = value;
       return;

@@ -1,5 +1,6 @@
 import type { Logger } from "@smithy/types";
 
+import { FALLBACK_LOGGER } from "../fallbackLogger";
 import type { HttpHandler } from "../httpHandler";
 
 /**
@@ -25,10 +26,11 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
  * @internal
  */
 export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { logger?: Logger }>(
-  runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig>
+  runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig> & { logger?: Logger }
 ) => {
-  if ((runtimeConfig as any).logger) {
-    runtimeConfig.httpHandler?.updateHttpClientConfig("logger" as keyof HandlerConfig, (runtimeConfig as any).logger);
+  // Offered as a fallback only: the handler keeps its own logger if it has one.
+  if (runtimeConfig.logger) {
+    runtimeConfig.httpHandler?.updateHttpClientConfig?.(FALLBACK_LOGGER, runtimeConfig.logger);
   }
 
   return {

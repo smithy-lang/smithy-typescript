@@ -16,6 +16,7 @@ export { SerdeContext } from "./SerdeContext";
 export { Field } from "./protocol-http/Field";
 export { Fields, type FieldsOptions } from "./protocol-http/Fields";
 export { type HttpHandler, type HttpHandlerUserInput } from "./protocol-http/httpHandler";
+export { FALLBACK_LOGGER } from "./protocol-http/fallbackLogger";
 export { HttpRequest, type IHttpRequest } from "@smithy/core/transport";
 export { HttpResponse } from "@smithy/core/transport";
 export { isValidHostname } from "@smithy/core/transport";

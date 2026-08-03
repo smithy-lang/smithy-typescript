@@ -1,6 +1,12 @@
 import type { Agent as hAgentType, request as hRequestType } from "node:http";
 import type { RequestOptions, Agent as hsAgentType } from "node:https";
-import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
+import {
+  FALLBACK_LOGGER,
+  HttpResponse,
+  buildQueryString,
+  type HttpHandler,
+  type HttpRequest,
+} from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 
 import { buildAbortError } from "./build-abort-error";
@@ -42,6 +48,10 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
   private socketWarningTimestamp = 0;
   private externalAgent = false;
+  /**
+   * Client logger, used only when this handler has no logger of its own.
+   */
+  private fallbackLogger?: Logger;
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
@@ -143,6 +153,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     }
 
     const config = this.config!;
+    const logger = config.logger ?? this.fallbackLogger;
 
     // determine which http(s) client to use
     const isSSL = request.protocol === "https:";
@@ -208,11 +219,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // This warning will be cancelled if the request resolves.
       socketWarningTimeoutId = timing.setTimeout(
         () => {
-          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
-            agent!,
-            this.socketWarningTimestamp,
-            config.logger
-          );
+          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent!, this.socketWarningTimestamp, logger);
         },
         config.socketAcquisitionWarningTimeout ?? (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000)
       );
@@ -298,7 +305,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         reject,
         effectiveRequestTimeout,
         config.throwOnRequestTimeout,
-        config.logger ?? console
+        logger ?? console
       );
       socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
 
@@ -322,7 +329,16 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     });
   }
 
-  public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
+  public updateHttpClientConfig(key: typeof FALLBACK_LOGGER, value: Logger): void;
+  public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void;
+  public updateHttpClientConfig(
+    key: keyof NodeHttpHandlerOptions | typeof FALLBACK_LOGGER,
+    value: NodeHttpHandlerOptions[keyof NodeHttpHandlerOptions] | Logger
+  ): void {
+    if (key === FALLBACK_LOGGER) {
+      this.fallbackLogger = value as Logger;
+      return;
+    }
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
       return {
