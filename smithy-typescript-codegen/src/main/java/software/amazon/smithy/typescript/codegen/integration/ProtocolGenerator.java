@@ -123,6 +123,16 @@ public interface ProtocolGenerator {
     }
 
     /**
+     * Returns the {@code @smithy/core/event-streams} provider that generated servers
+     * use to frame event streams. Defaults to the binary provider.
+     *
+     * @return The event stream serde provider export name.
+     */
+    default String getEventStreamSerdeProviderName() {
+        return "eventStreamSerdeProvider";
+    }
+
+    /**
      * Generates any standard code for service request/response serde.
      *
      * @param context Serde context.

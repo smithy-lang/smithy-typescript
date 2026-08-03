@@ -31,7 +31,7 @@ under development:
 
 | Experimental Feature | Flag | Description |
 | -------------------- | ---- | ----------- |
-| N/A                  | N/A  | N/A         |
+| SSE protocol         | `experimentalSseProtocol` | Enables the `sseJson` protocol, which frames event streams as Server-Sent Events (`text/event-stream`). |
 
 ## Reporting Bugs/Feature Requests
 

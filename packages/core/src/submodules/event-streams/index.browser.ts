@@ -30,6 +30,10 @@ export { EventStreamMarshaller, eventStreamSerdeProvider } from "./eventstream-s
 export type { EventStreamMarshallerOptions } from "./eventstream-serde/EventStreamMarshaller.browser";
 export { readableStreamToIterable, iterableToReadableStream } from "./eventstream-serde/utils";
 
+// SSE (text/event-stream) event stream serde
+export { SseEventStreamMarshaller, sseEventStreamSerdeProvider } from "./eventstream-serde-sse/SseEventStreamMarshaller";
+export type { SseEventStreamMarshallerOptions } from "./eventstream-serde-sse/SseEventStreamMarshaller";
+
 // @smithy/eventstream-serde-universal
 export {
   EventStreamMarshaller as UniversalEventStreamMarshaller,

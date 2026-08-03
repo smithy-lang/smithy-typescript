@@ -65,6 +65,7 @@ public final class TypeScriptSettings {
     private static final String GENERATE_ENDPOINT_BDD = "generateEndpointBdd";
     private static final String VERSIONING_SCHEME = "versioningScheme";
     private static final String TSCONFIG = "tsconfig";
+    private static final String EXPERIMENTAL_SSE_PROTOCOL = "experimentalSseProtocol";
 
     private String packageName;
     private String packageDescription = "";
@@ -90,6 +91,7 @@ public final class TypeScriptSettings {
     private boolean generateSnapshotTests = false;
     private String versioningScheme = "";
     private boolean isolatedModules = false;
+    private boolean experimentalSseProtocol = false;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -162,6 +164,7 @@ public final class TypeScriptSettings {
         settings.setGenerateIndexTests(config.getBooleanMemberOrDefault(GENERATE_INDEX_TESTS, false));
         settings.setGenerateSnapshotTests(config.getBooleanMemberOrDefault(GENERATE_SNAPSHOT_TESTS, false));
         settings.setVersioningScheme(config.getStringMemberOrDefault(VERSIONING_SCHEME, ""));
+        settings.setExperimentalSseProtocol(config.getBooleanMemberOrDefault(EXPERIMENTAL_SSE_PROTOCOL, false));
         settings.setIsolatedModules(
             config.getObjectMember("tsconfig")
                 .flatMap(tsconfig -> tsconfig.getObjectMember("types"))
@@ -285,6 +288,16 @@ public final class TypeScriptSettings {
     @SmithyInternalApi
     public boolean generateSchemas() {
         return generateSchemas;
+    }
+
+    @SmithyInternalApi
+    public void setExperimentalSseProtocol(boolean experimentalSseProtocol) {
+        this.experimentalSseProtocol = experimentalSseProtocol;
+    }
+
+    @SmithyInternalApi
+    public boolean experimentalSseProtocol() {
+        return experimentalSseProtocol;
     }
 
     @SmithyInternalApi
@@ -663,7 +676,8 @@ public final class TypeScriptSettings {
                 GENERATE_SCHEMAS,
                 GENERATE_ENDPOINT_BDD,
                 VERSIONING_SCHEME,
-                TSCONFIG
+                TSCONFIG,
+                EXPERIMENTAL_SSE_PROTOCOL
             )
         ),
         SSDK(
