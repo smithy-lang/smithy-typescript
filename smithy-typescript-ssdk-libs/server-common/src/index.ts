@@ -1,4 +1,4 @@
-import type { HttpRequest, HttpResponse } from "@smithy/protocol-http";
+import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { MetricsRecorderFactory, SerdeContext } from "@smithy/types";
 
 import type { ServiceException } from "./errors";

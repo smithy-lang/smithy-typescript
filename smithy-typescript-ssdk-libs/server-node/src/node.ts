@@ -5,7 +5,7 @@
 
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
 import { URL, type URLSearchParams } from "node:url";
-import { HttpRequest, type HeaderBag, type HttpResponse } from "@smithy/protocol-http";
+import { HttpRequest, type HeaderBag, type HttpResponse } from "@smithy/core/protocols";
 import type { QueryParameterBag } from "@smithy/types";
 
 function convertHeaders(headers: IncomingHttpHeaders): HeaderBag {
