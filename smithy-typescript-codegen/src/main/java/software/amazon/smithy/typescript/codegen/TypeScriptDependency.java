@@ -67,6 +67,7 @@ public enum TypeScriptDependency implements Dependency {
     @Deprecated
     EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
     SERVER_COMMON("dependencies", "@smithy/server-common", false),
+    SMITHY_TYPECHECK("dependencies", "@smithy/typecheck", false),
     SNAPSHOTS("devDependencies", "@smithy/snapshot-testing", false),
     TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
     VITEST("devDependencies", "vitest", "^4.0.17", false),

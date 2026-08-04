@@ -1,5 +1,6 @@
 const _A = "Alpha";
 const _AI = "AccountId";
+const _CA = "ConstrainedAddress";
 const _CTE = "CodedThrottlingError";
 const _DSN = "DifferentShapeName";
 const _GN = "GetNumbers";
@@ -21,8 +22,13 @@ const _TE = "TradeEvents";
 const _TES = "TradeEventStream";
 const _TESR = "TradeEventStreamRequest";
 const _TESRr = "TradeEventStreamResponse";
+const _VI = "ValidatedInput";
+const _VO = "ValidatedOutput";
+const _VOa = "ValidatedOperation";
 const _XYZSSE = "XYZServiceServiceException";
-const _a = "alpha";
+const _a = "age";
+const _ad = "address";
+const _al = "alpha";
 const _b = "beta";
 const _bD = "bigDecimal";
 const _bI = "bigInteger";
@@ -37,6 +43,7 @@ const _dNWC = "deprecatedNumbersWithoutChronology";
 const _dNWE = "deprecatedNumbersWithoutExplanation";
 const _e = "error";
 const _eS = "eventStream";
+const _em = "email";
 const _en = "endpoint";
 const _fWM = "fieldWithoutMessage";
 const _fWMi = "fieldWithMessage";
@@ -57,9 +64,14 @@ const _s = "smithy.ts.sdk.synthetic.org.xyz.v1";
 const _sN = "sparseNumbers";
 const _sT = "startToken";
 const _sp = "sparse";
-const _st = "streaming";
+const _st = "state";
+const _str = "streaming";
 const _t = "timestamp";
+const _ta = "tags";
 const _to = "token";
+const _u = "username";
+const _uT = "uniqueTags";
+const _zC = "zipCode";
 const n0 = "org.xyz.v1";
 const n1 = "org.xyz.secondary";
 
@@ -159,6 +171,11 @@ export var camelCaseOperationOutput$: StaticStructureSchema = [3, n0, _cCOO,
   [_to, _r],
   [0, 64 | 21]
 ];
+export var ConstrainedAddress$: StaticStructureSchema = [3, n0, _CA,
+  0,
+  [_zC, _st],
+  [0, 0]
+];
 export var DifferentShapeName$: StaticStructureSchema = [3, n0, _DSN,
   0,
   [_n, _nu],
@@ -189,19 +206,31 @@ export var TradeEventStreamResponse$: StaticStructureSchema = [3, n0, _TESRr,
   [_eS],
   [[() => TradeEvents$, 0]]
 ];
+export var ValidatedInput$: StaticStructureSchema = [3, n0, _VI,
+  0,
+  [_u, _a, _em, _ta, _uT, _ad],
+  [0, 1, 0, 64 | 0, 64 | 0, () => ConstrainedAddress$]
+];
+export var ValidatedOutput$: StaticStructureSchema = [3, n0, _VO,
+  0,
+  [_m],
+  [0]
+];
 var __Unit = "unit" as const;
 var Blobs = 64 | 21;
 var IntegerList = 64 | 1;
 var SparseIntegerList: StaticListSchema = [1, n0, _SIL,
   { [_sp]: 1 }, 1
 ];
+var TagList = 64 | 0;
+var UniqueTagList = 64 | 0;
 var IntegerMap = 128 | 1;
 var SparseIntegerMap: StaticMapSchema = [2, n0, _SIM,
   { [_sp]: 1 }, 0, 1
 ];
 export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
-  { [_st]: 1 },
-  [_a, _b, _g, _d],
+  { [_str]: 1 },
+  [_al, _b, _g, _d],
   [() => Alpha$, () => __Unit, () => __Unit, () => DifferentShapeName$]
 ];
 export var HttpLabelCommand$: StaticOperationSchema = [9, n1, _HLC,
@@ -218,4 +247,7 @@ export var HostPrefixOperation$: StaticOperationSchema = [9, n0, _HPO,
 ];
 export var TradeEventStream$: StaticOperationSchema = [9, n0, _TES,
   { [_h]: ["POST", "/trade-event-stream", 200] }, () => TradeEventStreamRequest$, () => TradeEventStreamResponse$
+];
+export var ValidatedOperation$: StaticOperationSchema = [9, n0, _VOa,
+  { [_h]: ["POST", "/validated", 200] }, () => ValidatedInput$, () => ValidatedOutput$
 ];

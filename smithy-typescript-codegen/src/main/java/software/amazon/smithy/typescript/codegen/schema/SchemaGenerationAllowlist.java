@@ -38,9 +38,12 @@ public abstract class SchemaGenerationAllowlist {
             return false;
         }
         boolean generateClient = settings.generateClient();
+        boolean generateServer = settings.generateServerSdk();
         boolean allowedByProtocol = PROTOCOLS.contains(settings.getProtocol());
         boolean allowedByName = ALLOWED.contains(serviceShapeId);
-        return settings.generateSchemas() && generateClient && (allowedByProtocol || allowedByName);
+        boolean clientAllowed = generateClient && settings.generateSchemas() && (allowedByProtocol || allowedByName);
+        boolean serverAllowed = generateServer && settings.generateServerSchemas();
+        return clientAllowed || serverAllowed;
     }
 
     @Deprecated

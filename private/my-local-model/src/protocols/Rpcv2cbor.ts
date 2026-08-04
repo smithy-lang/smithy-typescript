@@ -48,6 +48,10 @@ import type {
 } from "../commands/HostPrefixOperationCommand";
 import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "../commands/HttpLabelCommandCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
+import type {
+  ValidatedOperationCommandInput,
+  ValidatedOperationCommandOutput,
+} from "../commands/ValidatedOperationCommand";
 import {
   CodedThrottlingError,
   HaltError,
@@ -60,12 +64,14 @@ import {
   type Alpha,
   type CamelCaseOperationInput,
   type CamelCaseOperationOutput,
+  type ConstrainedAddress,
   type DifferentShapeName,
   type GetNumbersRequest,
   type GetNumbersResponse,
   type HostPrefixOperationInput,
   type HttpLabelCommandInput,
   type Unit,
+  type ValidatedInput,
   TradeEvents,
 } from "../models/models_0";
 import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
@@ -148,6 +154,19 @@ export const se_TradeEventStreamCommand = async (
   let body: any;
   body = se_TradeEvents(input.eventStream, context);
   return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/TradeEventStream", undefined, body);
+};
+
+/**
+ * serializeRpcv2cborValidatedOperationCommand
+ */
+export const se_ValidatedOperationCommand = async (
+  input: ValidatedOperationCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = SHARED_HEADERS;
+  let body: any;
+  body = cbor.serialize(_json(input));
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/ValidatedOperation", undefined, body);
 };
 
 /**
@@ -250,6 +269,28 @@ export const de_TradeEventStreamCommand = async (
 
   const contents = { eventStream: de_TradeEvents(output.body, context) };
   const response: TradeEventStreamCommandOutput = {
+    $metadata: deserializeMetadata(output), ...contents,
+  };
+  return response;
+
+};
+
+/**
+ * deserializeRpcv2cborValidatedOperationCommand
+ */
+export const de_ValidatedOperationCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<ValidatedOperationCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const data: any = await parseBody(output.body, context)
+  let contents: any = {};
+  contents = _json(data);
+  const response: ValidatedOperationCommandOutput = {
     $metadata: deserializeMetadata(output), ...contents,
   };
   return response;
@@ -529,6 +570,8 @@ const se_Alpha_event = (
 
       // se_CamelCaseOperationInput omitted.
 
+      // se_ConstrainedAddress omitted.
+
       // se_DifferentShapeName omitted.
 
       /**
@@ -574,6 +617,12 @@ const se_Alpha_event = (
           return acc;
         }, {});
       }
+
+      // se_TagList omitted.
+
+      // se_UniqueTagList omitted.
+
+      // se_ValidatedInput omitted.
 
       // se_Unit omitted.
 
@@ -665,6 +714,8 @@ const se_Alpha_event = (
         });
         return collection;
       }
+
+      // de_ValidatedOutput omitted.
 
       // de_XYZServiceServiceException omitted.
 

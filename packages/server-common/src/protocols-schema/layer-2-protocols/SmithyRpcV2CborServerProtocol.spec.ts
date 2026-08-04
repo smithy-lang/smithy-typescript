@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { SmithyRpcV2CborServerProtocol } from "./SmithyRpcV2CborServerProtocol";
 import { SerializationException, UnsupportedMediaTypeException } from "../../errors";
-import type { HttpRequest as IHttpRequest, $OperationSchema } from "@smithy/types";
+import type { HttpRequest as IHttpRequest, StaticOperationSchema } from "@smithy/types";
 
 function makeRequest(headers: Record<string, string> = {}, body?: any): IHttpRequest {
   return {
@@ -22,14 +22,8 @@ function makeContext(): any {
   };
 }
 
-function makeUnitOpSchema(): $OperationSchema {
-  return {
-    input: "unit",
-    output: "unit",
-    traits: {},
-    namespace: "test",
-    name: "MyOp",
-  } as unknown as $OperationSchema;
+function makeUnitOpSchema(): StaticOperationSchema {
+  return [9, "test", "MyOp", 0, "unit", "unit"] satisfies StaticOperationSchema;
 }
 
 describe("SmithyRpcV2CborServerProtocol", () => {

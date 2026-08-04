@@ -1,0 +1,46 @@
+{
+  "name": "xyz-schema-server",
+  "description": "xyz-schema-server server",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "concurrently 'npm:build:cjs' 'npm:build:es' 'npm:build:types'",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
+    "prepack": "npm run clean && npm run build"
+  },
+  "main": "./dist-cjs/index.js",
+  "types": "./dist-types/index.d.ts",
+  "module": "./dist-es/index.js",
+  "sideEffects": false,
+  "dependencies": {
+    "@smithy/core": "workspace:^",
+    "@smithy/server-common": "workspace:^",
+    "@smithy/types": "workspace:^",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "20.1.8",
+    "@types/node": "^20.14.8",
+    "concurrently": "7.0.0",
+    "downlevel-dts": "0.10.1",
+    "premove": "4.0.0",
+    "typescript": "~5.8.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "private": true
+}

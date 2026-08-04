@@ -1,11 +1,10 @@
 import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
 import { collectBody, type FromStringShapeDeserializer, HttpResponse } from "@smithy/core/protocols";
 import type {
-  HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
-  $OperationSchema,
   SerdeFunctions,
+  StaticOperationSchema,
 } from "@smithy/types";
 import { HttpServerProtocol } from "../layer-0-interface-and-base/HttpServerProtocol";
 import { SerializationException } from "../../errors";
@@ -26,14 +25,14 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
    * HTTP path, query, headers, and body.
    */
   public override async deserializeRequest<Input extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     request: IHttpRequest
   ): Promise<Input> {
     this.validateContentType(request);
     this.validateAccept(request);
 
-    const ns = NormalizedSchema.of(operationSchema.input);
+    const ns = NormalizedSchema.of(operationSchema[4]);
     const callerInput: any = {};
 
     // Extract path labels by building a regex from the operation's URI template.
@@ -148,11 +147,11 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
    * across HTTP status, headers, and body based on binding traits.
    */
   protected override async serializeSuccess<Output extends object>(
-    operationSchema: $OperationSchema,
-    _context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    _context: SerdeFunctions,
     output: Output
   ): Promise<IHttpResponse> {
-    const ns = NormalizedSchema.of(operationSchema.output);
+    const ns = NormalizedSchema.of(operationSchema[5]);
     const headers: Record<string, string> = {};
     let statusCode = 200;
     let body: Uint8Array | ReadableStream | undefined;
@@ -239,13 +238,14 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
    *
    * Compiled regexes are cached by operation shape ID.
    */
-  protected extractPathLabels(operationSchema: $OperationSchema, requestPath: string): Record<string, string> {
-    const opTraits = translateTraits(operationSchema.traits ?? {});
+  protected extractPathLabels(operationSchema: StaticOperationSchema, requestPath: string): Record<string, string> {
+    const [, ns, name, traits] = operationSchema;
+    const opTraits = translateTraits(traits ?? {});
     if (!opTraits.http) {
       return {};
     }
 
-    const shapeId = `${operationSchema.namespace}#${operationSchema.name}`;
+    const shapeId = `${ns}#${name}`;
     let regex = this.pathRegexCache.get(shapeId);
     if (!regex) {
       const templatePath = (opTraits.http[1] as string).split("?")[0];

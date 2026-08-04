@@ -9182,6 +9182,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"xyz-schema-server@workspace:private/my-local-model-schema-server":
+  version: 0.0.0-use.local
+  resolution: "xyz-schema-server@workspace:private/my-local-model-schema-server"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/server-common": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    premove: "npm:4.0.0"
+    tslib: "npm:^2.6.2"
+    typescript: "npm:~5.8.3"
+  languageName: unknown
+  linkType: soft
+
 "xyz-schema@workspace:private/my-local-model-schema":
   version: 0.0.0-use.local
   resolution: "xyz-schema@workspace:private/my-local-model-schema"

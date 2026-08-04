@@ -1,13 +1,12 @@
 import type { ServerProtocol } from "./ServerProtocol";
 import type {
   ConfigurableSerdeContext,
-  HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
-  $OperationSchema,
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticOperationSchema,
 } from "@smithy/types";
 import { HttpResponse } from "@smithy/core/protocols";
 import type { SmithyFrameworkException } from "../../errors";
@@ -62,8 +61,8 @@ export abstract class HttpServerProtocol
   }
 
   public abstract deserializeRequest<Input extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     request: IHttpRequest
   ): Promise<Input>;
 
@@ -72,8 +71,8 @@ export abstract class HttpServerProtocol
    * Inspects the output at runtime to determine if it's an error.
    */
   public async serializeResponse<Output extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     output: Output
   ): Promise<IHttpResponse> {
     if (isFrameworkException(output)) {
@@ -92,8 +91,8 @@ export abstract class HttpServerProtocol
    * Subclasses implement protocol-specific serialization logic.
    */
   protected abstract serializeSuccess<Output extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     output: Output
   ): Promise<IHttpResponse>;
 
@@ -102,8 +101,8 @@ export abstract class HttpServerProtocol
    * Subclasses implement protocol-specific error serialization logic.
    */
   protected abstract serializeError<E extends Error>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     error: E
   ): Promise<IHttpResponse>;
 
@@ -159,7 +158,7 @@ export abstract class HttpServerProtocol
   /**
    * Determines if the output value is one of the operation's modeled errors.
    */
-  private isOperationError(_operationSchema: $OperationSchema, output: object): boolean {
+  private isOperationError(_operationSchema: StaticOperationSchema, output: object): boolean {
     const errorName = (output as any).name;
     if (!errorName) {
       return false;

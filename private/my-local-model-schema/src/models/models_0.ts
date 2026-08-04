@@ -39,6 +39,23 @@ export interface CamelCaseOperationOutput {
 /**
  * @public
  */
+export interface ConstrainedAddress {
+  /**
+   * Zip code must be exactly 5 digits.
+   * @public
+   */
+  zipCode?: string | undefined;
+
+  /**
+   * State abbreviation must be exactly 2 characters.
+   * @public
+   */
+  state?: string | undefined;
+}
+
+/**
+ * @public
+ */
 export interface DifferentShapeName {
   name?: string | undefined;
   number?: number | undefined;
@@ -205,4 +222,52 @@ export interface TradeEventStreamRequest {
  */
 export interface TradeEventStreamResponse {
   eventStream?: AsyncIterable<TradeEvents> | undefined;
+}
+
+/**
+ * @public
+ */
+export interface ValidatedInput {
+  /**
+   * Must be between 1 and 100 characters.
+   * @public
+   */
+  username?: string | undefined;
+
+  /**
+   * Must be between 1 and 150 (inclusive).
+   * @public
+   */
+  age?: number | undefined;
+
+  /**
+   * Must match an email-like pattern.
+   * @public
+   */
+  email?: string | undefined;
+
+  /**
+   * A list that must have between 1 and 5 items.
+   * @public
+   */
+  tags?: string[] | undefined;
+
+  /**
+   * A list where each item must be unique.
+   * @public
+   */
+  uniqueTags?: string[] | undefined;
+
+  /**
+   * Nested structure with its own constraints.
+   * @public
+   */
+  address?: ConstrainedAddress | undefined;
+}
+
+/**
+ * @public
+ */
+export interface ValidatedOutput {
+  message?: string | undefined;
 }

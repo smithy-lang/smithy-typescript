@@ -6,6 +6,7 @@ import {
   camelCaseOperationOutput$,
   CodedThrottlingError,
   CodedThrottlingError$,
+  ConstrainedAddress$,
   DifferentShapeName$,
   GetNumbers$,
   GetNumbersCommand,
@@ -33,6 +34,10 @@ import {
   TradeEventStreamCommand,
   TradeEventStreamRequest$,
   TradeEventStreamResponse$,
+  ValidatedInput$,
+  ValidatedOperation$,
+  ValidatedOperationCommand,
+  ValidatedOutput$,
   waitForNumbersAligned,
   waitForNumbersMisaligned,
   waitForNumbersWhatDoTheyDoAnyway,
@@ -60,12 +65,15 @@ assert(typeof HostPrefixOperationCommand === "function");
 assert(typeof HostPrefixOperation$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
 assert(typeof TradeEventStream$ === "object");
+assert(typeof ValidatedOperationCommand === "function");
+assert(typeof ValidatedOperation$ === "object");
 // structural schemas
 assert(typeof HttpLabelCommandInput$ === "object");
 assert(typeof HttpLabelCommandOutput$ === "object");
 assert(typeof Alpha$ === "object");
 assert(typeof camelCaseOperationInput$ === "object");
 assert(typeof camelCaseOperationOutput$ === "object");
+assert(typeof ConstrainedAddress$ === "object");
 assert(typeof DifferentShapeName$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
 assert(typeof GetNumbersResponse$ === "object");
@@ -73,6 +81,8 @@ assert(typeof HostPrefixOperationInput$ === "object");
 assert(typeof TradeEvents$ === "object");
 assert(typeof TradeEventStreamRequest$ === "object");
 assert(typeof TradeEventStreamResponse$ === "object");
+assert(typeof ValidatedInput$ === "object");
+assert(typeof ValidatedOutput$ === "object");
 // errors
 assert(CodedThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
 assert(typeof CodedThrottlingError$ === "object");
