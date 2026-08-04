@@ -78,7 +78,7 @@ describe(getEndpointFromRegion.name, () => {
       mockRegion.mockResolvedValue(region);
       try {
         await getEndpointFromRegion(mockInput);
-        fail(`expected Error: ${errorMsg}`);
+        expect.fail(`expected Error: ${errorMsg}`);
       } catch (error) {
         expect(error.message).toEqual(errorMsg);
       }
@@ -92,7 +92,7 @@ describe(getEndpointFromRegion.name, () => {
     const errorMsg = "Cannot resolve hostname from client config";
     try {
       await getEndpointFromRegion(mockInput);
-      fail(`expected Error: ${errorMsg}`);
+      expect.fail(`expected Error: ${errorMsg}`);
     } catch (error) {
       expect(error.message).toEqual(errorMsg);
     }

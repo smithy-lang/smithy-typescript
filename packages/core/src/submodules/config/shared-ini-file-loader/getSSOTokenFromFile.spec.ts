@@ -33,7 +33,7 @@ describe(getSSOTokenFromFile.name, () => {
 
     try {
       await getSSOTokenFromFile(mockSsoStartUrl);
-      fail(`expected ${expectedError}`);
+      expect.fail(`expected ${expectedError}`);
     } catch (error) {
       expect(error).toStrictEqual(expectedError);
     }
@@ -46,7 +46,7 @@ describe(getSSOTokenFromFile.name, () => {
 
     try {
       await getSSOTokenFromFile(mockSsoStartUrl);
-      fail(`expected ${expectedError}`);
+      expect.fail(`expected ${expectedError}`);
     } catch (error) {
       expect(error).toStrictEqual(expectedError);
     }
@@ -59,7 +59,7 @@ describe(getSSOTokenFromFile.name, () => {
 
     try {
       await getSSOTokenFromFile(mockSsoStartUrl);
-      fail(`expected '${errMsg}'`);
+      expect.fail(`expected '${errMsg}'`);
     } catch (error) {
       expect(error.message).toContain(errMsg);
     }

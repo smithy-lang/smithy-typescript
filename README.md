@@ -789,8 +789,7 @@ Then, update the dependent package code to depend on the published version if di
 
 All TypeScript packages are included in a [Yarn](https://yarnpkg.com/) workspace at the root of the repository:
 
-- Smithy Client SDK packages are in the `packages/` directory, and
-- Smithy Server SDK packages are in the `smithy-typescript-ssdk-libs/` directory.
+- Smithy Client & Server SDK packages are in the `packages/` directory
 
 At the root of the repository, scripts defined in the root `package.json` are managed by [Turbo](https://turbo.build/).
 Commonly used commands during development include:

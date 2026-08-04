@@ -45,7 +45,7 @@ describe("memoize", () => {
       const memoized = memoize(provider);
       try {
         await memoized();
-        fail();
+        expect.fail();
       } catch (e) {
         expect(e).toBe("Error");
       }
@@ -213,7 +213,7 @@ describe("memoize", () => {
       const memoized = memoize(provider, isExpired);
       try {
         await memoized();
-        fail();
+        expect.fail();
       } catch (e) {
         expect(e).toBe("Error");
       }

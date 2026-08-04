@@ -138,10 +138,10 @@ cwti:
 	@:
 
 lint:
-	npx oxlint -c .oxlintrc.json --fix packages smithy-typescript-ssdk-libs
+	npx oxlint -c .oxlintrc.json --fix packages
 
 format:
-	npx oxfmt packages scripts testbed smithy-typescript-ssdk-libs
+	npx oxfmt packages scripts testbed
 
 test-e2e:
 	(cd ./testbed/aws/s3 && make run)

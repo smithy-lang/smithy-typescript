@@ -31,7 +31,7 @@ describe("resolveDefaultsModeConfig", () => {
   it.each(["invalid", "abc"])("should throw for invalid value %s", async (mode) => {
     try {
       await resolveDefaultsModeConfig({ defaultsMode: () => Promise.resolve(mode as any) })();
-      fail("should throw for invalid modes");
+      expect.fail("should throw for invalid modes");
     } catch (e) {
       expect(e.message).toContain("Invalid parameter");
     }

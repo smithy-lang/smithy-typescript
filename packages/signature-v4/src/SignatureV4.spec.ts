@@ -59,7 +59,7 @@ describe("SignatureV4", () => {
       const signer = new SignatureV4({ ...signerInit, credentials: {} as any });
       try {
         await signer.presign(minimalRequest, presigningOptions);
-        fail("This test is expected to fail");
+        expect.fail("This test is expected to fail");
       } catch (e) {
         expect(e.message).toBe("Resolved credential object is not valid");
       }
@@ -379,7 +379,7 @@ describe("SignatureV4", () => {
       const signer = new SignatureV4({ ...signerInit, credentials: {} as any });
       try {
         await signer.sign(minimalRequest);
-        fail("This test is expected to fail");
+        expect.fail("This test is expected to fail");
       } catch (e) {
         expect(e.message).toBe("Resolved credential object is not valid");
       }
@@ -690,7 +690,7 @@ describe("SignatureV4", () => {
       const signer = new SignatureV4({ ...signerInit, credentials: {} as any });
       try {
         await signer.sign("STRING_TO_SIGN");
-        fail("This test is expected to fail");
+        expect.fail("This test is expected to fail");
       } catch (e) {
         expect(e.message).toBe("Resolved credential object is not valid");
       }
@@ -751,7 +751,7 @@ describe("SignatureV4", () => {
             priorSignature: "",
           }
         );
-        fail("This test is expected to fail");
+        expect.fail("This test is expected to fail");
       } catch (e) {
         expect(e.message).toBe("Resolved credential object is not valid");
       }

@@ -13,6 +13,7 @@ const KNOWN_GAPS = new Set([
   "@smithy/credential-provider-imds",
   "@smithy/middleware-apply-body-checksum",
   "@smithy/middleware-compression",
+  "@smithy/server-common",
 ]);
 
 const PUBLIC_TAG = /^\s*(\/\*\*|\*)?\s*@public\b/m;

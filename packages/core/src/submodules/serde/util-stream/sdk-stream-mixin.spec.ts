@@ -28,7 +28,7 @@ describe(sdkStreamMixin.name, () => {
     for (const method of transformMethods) {
       try {
         await sdkStream[method]();
-        fail(new Error("expect subsequent transform to fail"));
+        expect.fail("expect subsequent transform to fail");
       } catch (error) {
         expect(error.message).toContain("The stream has already been transformed");
       }
@@ -58,7 +58,7 @@ describe(sdkStreamMixin.name, () => {
     try {
       const payload = {};
       sdkStreamMixin(payload);
-      fail("should throw when unexpected stream is supplied");
+      expect.fail("should throw when unexpected stream is supplied");
     } catch (error) {
       expect(error.message).toContain("Unexpected stream implementation");
     }
@@ -139,7 +139,7 @@ describe(sdkStreamMixin.name, () => {
       const sdkStream = sdkStreamMixin(passThrough);
       try {
         sdkStream.transformToWebStream();
-        fail(new Error("expect web stream transformation to fail"));
+        expect.fail("expect web stream transformation to fail");
       } catch (error) {
         expect(error.message).toContain("The stream has been consumed by other callbacks");
       }
@@ -159,7 +159,7 @@ describe(sdkStreamMixin.name, () => {
         const sdkStream = sdkStreamMixin(passThrough);
         try {
           sdkStream.transformToWebStream();
-          fail(new Error("expect web stream transformation to fail"));
+          expect.fail("expect web stream transformation to fail");
         } catch (error) {
           expect(error.message).toContain("Readable.toWeb() is not supported");
         }

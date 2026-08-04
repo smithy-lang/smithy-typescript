@@ -79,7 +79,7 @@ describe("deserializerMiddleware", () => {
     mockDeserializer.mockRejectedValueOnce(exception);
     try {
       await deserializerMiddleware(mockOptions, mockDeserializer)(mockNext, {})(mockArgs);
-      fail("DeserializerMiddleware should throw");
+      expect.fail("DeserializerMiddleware should throw");
     } catch (e) {
       expect(e).toMatchObject(exception);
       expect(e.$response).toEqual(mockNextResponse.response);
@@ -98,7 +98,7 @@ describe("deserializerMiddleware", () => {
     mockDeserializer.mockRejectedValueOnce(exception);
     try {
       await deserializerMiddleware(mockOptions, mockDeserializer)(mockNext, {})(mockArgs);
-      fail("DeserializerMiddleware should throw");
+      expect.fail("DeserializerMiddleware should throw");
     } catch (e) {
       expect(e.message).toContain(
         "to see the raw response, inspect the hidden field {error}.$response on this object."
@@ -137,7 +137,7 @@ describe("deserializerMiddleware", () => {
           error: sink,
         },
       })(mockArgs);
-      fail("DeserializerMiddleware should throw");
+      expect.fail("DeserializerMiddleware should throw");
     } catch (e) {
       expect(sink).toHaveBeenCalledWith(
         `Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object.`
@@ -167,7 +167,7 @@ describe("deserializerMiddleware", () => {
       );
       try {
         await handler(mockArgs);
-        fail("DeserializerMiddleware should throw");
+        expect.fail("DeserializerMiddleware should throw");
       } catch (e) {
         expect(e.$metadata).toEqual({
           httpStatusCode: 503,
@@ -196,7 +196,7 @@ describe("deserializerMiddleware", () => {
       );
       try {
         await handler(mockArgs);
-        fail("DeserializerMiddleware should throw");
+        expect.fail("DeserializerMiddleware should throw");
       } catch (e) {
         expect(e.$metadata).toEqual({
           httpStatusCode: 301,
