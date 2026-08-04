@@ -1,5 +1,5 @@
 import { CborCodec } from "@smithy/core/cbor";
-import { Bird$, ConservationStatus, type Bird } from "@smithy/types-example";
+import { Bird$, ConservationStatus, type Bird } from "@smithy/types-only";
 import { describe, expect, test as it } from "vitest";
 
 describe("types-only codegen schema serde", () => {

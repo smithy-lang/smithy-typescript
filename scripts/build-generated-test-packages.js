@@ -43,8 +43,6 @@ const nodeModulesDir = path.join(root, "node_modules");
 
 const smithyPackages = path.join(root, "packages");
 
-const smithyTsSsdkLibs = path.join(root, "smithy-typescript-ssdk-libs");
-
 /**
  * Map of package name to its directory, for every package that lives in this
  * repository. Codegen writes the local workspace versions into the generated
@@ -55,7 +53,7 @@ const smithyTsSsdkLibs = path.join(root, "smithy-typescript-ssdk-libs");
  */
 const getLocalPackageDirs = () => {
   const localPackageDirs = new Map();
-  for (const packagesDir of [smithyPackages, smithyTsSsdkLibs]) {
+  for (const packagesDir of [smithyPackages]) {
     for (const entry of fs.readdirSync(packagesDir)) {
       const packageDir = path.join(packagesDir, entry);
       const packageJsonPath = path.join(packageDir, "package.json");

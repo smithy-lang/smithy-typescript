@@ -53,7 +53,7 @@ async function validateDist(packageDir, pkgJson, distName) {
       if (pkg === pkgJson.name) {
         continue;
       }
-      if (!declared.has(pkg)) {
+      if (!declared.has(pkg) && !declared.has(`@types/${pkg}`)) {
         errors.push(`${pkg} imported but not declared in ${pkgJson.name} (${path.relative(packageDir, file)})`);
       } else if (useRequireResolve) {
         try {

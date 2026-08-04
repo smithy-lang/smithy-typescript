@@ -81,7 +81,7 @@ describe(readableStreamHasher.name, () => {
     const expectedError = new Error("Unable to calculate hash for flowing readable stream");
     try {
       readableStreamHasher(mockHashCtor, readableStream);
-      fail(`expected ${expectedError}`);
+      expect.fail(`expected ${expectedError}`);
     } catch (error) {
       expect(error).toStrictEqual(expectedError);
     }
@@ -100,7 +100,7 @@ describe(readableStreamHasher.name, () => {
 
     try {
       await hashPromise;
-      fail(`should throw error ${mockError}`);
+      expect.fail(`should throw error ${mockError}`);
     } catch (error) {
       expect(error).toEqual(mockError);
       expect(mockHashCalculatorEnd).toHaveBeenCalledTimes(1);
@@ -127,7 +127,7 @@ describe(readableStreamHasher.name, () => {
 
     try {
       await hashPromise;
-      fail(`should throw error ${mockError}`);
+      expect.fail(`should throw error ${mockError}`);
     } catch (error) {
       expect(error).toEqual(mockError);
     }
@@ -148,7 +148,7 @@ describe(readableStreamHasher.name, () => {
 
     try {
       await hashPromise;
-      fail(`should throw error ${mockError}`);
+      expect.fail(`should throw error ${mockError}`);
     } catch (error) {
       expect(error).toEqual(mockError);
       expect(mockHashCalculatorEnd).toHaveBeenCalledTimes(1);

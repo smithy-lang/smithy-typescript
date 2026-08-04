@@ -50,7 +50,7 @@ describe("staticStabilityProvider", () => {
     const provider = vi.fn().mockRejectedValue("Error");
     try {
       await staticStabilityProvider(provider)();
-      fail("This provider should throw");
+      expect.fail("This provider should throw");
     } catch (e) {
       expect(getExtendedInstanceMetadataCredentials).not.toBeCalled();
       expect(provider).toBeCalledTimes(1);
