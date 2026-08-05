@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { HttpServerProtocol } from "./HttpServerProtocol";
 import { NotAcceptableException, ServiceException, UnsupportedMediaTypeException } from "../../errors";
-import type { HttpRequest as IHttpRequest, HttpResponse as IHttpResponse, $OperationSchema } from "@smithy/types";
+import type { HttpRequest as IHttpRequest, HttpResponse as IHttpResponse, StaticOperationSchema } from "@smithy/types";
 
 /**
  * Concrete subclass for testing abstract HttpServerProtocol.
@@ -139,7 +139,7 @@ describe("HttpServerProtocol", () => {
 
   describe("serializeResponse routing", () => {
     const mockContext = {} as any;
-    const mockSchema = { input: {}, output: {}, traits: {} } as unknown as $OperationSchema;
+    const mockSchema = [9, "", "", 0, "unit", "unit"] satisfies StaticOperationSchema;
 
     it("routes framework exceptions to serializeFrameworkException", async () => {
       const frameworkError = {

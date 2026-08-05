@@ -4,3 +4,4 @@ export * from "./GetNumbersCommand";
 export * from "./HostPrefixOperationCommand";
 export * from "./HttpLabelCommandCommand";
 export * from "./TradeEventStreamCommand";
+export * from "./ValidatedOperationCommand";

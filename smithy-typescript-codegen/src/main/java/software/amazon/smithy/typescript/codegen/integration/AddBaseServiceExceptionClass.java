@@ -47,7 +47,10 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         BiConsumer<String, Consumer<TypeScriptWriter>> writerFactory
     ) {
         boolean isClientSdk = settings.generateClient();
-        if (isClientSdk) {
+        boolean isSchemaServer = settings.generateServerSdk()
+            && settings.getProtocol() != null
+            && settings.generateSchemas();
+        if (isClientSdk || isSchemaServer) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
             String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
             writerFactory.accept(
@@ -92,7 +95,10 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         TypeScriptWriter writer
     ) {
         boolean isClientSdk = settings.generateClient();
-        if (isClientSdk) {
+        boolean isSchemaServer = settings.generateServerSdk()
+            && settings.getProtocol() != null
+            && settings.generateSchemas();
+        if (isClientSdk || isSchemaServer) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
             String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
             writer.write("export { $1L } from \"./models/$1L\";", serviceExceptionName);

@@ -155,3 +155,6 @@ export interface Mux<S extends string, O extends string> {
 }
 
 export interface ServerSerdeContext extends Omit<SerdeContext, "endpoint"> {}
+
+export { SchemaServiceHandler, defaultRouter } from "./schema";
+export type { SchemaServiceHandlerOptions, RouterFunction } from "./schema";

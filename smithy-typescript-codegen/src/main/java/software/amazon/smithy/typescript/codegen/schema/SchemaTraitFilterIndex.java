@@ -30,8 +30,11 @@ import software.amazon.smithy.model.traits.HttpResponseCodeTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.JsonNameTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.traits.PatternTrait;
 import software.amazon.smithy.model.traits.ProtocolDefinitionTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequestCompressionTrait;
 import software.amazon.smithy.model.traits.RequiresLengthTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
@@ -39,6 +42,7 @@ import software.amazon.smithy.model.traits.SparseTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.Trait;
+import software.amazon.smithy.model.traits.UniqueItemsTrait;
 import software.amazon.smithy.model.traits.XmlAttributeTrait;
 import software.amazon.smithy.model.traits.XmlFlattenedTrait;
 import software.amazon.smithy.model.traits.XmlNameTrait;
@@ -54,6 +58,17 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
         TimestampFormatTrait.ID,
         // excluded because AddCompressionDependency handles it via middleware plugin.
         RequestCompressionTrait.ID
+    );
+
+    /**
+     * Constraint traits used for server-side input validation.
+     * Only included when explicitly enabled via {@link #enableConstraintTraits()}.
+     */
+    private static final Set<ShapeId> CONSTRAINT_TRAITS = SetUtils.of(
+        LengthTrait.ID,
+        RangeTrait.ID,
+        PatternTrait.ID,
+        UniqueItemsTrait.ID
     );
 
     /**
@@ -126,6 +141,19 @@ public final class SchemaTraitFilterIndex implements KnowledgeIndex {
 
     public static SchemaTraitFilterIndex of(Model model) {
         return model.getKnowledge(SchemaTraitFilterIndex.class, SchemaTraitFilterIndex::new);
+    }
+
+    /**
+     * Enables constraint traits (length, range, pattern, uniqueItems) for schema emission.
+     * Call this in SSDK mode to include validation constraints in generated schemas.
+     */
+    public void enableConstraintTraits() {
+        includedTraits.addAll(CONSTRAINT_TRAITS);
+        // Invalidate cache since trait inclusion changed.
+        cache.clear();
+        for (Shape shape : model.toSet()) {
+            cache.put(shape, hasSchemaTraits(shape));
+        }
     }
 
     /**

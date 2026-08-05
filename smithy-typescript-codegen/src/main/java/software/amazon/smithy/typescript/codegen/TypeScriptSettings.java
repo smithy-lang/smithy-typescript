@@ -64,6 +64,7 @@ public final class TypeScriptSettings {
     private static final String DEFAULT_PROTOCOL_PRIORITY = "defaultProtocolPriority";
     private static final String BIG_NUMBER_MODE = "bigNumberMode";
     private static final String GENERATE_SCHEMAS = "generateSchemas";
+    private static final String GENERATE_SERVER_SCHEMAS = "generateServerSchemas";
     private static final String GENERATE_ENDPOINT_BDD = "generateEndpointBdd";
     private static final String VERSIONING_SCHEME = "versioningScheme";
     private static final String TSCONFIG = "tsconfig";
@@ -90,6 +91,7 @@ public final class TypeScriptSettings {
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
     private String bigNumberMode = "native";
     private boolean generateSchemas = true;
+    private boolean generateServerSchemas = false;
     private boolean generateEndpointBdd = true;
     private boolean generateIndexTests = false;
     private boolean generateSnapshotTests = false;
@@ -216,6 +218,8 @@ public final class TypeScriptSettings {
         // Internal undocumented configuration used to control rollout of schemas.
         // `true` will eventually be the only available option, and this should not be set by users.
         settings.setGenerateSchemas(config.getBooleanMemberOrDefault(GENERATE_SCHEMAS, true));
+
+        settings.setGenerateServerSchema(config.getBooleanMemberOrDefault(GENERATE_SERVER_SCHEMAS, false));
 
         // Internal undocumented configuration used to control rollout of endpoint BDD.
         // `true` will eventually be the only available option, and this should not be set by users.
@@ -388,6 +392,16 @@ public final class TypeScriptSettings {
     @SmithyInternalApi
     public boolean generateSchemas() {
         return generateSchemas;
+    }
+
+    @SmithyInternalApi
+    public void setGenerateServerSchema(boolean generateServerSchemas) {
+        this.generateServerSchemas = generateServerSchemas;
+    }
+
+    @SmithyInternalApi
+    public boolean generateServerSchemas() {
+        return generateServerSchemas;
     }
 
     @SmithyInternalApi
@@ -847,6 +861,7 @@ public final class TypeScriptSettings {
                 GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
                 GENERATE_SCHEMAS,
+                GENERATE_SERVER_SCHEMAS,
                 GENERATE_ENDPOINT_BDD,
                 VERSIONING_SCHEME,
                 TSCONFIG,

@@ -1,9 +1,4 @@
-import type {
-  ConfigurableSerdeContext,
-  $OperationSchema,
-  SerdeFunctions,
-  HandlerExecutionContext,
-} from "@smithy/types";
+import type { ConfigurableSerdeContext, SerdeFunctions, StaticOperationSchema } from "@smithy/types";
 
 /**
  * Interface for server-side protocol implementations.
@@ -21,8 +16,8 @@ export interface ServerProtocol<Request, Response> extends ConfigurableSerdeCont
    * Deserializes an incoming request into the operation's input type.
    */
   deserializeRequest<Input extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     request: Request
   ): Promise<Input>;
 
@@ -31,8 +26,8 @@ export interface ServerProtocol<Request, Response> extends ConfigurableSerdeCont
    * Error handling is done via runtime inspection of the output value.
    */
   serializeResponse<Output extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     output: Output
   ): Promise<Response>;
 }

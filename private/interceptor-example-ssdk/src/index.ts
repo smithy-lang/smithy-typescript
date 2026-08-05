@@ -10,3 +10,5 @@ export * as Fakeprotocol from "./protocols/Fakeprotocol";
 export * from "./server/index";
 
 export * from "./models/models_0";
+
+export { InterceptorExampleServiceServiceException } from "./models/InterceptorExampleServiceServiceException";
