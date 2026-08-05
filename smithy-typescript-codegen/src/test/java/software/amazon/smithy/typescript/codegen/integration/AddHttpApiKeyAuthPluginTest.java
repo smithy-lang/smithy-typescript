@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,8 +19,18 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.TypeScriptClientCodegenPlugin;
+import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 
 public class AddHttpApiKeyAuthPluginTest {
+
+    @Test
+    public void skipsSettingsWithoutAService() {
+        TypeScriptSettings settings = new TypeScriptSettings();
+        settings.setArtifactType(TypeScriptSettings.ArtifactType.TYPES);
+        settings.useLegacyAuth(true);
+
+        assertFalse(new AddHttpApiKeyAuthPlugin().matchesSettings(settings));
+    }
 
     @Test
     public void httpApiKeyAuthClientOnService() {

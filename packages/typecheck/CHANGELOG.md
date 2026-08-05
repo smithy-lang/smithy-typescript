@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.2.16
+
+### Patch Changes
+
+- Updated dependencies [fcf1366]
+  - @smithy/core@3.31.1
+
 ## 1.2.15
 
 ### Patch Changes

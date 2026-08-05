@@ -27,7 +27,7 @@
  * the branch introduces relative to its fork point from main (the merge-base),
  * so a moving main tip while the PR is open does not affect the result. Any
  * package.json under a workspace root declared in the root package.json
- * (packages/*, smithy-typescript-ssdk-libs/*, private/*) whose version differs
+ * (packages/*, private/*) whose version differs
  * from that fork point, or is newly added, will be published - excluding
  * private packages, which are never released. The version at that fork point is
  * the one being superseded; a package the branch adds supersedes nothing, so only

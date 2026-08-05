@@ -25,7 +25,7 @@ describe(sdkStreamMixin.name, () => {
     for (const method of transformMethods) {
       try {
         await sdkStream[method]();
-        fail(new Error("expect subsequent transform to fail"));
+        expect.fail("expect subsequent transform to fail");
       } catch (error) {
         expect(error.message).toContain("The stream has already been transformed");
       }
@@ -64,7 +64,7 @@ describe(sdkStreamMixin.name, () => {
     global.ReadableStream = undefined;
     try {
       sdkStreamMixin({});
-      fail("expect unexpected stream to fail");
+      expect.fail("expect unexpected stream to fail");
     } catch (e) {
       expect(e.message).toContain("Unexpected stream implementation");
       global.Blob = originalBlobCtr;
@@ -134,7 +134,7 @@ describe(sdkStreamMixin.name, () => {
       const sdkStream = sdkStreamMixin(payloadStream);
       try {
         await sdkStream.transformToString(utfLabel);
-        fail("expect transformToString to throw when TextDecoder is not available");
+        expect.fail("expect transformToString to throw when TextDecoder is not available");
       } catch (error) {
         expect(error.message).toContain("TextDecoder is not available");
       }
@@ -210,7 +210,7 @@ describe(sdkStreamMixin.name, () => {
       const sdkStream = sdkStreamMixin(payloadStream as any);
       try {
         sdkStream.transformToWebStream();
-        fail("expect to fail");
+        expect.fail("expect to fail");
       } catch (e) {
         expect(e.message).toContain("Please make sure the Blob.stream() is polyfilled");
       }

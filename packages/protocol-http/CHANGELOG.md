@@ -1,5 +1,12 @@
 # @smithy/protocol-http
 
+## 5.5.16
+
+### Patch Changes
+
+- Updated dependencies [fcf1366]
+  - @smithy/core@3.31.1
+
 ## 5.5.15
 
 ### Patch Changes

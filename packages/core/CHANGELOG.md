@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.31.1
+
+### Patch Changes
+
+- fcf1366: switch cbor codec to use single-pass (v2) shape serializer and deserializer
+
 ## 3.31.0
 
 ### Minor Changes

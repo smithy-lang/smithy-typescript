@@ -1,5 +1,12 @@
 # @smithy/middleware-retry
 
+## 4.7.16
+
+### Patch Changes
+
+- Updated dependencies [fcf1366]
+  - @smithy/core@3.31.1
+
 ## 4.7.15
 
 ### Patch Changes

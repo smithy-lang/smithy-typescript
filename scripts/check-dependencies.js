@@ -75,6 +75,8 @@ const node_libraries = [
         if (
           !(dependencyPackageName in (pkgJson.dependencies ?? {})) &&
           !(dependencyPackageName in (pkgJson.peerDependencies ?? {})) &&
+          !(`@types/${dependencyPackageName}` in (pkgJson.dependencies ?? {})) &&
+          !(`@types/${dependencyPackageName}` in (pkgJson.peerDependencies ?? {})) &&
           dependencyPackageName !== pkgJson.name
         ) {
           errors.push(`${dependency} undeclared but imported in ${pkgJson.name} ${file}}`);

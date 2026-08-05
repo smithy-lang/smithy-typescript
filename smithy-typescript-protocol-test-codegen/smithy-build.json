@@ -138,6 +138,27 @@
           }
         }
       }
+    },
+    "types-only": {
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@smithy/types-only",
+          "packageManager": "npm",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "private": true
+          },
+          "modes": ["types"],
+          "closure": "org.xyz.types#typesClosure",
+          "tsconfig": {
+            "types": {
+              "compilerOptions": {
+                "isolatedModules": true
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -85,7 +85,7 @@ describe(StandardRetryStrategy.name, () => {
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
         await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
-        fail(`expected ${noRetryTokenAvailableError}`);
+        expect.fail(`expected ${noRetryTokenAvailableError}`);
       } catch (error) {
         expect(error).toStrictEqual(noRetryTokenAvailableError);
       }
@@ -104,7 +104,7 @@ describe(StandardRetryStrategy.name, () => {
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
         await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
-        fail(`expected ${noRetryTokenAvailableError}`);
+        expect.fail(`expected ${noRetryTokenAvailableError}`);
       } catch (error) {
         expect(error).toStrictEqual(noRetryTokenAvailableError);
       }
@@ -123,7 +123,7 @@ describe(StandardRetryStrategy.name, () => {
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       try {
         await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
-        fail(`expected ${noRetryTokenAvailableError}`);
+        expect.fail(`expected ${noRetryTokenAvailableError}`);
       } catch (error) {
         expect(error).toStrictEqual(noRetryTokenAvailableError);
       }
@@ -145,7 +145,7 @@ describe(StandardRetryStrategy.name, () => {
       } as RetryErrorInfo;
       try {
         await retryStrategy.refreshRetryTokenForRetry(token, errorInfo);
-        fail(`expected ${noRetryTokenAvailableError}`);
+        expect.fail(`expected ${noRetryTokenAvailableError}`);
       } catch (error) {
         expect(error).toStrictEqual(noRetryTokenAvailableError);
       }

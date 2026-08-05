@@ -54,9 +54,6 @@ abstract class SetDependencyVersionsTask : DefaultTask() {
     @get:InputDirectory
     abstract val packagesDir: DirectoryProperty
 
-    @get:InputDirectory
-    abstract val smithyTsSsdkLibs: DirectoryProperty
-
     @get:OutputFile
     abstract val versionsFile: RegularFileProperty
 
@@ -71,12 +68,7 @@ abstract class SetDependencyVersionsTask : DefaultTask() {
                 .get()
                 .asFile
                 .listFiles()
-                .toMutableList() +
-                smithyTsSsdkLibs
-                    .get()
-                    .asFile
-                    .listFiles()
-                    .toList()
+                .toList()
         roots.forEach { packageDir ->
             val packageJsonFile = File(packageDir, "package.json")
             if (packageJsonFile.isFile()) {
@@ -94,7 +86,6 @@ abstract class SetDependencyVersionsTask : DefaultTask() {
 
 tasks.register<SetDependencyVersionsTask>("set-dependency-versions") {
     packagesDir.set(project.file("../packages"))
-    smithyTsSsdkLibs.set(project.file("../smithy-typescript-ssdk-libs"))
     versionsFile.set(
         layout.buildDirectory.file("generated/resources/software/amazon/smithy/typescript/codegen/dependencyVersions.properties"),
     )

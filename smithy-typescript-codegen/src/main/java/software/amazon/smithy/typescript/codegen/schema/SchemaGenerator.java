@@ -6,12 +6,14 @@ package software.amazon.smithy.typescript.codegen.schema;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.CollectionShape;
@@ -60,7 +62,33 @@ public class SchemaGenerator implements Runnable {
     ) {
         this.model = model;
         this.fileManifest = fileManifest;
+        if (settings.getOptionalService().isEmpty()) {
+            // Types mode must use the shape-collection constructor so only the closure's
+            // shapes are scanned; scanning the whole model here would be a silent bug.
+            throw new CodegenException(
+                "SchemaGenerator requires a service; use the constructor taking a shape collection instead."
+            );
+        }
         closure = ServiceClosure.of(model, settings.getService(model));
+        elision = SchemaReferenceIndex.of(model);
+        this.settings = settings;
+        this.symbolProvider = symbolProvider;
+        writer.write(
+            """
+            /* eslint no-var: 0 */"""
+        );
+    }
+
+    public SchemaGenerator(
+        Model model,
+        FileManifest fileManifest,
+        TypeScriptSettings settings,
+        SymbolProvider symbolProvider,
+        Collection<Shape> shapes
+    ) {
+        this.model = model;
+        this.fileManifest = fileManifest;
+        closure = ServiceClosure.ofShapes(model, shapes);
         elision = SchemaReferenceIndex.of(model);
         this.settings = settings;
         this.symbolProvider = symbolProvider;
@@ -75,13 +103,14 @@ public class SchemaGenerator implements Runnable {
      */
     @Override
     public void run() {
-        for (ServiceShape service : model.getServiceShapes()) {
-            if (!SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-                return;
+        if (!settings.isTypesOnly()) {
+            for (ServiceShape service : model.getServiceShapes()) {
+                if (!SchemaGenerationAllowlist.allows(service.getId(), settings)) {
+                    return;
+                }
             }
+            writeBaseError();
         }
-
-        writeBaseError();
         writeErrors();
         closure.getSimpleShapes().forEach(this::writeSimpleSchema);
         closure.getStructureShapes().forEach(this::writeStructureSchema);
@@ -168,7 +197,9 @@ public class SchemaGenerator implements Runnable {
             if (errorShapeOpt.isPresent()) {
                 String ns = store.var(shape.getId().getNamespace(), "n");
                 String errorRegistryVarName = ns + "_registry";
-                String exceptionCtorSymbolName = ServiceClosure.RESERVED_WORDS.escape(shape.getId().getName());
+                // Resolve through the symbol provider so the import matches the class exported
+                // from models/errors.ts, which reflects closure/service renames and escaping.
+                String exceptionCtorSymbolName = symbolProvider.toSymbol(shape).getName();
 
                 writer.addTypeImport("StaticErrorSchema", null, TypeScriptDependency.SMITHY_TYPES);
                 writer.addRelativeImport(exceptionCtorSymbolName, null, Paths.get("..", "models", "errors"));
@@ -275,14 +306,14 @@ public class SchemaGenerator implements Runnable {
         List<MemberShape> orderedMembers = new ArrayList<>();
 
         for (MemberShape m : shape.getAllMembers().values()) {
-            if (closure.isMemberRequiredInClient(m)) {
+            if (ServiceClosure.isMemberRequiredInClient(m)) {
                 requiredMemberCount += 1;
                 orderedNames.add(m.getMemberName());
                 orderedMembers.add(m);
             }
         }
         for (MemberShape m : shape.getAllMembers().values()) {
-            if (!closure.isMemberRequiredInClient(m)) {
+            if (!ServiceClosure.isMemberRequiredInClient(m)) {
                 orderedNames.add(m.getMemberName());
                 orderedMembers.add(m);
             }

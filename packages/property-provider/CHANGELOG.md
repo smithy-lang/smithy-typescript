@@ -1,5 +1,12 @@
 # @smithy/property-provider
 
+## 4.4.16
+
+### Patch Changes
+
+- Updated dependencies [fcf1366]
+  - @smithy/core@3.31.1
+
 ## 4.4.15
 
 ### Patch Changes

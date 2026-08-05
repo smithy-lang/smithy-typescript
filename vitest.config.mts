@@ -5,7 +5,6 @@ export default defineConfig({
     exclude: [
       "node_modules",
       "**/*.{integ,e2e,browser}.spec.ts",
-      "smithy-typescript-ssdk-libs",
       "packages/types",
       "packages/util-defaults-mode-browser",
     ],

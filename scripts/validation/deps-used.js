@@ -14,6 +14,7 @@ const { getPackageName, extractImports, getPackageDirs, summarizePackages } = re
 
 const IMPLICIT_DEPS = new Set(["tslib"]);
 const DTS_IMPORT_RE = /from\s+["']([^"']+)["']/g;
+const TS_IMPORT_RE = /(?:import|from)\s+["']([^"']+)["']/g;
 
 /**
  * @param packageDir - package root.
@@ -69,10 +70,37 @@ async function validate(packageDir) {
     }
   }
 
+  // Scan source .ts files for type-only imports that may be erased from both
+  // JS output and .d.ts (e.g. when used only in function body type annotations).
+  const srcDir = path.join(packageDir, "src");
+  if (fs.existsSync(srcDir)) {
+    for await (const file of walk(srcDir, ["node_modules"])) {
+      if (!file.endsWith(".ts") || file.endsWith(".d.ts") || file.endsWith(".spec.ts") || file.endsWith(".bench.ts")) {
+        continue;
+      }
+      const contents = fs.readFileSync(file, "utf-8");
+      let m;
+      TS_IMPORT_RE.lastIndex = 0;
+      while ((m = TS_IMPORT_RE.exec(contents)) !== null) {
+        if (m[1].startsWith(".") || m[1].startsWith("node:")) {
+          continue;
+        }
+        used.add(getPackageName(m[1]));
+      }
+    }
+  }
+
   const errors = [];
   for (const dep of declared) {
     if (IMPLICIT_DEPS.has(dep)) {
       continue;
+    }
+    // @types/X packages provide type declarations for imports of "X".
+    if (dep.startsWith("@types/")) {
+      const bareModule = dep.slice("@types/".length);
+      if (used.has(bareModule)) {
+        continue;
+      }
     }
     if (!used.has(dep)) {
       errors.push(`${dep} declared but never imported in ${pkgJson.name}`);
