@@ -142,7 +142,7 @@ public final class AddEventStreamDependency implements TypeScriptIntegration {
         );
     }
 
-    private static boolean hasEventStream(Model model, ServiceShape service) {
+    public static boolean hasEventStream(Model model, ServiceShape service) {
         TopDownIndex topDownIndex = TopDownIndex.of(model);
         Set<OperationShape> operations = topDownIndex.getContainedOperations(service);
         EventStreamIndex eventStreamIndex = EventStreamIndex.of(model);
