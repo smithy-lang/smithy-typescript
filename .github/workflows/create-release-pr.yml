@@ -12,6 +12,13 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      # Set only when there were changesets to consume, and then on both the
+      # create and the update path, so the approve job can key off its presence
+      # to tell "there is a release PR to approve runs on" from "there was
+      # nothing to version". Notably it is empty on the push that merges the
+      # release PR, since `changeset version` already consumed the changesets.
+      pull-request-number: ${{ steps.version.outputs.pullRequestNumber }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -21,6 +28,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Create Release Pull Request
+        id: version
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           version: yarn changeset version
@@ -28,3 +36,130 @@ jobs:
           title: "Version NPM packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # The release PR is opened and updated by github-actions[bot] authenticating as
+  # GITHUB_TOKEN, above. Runs on such a pull request are created in an
+  # approval-required state and wait for a maintainer, so this job approves them.
+  #
+  # It has to live in this workflow rather than one triggered by the release PR
+  # itself. Events raised by GITHUB_TOKEN do not create workflow runs, and the
+  # only exception is the `pull_request` event with the opened, synchronize or
+  # reopened activity types - which is exactly the carve-out that produces the
+  # approval-required runs in the first place. `pull_request_target` gets no such
+  # exception and is never dispatched for this PR at all, so it cannot be used to
+  # approve them. This workflow is instead triggered by the human merge that
+  # pushed to main, which is an ordinary trigger, and it runs on every such push,
+  # so it covers the release PR being updated as well as opened. See
+  # https://docs.github.com/en/actions/concepts/security/github_token and
+  # https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/.
+  #
+  # Kept a separate job so that a failure to approve is not mistaken for a
+  # failure to create the release PR, which by then has already succeeded.
+  approve:
+    name: Approve pending runs on the release PR
+    needs: version
+    if: needs.version.outputs.pull-request-number != ''
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      pull-requests: read
+    env:
+      RELEASE_BRANCH: changeset-release/main
+      # Workflows that must leave the approval queue before this job is done. Both
+      # trigger on `pull_request` to main with no path filters, so both always run
+      # on the release PR; keep this list in step with them. Other pending runs are
+      # still approved, just not waited for.
+      EXPECTED_WORKFLOWS: ci npm-package-existence
+    steps:
+      - name: Approve workflow runs awaiting approval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.version.outputs.pull-request-number }}
+        run: |
+          set -euo pipefail
+
+          # The head SHA is read back from the pull request rather than from the
+          # local checkout: the changesets action commits and pushes the release
+          # branch itself, so this job - which does not check anything out - has
+          # no other view of what the runs to approve are keyed on.
+          head="$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '{sha: .head.sha, ref: .head.ref, repo: .head.repo.full_name}')"
+          head_sha="$(jq -r '.sha' <<< "$head")"
+
+          # Assert this is the release branch in this repository before approving
+          # anything. The pull request number comes from the changesets action, so
+          # this should always hold; it is checked so that a change in that
+          # action's behaviour cannot turn this into an approval of arbitrary runs.
+          if [ "$(jq -r '.ref' <<< "$head")" != "$RELEASE_BRANCH" ] \
+            || [ "$(jq -r '.repo' <<< "$head")" != "$REPO" ]; then
+            echo "::error::PR #$PR_NUMBER is not $REPO:$RELEASE_BRANCH; refusing to approve its runs."
+            exit 1
+          fi
+
+          echo "Approving runs on PR #$PR_NUMBER at $head_sha"
+
+          attempts=18
+          interval=10
+          approved=0
+
+          # Runs appear around the same time as this one, so poll until every
+          # expected workflow has left the approval queue instead of waiting a
+          # fixed window. A just-approved run only reads as non-pending on a later
+          # poll, so this always costs one poll more than the last approval.
+          for attempt in $(seq 1 "$attempts"); do
+            # Match head repository and branch as well as SHA, so a fork PR that
+            # happens to share a commit with the release branch can never pick up
+            # an approval here. The SHA is re-checked rather than left to the query
+            # parameter alone: if that filter ever stopped applying, an
+            # already-approved run from an earlier commit on this branch could
+            # satisfy the wait below while this commit's runs stayed stuck. A run
+            # awaiting approval reports status "completed" with conclusion
+            # "action_required", so the conclusion alone decides `pending`.
+            runs="$(
+              gh api \
+                --method GET "repos/$REPO/actions/runs" \
+                -f "head_sha=$head_sha" \
+                -f "per_page=100" \
+                | jq --arg repo "$REPO" --arg branch "$RELEASE_BRANCH" --arg sha "$head_sha" '
+                    [ .workflow_runs[]
+                      | select(.event == "pull_request")
+                      | select(.head_sha == $sha)
+                      | select(.head_branch == $branch)
+                      | select(.head_repository.full_name == $repo)
+                      | {
+                          id,
+                          name,
+                          pending: (.conclusion == "action_required"),
+                        } ]'
+            )"
+
+            for id in $(jq -r '.[] | select(.pending) | .id' <<< "$runs"); do
+              echo "Approving run $id"
+              gh api --method POST "repos/$REPO/actions/runs/$id/approve"
+              approved=$((approved + 1))
+            done
+
+            # A workflow counts as cleared once any of its runs is no longer
+            # pending, not only when this job approved it, so a run a maintainer
+            # approved first - or one that started on its own - counts too.
+            missing=""
+            for workflow in $EXPECTED_WORKFLOWS; do
+              jq -e --arg workflow "$workflow" \
+                'any(.[]; .name == $workflow and (.pending | not))' > /dev/null <<< "$runs" \
+                || missing="$missing $workflow"
+            done
+
+            if [ -z "$missing" ]; then
+              echo "All expected workflows are running for $head_sha." \
+                   "Approved $approved run(s)."
+              exit 0
+            fi
+
+            echo "Attempt $attempt/$attempts," \
+                 "waiting for these workflows to leave the approval queue:$missing"
+            sleep "$interval"
+          done
+
+          echo "::error::Timed out after approving $approved run(s);" \
+               "these workflows never left the approval queue for $head_sha:$missing"
+          exit 1
