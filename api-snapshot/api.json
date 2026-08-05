@@ -346,6 +346,7 @@
     "escapeUri": "function",
     "escapeUriPath": "function",
     "extendedEncodeURIComponent": "function",
+    "FALLBACK_LOGGER": "symbol",
     "Field": "function",
     "FieldOptions": "type(object)",
     "FieldPosition": "type(union)",
