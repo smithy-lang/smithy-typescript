@@ -1,6 +1,6 @@
 import http, { type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { HttpRequest } from "@smithy/core/protocols";
+import { FALLBACK_LOGGER, HttpRequest } from "@smithy/core/protocols";
 import { Agent, getGlobalDispatcher, setGlobalDispatcher, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -569,6 +569,23 @@ describe("UndiciHttpHandler", () => {
       handler.updateHttpClientConfig("logger", updatedLogger);
       await handler.handle(createMockRequest());
       expect(handler.httpHandlerConfigs().logger).toBe(updatedLogger);
+    });
+
+    it("does not overwrite an explicit logger with the fallback logger", async () => {
+      const logger = createMockLogger();
+      const clientLogger = createMockLogger();
+      handler = new UndiciHttpHandler({ logger });
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+      await handler.handle(createMockRequest());
+      expect(handler.httpHandlerConfigs().logger).toBe(logger);
+    });
+
+    it("does not expose the fallback logger on the public config", async () => {
+      handler = new UndiciHttpHandler();
+      const clientLogger = createMockLogger();
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+      await handler.handle(createMockRequest());
+      expect(handler.httpHandlerConfigs().logger).toBeUndefined();
     });
 
     it("retains existing dispatcher if undefined is passed", () => {

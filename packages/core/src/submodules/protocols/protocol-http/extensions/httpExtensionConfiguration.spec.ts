@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { FALLBACK_LOGGER } from "../fallbackLogger";
 import { getHttpHandlerExtensionConfiguration } from "./httpExtensionConfiguration";
 
 describe("getHttpHandlerExtensionConfiguration", () => {
@@ -19,13 +20,23 @@ describe("getHttpHandlerExtensionConfiguration", () => {
   });
 
   describe("client logger injection", () => {
-    it("passes logger to httpHandler via updateHttpClientConfig", () => {
+    it("offers the client logger to the handler under the fallback key", () => {
       const handler = createMockHandler();
       const logger = createMockLogger();
 
       getHttpHandlerExtensionConfiguration({ httpHandler: handler, logger } as any);
 
-      expect(handler.updateHttpClientConfig).toHaveBeenCalledWith("logger", logger);
+      expect(handler.updateHttpClientConfig).toHaveBeenCalledWith(FALLBACK_LOGGER, logger);
+    });
+
+    it("does not assign the public logger key, so an explicit handler logger is never overwritten", () => {
+      const handler = createMockHandler();
+      const logger = createMockLogger();
+
+      getHttpHandlerExtensionConfiguration({ httpHandler: handler, logger } as any);
+
+      expect(handler.updateHttpClientConfig).not.toHaveBeenCalledWith("logger", expect.anything());
+      expect(handler.updateHttpClientConfig).toHaveBeenCalledTimes(1);
     });
 
     it("does not call updateHttpClientConfig when logger is not set", () => {
@@ -41,6 +52,14 @@ describe("getHttpHandlerExtensionConfiguration", () => {
 
       // should not throw
       getHttpHandlerExtensionConfiguration({ logger } as any);
+    });
+
+    it("does not throw for a handler that predates updateHttpClientConfig", () => {
+      const logger = createMockLogger();
+      const legacyHandler = { metadata: {}, handle: vi.fn() };
+
+      // should not throw
+      getHttpHandlerExtensionConfiguration({ httpHandler: legacyHandler, logger } as any);
     });
   });
 });
