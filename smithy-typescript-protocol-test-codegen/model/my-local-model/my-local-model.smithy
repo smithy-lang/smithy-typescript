@@ -135,6 +135,7 @@ service XYZService {
         camelCaseOperation
         HttpLabelCommand
         HostPrefixOperation
+        ValidatedOperation
     ]
     errors: [
         MainServiceLinkedError
@@ -421,4 +422,64 @@ structure HostPrefixOperationInput {
     @required
     @hostLabel
     AccountId: String
+}
+
+/// Operation that demonstrates various constraint traits for validation testing.
+@http(method: "POST", uri: "/validated", code: 200)
+operation ValidatedOperation {
+    input: ValidatedInput
+    output: ValidatedOutput
+}
+
+@input
+structure ValidatedInput {
+    /// Must be between 1 and 100 characters.
+    @length(min: 1, max: 100)
+    username: String
+
+    /// Must be between 1 and 150 (inclusive).
+    @range(min: 1, max: 150)
+    age: Integer
+
+    /// Must match an email-like pattern.
+    @pattern("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+    email: String
+
+    /// A list that must have between 1 and 5 items.
+    @length(min: 1, max: 5)
+    tags: TagList
+
+    /// A list where each item must be unique.
+    uniqueTags: UniqueTagList
+
+    /// Nested structure with its own constraints.
+    address: ConstrainedAddress
+}
+
+@output
+structure ValidatedOutput {
+    message: String
+}
+
+list TagList {
+    member: Tag
+}
+
+@uniqueItems
+list UniqueTagList {
+    member: Tag
+}
+
+/// Each tag must be 1-50 characters.
+@length(min: 1, max: 50)
+string Tag
+
+structure ConstrainedAddress {
+    /// Zip code must be exactly 5 digits.
+    @pattern("^[0-9]{5}$")
+    zipCode: String
+
+    /// State abbreviation must be exactly 2 characters.
+    @length(min: 2, max: 2)
+    state: String
 }

@@ -3,7 +3,12 @@ import type * as schema from "@smithy/core/schema";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { RestServerProtocol } from "./RestServerProtocol";
 import { SerializationException } from "../../errors";
-import type { HttpRequest as IHttpRequest, HttpResponse as IHttpResponse, $OperationSchema } from "@smithy/types";
+import type {
+  HttpRequest as IHttpRequest,
+  HttpResponse as IHttpResponse,
+  $OperationSchema,
+  StaticOperationSchema,
+} from "@smithy/types";
 
 vi.mock("@smithy/core/schema", async (importOriginal) => {
   const actual = await importOriginal<typeof schema>();
@@ -56,7 +61,7 @@ class TestRestProtocol extends RestServerProtocol {
   }
 
   // Expose protected for testing.
-  public testExtractPathLabels(schema: $OperationSchema, path: string) {
+  public testExtractPathLabels(schema: StaticOperationSchema, path: string) {
     return this.extractPathLabels(schema, path);
   }
 }
@@ -90,14 +95,8 @@ describe("RestServerProtocol", () => {
   });
 
   describe("extractPathLabels", () => {
-    function makeOpSchema(uri: string): $OperationSchema {
-      return {
-        namespace: "test",
-        name: "TestOp",
-        traits: { http: ["GET", uri, 200] },
-        input: {},
-        output: {},
-      } as unknown as $OperationSchema;
+    function makeOpSchema(uri: string): StaticOperationSchema {
+      return [9, "test", "TestOp", { http: ["GET", uri, 200] }, "unit", "unit"] satisfies StaticOperationSchema;
     }
 
     it("extracts a single label", () => {
@@ -134,7 +133,7 @@ describe("RestServerProtocol", () => {
     });
 
     it("returns empty when no http trait", () => {
-      const schema = { namespace: "t", name: "Op", traits: {}, input: {}, output: {} } as unknown as $OperationSchema;
+      const schema = [9, "t", "Op", 0, "unit", "unit"] satisfies StaticOperationSchema;
       expect(protocol.testExtractPathLabels(schema, "/x")).toEqual({});
     });
 
@@ -167,13 +166,14 @@ describe("RestServerProtocol", () => {
 
       const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
 
-      const opSchema = {
-        input: {},
-        output: {},
-        traits: { http: ["GET", "/test", 200] },
-        namespace: "test",
-        name: "Op",
-      } as unknown as $OperationSchema;
+      const opSchema = [
+        9,
+        "test",
+        "Op",
+        { http: ["GET", "/test", 200] },
+        "unit",
+        "unit",
+      ] satisfies StaticOperationSchema;
 
       const request = makeRequest({ headers: { "x-my-header": "some-value" }, path: "/test" });
       const result: any = await protocol.deserializeRequest(opSchema, makeContext(), request);
@@ -205,13 +205,14 @@ describe("RestServerProtocol", () => {
 
       const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
 
-      const opSchema = {
-        input: {},
-        output: {},
-        traits: { http: ["GET", "/test", 200] },
-        namespace: "test",
-        name: "Op2",
-      } as unknown as $OperationSchema;
+      const opSchema = [
+        9,
+        "test",
+        "Op2",
+        { http: ["GET", "/test", 200] },
+        "unit",
+        "unit",
+      ] satisfies StaticOperationSchema;
 
       const request = makeRequest({ query: { limit: "10" }, path: "/test" });
       const result: any = await protocol.deserializeRequest(opSchema, makeContext(), request);
@@ -242,13 +243,14 @@ describe("RestServerProtocol", () => {
 
       const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
 
-      const opSchema = {
-        input: {},
-        output: {},
-        traits: { http: ["GET", "/test", 200] },
-        namespace: "test",
-        name: "Op3",
-      } as unknown as $OperationSchema;
+      const opSchema = [
+        9,
+        "test",
+        "Op3",
+        { http: ["GET", "/test", 200] },
+        "unit",
+        "unit",
+      ] satisfies StaticOperationSchema;
 
       const request = makeRequest({ query: { ids: ["1", "2", "3"] }, path: "/test" });
       const result: any = await protocol.deserializeRequest(opSchema, makeContext(), request);
@@ -280,13 +282,14 @@ describe("RestServerProtocol", () => {
 
       const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
 
-      const opSchema = {
-        input: {},
-        output: {},
-        traits: { http: ["GET", "/test", 200] },
-        namespace: "test",
-        name: "Op4",
-      } as unknown as $OperationSchema;
+      const opSchema = [
+        9,
+        "test",
+        "Op4",
+        { http: ["GET", "/test", 200] },
+        "unit",
+        "unit",
+      ] satisfies StaticOperationSchema;
 
       const request = makeRequest({
         headers: { "x-meta-color": "red", "x-meta-size": "large", authorization: "Bearer tok" },
@@ -318,13 +321,14 @@ describe("RestServerProtocol", () => {
 
       const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
 
-      const opSchema = {
-        input: {},
-        output: {},
-        traits: { http: ["POST", "/test", 200] },
-        namespace: "test",
-        name: "Op5",
-      } as unknown as $OperationSchema;
+      const opSchema = [
+        9,
+        "test",
+        "Op5",
+        { http: ["POST", "/test", 200] },
+        "unit",
+        "unit",
+      ] satisfies StaticOperationSchema;
 
       const request = makeRequest({ path: "/test", method: "POST" });
       await expect(protocol.deserializeRequest(opSchema, makeContext(), request)).rejects.toBeInstanceOf(
@@ -349,13 +353,14 @@ describe("RestServerProtocol", () => {
 
       const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
 
-      const opSchema = {
-        input: {},
-        output: {},
-        traits: { http: ["POST", "/test", 200] },
-        namespace: "test",
-        name: "Op6",
-      } as unknown as $OperationSchema;
+      const opSchema = [
+        9,
+        "test",
+        "Op5",
+        { http: ["POST", "/test", 200] },
+        "unit",
+        "unit",
+      ] satisfies StaticOperationSchema;
 
       const request = makeRequest({ path: "/test", method: "POST", body: fakeStream } as any);
       const result: any = await protocol.deserializeRequest(opSchema, makeContext(), request);

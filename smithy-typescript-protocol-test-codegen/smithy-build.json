@@ -139,6 +139,29 @@
         }
       }
     },
+    "my-local-model-schema-server": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["org.xyz.v1#XYZService", "org.xyz.v1#UnusedService", "org.xyz.secondary#TertiaryService"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-server-codegen": {
+          "service": "org.xyz.v1#XYZService",
+          "package": "xyz-schema-server",
+          "packageManager": "npm",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "private": true
+          },
+          "generateServerSchemas": true,
+          "disableDefaultValidation": false
+        }
+      }
+    },
     "types-only": {
       "plugins": {
         "typescript-codegen": {

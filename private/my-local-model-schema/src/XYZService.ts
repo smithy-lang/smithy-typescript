@@ -32,6 +32,11 @@ import {
   type TradeEventStreamCommandOutput,
   TradeEventStreamCommand,
 } from "./commands/TradeEventStreamCommand";
+import {
+  type ValidatedOperationCommandInput,
+  type ValidatedOperationCommandOutput,
+  ValidatedOperationCommand,
+} from "./commands/ValidatedOperationCommand";
 import type { HaltError } from "./models/errors";
 import type { XYZServiceSyntheticServiceException } from "./models/XYZServiceSyntheticServiceException";
 import { paginatecamelCaseOperation as paginateCamelCaseOperation } from "./pagination/camelCaseOperationPaginator";
@@ -47,6 +52,7 @@ const commands = {
   GetNumbersCommand,
   HostPrefixOperationCommand,
   TradeEventStreamCommand,
+  ValidatedOperationCommand,
 };
 const paginators = {
   paginateCamelCaseOperation,
@@ -145,6 +151,24 @@ export interface XYZService {
     args: TradeEventStreamCommandInput,
     options: __HttpHandlerOptions,
     cb: (err: any, data?: TradeEventStreamCommandOutput) => void
+  ): void;
+
+  /**
+   * @see {@link ValidatedOperationCommand}
+   */
+  validatedOperation(): Promise<ValidatedOperationCommandOutput>;
+  validatedOperation(
+    args: ValidatedOperationCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<ValidatedOperationCommandOutput>;
+  validatedOperation(
+    args: ValidatedOperationCommandInput,
+    cb: (err: any, data?: ValidatedOperationCommandOutput) => void
+  ): void;
+  validatedOperation(
+    args: ValidatedOperationCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: ValidatedOperationCommandOutput) => void
   ): void;
 
   /**

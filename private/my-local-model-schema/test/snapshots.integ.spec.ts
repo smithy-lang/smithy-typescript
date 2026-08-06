@@ -19,6 +19,8 @@ import {
   RetryableError$,
   TradeEventStream$,
   TradeEventStreamCommand,
+  ValidatedOperation$,
+  ValidatedOperationCommand,
   XYZServiceClient,
   XYZServiceServiceException$,
 } from "../src";
@@ -46,6 +48,7 @@ describe("XYZServiceClient" + ` (${mode})`, () => {
       [GetNumbers$, GetNumbersCommand],
       [HostPrefixOperation$, HostPrefixOperationCommand],
       [TradeEventStream$, TradeEventStreamCommand],
+      [ValidatedOperation$, ValidatedOperationCommand],
     ]),
     errors: [
       CodedThrottlingError$,

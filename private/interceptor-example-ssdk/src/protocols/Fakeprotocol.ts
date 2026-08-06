@@ -1,11 +1,4 @@
 // smithy-typescript generated code
-import {
-  acceptMatches as __acceptMatches,
-  NotAcceptableException as __NotAcceptableException,
-  ServerSerdeContext,
-  SmithyFrameworkException as __SmithyFrameworkException,
-  UnsupportedMediaTypeException as __UnsupportedMediaTypeException,
-} from "@smithy/server-common";
 import { isSerializableHeaderValue, map } from "@smithy/core/client";
 import { collectBody, HttpRequest as __HttpRequest, HttpResponse as __HttpResponse } from "@smithy/core/protocols";
 import {
@@ -13,6 +6,13 @@ import {
   expectNonNull as __expectNonNull,
   expectObject as __expectObject,
 } from "@smithy/core/serde";
+import {
+  acceptMatches as __acceptMatches,
+  NotAcceptableException as __NotAcceptableException,
+  ServerSerdeContext,
+  SmithyFrameworkException as __SmithyFrameworkException,
+  UnsupportedMediaTypeException as __UnsupportedMediaTypeException,
+} from "@smithy/server-common";
 import {
   type Endpoint as __Endpoint,
   type ResponseMetadata as __ResponseMetadata,

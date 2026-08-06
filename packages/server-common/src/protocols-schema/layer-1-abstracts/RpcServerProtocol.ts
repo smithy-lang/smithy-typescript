@@ -1,11 +1,10 @@
 import { NormalizedSchema } from "@smithy/core/schema";
 import { collectBody, HttpResponse } from "@smithy/core/protocols";
 import type {
-  HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
-  $OperationSchema,
   SerdeFunctions,
+  StaticOperationSchema,
 } from "@smithy/types";
 import { HttpServerProtocol } from "../layer-0-interface-and-base/HttpServerProtocol";
 
@@ -19,14 +18,14 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
    * Deserializes an RPC request. The entire input is in the body.
    */
   public override async deserializeRequest<Input extends object>(
-    operationSchema: $OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    context: SerdeFunctions,
     request: IHttpRequest
   ): Promise<Input> {
     this.validateContentType(request);
     this.validateAccept(request);
 
-    const ns = NormalizedSchema.of(operationSchema.input);
+    const ns = NormalizedSchema.of(operationSchema[4]);
 
     if (ns.getSchema() === "unit") {
       // discard body stream.
@@ -48,11 +47,11 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
    * Serializes a successful RPC response. The entire output is in the body.
    */
   protected override async serializeSuccess<Output extends object>(
-    operationSchema: $OperationSchema,
-    _context: HandlerExecutionContext & SerdeFunctions,
+    operationSchema: StaticOperationSchema,
+    _context: SerdeFunctions,
     output: Output
   ): Promise<IHttpResponse> {
-    const ns = NormalizedSchema.of(operationSchema.output);
+    const ns = NormalizedSchema.of(operationSchema[5]);
     const schema = ns.getSchema();
 
     this.serializer.write(schema, output);
@@ -72,8 +71,8 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
    * The error is serialized as a document body with __type discriminator.
    */
   protected override async serializeError<E extends Error>(
-    _operationSchema: $OperationSchema,
-    _context: HandlerExecutionContext & SerdeFunctions,
+    _operationSchema: StaticOperationSchema,
+    _context: SerdeFunctions,
     error: E
   ): Promise<IHttpResponse> {
     const errorName = (error as any).name ?? "UnknownError";

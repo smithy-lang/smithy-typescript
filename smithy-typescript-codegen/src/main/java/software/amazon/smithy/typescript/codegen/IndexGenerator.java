@@ -50,8 +50,24 @@ final class IndexGenerator {
         }
 
         if (settings.generateServerSdk() && protocolGenerator != null) {
-            writeProtocolExports(protocolGenerator, writer);
-            writer.write("export * from \"./server/index\";");
+            if (
+                !SchemaGenerationAllowlist.allows(
+                    settings.getOptionalService().orElse(null),
+                    settings
+                )
+            ) {
+                writeProtocolExports(protocolGenerator, writer);
+            }
+            boolean schemaMode = SchemaGenerationAllowlist.allows(
+                settings.getOptionalService().orElse(null),
+                settings
+            );
+            if (schemaMode) {
+                String serviceName = settings.getService(model).getId().getName();
+                writer.write("export * from \"./server/$LHandler\";", serviceName);
+            } else {
+                writer.write("export * from \"./server/index\";");
+            }
         }
 
         if (

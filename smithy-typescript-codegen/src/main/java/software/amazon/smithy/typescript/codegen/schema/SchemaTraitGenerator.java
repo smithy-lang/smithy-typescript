@@ -25,7 +25,10 @@ import software.amazon.smithy.model.traits.HttpResponseCodeTrait;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.traits.IdempotencyTokenTrait;
 import software.amazon.smithy.model.traits.JsonNameTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.MediaTypeTrait;
+import software.amazon.smithy.model.traits.PatternTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.RequiresLengthTrait;
 import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.model.traits.SparseTrait;
@@ -33,6 +36,7 @@ import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.model.traits.TimestampFormatTrait;
 import software.amazon.smithy.model.traits.Trait;
+import software.amazon.smithy.model.traits.UniqueItemsTrait;
 import software.amazon.smithy.model.traits.XmlAttributeTrait;
 import software.amazon.smithy.model.traits.XmlFlattenedTrait;
 import software.amazon.smithy.model.traits.XmlNameTrait;
@@ -117,6 +121,18 @@ public class SchemaTraitGenerator {
             }
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {
             return SchemaTraitExtension.INSTANCE.render(trait);
+        } else if (trait instanceof LengthTrait lengthTrait) {
+            String min = lengthTrait.getMin().map(Objects::toString).orElse("undefined");
+            String max = lengthTrait.getMax().map(Objects::toString).orElse("undefined");
+            return "[%s, %s]".formatted(min, max);
+        } else if (trait instanceof RangeTrait rangeTrait) {
+            String min = rangeTrait.getMin().map(v -> v.toString()).orElse("undefined");
+            String max = rangeTrait.getMax().map(v -> v.toString()).orElse("undefined");
+            return "[%s, %s]".formatted(min, max);
+        } else if (trait instanceof PatternTrait patternTrait) {
+            return stringStore.var(patternTrait.getValue());
+        } else if (trait instanceof UniqueItemsTrait) {
+            return ANNOTATION_TRAIT_VALUE;
         }
 
         String name = """
