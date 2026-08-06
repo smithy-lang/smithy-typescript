@@ -1,6 +1,5 @@
 // smithy-typescript generated code
-import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
-import { type SchemaServiceHandlerOptions, SchemaServiceHandler } from "@smithy/server-common";
+import { type SchemaServiceHandlerOptions, type ServerRequestContext, SchemaServiceHandler } from "@smithy/server-common";
 import type { StaticOperationSchema } from "@smithy/types";
 
 import type {
@@ -43,17 +42,15 @@ const OPERATION_SCHEMAS: Record<string, StaticOperationSchema> = {
  *
  */
 export class XYZServiceHandler<Context = {}> extends SchemaServiceHandler<Context> {
-  constructor(options: {
-    protocols: SchemaServiceHandlerOptions<Context>["protocols"];
+  constructor(options: SchemaServiceHandlerOptions<Context> & {
     handlers: {
-      HttpLabelCommand: (input: HttpLabelCommandInput, context: Context) => Promise<HttpLabelCommandOutput>;
-      camelCaseOperation: (input: CamelCaseOperationInput, context: Context) => Promise<CamelCaseOperationOutput>;
-      GetNumbers: (input: GetNumbersRequest, context: Context) => Promise<GetNumbersResponse>;
-      HostPrefixOperation: (input: HostPrefixOperationInput, context: Context) => Promise<Unit>;
-      TradeEventStream: (input: TradeEventStreamRequest, context: Context) => Promise<TradeEventStreamResponse>;
-      ValidatedOperation: (input: ValidatedInput, context: Context) => Promise<ValidatedOutput>;
+      HttpLabelCommand: (input: HttpLabelCommandInput, context: ServerRequestContext, userContext: Context) => Promise<HttpLabelCommandOutput>;
+      camelCaseOperation: (input: CamelCaseOperationInput, context: ServerRequestContext, userContext: Context) => Promise<CamelCaseOperationOutput>;
+      GetNumbers: (input: GetNumbersRequest, context: ServerRequestContext, userContext: Context) => Promise<GetNumbersResponse>;
+      HostPrefixOperation: (input: HostPrefixOperationInput, context: ServerRequestContext, userContext: Context) => Promise<Unit>;
+      TradeEventStream: (input: TradeEventStreamRequest, context: ServerRequestContext, userContext: Context) => Promise<TradeEventStreamResponse>;
+      ValidatedOperation: (input: ValidatedInput, context: ServerRequestContext, userContext: Context) => Promise<ValidatedOutput>;
     };
-    router?: SchemaServiceHandlerOptions<Context>["router"];
   }) {
     super(options);
   }

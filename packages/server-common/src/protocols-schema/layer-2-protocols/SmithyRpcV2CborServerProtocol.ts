@@ -1,7 +1,7 @@
 import { CborCodec } from "@smithy/core/cbor";
 import type { HttpRequest as IHttpRequest, HttpResponse as IHttpResponse } from "@smithy/types";
 import { RpcServerProtocol } from "../layer-1-abstracts/RpcServerProtocol";
-import { SerializationException } from "../../errors";
+import { SerializationException } from "../../validation/errors";
 
 /**
  * Server protocol implementation for Smithy RPCv2 CBOR.

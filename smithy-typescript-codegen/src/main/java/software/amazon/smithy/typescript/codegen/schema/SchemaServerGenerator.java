@@ -13,7 +13,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -81,18 +80,6 @@ public class SchemaServerGenerator {
         // Import base class from server-common.
         writer.addImport("SchemaServiceHandler", null, TypeScriptDependency.SERVER_COMMON);
         writer.addTypeImport("SchemaServiceHandlerOptions", null, TypeScriptDependency.SERVER_COMMON);
-        writer.addTypeImportSubmodule(
-            "HttpRequest",
-            null,
-            TypeScriptDependency.SMITHY_CORE,
-            SmithyCoreSubmodules.PROTOCOLS
-        );
-        writer.addTypeImportSubmodule(
-            "HttpResponse",
-            null,
-            TypeScriptDependency.SMITHY_CORE,
-            SmithyCoreSubmodules.PROTOCOLS
-        );
         writer.addTypeImport("StaticOperationSchema", null, TypeScriptDependency.SMITHY_TYPES);
 
         Path schemasPath = Paths.get(".", "src", "schemas", "schemas_0");
@@ -171,10 +158,7 @@ public class SchemaServerGenerator {
     }
 
     private void writeConstructor(String serviceName, Set<OperationShape> operations) {
-        writer.openBlock("constructor(options: {", "}) {", () -> {
-            writer.write(
-                "protocols: SchemaServiceHandlerOptions<Context>[\"protocols\"];"
-            );
+        writer.openBlock("constructor(options: SchemaServiceHandlerOptions<Context> & {", "}) {", () -> {
             writer.write(
                 "handlers: {"
             );
@@ -196,7 +180,6 @@ public class SchemaServerGenerator {
             }
             writer.dedent();
             writer.write("};");
-            writer.write("router?: SchemaServiceHandlerOptions<Context>[\"router\"];");
         });
         writer.indent();
         writer.write("super(options);");

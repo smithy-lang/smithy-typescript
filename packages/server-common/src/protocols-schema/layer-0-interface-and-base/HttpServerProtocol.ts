@@ -9,11 +9,11 @@ import type {
   StaticOperationSchema,
 } from "@smithy/types";
 import { HttpResponse } from "@smithy/core/protocols";
-import type { SmithyFrameworkException } from "../../errors";
-import { isFrameworkException } from "../../errors";
-import { ServiceException } from "../../errors";
-import { NotAcceptableException, UnsupportedMediaTypeException } from "../../errors";
-import { acceptMatches } from "../../accept";
+import type { SmithyFrameworkException } from "../../validation/errors";
+import { isFrameworkException } from "../../validation/errors";
+import { ServiceException } from "../../validation/errors";
+import { NotAcceptableException, UnsupportedMediaTypeException } from "../../validation/errors";
+import { acceptMatches } from "../../validation/accept";
 
 /**
  * @internal

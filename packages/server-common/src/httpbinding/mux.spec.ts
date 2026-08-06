@@ -16,7 +16,7 @@
 import { describe, expect, it } from "vitest";
 import { HttpRequest } from "@smithy/core/protocols";
 
-import { HttpBindingMux, UriSpec } from ".";
+import { HttpBindingMux, UriSpec } from "./mux";
 
 describe("simple matching", () => {
   const router = new HttpBindingMux<
