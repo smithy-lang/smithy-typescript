@@ -8,10 +8,16 @@ import {
   HttpLabelCommandCommand,
   ValidatedOperationCommand,
 } from "xyz-schema";
-import { SmithyRpcV2CborServerProtocol, AwsRestJsonServerProtocol, AwsJsonRpcServerProtocol } from "../src/index";
+import {
+  SmithyRpcV2CborServerProtocol,
+  AwsRestJsonServerProtocol,
+  AwsJsonRpcServerProtocol,
+  SchemaServiceHandler,
+} from "../src/index";
 import type { HttpResponse } from "@smithy/core/protocols";
 import { HttpRequest } from "@smithy/core/protocols";
 import { AwsRestJsonProtocol, AwsJson1_0Protocol } from "@aws-sdk/core/protocols";
+import { GetNumbers$, camelCaseOperation$ } from "xyz-schema-server";
 
 /**
  * End-to-end integration test that stands up a real Node.js HTTP server
@@ -498,6 +504,129 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
         "modifyBeforeSerialization",
         "modifyBeforeCompletion",
       ]);
+    });
+  });
+
+  describe("direct SchemaServiceHandler instantiation (no subclass)", () => {
+    let directServer: http.Server;
+    let directClient: XYZServiceClient;
+    let directBaseUrl: string;
+
+    beforeAll(async () => {
+      const directHandler = new SchemaServiceHandler({
+        protocols: [new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" })],
+        operationSchemas: [GetNumbers$, camelCaseOperation$],
+        handlers: {
+          GetNumbers: async (input: any) => {
+            const inputNumbers = input.numbers ?? {};
+            const tripled = Object.values(inputNumbers).map((n: any) => n * 3);
+            return { numbers: tripled };
+          },
+          camelCaseOperation: async (input: any) => {
+            return { token: `direct-${input.token ?? "none"}` };
+          },
+        },
+      });
+
+      directServer = http.createServer(async (req, res) => {
+        const chunks: Buffer[] = [];
+        for await (const chunk of req) {
+          chunks.push(chunk);
+        }
+        const body = Buffer.concat(chunks);
+
+        const httpRequest = new HttpRequest({
+          method: req.method ?? "POST",
+          path: req.url ?? "/",
+          headers: Object.fromEntries(
+            Object.entries(req.headers)
+              .filter(([, v]) => v !== undefined)
+              .map(([k, v]) => [k, Array.isArray(v) ? v.join(", ") : v!])
+          ),
+          body,
+        });
+
+        const httpResponse = await directHandler.handle(httpRequest, {});
+        res.writeHead(httpResponse.statusCode, httpResponse.headers);
+        if (httpResponse.body) {
+          res.end(httpResponse.body);
+        } else {
+          res.end();
+        }
+      });
+
+      await new Promise<void>((resolve) => {
+        directServer.listen(0, "127.0.0.1", () => resolve());
+      });
+
+      const addr = directServer.address() as { port: number };
+      directBaseUrl = `http://127.0.0.1:${addr.port}`;
+
+      directClient = new XYZServiceClient({
+        endpoint: directBaseUrl,
+        apiKey: { apiKey: "test-key" },
+      });
+    });
+
+    afterAll(async () => {
+      directClient.destroy();
+      await new Promise<void>((resolve, reject) => {
+        directServer.close((err) => (err ? reject(err) : resolve()));
+      });
+    });
+
+    it("GetNumbers: triples input numbers", async () => {
+      const response = await directClient.send(new GetNumbersCommand({ numbers: { a: 2, b: 5 } }));
+      expect(response.numbers).toEqual([6, 15]);
+    });
+
+    it("camelCaseOperation: prefixes token with 'direct-'", async () => {
+      const response = await directClient.send(new CamelCaseOperationCommand({ token: "hello" }));
+      expect(response.token).toBe("direct-hello");
+    });
+
+    it("returns error for operations not in the subset", async () => {
+      // ValidatedOperation is not registered on this handler
+      await expect(
+        directClient.send(
+          new ValidatedOperationCommand({
+            username: "alice",
+            age: 30,
+            email: "a@b.com",
+            tags: ["x"],
+            address: { zipCode: "12345", state: "WA" },
+          })
+        )
+      ).rejects.toThrow();
+    });
+
+    it("dynamically adds an operation via addOperation", async () => {
+      const dynamicHandler = new SchemaServiceHandler({
+        protocols: [new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" })],
+        operationSchemas: [GetNumbers$],
+        handlers: {
+          GetNumbers: async () => ({ numbers: [99] }),
+        },
+      });
+
+      // Dynamically add camelCaseOperation
+      dynamicHandler.addOperation(camelCaseOperation$, async (input: any) => ({
+        token: `added-${input.token ?? ""}`,
+      }));
+
+      const request = new HttpRequest({
+        method: "POST",
+        path: `/service/org.xyz.v1%23XYZService/operation/camelCaseOperation`,
+        headers: {
+          "content-type": "application/cbor",
+          "smithy-protocol": "rpc-v2-cbor",
+          accept: "application/cbor",
+        },
+        body: new Uint8Array(0),
+      });
+
+      const response = await dynamicHandler.handle(request, {});
+      expect(response.statusCode).toBeLessThan(400);
     });
   });
 });
