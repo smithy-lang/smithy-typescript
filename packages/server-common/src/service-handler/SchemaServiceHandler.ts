@@ -115,10 +115,12 @@ export interface SchemaServiceHandlerOptions<Context = {}> {
  *
  * @example
  * ```ts
+ * import { MyOperationShape$ } from ...;
+ *
  * const handler = new SchemaServiceHandler({
  *   protocols: [new SmithyRpcV2CborServerProtocol(...)],
- *   operationSchemas: { MyOp: MyOp$ },
- *   handlers: { MyOp: async (input, ctx) => ({ ... }) },
+ *   operationSchemas: [MyOperationShape$],
+ *   handlers: { MyOperationShape: async (input, ctx) => ({ ... }) },
  * });
  * handler.withMetrics(myFactory).addInterceptor(myInterceptor);
  * const response = await handler.handle(request, {});
