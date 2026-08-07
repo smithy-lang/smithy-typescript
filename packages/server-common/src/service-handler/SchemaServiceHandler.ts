@@ -65,6 +65,23 @@ export interface SchemaServiceHandlerOptions<Context = {}> {
   handlers: Record<string, (input: any, context: ServerRequestContext, userContext: Context) => Promise<any>>;
 
   /**
+   * Operation schemas for request routing, serde, and validation.
+   * The handler derives the operation name from each schema (index 2 of the tuple).
+   *
+   * @defaultValue []
+   */
+  operationSchemas?: StaticOperationSchema[];
+
+  /**
+   * Whether input validation is enabled. When `true` (the default), the
+   * handler validates deserialized input against schema constraints before
+   * invoking the operation handler.
+   *
+   * @defaultValue true
+   */
+  validationEnabled?: boolean;
+
+  /**
    * Custom router. When omitted the handler uses {@link combinedRouter},
    * which matches RPC-style paths like `/service/{ns}/operation/{op}`.
    */
@@ -89,18 +106,21 @@ export interface SchemaServiceHandlerOptions<Context = {}> {
 }
 
 /**
- * Base class for schema-based service handlers.
+ * Schema-based service handler.
  *
- * Generated handler subclasses extend this to supply typed constructor
- * signatures and operation schemas. The base class provides the request
- * pipeline: protocol resolution, routing, auth, deserialization, validation,
- * invocation, serialization, interceptors, and metrics.
+ * Provides the full request pipeline: protocol resolution, routing, auth,
+ * deserialization, validation, invocation, serialization, interceptors, and
+ * metrics. Can be instantiated directly or extended by generated subclasses
+ * that supply typed constructor signatures.
  *
  * @example
  * ```ts
- * const handler = new MyServiceHandler({
+ * import { MyOperationShape$ } from ...;
+ *
+ * const handler = new SchemaServiceHandler({
  *   protocols: [new SmithyRpcV2CborServerProtocol(...)],
- *   handlers: { MyOp: async (input, ctx) => ({ ... }) },
+ *   operationSchemas: [MyOperationShape$],
+ *   handlers: { MyOperationShape: async (input, ctx) => ({ ... }) },
  * });
  * handler.withMetrics(myFactory).addInterceptor(myInterceptor);
  * const response = await handler.handle(request, {});
@@ -108,13 +128,15 @@ export interface SchemaServiceHandlerOptions<Context = {}> {
  *
  * @public
  */
-export abstract class SchemaServiceHandler<Context = {}> {
+export class SchemaServiceHandler<Context = {}> {
   private router: RouterFunction;
   private readonly protocols: Record<string, ServerProtocol<HttpRequest, HttpResponse>>;
+  private readonly operationSchemas: Record<string, StaticOperationSchema>;
   private readonly handlers: Record<
     string,
     (input: any, context: ServerRequestContext, userContext: Context) => Promise<any>
   >;
+  private readonly validationEnabled: boolean;
   private interceptors: ServerInterceptor<Context>[] = [];
   private authSchemes: AuthScheme<Context>[] = [];
   private metricsRecorderFactory?: MetricsRecorderFactory<any>;
@@ -126,20 +148,39 @@ export abstract class SchemaServiceHandler<Context = {}> {
     for (const protocol of options.protocols) {
       this.protocols[protocol.getShapeId()] = protocol;
     }
-    this.handlers = options.handlers;
+    this.operationSchemas = {};
+    for (const schema of options.operationSchemas ?? []) {
+      this.operationSchemas[schema[2]] = schema;
+    }
+    this.handlers = { ...options.handlers };
+    this.validationEnabled = options.validationEnabled ?? true;
     this.router = options.router ?? createCombinedRouter(this.protocols);
     this.logger = options.logger ?? new NoOpLogger();
     this.onError = options.onError;
+
+    // Validate that every operation schema has a corresponding handler.
+    const schemaKeys = Object.keys(this.operationSchemas);
+    const handlerKeys = Object.keys(this.handlers);
+    const missingHandlers = schemaKeys.filter((op) => !(op in this.handlers));
+    const orphanHandlers = handlerKeys.filter((op) => !(op in this.operationSchemas));
+    if (missingHandlers.length > 0) {
+      throw new Error(
+        `@smithy/server-common::SchemaServiceHandler: the following operations are missing handlers: ${missingHandlers.join(", ")}`
+      );
+    }
+    if (orphanHandlers.length > 0) {
+      throw new Error(
+        `@smithy/server-common::SchemaServiceHandler: the following handlers have no corresponding operation schema: ${orphanHandlers.join(", ")}`
+      );
+    }
   }
 
   /**
    * Handles an incoming HTTP request through the full pipeline:
    * route → authenticate → deserialize → validate → invoke → serialize.
-   *
-   * @public
    */
   public async handle(request: HttpRequest, context: Context): Promise<HttpResponse> {
-    const operationSchemas = this.getOperationSchemas();
+    const operationSchemas = this.operationSchemas;
     const routeResult = this.router(request, this.protocols, operationSchemas, this.logger);
 
     if (!routeResult) {
@@ -239,7 +280,7 @@ export abstract class SchemaServiceHandler<Context = {}> {
       }
 
       // Validate
-      if (this.isValidationEnabled()) {
+      if (this.validationEnabled) {
         recordTimedSync(recorder, "Validate", () => {
           const inputSchema = operationSchema[4];
           if (inputSchema) {
@@ -397,8 +438,6 @@ export abstract class SchemaServiceHandler<Context = {}> {
   /**
    * Register a metrics recorder factory. The framework creates one recorder
    * per request and records lifecycle timings.
-   *
-   * @public
    */
   public withMetrics<Native>(metricsRecorderFactory: MetricsRecorderFactory<Native>): this {
     this.metricsRecorderFactory = metricsRecorderFactory;
@@ -408,8 +447,6 @@ export abstract class SchemaServiceHandler<Context = {}> {
   /**
    * Register auth schemes. Schemes are tried in registration order; the first
    * to return a non-null {@link Caller} wins.
-   *
-   * @public
    */
   public withAuth(...schemes: AuthScheme<Context>[]): this {
     this.authSchemes.push(...schemes);
@@ -418,8 +455,6 @@ export abstract class SchemaServiceHandler<Context = {}> {
 
   /**
    * Register a single interceptor. Later registrations run before earlier ones.
-   *
-   * @public
    */
   public addInterceptor(interceptor: ServerInterceptor<Context>): this {
     this.interceptors.unshift(interceptor);
@@ -428,8 +463,6 @@ export abstract class SchemaServiceHandler<Context = {}> {
 
   /**
    * Register multiple interceptors. Later registrations run before earlier ones.
-   *
-   * @public
    */
   public addInterceptors(...interceptors: ServerInterceptor<Context>[]): this {
     this.interceptors.unshift(...[...interceptors].reverse());
@@ -438,8 +471,6 @@ export abstract class SchemaServiceHandler<Context = {}> {
 
   /**
    * Replace the router with a custom implementation.
-   *
-   * @public
    */
   public withRouter(router: RouterFunction): this {
     this.router = router;
@@ -447,20 +478,19 @@ export abstract class SchemaServiceHandler<Context = {}> {
   }
 
   /**
-   * Returns the operation schemas for this service.
-   * Generated subclasses implement this to provide the static schema map.
-   *
-   * @internal
+   * Dynamically register an operation schema and its handler.
+   * Throws if an operation with the same name is already registered.
    */
-  protected abstract getOperationSchemas(): Record<string, StaticOperationSchema>;
-
-  /**
-   * Whether input validation is enabled. Generated subclasses override this
-   * to return `false` when `disableDefaultValidation` is set.
-   *
-   * @internal
-   */
-  protected isValidationEnabled(): boolean {
-    return true;
+  public addOperation(
+    schema: StaticOperationSchema,
+    handler: (input: any, context: ServerRequestContext, userContext: Context) => Promise<any>
+  ): this {
+    const operationName = schema[2];
+    if (operationName in this.operationSchemas) {
+      throw new Error(`SchemaServiceHandler: operation "${operationName}" is already registered.`);
+    }
+    this.operationSchemas[operationName] = schema;
+    this.handlers[operationName] = handler;
+    return this;
   }
 }
