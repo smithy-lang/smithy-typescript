@@ -14,10 +14,10 @@ import {
   AwsJsonRpcServerProtocol,
   SchemaServiceHandler,
 } from "../src/index";
-import type { HttpResponse } from "@smithy/core/protocols";
 import { HttpRequest } from "@smithy/core/protocols";
 import { AwsRestJsonProtocol, AwsJson1_0Protocol } from "@aws-sdk/core/protocols";
 import { GetNumbers$, camelCaseOperation$ } from "xyz-schema-server";
+import { convertRequest, writeResponse } from "@smithy/server-node";
 
 /**
  * End-to-end integration test that stands up a real Node.js HTTP server
@@ -78,38 +78,9 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
 
   beforeAll(async () => {
     server = http.createServer(async (req, res) => {
-      const chunks: Buffer[] = [];
-      for await (const chunk of req) {
-        chunks.push(chunk);
-      }
-      const body = Buffer.concat(chunks);
-
-      const httpRequest = new HttpRequest({
-        method: req.method ?? "POST",
-        path: req.url ?? "/",
-        headers: Object.fromEntries(
-          Object.entries(req.headers)
-            .filter(([, v]) => v !== undefined)
-            .map(([k, v]) => [k, Array.isArray(v) ? v.join(", ") : v!])
-        ),
-        body,
-      });
-
-      let httpResponse: HttpResponse;
-      try {
-        httpResponse = await handler.handle(httpRequest, {});
-      } catch (ignored: unknown) {
-        res.writeHead(500);
-        res.end();
-        return;
-      }
-
-      res.writeHead(httpResponse.statusCode, httpResponse.headers);
-      if (httpResponse.body) {
-        res.end(httpResponse.body);
-      } else {
-        res.end();
-      }
+      const httpRequest = convertRequest(req);
+      const httpResponse = await handler.handle(httpRequest, {});
+      writeResponse(httpResponse, res);
     });
 
     await new Promise<void>((resolve) => {
@@ -434,30 +405,9 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       });
 
       interceptorServer = http.createServer(async (req, res) => {
-        const chunks: Buffer[] = [];
-        for await (const chunk of req) {
-          chunks.push(chunk);
-        }
-        const body = Buffer.concat(chunks);
-
-        const httpRequest = new HttpRequest({
-          method: req.method ?? "POST",
-          path: req.url ?? "/",
-          headers: Object.fromEntries(
-            Object.entries(req.headers)
-              .filter(([, v]) => v !== undefined)
-              .map(([k, v]) => [k, Array.isArray(v) ? v.join(", ") : v!])
-          ),
-          body,
-        });
-
+        const httpRequest = convertRequest(req);
         const httpResponse = await interceptorHandler.handle(httpRequest, {});
-        res.writeHead(httpResponse.statusCode, httpResponse.headers);
-        if (httpResponse.body) {
-          res.end(httpResponse.body);
-        } else {
-          res.end();
-        }
+        writeResponse(httpResponse, res);
       });
 
       await new Promise<void>((resolve) => {
@@ -529,30 +479,9 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       });
 
       directServer = http.createServer(async (req, res) => {
-        const chunks: Buffer[] = [];
-        for await (const chunk of req) {
-          chunks.push(chunk);
-        }
-        const body = Buffer.concat(chunks);
-
-        const httpRequest = new HttpRequest({
-          method: req.method ?? "POST",
-          path: req.url ?? "/",
-          headers: Object.fromEntries(
-            Object.entries(req.headers)
-              .filter(([, v]) => v !== undefined)
-              .map(([k, v]) => [k, Array.isArray(v) ? v.join(", ") : v!])
-          ),
-          body,
-        });
-
+        const httpRequest = convertRequest(req);
         const httpResponse = await directHandler.handle(httpRequest, {});
-        res.writeHead(httpResponse.statusCode, httpResponse.headers);
-        if (httpResponse.body) {
-          res.end(httpResponse.body);
-        } else {
-          res.end();
-        }
+        writeResponse(httpResponse, res);
       });
 
       await new Promise<void>((resolve) => {
