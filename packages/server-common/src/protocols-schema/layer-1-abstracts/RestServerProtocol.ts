@@ -7,7 +7,7 @@ import type {
   StaticOperationSchema,
 } from "@smithy/types";
 import { HttpServerProtocol } from "../layer-0-interface-and-base/HttpServerProtocol";
-import { SerializationException } from "../../errors";
+import { SerializationException } from "../../validation/errors";
 
 /**
  * Abstract base for REST (HTTP binding) server protocols.
@@ -29,10 +29,16 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
     context: SerdeFunctions,
     request: IHttpRequest
   ): Promise<Input> {
-    this.validateContentType(request);
-    this.validateAccept(request);
-
     const ns = NormalizedSchema.of(operationSchema[4]);
+
+    // Only validate Content-Type and Accept when the body will be parsed
+    // as the protocol's document format. When @httpPayload targets a blob
+    // or string, the wire content type is determined by the media and is
+    // not constrained to the protocol's default.
+    if (this.bodyIsDocument(ns)) {
+      this.validateContentType(request);
+      this.validateAccept(request);
+    }
     const callerInput: any = {};
 
     // Extract path labels by building a regex from the operation's URI template.
@@ -267,5 +273,35 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
       }
     }
     return result;
+  }
+
+  /**
+   * Determines whether the request body will be parsed as a protocol document.
+   *
+   * Returns `true` when:
+   * - There is no @httpPayload member (body contains non-bound members serialized as a document), or
+   * - @httpPayload targets a structure, union, or document (serialized with the protocol codec).
+   *
+   * Returns `false` when:
+   * - @httpPayload targets a blob or string (raw passthrough, content-type is media-dependent), or
+   * - @httpPayload targets a streaming blob (raw stream passthrough).
+   */
+  protected bodyIsDocument(ns: NormalizedSchema): boolean {
+    for (const [, memberSchema] of ns.structIterator()) {
+      const traits = memberSchema.getMergedTraits();
+      if (traits.httpPayload) {
+        if (memberSchema.isBlobSchema()) {
+          return false;
+        }
+        if (memberSchema.isStreaming()) {
+          return true;
+        }
+        if (memberSchema.isStringSchema()) {
+          return false;
+        }
+        break;
+      }
+    }
+    return true;
   }
 }

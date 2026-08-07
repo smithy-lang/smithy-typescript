@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { SmithyRpcV2CborServerProtocol } from "./SmithyRpcV2CborServerProtocol";
-import { SerializationException, UnsupportedMediaTypeException } from "../../errors";
+import { SerializationException, UnsupportedMediaTypeException } from "../../validation/errors";
 import type { HttpRequest as IHttpRequest, StaticOperationSchema } from "@smithy/types";
 
 function makeRequest(headers: Record<string, string> = {}, body?: any): IHttpRequest {

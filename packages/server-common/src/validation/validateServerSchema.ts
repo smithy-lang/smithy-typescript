@@ -5,6 +5,7 @@
 
 import { NormalizedSchema } from "@smithy/core/schema";
 import { NumericValue } from "@smithy/core/serde";
+import { RE2 } from "re2-wasm";
 import type { $SchemaRef, StaticStructureSchema } from "@smithy/types";
 import type { ServerSchemaTraits } from "./serverSchemaTraits";
 
@@ -170,7 +171,7 @@ function validatePattern(errors: string[], path: string, value: string, traits: 
   if (!pattern) {
     return;
   }
-  if (!new RegExp(pattern, "u").test(value)) {
+  if (!new RE2(pattern, "u").test(value)) {
     errors.push(`${path}: value does not match pattern: ${pattern}.`);
   }
 }

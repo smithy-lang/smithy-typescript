@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type * as schema from "@smithy/core/schema";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { RestServerProtocol } from "./RestServerProtocol";
-import { SerializationException } from "../../errors";
+import { SerializationException } from "../../validation/errors";
 import type {
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
@@ -160,7 +160,7 @@ describe("RestServerProtocol", () => {
       };
       const inputNs = {
         structIterator: function* () {
-          yield ["myHeader", memberSchema] as const;
+          yield ["myHeader", memberSchema];
         },
       };
 
@@ -199,7 +199,7 @@ describe("RestServerProtocol", () => {
       };
       const inputNs = {
         structIterator: function* () {
-          yield ["limit", memberSchema] as const;
+          yield ["limit", memberSchema];
         },
       };
 
@@ -237,7 +237,7 @@ describe("RestServerProtocol", () => {
       };
       const inputNs = {
         structIterator: function* () {
-          yield ["ids", memberSchema] as const;
+          yield ["ids", memberSchema];
         },
       };
 
@@ -276,7 +276,7 @@ describe("RestServerProtocol", () => {
       };
       const inputNs = {
         structIterator: function* () {
-          yield ["metadata", memberSchema] as const;
+          yield ["metadata", memberSchema];
         },
       };
 
@@ -307,26 +307,18 @@ describe("RestServerProtocol", () => {
 
   describe("deserializeRequest - httpPayload", () => {
     it("throws SerializationException for streaming event stream", async () => {
-      const memberSchema = {
-        getMergedTraits: () => ({ httpPayload: 1 }),
-        isStreaming: () => true,
-        isStructSchema: () => true,
-        isBlobSchema: () => false,
-      };
-      const inputNs = {
-        structIterator: function* () {
-          yield ["events", memberSchema] as const;
-        },
-      };
-
-      const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
+      // A streaming union with @httpPayload — the input struct has one member
+      // "events" targeting a union schema with { streaming: 1 }, and the member
+      // itself carries { httpPayload: 1 }.
+      const streamingUnion: any = [4, "test", "Events", { streaming: 1 }, ["a"], [0]];
+      const inputSchema: any = [3, "test", "Input", 0, ["events"], [[() => streamingUnion, { httpPayload: 1 }]]];
 
       const opSchema = [
         9,
         "test",
         "Op5",
         { http: ["POST", "/test", 200] },
-        "unit",
+        () => inputSchema,
         "unit",
       ] satisfies StaticOperationSchema;
 
@@ -334,38 +326,25 @@ describe("RestServerProtocol", () => {
       await expect(protocol.deserializeRequest(opSchema, makeContext(), request)).rejects.toBeInstanceOf(
         SerializationException
       );
-      spy.mockRestore();
     });
 
     it("passes streaming blob body through directly", async () => {
       const fakeStream = Symbol("stream");
-      const memberSchema = {
-        getMergedTraits: () => ({ httpPayload: 1 }),
-        isStreaming: () => true,
-        isStructSchema: () => false,
-        isBlobSchema: () => false,
-      };
-      const inputNs = {
-        structIterator: function* () {
-          yield ["body", memberSchema] as const;
-        },
-      };
-
-      const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(inputNs as any);
+      // 42 is StreamingBlobSchema sentinel. Member has { httpPayload: 1 }.
+      const inputSchema: any = [3, "test", "Input", 0, ["body"], [[42, { httpPayload: 1 }]]];
 
       const opSchema = [
         9,
         "test",
-        "Op5",
+        "Op6",
         { http: ["POST", "/test", 200] },
-        "unit",
+        () => inputSchema,
         "unit",
       ] satisfies StaticOperationSchema;
 
       const request = makeRequest({ path: "/test", method: "POST", body: fakeStream } as any);
       const result: any = await protocol.deserializeRequest(opSchema, makeContext(), request);
       expect(result.body).toBe(fakeStream);
-      spy.mockRestore();
     });
   });
 
@@ -373,7 +352,7 @@ describe("RestServerProtocol", () => {
     it("sets httpResponseCode from output member", async () => {
       const outputNs = {
         structIterator: function* () {
-          yield ["code", { getMergedTraits: () => ({ httpResponseCode: 1 }) }] as const;
+          yield ["code", { getMergedTraits: () => ({ httpResponseCode: 1 }) }];
         },
       };
 
@@ -388,7 +367,7 @@ describe("RestServerProtocol", () => {
     it("lowercases httpHeader names", async () => {
       const outputNs = {
         structIterator: function* () {
-          yield ["etag", { getMergedTraits: () => ({ httpHeader: "ETag" }) }] as const;
+          yield ["etag", { getMergedTraits: () => ({ httpHeader: "ETag" }) }];
         },
       };
 
@@ -411,7 +390,7 @@ describe("RestServerProtocol", () => {
               isStructSchema: () => true,
               isBlobSchema: () => false,
             },
-          ] as const;
+          ];
         },
       };
 
@@ -436,7 +415,7 @@ describe("RestServerProtocol", () => {
               isStructSchema: () => false,
               isBlobSchema: () => false,
             },
-          ] as const;
+          ];
         },
       };
 
@@ -451,8 +430,8 @@ describe("RestServerProtocol", () => {
     it("skips null/undefined output members", async () => {
       const outputNs = {
         structIterator: function* () {
-          yield ["etag", { getMergedTraits: () => ({ httpHeader: "ETag" }) }] as const;
-          yield ["name", { getMergedTraits: () => ({}) }] as const;
+          yield ["etag", { getMergedTraits: () => ({ httpHeader: "ETag" }) }];
+          yield ["name", { getMergedTraits: () => ({}) }];
         },
         getSchema: () => ({}),
       };

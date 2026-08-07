@@ -1,23 +1,13 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { MetricsRecorderFactory, SerdeContext } from "@smithy/types";
 
-import type { ServiceException } from "./errors";
-import type { AuthScheme, ServerInterceptor } from "./interceptors";
-
-/*
- *  Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License").
- *  You may not use this file except in compliance with the License.
- *  A copy of the License is located at
- *
- *   http://aws.amazon.com/apache2.0
- *
- *  or in the "license" file accompanying this file. This file is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- *  express or implied. See the License for the specific language governing
- *  permissions and limitations under the License.
- */
+import type { ServiceException } from "./validation/errors";
+import type { AuthScheme, ServerInterceptor } from "./interceptors/types";
 
 export { HttpBindingMux, UriSpec } from "./httpbinding/mux";
 export type {
@@ -28,7 +18,7 @@ export type {
   QuerySegment,
 } from "./httpbinding/mux";
 
-import * as httpbindingModule from "./httpbinding";
+import * as httpbindingModule from "./httpbinding/mux";
 
 /**
  * Namespace re-export for backward compatibility with generated SSDK code.
@@ -36,7 +26,7 @@ import * as httpbindingModule from "./httpbinding";
  */
 export const httpbinding: typeof httpbindingModule = httpbindingModule;
 
-export { acceptMatches } from "./accept";
+export { acceptMatches } from "./validation/accept";
 
 export {
   ServiceException,
@@ -47,10 +37,10 @@ export {
   NotAcceptableException,
   UnauthenticatedException,
   isFrameworkException,
-} from "./errors";
-export type { SmithyFrameworkException } from "./errors";
+} from "./validation/errors";
+export type { SmithyFrameworkException } from "./validation/errors";
 
-export { recordSafely, recordTimed, recordTimedSync } from "./metrics";
+export { recordSafely, recordTimed, recordTimedSync } from "./metrics/metrics";
 
 export type {
   AuthHook,
@@ -63,7 +53,7 @@ export type {
   RequestHook,
   ResponseHook,
   ServerInterceptor,
-} from "./interceptors";
+} from "./interceptors/types";
 
 export {
   CompositeValidator,
@@ -79,10 +69,9 @@ export {
   PatternValidator,
   RequiredValidator,
   UniqueItemsValidator,
-  RequiredValidationFailure,
-  generateValidationSummary,
-  generateValidationMessage,
-} from "./validation";
+} from "./validation/validators";
+export { RequiredValidationFailure } from "./validation/types";
+export { generateValidationSummary, generateValidationMessage } from "./validation/generateValidationMessage";
 export type {
   EnumValidationFailure,
   IntegerEnumValidationFailure,
@@ -93,12 +82,11 @@ export type {
   ValidationFailure,
   ValidationContext,
   ValidationCustomizer,
-  MultiConstraintValidator,
-  SingleConstraintValidator,
-} from "./validation";
+} from "./validation/types";
+export type { MultiConstraintValidator, SingleConstraintValidator } from "./validation/validators";
 
-export { findDuplicates } from "./unique";
-export type { Input } from "./unique";
+export { findDuplicates } from "./validation/unique";
+export type { Input } from "./validation/unique";
 
 export type { ServerProtocol } from "./protocols-schema/layer-0-interface-and-base/ServerProtocol";
 export {
@@ -108,6 +96,9 @@ export {
 export { RestServerProtocol } from "./protocols-schema/layer-1-abstracts/RestServerProtocol";
 export { RpcServerProtocol } from "./protocols-schema/layer-1-abstracts/RpcServerProtocol";
 export { SmithyRpcV2CborServerProtocol } from "./protocols-schema/layer-2-protocols/SmithyRpcV2CborServerProtocol";
+export { AwsRestJsonServerProtocol } from "./protocols-schema/layer-2-protocols/AwsRestJsonServerProtocol";
+export { AwsJsonRpcServerProtocol } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
+export type { AwsJsonRpcServerProtocolOptions } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
 
 export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 
@@ -156,5 +147,6 @@ export interface Mux<S extends string, O extends string> {
 
 export interface ServerSerdeContext extends Omit<SerdeContext, "endpoint"> {}
 
-export { SchemaServiceHandler, defaultRouter } from "./schema";
-export type { SchemaServiceHandlerOptions, RouterFunction } from "./schema";
+export type { RouterFunction, RouteResult } from "./service-handler/routing";
+export { type SchemaServiceHandlerOptions, SchemaServiceHandler } from "./service-handler/SchemaServiceHandler";
+export type { RequestMetadata, ServerRequestContext } from "./service-handler/SchemaServiceHandler";
