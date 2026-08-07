@@ -11,7 +11,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import type { Readable } from "node:stream";
 
-import { convertRequest } from "./node";
+import { convertRequest } from "./node-http-converters";
 
 let socketPath: string;
 let promiseResolve: ([req, res]: [IncomingMessage, ServerResponse]) => void;
