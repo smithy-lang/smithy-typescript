@@ -2,6 +2,19 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.52.0 (2026-08-07)
+
+### Features
+
+- Added types-only codegen mode driven by Smithy shape closures ([#2158](https://github.com/smithy-lang/smithy-typescript/pull/2158))
+- Enabled creation of RPCv2 SSDK in schema mode ([#2208](https://github.com/smithy-lang/smithy-typescript/pull/2208))
+- Supported additional server protocols in schema mode ([#2210](https://github.com/smithy-lang/smithy-typescript/pull/2210))
+
+### Chores
+
+- Renamed '@aws-smithy/server-*' packages to '@smithy/server-*' ([#2156](https://github.com/smithy-lang/smithy-typescript/pull/2156))
+- Updated server package dependencies for '@smithy/server-*@0.1.0' release ([#2157](https://github.com/smithy-lang/smithy-typescript/pull/2157))
+
 ## 0.51.0 (2026-07-13)
 
 ### Features
