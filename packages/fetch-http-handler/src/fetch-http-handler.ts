@@ -9,7 +9,7 @@ declare let AbortController: any;
 /**
  * @public
  */
-export { FetchHttpHandlerOptions };
+export type { FetchHttpHandlerOptions };
 
 /**
  * Detection of keepalive support. Can be overridden for testing.
