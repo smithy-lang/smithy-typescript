@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { HttpServerProtocol } from "./HttpServerProtocol";
-import { NotAcceptableException, ServiceException, UnsupportedMediaTypeException } from "../../errors";
+import { NotAcceptableException, ServiceException, UnsupportedMediaTypeException } from "../../validation/errors";
 import type { HttpRequest as IHttpRequest, HttpResponse as IHttpResponse, StaticOperationSchema } from "@smithy/types";
 
 /**

@@ -54,6 +54,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@aws-sdk/core@npm:^3.977.6":
+  version: 3.977.6
+  resolution: "@aws-sdk/core@npm:3.977.6"
+  dependencies:
+    "@aws-sdk/types": "npm:^3.974.2"
+    "@aws-sdk/xml-builder": "npm:^3.972.37"
+    "@aws/lambda-invoke-store": "npm:^0.3.0"
+    "@smithy/core": "npm:^3.31.1"
+    "@smithy/signature-v4": "npm:^5.6.12"
+    "@smithy/types": "npm:^4.16.1"
+    bowser: "npm:^2.11.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/4d743603bb41aeed426e2928be0947202191c341f9fbefe9ea347b0b4b7154b1ea94189d01c8abf3b03b9635449e2e7c268bd67379ea2294b9f49a61b909b9af
+  languageName: node
+  linkType: hard
+
 "@aws-sdk/types@npm:^3.222.0, @aws-sdk/types@npm:^3.974.2":
   version: 3.974.2
   resolution: "@aws-sdk/types@npm:3.974.2"
@@ -1897,7 +1913,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/core@npm:^3.29.8, @smithy/core@workspace:^, @smithy/core@workspace:packages/core":
+"@smithy/core@npm:^3.29.8, @smithy/core@npm:^3.31.1, @smithy/core@workspace:^, @smithy/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@smithy/core@workspace:packages/core"
   dependencies:
@@ -2245,6 +2261,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@smithy/server-common@workspace:packages/server-common"
   dependencies:
+    "@aws-sdk/core": "npm:^3.977.6"
     "@smithy/core": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
@@ -2307,7 +2324,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/signature-v4@npm:^5.6.9, @smithy/signature-v4@workspace:^, @smithy/signature-v4@workspace:packages/signature-v4":
+"@smithy/signature-v4@npm:^5.6.12, @smithy/signature-v4@npm:^5.6.9, @smithy/signature-v4@workspace:^, @smithy/signature-v4@workspace:packages/signature-v4":
   version: 0.0.0-use.local
   resolution: "@smithy/signature-v4@workspace:packages/signature-v4"
   dependencies:

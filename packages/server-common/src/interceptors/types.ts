@@ -5,7 +5,7 @@
 
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 
-import type { SmithyFrameworkException } from "../errors";
+import type { SmithyFrameworkException } from "../validation/errors";
 
 /**
  * Identity established by the authenticate step. The shape is service-defined;

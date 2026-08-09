@@ -11,7 +11,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import type { Readable } from "node:stream";
 
-import { convertRequest } from "./node";
+import { convertRequest, writeResponse } from "./node-http-converters";
 
 let socketPath: string;
 let promiseResolve: ([req, res]: [IncomingMessage, ServerResponse]) => void;
@@ -73,7 +73,6 @@ describe("convertRequest", () => {
     expect(convertedReq.query).toEqual({});
     expect(convertedReq.headers).toMatchObject({
       host: "example.com",
-      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("");
   });
@@ -97,7 +96,6 @@ describe("convertRequest", () => {
     expect(convertedReq.headers).toMatchObject({
       host: "example.com",
       "content-length": "5",
-      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("hello");
   });
@@ -123,13 +121,106 @@ describe("convertRequest", () => {
       "access-control-request-method": "DELETE",
       origin: "https://example.com",
       host: "example.com",
-      // From LTS 18 -> 20, the connection header defaults from "close" to "keep-alive", so don't test explicitly
     });
     expect(await streamToString(convertedReq.body)).toEqual("");
   });
+  it("preserves multi-value query parameters", async () => {
+    const [req] = await getRequest({
+      host: "example.com",
+      path: "/search?tag=a&tag=b&tag=c&single=one",
+    });
+    const convertedReq = convertRequest(req);
+    expect(convertedReq.query).toEqual({
+      tag: ["a", "b", "c"],
+      single: "one",
+    });
+  });
+  it("omits undefined header values", async () => {
+    const [req] = await getRequest({
+      host: "example.com",
+      path: "/",
+    });
+    const convertedReq = convertRequest(req);
+    for (const value of Object.values(convertedReq.headers)) {
+      expect(value).not.toBeUndefined();
+    }
+  });
 });
 
-// TODO Implement writeResponse tests
-// describe("writeResponse", () => {
-//   it("converts a simple GET / correctly", async () => {});
-// });
+describe("writeResponse", () => {
+  let writeServer: Server;
+  let writeSocketPath: string;
+
+  beforeAll(async () => {
+    writeSocketPath = path.join(await mkdtemp(path.join(os.tmpdir(), "write-response-test-")), "server");
+  });
+
+  afterAll(() => {
+    writeServer?.close();
+  });
+
+  function startServer(handler: (req: IncomingMessage, res: ServerResponse) => void): Promise<void> {
+    return new Promise((resolve) => {
+      writeServer = createServer(handler);
+      writeServer.listen(writeSocketPath, resolve);
+    });
+  }
+
+  function makeResponse(
+    options: RequestOptions = {}
+  ): Promise<{ statusCode: number; headers: Record<string, string>; body: string }> {
+    return new Promise((resolve, reject) => {
+      const req = request({ socketPath: writeSocketPath, ...options }, (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
+          resolve({
+            statusCode: res.statusCode!,
+            headers: res.headers as Record<string, string>,
+            body: Buffer.concat(chunks).toString("utf-8"),
+          });
+        });
+      });
+      req.on("error", reject);
+      req.end();
+    });
+  }
+
+  it("writes status code, headers, and body", async () => {
+    await startServer((_req, res) => {
+      writeResponse(
+        { statusCode: 200, headers: { "content-type": "application/json" }, body: '{"ok":true}' } as any,
+        res
+      );
+    });
+
+    const result = await makeResponse();
+    expect(result.statusCode).toBe(200);
+    expect(result.headers["content-type"]).toBe("application/json");
+    expect(result.body).toBe('{"ok":true}');
+  });
+
+  it("handles undefined body without crashing", async () => {
+    writeServer?.close();
+    writeSocketPath = path.join(await mkdtemp(path.join(os.tmpdir(), "write-response-test-")), "server");
+    await startServer((_req, res) => {
+      writeResponse({ statusCode: 204, headers: {}, body: undefined } as any, res);
+    });
+
+    const result = await makeResponse();
+    expect(result.statusCode).toBe(204);
+    expect(result.body).toBe("");
+  });
+
+  it("returns 500 when httpResponse is falsy", async () => {
+    writeServer?.close();
+    writeSocketPath = path.join(await mkdtemp(path.join(os.tmpdir(), "write-response-test-")), "server");
+    await startServer((_req, res) => {
+      writeResponse(undefined as any, res);
+    });
+
+    const result = await makeResponse();
+    expect(result.statusCode).toBe(500);
+    expect(result.body).toBe("Error processing request");
+  });
+});

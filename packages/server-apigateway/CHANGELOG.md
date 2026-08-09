@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- e3172c6: chore to bring @smithy/server-\* packages into repo standards
+
+### Patch Changes
+
+- 3161d31: server SDK HTTP converters - fix bugs and update documentation
+
 ## 0.1.6
 
 ### Patch Changes

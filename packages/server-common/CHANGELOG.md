@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- 008d164: add additional protocol options to schema-based server handler
+- 761267d: update ServerProtocol interfaces
+- e3172c6: chore to bring @smithy/server-\* packages into repo standards
+- bb4c289: make SchemaServiceHandler directly instantiable without a generated extending class
+
 ## 0.1.6
 
 ### Patch Changes

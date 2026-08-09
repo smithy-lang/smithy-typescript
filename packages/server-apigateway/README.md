@@ -1,46 +1,44 @@
 # smithy-typescript/server-apigateway
 
-This package provides glue code to enable using a server sdk inside of
-apigateway.
+This package provides glue code to enable using a server SDK inside of
+API Gateway Lambda functions.
 
 ## Usage
 
-### Example
+### API Gateway v2 (HTTP API)
 
 ```typescript
-import { convertEvent, convertResponse } from "@smithy/server-apigateway";
-import {
-  SayHelloInput,
-  SayHelloOutput,
-  GreetingService as __GreetingService,
-  getGreetingServiceHandler,
-} from "@greeting-service/service-greeting";
-import { HttpRequest } from "@smithy/protocol-http";
-import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import { convertEvent, convertVersion2Response } from "@smithy/server-apigateway";
 
-class GreetingService implements __GreetingService {
-  SayHello(input: SayHelloInput, request: HttpRequest): SayHelloOutput {
-    return {
-      greeting: `Hello ${input.name}! How is ${input.city}?`,
-    };
-  }
-}
-const serviceHandler = getGreetingServiceHandler(new GreetingService());
-export const lambdaHandler: APIGatewayProxyHandlerV2 = async (
-  event: APIGatewayProxyEventV2
-): Promise<APIGatewayProxyResultV2> => {
-  console.log(`Received event: ${JSON.stringify(event)}`);
+// A SchemaServiceHandler or generated service handler instance.
+const serviceHandler = ...
 
-  // Convert apigateway's lambda event to an HttpRequest.
-  const convertedEvent = convertEvent(event);
+export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+  // Convert API Gateway's Lambda event to an HttpRequest.
+  const httpRequest = convertEvent(event);
 
-  // Call the service handler, which will route the request to the GreetingService
-  // implementation and then serialize the response to an HttpResponse.
-  let rawResponse = await serviceHandler.handle(convertedEvent);
+  // Call the service handler, which will route the request to the
+  // operation implementation and serialize the response to an HttpResponse.
+  const httpResponse = await serviceHandler.handle(httpRequest, {});
 
-  // Convert the HttpResponse to apigateway's expected format.
-  const convertedResponse = convertResponse(rawResponse);
-  console.log(`Returning response: ${JSON.stringify(convertedResponse)}`);
-  return convertedResponse;
+  // Convert the HttpResponse to API Gateway's expected format.
+  return convertVersion2Response(httpResponse);
+};
+```
+
+### API Gateway v1 (REST API)
+
+```typescript
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { convertEvent, convertVersion1Response } from "@smithy/server-apigateway";
+
+// A SchemaServiceHandler or generated service handler instance.
+const serviceHandler = ...
+
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const httpRequest = convertEvent(event);
+  const httpResponse = await serviceHandler.handle(httpRequest, {});
+  return convertVersion1Response(httpResponse);
 };
 ```

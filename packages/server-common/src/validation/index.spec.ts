@@ -17,14 +17,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   RequiredValidationFailure,
-  generateValidationMessage,
   type EnumValidationFailure,
   type IntegerEnumValidationFailure,
   type LengthValidationFailure,
   type PatternValidationFailure,
   type RangeValidationFailure,
   type UniqueItemsValidationFailure,
-} from "./index";
+} from "./types";
+import { generateValidationMessage } from "./generateValidationMessage";
 
 describe("message formatting", () => {
   it("does not return very large inputs", () => {

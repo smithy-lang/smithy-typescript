@@ -13,7 +13,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.typescript.codegen.SmithyCoreSubmodules;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
@@ -81,18 +80,7 @@ public class SchemaServerGenerator {
         // Import base class from server-common.
         writer.addImport("SchemaServiceHandler", null, TypeScriptDependency.SERVER_COMMON);
         writer.addTypeImport("SchemaServiceHandlerOptions", null, TypeScriptDependency.SERVER_COMMON);
-        writer.addTypeImportSubmodule(
-            "HttpRequest",
-            null,
-            TypeScriptDependency.SMITHY_CORE,
-            SmithyCoreSubmodules.PROTOCOLS
-        );
-        writer.addTypeImportSubmodule(
-            "HttpResponse",
-            null,
-            TypeScriptDependency.SMITHY_CORE,
-            SmithyCoreSubmodules.PROTOCOLS
-        );
+        writer.addTypeImport("ServerRequestContext", null, TypeScriptDependency.SERVER_COMMON);
         writer.addTypeImport("StaticOperationSchema", null, TypeScriptDependency.SMITHY_TYPES);
 
         Path schemasPath = Paths.get(".", "src", "schemas", "schemas_0");
@@ -120,13 +108,12 @@ public class SchemaServerGenerator {
 
     private void writeOperationSchemaMap(Set<OperationShape> operations) {
         writer.openBlock(
-            "const OPERATION_SCHEMAS: Record<string, StaticOperationSchema> = {",
-            "} as const;",
+            "const OPERATION_SCHEMAS: StaticOperationSchema[] = [",
+            "];",
             () -> {
                 for (OperationShape operation : operations) {
-                    String opName = operation.getId().getName();
                     String schemaVarName = getOperationSchemaVarName(operation);
-                    writer.write("$S: $L,", opName, schemaVarName);
+                    writer.write("$L,", schemaVarName);
                 }
             }
         );
@@ -148,58 +135,51 @@ public class SchemaServerGenerator {
             serviceName,
             () -> {
                 // Constructor with typed handlers
-                writeConstructor(serviceName, operations);
-
-                // getOperationSchemas() override
-                writer.openBlock(
-                    "protected getOperationSchemas(): Record<string, StaticOperationSchema> {",
-                    "}",
-                    () -> writer.write("return OPERATION_SCHEMAS;")
-                );
-
-                // isValidationEnabled() override if validation is disabled
-                if (!validationEnabled) {
-                    writer.write("");
-                    writer.openBlock(
-                        "protected isValidationEnabled(): boolean {",
-                        "}",
-                        () -> writer.write("return false;")
-                    );
-                }
+                writeConstructor(serviceName, operations, validationEnabled);
             }
         );
     }
 
-    private void writeConstructor(String serviceName, Set<OperationShape> operations) {
-        writer.openBlock("constructor(options: {", "}) {", () -> {
-            writer.write(
-                "protocols: SchemaServiceHandlerOptions<Context>[\"protocols\"];"
-            );
-            writer.write(
-                "handlers: {"
-            );
-            writer.indent();
-            for (OperationShape operation : operations) {
-                String opName = operation.getId().getName();
-                String inputName = symbolProvider.toSymbol(
-                    model.expectShape(operation.getInputShape())
-                ).getName();
-                String outputName = symbolProvider.toSymbol(
-                    model.expectShape(operation.getOutputShape())
-                ).getName();
+    private void writeConstructor(String serviceName, Set<OperationShape> operations, boolean validationEnabled) {
+        writer.openBlock(
+            "constructor(options: SchemaServiceHandlerOptions<Context> & {",
+            "}) {",
+            () -> {
                 writer.write(
-                    "$L: (input: $L, context: Context) => Promise<$L>;",
-                    opName,
-                    inputName,
-                    outputName
+                    "handlers: {"
                 );
+                writer.indent();
+                for (OperationShape operation : operations) {
+                    String opName = operation.getId().getName();
+                    String inputName = symbolProvider.toSymbol(
+                        model.expectShape(operation.getInputShape())
+                    ).getName();
+                    String outputName = symbolProvider.toSymbol(
+                        model.expectShape(operation.getOutputShape())
+                    ).getName();
+                    writer.write(
+                        "$L: (input: $L, context: ServerRequestContext, userContext: Context) => Promise<$L>;",
+                        opName,
+                        inputName,
+                        outputName
+                    );
+                }
+                writer.dedent();
+                writer.write("};");
             }
-            writer.dedent();
-            writer.write("};");
-            writer.write("router?: SchemaServiceHandlerOptions<Context>[\"router\"];");
-        });
+        );
         writer.indent();
-        writer.write("super(options);");
+        if (validationEnabled) {
+            writer.write(
+                "super({ ...options, validationEnabled: options.validationEnabled ?? true,"
+                    + " operationSchemas: options.operationSchemas ?? OPERATION_SCHEMAS });"
+            );
+        } else {
+            writer.write(
+                "super({ ...options, validationEnabled: options.validationEnabled ?? false,"
+                    + " operationSchemas: options.operationSchemas ?? OPERATION_SCHEMAS });"
+            );
+        }
         writer.closeBlock("}");
         writer.write("");
     }

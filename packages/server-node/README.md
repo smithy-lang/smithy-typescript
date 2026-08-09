@@ -1,46 +1,30 @@
 # smithy-typescript/server-node
 
-This package provides glue code to enable using a server sdk with NodeJS.
+This package provides glue code to enable using a server sdk with Node.js.
 
 ## Usage
 
-### Example
-
 ```typescript
-import { IncomingMessage, ServerResponse, createServer } from "http";
-import { convertEvent, convertResponse } from "@smithy/server-node";
-import {
-  SayHelloInput,
-  SayHelloOutput,
-  GreetingService as __GreetingService,
-  getGreetingServiceHandler,
-} from "@greeting-service/service-greeting";
-import { HttpRequest } from "@smithy/protocol-http";
+import { createServer } from "node:http";
+import { convertRequest, writeResponse } from "@smithy/server-node";
 
-class GreetingService implements __GreetingService {
-  SayHello(input: SayHelloInput, request: HttpRequest): SayHelloOutput {
-    return {
-      greeting: `Hello ${input.name}! How is ${input.city}?`,
-    };
-  }
-}
-const serviceHandler = getGreetingServiceHandler(new GreetingService());
+// This is instantiated from your generated Server SDK package.
+// It is either a ServiceHandler type or SchemaServiceHandler extension,
+// both of which have a method `handle(HttpRequest): Promise<HttpResponse>`.
+const serviceHandler = ...
 
-const server = createServer(async function (
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage> & { req: IncomingMessage }
-) {
-  // Convert NodeJS's http request to an HttpRequest.
+const server = createServer(async (req, res) => {
+  // Convert NodeJS's http request to an HttpRequest (a Smithy type).
   const httpRequest = convertRequest(req);
 
-  // Call the service handler, which will route the request to the GreetingService
-  // implementation and then serialize the response to an HttpResponse.
-  const httpResponse = await serviceHandler.handle(httpRequest);
+  // Call the service handler, which will route the request to the
+  // implementation and then serialize the response to an HttpResponse (Smithy).
+  const httpResponse = await serviceHandler.handle(httpRequest, {});
 
   // Write the HttpResponse to NodeJS http's response expected format.
-  return writeResponse(httpResponse, res);
+  writeResponse(httpResponse, res);
 });
 
 server.listen(3000);
-console.error("Listening on port 3000");
+console.log("Listening on port 3000");
 ```
