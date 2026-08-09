@@ -1,15 +1,17 @@
 import type { Readable } from "node:stream";
-import {
-  FALLBACK_LOGGER,
-  HttpResponse,
-  buildQueryString,
-  type HttpHandler,
-  type HttpRequest,
-} from "@smithy/core/protocols";
+import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
 import { Agent, Dispatcher, getGlobalDispatcher } from "undici";
 
 import { buildAbortError } from "./build-abort-error";
+
+/**
+ * Key with which a client offers its logger, to be used only if this handler
+ * has no logger of its own. `Symbol.for` makes this equal to the client's copy.
+ *
+ * @internal
+ */
+const FALLBACK_LOGGER: symbol = Symbol.for("logger");
 
 /**
  * Duck-type check: returns true if the value looks like a Dispatcher
@@ -72,11 +74,6 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
    * caller-configured TLS, connect, and timeout settings.
    */
   private internalAgentOptions?: Agent.Options;
-
-  /**
-   * Client logger, used only when this handler has no logger of its own.
-   */
-  private fallbackLogger?: Logger;
 
   constructor(options?: UndiciHttpHandlerOptions) {
     if (options?.dispatcher && isDispatcher(options.dispatcher)) {
@@ -220,17 +217,13 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     }
   }
 
-  public updateHttpClientConfig(key: typeof FALLBACK_LOGGER, value: Logger): void;
   public updateHttpClientConfig<K extends keyof UndiciHttpHandlerOptions>(
     key: K,
     value: UndiciHttpHandlerOptions[K]
-  ): void;
-  public updateHttpClientConfig(
-    key: keyof UndiciHttpHandlerOptions | typeof FALLBACK_LOGGER,
-    value: UndiciHttpHandlerOptions[keyof UndiciHttpHandlerOptions] | Logger
   ): void {
-    if (key === FALLBACK_LOGGER) {
-      this.fallbackLogger = value as Logger;
+    if ((key as unknown) === FALLBACK_LOGGER) {
+      // Offered by the client: take it only if this handler has no logger of its own.
+      this.config.logger ??= value as Logger;
       return;
     }
 

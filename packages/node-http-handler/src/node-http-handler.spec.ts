@@ -1,6 +1,6 @@
 import http from "node:http";
 import https from "node:https";
-import { FALLBACK_LOGGER, HttpRequest } from "@smithy/core/protocols";
+import { HttpRequest } from "@smithy/core/protocols";
 import type { NodeHttpHandlerOptions } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
@@ -8,6 +8,10 @@ import { NodeHttpHandler } from "./node-http-handler";
 import * as setConnectionTimeoutModule from "./set-connection-timeout";
 import * as setRequestTimeoutModule from "./set-request-timeout";
 import * as setSocketTimeoutModule from "./set-socket-timeout";
+
+// Matches the key the client offers its logger under. `Symbol.for` makes this
+// the same symbol the handler compares against.
+const FALLBACK_LOGGER = Symbol.for("logger") as unknown as keyof NodeHttpHandlerOptions;
 import { timing } from "./timing";
 
 let { request: hRequest } = http;
@@ -563,14 +567,14 @@ describe("NodeHttpHandler", () => {
       expect(await getEffectiveLogger(handler)).toBe(handlerLogger);
     });
 
-    it("does not expose the fallback logger on the handler's public config", async () => {
+    it("stores the fallback logger under the handler's own logger key", async () => {
       const handler = new NodeHttpHandler();
       const clientLogger = createLogger();
 
       handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
       await getEffectiveLogger(handler);
 
-      expect(handler.httpHandlerConfigs().logger).toBeUndefined();
+      expect(handler.httpHandlerConfigs().logger).toBe(clientLogger);
     });
   });
 

@@ -1,5 +1,5 @@
 import { AbortController } from "@smithy/abort-controller";
-import { FALLBACK_LOGGER, HttpRequest } from "@smithy/core/protocols";
+import { HttpRequest } from "@smithy/core/protocols";
 import { afterAll, afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { FetchHttpHandler, keepAliveSupport } from "./fetch-http-handler";
@@ -96,27 +96,6 @@ const globalFetch = global.fetch;
     const fetchHttpHandler = new FetchHttpHandler();
     fetchHttpHandler.updateHttpClientConfig("requestTimeout", 300);
     expect(fetchHttpHandler.httpHandlerConfigs()).toEqual({});
-  });
-
-  it("accepts the fallback logger without adding it to the public config", async () => {
-    const mockResponse = {
-      headers: {
-        entries: vi.fn().mockReturnValue([]),
-      },
-      blob: vi.fn().mockResolvedValue(new Blob(["FOO"])),
-    };
-    (global as any).fetch = vi.fn().mockResolvedValue(mockResponse);
-
-    const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 200 });
-    const clientLogger = { trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
-    fetchHttpHandler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
-
-    await fetchHttpHandler.handle({} as any, {});
-
-    const configs = fetchHttpHandler.httpHandlerConfigs();
-    expect(configs).not.toHaveProperty("logger");
-    // unrelated config is untouched by the fallback logger call.
-    expect(configs.requestTimeout).toBe(200);
   });
 
   it("defaults to response.blob for response.body = null", async () => {

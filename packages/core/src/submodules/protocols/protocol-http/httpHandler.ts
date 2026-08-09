@@ -2,12 +2,9 @@ import type { HttpRequest, HttpResponse } from "@smithy/core/transport";
 import type {
   FetchHttpHandlerOptions,
   HttpHandlerOptions,
-  Logger,
   NodeHttpHandlerOptions,
   RequestHandler,
 } from "@smithy/types";
-
-import type { FALLBACK_LOGGER } from "./fallbackLogger";
 
 /**
  * @internal
@@ -19,15 +16,8 @@ export type HttpHandler<HttpHandlerConfig extends object = {}> = RequestHandler<
 > & {
   /**
    * @internal
-   *
-   * The key may also be {@link FALLBACK_LOGGER}, with which a client offers its
-   * logger for use only when the handler has no logger of its own. Handlers
-   * that predate that key ignore it.
    */
-  updateHttpClientConfig(
-    key: keyof HttpHandlerConfig | typeof FALLBACK_LOGGER,
-    value: HttpHandlerConfig[keyof HttpHandlerConfig] | Logger
-  ): void;
+  updateHttpClientConfig(key: keyof HttpHandlerConfig, value: HttpHandlerConfig[typeof key]): void;
 
   /**
    * @internal

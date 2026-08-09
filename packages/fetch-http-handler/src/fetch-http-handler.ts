@@ -1,11 +1,5 @@
-import {
-  FALLBACK_LOGGER,
-  HttpResponse,
-  buildQueryString,
-  type HttpHandler,
-  type HttpRequest,
-} from "@smithy/core/protocols";
-import type { FetchHttpHandlerOptions, HeaderBag, HttpHandlerOptions, Logger, Provider } from "@smithy/types";
+import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
+import type { FetchHttpHandlerOptions, HeaderBag, HttpHandlerOptions, Provider } from "@smithy/types";
 
 import { createRequest } from "./create-request";
 import { requestTimeout as requestTimeoutFn } from "./request-timeout";
@@ -15,7 +9,7 @@ declare let AbortController: any;
 /**
  * @public
  */
-export type { FetchHttpHandlerOptions };
+export { FetchHttpHandlerOptions };
 
 /**
  * Detection of keepalive support. Can be overridden for testing.
@@ -44,10 +38,6 @@ export type AdditionalRequestParameters = {
 export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
   private config?: FetchHttpHandlerOptions;
   private configProvider: Promise<FetchHttpHandlerOptions>;
-  /**
-   * Client logger, used only when this handler has no logger of its own.
-   */
-  private fallbackLogger?: Logger;
 
   /**
    * @returns the input if it is an HttpHandler of any class,
@@ -210,19 +200,10 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
     return Promise.race(raceOfPromises).finally(removeSignalEventListener);
   }
 
-  updateHttpClientConfig(key: typeof FALLBACK_LOGGER, value: Logger): void;
-  updateHttpClientConfig(key: keyof FetchHttpHandlerOptions, value: FetchHttpHandlerOptions[typeof key]): void;
-  updateHttpClientConfig(
-    key: keyof FetchHttpHandlerOptions | typeof FALLBACK_LOGGER,
-    value: FetchHttpHandlerOptions[keyof FetchHttpHandlerOptions] | Logger
-  ): void {
-    if (key === FALLBACK_LOGGER) {
-      this.fallbackLogger = value as Logger;
-      return;
-    }
+  updateHttpClientConfig(key: keyof FetchHttpHandlerOptions, value: FetchHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
-      (config as Record<string, unknown>)[key as string] = value;
+      (config as Record<typeof key, typeof value>)[key] = value;
       return config;
     });
   }

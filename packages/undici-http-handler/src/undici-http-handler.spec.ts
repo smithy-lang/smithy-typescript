@@ -1,10 +1,14 @@
 import http, { type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { FALLBACK_LOGGER, HttpRequest } from "@smithy/core/protocols";
+import { HttpRequest } from "@smithy/core/protocols";
 import { Agent, getGlobalDispatcher, setGlobalDispatcher, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { UndiciHttpHandler } from "./undici-http-handler";
+import { UndiciHttpHandler, type UndiciHttpHandlerOptions } from "./undici-http-handler";
+
+// Matches the key the client offers its logger under. `Symbol.for` makes this
+// the same symbol the handler compares against.
+const FALLBACK_LOGGER = Symbol.for("logger") as unknown as keyof UndiciHttpHandlerOptions;
 
 const { createServer } = http;
 
@@ -580,12 +584,12 @@ describe("UndiciHttpHandler", () => {
       expect(handler.httpHandlerConfigs().logger).toBe(logger);
     });
 
-    it("does not expose the fallback logger on the public config", async () => {
+    it("stores the fallback logger under the handler's own logger key", async () => {
       handler = new UndiciHttpHandler();
       const clientLogger = createMockLogger();
       handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
       await handler.handle(createMockRequest());
-      expect(handler.httpHandlerConfigs().logger).toBeUndefined();
+      expect(handler.httpHandlerConfigs().logger).toBe(clientLogger);
     });
 
     it("retains existing dispatcher if undefined is passed", () => {

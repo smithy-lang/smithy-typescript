@@ -17,7 +17,7 @@ export interface HttpHandlerExtensionConfiguration<HandlerConfig extends object 
  * @internal
  */
 export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = Partial<{
-  httpHandler: HttpHandler<HandlerConfig>;
+  requestHandler: HttpHandler<HandlerConfig>;
 }>;
 
 /**
@@ -29,22 +29,27 @@ export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { log
   runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig> & { logger?: Logger }
 ) => {
   // Offered as a fallback only: the handler keeps its own logger if it has one.
-  if (runtimeConfig.logger) {
-    runtimeConfig.httpHandler?.updateHttpClientConfig?.(FALLBACK_LOGGER, runtimeConfig.logger);
+  // A NoOpLogger is not offered at all, so that handlers fall through to their
+  // own console-based defaults instead of being silenced.
+  if (runtimeConfig.logger && runtimeConfig.logger.constructor?.name !== "NoOpLogger") {
+    runtimeConfig.requestHandler?.updateHttpClientConfig?.(
+      FALLBACK_LOGGER as unknown as keyof HandlerConfig,
+      runtimeConfig.logger as HandlerConfig[keyof HandlerConfig]
+    );
   }
 
   return {
     setHttpHandler(handler: HttpHandler<HandlerConfig>): void {
-      runtimeConfig.httpHandler = handler;
+      runtimeConfig.requestHandler = handler;
     },
     httpHandler(): HttpHandler<HandlerConfig> {
-      return runtimeConfig.httpHandler!;
+      return runtimeConfig.requestHandler!;
     },
     updateHttpClientConfig(key: keyof HandlerConfig, value: HandlerConfig[typeof key]): void {
-      runtimeConfig.httpHandler?.updateHttpClientConfig(key, value);
+      runtimeConfig.requestHandler?.updateHttpClientConfig(key, value);
     },
     httpHandlerConfigs(): HandlerConfig {
-      return runtimeConfig.httpHandler!.httpHandlerConfigs();
+      return runtimeConfig.requestHandler!.httpHandlerConfigs();
     },
   };
 };
@@ -58,6 +63,6 @@ export const resolveHttpHandlerRuntimeConfig = <HandlerConfig extends object = {
   httpHandlerExtensionConfiguration: HttpHandlerExtensionConfiguration<HandlerConfig>
 ): HttpHandlerExtensionConfigType<HandlerConfig> => {
   return {
-    httpHandler: httpHandlerExtensionConfiguration.httpHandler(),
+    requestHandler: httpHandlerExtensionConfiguration.httpHandler(),
   };
 };

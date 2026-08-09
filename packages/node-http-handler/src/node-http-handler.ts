@@ -1,12 +1,6 @@
 import type { Agent as hAgentType, request as hRequestType } from "node:http";
 import type { RequestOptions, Agent as hsAgentType } from "node:https";
-import {
-  FALLBACK_LOGGER,
-  HttpResponse,
-  buildQueryString,
-  type HttpHandler,
-  type HttpRequest,
-} from "@smithy/core/protocols";
+import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger, NodeHttpHandlerOptions, Provider } from "@smithy/types";
 
 import { buildAbortError } from "./build-abort-error";
@@ -21,6 +15,14 @@ import { timing } from "./timing";
 import { writeRequestBody } from "./write-request-body";
 
 export type { NodeHttpHandlerOptions };
+
+/**
+ * Key with which a client offers its logger, to be used only if this handler
+ * has no logger of its own. `Symbol.for` makes this equal to the client's copy.
+ *
+ * @internal
+ */
+const FALLBACK_LOGGER: symbol = Symbol.for("logger");
 
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
   httpAgentProvider: () => Promise<hAgentType>;
@@ -48,10 +50,6 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
   private configProvider: Promise<ResolvedNodeHttpHandlerConfig>;
   private socketWarningTimestamp = 0;
   private externalAgent = false;
-  /**
-   * Client logger, used only when this handler has no logger of its own.
-   */
-  private fallbackLogger?: Logger;
 
   // Node http handler is hard-coded to http/1.1: https://github.com/nodejs/node/blob/ff5664b83b89c55e4ab5d5f60068fb457f1f5872/lib/_http_server.js#L286
   public readonly metadata = { handlerProtocol: "http/1.1" };
@@ -153,7 +151,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     }
 
     const config = this.config!;
-    const logger = config.logger ?? this.fallbackLogger;
+    const logger = config.logger;
 
     // determine which http(s) client to use
     const isSSL = request.protocol === "https:";
@@ -329,18 +327,16 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     });
   }
 
-  public updateHttpClientConfig(key: typeof FALLBACK_LOGGER, value: Logger): void;
-  public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void;
-  public updateHttpClientConfig(
-    key: keyof NodeHttpHandlerOptions | typeof FALLBACK_LOGGER,
-    value: NodeHttpHandlerOptions[keyof NodeHttpHandlerOptions] | Logger
-  ): void {
-    if (key === FALLBACK_LOGGER) {
-      this.fallbackLogger = value as Logger;
-      return;
-    }
+  public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
+      if ((key as unknown) === FALLBACK_LOGGER) {
+        // Offered by the client: take it only if this handler has no logger of its own.
+        return {
+          ...config,
+          logger: config.logger ?? (value as Logger),
+        };
+      }
       return {
         ...config,
         [key]: value,
