@@ -7,6 +7,7 @@ use smithy.protocols#rpcv2Cbor
 use smithy.rules#clientContextParams
 use smithy.rules#contextParam
 use smithy.rules#endpointRuleSet
+use smithy.rules#staticContextParams
 use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 use smithy.waiters#waitable
@@ -35,6 +36,7 @@ use smithy.waiters#waitable
         nonConflictingParam: { type: "string", required: true, default: "non-conflict-default", documentation: "Non-conflicting with default" }
         logger: { type: "string", required: true, default: "default-logger", documentation: "Conflicting logger with default" }
         CustomHeaderValue: { type: "string", required: false, documentation: "Value to send as x-custom-header" }
+        OverloadedParam: { type: "string", required: true, default: "overloaded!", documentation: "both a static and non-static context param." }
     }
     rules: [
         {
@@ -401,7 +403,11 @@ structure CompletelyUnlinkedError {}
 operation camelCaseOperation {
     input := {
         token: String
+
+        @contextParam(name: "OverloadedParam")
+        overloadedParam: String
     }
+
     output := {
         token: String
         results: Blobs
@@ -412,6 +418,9 @@ list Blobs {
     member: Blob
 }
 
+@staticContextParams(
+    OverloadedParam: { value: "from-host-prefix-operation" }
+)
 @endpoint(hostPrefix: "{AccountId}.")
 operation HostPrefixOperation {
     input: HostPrefixOperationInput

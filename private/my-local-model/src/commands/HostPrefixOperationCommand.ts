@@ -67,7 +67,10 @@ export class HostPrefixOperationCommand extends $Command
     ServiceInputTypes,
     ServiceOutputTypes
   >()
-  .ep(commonParams)
+  .ep({
+    ...commonParams,
+    OverloadedParam: { type: "staticContextParams", value: `from-host-prefix-operation` },
+  })
   .m(function (this: any, Command: any, cs: any, config: XYZServiceClientResolvedConfig, o: any) {
     return [
       getSerdePlugin(config, this.serialize, this.deserialize),

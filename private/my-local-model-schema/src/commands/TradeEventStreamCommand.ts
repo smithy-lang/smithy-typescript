@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { _ep0, _mw0, command } from "../commandBuilder";
+import { _ep3, _mw0, command } from "../commandBuilder";
 import type { TradeEventStreamRequest, TradeEventStreamResponse } from "../models/models_0";
 import { TradeEventStream$ } from "../schemas/schemas_0";
 
@@ -80,7 +80,7 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  *
  */
 export class TradeEventStreamCommand extends command<TradeEventStreamCommandInput, TradeEventStreamCommandOutput>(
-  _ep0,
+  _ep3,
   _mw0,
   "TradeEventStream",
   TradeEventStream$

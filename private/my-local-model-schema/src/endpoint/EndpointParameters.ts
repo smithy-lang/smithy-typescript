@@ -84,4 +84,5 @@ export interface EndpointParameters extends __EndpointParameters {
   nonConflictingParam?: string | undefined;
   logger?: string | undefined;
   CustomHeaderValue?: string | undefined;
+  OverloadedParam?: string | undefined;
 }

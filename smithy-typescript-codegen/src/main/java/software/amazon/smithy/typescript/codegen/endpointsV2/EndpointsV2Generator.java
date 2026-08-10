@@ -194,10 +194,13 @@ public final class EndpointsV2Generator implements Runnable {
                                  ): T & ClientResolvedEndpointParameters => {""", "};", () -> {
                     writer.openBlock("return Object.assign(options, {", "});", () -> {
                         ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                        Set<String> clientLevelParams = new HashSet<>();
+                        clientLevelParams.addAll(ruleSetParameterFinder.getBuiltInParams().keySet());
+                        clientLevelParams.addAll(ruleSetParameterFinder.getClientContextParams().keySet());
                         ruleSet
                             .getObjectMember("parameters")
                             .ifPresent(parameters -> {
-                                parameters.accept(new RuleSetParametersVisitor(writer, true));
+                                parameters.accept(new RuleSetParametersVisitor(writer, true, clientLevelParams));
                             });
                         writer.write(
                             "defaultSigningName: \"$L\",",

@@ -59,6 +59,7 @@ const _n = "name";
 const _nT = "nextToken";
 const _nu = "number";
 const _num = "numbers";
+const _oP = "overloadedParam";
 const _r = "results";
 const _s = "smithy.ts.sdk.synthetic.org.xyz.v1";
 const _sN = "sparseNumbers";
@@ -163,8 +164,8 @@ export var Alpha$: StaticStructureSchema = [3, n0, _A,
 ];
 export var camelCaseOperationInput$: StaticStructureSchema = [3, n0, _cCOI,
   0,
-  [_to],
-  [0]
+  [_to, _oP],
+  [0, 0]
 ];
 export var camelCaseOperationOutput$: StaticStructureSchema = [3, n0, _cCOO,
   0,
