@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.17.0
+
+### Minor Changes
+
+- ec9b4b2: chore: update builds to use typescript 6. This should not affect consumers, who may continue to use TypeScript 3.4 through 7.0 as of this version.
+
 ## 4.16.1
 
 ### Patch Changes
