@@ -60,8 +60,7 @@
   "devDependencies": {
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
-    "premove": "4.0.0",
-    "web-streams-polyfill": "3.2.1"
+    "premove": "4.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

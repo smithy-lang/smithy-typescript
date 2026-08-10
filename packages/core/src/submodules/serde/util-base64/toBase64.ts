@@ -18,5 +18,7 @@ export const toBase64 = (_input: Uint8Array | string): string => {
   if (typeof input !== "object" || typeof input.byteOffset !== "number" || typeof input.byteLength !== "number") {
     throw new Error("@smithy/util-base64: toBase64 encoder function only accepts string | Uint8Array.");
   }
-  return fromArrayBuffer(input.buffer, input.byteOffset, input.byteLength).toString("base64");
+  // TODO(TS6): type input as Uint8Array<ArrayBuffer> to remove cast
+  // after dropping support for TS < 5.7.
+  return fromArrayBuffer(input.buffer as ArrayBuffer, input.byteOffset, input.byteLength).toString("base64");
 };

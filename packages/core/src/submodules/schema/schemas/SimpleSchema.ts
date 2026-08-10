@@ -11,9 +11,9 @@ import { Schema } from "./Schema";
  */
 export class SimpleSchema extends Schema implements TraitsSchema {
   public static readonly symbol = Symbol.for("@smithy/sim");
-  public name!: string;
+  declare name: string;
   public schemaRef!: SchemaRef;
-  public traits!: SchemaTraits;
+  declare traits: SchemaTraits;
   protected readonly symbol = SimpleSchema.symbol;
 }
 

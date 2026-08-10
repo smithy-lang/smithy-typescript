@@ -11,8 +11,8 @@ import { Schema } from "./Schema";
  */
 export class ListSchema extends Schema implements IListSchema {
   public static readonly symbol = Symbol.for("@smithy/lis");
-  public name!: string;
-  public traits!: SchemaTraits;
+  declare name: string;
+  declare traits: SchemaTraits;
   public valueSchema!: SchemaRef;
   protected readonly symbol = ListSchema.symbol;
 }

@@ -8,7 +8,7 @@
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
     "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-    "test:index": "tsc --noEmit ./test/index-types.ts && node ./test/index-objects.spec.mjs",
+    "test:index": "tsc -p tsconfig.test.json && node ./test/index-objects.spec.mjs",
     "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
     "prepack": "${packageManager} run clean && ${packageManager} run build"
   },
@@ -24,7 +24,7 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
-    "typescript": "~5.8.3"
+    "typescript": "~6.0.3"
   },
   "engines": {
     "node": ">=20.0.0"

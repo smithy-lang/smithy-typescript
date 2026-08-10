@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "downlevelIteration": true,
+    "strict": false,
     "esModuleInterop": true,
-    "lib": ["es2015", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "lib": ["es2022", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@smithy/*": ["packages/*/src", "smithy-typescript-ssdk-libs/*/src"]
+      "@smithy/*": ["./packages/*/src", "./smithy-typescript-ssdk-libs/*/src"]
     },
     "preserveConstEnums": true,
     "removeComments": true,
     "resolveJsonModule": true,
-    "target": "es5",
+    "target": "es2022",
+    "types": ["node"],
     "useUnknownInCatchVariables": false,
     "experimentalDecorators": true,
     "jsx": "react",

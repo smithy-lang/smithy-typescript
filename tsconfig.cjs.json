@@ -3,8 +3,10 @@
   "compilerOptions": {
     "importHelpers": true,
     "module": "commonjs",
+    "moduleResolution": "bundler",
     "noEmitHelpers": false,
     "target": "es2022",
-    "noCheck": true
+    "noCheck": true,
+    "paths": {}
   }
 }

@@ -10,8 +10,8 @@ import { Schema } from "./Schema";
  */
 export class StructureSchema extends Schema implements IStructureSchema {
   public static symbol = Symbol.for("@smithy/str");
-  public name!: string;
-  public traits!: SchemaTraits;
+  declare name: string;
+  declare traits: SchemaTraits;
   public memberNames!: string[];
   public memberList!: SchemaRef[];
   protected readonly symbol = StructureSchema.symbol;

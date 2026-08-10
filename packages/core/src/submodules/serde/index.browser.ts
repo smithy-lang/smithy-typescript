@@ -103,6 +103,8 @@ export { isReadableStream, isBlob } from "./util-stream/stream-type-check";
 export { streamCollector } from "./util-stream/stream-collector.browser";
 
 // @smithy/uuid
-const _getRandomValues = (array: Uint8Array) => crypto.getRandomValues(array);
+// TODO(TS6): type param as Uint8Array<ArrayBuffer> to remove casts
+// after dropping support for TS < 5.7.
+const _getRandomValues = (array: Uint8Array): Uint8Array => crypto.getRandomValues(array as Uint8Array<ArrayBuffer>);
 export const v4 = bindV4(_getRandomValues);
 export const generateIdempotencyToken = v4;

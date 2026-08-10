@@ -61,7 +61,9 @@ for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
 
 const allDtsPaths = dtsEntries.map((e) => e.dtsPath);
 const program = ts.createProgram(allDtsPaths, {
-  moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
+  module: ts.ModuleKind.ESNext,
+  types: ["node"],
   baseUrl: root,
   paths: {
     ...submodulePaths,
