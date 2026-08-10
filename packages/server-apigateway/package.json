@@ -46,7 +46,6 @@
     "concurrently": "7.0.0",
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
-    "typescript": "~6.0.3",
     "vitest": "^3.2.1"
   },
   "engines": {

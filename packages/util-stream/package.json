@@ -33,9 +33,6 @@
   "devDependencies": {
     "premove": "4.0.0"
   },
-  "typedoc": {
-    "entryPoint": "src/index.ts"
-  },
   "engines": {
     "node": ">=18.0.0"
   }

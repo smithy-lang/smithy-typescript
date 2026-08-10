@@ -9,7 +9,7 @@ Data may only be deleted from api.json in an intentional backwards-incompatible 
 
 const fs = require("node:fs");
 const path = require("node:path");
-const ts = require("typescript");
+const ts = require("typescript-6");
 
 const root = path.join(__dirname, "..", "..");
 const dataPath = path.join(root, "api-snapshot", "api.json");

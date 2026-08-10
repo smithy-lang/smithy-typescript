@@ -9,17 +9,16 @@
  */
 const { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync } = require("node:fs");
 const path = require("node:path");
+const { execFileSync } = require("node:child_process");
 
 /**
- * Toggle between oxc-transform and tsc (transpileModule) for type stripping.
+ * Toggle between tsc CLI and oxc-transform for type stripping.
  * tsc preserves source formatting; oxc reformats from AST.
  */
 const USE_TSC = true;
 
-let transformSync, parseSync, ts;
-if (USE_TSC) {
-  ts = require("typescript");
-} else {
+let transformSync, parseSync;
+if (!USE_TSC) {
   ({ transformSync } = require("oxc-transform"));
   ({ parseSync } = require("oxc-parser"));
 }
@@ -342,12 +341,12 @@ function findProtectedSpan(spans, pos) {
   return null;
 }
 
-function processDir(dir, srcDir, outDir, compilerOptions) {
+function processDir(dir, srcDir, outDir) {
   let count = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      count += processDir(fullPath, srcDir, outDir, compilerOptions);
+      count += processDir(fullPath, srcDir, outDir);
     } else if (
       entry.name.endsWith(".ts") &&
       !entry.name.endsWith(".d.ts") &&
@@ -362,50 +361,43 @@ function processDir(dir, srcDir, outDir, compilerOptions) {
       mkdirSync(path.dirname(outPath), { recursive: true });
       const source = readFileSync(fullPath, "utf-8");
 
-      let code;
-      if (USE_TSC) {
-        const result = ts.transpileModule(source, {
-          fileName: fullPath,
-          compilerOptions,
-        });
-        code = result.outputText;
-      } else {
-        const result = transformSync(fullPath, source, { sourcemap: false });
-        if (result.errors.length) {
-          console.error(`Errors in ${fullPath}:`, result.errors);
-          process.exit(1);
-        }
-        code = result.code;
+      const result = transformSync(fullPath, source, { sourcemap: false });
+      if (result.errors.length) {
+        console.error(`Errors in ${fullPath}:`, result.errors);
+        process.exit(1);
       }
 
-      writeFileSync(outPath, USE_TSC ? code : minifyFormat(stripComments(code)));
+      writeFileSync(outPath, minifyFormat(stripComments(result.code)));
       count++;
     }
   }
   return count;
 }
 
+// Resolve the tsc binary path from the workspace root node_modules/.bin.
+const tscPath = path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc");
+
 /**
  * Transpile src/ -> dist-es/ for a given package directory.
  * @param {string} packageDir - absolute path to the package root.
- * @returns {number} number of files transpiled.
  */
 function buildEs(packageDir) {
-  const srcDir = path.join(packageDir, "src");
   const outDir = path.join(packageDir, "dist-es");
 
   // Clear dist-es contents before building.
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
 
-  let compilerOptions;
   if (USE_TSC) {
-    const configPath = ts.findConfigFile(packageDir, ts.sys.fileExists, "tsconfig.es.json");
-    const { config } = ts.readConfigFile(configPath, ts.sys.readFile);
-    ({ options: compilerOptions } = ts.parseJsonConfigFileContent(config, ts.sys, packageDir));
+    // Dispatch tsc CLI directly — tsconfig.es.json already has noCheck: true.
+    execFileSync(tscPath, ["-p", "tsconfig.es.json"], {
+      cwd: packageDir,
+      stdio: "inherit",
+    });
+  } else {
+    const srcDir = path.join(packageDir, "src");
+    processDir(srcDir, srcDir, outDir);
   }
-
-  return processDir(srcDir, srcDir, outDir, compilerOptions);
 }
 
 module.exports = buildEs;

@@ -15,6 +15,7 @@
     "target": "es2022",
     "types": ["node"],
     "useUnknownInCatchVariables": false,
+    "skipLibCheck": true,
     "experimentalDecorators": true,
     "jsx": "react",
     "jsxFactory": "JSX.createElement",
