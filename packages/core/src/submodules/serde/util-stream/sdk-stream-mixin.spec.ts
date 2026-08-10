@@ -8,7 +8,7 @@ import { sdkStreamMixin } from "./sdk-stream-mixin";
 vi.mock("../util-buffer-from/buffer-from");
 
 describe(sdkStreamMixin.name, () => {
-  const writeDataToStream = (stream: Writable, data: Array<ArrayBufferLike>): Promise<void> =>
+  const writeDataToStream = (stream: Writable, data: Array<ArrayBufferLike | Uint8Array>): Promise<void> =>
     new Promise((resolve, reject) => {
       data.forEach((chunk) => {
         stream.write(chunk, (err) => {

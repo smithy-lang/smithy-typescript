@@ -43,7 +43,9 @@ function castSourceData(toCast: SourceData, encoding?: StringEncoding): Buffer {
   }
 
   if (ArrayBuffer.isView(toCast)) {
-    return fromArrayBuffer(toCast.buffer, toCast.byteOffset, toCast.byteLength);
+    // TODO(TS6): type .buffer as ArrayBuffer (use Uint8Array<ArrayBuffer>) to remove cast
+    // after dropping support for TS < 5.7.
+    return fromArrayBuffer(toCast.buffer as ArrayBuffer, toCast.byteOffset, toCast.byteLength);
   }
 
   return fromArrayBuffer(toCast);

@@ -459,7 +459,7 @@ const se_Alpha_event = (
     ":message-type": { type: "string", value: "event" },
     ":content-type": { type: "string", value: "application/cbor" },
   }
-  let body = new Uint8Array();
+  let body: Uint8Array = new Uint8Array();
   body = se_Alpha(input, context);
   body = cbor.serialize(body);
   return { headers, body };
@@ -473,7 +473,7 @@ const se_Alpha_event = (
       ":message-type": { type: "string", value: "event" },
       ":content-type": { type: "string", value: "application/cbor" },
     }
-    let body = new Uint8Array();
+    let body: Uint8Array = new Uint8Array();
     body = _json(input);
     body = cbor.serialize(body);
     return { headers, body };
@@ -487,7 +487,7 @@ const se_Alpha_event = (
         ":message-type": { type: "string", value: "event" },
         ":content-type": { type: "string", value: "application/cbor" },
       }
-      let body = new Uint8Array();
+      let body: Uint8Array = new Uint8Array();
       body = _json(input);
       body = cbor.serialize(body);
       return { headers, body };

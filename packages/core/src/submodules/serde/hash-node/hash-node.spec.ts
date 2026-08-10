@@ -15,7 +15,7 @@ describe("Hash", () => {
           const hash = new Hash(supportedHash);
           hash.update(fromString(input, "base64"));
           const { buffer } = await hash.digest();
-          expect(fromArrayBuffer(buffer).toString("hex")).toBe(expected);
+          expect(fromArrayBuffer(buffer as ArrayBuffer).toString("hex")).toBe(expected);
         });
       }
 
@@ -25,7 +25,7 @@ describe("Hash", () => {
           const hash = new Hash(supportedHash, fromString(key, "hex"));
           hash.update(fromString(data, "hex"));
           const { buffer } = await hash.digest();
-          expect(fromArrayBuffer(buffer).toString("hex")).toMatch(expected);
+          expect(fromArrayBuffer(buffer as ArrayBuffer).toString("hex")).toMatch(expected);
         });
       }
     });
@@ -35,20 +35,20 @@ describe("Hash", () => {
     const hash = new Hash("md5");
     hash.update("");
     const { buffer } = await hash.digest();
-    expect(fromArrayBuffer(buffer).toString("hex")).toBe("d41d8cd98f00b204e9800998ecf8427e");
+    expect(fromArrayBuffer(buffer as ArrayBuffer).toString("hex")).toBe("d41d8cd98f00b204e9800998ecf8427e");
   });
 
   it("should accept ArrayBuffer data", async () => {
     const hash = new Hash("md5");
     hash.update(new ArrayBuffer(0));
     const { buffer } = await hash.digest();
-    expect(fromArrayBuffer(buffer).toString("hex")).toBe("d41d8cd98f00b204e9800998ecf8427e");
+    expect(fromArrayBuffer(buffer as ArrayBuffer).toString("hex")).toBe("d41d8cd98f00b204e9800998ecf8427e");
   });
 
   it("should accept ArrayBufferView data", async () => {
     const hash = new Hash("md5");
     hash.update(new Uint8Array(0));
     const { buffer } = await hash.digest();
-    expect(fromArrayBuffer(buffer).toString("hex")).toBe("d41d8cd98f00b204e9800998ecf8427e");
+    expect(fromArrayBuffer(buffer as ArrayBuffer).toString("hex")).toBe("d41d8cd98f00b204e9800998ecf8427e");
   });
 });

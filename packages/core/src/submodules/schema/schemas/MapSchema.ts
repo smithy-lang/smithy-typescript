@@ -9,8 +9,8 @@ import { Schema } from "./Schema";
  */
 export class MapSchema extends Schema implements IMapSchema {
   public static readonly symbol = Symbol.for("@smithy/map");
-  public name!: string;
-  public traits!: SchemaTraits;
+  declare name: string;
+  declare traits: SchemaTraits;
   /**
    * This is expected to be StringSchema, but may have traits.
    */

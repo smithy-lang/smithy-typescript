@@ -419,7 +419,7 @@ describe("cbor", () => {
           context.skip();
         }
         const serialized = cbor.serialize(data);
-        expect(allocByteArray(serialized.buffer, serialized.byteOffset, serialized.byteLength)).toEqual(
+        expect(allocByteArray(serialized.buffer as ArrayBuffer, serialized.byteOffset, serialized.byteLength)).toEqual(
           cbor_representation
         );
       });

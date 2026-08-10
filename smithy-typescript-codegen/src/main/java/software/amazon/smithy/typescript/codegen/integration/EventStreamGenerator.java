@@ -428,7 +428,7 @@ public class EventStreamGenerator {
     ) {
         TypeScriptWriter writer = context.getWriter();
         Optional<MemberShape> payloadMemberOptional = getEventPayloadMember(event);
-        writer.write("let body = new Uint8Array();");
+        writer.write("let body: Uint8Array = new Uint8Array();");
         if (payloadMemberOptional.isPresent()) {
             Shape payloadShape = context.getModel().expectShape(payloadMemberOptional.get().getTarget());
             String payloadMemberName = payloadMemberOptional.get().getMemberName();

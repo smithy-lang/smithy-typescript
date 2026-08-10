@@ -40,7 +40,11 @@ export const sdkStreamMixin = (stream: unknown): SdkStream<ReadableStream | Blob
     transformToString: async (encoding?: string) => {
       const buf = await transformToByteArray();
       if (encoding === undefined || Buffer.isEncoding(encoding)) {
-        return fromArrayBuffer(buf.buffer, buf.byteOffset, buf.byteLength).toString(encoding as BufferEncoding);
+        // TODO(TS6): type buf as Uint8Array<ArrayBuffer> to remove cast
+        // after dropping support for TS < 5.7.
+        return fromArrayBuffer(buf.buffer as ArrayBuffer, buf.byteOffset, buf.byteLength).toString(
+          encoding as BufferEncoding
+        );
       } else {
         const decoder = new TextDecoder(encoding);
         return decoder.decode(buf);
