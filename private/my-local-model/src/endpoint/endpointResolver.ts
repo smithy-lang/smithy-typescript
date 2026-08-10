@@ -17,9 +17,11 @@ export const defaultEndpointResolver = (
   endpointParams: EndpointParameters,
   context: { logger?: Logger } = {}
 ): EndpointV2 => {
-  return cache.get(endpointParams as EndpointParams, () =>
+  const params = { ...endpointParams } as EndpointParams;
+  params.OverloadedParam ??= "overloaded!";
+  return cache.get(params, () =>
     decideEndpoint(bdd, {
-      endpointParams: endpointParams as EndpointParams,
+      endpointParams: params,
       logger: context.logger,
     })
   );
