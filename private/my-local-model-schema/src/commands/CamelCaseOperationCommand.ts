@@ -35,6 +35,7 @@ export interface CamelCaseOperationCommandOutput extends CamelCaseOperationOutpu
  * const client = new XYZServiceClient(config);
  * const input = { // camelCaseOperationInput
  *   token: "STRING_VALUE",
+ *   overloadedParam: "STRING_VALUE",
  * };
  * const command = new CamelCaseOperationCommand(input);
  * const response = await client.send(command);

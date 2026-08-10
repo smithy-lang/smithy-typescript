@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { _ep0, _mw0, command } from "../commandBuilder";
+import { _ep2, _mw0, command } from "../commandBuilder";
 import type { HostPrefixOperationInput } from "../models/models_0";
 import { HostPrefixOperation$ } from "../schemas/schemas_0";
 
@@ -56,7 +56,7 @@ export interface HostPrefixOperationCommandOutput extends __MetadataBearer {}
  *
  */
 export class HostPrefixOperationCommand extends command<HostPrefixOperationCommandInput, HostPrefixOperationCommandOutput>(
-  _ep0,
+  _ep2,
   _mw0,
   "HostPrefixOperation",
   HostPrefixOperation$

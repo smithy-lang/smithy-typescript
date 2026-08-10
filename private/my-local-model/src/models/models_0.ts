@@ -26,6 +26,7 @@ export interface Alpha {
  */
 export interface CamelCaseOperationInput {
   token?: string | undefined;
+  overloadedParam?: string | undefined;
 }
 
 /**
