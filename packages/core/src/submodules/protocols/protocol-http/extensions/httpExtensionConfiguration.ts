@@ -1,6 +1,5 @@
 import type { Logger } from "@smithy/types";
 
-import { FALLBACK_LOGGER } from "../fallbackLogger";
 import type { HttpHandler } from "../httpHandler";
 
 /**
@@ -28,12 +27,17 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
 export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { logger?: Logger }>(
   runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig> & { logger?: Logger }
 ) => {
+  // Offer the client's logger under `Symbol.for("logger")`. A symbol keeps this
+  // off the handlers' public options types, and being a symbol already
+  // distinguishes it from the `"logger"` string key. `Symbol.for` means each
+  // handler can declare its own copy of the key and still compare equal to it.
+  //
   // Offered as a fallback only: the handler keeps its own logger if it has one.
   // A NoOpLogger is not offered at all, so that handlers fall through to their
   // own console-based defaults instead of being silenced.
   if (runtimeConfig.logger && runtimeConfig.logger.constructor?.name !== "NoOpLogger") {
     runtimeConfig.requestHandler?.updateHttpClientConfig?.(
-      FALLBACK_LOGGER as unknown as keyof HandlerConfig,
+      Symbol.for("logger") as unknown as keyof HandlerConfig,
       runtimeConfig.logger as HandlerConfig[keyof HandlerConfig]
     );
   }

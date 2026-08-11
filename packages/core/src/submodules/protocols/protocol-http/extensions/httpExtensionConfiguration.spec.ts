@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { FALLBACK_LOGGER } from "../fallbackLogger";
 import { getHttpHandlerExtensionConfiguration, resolveHttpHandlerRuntimeConfig } from "./httpExtensionConfiguration";
+
+/**
+ * The key under which a client offers its logger. Declared locally, as the
+ * handlers do: `Symbol.for` makes every copy of this key equal.
+ */
+const FALLBACK_LOGGER = Symbol.for("logger");
 
 describe("getHttpHandlerExtensionConfiguration", () => {
   const createMockHandler = () => ({
