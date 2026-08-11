@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.8.0
+
+### Minor Changes
+
+- ec9b4b2: chore: update builds to use typescript 6. This should not affect consumers, who may continue to use TypeScript 3.4 through 7.0 as of this version.
+
+### Patch Changes
+
+- Updated dependencies [ec9b4b2]
+  - @smithy/signature-v4@5.7.0
+  - @smithy/types@4.17.0
+  - @smithy/core@3.32.0
+
 ## 0.7.16
 
 ### Patch Changes

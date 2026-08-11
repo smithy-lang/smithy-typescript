@@ -1,5 +1,16 @@
 # @smithy/shared-ini-file-loader
 
+## 4.7.0
+
+### Minor Changes
+
+- ec9b4b2: chore: update builds to use typescript 6. This should not affect consumers, who may continue to use TypeScript 3.4 through 7.0 as of this version.
+
+### Patch Changes
+
+- Updated dependencies [ec9b4b2]
+  - @smithy/core@3.32.0
+
 ## 4.6.16
 
 ### Patch Changes
