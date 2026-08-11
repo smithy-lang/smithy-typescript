@@ -16,14 +16,6 @@ import { writeRequestBody } from "./write-request-body";
 
 export type { NodeHttpHandlerOptions };
 
-/**
- * Key with which a client offers its logger, to be used only if this handler
- * has no logger of its own. `Symbol.for` makes this equal to the client's copy.
- *
- * @internal
- */
-const FALLBACK_LOGGER: symbol = Symbol.for("logger");
-
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
   httpAgentProvider: () => Promise<hAgentType>;
   httpAgent?: hAgentType;
@@ -330,8 +322,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
   public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
-      if ((key as unknown) === FALLBACK_LOGGER) {
-        // Offered by the client: take it only if this handler has no logger of its own.
+      if ((key as unknown) === Symbol.for("logger")) {
+        // A client offers its logger under this key: take it only if this
+        // handler has no logger of its own.
         return {
           ...config,
           logger: config.logger ?? (value as Logger),

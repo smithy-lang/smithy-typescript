@@ -6,14 +6,6 @@ import { Agent, Dispatcher, getGlobalDispatcher } from "undici";
 import { buildAbortError } from "./build-abort-error";
 
 /**
- * Key with which a client offers its logger, to be used only if this handler
- * has no logger of its own. `Symbol.for` makes this equal to the client's copy.
- *
- * @internal
- */
-const FALLBACK_LOGGER: symbol = Symbol.for("logger");
-
-/**
  * Duck-type check: returns true if the value looks like a Dispatcher
  * (has `request`, `close`, and `destroy` methods), as opposed to plain
  * Agent.Options. We require all three because the handler invokes each
@@ -221,8 +213,9 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     key: K,
     value: UndiciHttpHandlerOptions[K]
   ): void {
-    if ((key as unknown) === FALLBACK_LOGGER) {
-      // Offered by the client: take it only if this handler has no logger of its own.
+    if ((key as unknown) === Symbol.for("logger")) {
+      // A client offers its logger under this key: take it only if this
+      // handler has no logger of its own.
       this.config.logger ??= value as Logger;
       return;
     }
