@@ -1,7 +1,12 @@
-# smithy-typescript/server-apigateway
+# `@smithy-typescript/server-apigateway`
 
 This package provides glue code to enable using a server SDK inside of
 API Gateway Lambda functions.
+
+## Alpha software
+
+The Smithy TypeScript Server SDK is an alpha release, and breaking changes may happen between
+minor versions in the `0.x` range.
 
 ## Usage
 
