@@ -35,7 +35,7 @@
     "g:vitest": "cd $INIT_CWD && vitest"
   },
   "dependencies": {
-    "@changesets/cli": "^2.27.5",
+    "@changesets/cli": "^3.0.0",
     "glob": "^7.1.6",
     "premove": "4.0.0"
   },
