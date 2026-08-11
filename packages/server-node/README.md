@@ -1,6 +1,11 @@
-# smithy-typescript/server-node
+# `@smithy-typescript/server-node`
 
 This package provides glue code to enable using a server sdk with Node.js.
+
+## Alpha software
+
+The Smithy TypeScript Server SDK is an alpha release, and breaking changes may happen between
+minor versions in the `0.x` range.
 
 ## Usage
 
