@@ -33,6 +33,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+// Aliased, so a wait cannot be misread as scheduling a callback with the global.
+import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 type ExistStatus = "exists" | "missing" | "unknown";
@@ -204,12 +206,20 @@ async function check({ name, version }: PackageCheck): Promise<CheckStatus> {
   return (await probe(packageUrl(name))) === "missing" ? "missingName" : "missingVersion";
 }
 
+/** How a set of checks came out: every check lands in exactly one bucket. */
+export interface ExistencePartition<T extends PackageCheck> {
+  exists: T[];
+  missingNames: T[];
+  missingVersions: T[];
+  unknown: T[];
+}
+
 /**
  * Queries the registry for the given checks and splits them by what it found:
  * names that do not exist at all, versions that are not published under a name
  * that does, and checks the registry could not answer.
  */
-export async function partitionByExistence<T extends PackageCheck>(checks: T[]) {
+export async function partitionByExistence<T extends PackageCheck>(checks: T[]): Promise<ExistencePartition<T>> {
   const results = await Promise.all(checks.map(async (item) => ({ item, status: await check(item) })));
   const withStatus = (status: CheckStatus) => results.filter((r) => r.status === status).map((r) => r.item);
   return {
@@ -218,6 +228,80 @@ export async function partitionByExistence<T extends PackageCheck>(checks: T[]) 
     missingVersions: withStatus("missingVersion"),
     unknown: withStatus("unknown"),
   };
+}
+
+/**
+ * How long to keep re-checking a package the registry does not have yet, and how
+ * long to leave between passes.
+ *
+ * Since 2026-07-28 npm scans every publish for malware before making it
+ * available for install, which typically takes around five minutes and can take
+ * 15 or more depending on the size and content of the package and on how busy
+ * the registry is. Until the scan passes the registry answers 404 for the new
+ * version exactly as it does for a version that was never published, so a caller
+ * probing versions that were only just published cannot tell the two apart and
+ * has to wait the scan out. See
+ * https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/.
+ *
+ * The budget is deliberately well past the quoted 15 minutes, since those times
+ * are described as current typical behaviour rather than a guarantee. Overrunning
+ * it is not a failure: the only cost is a version left unverified.
+ */
+const DEFAULT_PUBLISH_SCAN_WAIT_MS = 25 * 60_000;
+const PUBLISH_SCAN_POLL_INTERVAL_MS = 60_000;
+
+/**
+ * The wait budget, which NPM_PUBLISH_SCAN_WAIT_MS overrides - set it to 0 for a
+ * local run that should not wait at all. A value that is not a non-negative
+ * number is an error rather than a silent fall back to the default, so a typo
+ * cannot leave a run waiting for 25 minutes unexplained.
+ */
+function getPublishScanWaitMs(): number {
+  const override = process.env.NPM_PUBLISH_SCAN_WAIT_MS?.trim();
+  if (!override) {
+    return DEFAULT_PUBLISH_SCAN_WAIT_MS;
+  }
+  const ms = Number(override);
+  if (!Number.isFinite(ms) || ms < 0) {
+    fail(`NPM_PUBLISH_SCAN_WAIT_MS must be a number of milliseconds >= 0, got ${override}.`);
+  }
+  return ms;
+}
+
+const PUBLISH_SCAN_WAIT_MS = getPublishScanWaitMs();
+
+/**
+ * partitionByExistence for a caller probing versions that may have been
+ * published moments ago: whatever the registry does not have yet is re-checked
+ * until it appears or PUBLISH_SCAN_WAIT_MS runs out, so a version still going
+ * through npm's publish-time scan is not mistaken for one that was never
+ * published.
+ *
+ * Checks the registry could not answer are re-checked too, so a transient
+ * registry outage that outlasts probe's own retries is also waited out. onWait is
+ * called before each wait, so the caller can report that it is still waiting and
+ * on what.
+ */
+export async function partitionByExistenceWaitingForPublish<T extends PackageCheck>(
+  checks: T[],
+  onWait?: (pending: T[], waitMs: number) => void
+): Promise<ExistencePartition<T>> {
+  const deadline = Date.now() + PUBLISH_SCAN_WAIT_MS;
+  let partition = await partitionByExistence(checks);
+  // Only the pending checks are re-queried, so each pass costs less than the
+  // last; what already exists is carried across passes.
+  const exists = [...partition.exists];
+  let pending = [...partition.missingNames, ...partition.missingVersions, ...partition.unknown];
+  while (pending.length > 0 && Date.now() < deadline) {
+    const waitMs = Math.min(PUBLISH_SCAN_POLL_INTERVAL_MS, deadline - Date.now());
+    onWait?.(pending, waitMs);
+    await sleep(waitMs);
+    partition = await partitionByExistence(pending);
+    exists.push(...partition.exists);
+    pending = [...partition.missingNames, ...partition.missingVersions, ...partition.unknown];
+  }
+  // The last pass decides how anything still pending is reported.
+  return { ...partition, exists };
 }
 
 /** Warns about entries the registry could not answer for. */
