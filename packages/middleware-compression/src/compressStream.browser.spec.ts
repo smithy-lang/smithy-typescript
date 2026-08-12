@@ -1,6 +1,5 @@
 import { AsyncGzip } from "fflate";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
-import { ReadableStream } from "web-streams-polyfill";
 
 import { compressStream } from "./compressStream.browser";
 

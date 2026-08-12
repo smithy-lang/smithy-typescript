@@ -68,12 +68,24 @@ export class Sha256WebCrypto implements Checksum {
     if (subtle) {
       if (this.secret) {
         this.finished = true;
-        const key = await subtle.importKey("raw", this.secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-        const sig = await subtle.sign("HMAC", key, data);
+        const key = await subtle.importKey(
+          "raw",
+          // TODO(TS6): use Uint8Array<ArrayBuffer> for this.secret to remove cast
+          // after dropping support for TS < 5.7.
+          this.secret as unknown as BufferSource,
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+        // TODO(TS6): type concatBytes return as Uint8Array<ArrayBuffer> to remove cast
+        // after dropping support for TS < 5.7.
+        const sig = await subtle.sign("HMAC", key, data as unknown as BufferSource);
         return new Uint8Array(sig);
       }
 
-      const hash = await subtle.digest("SHA-256", data);
+      // TODO(TS6): type concatBytes return as Uint8Array<ArrayBuffer> to remove cast
+      // after dropping support for TS < 5.7.
+      const hash = await subtle.digest("SHA-256", data as unknown as BufferSource);
       return new Uint8Array(hash);
     }
 

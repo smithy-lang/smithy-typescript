@@ -38,6 +38,7 @@ generate-protocol-tests:
 	node ./scripts/post-protocol-test-codegen
 	yarn
 	yarn turbo run build -F="./private/*" --only
+	make generate-server-tests
 	make test-protocols;
 
 generate-server-tests:

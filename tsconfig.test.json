@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "noEmit": true,
     "noCheck": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"],
+    "module": "esnext",
+    "moduleResolution": "bundler"
   },
   "extends": "./tsconfig.types.json",
   "include": ["packages/**/*.spec.ts", "private/**/*.spec.ts"],

@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { _ep0, _mw0, command } from "../commandBuilder";
+import { _ep3, _mw0, command } from "../commandBuilder";
 import type { HttpLabelCommandInput, HttpLabelCommandOutput } from "../models/models_0";
 import { HttpLabelCommand$ } from "../schemas/schemas_0";
 
@@ -56,7 +56,7 @@ export interface HttpLabelCommandCommandOutput extends HttpLabelCommandOutput, _
  *
  */
 export class HttpLabelCommandCommand extends command<HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput>(
-  _ep0,
+  _ep3,
   _mw0,
   "HttpLabelCommand",
   HttpLabelCommand$

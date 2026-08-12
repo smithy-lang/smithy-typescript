@@ -12,6 +12,14 @@
  * write to the cache scope that pull requests restore from, which is why the
  * refresh happens here and not on the release PR itself.
  *
+ * Publishing does not make a version available immediately - npm scans it for
+ * malware first, which usually takes a few minutes - so this run starts inside
+ * the window where the versions it is about to record still read as absent.
+ * Anything the registry does not have yet is therefore re-checked until it
+ * appears, or until the wait budget in shared.mts runs out. Without that wait a
+ * release would record none of what it just published and every check on the next
+ * release PR would fall back to the registry.
+ *
  * Versions that are not on npm are reported but never fail the run: a package can
  * legitimately sit on main unpublished until a maintainer does its one-time manual
  * first publish, and a release may have published only some of what it versioned.
@@ -29,7 +37,8 @@ import {
   formatPackageVersion,
   getAllPublishablePackages,
   loadRecord,
-  partitionByExistence,
+  partitionByExistenceWaitingForPublish,
+  type PackageVersion,
   type PublishedRecord,
   RECORD_DISPLAY,
   saveRecord,
@@ -57,7 +66,22 @@ if (toVerify.length === 0) {
   process.exit(0);
 }
 
-const { exists, missingNames, missingVersions, unknown } = await partitionByExistence(toVerify);
+// The full list of what is still pending is worth seeing once; after that only
+// how many, so a long wait does not bury the rest of the log.
+let listPending = true;
+const reportWait = (pending: PackageVersion[], waitMs: number) => {
+  console.log(
+    `⏳ ${pending.length} version(s) are not on the registry yet, which is expected for a few minutes after a ` +
+      `publish while npm scans it; re-checking in ${Math.round(waitMs / 1000)}s` +
+      (listPending ? `:\n  ${pending.map(formatPackageVersion).join("\n  ")}` : ".")
+  );
+  listPending = false;
+};
+
+const { exists, missingNames, missingVersions, unknown } = await partitionByExistenceWaitingForPublish(
+  toVerify,
+  reportWait
+);
 // Why a version is absent does not matter here: either way it is left unrecorded.
 const missing = [...missingNames, ...missingVersions];
 for (const { name, version } of exists) {
@@ -70,8 +94,9 @@ warnUnknown(unknown.map(formatPackageVersion));
 
 if (missing.length) {
   console.log(
-    `ℹ️  ${missing.length} version(s) on main are not on npm, either because the release publishing them has ` +
-      `not finished or because the package has never been published at all:\n  ` +
+    `ℹ️  ${missing.length} version(s) on main are not on npm: the release publishing them did not finish, the ` +
+      `package has never been published at all, or npm's publish-time scan is holding the version back for longer ` +
+      `than this run waited for:\n  ` +
       missing.map(formatPackageVersion).join("\n  ")
   );
 }

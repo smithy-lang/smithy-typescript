@@ -11,8 +11,8 @@ import { Schema } from "./Schema";
  */
 export class OperationSchema extends Schema implements IOperationSchema {
   public static readonly symbol = Symbol.for("@smithy/ope");
-  public name!: string;
-  public traits!: SchemaTraits;
+  declare name: string;
+  declare traits: SchemaTraits;
   public input!: SchemaRef;
   public output!: SchemaRef;
   protected readonly symbol = OperationSchema.symbol;

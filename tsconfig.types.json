@@ -3,8 +3,10 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
+    "lib": ["es2015", "dom"],
     "removeComments": false,
     "strict": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "paths": {}
   }
 }

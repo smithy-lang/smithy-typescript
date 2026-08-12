@@ -1,7 +1,7 @@
 // smithy-typescript generated code
 import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
 
-import { _ep0, _mw0, command } from "../commandBuilder";
+import { _ep3, _mw0, command } from "../commandBuilder";
 import type { ValidatedInput, ValidatedOutput } from "../models/models_0";
 import { ValidatedOperation$ } from "../schemas/schemas_0";
 
@@ -70,7 +70,7 @@ export interface ValidatedOperationCommandOutput extends ValidatedOutput, __Meta
  * @public
  */
 export class ValidatedOperationCommand extends command<ValidatedOperationCommandInput, ValidatedOperationCommandOutput>(
-  _ep0,
+  _ep3,
   _mw0,
   "ValidatedOperation",
   ValidatedOperation$

@@ -26,6 +26,6 @@
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
     "typedoc": "0.23.23",
-    "typescript": "~5.8.3"
+    "typescript": "~6.0.3"
   }
 }

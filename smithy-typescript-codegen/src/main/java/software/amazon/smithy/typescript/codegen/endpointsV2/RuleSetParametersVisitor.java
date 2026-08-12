@@ -6,6 +6,7 @@ package software.amazon.smithy.typescript.codegen.endpointsV2;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.NodeVisitor;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -22,6 +23,7 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
     private final Map<String, String> clientContextParams;
     private boolean useLocalNames = false;
     private boolean writeDefaults = false;
+    private Set<String> clientLevelParams = null;
 
     public RuleSetParametersVisitor(TypeScriptWriter writer) {
         this.writer = writer;
@@ -42,6 +44,16 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
         this(writer);
         this.writeDefaults = writeDefaults;
         this.useLocalNames = true;
+    }
+
+    /**
+     * @param clientLevelParams - the set of parameter names that are valid at the client level
+     *                            (built-ins and client context params). When writing defaults,
+     *                            only parameters in this set will have defaults emitted.
+     */
+    public RuleSetParametersVisitor(TypeScriptWriter writer, boolean writeDefaults, Set<String> clientLevelParams) {
+        this(writer, writeDefaults);
+        this.clientLevelParams = clientLevelParams;
     }
 
     @Override
@@ -66,7 +78,12 @@ public class RuleSetParametersVisitor extends NodeVisitor.Default<Void> {
             if (writeDefaults) {
                 if (parameterGenerator.hasDefault()) {
                     // Don't write root-level defaults for conflicting parameters
-                    if (!ClientConfigKeys.isKnownConfigKey(key)) {
+                    // Don't write defaults for params not available at the client level
+                    // (e.g. static context params that are only set per-command)
+                    if (
+                        !ClientConfigKeys.isKnownConfigKey(key)
+                            && (clientLevelParams == null || clientLevelParams.contains(key))
+                    ) {
                         writer.write(parameterGenerator.defaultAsCodeString());
                     }
                 }

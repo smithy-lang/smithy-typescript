@@ -499,6 +499,19 @@ final class DirectedTypeScriptCodegen
                     directive.symbolProvider()
                 ).writeRuntimeIndexTest();
             });
+            directive.fileManifest().writeFile("tsconfig.test.json", """
+                                                                     {
+                                                                       "extends": "./tsconfig.types.json",
+                                                                       "compilerOptions": {
+                                                                         "noEmit": true,
+                                                                         "rootDir": ".",
+                                                                         "declaration": false,
+                                                                         "emitDeclarationOnly": false,
+                                                                         "declarationDir": null
+                                                                       },
+                                                                       "include": ["test/index-types.ts"]
+                                                                     }
+                                                                     """);
         }
 
         // snapshot tests require schema mode and client codegen.

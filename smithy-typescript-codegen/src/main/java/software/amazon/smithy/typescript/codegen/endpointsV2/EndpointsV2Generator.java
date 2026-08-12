@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ArrayNode;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.rulesengine.language.syntax.rule.Condition;
@@ -194,10 +195,13 @@ public final class EndpointsV2Generator implements Runnable {
                                  ): T & ClientResolvedEndpointParameters => {""", "};", () -> {
                     writer.openBlock("return Object.assign(options, {", "});", () -> {
                         ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                        Set<String> clientLevelParams = new HashSet<>();
+                        clientLevelParams.addAll(ruleSetParameterFinder.getBuiltInParams().keySet());
+                        clientLevelParams.addAll(ruleSetParameterFinder.getClientContextParams().keySet());
                         ruleSet
                             .getObjectMember("parameters")
                             .ifPresent(parameters -> {
-                                parameters.accept(new RuleSetParametersVisitor(writer, true));
+                                parameters.accept(new RuleSetParametersVisitor(writer, true, clientLevelParams));
                             });
                         writer.write(
                             "defaultSigningName: \"$L\",",
@@ -363,23 +367,87 @@ public final class EndpointsV2Generator implements Runnable {
                             .collect(Collectors.joining("\", \"", "\"", "\""))
                     );
                 }
+                // Determine operation-level params with defaults (not built-in, not clientContextParams).
+                Set<String> clientLevelParams = new HashSet<>();
+                clientLevelParams.addAll(ruleSetParameterFinder.getBuiltInParams().keySet());
+                clientLevelParams.addAll(ruleSetParameterFinder.getClientContextParams().keySet());
+
+                ObjectNode ruleSet = endpointRuleSetTrait.getRuleSet().expectObjectNode();
+                Map<String, String> operationDefaults = new HashMap<>();
+                ruleSet.getObjectMember("parameters").ifPresent(parameters -> {
+                    parameters.getMembers().forEach((key, value) -> {
+                        String paramName = key.getValue();
+                        if (!clientLevelParams.contains(paramName)) {
+                            ObjectNode paramNode = value.expectObjectNode();
+                            if (paramNode.containsMember("default")) {
+                                Node defaultValue = paramNode.getMember("default").get();
+                                String type = paramNode.expectStringMember("type").getValue();
+                                String defaultStr;
+                                switch (type.toLowerCase()) {
+                                    case "string":
+                                        defaultStr = "\"" + defaultValue.expectStringNode().getValue() + "\"";
+                                        break;
+                                    case "boolean":
+                                        defaultStr = String.valueOf(defaultValue.expectBooleanNode().getValue());
+                                        break;
+                                    default:
+                                        defaultStr = null;
+                                }
+                                if (defaultStr != null) {
+                                    operationDefaults.put(paramName, defaultStr);
+                                }
+                            }
+                        }
+                    });
+                });
+
+                boolean hasOperationDefaults = !operationDefaults.isEmpty();
+
                 writer.writeDocs("@internal");
-                writer.write(
-                    """
-                    export const defaultEndpointResolver = (
-                      endpointParams: EndpointParameters,
-                      context: { logger?: Logger } = {}
-                    ): EndpointV2 => {
-                      return cache.get(endpointParams as EndpointParams, () =>
-                        $L, {
-                          endpointParams: endpointParams as EndpointParams,
-                          logger: context.logger,
-                        })
-                      );
-                    };
-                    """,
-                    settings.generateEndpointBdd() ? "decideEndpoint(bdd" : "resolveEndpoint(ruleSet"
-                );
+                if (hasOperationDefaults) {
+                    writer.write(
+                        """
+                        export const defaultEndpointResolver = (
+                          endpointParams: EndpointParameters,
+                          context: { logger?: Logger } = {}
+                        ): EndpointV2 => {
+                          const params = { ...endpointParams } as EndpointParams;"""
+                    );
+                    writer.indent();
+                    operationDefaults.forEach((paramName, defaultStr) -> {
+                        writer.write("params.$L ??= $L;", paramName, defaultStr);
+                    });
+                    writer.dedent();
+                    writer.write(
+                        """
+                          return cache.get(params, () =>
+                            $L, {
+                              endpointParams: params,
+                              logger: context.logger,
+                            })
+                          );
+                        };
+                        """,
+                        settings.generateEndpointBdd() ? "decideEndpoint(bdd" : "resolveEndpoint(ruleSet"
+                    );
+                } else {
+                    writer.write(
+                        """
+                        export const defaultEndpointResolver = (
+                          endpointParams: EndpointParameters,
+                          context: { logger?: Logger } = {}
+                        ): EndpointV2 => {
+                          return cache.get(endpointParams as EndpointParams, () =>
+                            $L, {
+                              endpointParams: endpointParams as EndpointParams,
+                              logger: context.logger,
+                            })
+                          );
+                        };
+                        """,
+                        settings.generateEndpointBdd() ? "decideEndpoint(bdd" : "resolveEndpoint(ruleSet"
+                    );
+                }
             }
         );
     }

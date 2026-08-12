@@ -9,9 +9,11 @@ on:
     branches:
       - main
   # Refresh the cached record of packages and versions known to exist on npm once
-  # the release that publishes them has finished, so the versions it published are
-  # on the registry by the time they are probed. Refreshing on push to main instead
-  # would race that release and record its versions as absent.
+  # the release that publishes them has finished. Refreshing on push to main
+  # instead would race that release and record its versions as absent. A publish
+  # does not reach the registry instantly either - npm scans it for malware first -
+  # so the refresh waits that out rather than the workflow trying to time it; see
+  # refresh-npm-package-record.mts.
   #
   # release-npm-packages.yml raises this event, rather than this workflow listening
   # for it to complete, for cache access: only a trusted trigger may write to the
@@ -95,6 +97,9 @@ jobs:
   refresh-npm-package-record:
     runs-on: ubuntu-latest
     name: Refresh record of published packages
+    # Comfortably over the wait budget in shared.mts, which is what makes this job
+    # long-running, so that a hang is cut short well before the 6 hour default.
+    timeout-minutes: 40
     # The release raises the event only once it has published, so a release that
     # failed, was cancelled or published nothing never gets here: those versions
     # stay absent from the registry, which is what the next release PR's check must
