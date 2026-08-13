@@ -18,7 +18,7 @@ jobs:
       # to tell "there is a release PR to approve runs on" from "there was
       # nothing to version". Notably it is empty on the push that merges the
       # release PR, since `changeset version` already consumed the changesets.
-      pull-request-number: ${{ steps.version.outputs.pullRequestNumber }}
+      pull-request-number: ${{ steps.version.outputs.pr-number }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -29,13 +29,12 @@ jobs:
         run: yarn install
       - name: Create Release Pull Request
         id: version
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v2.0.0
         with:
-          version: yarn changeset version
-          commit: "Version NPM packages"
-          title: "Version NPM packages"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-script: yarn changeset version
+          commit-message: "Version NPM packages"
+          pr-title: "Version NPM packages"
 
   # The release PR is opened and updated by github-actions[bot] authenticating as
   # GITHUB_TOKEN, above. Runs on such a pull request are created in an
