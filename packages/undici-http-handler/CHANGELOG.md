@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- cf69285: use the client logger as a fallback when the request handler has no logger configured, while preserving an explicitly configured handler logger.
+
+### Patch Changes
+
+- Updated dependencies [cf69285]
+  - @smithy/core@3.33.0
+
 ## 3.1.0
 
 ### Minor Changes

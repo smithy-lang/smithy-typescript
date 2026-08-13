@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.33.0
+
+### Minor Changes
+
+- cf69285: offer the client logger to request handlers as a fallback without overwriting a handler's own logger. A `NoOpLogger` is not offered, so handlers keep their console-based defaults.
+
 ## 3.32.0
 
 ### Minor Changes
