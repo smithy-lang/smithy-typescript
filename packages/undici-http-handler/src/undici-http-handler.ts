@@ -213,6 +213,13 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     key: K,
     value: UndiciHttpHandlerOptions[K]
   ): void {
+    if ((key as unknown) === Symbol.for("logger")) {
+      // A client offers its logger under this key: take it only if this
+      // handler has no logger of its own.
+      this.config.logger ??= value as Logger;
+      return;
+    }
+
     if (key !== "dispatcher") {
       (this.config as any)[key] = value;
       return;

@@ -1,12 +1,17 @@
 import http from "node:http";
 import https from "node:https";
 import { HttpRequest } from "@smithy/core/protocols";
+import type { NodeHttpHandlerOptions } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { NodeHttpHandler } from "./node-http-handler";
 import * as setConnectionTimeoutModule from "./set-connection-timeout";
 import * as setRequestTimeoutModule from "./set-request-timeout";
 import * as setSocketTimeoutModule from "./set-socket-timeout";
+
+// Matches the key the client offers its logger under. `Symbol.for` makes this
+// the same symbol the handler compares against.
+const FALLBACK_LOGGER = Symbol.for("logger") as unknown as keyof NodeHttpHandlerOptions;
 import { timing } from "./timing";
 
 let { request: hRequest } = http;
@@ -482,6 +487,94 @@ describe("NodeHttpHandler", () => {
         expect(e.message).toBe("string reason");
         expect(e.name).toBe("AbortError");
       }
+    });
+  });
+
+  describe("updateHttpClientConfig", () => {
+    const createLogger = () => ({ trace: vi.fn(), debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() });
+
+    /**
+     * @returns the logger the handler resolved for the request, observed via
+     * setRequestTimeout, which receives it as its last argument.
+     */
+    const getEffectiveLogger = async (handler: NodeHttpHandler) => {
+      const spy = vi.spyOn(setRequestTimeoutModule, "setRequestTimeout");
+      spy.mockClear();
+      const request = new HttpRequest({ hostname: "localhost", method: "GET", protocol: "https:", path: "/" });
+      try {
+        await handler.handle(request);
+      } catch {
+        // ignore request errors
+      }
+      return spy.mock.calls[0][4];
+    };
+
+    it("updates non-logger keys", async () => {
+      const handler = new NodeHttpHandler({ requestTimeout: 1000 });
+      handler.updateHttpClientConfig("requestTimeout", 5000);
+
+      const request = new HttpRequest({ hostname: "localhost", method: "GET", protocol: "https:", path: "/" });
+      try {
+        await handler.handle(request);
+      } catch {
+        // ignore request errors
+      }
+
+      const configs = handler.httpHandlerConfigs();
+      expect(configs.requestTimeout).toBe(5000);
+    });
+
+    it("uses the fallback logger when the handler has no logger of its own", async () => {
+      const handler = new NodeHttpHandler();
+      const clientLogger = createLogger();
+
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+
+      expect(await getEffectiveLogger(handler)).toBe(clientLogger);
+    });
+
+    it("keeps the handler's explicit logger instead of the fallback logger", async () => {
+      const handlerLogger = createLogger();
+      const handler = new NodeHttpHandler({ logger: handlerLogger });
+      const clientLogger = createLogger();
+
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+
+      expect(await getEffectiveLogger(handler)).toBe(handlerLogger);
+    });
+
+    it("accepts the fallback logger synchronously while config resolves asynchronously", async () => {
+      let resolveOptions: (o: NodeHttpHandlerOptions) => void;
+      const handler = new NodeHttpHandler(
+        () => new Promise<NodeHttpHandlerOptions>((resolve) => (resolveOptions = resolve))
+      );
+      const clientLogger = createLogger();
+
+      // Offered before the handler's own config has resolved.
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+      resolveOptions!({});
+
+      expect(await getEffectiveLogger(handler)).toBe(clientLogger);
+    });
+
+    it("keeps an explicit logger that resolves asynchronously, over the fallback logger", async () => {
+      const handlerLogger = createLogger();
+      const handler = new NodeHttpHandler(async () => ({ logger: handlerLogger }));
+      const clientLogger = createLogger();
+
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+
+      expect(await getEffectiveLogger(handler)).toBe(handlerLogger);
+    });
+
+    it("stores the fallback logger under the handler's own logger key", async () => {
+      const handler = new NodeHttpHandler();
+      const clientLogger = createLogger();
+
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+      await getEffectiveLogger(handler);
+
+      expect(handler.httpHandlerConfigs().logger).toBe(clientLogger);
     });
   });
 

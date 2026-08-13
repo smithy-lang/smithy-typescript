@@ -143,6 +143,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     }
 
     const config = this.config!;
+    const logger = config.logger;
 
     // determine which http(s) client to use
     const isSSL = request.protocol === "https:";
@@ -208,11 +209,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // This warning will be cancelled if the request resolves.
       socketWarningTimeoutId = timing.setTimeout(
         () => {
-          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(
-            agent!,
-            this.socketWarningTimestamp,
-            config.logger
-          );
+          this.socketWarningTimestamp = NodeHttpHandler.checkSocketUsage(agent!, this.socketWarningTimestamp, logger);
         },
         config.socketAcquisitionWarningTimeout ?? (config.requestTimeout ?? 2000) + (config.connectionTimeout ?? 1000)
       );
@@ -298,7 +295,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         reject,
         effectiveRequestTimeout,
         config.throwOnRequestTimeout,
-        config.logger ?? console
+        logger ?? console
       );
       socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
 
@@ -325,6 +322,14 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
   public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
+      if ((key as unknown) === Symbol.for("logger")) {
+        // A client offers its logger under this key: take it only if this
+        // handler has no logger of its own.
+        return {
+          ...config,
+          logger: config.logger ?? (value as Logger),
+        };
+      }
       return {
         ...config,
         [key]: value,

@@ -1,3 +1,5 @@
+import type { Logger } from "@smithy/types";
+
 import type { HttpHandler } from "../httpHandler";
 
 /**
@@ -14,7 +16,7 @@ export interface HttpHandlerExtensionConfiguration<HandlerConfig extends object 
  * @internal
  */
 export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = Partial<{
-  httpHandler: HttpHandler<HandlerConfig>;
+  requestHandler: HttpHandler<HandlerConfig>;
 }>;
 
 /**
@@ -22,21 +24,36 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
  *
  * @internal
  */
-export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends object = {}>(
-  runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig>
+export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { logger?: Logger }>(
+  runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig> & { logger?: Logger }
 ) => {
+  // Offer the client's logger under `Symbol.for("logger")`. A symbol keeps this
+  // off the handlers' public options types, and being a symbol already
+  // distinguishes it from the `"logger"` string key. `Symbol.for` means each
+  // handler can declare its own copy of the key and still compare equal to it.
+  //
+  // Offered as a fallback only: the handler keeps its own logger if it has one.
+  // A NoOpLogger is not offered at all, so that handlers fall through to their
+  // own console-based defaults instead of being silenced.
+  if (runtimeConfig.logger && runtimeConfig.logger.constructor?.name !== "NoOpLogger") {
+    runtimeConfig.requestHandler?.updateHttpClientConfig?.(
+      Symbol.for("logger") as unknown as keyof HandlerConfig,
+      runtimeConfig.logger as HandlerConfig[keyof HandlerConfig]
+    );
+  }
+
   return {
     setHttpHandler(handler: HttpHandler<HandlerConfig>): void {
-      runtimeConfig.httpHandler = handler;
+      runtimeConfig.requestHandler = handler;
     },
     httpHandler(): HttpHandler<HandlerConfig> {
-      return runtimeConfig.httpHandler!;
+      return runtimeConfig.requestHandler!;
     },
     updateHttpClientConfig(key: keyof HandlerConfig, value: HandlerConfig[typeof key]): void {
-      runtimeConfig.httpHandler?.updateHttpClientConfig(key, value);
+      runtimeConfig.requestHandler?.updateHttpClientConfig(key, value);
     },
     httpHandlerConfigs(): HandlerConfig {
-      return runtimeConfig.httpHandler!.httpHandlerConfigs();
+      return runtimeConfig.requestHandler!.httpHandlerConfigs();
     },
   };
 };
@@ -50,6 +67,6 @@ export const resolveHttpHandlerRuntimeConfig = <HandlerConfig extends object = {
   httpHandlerExtensionConfiguration: HttpHandlerExtensionConfiguration<HandlerConfig>
 ): HttpHandlerExtensionConfigType<HandlerConfig> => {
   return {
-    httpHandler: httpHandlerExtensionConfiguration.httpHandler(),
+    requestHandler: httpHandlerExtensionConfiguration.httpHandler(),
   };
 };

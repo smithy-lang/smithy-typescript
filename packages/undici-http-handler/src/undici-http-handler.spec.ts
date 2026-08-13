@@ -4,7 +4,11 @@ import { HttpRequest } from "@smithy/core/protocols";
 import { Agent, getGlobalDispatcher, setGlobalDispatcher, type Dispatcher } from "undici";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { UndiciHttpHandler } from "./undici-http-handler";
+import { UndiciHttpHandler, type UndiciHttpHandlerOptions } from "./undici-http-handler";
+
+// Matches the key the client offers its logger under. `Symbol.for` makes this
+// the same symbol the handler compares against.
+const FALLBACK_LOGGER = Symbol.for("logger") as unknown as keyof UndiciHttpHandlerOptions;
 
 const { createServer } = http;
 
@@ -561,15 +565,31 @@ describe("UndiciHttpHandler", () => {
       expect(configs.logger).toBe(logger);
     });
 
-    it("updates config", async () => {
+    it("updates logger via updateHttpClientConfig", async () => {
       const logger = createMockLogger();
       const updatedLogger = createMockLogger();
       handler = new UndiciHttpHandler({ logger });
       await handler.handle(createMockRequest());
       handler.updateHttpClientConfig("logger", updatedLogger);
-      // Config is reset, need another request to resolve
       await handler.handle(createMockRequest());
       expect(handler.httpHandlerConfigs().logger).toBe(updatedLogger);
+    });
+
+    it("does not overwrite an explicit logger with the fallback logger", async () => {
+      const logger = createMockLogger();
+      const clientLogger = createMockLogger();
+      handler = new UndiciHttpHandler({ logger });
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+      await handler.handle(createMockRequest());
+      expect(handler.httpHandlerConfigs().logger).toBe(logger);
+    });
+
+    it("stores the fallback logger under the handler's own logger key", async () => {
+      handler = new UndiciHttpHandler();
+      const clientLogger = createMockLogger();
+      handler.updateHttpClientConfig(FALLBACK_LOGGER, clientLogger);
+      await handler.handle(createMockRequest());
+      expect(handler.httpHandlerConfigs().logger).toBe(clientLogger);
     });
 
     it("retains existing dispatcher if undefined is passed", () => {
