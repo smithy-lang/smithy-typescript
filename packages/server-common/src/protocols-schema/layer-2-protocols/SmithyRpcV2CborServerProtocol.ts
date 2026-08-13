@@ -45,7 +45,14 @@ export class SmithyRpcV2CborServerProtocol extends RpcServerProtocol {
    */
   protected override validateContentType(request: IHttpRequest): void {
     super.validateContentType(request);
+    this.validateProtocolHeaders(request);
+  }
 
+  /**
+   * Validates protocol identity headers independently of Content-Type.
+   * Called for all requests including event stream operations.
+   */
+  private validateProtocolHeaders(request: IHttpRequest): void {
     const smithyProtocol = this.getHeaderValue(request, "smithy-protocol");
     if (smithyProtocol !== "rpc-v2-cbor") {
       throw new SerializationException();
@@ -57,6 +64,20 @@ export class SmithyRpcV2CborServerProtocol extends RpcServerProtocol {
     ) {
       throw new SerializationException();
     }
+  }
+
+  /**
+   * @override - For event stream operations, skip content-type validation but
+   * still validate protocol identity headers.
+   */
+  public override async deserializeRequest<Input extends object>(
+    operationSchema: any,
+    context: any,
+    request: IHttpRequest
+  ): Promise<Input> {
+    // Always validate protocol identity headers regardless of event stream.
+    this.validateProtocolHeaders(request);
+    return super.deserializeRequest(operationSchema, context, request);
   }
 
   /**

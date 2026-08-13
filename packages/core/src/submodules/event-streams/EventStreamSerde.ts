@@ -67,10 +67,17 @@ export class EventStreamSerde {
     eventStream,
     requestSchema,
     initialRequest,
+    initialMessageType,
   }: {
     eventStream: AsyncIterable<any>;
     requestSchema: NormalizedSchema;
     initialRequest?: any;
+    /**
+     * The :event-type header value for the initial message.
+     * Defaults to "initial-request" (client→server).
+     * Server→client should pass "initial-response".
+     */
+    initialMessageType?: string;
   }): Promise<IHttpRequest["body"] | Uint8Array> {
     const marshaller = this.marshaller;
     const eventStreamMember = requestSchema.getEventStreamMember();
@@ -85,7 +92,7 @@ export class EventStreamSerde {
       async *[Symbol.asyncIterator]() {
         if (initialRequest) {
           const headers: MessageHeaders = {
-            ":event-type": { type: "string", value: "initial-request" },
+            ":event-type": { type: "string", value: initialMessageType ?? "initial-request" },
             ":message-type": { type: "string", value: "event" },
             ":content-type": { type: "string", value: defaultContentType },
           };
@@ -150,10 +157,17 @@ export class EventStreamSerde {
     response,
     responseSchema,
     initialResponseContainer,
+    initialMessageType,
   }: {
     response: IHttpResponse;
     responseSchema: NormalizedSchema;
     initialResponseContainer?: any;
+    /**
+     * The :event-type header value to match as the initial message.
+     * Defaults to "initial-response" (server→client).
+     * Server-side deserialization of client requests should pass "initial-request".
+     */
+    initialMessageType?: string;
   }): Promise<AsyncIterable<{ [key: string]: any; $unknown?: unknown }>> {
     const marshaller = this.marshaller;
     const eventStreamMember = responseSchema.getEventStreamMember();
@@ -173,7 +187,7 @@ export class EventStreamSerde {
 
       const body = event[unionMember].body;
 
-      if (unionMember === "initial-response") {
+      if (unionMember === (initialMessageType ?? "initial-response")) {
         const dataObject = await this.deserializer.read(responseSchema, body);
         delete dataObject[eventStreamMember];
         return {

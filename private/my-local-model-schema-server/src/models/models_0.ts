@@ -65,6 +65,22 @@ export interface DifferentShapeName {
 /**
  * @public
  */
+export interface GammaPayload {
+  message?: string | undefined;
+  values?: number[] | undefined;
+}
+
+/**
+ * @public
+ */
+export interface Gamma {
+  sequenceNumber?: number | undefined;
+  payload?: GammaPayload | undefined;
+}
+
+/**
+ * @public
+ */
 export interface GetNumbersRequest {
   bigDecimal?: NumericValue | undefined;
   bigInteger?: bigint | undefined;
@@ -132,8 +148,159 @@ export interface GetNumbersResponse {
 /**
  * @public
  */
+export interface HeartbeatEvent {
+  timestamp?: Date | undefined;
+}
+
+/**
+ * @public
+ */
 export interface HostPrefixOperationInput {
   AccountId: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface LogEvent {
+  level?: string | undefined;
+  message?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface MetricEvent {
+  name?: string | undefined;
+  value?: number | undefined;
+}
+
+/**
+ * @public
+ */
+export interface NotificationEvent {
+  topic?: string | undefined;
+  payload?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export type PublishEventStream =
+  | PublishEventStream.LogMember
+  | PublishEventStream.MetricMember
+  | PublishEventStream.$UnknownMember;
+
+/**
+ * @public
+ */
+export namespace PublishEventStream {
+  export interface LogMember {
+    log: LogEvent;
+    metric?: never;
+    $unknown?: never;
+  }
+
+  export interface MetricMember {
+    log?: never;
+    metric: MetricEvent;
+    $unknown?: never;
+  }
+
+  /**
+   * @public
+   */
+  export interface $UnknownMember {
+    log?: never;
+    metric?: never;
+    $unknown: [string, any];
+  }
+
+  /**
+   * @deprecated unused in schema-serde mode.
+   *
+   */
+  export interface Visitor<T> {
+    log: (value: LogEvent) => T;
+    metric: (value: MetricEvent) => T;
+    _: (name: string, value: any) => T;
+  }
+}
+
+/**
+ * @public
+ */
+export interface PublishEventsRequest {
+  channel?: string | undefined;
+  events?: AsyncIterable<PublishEventStream> | undefined;
+}
+
+/**
+ * @public
+ */
+export interface PublishEventsResponse {
+  eventCount?: number | undefined;
+  message?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export type SubscribeEventStream =
+  | SubscribeEventStream.HeartbeatMember
+  | SubscribeEventStream.NotificationMember
+  | SubscribeEventStream.$UnknownMember;
+
+/**
+ * @public
+ */
+export namespace SubscribeEventStream {
+  export interface NotificationMember {
+    notification: NotificationEvent;
+    heartbeat?: never;
+    $unknown?: never;
+  }
+
+  export interface HeartbeatMember {
+    notification?: never;
+    heartbeat: HeartbeatEvent;
+    $unknown?: never;
+  }
+
+  /**
+   * @public
+   */
+  export interface $UnknownMember {
+    notification?: never;
+    heartbeat?: never;
+    $unknown: [string, any];
+  }
+
+  /**
+   * @deprecated unused in schema-serde mode.
+   *
+   */
+  export interface Visitor<T> {
+    notification: (value: NotificationEvent) => T;
+    heartbeat: (value: HeartbeatEvent) => T;
+    _: (name: string, value: any) => T;
+  }
+}
+
+/**
+ * @public
+ */
+export interface SubscribeToEventsRequest {
+  channel?: string | undefined;
+  maxEvents?: number | undefined;
+}
+
+/**
+ * @public
+ */
+export interface SubscribeToEventsResponse {
+  subscriptionId?: string | undefined;
+  events?: AsyncIterable<SubscribeEventStream> | undefined;
 }
 
 /**
@@ -174,7 +341,7 @@ export namespace TradeEvents {
   export interface GammaMember {
     alpha?: never;
     beta?: never;
-    gamma: Unit;
+    gamma: Gamma;
     delta?: never;
     $unknown?: never;
   }
@@ -205,7 +372,7 @@ export namespace TradeEvents {
   export interface Visitor<T> {
     alpha: (value: Alpha) => T;
     beta: (value: Unit) => T;
-    gamma: (value: Unit) => T;
+    gamma: (value: Gamma) => T;
     delta: (value: DifferentShapeName) => T;
     _: (name: string, value: any) => T;
   }
@@ -215,6 +382,7 @@ export namespace TradeEvents {
  * @public
  */
 export interface TradeEventStreamRequest {
+  sessionId?: string | undefined;
   eventStream?: AsyncIterable<TradeEvents> | undefined;
 }
 
@@ -222,6 +390,7 @@ export interface TradeEventStreamRequest {
  * @public
  */
 export interface TradeEventStreamResponse {
+  sessionId?: string | undefined;
   eventStream?: AsyncIterable<TradeEvents> | undefined;
 }
 

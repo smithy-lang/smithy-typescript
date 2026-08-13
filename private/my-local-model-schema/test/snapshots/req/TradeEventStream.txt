@@ -5,7 +5,6 @@ x-api-key: [object Object]
 content-type: application/cbor
 smithy-protocol: rpc-v2-cbor
 accept: application/cbor
-content-length: undefined
 amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
 amz-sdk-request: attempt=1; max=3
 X-Api-Key: MOCK_api_key
@@ -13,18 +12,21 @@ X-Api-Key: MOCK_api_key
 [async_iterable (Readable)]
 
 [chunk (event-stream object view)]
-  [total-size] 102 [header-size] 85 [prelude-crc] 1750202623
+  [total-size] 126 [header-size] 85 [prelude-crc] 952181948
 :event-type: initial-request
 :message-type: event
 :content-type: application/cbor
 
 [cbor object view]
-{}
+{
+  "sessionId": "__sessionId__"
+}
 
 [actual bytes]
-160
+161, 105, 115, 101, 115, 115, 105, 111, 110, 73, 100, 109, 95, 95, 115, 101, 115, 115, 105, 111, 110, 73, 100, 95,
+95
 
-[message-crc] 802441068
+[message-crc] 3879059039
 ============================================================
 
 [chunk (event-stream object view)]
@@ -65,18 +67,27 @@ X-Api-Key: MOCK_api_key
 ============================================================
 
 [chunk (event-stream object view)]
-  [total-size] 92 [header-size] 75 [prelude-crc] 2043635131
+  [total-size] 143 [header-size] 95 [prelude-crc] 2906698831
 :event-type: gamma
 :message-type: event
 :content-type: application/cbor
+sequenceNumber: 0 (integer)
 
 [cbor object view]
-{}
+{
+  "message": "__message__",
+  "values": [
+    0,
+    0,
+    0
+  ]
+}
 
 [actual bytes]
-160
+162, 103, 109, 101, 115, 115, 97, 103, 101, 107, 95, 95, 109, 101, 115, 115, 97, 103, 101, 95, 95, 102, 118, 97,
+108, 117, 101, 115, 131, 0, 0, 0
 
-[message-crc] 2477278713
+[message-crc] 587089113
 ============================================================
 
 [chunk (event-stream object view)]

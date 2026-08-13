@@ -3,5 +3,7 @@ export * from "./CamelCaseOperationCommand";
 export * from "./GetNumbersCommand";
 export * from "./HostPrefixOperationCommand";
 export * from "./HttpLabelCommandCommand";
+export * from "./PublishEventsCommand";
+export * from "./SubscribeToEventsCommand";
 export * from "./TradeEventStreamCommand";
 export * from "./ValidatedOperationCommand";

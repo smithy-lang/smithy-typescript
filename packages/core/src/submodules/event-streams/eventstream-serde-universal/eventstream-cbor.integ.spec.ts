@@ -1,6 +1,7 @@
 // oxlint-disable no-useless-spread
 import { Readable } from "node:stream";
 import { cbor, dateToTag } from "@smithy/core/cbor";
+import { EventStreamCodec } from "../eventstream-codec/EventStreamCodec";
 import { HttpResponse } from "@smithy/core/protocols";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";
@@ -28,6 +29,10 @@ describe("local model integration test for cbor eventstreams", () => {
       return [...uint32];
     }
 
+    const toUtf8 = (input: Uint8Array): string => new TextDecoder().decode(input);
+    const fromUtf8 = (input: string): Uint8Array => new TextEncoder().encode(input);
+    const codec = new EventStreamCodec(toUtf8, fromUtf8);
+
     requireRequestsFrom(client)
       .toMatch({
         hostname: /localhost/,
@@ -37,25 +42,30 @@ describe("local model integration test for cbor eventstreams", () => {
             outgoing.push(chunk);
           }
           expect(outgoing).toEqual([
-            new Uint8Array([
-              0, 0, 0, 101, 0, 0, 0, 75, 213, 254, 191, 76, 11, 58, 101, 118, 101, 110, 116, 45, 116, 121, 112, 101, 7,
-              0, 5, 97, 108, 112, 104, 97, 13, 58, 109, 101, 115, 115, 97, 103, 101, 45, 116, 121, 112, 101, 7, 0, 5,
-              101, 118, 101, 110, 116, 13, 58, 99, 111, 110, 116, 101, 110, 116, 45, 116, 121, 112, 101, 7, 0, 16, 97,
-              112, 112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 99, 98, 111, 114, 161, 98, 105, 100, 101, 97, 108,
-              112, 104, 97, 32, 93, 69, 236,
-            ]),
-            new Uint8Array([
-              0, 0, 0, 91, 0, 0, 0, 74, 188, 232, 137, 61, 11, 58, 101, 118, 101, 110, 116, 45, 116, 121, 112, 101, 7,
-              0, 4, 98, 101, 116, 97, 13, 58, 109, 101, 115, 115, 97, 103, 101, 45, 116, 121, 112, 101, 7, 0, 5, 101,
-              118, 101, 110, 116, 13, 58, 99, 111, 110, 116, 101, 110, 116, 45, 116, 121, 112, 101, 7, 0, 16, 97, 112,
-              112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 99, 98, 111, 114, 160, 195, 209, 62, 47,
-            ]),
-            new Uint8Array([
-              0, 0, 0, 91, 0, 0, 0, 74, 188, 232, 137, 61, 11, 58, 101, 118, 101, 110, 116, 45, 116, 121, 112, 101, 7,
-              0, 4, 98, 101, 116, 97, 13, 58, 109, 101, 115, 115, 97, 103, 101, 45, 116, 121, 112, 101, 7, 0, 5, 101,
-              118, 101, 110, 116, 13, 58, 99, 111, 110, 116, 101, 110, 116, 45, 116, 121, 112, 101, 7, 0, 16, 97, 112,
-              112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 99, 98, 111, 114, 160, 195, 209, 62, 47,
-            ]),
+            codec.encode({
+              headers: {
+                ":event-type": { type: "string", value: "alpha" },
+                ":message-type": { type: "string", value: "event" },
+                ":content-type": { type: "string", value: "application/cbor" },
+              },
+              body: cbor.serialize({ id: "alpha" }),
+            }),
+            codec.encode({
+              headers: {
+                ":event-type": { type: "string", value: "beta" },
+                ":message-type": { type: "string", value: "event" },
+                ":content-type": { type: "string", value: "application/cbor" },
+              },
+              body: cbor.serialize({}),
+            }),
+            codec.encode({
+              headers: {
+                ":event-type": { type: "string", value: "gamma" },
+                ":message-type": { type: "string", value: "event" },
+                ":content-type": { type: "string", value: "application/cbor" },
+              },
+              body: new Uint8Array(),
+            }),
             new Uint8Array(),
           ]);
         },

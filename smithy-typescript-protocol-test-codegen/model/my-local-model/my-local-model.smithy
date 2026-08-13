@@ -12,7 +12,10 @@ use smithy.test#httpRequestTests
 use smithy.test#httpResponseTests
 use smithy.waiters#waitable
 
-@rpcv2Cbor
+@rpcv2Cbor(
+    http: ["h2", "http/1.1"]
+    eventStreamHttp: ["h2"]
+)
 @documentation("xyz interfaces")
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @clientContextParams(
@@ -134,6 +137,8 @@ service XYZService {
     operations: [
         GetNumbers
         TradeEventStream
+        PublishEvents
+        SubscribeToEvents
         camelCaseOperation
         HttpLabelCommand
         HostPrefixOperation
@@ -337,10 +342,18 @@ operation TradeEventStream {
 }
 
 structure TradeEventStreamRequest {
+    @httpHeader("x-session-id")
+    sessionId: String
+
+    @httpPayload
     eventStream: TradeEvents
 }
 
 structure TradeEventStreamResponse {
+    @httpHeader("x-session-id")
+    sessionId: String
+
+    @httpPayload
     eventStream: TradeEvents
 }
 
@@ -348,7 +361,7 @@ structure TradeEventStreamResponse {
 union TradeEvents {
     alpha: Alpha
     beta: Unit
-    gamma: Unit
+    gamma: Gamma
     delta: DifferentShapeName
 }
 
@@ -357,11 +370,100 @@ structure Alpha {
     timestamp: Timestamp
 }
 
+structure Gamma {
+    @eventHeader
+    sequenceNumber: Integer
+
+    @eventPayload
+    payload: GammaPayload
+}
+
+structure GammaPayload {
+    message: String
+    values: IntegerList
+}
+
 // this tests that the event stream member associated with it
 // generates using :event-type: delta rather than :event-type: DifferentShapeName.
 structure DifferentShapeName {
     name: String
     number: Integer
+}
+
+/// Input-only event stream: client sends events, server responds with a summary.
+@http(method: "POST", uri: "/publish-events", code: 200)
+operation PublishEvents {
+    input: PublishEventsRequest
+    output: PublishEventsResponse
+}
+
+structure PublishEventsRequest {
+    @httpHeader("x-channel")
+    channel: String
+
+    @httpPayload
+    events: PublishEventStream
+}
+
+structure PublishEventsResponse {
+    @httpHeader("x-event-count")
+    eventCount: Integer
+
+    message: String
+}
+
+@streaming
+union PublishEventStream {
+    log: LogEvent
+    metric: MetricEvent
+}
+
+structure LogEvent {
+    level: String
+    message: String
+}
+
+structure MetricEvent {
+    name: String
+    value: Double
+}
+
+/// Output-only event stream: client sends a subscription request, server streams events.
+@http(method: "POST", uri: "/subscribe-to-events", code: 200)
+operation SubscribeToEvents {
+    input: SubscribeToEventsRequest
+    output: SubscribeToEventsResponse
+}
+
+structure SubscribeToEventsRequest {
+    @httpHeader("x-channel")
+    channel: String
+
+    @httpHeader("x-max-events")
+    maxEvents: Integer
+}
+
+structure SubscribeToEventsResponse {
+    @httpHeader("x-subscription-id")
+    subscriptionId: String
+
+    @httpPayload
+    events: SubscribeEventStream
+}
+
+@streaming
+union SubscribeEventStream {
+    notification: NotificationEvent
+    heartbeat: HeartbeatEvent
+}
+
+structure NotificationEvent {
+    topic: String
+    payload: String
+}
+
+structure HeartbeatEvent {
+    timestamp: Timestamp
 }
 
 @rpcv2Cbor

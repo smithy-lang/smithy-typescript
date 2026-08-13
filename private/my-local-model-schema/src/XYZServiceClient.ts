@@ -55,6 +55,11 @@ import type {
   HostPrefixOperationCommandOutput,
 } from "./commands/HostPrefixOperationCommand";
 import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "./commands/HttpLabelCommandCommand";
+import type { PublishEventsCommandInput, PublishEventsCommandOutput } from "./commands/PublishEventsCommand";
+import type {
+  SubscribeToEventsCommandInput,
+  SubscribeToEventsCommandOutput,
+} from "./commands/SubscribeToEventsCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import type {
   ValidatedOperationCommandInput,
@@ -79,6 +84,8 @@ export type ServiceInputTypes =
   | GetNumbersCommandInput
   | HostPrefixOperationCommandInput
   | HttpLabelCommandCommandInput
+  | PublishEventsCommandInput
+  | SubscribeToEventsCommandInput
   | TradeEventStreamCommandInput
   | ValidatedOperationCommandInput;
 
@@ -90,6 +97,8 @@ export type ServiceOutputTypes =
   | GetNumbersCommandOutput
   | HostPrefixOperationCommandOutput
   | HttpLabelCommandCommandOutput
+  | PublishEventsCommandOutput
+  | SubscribeToEventsCommandOutput
   | TradeEventStreamCommandOutput
   | ValidatedOperationCommandOutput;
 

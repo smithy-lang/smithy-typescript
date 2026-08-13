@@ -28,6 +28,16 @@ import {
   HttpLabelCommandCommand,
 } from "./commands/HttpLabelCommandCommand";
 import {
+  type PublishEventsCommandInput,
+  type PublishEventsCommandOutput,
+  PublishEventsCommand,
+} from "./commands/PublishEventsCommand";
+import {
+  type SubscribeToEventsCommandInput,
+  type SubscribeToEventsCommandOutput,
+  SubscribeToEventsCommand,
+} from "./commands/SubscribeToEventsCommand";
+import {
   type TradeEventStreamCommandInput,
   type TradeEventStreamCommandOutput,
   TradeEventStreamCommand,
@@ -51,6 +61,8 @@ const commands = {
   CamelCaseOperationCommand,
   GetNumbersCommand,
   HostPrefixOperationCommand,
+  PublishEventsCommand,
+  SubscribeToEventsCommand,
   TradeEventStreamCommand,
   ValidatedOperationCommand,
 };
@@ -133,6 +145,42 @@ export interface XYZService {
     args: HostPrefixOperationCommandInput,
     options: __HttpHandlerOptions,
     cb: (err: any, data?: HostPrefixOperationCommandOutput) => void
+  ): void;
+
+  /**
+   * @see {@link PublishEventsCommand}
+   */
+  publishEvents(): Promise<PublishEventsCommandOutput>;
+  publishEvents(
+    args: PublishEventsCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<PublishEventsCommandOutput>;
+  publishEvents(
+    args: PublishEventsCommandInput,
+    cb: (err: any, data?: PublishEventsCommandOutput) => void
+  ): void;
+  publishEvents(
+    args: PublishEventsCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: PublishEventsCommandOutput) => void
+  ): void;
+
+  /**
+   * @see {@link SubscribeToEventsCommand}
+   */
+  subscribeToEvents(): Promise<SubscribeToEventsCommandOutput>;
+  subscribeToEvents(
+    args: SubscribeToEventsCommandInput,
+    options?: __HttpHandlerOptions
+  ): Promise<SubscribeToEventsCommandOutput>;
+  subscribeToEvents(
+    args: SubscribeToEventsCommandInput,
+    cb: (err: any, data?: SubscribeToEventsCommandOutput) => void
+  ): void;
+  subscribeToEvents(
+    args: SubscribeToEventsCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: SubscribeToEventsCommandOutput) => void
   ): void;
 
   /**

@@ -7,7 +7,6 @@ import type {
   StaticOperationSchema,
 } from "@smithy/types";
 import { HttpServerProtocol } from "../layer-0-interface-and-base/HttpServerProtocol";
-import { SerializationException } from "../../validation/errors";
 
 /**
  * Abstract base for REST (HTTP binding) server protocols.
@@ -94,12 +93,17 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
         // This member is the entire body.
         if (memberSchema.isStreaming()) {
           if (memberSchema.isStructSchema()) {
-            // Event stream (streaming union) — not yet supported on the server.
-            // TODO: implement event stream deserialization for server requests.
-            throw new SerializationException();
+            // Event stream (streaming union).
+            // In REST protocols, initial-request members are bound to HTTP
+            // headers/URI/query — they are NOT part of the event stream.
+            callerInput[memberName] = await this.deserializeEventStream({
+              request,
+              requestSchema: ns,
+            });
+          } else {
+            // Data stream (streaming blob) — pass body through to the handler.
+            callerInput[memberName] = request.body;
           }
-          // Data stream (streaming blob) — pass body through to the handler.
-          callerInput[memberName] = request.body;
         } else if (memberSchema.isBlobSchema()) {
           callerInput[memberName] = await collectBody(request.body, context);
         } else {
@@ -185,12 +189,20 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
         payloadMember = memberName;
         if (memberSchema.isStreaming()) {
           if (memberSchema.isStructSchema()) {
-            // Event stream (streaming union) — not yet supported on the server.
-            // TODO: implement event stream serialization for server responses.
-            throw new SerializationException();
+            // Event stream (streaming union).
+            // In REST protocols, initial-response members are bound to HTTP
+            // headers — they are NOT part of the event stream.
+            const eventIterable = value as AsyncIterable<any>;
+            const eventBody = await this.serializeEventStream({
+              eventStream: eventIterable,
+              responseSchema: ns,
+            });
+            body = eventBody as any;
+            headers["content-type"] = "application/vnd.amazon.eventstream";
+          } else {
+            // Data stream (streaming blob) — pass through to the response body.
+            body = value;
           }
-          // Data stream (streaming blob) — pass through to the response body.
-          body = value;
         } else if (memberSchema.isBlobSchema()) {
           body = value;
         } else {

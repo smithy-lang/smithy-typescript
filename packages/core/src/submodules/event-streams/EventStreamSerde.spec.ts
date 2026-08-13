@@ -16,6 +16,7 @@ import type {
 import { describe, expect, test as it } from "vitest";
 
 import { EventStreamSerde } from "./EventStreamSerde";
+import { EventStreamCodec } from "./eventstream-codec/EventStreamCodec";
 import { EventStreamMarshaller } from "./eventstream-serde/EventStreamMarshaller";
 
 describe(EventStreamSerde.name, () => {
@@ -761,6 +762,68 @@ describe(EventStreamSerde.name, () => {
           expect(thrown.name).toBe("UnknownException");
         }
       });
+    });
+  });
+
+  describe("initial-request serialization correctness", () => {
+    it("serializes initial-request string members as strings, not pre-encoded bytes", async () => {
+      // This test verifies that when raw values (not pre-serialized bytes) are
+      // passed as initialRequest, the CBOR serializer correctly encodes them as
+      // their proper types. This catches a regression where pre-serialized
+      // Uint8Array values were passed, causing strings to be double-encoded as blobs.
+      const cborCodec = new CborCodec();
+      const marshaller = new EventStreamMarshaller({ utf8Encoder: toUtf8, utf8Decoder: fromUtf8 });
+      const serde = new EventStreamSerde({
+        marshaller,
+        serializer: cborCodec.createSerializer(),
+        deserializer: cborCodec.createDeserializer(),
+        defaultContentType: "application/cbor",
+      });
+
+      // Schema with a string member and a streaming union member.
+      const streamingUnion: StaticStructureSchema = [
+        4,
+        "ns",
+        "Events",
+        { streaming: 1 },
+        ["alpha"],
+        [[3, "ns", "Alpha", 0, ["id"], [0 satisfies StringSchema]] satisfies StaticStructureSchema],
+      ] as any;
+      const containerSchema: StaticStructureSchema = [
+        3,
+        "ns",
+        "Container",
+        0,
+        ["sessionId", "eventStream"],
+        [0 satisfies StringSchema, [() => streamingUnion, 0]],
+      ];
+
+      const requestBody = await serde.serializeEventStream({
+        eventStream: (async function* () {})(),
+        requestSchema: NormalizedSchema.of(containerSchema),
+        initialRequest: {
+          sessionId: "my-session-value",
+        },
+      });
+
+      // Collect and decode the initial-request message.
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of requestBody as AsyncIterable<Uint8Array>) {
+        chunks.push(chunk);
+      }
+      const fullBody = Buffer.concat(chunks);
+
+      // Read the first message (initial-request).
+      const totalLength = fullBody.readUInt32BE(0);
+      const codec = new EventStreamCodec(toUtf8, fromUtf8);
+      const firstMessage = codec.decode(fullBody.subarray(0, totalLength));
+
+      expect(firstMessage.headers[":event-type"]?.value).toBe("initial-request");
+
+      // Decode the CBOR payload and verify sessionId is a string, not bytes.
+      const decoded = cbor.deserialize(firstMessage.body);
+      expect(typeof decoded.sessionId).toBe("string");
+      expect(decoded.sessionId).toBe("my-session-value");
     });
   });
 });

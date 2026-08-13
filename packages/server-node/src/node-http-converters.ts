@@ -53,7 +53,20 @@ export function writeResponse(httpResponse: HttpResponse, res: ServerResponse) {
     res.setHeader(key, value);
   }
   if (httpResponse.body) {
-    res.end(httpResponse.body);
+    if (typeof httpResponse.body[Symbol.asyncIterator] === "function") {
+      // Streaming body (e.g. event stream) — pipe chunks to the response.
+      const iterable = httpResponse.body as AsyncIterable<Uint8Array>;
+      (async () => {
+        for await (const chunk of iterable) {
+          res.write(chunk);
+        }
+        res.end();
+      })().catch(() => {
+        res.destroy();
+      });
+    } else {
+      res.end(httpResponse.body);
+    }
   } else {
     res.end();
   }

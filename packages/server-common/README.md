@@ -379,6 +379,219 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 ```
 
+### Event Streams
+
+The schema-based server supports the [Amazon Event Stream](https://smithy.io/2.0/aws/amazon-eventstream.html)
+wire format for streaming operations. Event streams enable long-lived
+bidirectional communication between client and server using typed events.
+
+There are three streaming patterns:
+
+| Pattern                         | Client sends         | Server sends          |
+| ------------------------------- | -------------------- | --------------------- |
+| **Output-only** (server→client) | Normal request       | Event stream response |
+| **Input-only** (client→server)  | Event stream request | Normal response       |
+| **Bidirectional**               | Event stream request | Event stream response |
+
+#### Smithy model
+
+```smithy
+/// Output-only: server streams notifications to the client.
+operation SubscribeToEvents {
+    input := {
+        @httpHeader("x-channel")
+        channel: String
+    }
+    output := {
+        @httpHeader("x-subscription-id")
+        subscriptionId: String
+
+        @httpPayload
+        events: NotificationStream
+    }
+}
+
+/// Input-only: client streams events to the server.
+operation PublishEvents {
+    input := {
+        @httpHeader("x-channel")
+        channel: String
+
+        @httpPayload
+        events: PublishStream
+    }
+    output := {
+        eventCount: Integer
+        message: String
+    }
+}
+
+/// Bidirectional: both sides stream simultaneously.
+operation Chat {
+    input := {
+        @httpHeader("x-session-id")
+        sessionId: String
+
+        @httpPayload
+        messages: ChatStream
+    }
+    output := {
+        @httpHeader("x-session-id")
+        sessionId: String
+
+        @httpPayload
+        messages: ChatStream
+    }
+}
+
+@streaming
+union NotificationStream {
+    notification: Notification
+    heartbeat: Heartbeat
+}
+
+@streaming
+union PublishStream { /* ... */ }
+
+@streaming
+union ChatStream { /* ... */ }
+```
+
+#### Server handler implementation
+
+Event stream members appear as `AsyncIterable<T>` in both input and output
+types. To consume an incoming stream, iterate it with `for await`. To produce
+an outgoing stream, return an async generator.
+
+```typescript
+const serviceHandler = new MyServiceHandler({
+  protocols: [/* ... */],
+  handlers: {
+    // Output-only: return an async generator for the response stream.
+    async SubscribeToEvents(input) {
+      const channel = input.channel ?? "default";
+      return {
+        subscriptionId: `sub-${channel}`,
+        events: (async function* () {
+          for (let i = 0; i < 10; i++) {
+            yield { notification: { topic: channel, payload: `event-${i}` } };
+            await sleep(1000);
+          }
+        })(),
+      };
+    },
+
+    // Input-only: consume the incoming stream, return a normal response.
+    async PublishEvents(input) {
+      let count = 0;
+      for await (const event of input.events) {
+        count++;
+        processEvent(event);
+      }
+      return { eventCount: count, message: `Processed ${count} events` };
+    },
+
+    // Bidirectional: consume input stream and produce output stream.
+    async Chat(input) {
+      const inputMessages = input.messages;
+      return {
+        sessionId: `ack-${input.sessionId}`,
+        messages: (async function* () {
+          for await (const msg of inputMessages) {
+            // Echo back a response for each incoming message.
+            yield { response: { text: `Got: ${msg.message?.text}` } };
+          }
+        })(),
+      };
+    },
+  },
+});
+```
+
+#### Client-side usage
+
+From the client SDK, event stream operations use the same async iterable
+pattern:
+
+```typescript
+import { MyServiceClient, SubscribeToEventsCommand, PublishEventsCommand } from "@example/my-client";
+
+const client = new MyServiceClient({ endpoint: "http://localhost:8080" });
+
+// Output-only: iterate the response stream.
+const response = await client.send(new SubscribeToEventsCommand({ channel: "news" }));
+console.log(response.subscriptionId);
+for await (const event of response.events) {
+  console.log(event.notification?.payload);
+}
+
+// Input-only: pass an async generator as the request stream.
+await client.send(
+  new PublishEventsCommand({
+    channel: "metrics",
+    events: (async function* () {
+      yield { metric: { name: "cpu", value: 0.85 } };
+      yield { metric: { name: "mem", value: 0.6 } };
+    })(),
+  })
+);
+```
+
+#### HTTP transport requirements
+
+Event streams use the `application/vnd.amazon.eventstream` binary framing
+format.
+
+- **Output-only streams** work over HTTP/1.1 using chunked transfer encoding
+  on the response.
+- **Input-only streams** can work over HTTP/1.1 (chunked request body) or
+  HTTP/2, depending on the service's `eventStreamHttp` trait.
+- **Bidirectional streams** require HTTP/2 for full-duplex communication.
+
+See the [`@smithy/server-node` README](../server-node/README.md) for an example
+of setting up an HTTP/2 server that supports bidirectional event streams.
+
+When the service's protocol trait includes `eventStreamHttp: ["h2"]`, the
+generated client automatically uses `NodeHttp2Handler`:
+
+```smithy
+@rpcv2Cbor(
+    http: ["h2", "http/1.1"]
+    eventStreamHttp: ["h2"]
+)
+service MyService { /* ... */ }
+```
+
+Output-only event streams work over HTTP/1.1 (the request is normal; only the
+response body streams).
+
+#### RPC vs REST protocol differences
+
+For **RPC protocols** (Smithy RPC v2 CBOR, AWS JSON 1.0/1.1), non-stream
+members of the input/output are serialized as an `initial-request` or
+`initial-response` message — the first event in the stream.
+
+For **REST protocols** (AWS restJson1), non-stream members are bound to HTTP
+headers, URI path labels, or query parameters. They do not appear in the
+event stream itself. The event stream member must carry `@httpPayload`.
+
+#### Lambda / API Gateway limitations
+
+> **Important:** AWS Lambda does not support incoming request streams or
+> bidirectional event streams. The Lambda execution model buffers the full
+> request body before invoking the handler, and does not support streaming
+> the request.
+>
+> - **Output-only streams** (server→client) are supported via Lambda response
+>   streaming (`awslambda.streamifyResponse`) with HTTP API (API Gateway v2).
+> - **Input-only and bidirectional streams** are **not supported** on Lambda.
+>   These require a long-lived connection (e.g., a Node.js HTTP/2 server on
+>   EC2, ECS, or Fargate).
+>
+> The `@smithy/server-apigateway` adapter does not support event stream
+> operations. Use `@smithy/server-node` with an HTTP/2 server for full
+> event stream support.
+
 ### Passing User Context
 
 The `handle` method's second argument is a user-defined context object that
