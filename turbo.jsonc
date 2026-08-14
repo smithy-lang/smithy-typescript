@@ -34,7 +34,12 @@
     },
     "build:types:downlevel": {
       "outputs": ["dist-types/ts3.4/**"],
-      "dependsOn": ["build:types"],
+      // Depends on "build", not "build:types": "build" runs "build:types"
+      // internally (via concurrently), so depending on "build:types" here puts
+      // two independent producers of dist-types in the graph with no ordering
+      // between them. "build:types" starts with "premove dist-types", so it can
+      // wipe the directory just as downlevel-dts starts reading it.
+      "dependsOn": ["build"],
     },
     "test": {
       "dependsOn": ["build", "^build"],

@@ -47,8 +47,7 @@ jobs:
       # each package directory, which is what changesets publishes from.
       - name: Build Release Artifacts
         id: build
-        run: |
-          yarn build:release --concurrency=1
+        run: yarn build:release
       - name: Release
         id: release
         uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v2.0.0
