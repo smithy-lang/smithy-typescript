@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.1
+
+### Patch Changes
+
+- 298d726: Update refs to undici.nodejs.org/v7.x
+
 ## 3.2.0
 
 ### Minor Changes
