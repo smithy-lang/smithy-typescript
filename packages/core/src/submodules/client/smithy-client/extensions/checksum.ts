@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import {
   AlgorithmId,
   type ChecksumAlgorithm,
@@ -33,6 +34,7 @@ export const getChecksumConfiguration = (runtimeConfig: PartialChecksumRuntimeCo
   const checksumAlgorithms: ChecksumAlgorithm[] = [];
 
   for (const id in AlgorithmId) {
+    if (!hasOwn(AlgorithmId, id)) continue;
     const algorithmId = AlgorithmId[id as keyof typeof AlgorithmId];
     if (runtimeConfig[algorithmId] === undefined) {
       continue;

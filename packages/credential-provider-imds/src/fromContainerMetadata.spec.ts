@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import {
@@ -86,7 +87,8 @@ describe("fromContainerMetadata", () => {
     });
 
     it("should retry responses that receive invalid response values", async () => {
-      for (const key of Object.keys(creds)) {
+      for (const key in creds) {
+        if (!hasOwn(creds, key)) continue;
         const invalidCreds: any = { ...creds };
         delete invalidCreds[key];
         mockHttpRequest.mockReturnValueOnce(Promise.resolve(JSON.stringify(invalidCreds)));

@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import { describe, expect, test as it } from "vitest";
 
@@ -7,7 +8,8 @@ import { vectors } from "./TestVectors.fixture";
 describe("eventstream parsing", () => {
   const eventStreamCodec = new EventStreamCodec(toUtf8, fromUtf8);
 
-  for (const vectorName of Object.keys(vectors)) {
+  for (const vectorName in vectors) {
+    if (!hasOwn(vectors, vectorName)) continue;
     const vector = vectors[vectorName];
     it(`should handle the ${vectorName} test case`, () => {
       if (vector.expectation === "failure") {

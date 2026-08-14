@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import type { EndpointV2 } from "@smithy/types";
 
 import { debugId, toDebugString } from "./debug";
@@ -14,6 +15,7 @@ export const resolveEndpoint = (ruleSetObject: RuleSetObject, options: EndpointR
   options.logger?.debug?.(`${debugId} Initial EndpointParams: ${toDebugString(endpointParams)}`);
 
   for (const paramKey in parameters) {
+    if (!hasOwn(parameters, paramKey)) continue;
     const parameter = parameters[paramKey];
     const endpointParam = endpointParams[paramKey];
 

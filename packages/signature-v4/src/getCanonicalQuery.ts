@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import { escapeUri } from "@smithy/core/protocols";
 import type { HttpRequest } from "@smithy/types";
 
@@ -9,7 +10,8 @@ import { SIGNATURE_HEADER } from "./constants";
 export const getCanonicalQuery = ({ query = {} }: HttpRequest): string => {
   const keys: Array<string> = [];
   const serialized: Record<string, string> = {};
-  for (const key of Object.keys(query)) {
+  for (const key in query) {
+    if (!hasOwn(query, key)) continue;
     if (key.toLowerCase() === SIGNATURE_HEADER) {
       continue;
     }

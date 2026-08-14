@@ -104,3 +104,5 @@ export { streamCollector } from "./util-stream/stream-collector";
 const _getRandomValues = getRandomValues as (array: Uint8Array) => Uint8Array;
 export const v4 = bindV4(_getRandomValues);
 export const generateIdempotencyToken = v4;
+
+export { hasOwn } from "@smithy/core/transport";

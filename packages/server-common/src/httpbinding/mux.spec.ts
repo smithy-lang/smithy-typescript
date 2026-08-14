@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  */
 
+import { hasOwn } from "@smithy/core/transport";
 import { describe, expect, it } from "vitest";
 import { HttpRequest } from "@smithy/core/protocols";
 
@@ -122,6 +123,7 @@ describe("simple matching", () => {
   ];
 
   for (const key in matches) {
+    if (!hasOwn(matches, key)) continue;
     const reqs = matches[key];
     for (const req of reqs) {
       it(`should match ${JSON.stringify(req)} to ${key}`, () => {

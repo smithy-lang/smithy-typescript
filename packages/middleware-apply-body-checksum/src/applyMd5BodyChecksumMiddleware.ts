@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/core/protocols";
 import { isArrayBuffer } from "@smithy/core/serde";
 import type {
@@ -59,7 +60,8 @@ export const getApplyMd5BodyChecksumPlugin = (config: Md5BodyChecksumResolvedCon
 
 const hasHeader = (soughtHeader: string, headers: HeaderBag): boolean => {
   soughtHeader = soughtHeader.toLowerCase();
-  for (const headerName of Object.keys(headers)) {
+  for (const headerName in headers) {
+    if (!hasOwn(headers, headerName)) continue;
     if (soughtHeader === headerName.toLowerCase()) {
       return true;
     }

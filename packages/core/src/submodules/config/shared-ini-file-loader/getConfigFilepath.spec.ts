@@ -19,11 +19,15 @@ describe(getConfigFilepath.name, () => {
   });
 
   it("returns configFilePath from default locations", () => {
+    const OLD_ENV = process.env;
+    process.env = { ...OLD_ENV };
+    delete process.env[ENV_CONFIG_PATH];
     vi.mocked(join).mockImplementation((...args) => args.join(mockSeparator));
     vi.mocked(getHomeDir).mockReturnValue(mockHomeDir);
     expect(getConfigFilepath()).toStrictEqual(defaultConfigFilepath);
     expect(getHomeDir).toHaveBeenCalledWith();
     expect(join).toHaveBeenCalledWith(mockHomeDir, ".aws", "config");
+    process.env = OLD_ENV;
   });
 
   it("returns configFile from location defined in environment", () => {

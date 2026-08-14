@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { _parseEpochTimestamp, fromBase64, generateIdempotencyToken } from "@smithy/core/serde";
@@ -66,6 +67,7 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
       if (ns.isMapSchema()) {
         const sparse = !!ns.getMergedTraits().sparse;
         for (const key in sourceObject) {
+          if (!hasOwn(sourceObject, key)) continue;
           const value = this.serialize(ns.getValueSchema(), sourceObject[key]);
           if (value != null || sparse) {
             newObject[key] = value;
@@ -86,6 +88,7 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
           // This if-block is for backwards compatibility support and should not be copied
           // to other implementations.
           for (const k in sourceObject) {
+            if (!hasOwn(sourceObject, k)) continue;
             if (!(k in newObject)) {
               // we have no type information, so serialize with Document rules.
               newObject[k] = this.serialize(15 satisfies DocumentSchema, sourceObject[k]);
@@ -102,6 +105,7 @@ export class CborShapeSerializer extends SerdeContext implements ShapeSerializer
           return newArray;
         }
         for (const key in sourceObject) {
+          if (!hasOwn(sourceObject, key)) continue;
           newObject[key] = this.serialize(ns.getValueSchema(), sourceObject[key]);
         }
       } else if (ns.isBigDecimalSchema()) {

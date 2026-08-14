@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { HttpResponse } from "@smithy/core/protocols";
 import { parseRfc7231DateTime } from "@smithy/core/serde";
 import type { Logger } from "@smithy/types";
@@ -10,7 +11,8 @@ export function parseRetryAfterHeader(response: unknown, logger?: Logger): Date 
     return;
   }
 
-  for (const header of Object.keys(response.headers)) {
+  for (const header in response.headers) {
+    if (!hasOwn(response.headers, header)) continue;
     const h = header.toLowerCase();
     if (h === "retry-after") {
       const retryAfter = response.headers[header];

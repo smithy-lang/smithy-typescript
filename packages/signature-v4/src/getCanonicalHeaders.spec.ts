@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { HttpRequest } from "@smithy/core/protocols";
 import type { HeaderBag } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
@@ -40,7 +41,8 @@ describe("getCanonicalHeaders", () => {
       },
       hostname: "foo.us-east-1.amazonaws.com",
     });
-    for (const headerName of Object.keys(ALWAYS_UNSIGNABLE_HEADERS)) {
+    for (const headerName in ALWAYS_UNSIGNABLE_HEADERS) {
+      if (!hasOwn(ALWAYS_UNSIGNABLE_HEADERS, headerName)) continue;
       request.headers[headerName] = "baz";
     }
 

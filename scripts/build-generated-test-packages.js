@@ -140,6 +140,10 @@ const buildAndCopyToNodeModules = async (packageName, codegenDir, nodeModulesDir
       if (linkedPackageDirs.has(localPackageDir)) {
         continue;
       }
+      // Ensure the destination directory exists up front. Without this, the parallel
+      // `cp -r` calls below race to create the same target directory, and `cp` on some
+      // platforms fails with EEXIST when more than one of them tries to create it first.
+      await spawnProcess("mkdir", ["-p", path.join(node_modules, "@smithy", smithyPkg)]);
       await Promise.all(
         ["dist-cjs", "dist-types", "dist-es", "package.json"].map((folder) =>
           spawnProcess("cp", [

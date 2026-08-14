@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { HttpRequest as __HttpRequest, collectBody } from "@smithy/core/protocols";
 import { calculateBodyLength } from "@smithy/core/serde";
 import type {
@@ -75,6 +76,7 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
 
   let codeKey: string | undefined;
   for (const key in data) {
+    if (!hasOwn(data, key)) continue;
     if (key.toLowerCase() === "code") {
       codeKey = key;
       break;
@@ -122,6 +124,7 @@ export const buildHttpRpcRequest = async (
   }
   if (endpoint.headers) {
     for (const name in endpoint.headers) {
+      if (!hasOwn(endpoint.headers, name)) continue;
       contents.headers[name] = endpoint.headers[name];
     }
   }
