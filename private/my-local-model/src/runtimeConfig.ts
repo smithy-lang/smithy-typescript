@@ -8,7 +8,7 @@ import {
   NODE_RETRY_MODE_CONFIG_OPTIONS,
 } from "@smithy/core/retry";
 import { calculateBodyLength } from "@smithy/core/serde";
-import { NodeHttpHandler as RequestHandler, streamCollector } from "@smithy/node-http-handler";
+import { NodeHttp2Handler as RequestHandler, streamCollector } from "@smithy/node-http-handler";
 
 import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";
 import type { XYZServiceClientConfig } from "./XYZServiceClient";
@@ -29,7 +29,10 @@ export const getRuntimeConfig = (config: XYZServiceClientConfig) => {
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
     eventStreamSerdeProvider: config?.eventStreamSerdeProvider ?? eventStreamSerdeProvider,
     maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
-    requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
+    requestHandler: RequestHandler.create(config?.requestHandler ?? (async () => ({
+      ...await defaultConfigProvider(),
+      disableConcurrentStreams: true
+    }))),
     retryMode:
       config?.retryMode ??
       loadNodeConfig(

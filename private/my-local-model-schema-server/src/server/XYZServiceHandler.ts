@@ -14,6 +14,10 @@ import type {
   HostPrefixOperationInput,
   HttpLabelCommandInput,
   HttpLabelCommandOutput,
+  PublishEventsRequest,
+  PublishEventsResponse,
+  SubscribeToEventsRequest,
+  SubscribeToEventsResponse,
   TradeEventStreamRequest,
   TradeEventStreamResponse,
   Unit,
@@ -25,6 +29,8 @@ import {
   GetNumbers$,
   HostPrefixOperation$,
   HttpLabelCommand$,
+  PublishEvents$,
+  SubscribeToEvents$,
   TradeEventStream$,
   ValidatedOperation$,
 } from "../schemas/schemas_0";
@@ -35,6 +41,8 @@ const OPERATION_SCHEMAS: StaticOperationSchema[] = [
   camelCaseOperation$,
   GetNumbers$,
   HostPrefixOperation$,
+  PublishEvents$,
+  SubscribeToEvents$,
   TradeEventStream$,
   ValidatedOperation$,
 ];
@@ -52,6 +60,8 @@ export class XYZServiceHandler<Context = {}> extends SchemaServiceHandler<Contex
       camelCaseOperation: (input: CamelCaseOperationInput, context: ServerRequestContext, userContext: Context) => Promise<CamelCaseOperationOutput>;
       GetNumbers: (input: GetNumbersRequest, context: ServerRequestContext, userContext: Context) => Promise<GetNumbersResponse>;
       HostPrefixOperation: (input: HostPrefixOperationInput, context: ServerRequestContext, userContext: Context) => Promise<Unit>;
+      PublishEvents: (input: PublishEventsRequest, context: ServerRequestContext, userContext: Context) => Promise<PublishEventsResponse>;
+      SubscribeToEvents: (input: SubscribeToEventsRequest, context: ServerRequestContext, userContext: Context) => Promise<SubscribeToEventsResponse>;
       TradeEventStream: (input: TradeEventStreamRequest, context: ServerRequestContext, userContext: Context) => Promise<TradeEventStreamResponse>;
       ValidatedOperation: (input: ValidatedInput, context: ServerRequestContext, userContext: Context) => Promise<ValidatedOutput>;
     };

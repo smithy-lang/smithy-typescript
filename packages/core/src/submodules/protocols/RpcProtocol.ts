@@ -64,10 +64,9 @@ export abstract class RpcProtocol extends HttpProtocol {
       if (eventStreamMember) {
         if (input[eventStreamMember]) {
           const initialRequest = {} as any;
-          for (const [memberName, memberSchema] of ns.structIterator()) {
-            if (memberName !== eventStreamMember && input[memberName]) {
-              serializer.write(memberSchema, input[memberName]);
-              initialRequest[memberName] = serializer.flush();
+          for (const [memberName] of ns.structIterator()) {
+            if (memberName !== eventStreamMember && input[memberName] != null) {
+              initialRequest[memberName] = input[memberName];
             }
           }
 

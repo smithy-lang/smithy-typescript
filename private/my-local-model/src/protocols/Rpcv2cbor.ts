@@ -47,6 +47,11 @@ import type {
   HostPrefixOperationCommandOutput,
 } from "../commands/HostPrefixOperationCommand";
 import type { HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput } from "../commands/HttpLabelCommandCommand";
+import type { PublishEventsCommandInput, PublishEventsCommandOutput } from "../commands/PublishEventsCommand";
+import type {
+  SubscribeToEventsCommandInput,
+  SubscribeToEventsCommandOutput,
+} from "../commands/SubscribeToEventsCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import type {
   ValidatedOperationCommandInput,
@@ -66,12 +71,21 @@ import {
   type CamelCaseOperationOutput,
   type ConstrainedAddress,
   type DifferentShapeName,
+  type Gamma,
+  type GammaPayload,
   type GetNumbersRequest,
   type GetNumbersResponse,
+  type HeartbeatEvent,
   type HostPrefixOperationInput,
   type HttpLabelCommandInput,
+  type LogEvent,
+  type MetricEvent,
+  type NotificationEvent,
+  type SubscribeEventStream,
+  type SubscribeToEventsRequest,
   type Unit,
   type ValidatedInput,
+  PublishEventStream,
   TradeEvents,
 } from "../models/models_0";
 import { XYZServiceSyntheticServiceException as __BaseException } from "../models/XYZServiceSyntheticServiceException";
@@ -137,6 +151,36 @@ export const se_HostPrefixOperationCommand = async (
     }
   }
   return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/HostPrefixOperation", resolvedHostname, body);
+};
+
+/**
+ * serializeRpcv2cborPublishEventsCommand
+ */
+export const se_PublishEventsCommand = async (
+  input: PublishEventsCommandInput,
+  context: __SerdeContext & __EventStreamSerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = { ...SHARED_HEADERS };
+  headers["content-type"] = "application/vnd.amazon.eventstream";
+
+  let body: any;
+  body = se_PublishEventStream(input.events, context);
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/PublishEvents", undefined, body);
+};
+
+/**
+ * serializeRpcv2cborSubscribeToEventsCommand
+ */
+export const se_SubscribeToEventsCommand = async (
+  input: SubscribeToEventsCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = { ...SHARED_HEADERS };
+  headers.accept = "application/vnd.amazon.eventstream";
+
+  let body: any;
+  body = cbor.serialize(_json(input));
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/SubscribeToEvents", undefined, body);
 };
 
 /**
@@ -250,6 +294,48 @@ export const de_HostPrefixOperationCommand = async (
   await collectBody(output.body, context);
   const response: HostPrefixOperationCommandOutput = {
     $metadata: deserializeMetadata(output),
+  };
+  return response;
+
+};
+
+/**
+ * deserializeRpcv2cborPublishEventsCommand
+ */
+export const de_PublishEventsCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<PublishEventsCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const data: any = await parseBody(output.body, context)
+  let contents: any = {};
+  contents = _json(data);
+  const response: PublishEventsCommandOutput = {
+    $metadata: deserializeMetadata(output), ...contents,
+  };
+  return response;
+
+};
+
+/**
+ * deserializeRpcv2cborSubscribeToEventsCommand
+ */
+export const de_SubscribeToEventsCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext & __EventStreamSerdeContext
+): Promise<SubscribeToEventsCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const contents = { events: de_SubscribeEventStream(output.body, context) };
+  const response: SubscribeToEventsCommandOutput = {
+    $metadata: deserializeMetadata(output), ...contents,
   };
   return response;
 
@@ -435,6 +521,20 @@ const de_XYZServiceServiceExceptionRes = async (
 };
 
 /**
+ * serializeRpcv2cborPublishEventStream
+ */
+const se_PublishEventStream = (
+  input: any,
+  context: __SerdeContext & __EventStreamSerdeContext
+): any => {
+  const eventMarshallingVisitor = (event: any): __Message => PublishEventStream.visit(event, {
+    log: value => se_LogEvent_event(value, context),
+    metric: value => se_MetricEvent_event(value, context),
+    _: value => value as any
+  });
+  return context.eventStreamMarshaller.serialize(input, eventMarshallingVisitor);
+}
+/**
  * serializeRpcv2cborTradeEvents
  */
 const se_TradeEvents = (
@@ -444,7 +544,7 @@ const se_TradeEvents = (
   const eventMarshallingVisitor = (event: any): __Message => TradeEvents.visit(event, {
     alpha: value => se_Alpha_event(value, context),
     beta: value => se_Unit_event(value, context),
-    gamma: value => se_Unit_event(value, context),
+    gamma: value => se_Gamma_event(value, context),
     delta: value => se_DifferentShapeName_event(value, context),
     _: value => value as any
   });
@@ -478,260 +578,403 @@ const se_Alpha_event = (
     body = cbor.serialize(body);
     return { headers, body };
     }
-    const se_Unit_event = (
-      input: Unit,
+    const se_Gamma_event = (
+      input: Gamma,
       context: __SerdeContext
     ): __Message => {
       const headers: __MessageHeaders = {
-        ":event-type": { type: "string", value: "beta" },
+        ":event-type": { type: "string", value: "gamma" },
         ":message-type": { type: "string", value: "event" },
         ":content-type": { type: "string", value: "application/cbor" },
       }
+      if (input.sequenceNumber != null) {
+        headers["sequenceNumber"] = { type: "integer", value: input.sequenceNumber }
+      }
       let body: Uint8Array = new Uint8Array();
-      body = _json(input);
-      body = cbor.serialize(body);
+      if (input.payload != null) {
+        body = _json(input.payload);
+        body = cbor.serialize(body);
+      }
       return { headers, body };
       }
-      /**
-       * deserializeRpcv2cborTradeEvents
-       */
-      const de_TradeEvents = (
-        output: any,
-        context: __SerdeContext & __EventStreamSerdeContext
-      ): AsyncIterable<TradeEvents> => {
-        return context.eventStreamMarshaller.deserialize(
-          output,
-          async event => {
-            if (event["alpha"] != null) {
-              return {
-                alpha: await de_Alpha_event(event["alpha"], context),
-              };
-            }
-            if (event["beta"] != null) {
-              return {
-                beta: await de_Unit_event(event["beta"], context),
-              };
-            }
-            if (event["gamma"] != null) {
-              return {
-                gamma: await de_Unit_event(event["gamma"], context),
-              };
-            }
-            if (event["delta"] != null) {
-              return {
-                delta: await de_DifferentShapeName_event(event["delta"], context),
-              };
-            }
-            return {$unknown: event as any};
+      const se_LogEvent_event = (
+        input: LogEvent,
+        context: __SerdeContext
+      ): __Message => {
+        const headers: __MessageHeaders = {
+          ":event-type": { type: "string", value: "log" },
+          ":message-type": { type: "string", value: "event" },
+          ":content-type": { type: "string", value: "application/cbor" },
+        }
+        let body: Uint8Array = new Uint8Array();
+        body = _json(input);
+        body = cbor.serialize(body);
+        return { headers, body };
+        }
+        const se_MetricEvent_event = (
+          input: MetricEvent,
+          context: __SerdeContext
+        ): __Message => {
+          const headers: __MessageHeaders = {
+            ":event-type": { type: "string", value: "metric" },
+            ":message-type": { type: "string", value: "event" },
+            ":content-type": { type: "string", value: "application/cbor" },
           }
-        );
-      }
-      const de_Alpha_event = async (
-        output: any,
-        context: __SerdeContext
-      ): Promise<Alpha> => {
-        const contents: Alpha = {} as any;
-        const data: any = await parseBody(output.body, context);
-        Object.assign(contents, de_Alpha(data, context));
-        return contents;
-      }
-      const de_DifferentShapeName_event = async (
-        output: any,
-        context: __SerdeContext
-      ): Promise<DifferentShapeName> => {
-        const contents: DifferentShapeName = {} as any;
-        const data: any = await parseBody(output.body, context);
-        Object.assign(contents, _json(data));
-        return contents;
-      }
-      const de_Unit_event = async (
-        output: any,
-        context: __SerdeContext
-      ): Promise<Unit> => {
-        const contents: Unit = {} as any;
-        const data: any = await parseBody(output.body, context);
-        Object.assign(contents, _json(data));
-        return contents;
-      }
-      // se_HttpLabelCommandInput omitted.
-
-      /**
-       * serializeRpcv2cborAlpha
-       */
-      const se_Alpha = (
-        input: Alpha,
-        context: __SerdeContext
-      ): any => {
-        return take(input, {
-          'id': [],
-          'timestamp': __dateToTag,
-        });
-      }
-
-      // se_CamelCaseOperationInput omitted.
-
-      // se_ConstrainedAddress omitted.
-
-      // se_DifferentShapeName omitted.
-
-      /**
-       * serializeRpcv2cborGetNumbersRequest
-       */
-      const se_GetNumbersRequest = (
-        input: GetNumbersRequest,
-        context: __SerdeContext
-      ): any => {
-        return take(input, {
-          'bigDecimal': __nv,
-          'bigInteger': [],
-          'customHeaderInput': [],
-          'fieldWithMessage': [],
-          'fieldWithoutMessage': [],
-          'maxResults': [],
-          'numbers': _json,
-          'sparseNumbers': _ => se_SparseIntegerMap(_, context),
-          'startToken': [],
-        });
-      }
-
-      // se_HostPrefixOperationInput omitted.
-
-      // se_IntegerMap omitted.
-
-      /**
-       * serializeRpcv2cborSparseIntegerMap
-       */
-      const se_SparseIntegerMap = (
-        input: Record<string, number | null>,
-        context: __SerdeContext
-      ): any => {
-        return Object.entries(input).reduce((acc: Record<string, any>, [key, value]: [string, any]) => {
-          if (value !== null) {
-              acc[key] = value;
+          let body: Uint8Array = new Uint8Array();
+          body = se_MetricEvent(input, context);
+          body = cbor.serialize(body);
+          return { headers, body };
           }
+          const se_Unit_event = (
+            input: Unit,
+            context: __SerdeContext
+          ): __Message => {
+            const headers: __MessageHeaders = {
+              ":event-type": { type: "string", value: "beta" },
+              ":message-type": { type: "string", value: "event" },
+              ":content-type": { type: "string", value: "application/cbor" },
+            }
+            let body: Uint8Array = new Uint8Array();
+            body = _json(input);
+            body = cbor.serialize(body);
+            return { headers, body };
+            }
+            /**
+             * deserializeRpcv2cborSubscribeEventStream
+             */
+            const de_SubscribeEventStream = (
+              output: any,
+              context: __SerdeContext & __EventStreamSerdeContext
+            ): AsyncIterable<SubscribeEventStream> => {
+              return context.eventStreamMarshaller.deserialize(
+                output,
+                async event => {
+                  if (event["notification"] != null) {
+                    return {
+                      notification: await de_NotificationEvent_event(event["notification"], context),
+                    };
+                  }
+                  if (event["heartbeat"] != null) {
+                    return {
+                      heartbeat: await de_HeartbeatEvent_event(event["heartbeat"], context),
+                    };
+                  }
+                  return {$unknown: event as any};
+                }
+              );
+            }
+            /**
+             * deserializeRpcv2cborTradeEvents
+             */
+            const de_TradeEvents = (
+              output: any,
+              context: __SerdeContext & __EventStreamSerdeContext
+            ): AsyncIterable<TradeEvents> => {
+              return context.eventStreamMarshaller.deserialize(
+                output,
+                async event => {
+                  if (event["alpha"] != null) {
+                    return {
+                      alpha: await de_Alpha_event(event["alpha"], context),
+                    };
+                  }
+                  if (event["beta"] != null) {
+                    return {
+                      beta: await de_Unit_event(event["beta"], context),
+                    };
+                  }
+                  if (event["gamma"] != null) {
+                    return {
+                      gamma: await de_Gamma_event(event["gamma"], context),
+                    };
+                  }
+                  if (event["delta"] != null) {
+                    return {
+                      delta: await de_DifferentShapeName_event(event["delta"], context),
+                    };
+                  }
+                  return {$unknown: event as any};
+                }
+              );
+            }
+            const de_Alpha_event = async (
+              output: any,
+              context: __SerdeContext
+            ): Promise<Alpha> => {
+              const contents: Alpha = {} as any;
+              const data: any = await parseBody(output.body, context);
+              Object.assign(contents, de_Alpha(data, context));
+              return contents;
+            }
+            const de_DifferentShapeName_event = async (
+              output: any,
+              context: __SerdeContext
+            ): Promise<DifferentShapeName> => {
+              const contents: DifferentShapeName = {} as any;
+              const data: any = await parseBody(output.body, context);
+              Object.assign(contents, _json(data));
+              return contents;
+            }
+            const de_Gamma_event = async (
+              output: any,
+              context: __SerdeContext
+            ): Promise<Gamma> => {
+              const contents: Gamma = {} as any;
+              if (output.headers[_sN] !== undefined) {
+                  contents[_sN] = output.headers[_sN].value;
+              }
 
-          else {
-              acc[key] = null as any;
-          }
+              const data: any = await parseBody(output.body, context);
+              contents.payload = _json(data);
+              return contents;
+            }
+            const de_HeartbeatEvent_event = async (
+              output: any,
+              context: __SerdeContext
+            ): Promise<HeartbeatEvent> => {
+              const contents: HeartbeatEvent = {} as any;
+              const data: any = await parseBody(output.body, context);
+              Object.assign(contents, de_HeartbeatEvent(data, context));
+              return contents;
+            }
+            const de_NotificationEvent_event = async (
+              output: any,
+              context: __SerdeContext
+            ): Promise<NotificationEvent> => {
+              const contents: NotificationEvent = {} as any;
+              const data: any = await parseBody(output.body, context);
+              Object.assign(contents, _json(data));
+              return contents;
+            }
+            const de_Unit_event = async (
+              output: any,
+              context: __SerdeContext
+            ): Promise<Unit> => {
+              const contents: Unit = {} as any;
+              const data: any = await parseBody(output.body, context);
+              Object.assign(contents, _json(data));
+              return contents;
+            }
+            // se_HttpLabelCommandInput omitted.
 
-          return acc;
-        }, {});
-      }
+            /**
+             * serializeRpcv2cborAlpha
+             */
+            const se_Alpha = (
+              input: Alpha,
+              context: __SerdeContext
+            ): any => {
+              return take(input, {
+                'id': [],
+                'timestamp': __dateToTag,
+              });
+            }
 
-      // se_TagList omitted.
+            // se_CamelCaseOperationInput omitted.
 
-      // se_UniqueTagList omitted.
+            // se_ConstrainedAddress omitted.
 
-      // se_ValidatedInput omitted.
+            // se_DifferentShapeName omitted.
 
-      // se_Unit omitted.
+            // se_GammaPayload omitted.
 
-      // de_HttpLabelCommandOutput omitted.
+            /**
+             * serializeRpcv2cborGetNumbersRequest
+             */
+            const se_GetNumbersRequest = (
+              input: GetNumbersRequest,
+              context: __SerdeContext
+            ): any => {
+              return take(input, {
+                'bigDecimal': __nv,
+                'bigInteger': [],
+                'customHeaderInput': [],
+                'fieldWithMessage': [],
+                'fieldWithoutMessage': [],
+                'maxResults': [],
+                'numbers': _json,
+                'sparseNumbers': _ => se_SparseIntegerMap(_, context),
+                'startToken': [],
+              });
+            }
 
-      /**
-       * deserializeRpcv2cborAlpha
-       */
-      const de_Alpha = (
-        output: any,
-        context: __SerdeContext
-      ): Alpha => {
-        return take(output, {
-          'id': __expectString,
-          'timestamp': (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
-        }) as any;
-      }
+            // se_HostPrefixOperationInput omitted.
 
-      /**
-       * deserializeRpcv2cborBlobs
-       */
-      const de_Blobs = (
-        output: any,
-        context: __SerdeContext
-      ): Uint8Array[] => {
-        const collection = (output || []).filter((e: any) => e != null)
-        return collection;
-      }
+            // se_IntegerList omitted.
 
-      /**
-       * deserializeRpcv2cborCamelCaseOperationOutput
-       */
-      const de_CamelCaseOperationOutput = (
-        output: any,
-        context: __SerdeContext
-      ): CamelCaseOperationOutput => {
-        return take(output, {
-          'results': (_: any) => de_Blobs(_, context),
-          'token': __expectString,
-        }) as any;
-      }
+            // se_IntegerMap omitted.
 
-      // de_CodedThrottlingError omitted.
+            // se_LogEvent omitted.
 
-      // de_DifferentShapeName omitted.
+            /**
+             * serializeRpcv2cborMetricEvent
+             */
+            const se_MetricEvent = (
+              input: MetricEvent,
+              context: __SerdeContext
+            ): any => {
+              return take(input, {
+                'name': [],
+                'value': [],
+              });
+            }
 
-      /**
-       * deserializeRpcv2cborGetNumbersResponse
-       */
-      const de_GetNumbersResponse = (
-        output: any,
-        context: __SerdeContext
-      ): GetNumbersResponse => {
-        return take(output, {
-          'bigDecimal': [],
-          'bigInteger': [],
-          'deprecatedNumbers': _json,
-          'deprecatedNumbersWithoutChronology': _json,
-          'deprecatedNumbersWithoutExplanation': _json,
-          'inexplicablyDeprecatedNumbers': _json,
-          'nextToken': __expectString,
-          'numbers': _json,
-          'sparseNumbers': (_: any) => de_SparseIntegerList(_, context),
-        }) as any;
-      }
+            /**
+             * serializeRpcv2cborSparseIntegerMap
+             */
+            const se_SparseIntegerMap = (
+              input: Record<string, number | null>,
+              context: __SerdeContext
+            ): any => {
+              return Object.entries(input).reduce((acc: Record<string, any>, [key, value]: [string, any]) => {
+                if (value !== null) {
+                    acc[key] = value;
+                }
 
-      // de_HaltError omitted.
+                else {
+                    acc[key] = null as any;
+                }
 
-      // de_IntegerList omitted.
+                return acc;
+              }, {});
+            }
 
-      // de_MainServiceLinkedError omitted.
+            // se_SubscribeToEventsRequest omitted.
 
-      // de_MysteryThrottlingError omitted.
+            // se_TagList omitted.
 
-      // de_RetryableError omitted.
+            // se_UniqueTagList omitted.
 
-      /**
-       * deserializeRpcv2cborSparseIntegerList
-       */
-      const de_SparseIntegerList = (
-        output: any,
-        context: __SerdeContext
-      ): (number | null)[] => {
-        const collection = (output || []).map((entry: any) => {
-          if (entry === null) {
-            return null as any;
-          }
-          return __expectInt32(entry) as any;
-        });
-        return collection;
-      }
+            // se_ValidatedInput omitted.
 
-      // de_ValidatedOutput omitted.
+            // se_Unit omitted.
 
-      // de_XYZServiceServiceException omitted.
+            // de_HttpLabelCommandOutput omitted.
 
-      // de_Unit omitted.
+            /**
+             * deserializeRpcv2cborAlpha
+             */
+            const de_Alpha = (
+              output: any,
+              context: __SerdeContext
+            ): Alpha => {
+              return take(output, {
+                'id': __expectString,
+                'timestamp': (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
+              }) as any;
+            }
 
-      const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
-        httpStatusCode: output.statusCode,
-        requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
-        extendedRequestId: output.headers["x-amz-id-2"],
-        cfId: output.headers["x-amz-cf-id"],
-      });
+            /**
+             * deserializeRpcv2cborBlobs
+             */
+            const de_Blobs = (
+              output: any,
+              context: __SerdeContext
+            ): Uint8Array[] => {
+              const collection = (output || []).filter((e: any) => e != null)
+              return collection;
+            }
 
-      const throwDefaultError = withBaseException(__BaseException);
-      const SHARED_HEADERS: __HeaderBag = {
-        'content-type': "application/cbor",
-        "smithy-protocol": "rpc-v2-cbor",
-        "accept": "application/cbor",
+            /**
+             * deserializeRpcv2cborCamelCaseOperationOutput
+             */
+            const de_CamelCaseOperationOutput = (
+              output: any,
+              context: __SerdeContext
+            ): CamelCaseOperationOutput => {
+              return take(output, {
+                'results': (_: any) => de_Blobs(_, context),
+                'token': __expectString,
+              }) as any;
+            }
 
-      };
+            // de_CodedThrottlingError omitted.
+
+            // de_DifferentShapeName omitted.
+
+            // de_GammaPayload omitted.
+
+            /**
+             * deserializeRpcv2cborGetNumbersResponse
+             */
+            const de_GetNumbersResponse = (
+              output: any,
+              context: __SerdeContext
+            ): GetNumbersResponse => {
+              return take(output, {
+                'bigDecimal': [],
+                'bigInteger': [],
+                'deprecatedNumbers': _json,
+                'deprecatedNumbersWithoutChronology': _json,
+                'deprecatedNumbersWithoutExplanation': _json,
+                'inexplicablyDeprecatedNumbers': _json,
+                'nextToken': __expectString,
+                'numbers': _json,
+                'sparseNumbers': (_: any) => de_SparseIntegerList(_, context),
+              }) as any;
+            }
+
+            // de_HaltError omitted.
+
+            /**
+             * deserializeRpcv2cborHeartbeatEvent
+             */
+            const de_HeartbeatEvent = (
+              output: any,
+              context: __SerdeContext
+            ): HeartbeatEvent => {
+              return take(output, {
+                'timestamp': (_: any) => __expectNonNull(__parseEpochTimestamp(_)),
+              }) as any;
+            }
+
+            // de_IntegerList omitted.
+
+            // de_MainServiceLinkedError omitted.
+
+            // de_MysteryThrottlingError omitted.
+
+            // de_NotificationEvent omitted.
+
+            // de_PublishEventsResponse omitted.
+
+            // de_RetryableError omitted.
+
+            /**
+             * deserializeRpcv2cborSparseIntegerList
+             */
+            const de_SparseIntegerList = (
+              output: any,
+              context: __SerdeContext
+            ): (number | null)[] => {
+              const collection = (output || []).map((entry: any) => {
+                if (entry === null) {
+                  return null as any;
+                }
+                return __expectInt32(entry) as any;
+              });
+              return collection;
+            }
+
+            // de_ValidatedOutput omitted.
+
+            // de_XYZServiceServiceException omitted.
+
+            // de_Unit omitted.
+
+            const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
+              httpStatusCode: output.statusCode,
+              requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
+              extendedRequestId: output.headers["x-amz-id-2"],
+              cfId: output.headers["x-amz-cf-id"],
+            });
+
+            const throwDefaultError = withBaseException(__BaseException);
+            const SHARED_HEADERS: __HeaderBag = {
+              'content-type': "application/cbor",
+              "smithy-protocol": "rpc-v2-cbor",
+              "accept": "application/cbor",
+
+            };
+
+            const _sN = "sequenceNumber";

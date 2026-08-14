@@ -1,4 +1,5 @@
 import http from "node:http";
+import http2 from "node:http2";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { XYZServiceHandler } from "xyz-schema-server";
 import {
@@ -7,6 +8,7 @@ import {
   CamelCaseOperationCommand,
   HttpLabelCommandCommand,
   ValidatedOperationCommand,
+  TradeEventStreamCommand,
 } from "xyz-schema";
 import {
   SmithyRpcV2CborServerProtocol,
@@ -18,6 +20,7 @@ import { HttpRequest } from "@smithy/core/protocols";
 import { AwsRestJsonProtocol, AwsJson1_0Protocol } from "@aws-sdk/core/protocols";
 import { GetNumbers$, camelCaseOperation$ } from "xyz-schema-server";
 import { convertRequest, writeResponse } from "@smithy/server-node";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 /**
  * End-to-end integration test that stands up a real Node.js HTTP server
@@ -41,7 +44,6 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       new AwsRestJsonServerProtocol({ defaultNamespace: "org.xyz.v1" }),
       new AwsJsonRpcServerProtocol({ defaultNamespace: "org.xyz.v1" }),
     ],
-    // logger: console,
     handlers: {
       async GetNumbers(input) {
         const inputNumbers = input.numbers ?? {};
@@ -65,8 +67,35 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       async HostPrefixOperation(_input) {
         return {};
       },
-      async TradeEventStream(_input) {
-        return {} as any;
+      async TradeEventStream(input) {
+        // Echo the event stream back, prefixed with the sessionId from the initial message.
+        const prefix = input.sessionId ?? "no-session";
+        const inputEvents = input.eventStream;
+        const outputEvents = (async function* () {
+          if (inputEvents) {
+            for await (const event of inputEvents) {
+              if (event.alpha) {
+                yield { alpha: { ...event.alpha, id: `${prefix}:${event.alpha.id}` } };
+              } else if (event.gamma) {
+                yield { gamma: event.gamma };
+              } else if (event.delta) {
+                yield { delta: { ...event.delta, name: `${prefix}:${event.delta.name}` } };
+              } else {
+                yield event;
+              }
+            }
+          }
+        })();
+        return {
+          sessionId: `ack-${prefix}`,
+          eventStream: outputEvents,
+        };
+      },
+      async PublishEvents() {
+        return { eventCount: 0, message: "not tested over h1" };
+      },
+      async SubscribeToEvents() {
+        return { subscriptionId: "n/a", events: (async function* () {})() };
       },
       async ValidatedOperation(input) {
         return {
@@ -90,10 +119,12 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
     const addr = server.address() as { port: number };
     baseUrl = `http://127.0.0.1:${addr.port}`;
 
-    // CBOR client — uses default protocol.
+    // CBOR client — uses default protocol. Override requestHandler to HTTP/1.1
+    // since the main test server is H1 (event stream tests use a separate H2 server).
     cborClient = new XYZServiceClient({
       endpoint: baseUrl,
       apiKey: { apiKey: "test-key" },
+      requestHandler: new NodeHttpHandler(),
     });
 
     // restJson1 client — overrides protocol.
@@ -104,6 +135,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       protocolSettings: {
         defaultNamespace: "org.xyz.v1",
       },
+      requestHandler: new NodeHttpHandler(),
     });
 
     // AWS JSON 1.0 RPC client — overrides protocol.
@@ -115,6 +147,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
         defaultNamespace: "org.xyz.v1",
         serviceTarget: "XYZService",
       },
+      requestHandler: new NodeHttpHandler(),
     });
   });
 
@@ -342,6 +375,364 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
     });
   });
 
+  describe("Event stream (bidirectional)", () => {
+    let h2Server: http2.Http2Server;
+    let h2CborClient: XYZServiceClient;
+    let h2JsonRpcClient: XYZServiceClient;
+    let h2RestJsonClient: XYZServiceClient;
+
+    async function collectEvents(iterable: AsyncIterable<any>): Promise<any[]> {
+      const events: any[] = [];
+      for await (const event of iterable) {
+        events.push(event);
+      }
+      return events;
+    }
+
+    beforeAll(async () => {
+      const h2Handler = new XYZServiceHandler({
+        protocols: [
+          new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+          new AwsJsonRpcServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+          new AwsRestJsonServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+        ],
+        validationEnabled: false,
+        handlers: {
+          async GetNumbers() {
+            return {};
+          },
+          async camelCaseOperation() {
+            return {};
+          },
+          async HttpLabelCommand() {
+            return {};
+          },
+          async HostPrefixOperation() {
+            return {};
+          },
+          async TradeEventStream(input) {
+            const prefix = input.sessionId ?? "no-session";
+            const inputEvents = input.eventStream;
+            const outputEvents = (async function* () {
+              if (inputEvents) {
+                for await (const event of inputEvents) {
+                  if (event.alpha) {
+                    yield { alpha: { ...event.alpha, id: `${prefix}:${event.alpha.id}` } };
+                  } else if (event.gamma) {
+                    yield { gamma: event.gamma };
+                  } else if (event.delta) {
+                    yield { delta: { ...event.delta, name: `${prefix}:${event.delta.name}` } };
+                  } else {
+                    yield event;
+                  }
+                }
+              }
+            })();
+            return {
+              sessionId: `ack-${prefix}`,
+              eventStream: outputEvents,
+            };
+          },
+          async PublishEvents(input) {
+            // Input-only stream: consume events and return a summary.
+            const events = await collectEvents(input.events ?? (async function* () {})());
+            return {
+              eventCount: events.length,
+              message: `Received ${events.length} events on channel ${input.channel ?? "default"}`,
+            };
+          },
+          async SubscribeToEvents(input) {
+            // Output-only stream: return a stream of events based on the request.
+            const max = input.maxEvents ?? 3;
+            const channel = input.channel ?? "default";
+            const outputEvents = (async function* () {
+              for (let i = 0; i < max; ++i) {
+                yield { notification: { topic: channel, payload: `event-${i}` } };
+              }
+            })();
+            return {
+              subscriptionId: `sub-${channel}`,
+              events: outputEvents,
+            };
+          },
+          async ValidatedOperation(input) {
+            return { message: `Hello, ${input.username}!` };
+          },
+        },
+      });
+
+      h2Server = http2.createServer();
+      h2Server.on("stream", async (stream, headers) => {
+        stream.on("error", () => {});
+        const method = headers[":method"] as string;
+        const path = headers[":path"] as string;
+        const reqHeaders: Record<string, string> = {};
+        for (const [key, value] of Object.entries(headers)) {
+          if (!key.startsWith(":") && value !== undefined) {
+            reqHeaders[key] = Array.isArray(value) ? value.join(", ") : value;
+          }
+        }
+
+        const httpRequest = new HttpRequest({
+          method,
+          path,
+          headers: reqHeaders,
+          body: stream,
+        });
+
+        try {
+          const httpResponse = await h2Handler.handle(httpRequest, {});
+
+          const responseHeaders: Record<string, string | number> = {
+            ":status": httpResponse.statusCode,
+          };
+          for (const [key, value] of Object.entries(httpResponse.headers)) {
+            responseHeaders[key] = value;
+          }
+          stream.respond(responseHeaders);
+
+          if (httpResponse.body) {
+            if (typeof httpResponse.body[Symbol.asyncIterator] === "function") {
+              for await (const chunk of httpResponse.body as AsyncIterable<Uint8Array>) {
+                stream.write(chunk);
+              }
+              stream.end();
+            } else {
+              stream.end(httpResponse.body);
+            }
+          } else {
+            stream.end();
+          }
+        } catch (err: any) {
+          if (!stream.destroyed) {
+            stream.respond({ ":status": 500 });
+            stream.end(err.message);
+          }
+        }
+      });
+
+      await new Promise<void>((resolve) => {
+        h2Server.listen(0, "127.0.0.1", () => resolve());
+      });
+      const h2Port = (h2Server.address() as { port: number }).port;
+      const h2BaseUrl = `http://127.0.0.1:${h2Port}`;
+
+      h2CborClient = new XYZServiceClient({
+        endpoint: h2BaseUrl,
+        apiKey: { apiKey: "test-key" },
+      });
+
+      h2JsonRpcClient = new XYZServiceClient({
+        endpoint: h2BaseUrl,
+        apiKey: { apiKey: "test-key" },
+        protocol: AwsJson1_0Protocol,
+        protocolSettings: {
+          defaultNamespace: "org.xyz.v1",
+          serviceTarget: "XYZService",
+        },
+      });
+
+      h2RestJsonClient = new XYZServiceClient({
+        endpoint: h2BaseUrl,
+        apiKey: { apiKey: "test-key" },
+        protocol: AwsRestJsonProtocol,
+        protocolSettings: {
+          defaultNamespace: "org.xyz.v1",
+        },
+      });
+    });
+
+    afterAll(async () => {
+      h2CborClient.destroy();
+      h2JsonRpcClient.destroy();
+      h2RestJsonClient.destroy();
+      await new Promise<void>((resolve, reject) => {
+        h2Server.close((err) => (err ? reject(err) : resolve()));
+      });
+    });
+
+    // --- Bidirectional (TradeEventStream) ---
+
+    it("CBOR: bidirectional event stream with initial message", async () => {
+      const response = await h2CborClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "cbor-session",
+          eventStream: (async function* () {
+            yield { alpha: { id: "evt-1" } };
+            yield { delta: { name: "trade-1", number: 42 } };
+          })(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-cbor-session");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(2);
+      expect(events[0].alpha?.id).toBe("cbor-session:evt-1");
+      expect(events[1].delta?.name).toBe("cbor-session:trade-1");
+      expect(events[1].delta?.number).toBe(42);
+    });
+
+    it("CBOR: eventHeader and eventPayload (gamma)", async () => {
+      const response = await h2CborClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "gamma-test",
+          eventStream: (async function* () {
+            yield { gamma: { sequenceNumber: 7, payload: { message: "hello", values: [1, 2, 3] } } };
+          })(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-gamma-test");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(1);
+      expect(events[0].gamma?.sequenceNumber).toBe(7);
+      expect(events[0].gamma?.payload?.message).toBe("hello");
+      expect(events[0].gamma?.payload?.values).toEqual([1, 2, 3]);
+    });
+
+    it("JSON RPC: bidirectional event stream with initial message", async () => {
+      const response = await h2JsonRpcClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "json-rpc-session",
+          eventStream: (async function* () {
+            yield { alpha: { id: "json-evt-1" } };
+            yield { delta: { name: "json-trade", number: 99 } };
+          })(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-json-rpc-session");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(2);
+      expect(events[0].alpha?.id).toBe("json-rpc-session:json-evt-1");
+      expect(events[1].delta?.name).toBe("json-rpc-session:json-trade");
+    });
+
+    it("REST JSON: bidirectional event stream with initial message in headers", async () => {
+      const response = await h2RestJsonClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "rest-session",
+          eventStream: (async function* () {
+            yield { alpha: { id: "rest-evt-1" } };
+            yield { delta: { name: "rest-trade", number: 77 } };
+          })(),
+        })
+      );
+      // REST protocol: sessionId is in HTTP headers, not initial-response event.
+      expect(response.sessionId).toBe("ack-rest-session");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(2);
+      expect(events[0].alpha?.id).toBe("rest-session:rest-evt-1");
+      expect(events[1].delta?.name).toBe("rest-session:rest-trade");
+      expect(events[1].delta?.number).toBe(77);
+    });
+
+    it("CBOR: empty event stream returns no events", async () => {
+      const response = await h2CborClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "empty-stream",
+          eventStream: (async function* () {})(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-empty-stream");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(0);
+    });
+
+    // --- Input-only stream (PublishEvents) ---
+
+    it("CBOR: input-only event stream", async () => {
+      const { PublishEventsCommand } = await import("xyz-schema");
+      const response = await h2CborClient.send(
+        new PublishEventsCommand({
+          channel: "metrics",
+          events: (async function* () {
+            yield { log: { level: "INFO", message: "started" } };
+            yield { metric: { name: "cpu", value: 0.75 } };
+            yield { log: { level: "WARN", message: "high load" } };
+          })(),
+        })
+      );
+      expect(response.eventCount).toBe(3);
+      expect(response.message).toBe("Received 3 events on channel metrics");
+    });
+
+    it("JSON RPC: input-only event stream", async () => {
+      const { PublishEventsCommand } = await import("xyz-schema");
+      const response = await h2JsonRpcClient.send(
+        new PublishEventsCommand({
+          channel: "logs",
+          events: (async function* () {
+            yield { log: { level: "ERROR", message: "oops" } };
+          })(),
+        })
+      );
+      expect(response.eventCount).toBe(1);
+      expect(response.message).toBe("Received 1 events on channel logs");
+    });
+
+    it("REST JSON: input-only event stream", async () => {
+      const { PublishEventsCommand } = await import("xyz-schema");
+      const response = await h2RestJsonClient.send(
+        new PublishEventsCommand({
+          channel: "telemetry",
+          events: (async function* () {
+            yield { metric: { name: "latency", value: 123.4 } };
+            yield { metric: { name: "errors", value: 0 } };
+          })(),
+        })
+      );
+      expect(response.eventCount).toBe(2);
+      expect(response.message).toBe("Received 2 events on channel telemetry");
+    });
+
+    // --- Output-only stream (SubscribeToEvents) ---
+
+    it("CBOR: output-only event stream", async () => {
+      const { SubscribeToEventsCommand } = await import("xyz-schema");
+      const response = await h2CborClient.send(
+        new SubscribeToEventsCommand({
+          channel: "news",
+          maxEvents: 3,
+        })
+      );
+      expect(response.subscriptionId).toBe("sub-news");
+      const events = await collectEvents(response.events!);
+      expect(events).toHaveLength(3);
+      expect(events[0].notification?.topic).toBe("news");
+      expect(events[0].notification?.payload).toBe("event-0");
+      expect(events[2].notification?.payload).toBe("event-2");
+    });
+
+    it("JSON RPC: output-only event stream", async () => {
+      const { SubscribeToEventsCommand } = await import("xyz-schema");
+      const response = await h2JsonRpcClient.send(
+        new SubscribeToEventsCommand({
+          channel: "alerts",
+          maxEvents: 2,
+        })
+      );
+      expect(response.subscriptionId).toBe("sub-alerts");
+      const events = await collectEvents(response.events!);
+      expect(events).toHaveLength(2);
+      expect(events[0].notification?.topic).toBe("alerts");
+      expect(events[1].notification?.payload).toBe("event-1");
+    });
+
+    it("REST JSON: output-only event stream", async () => {
+      const { SubscribeToEventsCommand } = await import("xyz-schema");
+      const response = await h2RestJsonClient.send(
+        new SubscribeToEventsCommand({
+          channel: "updates",
+          maxEvents: 4,
+        })
+      );
+      // REST protocol: subscriptionId is in HTTP header.
+      expect(response.subscriptionId).toBe("sub-updates");
+      const events = await collectEvents(response.events!);
+      expect(events).toHaveLength(4);
+      expect(events[0].notification?.topic).toBe("updates");
+      expect(events[3].notification?.payload).toBe("event-3");
+    });
+  });
+
   describe("interceptor modify hooks", () => {
     let interceptorServer: http.Server;
     let interceptorClient: XYZServiceClient;
@@ -366,8 +757,14 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           async HostPrefixOperation() {
             return {};
           },
-          async TradeEventStream() {
-            return {} as any;
+          async TradeEventStream(input) {
+            return { sessionId: input.sessionId, eventStream: (async function* () {})() };
+          },
+          async PublishEvents() {
+            return { eventCount: 0, message: "" };
+          },
+          async SubscribeToEvents() {
+            return { subscriptionId: "", events: (async function* () {})() };
           },
           async ValidatedOperation(input) {
             return { message: `Hello, ${input.username}!` };
@@ -420,6 +817,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       interceptorClient = new XYZServiceClient({
         endpoint: interceptorBaseUrl,
         apiKey: { apiKey: "test-key" },
+        requestHandler: new NodeHttpHandler(),
       });
     });
 
@@ -494,6 +892,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       directClient = new XYZServiceClient({
         endpoint: directBaseUrl,
         apiKey: { apiKey: "test-key" },
+        requestHandler: new NodeHttpHandler(),
       });
     });
 

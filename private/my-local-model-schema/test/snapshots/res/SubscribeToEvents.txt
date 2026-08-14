@@ -1,0 +1,101 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[async_iterable (Object)]
+
+
+
+
+--- [output object] ---
+{
+  events: async_it[<empty>],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 135 [header-size] 82 [prelude-crc] 3816915763
+:event-type: notification
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "topic": "__topic__",
+  "payload": "__payload__"
+}
+
+[actual bytes]
+162, 101, 116, 111, 112, 105, 99, 105, 95, 95, 116, 111, 112, 105, 99, 95, 95, 103, 112, 97, 121, 108, 111, 97,
+100, 107, 95, 95, 112, 97, 121, 108, 111, 97, 100, 95, 95
+
+[message-crc] 2400364377
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 116 [header-size] 79 [prelude-crc] 2400437607
+:event-type: heartbeat
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "timestamp": {
+    "tag": 1,
+    "value": 946702799.999
+  }
+}
+
+[actual bytes]
+161, 105, 116, 105, 109, 101, 115, 116, 97, 109, 112, 193, 251, 65, 204, 54, 196, 231, 255, 223, 59
+
+[message-crc] 3042832380
+============================================================
+
+[chunk (b64)]
+Cg==
+
+
+
+--- [output object] ---
+{
+  events: async_it[
+    {
+      notification: {
+        topic: "__topic__",
+        payload: "__payload__"
+      }
+    },
+    {
+      heartbeat: {
+        timestamp: (Date) Fri, Dec 31, 1999, 20:59:59 Pacific Standard Time
+      }
+    }
+  ],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type * as schema from "@smithy/core/schema";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { RestServerProtocol } from "./RestServerProtocol";
-import { SerializationException } from "../../validation/errors";
 import type {
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
@@ -306,7 +305,7 @@ describe("RestServerProtocol", () => {
   });
 
   describe("deserializeRequest - httpPayload", () => {
-    it("throws SerializationException for streaming event stream", async () => {
+    it("deserializes streaming event stream via event stream serde", async () => {
       // A streaming union with @httpPayload — the input struct has one member
       // "events" targeting a union schema with { streaming: 1 }, and the member
       // itself carries { httpPayload: 1 }.
@@ -322,10 +321,13 @@ describe("RestServerProtocol", () => {
         "unit",
       ] satisfies StaticOperationSchema;
 
-      const request = makeRequest({ path: "/test", method: "POST" });
-      await expect(protocol.deserializeRequest(opSchema, makeContext(), request)).rejects.toBeInstanceOf(
-        SerializationException
-      );
+      // Provide an empty async iterable as the body (simulates binary event stream).
+      const fakeBody = (async function* () {})();
+      const request = makeRequest({ path: "/test", method: "POST", body: fakeBody } as any);
+      const result: any = await protocol.deserializeRequest(opSchema, makeContext(), request);
+      // The event stream member is populated with an async iterable.
+      expect(result.events).toBeDefined();
+      expect(result.events[Symbol.asyncIterator]).toBeDefined();
     });
 
     it("passes streaming blob body through directly", async () => {
@@ -379,28 +381,26 @@ describe("RestServerProtocol", () => {
       spy.mockRestore();
     });
 
-    it("throws SerializationException for event stream in response payload", async () => {
-      const outputNs = {
-        structIterator: function* () {
-          yield [
-            "events",
-            {
-              getMergedTraits: () => ({ httpPayload: 1 }),
-              isStreaming: () => true,
-              isStructSchema: () => true,
-              isBlobSchema: () => false,
-            },
-          ];
-        },
-      };
+    it("serializes event stream in response payload as binary stream", async () => {
+      // A streaming union with @httpPayload — the output struct has one member
+      // "events" targeting a union schema with { streaming: 1 }, and the member
+      // itself carries { httpPayload: 1 }.
+      const streamingUnion: any = [4, "test", "Events", { streaming: 1 }, ["a"], [0]];
+      const outputSchema: any = [3, "test", "Output", 0, ["events"], [[() => streamingUnion, { httpPayload: 1 }]]];
 
-      const spy = vi.spyOn(NormalizedSchema, "of").mockReturnValue(outputNs as any);
+      const opSchema = [
+        9,
+        "test",
+        "Op",
+        { http: ["POST", "/test", 200] },
+        "unit",
+        () => outputSchema,
+      ] satisfies StaticOperationSchema;
 
-      const opSchema = { input: {}, output: {}, traits: {} } as unknown as $OperationSchema;
-      await expect((protocol as any).serializeSuccess(opSchema, makeContext(), { events: {} })).rejects.toBeInstanceOf(
-        SerializationException
-      );
-      spy.mockRestore();
+      const fakeEvents = (async function* () {})();
+      const response = await (protocol as any).serializeSuccess(opSchema, makeContext(), { events: fakeEvents });
+      // The response should have event stream content type.
+      expect(response.headers["content-type"]).toBe("application/vnd.amazon.eventstream");
     });
 
     it("passes streaming blob body through to response", async () => {

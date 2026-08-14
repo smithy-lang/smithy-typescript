@@ -67,9 +67,9 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
         this.serializer.write(15, {});
         request.body = this.serializer.flush();
       }
-      try {
-        request.headers["content-length"] = String((request.body as Uint8Array).byteLength);
-      } catch (ignored) {}
+      if (request.body instanceof Uint8Array) {
+        request.headers["content-length"] = String(request.body.byteLength);
+      }
     }
     const { service, operation } = getSmithyContext(context) as {
       service: string;

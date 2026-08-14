@@ -22,15 +22,35 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
     context: SerdeFunctions,
     request: IHttpRequest
   ): Promise<Input> {
-    this.validateContentType(request);
-    this.validateAccept(request);
-
     const ns = NormalizedSchema.of(operationSchema[4]);
+    const eventStreamMember = ns.getEventStreamMember();
+
+    // For event stream operations, the Content-Type is
+    // application/vnd.amazon.eventstream, not the protocol's default.
+    if (!eventStreamMember) {
+      this.validateContentType(request);
+      this.validateAccept(request);
+    }
 
     if (ns.getSchema() === "unit") {
       // discard body stream.
       await collectBody(request.body, context);
       return {} as Input;
+    }
+
+    if (eventStreamMember) {
+      // RPC event stream input: the body is a binary event stream.
+      // The initial-request message contains non-stream members.
+      const initialRequestContainer: Record<string, any> = {};
+      const eventIterable = await this.deserializeEventStream({
+        request,
+        requestSchema: ns,
+        initialRequestContainer,
+      });
+
+      const input: any = { ...initialRequestContainer };
+      input[eventStreamMember] = eventIterable;
+      return input as Input;
     }
 
     const bytes = await collectBody(request.body, context);
@@ -44,7 +64,13 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
   }
 
   /**
-   * Serializes a successful RPC response. The entire output is in the body.
+   * Serializes a successful RPC response.
+   *
+   * For event stream operations (output has a streaming union member):
+   * - The response body is a binary event stream.
+   * - The first message is `initial-response` containing non-stream members.
+   * - The remaining messages are the event stream from the handler.
+   * - The response Content-Type is `application/vnd.amazon.eventstream`.
    */
   protected override async serializeSuccess<Output extends object>(
     operationSchema: StaticOperationSchema,
@@ -53,6 +79,48 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
   ): Promise<IHttpResponse> {
     const ns = NormalizedSchema.of(operationSchema[5]);
     const schema = ns.getSchema();
+
+    const eventStreamMember = ns.getEventStreamMember();
+
+    if (eventStreamMember) {
+      // RPC event stream output: serialize as binary event stream.
+      // Non-stream members go into the initial-response message.
+      const eventStream = (output as any)[eventStreamMember] as AsyncIterable<any>;
+      if (!eventStream) {
+        // No event stream provided by handler — return empty body.
+        return new HttpResponse({
+          statusCode: 200,
+          headers: {
+            "content-type": "application/vnd.amazon.eventstream",
+          },
+          body: undefined,
+        });
+      }
+
+      // Collect non-stream members for the initial-response.
+      const initialResponse: Record<string, any> = {};
+      let hasInitialResponse = false;
+      for (const [memberName] of ns.structIterator()) {
+        if (memberName !== eventStreamMember && (output as any)[memberName] !== undefined) {
+          initialResponse[memberName] = (output as any)[memberName];
+          hasInitialResponse = true;
+        }
+      }
+
+      const body = await this.serializeEventStream({
+        eventStream,
+        responseSchema: ns,
+        initialResponse: hasInitialResponse ? initialResponse : undefined,
+      });
+
+      return new HttpResponse({
+        statusCode: 200,
+        headers: {
+          "content-type": "application/vnd.amazon.eventstream",
+        },
+        body,
+      });
+    }
 
     this.serializer.write(schema, output);
     const body = this.serializer.flush();

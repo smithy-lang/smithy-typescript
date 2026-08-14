@@ -8,12 +8,15 @@ import {
   CodedThrottlingError$,
   ConstrainedAddress$,
   DifferentShapeName$,
+  Gamma$,
+  GammaPayload$,
   GetNumbers$,
   GetNumbersCommand,
   GetNumbersRequest$,
   GetNumbersResponse$,
   HaltError,
   HaltError$,
+  HeartbeatEvent$,
   HostPrefixOperation$,
   HostPrefixOperationCommand,
   HostPrefixOperationInput$,
@@ -21,14 +24,27 @@ import {
   HttpLabelCommandCommand,
   HttpLabelCommandInput$,
   HttpLabelCommandOutput$,
+  LogEvent$,
   MainServiceLinkedError,
   MainServiceLinkedError$,
+  MetricEvent$,
   MysteryThrottlingError,
   MysteryThrottlingError$,
+  NotificationEvent$,
   paginatecamelCaseOperation,
   paginateGetNumbers,
+  PublishEvents$,
+  PublishEventsCommand,
+  PublishEventsRequest$,
+  PublishEventsResponse$,
+  PublishEventStream$,
   RetryableError,
   RetryableError$,
+  SubscribeEventStream$,
+  SubscribeToEvents$,
+  SubscribeToEventsCommand,
+  SubscribeToEventsRequest$,
+  SubscribeToEventsResponse$,
   TradeEvents$,
   TradeEventStream$,
   TradeEventStreamCommand,
@@ -63,6 +79,10 @@ assert(typeof GetNumbersCommand === "function");
 assert(typeof GetNumbers$ === "object");
 assert(typeof HostPrefixOperationCommand === "function");
 assert(typeof HostPrefixOperation$ === "object");
+assert(typeof PublishEventsCommand === "function");
+assert(typeof PublishEvents$ === "object");
+assert(typeof SubscribeToEventsCommand === "function");
+assert(typeof SubscribeToEvents$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
 assert(typeof TradeEventStream$ === "object");
 assert(typeof ValidatedOperationCommand === "function");
@@ -75,9 +95,21 @@ assert(typeof camelCaseOperationInput$ === "object");
 assert(typeof camelCaseOperationOutput$ === "object");
 assert(typeof ConstrainedAddress$ === "object");
 assert(typeof DifferentShapeName$ === "object");
+assert(typeof Gamma$ === "object");
+assert(typeof GammaPayload$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
 assert(typeof GetNumbersResponse$ === "object");
+assert(typeof HeartbeatEvent$ === "object");
 assert(typeof HostPrefixOperationInput$ === "object");
+assert(typeof LogEvent$ === "object");
+assert(typeof MetricEvent$ === "object");
+assert(typeof NotificationEvent$ === "object");
+assert(typeof PublishEventsRequest$ === "object");
+assert(typeof PublishEventsResponse$ === "object");
+assert(typeof PublishEventStream$ === "object");
+assert(typeof SubscribeEventStream$ === "object");
+assert(typeof SubscribeToEventsRequest$ === "object");
+assert(typeof SubscribeToEventsResponse$ === "object");
 assert(typeof TradeEvents$ === "object");
 assert(typeof TradeEventStreamRequest$ === "object");
 assert(typeof TradeEventStreamResponse$ === "object");

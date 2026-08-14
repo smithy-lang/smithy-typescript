@@ -43,13 +43,22 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  * const config = {}; // type is XYZServiceClientConfig
  * const client = new XYZServiceClient(config);
  * const input = { // TradeEventStreamRequest
+ *   sessionId: "STRING_VALUE",
  *   eventStream: { // TradeEvents Union: only one key present
  *     alpha: { // Alpha
  *       id: "STRING_VALUE",
  *       timestamp: new Date("TIMESTAMP"),
  *     },
  *     beta: {},
- *     gamma: {},
+ *     gamma: { // Gamma
+ *       sequenceNumber: Number("int"),
+ *       payload: { // GammaPayload
+ *         message: "STRING_VALUE",
+ *         values: [ // IntegerList
+ *           Number("int"),
+ *         ],
+ *       },
+ *     },
  *     delta: { // DifferentShapeName
  *       name: "STRING_VALUE",
  *       number: Number("int"),
@@ -59,13 +68,22 @@ export interface TradeEventStreamCommandOutput extends TradeEventStreamResponse,
  * const command = new TradeEventStreamCommand(input);
  * const response = await client.send(command);
  * // { // TradeEventStreamResponse
+ * //   sessionId: "STRING_VALUE",
  * //   eventStream: { // TradeEvents Union: only one key present
  * //     alpha: { // Alpha
  * //       id: "STRING_VALUE",
  * //       timestamp: new Date("TIMESTAMP"),
  * //     },
  * //     beta: {},
- * //     gamma: {},
+ * //     gamma: { // Gamma
+ * //       sequenceNumber: Number("int"),
+ * //       payload: { // GammaPayload
+ * //         message: "STRING_VALUE",
+ * //         values: [ // IntegerList
+ * //           Number("int"),
+ * //         ],
+ * //       },
+ * //     },
  * //     delta: { // DifferentShapeName
  * //       name: "STRING_VALUE",
  * //       number: Number("int"),

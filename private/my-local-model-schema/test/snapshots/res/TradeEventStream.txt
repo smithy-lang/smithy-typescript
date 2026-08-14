@@ -68,18 +68,27 @@ content-type: application/cbor
 ============================================================
 
 [chunk (event-stream object view)]
-  [total-size] 92 [header-size] 75 [prelude-crc] 2043635131
+  [total-size] 143 [header-size] 95 [prelude-crc] 2906698831
 :event-type: gamma
 :message-type: event
 :content-type: application/cbor
+sequenceNumber: 0 (integer)
 
 [cbor object view]
-{}
+{
+  "message": "__message__",
+  "values": [
+    0,
+    0,
+    0
+  ]
+}
 
 [actual bytes]
-160
+162, 103, 109, 101, 115, 115, 97, 103, 101, 107, 95, 95, 109, 101, 115, 115, 97, 103, 101, 95, 95, 102, 118, 97,
+108, 117, 101, 115, 131, 0, 0, 0
 
-[message-crc] 2477278713
+[message-crc] 587089113
 ============================================================
 
 [chunk (event-stream object view)]
@@ -118,7 +127,17 @@ Cg==
       beta: {}
     },
     {
-      gamma: {}
+      gamma: {
+        sequenceNumber: (number) 0,
+        payload: {
+          message: "__message__",
+          values: [
+            (number) 0,
+            (number) 0,
+            (number) 0
+          ]
+        }
+      }
     },
     {
       delta: {

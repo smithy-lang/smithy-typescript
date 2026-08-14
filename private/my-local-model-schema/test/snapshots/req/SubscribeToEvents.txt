@@ -1,0 +1,21 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/SubscribeToEvents
+
+x-api-key: [object Object]
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+content-length: 32
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[Uint8Array (cbor object view)]
+{
+  "channel": "__channel__",
+  "maxEvents": 0
+}
+
+[actual bytes]
+162, 103, 99, 104, 97, 110, 110, 101, 108, 107, 95, 95, 99, 104, 97, 110, 110, 101, 108, 95, 95, 105, 109, 97,
+120, 69, 118, 101, 110, 116, 115, 0
