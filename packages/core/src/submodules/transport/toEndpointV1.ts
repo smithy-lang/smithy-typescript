@@ -13,7 +13,7 @@ export const toEndpointV1 = (endpoint: string | Endpoint | EndpointV2): Endpoint
       const v1Endpoint = parseUrl(endpoint.url);
       if (endpoint.headers) {
         v1Endpoint.headers = {};
-        for (const name in endpoint.headers) {
+        for (const name of Object.keys(endpoint.headers)) {
           v1Endpoint.headers[name.toLowerCase()] = endpoint.headers[name].join(", ");
         }
       }

@@ -45,6 +45,29 @@ describe(toEndpointV1.name, () => {
     });
   });
 
+  it("does not iterate inherited Object.prototype properties in headers", () => {
+    Object.defineProperty(Object.prototype, "testProp", {
+      value: "not-an-array",
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+
+    try {
+      const result = toEndpointV1({
+        url: new URL("https://example.com/path"),
+        headers: {},
+      });
+
+      expect(result.protocol).toBe("https:");
+      expect(result.hostname).toBe("example.com");
+      expect(result.path).toBe("/path");
+      expect(Object.keys(result.headers!)).toEqual([]);
+    } finally {
+      delete (Object.prototype as any).testProp;
+    }
+  });
+
   it("passes through EndpointV1", () => {
     const v1Endpoint = {
       protocol: "https:",
