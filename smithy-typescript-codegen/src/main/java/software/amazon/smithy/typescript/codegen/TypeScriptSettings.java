@@ -57,7 +57,6 @@ public final class TypeScriptSettings {
     private static final String PACKAGE_MANAGER = "packageManager";
     private static final String CREATE_DEFAULT_README = "createDefaultReadme";
     private static final String USE_LEGACY_AUTH = "useLegacyAuth";
-    private static final String GENERATE_TYPEDOC = "generateTypeDoc";
     private static final String GENERATE_INDEX_TESTS = "generateIndexTests";
     private static final String GENERATE_SNAPSHOT_TESTS = "generateSnapshotTests";
     private static final String SERVICE_PROTOCOL_PRIORITY = "serviceProtocolPriority";
@@ -70,6 +69,8 @@ public final class TypeScriptSettings {
     private static final String TSCONFIG = "tsconfig";
     private static final String MODES = "modes";
     private static final String CLOSURE = "closure";
+    private static final String TYPESCRIPT_VERSION = "typescriptVersion";
+    private static final String DEFAULT_TYPESCRIPT_VERSION = "~5.8.3";
 
     private String packageName;
     private String packageDescription = "";
@@ -87,7 +88,6 @@ public final class TypeScriptSettings {
     private PackageManager packageManager = PackageManager.YARN;
     private boolean createDefaultReadme = false;
     private boolean useLegacyAuth = false;
-    private boolean generateTypeDoc = false;
     private ProtocolPriorityConfig protocolPriorityConfig = new ProtocolPriorityConfig(null, null);
     private String bigNumberMode = "native";
     private boolean generateSchemas = true;
@@ -97,6 +97,7 @@ public final class TypeScriptSettings {
     private boolean generateSnapshotTests = false;
     private String versioningScheme = "";
     private boolean isolatedModules = false;
+    private String typescriptVersion = DEFAULT_TYPESCRIPT_VERSION;
 
     @Deprecated
     public static TypeScriptSettings from(Model model, ObjectNode config) {
@@ -191,7 +192,6 @@ public final class TypeScriptSettings {
         if (settings.generateClient()) {
             settings.useLegacyAuth(config.getBooleanMemberOrDefault(USE_LEGACY_AUTH, false));
         }
-        settings.setGenerateTypeDoc(config.getBooleanMember(GENERATE_TYPEDOC).map(BooleanNode::getValue).orElse(false));
         settings.setPackageManager(
             config
                 .getStringMember(PACKAGE_MANAGER)
@@ -236,6 +236,8 @@ public final class TypeScriptSettings {
                 .map(node -> node.getValue())
                 .orElse(false)
         );
+
+        settings.setTypescriptVersion(config.getStringMemberOrDefault(TYPESCRIPT_VERSION, DEFAULT_TYPESCRIPT_VERSION));
 
         return settings;
     }
@@ -444,6 +446,14 @@ public final class TypeScriptSettings {
 
     public boolean isolatedModules() {
         return isolatedModules;
+    }
+
+    public void setTypescriptVersion(String typescriptVersion) {
+        this.typescriptVersion = typescriptVersion;
+    }
+
+    public String getTypescriptVersion() {
+        return this.typescriptVersion;
     }
 
     /**
@@ -683,23 +693,13 @@ public final class TypeScriptSettings {
         this.useLegacyAuth = useLegacyAuth;
     }
 
-    /**
-     * Returns whether to generate typedoc support.
-     *
-     * @return whether to generate typedoc support. Default: false
-     */
+    @Deprecated
     public boolean generateTypeDoc() {
-        return generateTypeDoc;
+        return false;
     }
 
-    /**
-     * Sets whether to generate typedoc support.
-     *
-     * @param generateTypeDoc whether to generate typedoc support
-     */
-    public void setGenerateTypeDoc(boolean generateTypeDoc) {
-        this.generateTypeDoc = generateTypeDoc;
-    }
+    @Deprecated
+    public void setGenerateTypeDoc(boolean generateTypeDoc) {}
 
     /**
      * Gets the corresponding {@link ServiceShape} from a model.
@@ -829,7 +829,6 @@ public final class TypeScriptSettings {
                 REQUIRED_MEMBER_MODE,
                 CREATE_DEFAULT_README,
                 USE_LEGACY_AUTH,
-                GENERATE_TYPEDOC,
                 GENERATE_INDEX_TESTS,
                 GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
@@ -838,7 +837,8 @@ public final class TypeScriptSettings {
                 VERSIONING_SCHEME,
                 TSCONFIG,
                 SERVICE_PROTOCOL_PRIORITY,
-                DEFAULT_PROTOCOL_PRIORITY
+                DEFAULT_PROTOCOL_PRIORITY,
+                TYPESCRIPT_VERSION
             )
         ),
         SSDK(
@@ -856,7 +856,6 @@ public final class TypeScriptSettings {
                 REQUIRED_MEMBER_MODE,
                 DISABLE_DEFAULT_VALIDATION,
                 CREATE_DEFAULT_README,
-                GENERATE_TYPEDOC,
                 GENERATE_INDEX_TESTS,
                 GENERATE_SNAPSHOT_TESTS,
                 BIG_NUMBER_MODE,
@@ -866,7 +865,8 @@ public final class TypeScriptSettings {
                 VERSIONING_SCHEME,
                 TSCONFIG,
                 SERVICE_PROTOCOL_PRIORITY,
-                DEFAULT_PROTOCOL_PRIORITY
+                DEFAULT_PROTOCOL_PRIORITY,
+                TYPESCRIPT_VERSION
             )
         ),
         TYPES(
@@ -880,12 +880,12 @@ public final class TypeScriptSettings {
                 PACKAGE_MANAGER,
                 PRIVATE,
                 REQUIRED_MEMBER_MODE,
-                GENERATE_TYPEDOC,
                 BIG_NUMBER_MODE,
                 GENERATE_SCHEMAS,
                 VERSIONING_SCHEME,
                 TSCONFIG,
-                CLOSURE
+                CLOSURE,
+                TYPESCRIPT_VERSION
             )
         );
 

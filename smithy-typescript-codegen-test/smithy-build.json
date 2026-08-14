@@ -6,7 +6,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["example.interceptors#InterceptorExample"]
+            "services": [
+              "example.interceptors#InterceptorExample"
+            ]
           }
         }
       ],
@@ -19,7 +21,8 @@
             "license": "Apache-2.0",
             "private": true
           },
-          "disableDefaultValidation": true
+          "disableDefaultValidation": true,
+          "typescriptVersion": "~7.0.2"
         },
         "typescript-client-codegen": {
           "service": "example.interceptors#InterceptorExample",
@@ -28,7 +31,8 @@
           "packageJson": {
             "license": "Apache-2.0",
             "private": true
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -37,13 +41,17 @@
         {
           "name": "excludeShapesByTag",
           "args": {
-            "tags": ["client-only"]
+            "tags": [
+              "client-only"
+            ]
           }
         },
         {
           "name": "includeServices",
           "args": {
-            "services": ["example.weather#Weather"]
+            "services": [
+              "example.weather#Weather"
+            ]
           }
         }
       ],
@@ -56,7 +64,8 @@
             "license": "Apache-2.0",
             "private": true
           },
-          "disableDefaultValidation": true
+          "disableDefaultValidation": true,
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -65,7 +74,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["example.weather#Weather"]
+            "services": [
+              "example.weather#Weather"
+            ]
           }
         }
       ],
@@ -77,7 +88,8 @@
           "packageJson": {
             "license": "Apache-2.0",
             "private": true
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -86,7 +98,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["example.weather#Weather"]
+            "services": [
+              "example.weather#Weather"
+            ]
           }
         }
       ],
@@ -99,7 +113,8 @@
             "license": "Apache-2.0",
             "private": true
           },
-          "useLegacyAuth": true
+          "useLegacyAuth": true,
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -108,7 +123,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["identity.auth.httpApiKeyAuth#HttpApiKeyAuthService"]
+            "services": [
+              "identity.auth.httpApiKeyAuth#HttpApiKeyAuthService"
+            ]
           }
         }
       ],
@@ -120,7 +137,8 @@
           "packageJson": {
             "license": "Apache-2.0",
             "private": true
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -129,7 +147,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["identity.auth.httpBearerAuth#HttpBearerAuthService"]
+            "services": [
+              "identity.auth.httpBearerAuth#HttpBearerAuthService"
+            ]
           }
         }
       ],
@@ -141,7 +161,8 @@
           "packageJson": {
             "license": "Apache-2.0",
             "private": true
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -154,8 +175,11 @@
             "license": "Apache-2.0",
             "private": true
           },
-          "modes": ["types"],
-          "closure": "example.types#typesClosure"
+          "modes": [
+            "types"
+          ],
+          "closure": "example.types#typesClosure",
+          "typescriptVersion": "~7.0.2"
         }
       }
     }
@@ -168,7 +192,8 @@
       "packageJson": {
         "license": "Apache-2.0",
         "private": true
-      }
+      },
+      "typescriptVersion": "~7.0.2"
     }
   }
 }

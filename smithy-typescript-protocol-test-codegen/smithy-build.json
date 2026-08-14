@@ -6,7 +6,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"]
+            "services": [
+              "smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"
+            ]
           }
         }
       ],
@@ -34,7 +36,8 @@
                 "isolatedModules": true
               }
             }
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -43,7 +46,9 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"]
+            "services": [
+              "smithy.protocoltests.rpcv2Cbor#RpcV2Protocol"
+            ]
           }
         }
       ],
@@ -70,7 +75,8 @@
                 "isolatedModules": true
               }
             }
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -79,7 +85,11 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["org.xyz.v1#XYZService", "org.xyz.v1#UnusedService", "org.xyz.secondary#TertiaryService"]
+            "services": [
+              "org.xyz.v1#XYZService",
+              "org.xyz.v1#UnusedService",
+              "org.xyz.secondary#TertiaryService"
+            ]
           }
         }
       ],
@@ -101,7 +111,8 @@
                 "isolatedModules": true
               }
             }
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -110,7 +121,11 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["org.xyz.v1#XYZService", "org.xyz.v1#UnusedService", "org.xyz.secondary#TertiaryService"]
+            "services": [
+              "org.xyz.v1#XYZService",
+              "org.xyz.v1#UnusedService",
+              "org.xyz.secondary#TertiaryService"
+            ]
           }
         }
       ],
@@ -135,7 +150,8 @@
                 "isolatedModules": true
               }
             }
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -144,7 +160,11 @@
         {
           "name": "includeServices",
           "args": {
-            "services": ["org.xyz.v1#XYZService", "org.xyz.v1#UnusedService", "org.xyz.secondary#TertiaryService"]
+            "services": [
+              "org.xyz.v1#XYZService",
+              "org.xyz.v1#UnusedService",
+              "org.xyz.secondary#TertiaryService"
+            ]
           }
         }
       ],
@@ -158,7 +178,8 @@
             "private": true
           },
           "generateServerSchemas": true,
-          "disableDefaultValidation": false
+          "disableDefaultValidation": false,
+          "typescriptVersion": "~7.0.2"
         }
       }
     },
@@ -171,7 +192,9 @@
           "packageJson": {
             "private": true
           },
-          "modes": ["types"],
+          "modes": [
+            "types"
+          ],
           "closure": "org.xyz.types#typesClosure",
           "tsconfig": {
             "types": {
@@ -179,7 +202,8 @@
                 "isolatedModules": true
               }
             }
-          }
+          },
+          "typescriptVersion": "~7.0.2"
         }
       }
     }

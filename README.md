@@ -273,6 +273,7 @@ supported.
 | `private`            | No       | Whether the generated package is private. Defaults to `false`. |
 | `requiredMemberMode` | No       | Controls whether required members may be `undefined`. Defaults to `nullable`. |
 | `bigNumberMode`      | No       | Uses `native` or `big.js` representations for big numbers. Defaults to `native`. |
+| `typescriptVersion`  | No       | TypeScript version range for the generated `package.json` `devDependencies`. Defaults to `~5.8.3`. |
 
 ### Client SDK code generation: `typescript-client-codegen` plugin
 
@@ -306,6 +307,7 @@ top-level properties enabled for `typescript-client-codegen` can be found in `Ty
 | `generateIndexTests`      | No       | Default=`false`. Whether to generate a set of tests that does a basic validation of the export surface of the generated client package. The tests can be run with the script `test:index` in the generated package.                                                                                                                                                                                                                                                                                                       |
 | `generateSnapshotTests`   | No       | Default=`false`. Whether to generate snapshot tests along with the client.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `tsconfig`                | No       | Object for customizing generated `tsconfig.*.json` files. Keys correspond to the generated file variants (e.g., `types` maps to `tsconfig.types.json`). Only `tsconfig.types.compilerOptions.isolatedModules` (default `false`) is currently supported. When `isolatedModules` is `true`, the generated `tsconfig.types.json` will include the flag, enabling single-file transpilation compatibility for the declarations build. Example: `"tsconfig": { "types": { "compilerOptions": { "isolatedModules": true } } }`. |
+| `typescriptVersion`       | No       | TypeScript version range for the generated `package.json` `devDependencies`. Defaults to `~5.8.3`. |
 
 #### `typescript-client-codegen` plugin artifacts
 
@@ -427,7 +429,6 @@ build/smithy/source/typescript-client-codegen/
 ├── tsconfig.es.json
 ├── tsconfig.json
 ├── tsconfig.types.json
-└── typedoc.json
 ```
 
 #### Code generation implementations not included
@@ -614,6 +615,7 @@ top-level properties enabled for `typescript-server-codegen` can be found in `Ty
 | `requiredMemberMode`       | No       | **NOT RECOMMENDED DUE TO BACKWARD COMPATIBILITY CONCERNS.** Sets whether members marked with the `@required` trait are allowed to be `undefined`. See more details on the risks in `TypeScriptSettings.RequiredMemberMode`. The default value is `nullable`.                                                                                                     |
 | `createDefaultReadme`      | No       | Whether to generate a default `README.md` for the package. The default value is `false`.                                                                                                                                                                                                                                                                         |
 | `disableDefaultValidation` | No       | Whether or not default validation is disabled. See [the documentation for Smithy TypeScript SSDK validation](https://smithy.io/2.0/languages/typescript/ts-ssdk/validation.html) to learn more. The default value is `false`.                                                                                                                                    |
+| `typescriptVersion`        | No       | TypeScript version range for the generated `package.json` `devDependencies`. Defaults to `~5.8.3`. |
 
 ### Adding customizations to Smithy TypeScript
 

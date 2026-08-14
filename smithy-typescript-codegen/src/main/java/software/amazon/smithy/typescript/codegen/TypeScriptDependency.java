@@ -28,18 +28,6 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public enum TypeScriptDependency implements Dependency {
     SMITHY_TYPES("dependencies", "@smithy/types", true),
     SMITHY_CORE("dependencies", "@smithy/core", false),
-
-    /**
-     * @deprecated Use {@code @smithy/core/checksum} via {@link SmithyCoreSubmodules#CHECKSUM} instead.
-     */
-    @Deprecated
-    AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", false),
-    /**
-     * @deprecated Use {@code @smithy/core/checksum} via {@link SmithyCoreSubmodules#CHECKSUM} instead.
-     */
-    @Deprecated
-    AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", false),
-    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
     AWS_SDK_FETCH_HTTP_HANDLER("dependencies", "@smithy/fetch-http-handler", false),
     AWS_SDK_NODE_HTTP_HANDLER("dependencies", "@smithy/node-http-handler", false),
     BIG_JS("dependencies", "big.js", "^6.0.0", false),
@@ -63,13 +51,9 @@ public enum TypeScriptDependency implements Dependency {
     @Deprecated
     UTIL_RETRY("dependencies", "@smithy/util-retry", "0.0.0", false),
 
-    // devtools
-    @Deprecated
-    EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false),
     SERVER_COMMON("dependencies", "@smithy/server-common", false),
     SMITHY_TYPECHECK("dependencies", "@smithy/typecheck", false),
     SNAPSHOTS("devDependencies", "@smithy/snapshot-testing", false),
-    TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
     VITEST("devDependencies", "vitest", "^4.0.17", false),
 
     // Deprecated: consolidated into @smithy/core submodules.
@@ -144,7 +128,32 @@ public enum TypeScriptDependency implements Dependency {
         false
     ),
     @Deprecated
-    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", "0.0.0", false);
+    AWS_SDK_EVENTSTREAM_SERDE_NODE("dependencies", "@smithy/eventstream-serde-node", "0.0.0", false),
+    /**
+     * If typedoc is desired, apply it manually to the generated package.
+     * @deprecated automatic typedoc generation is no longer supported.
+     */
+    @Deprecated
+    TYPEDOC("devDependencies", "typedoc", "0.23.23", false),
+    /**
+    * @deprecated Use {@code @smithy/core/checksum} via {@link SmithyCoreSubmodules#CHECKSUM} instead.
+    */
+    @Deprecated
+    AWS_CRYPTO_SHA256_BROWSER("dependencies", "@aws-crypto/sha256-browser", "5.2.0", false),
+    /**
+     * @deprecated Use {@code @smithy/core/checksum} via {@link SmithyCoreSubmodules#CHECKSUM} instead.
+     */
+    @Deprecated
+    AWS_CRYPTO_SHA256_JS("dependencies", "@aws-crypto/sha256-js", "5.2.0", false),
+    /**
+     * If typedoc is desired, apply it manually to the generated package.
+     * @deprecated automatic typedoc generation is no longer supported.
+     */
+    @Deprecated
+    AWS_SDK_CLIENT_DOCGEN("devDependencies", "@smithy/service-client-documentation-generator", false),
+    // devtools
+    @Deprecated
+    EXPERIMENTAL_IDENTITY_AND_AUTH("dependencies", "@smithy/experimental-identity-and-auth", false);
 
     public static final String NORMAL_DEPENDENCY = "dependencies";
     public static final String DEV_DEPENDENCY = "devDependencies";
