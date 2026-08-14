@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.33.1
+
+### Patch Changes
+
+- b3958ad: fix for RPC protocol event stream initial messages
+- d774f8d: chore: build packages with typescript 7. Packages continue to be compatible with TypeScript 3.4 through 7.0 in consumer applications.
+- Updated dependencies [d774f8d]
+  - @smithy/types@4.17.1
+
 ## 3.33.0
 
 ### Minor Changes
