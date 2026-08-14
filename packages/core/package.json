@@ -214,9 +214,6 @@
       "require": "./dist-cjs/submodules/transport/index.js"
     }
   },
-  "publishConfig": {
-    "directory": ".release/package"
-  },
   "scripts": {
     "benchmark:cbor": "node ./scripts/cbor-perf.mjs",
     "benchmark:checksum": "node ./scripts/checksum-perf.mjs",
@@ -229,7 +226,6 @@
     "extract:docs": "api-extractor run --local",
     "lint": "node ../../scripts/validation/submodules-linter.js",
     "prebuild": "yarn lint",
-    "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "yarn g:vitest run",
     "test:watch": "yarn g:vitest watch",
     "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",

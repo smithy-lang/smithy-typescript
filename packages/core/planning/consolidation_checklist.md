@@ -20,7 +20,7 @@ For each group of packages being consolidated into a `@smithy/core` submodule:
 - [ ] Delete README.md, CHANGELOG.md, all source files, and all test files in the old `packages/<package>` folder.
 - [ ] Delete all dependencies and browser/react-native replacement metadata in package.json.
 - [ ] Remove `typesVersions` metadata from package.json.
-- [ ] Preserve only the build, clean, and stage-release NPM scripts.
+- [ ] Preserve only the build and clean NPM scripts.
 - [ ] Take a dependency on `@smithy/core`.
 - [ ] Re-export from `@smithy/core` every symbol that was previously exported for backwards compatibility.
 - [ ] Delete leftover sub-directory barrel files (e.g. `src/endpointsConfig/index.ts`) — only `src/index.ts` should remain.

@@ -29,9 +29,6 @@
       ]
     }
   },
-  "publishConfig": {
-    "directory": ".release/package"
-  },
   "scripts": {
     "build": "yarn g:tsc -p tsconfig.cjs.json && yarn g:tsc -p tsconfig.es.json && yarn g:tsc -p tsconfig.types.json",
     "build:cjs": "premove dist-cjs && yarn g:tsc -p tsconfig.cjs.json",
@@ -39,7 +36,6 @@
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types",
-    "stage-release": "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz",
     "test": "exit 0"
   },
   "dependencies": {

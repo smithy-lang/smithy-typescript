@@ -431,23 +431,26 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
     }
   }
 
-  // Enforce stage-release script: must not exist for private packages, must exist for public.
-  const expectedStageRelease =
-    "premove .release && yarn pack && mkdir ./.release && tar zxvf ./package.tgz --directory ./.release && rm ./package.tgz";
-  if (pkgJson.private) {
-    if (pkgJson.scripts?.["stage-release"]) {
-      errors.push(`${pkgJson.name} is private and must not have a "stage-release" script`);
-      if (overwrite) {
-        delete pkgJson.scripts["stage-release"];
+  // Ban publishConfig.directory. changesets (v3+) refuses to publish a package
+  // that sets it when the package manager is Yarn, which fails the release.
+  // Yarn resolves workspace: ranges on its own when publishing from the package
+  // directory, so no staged publish directory is needed.
+  if (pkgJson.publishConfig && "directory" in pkgJson.publishConfig) {
+    errors.push(`${pkgJson.name} must not have publishConfig.directory. changesets cannot publish it with Yarn.`);
+    if (overwrite) {
+      delete pkgJson.publishConfig.directory;
+      if (Object.keys(pkgJson.publishConfig).length === 0) {
+        delete pkgJson.publishConfig;
       }
     }
-  } else {
-    if (pkgJson.scripts?.["stage-release"] !== expectedStageRelease) {
-      errors.push(`${pkgJson.name} scripts["stage-release"] must be "${expectedStageRelease}"`);
-      if (overwrite) {
-        pkgJson.scripts = pkgJson.scripts || {};
-        pkgJson.scripts["stage-release"] = expectedStageRelease;
-      }
+  }
+
+  // Ban the stage-release script that populated publishConfig.directory.
+  // Release artifacts are built by "yarn build:release" at the repo root.
+  if (pkgJson.scripts?.["stage-release"]) {
+    errors.push(`${pkgJson.name} must not have a "stage-release" script. Use "yarn build:release" from the repo root.`);
+    if (overwrite) {
+      delete pkgJson.scripts["stage-release"];
     }
   }
 

@@ -43,14 +43,16 @@ jobs:
           role-to-assume: ${{ secrets.JS_TEAM_ROLE_TO_ASSUME }}
           role-session-name: SmithyTypeScriptGitHubRelease
           audience: sts.amazonaws.com
-      - name: Stage Release
-        id: stage
+      # Builds dist-cjs/dist-es/dist-types (plus downleveled ts3.4 types) in
+      # each package directory, which is what changesets publishes from.
+      - name: Build Release Artifacts
+        id: build
         run: |
-          yarn stage-release --concurrency=1
+          yarn build:release --concurrency=1
       - name: Release
         id: release
         uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v2.0.0
-        if: steps.stage.outcome == 'success'
+        if: steps.build.outcome == 'success'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: yarn release
