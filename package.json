@@ -17,6 +17,7 @@
   "scripts": {
     "clean": "turbo run clean --force --parallel",
     "build": "make build-packages",
+    "build:release": "turbo run build build:types:downlevel",
     "test": "make test-unit",
     "test:integration": "yarn build-test-packages && make test-integration",
     "test:protocols": "make generate-protocol-tests test-protocols benchmark",
@@ -27,7 +28,6 @@
     "lint:versions": "node scripts/runtime-dep-version-check.js",
     "lint:api": "node scripts/validation/api-snapshot.js",
     "format": "make format",
-    "stage-release": "turbo run stage-release",
     "extract:docs": "mkdir -p api-extractor-packages && turbo run extract:docs",
     "release": "yarn changeset publish",
     "build-test-packages": "./gradlew clean build && node ./scripts/build-generated-test-packages",

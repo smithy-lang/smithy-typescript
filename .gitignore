@@ -58,9 +58,6 @@ dist-*
 !.yarn/sdks
 !.yarn/versions
 
-# NPM release staging
-.release
-
 # Gradle composite build properties
 local.properties
 
