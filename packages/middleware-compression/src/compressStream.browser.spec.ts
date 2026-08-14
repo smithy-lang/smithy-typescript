@@ -14,6 +14,8 @@ describe(compressStream.name, () => {
       const data = typeof chunk === "string" ? [chunk, compressionSuffix].join(compressionSeparator) : null;
       asyncGzip.ondata(undefined, data, final);
     }),
+    flush: vi.fn(),
+    queuedSize: 0,
     terminate() {},
   };
 
