@@ -2040,7 +2040,7 @@ __metadata:
     "@smithy/types": "workspace:^"
     concurrently: "npm:7.0.0"
     downlevel-dts: "npm:0.10.1"
-    fflate: "npm:0.8.1"
+    fflate: "npm:0.8.3"
     premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
   languageName: unknown
@@ -4514,10 +4514,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:0.8.1":
-  version: 0.8.1
-  resolution: "fflate@npm:0.8.1"
-  checksum: 10c0/c8e8e118738cdbbe7b38d0afebd9166539ce71bbc42cc78e497b58b173f7b7d2efc80f6ed77199283c3665e2e606e56a9f5019a32ceb4ffe5a6fa680dfd9648b
+"fflate@npm:0.8.3":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10c0/eab181ca37f5348ae76d4b6f840e0026e30220e33153289ac942222d8b9638237d486507dbcc09878d724095bd354993a2ee48bbee99c8f2c6440d4448719aa7
   languageName: node
   linkType: hard
 
