@@ -52,6 +52,15 @@ jobs:
         id: release
         uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v2.0.0
         if: steps.build.outcome == 'success'
+        # Provenance must be opted into explicitly. npm CLI attaches it
+        # automatically under trusted publishing, but changesets picks the
+        # publish tool from the repo's package manager, and `yarn npm publish`
+        # skips provenance silently unless asked. Both vars are set so the
+        # attestation is generated whichever tool changesets selects: Yarn
+        # reads YARN_NPM_PUBLISH_PROVENANCE, npm/pnpm read NPM_CONFIG_PROVENANCE.
+        env:
+          YARN_NPM_PUBLISH_PROVENANCE: "true"
+          NPM_CONFIG_PROVENANCE: "true"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: yarn release
