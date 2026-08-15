@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.4.1
+
+### Patch Changes
+
+- d774f8d: chore: build packages with typescript 7. Packages continue to be compatible with TypeScript 3.4 through 7.0 in consumer applications.
+- Updated dependencies [d774f8d]
+  - @smithy/types@4.17.1
+
 ## 4.4.0
 
 ### Minor Changes

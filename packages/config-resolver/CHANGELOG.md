@@ -1,5 +1,14 @@
 # @smithy/config-resolver
 
+## 4.7.1
+
+### Patch Changes
+
+- d774f8d: chore: build packages with typescript 7. Packages continue to be compatible with TypeScript 3.4 through 7.0 in consumer applications.
+- Updated dependencies [b3958ad]
+- Updated dependencies [d774f8d]
+  - @smithy/core@3.33.1
+
 ## 4.7.0
 
 ### Minor Changes
