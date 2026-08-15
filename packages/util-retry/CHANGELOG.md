@@ -1,5 +1,13 @@
 # @smithy/util-retry
 
+## 4.6.2
+
+### Patch Changes
+
+- 99c3f91: Restore npm provenance attestations. No functional changes.
+- Updated dependencies [99c3f91]
+  - @smithy/core@3.33.2
+
 ## 4.6.1
 
 ### Patch Changes

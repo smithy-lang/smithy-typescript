@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.17.2
+
+### Patch Changes
+
+- 99c3f91: Restore npm provenance attestations. No functional changes.
+
 ## 4.17.1
 
 ### Patch Changes

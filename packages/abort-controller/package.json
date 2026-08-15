@@ -1,6 +1,6 @@
 {
   "name": "@smithy/abort-controller",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "A simple abort controller library",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/abort-controller",
   "license": "Apache-2.0",

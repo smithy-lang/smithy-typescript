@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.3.2
+
+### Patch Changes
+
+- 99c3f91: Restore npm provenance attestations. No functional changes.
+- Updated dependencies [99c3f91]
+  - @smithy/core@3.33.2
+  - @smithy/node-http-handler@4.11.2
+  - @smithy/types@4.17.2
+
 ## 2.3.1
 
 ### Patch Changes
