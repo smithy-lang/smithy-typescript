@@ -9,10 +9,15 @@ on:
 permissions:
   contents: read
 
+# Every job is guarded with `if: github.head_ref != 'changeset-release/main'` so
+# that none of them run on the release PR, which only bumps versions and writes
+# changelogs; release-dry-run.yml installs, builds and packs that tree already.
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     name: Java ${{ matrix.java }} ${{ matrix.os }}
+    if: github.head_ref != 'changeset-release/main'
     strategy:
       matrix:
         java: [17]
@@ -41,6 +46,7 @@ jobs:
   protocol-tests:
     runs-on: ${{ matrix.os }}
     name: Protocol Tests
+    if: github.head_ref != 'changeset-release/main'
     strategy:
       matrix:
         java: [17]
@@ -78,6 +84,7 @@ jobs:
   lint-typescript:
     runs-on: ubuntu-latest
     name: TypeScript Lint
+    if: github.head_ref != 'changeset-release/main'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -93,6 +100,7 @@ jobs:
     runs-on: smithy-typescript_ubuntu-latest_8-core
     name: TypeScript Test ${{ matrix.node }}
     needs: ["ensure-typescript-packages-have-changesets", "lint-typescript", "ensure-typescript-formatted"]
+    if: github.head_ref != 'changeset-release/main'
     strategy:
       fail-fast: false
       matrix:
@@ -129,6 +137,7 @@ jobs:
   extract-docs:
     runs-on: smithy-typescript_ubuntu-latest_8-core
     name: Extract Docs
+    if: github.head_ref != 'changeset-release/main'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -147,6 +156,7 @@ jobs:
   ensure-typescript-formatted:
     runs-on: ubuntu-latest
     name: Ensure TypeScript is formatted
+    if: github.head_ref != 'changeset-release/main'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -167,6 +177,7 @@ jobs:
   ensure-typescript-packages-have-changesets:
     runs-on: ubuntu-latest
     name: Ensure TypeScript packages have changesets
+    if: github.head_ref != 'changeset-release/main'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         # Include full git history needed for `yarn changeset status`
@@ -180,7 +191,4 @@ jobs:
       - name: Install
         run: yarn
       - name: Ensure changesets exist for each changed package
-        # Skip on the release PR opened by the changesets action, where
-        # changesets have already been consumed by `changeset version`.
-        if: github.head_ref != 'changeset-release/main'
         run: yarn changeset status --since=origin/main

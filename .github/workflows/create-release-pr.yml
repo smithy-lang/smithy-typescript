@@ -65,9 +65,13 @@ jobs:
     env:
       RELEASE_BRANCH: changeset-release/main
       # Workflows that must leave the approval queue before this job is done. They
-      # all trigger on `pull_request` to main with no path filters, so they always
-      # run on the release PR; keep this list in step with them. Other pending runs
-      # are still approved, just not waited for.
+      # all trigger on `pull_request` to main with no path filters, so a run is
+      # always created for the release PR; keep this list in step with them. Other
+      # pending runs are still approved, just not waited for.
+      #
+      # ci is listed even though all its jobs skip on the release PR: the run is
+      # queued for approval before those conditions are evaluated, so it would
+      # otherwise sit pending forever. Waiting is what guarantees it was approved.
       EXPECTED_WORKFLOWS: ci npm-package-existence release-dry-run
     steps:
       - name: Approve workflow runs awaiting approval
