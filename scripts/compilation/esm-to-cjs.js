@@ -306,7 +306,7 @@ function collectAwaitImports(ast, edits, src) {
     if (node.type === ImportExpression) {
       throw new Error(ERR_NON_AWAITED_IMPORT);
     }
-    for (const key in node) {
+    for (const key of Object.keys(node)) {
       if (SKIP_KEYS.has(key)) {
         continue;
       }

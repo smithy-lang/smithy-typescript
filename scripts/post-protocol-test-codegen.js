@@ -59,7 +59,7 @@ for (const dir of privatePackages) {
   if (fs.existsSync(pkgJsonPath)) {
     const pkgJson = require(pkgJsonPath);
     const imported = collectImportedPackages(packageDir);
-    for (const dep in pkgJson.dependencies ?? {}) {
+    for (const dep of Object.keys(pkgJson.dependencies ?? {})) {
       if (!IMPLICIT_DEPS.has(dep) && !imported.has(dep)) {
         delete pkgJson.dependencies[dep];
         continue;
@@ -68,7 +68,7 @@ for (const dir of privatePackages) {
         pkgJson.dependencies[dep] = "workspace:^";
       }
     }
-    for (const dep in pkgJson.devDependencies ?? {}) {
+    for (const dep of Object.keys(pkgJson.devDependencies ?? {})) {
       if (isWorkspaceDep(dep)) {
         pkgJson.devDependencies[dep] = "workspace:^";
       }

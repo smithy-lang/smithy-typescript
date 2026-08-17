@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { externalDataInterceptor } from "@smithy/core/config";
 import { afterEach, beforeEach, describe, expect, test as it } from "vitest";
 
@@ -9,14 +10,16 @@ describe(getEndpointFromConfig.name, () => {
 
   beforeEach(() => {
     process.env = { ...ORIGINAL_ENV };
-    for (const key of Object.keys(fileRecord)) {
+    for (const key in fileRecord) {
+      if (!hasOwn(fileRecord, key)) continue;
       delete fileRecord[key];
     }
   });
 
   afterEach(() => {
     process.env = ORIGINAL_ENV;
-    for (const key of Object.keys(fileRecord)) {
+    for (const key in fileRecord) {
+      if (!hasOwn(fileRecord, key)) continue;
       delete fileRecord[key];
     }
   });

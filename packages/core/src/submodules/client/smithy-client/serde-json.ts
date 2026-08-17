@@ -1,3 +1,5 @@
+import { hasOwn } from "@smithy/core/transport";
+
 /**
  * Maps an object through the default JSON serde behavior.
  * This means removing nullish fields and un-sparsifying lists.
@@ -16,7 +18,8 @@ export const _json = (obj: any): any => {
   }
   if (typeof obj === "object") {
     const target: any = {};
-    for (const key of Object.keys(obj)) {
+    for (const key in obj) {
+      if (!hasOwn(obj, key)) continue;
       if (obj[key] == null) {
         continue;
       }

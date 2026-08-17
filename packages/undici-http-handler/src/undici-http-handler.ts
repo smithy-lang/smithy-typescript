@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import type { Readable } from "node:stream";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
 import type { HttpHandlerOptions, Logger } from "@smithy/types";
@@ -156,12 +157,14 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       // Only allocate a new object if multi-value headers are present.
       let transformedHeaders: Record<string, string> | undefined;
       for (const key in responseHeaders) {
+        if (!hasOwn(responseHeaders, key)) continue;
         const value = responseHeaders[key];
         if (Array.isArray(value)) {
           if (!transformedHeaders) {
             // Lazily copy all headers seen so far.
             transformedHeaders = {};
             for (const k in responseHeaders) {
+              if (!hasOwn(responseHeaders, k)) continue;
               if (k === key) break;
               transformedHeaders[k] = responseHeaders[k] as string;
             }

@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import type { IncomingHttpHeaders } from "node:http2";
 import type { HeaderBag } from "@smithy/types";
 
@@ -5,6 +6,7 @@ const getTransformedHeaders = (headers: IncomingHttpHeaders) => {
   const transformedHeaders: HeaderBag = {};
 
   for (const name in headers) {
+    if (!hasOwn(headers, name)) continue;
     const headerValues = <string>headers[name];
     transformedHeaders[name] = Array.isArray(headerValues) ? headerValues.join(",") : headerValues;
   }

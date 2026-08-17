@@ -10,6 +10,7 @@
   "rules": {
     "@typescript-eslint/consistent-type-imports": "error",
     "@typescript-eslint/no-import-type-side-effects": "error",
+    "guard-for-in": "error",
     "no-sparse-arrays": "off",
     "no-unused-vars": ["error", { "args": "none", "caughtErrorsIgnorePattern": "^ignored", "varsIgnorePattern": "^_" }],
     "unicorn/no-new-array": "off",

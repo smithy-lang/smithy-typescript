@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import type { Agent as hAgentType, request as hRequestType } from "node:http";
 import type { RequestOptions, Agent as hsAgentType } from "node:https";
 import { HttpResponse, buildQueryString, type HttpHandler, type HttpRequest } from "@smithy/core/protocols";
@@ -88,6 +89,7 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
     if (sockets && requests) {
       for (const origin in sockets) {
+        if (!hasOwn(sockets, origin)) continue;
         const socketsInUse = sockets[origin]?.length ?? 0;
         const requestsEnqueued = requests[origin]?.length ?? 0;
 

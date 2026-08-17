@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import { isArrayBuffer, toHex, toUint8Array } from "@smithy/core/serde";
 import type { ChecksumConstructor, HashConstructor, HttpRequest } from "@smithy/types";
 
@@ -10,7 +11,8 @@ export const getPayloadHash = async (
   { headers, body }: HttpRequest,
   hashConstructor: ChecksumConstructor | HashConstructor
 ): Promise<string> => {
-  for (const headerName of Object.keys(headers)) {
+  for (const headerName in headers) {
+    if (!hasOwn(headers, headerName)) continue;
     if (headerName.toLowerCase() === SHA256_HEADER) {
       return headers[headerName];
     }

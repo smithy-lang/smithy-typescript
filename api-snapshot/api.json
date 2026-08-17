@@ -499,6 +499,7 @@
     "getSerdePlugin": "function",
     "handleFloat": "function",
     "Hash": "function(node-only)",
+    "hasOwn": "function",
     "headStream": "function",
     "isArrayBuffer": "function",
     "isBlob": "function",
@@ -543,6 +544,7 @@
   },
   "@smithy/core/transport": {
     "getSmithyContext": "function",
+    "hasOwn": "function",
     "HttpRequest": "function",
     "HttpResponse": "function",
     "IHttpRequest": "type(interface)",

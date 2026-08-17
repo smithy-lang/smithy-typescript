@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
 import { NumericValue, _parseEpochTimestamp, fromBase64 } from "@smithy/core/serde";
@@ -80,6 +81,7 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         const targetSchema = ns.getValueSchema();
 
         for (const key in value) {
+          if (!hasOwn(value, key)) continue;
           const itemValue = this.readValue(targetSchema, value[key]);
           newObject[key] = itemValue;
         }
@@ -89,6 +91,7 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         if (isUnion) {
           keys = new Set<string>();
           for (const k in value) {
+            if (!hasOwn(value, k)) continue;
             if (k !== "__type") {
               keys.add(k);
             }
@@ -105,6 +108,7 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         if (isUnion && keys?.size === 1) {
           let newObjectEmpty = true;
           for (const _ in newObject) {
+            if (!hasOwn(newObject, _)) continue;
             newObjectEmpty = false;
             break;
           }
@@ -116,6 +120,7 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
           // This if-block is for backwards compatibility support and should not be copied
           // to other implementations.
           for (const k in value) {
+            if (!hasOwn(value, k)) continue;
             if (!(k in newObject)) {
               // we have no type information, so copy as-is from CBOR-derived object.
               newObject[k] = value[k];

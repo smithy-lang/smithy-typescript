@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { rejects } from "node:assert";
 import http2, { type ClientHttp2Session, type ClientHttp2Stream, type Http2Server, type Http2Stream } from "node:http2";
 import { Duplex } from "node:stream";
@@ -73,6 +74,7 @@ describe(NodeHttp2Handler.name, () => {
     mockH2Server.removeAllListeners("request");
     vi.clearAllMocks();
     for (const p in mockH2Servers) {
+      if (!hasOwn(mockH2Servers, p)) continue;
       mockH2Servers[p].removeAllListeners("request");
       mockH2Servers[p].close();
     }

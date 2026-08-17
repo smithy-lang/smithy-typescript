@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { hasOwn } from "@smithy/core/serde";
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { Logger, StaticOperationSchema } from "@smithy/types";
 
@@ -262,6 +263,7 @@ export function createCombinedRouter(protocols: Record<string, ServerProtocol<Ht
  */
 function getHeaderValue(request: HttpRequest, name: string): string | undefined {
   for (const key in request.headers) {
+    if (!hasOwn(request.headers, key)) continue;
     if (key.toLowerCase() === name) {
       return request.headers[key];
     }

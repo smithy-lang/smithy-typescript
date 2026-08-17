@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import { fromHex, fromUtf8, toHex } from "@smithy/core/serde";
 import type { Int64 as IInt64, MessageHeaderValue, MessageHeaders } from "@smithy/types";
 
@@ -11,7 +12,8 @@ export class HeaderFormatter {
   public format(headers: MessageHeaders): Uint8Array {
     const chunks: Array<Uint8Array> = [];
 
-    for (const headerName of Object.keys(headers)) {
+    for (const headerName in headers) {
+      if (!hasOwn(headers, headerName)) continue;
       const bytes = fromUtf8(headerName);
       chunks.push(Uint8Array.from([bytes.byteLength]), bytes, this.formatHeaderValue(headers[headerName]));
     }

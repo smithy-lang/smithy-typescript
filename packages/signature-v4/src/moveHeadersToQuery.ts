@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/core/protocols";
 import type { HttpRequest as IHttpRequest, QueryParameterBag } from "@smithy/types";
 
@@ -9,7 +10,8 @@ export const moveHeadersToQuery = (
   options: { unhoistableHeaders?: Set<string>; hoistableHeaders?: Set<string> } = {}
 ): IHttpRequest & { query: QueryParameterBag } => {
   const { headers, query = {} as QueryParameterBag } = HttpRequest.clone(request);
-  for (const name of Object.keys(headers)) {
+  for (const name in headers) {
+    if (!hasOwn(headers, name)) continue;
     const lname = name.toLowerCase();
     if (
       (lname.slice(0, 6) === "x-amz-" && !options.unhoistableHeaders?.has(lname)) ||

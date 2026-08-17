@@ -1,3 +1,5 @@
+import { hasOwn } from "@smithy/core/transport";
+
 /**
  * A set of instructions for multiple keys.
  * The aim is to provide a concise yet readable way to map and filter values
@@ -188,7 +190,8 @@ export function map(arg0: any, arg1?: any, arg2?: any): any {
     }
   }
 
-  for (const key of Object.keys(instructions)) {
+  for (const key in instructions) {
+    if (!hasOwn(instructions, key)) continue;
     if (!Array.isArray(instructions[key])) {
       target[key] = instructions[key]; // unchecked value.
       continue;
@@ -221,6 +224,7 @@ export const convertMap = (target: any): Record<string, any> => {
 export const take = (source: any, instructions: SourceMappingInstructions): any => {
   const out = {};
   for (const key in instructions) {
+    if (!hasOwn(instructions, key)) continue;
     applyInstruction(out, source, instructions, key);
   }
   return out;

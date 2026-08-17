@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { describe, expect, test as it } from "vitest";
 
 import { fromUtf8 } from "./fromUtf8";
@@ -21,7 +22,8 @@ const utf8StringsToByteArrays: Record<string, Uint8Array> = {
 };
 
 describe("fromUtf8", () => {
-  for (const string of Object.keys(utf8StringsToByteArrays)) {
+  for (const string in utf8StringsToByteArrays) {
+    if (!hasOwn(utf8StringsToByteArrays, string)) continue;
     it(`should UTF-8 decode "${string}" to the correct value`, () => {
       expect(fromUtf8(string)).toEqual(utf8StringsToByteArrays[string]);
     });

@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { fromHex, toHex } from "@smithy/core/serde";
 import type { Decoder, Encoder, MessageHeaderValue, MessageHeaders } from "@smithy/types";
 
@@ -15,7 +16,8 @@ export class HeaderMarshaller {
   format(headers: MessageHeaders): Uint8Array {
     const chunks: Array<Uint8Array> = [];
 
-    for (const headerName of Object.keys(headers)) {
+    for (const headerName in headers) {
+      if (!hasOwn(headers, headerName)) continue;
       const bytes = this.fromUtf8(headerName);
       chunks.push(Uint8Array.from([bytes.byteLength]), bytes, this.formatHeaderValue(headers[headerName]));
     }

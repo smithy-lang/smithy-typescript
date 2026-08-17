@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import type { Encoder } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
@@ -22,7 +23,8 @@ const utf8StringsToByteArrays: Record<string, Uint8Array> = {
 };
 
 describe("toUtf8", () => {
-  for (const string of Object.keys(utf8StringsToByteArrays)) {
+  for (const string in utf8StringsToByteArrays) {
+    if (!hasOwn(utf8StringsToByteArrays, string)) continue;
     it(`should derive "${string}" from the UTF-8 decoded bytes`, () => {
       expect(toUtf8(utf8StringsToByteArrays[string])).toBe(string);
     });

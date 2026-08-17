@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import { NormalizedSchema, type TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest } from "@smithy/core/transport";
 import type {
@@ -110,6 +111,7 @@ export abstract class RpcProtocol extends HttpProtocol {
     }
 
     for (const header in response.headers) {
+      if (!hasOwn(response.headers, header)) continue;
       const value = response.headers[header];
       delete response.headers[header];
       response.headers[header.toLowerCase()] = value;

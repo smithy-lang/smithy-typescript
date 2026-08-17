@@ -1,3 +1,4 @@
+import { hasOwn } from "@smithy/core/transport";
 import type { HttpHandler, HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { Client, HttpHandlerOptions, RequestHandler, RequestHandlerOutput } from "@smithy/types";
 import { expect } from "vitest";
@@ -63,6 +64,7 @@ export class TestHttpHandler implements HttpHandler {
       AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE: 1,
     };
     for (const key in RESERVED_ENVIRONMENT_VARIABLES) {
+      if (!hasOwn(RESERVED_ENVIRONMENT_VARIABLES, key)) continue;
       delete process.env[key];
     }
     process.env.AWS_ACCESS_KEY_ID = "INTEGRATION_TEST_MOCK";
