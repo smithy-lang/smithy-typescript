@@ -1,0 +1,91 @@
+name: release-dry-run
+
+on:
+  # Verify the changesets release PR by doing everything release-npm-packages.yml
+  # does except the publish itself, so that a packaging problem fails a check on
+  # the PR instead of surfacing part-way through a release, with some packages
+  # already on the registry and the rest not. Changesets has no `publish
+  # --dry-run` (changesets/changesets#614 is still open); what stands in for it is
+  # `changeset publish-plan` plus `changeset pack`, which between them resolve the
+  # same plan against the registry and run the same per-package pack that
+  # `changeset publish` would, and stop short of uploading anything.
+  #
+  # Fires on every pull request to main and skips the ones that are not the
+  # release PR, the same way npm-package-existence.yml does. Keep it listed in
+  # EXPECTED_WORKFLOWS in create-release-pr.yml: runs on the release PR need
+  # approving, and that job is what approves them.
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run-release:
+    name: Dry-run the release
+    runs-on: ubuntu-latest
+    # Only the changesets release PR is worth this: it is the only PR whose merge
+    # triggers a publish, and the only one carrying the versions that publish would
+    # use. Every other PR still has its packages built and validated by ci.
+    if: github.head_ref == 'changeset-release/main'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        # The PR head, which is the commit that would be published, rather than
+        # the merge ref the default checkout resolves to.
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      # Node version, install and build below all match release-npm-packages.yml.
+      # The point of this job is that it packs what that workflow would publish,
+      # so any difference in how the artifacts are produced weakens it.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install
+      # The plan and the tarballs go under $RUNNER_TEMP, not the workspace, so that
+      # nothing packed here can be mistaken for a change to the tree under test.
+      # Set in a step rather than in the job's `env`, where the runner context is
+      # not available.
+      - name: Set up dry-run paths
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/release-dry-run"
+          echo "PUBLISH_PLAN=$dir/publish-plan.json" >> "$GITHUB_ENV"
+          echo "PACK_DIR=$dir/pack" >> "$GITHUB_ENV"
+      # Resolved before the build because it needs no artifacts and is the step
+      # that reaches the registry: a plan that cannot be resolved - a bad
+      # .changeset/config.json, an unreachable registry - fails here in seconds
+      # rather than after a full build. The plan is written out so the pack below
+      # uses exactly this one and the two steps cannot disagree about what is
+      # being released.
+      #
+      # --output is marked experimental by the CLI. If it is ever dropped, pack
+      # resolves its own plan when given no --from-publish-plan, so the fallback is
+      # to drop this step's flag and pack's.
+      - name: Resolve the publish plan
+        run: yarn changeset publish-plan --output "$PUBLISH_PLAN"
+      # dist-cjs/dist-es/dist-types plus downleveled ts3.4 types, which is all a
+      # published tarball contains.
+      - name: Build Release Artifacts
+        run: yarn build:release
+      # The dry run proper. `changeset pack` walks the plan and runs the pack tool
+      # the workspace's package manager implies - `yarn pack` here - once per
+      # package, which is where a package.json that publishes under Yarn only in
+      # theory gives way: the publishConfig.directory incompatibility that broke a
+      # release in #2235 fails this step.
+      - name: Pack every package the release would publish
+        run: yarn changeset pack --from-publish-plan "$PUBLISH_PLAN" --out-dir "$PACK_DIR"
+      # Packing an unbuilt tree is not an error to yarn - it just matches no files
+      # and produces a manifest-only tarball - so passing the step above is not by
+      # itself evidence that the release would ship anything usable.
+      - name: Verify the packed tarballs
+        run: node ./scripts/npm-packages/verify-packed-tarballs.mts "$PACK_DIR"
+      # What this job cannot cover, so that it is not mistaken for a full
+      # rehearsal: npm provenance and the trusted publishing (OIDC) exchange only
+      # happen when a tarball is actually uploaded, by a workflow holding
+      # id-token: write on a push to main. A dry run on a pull request has neither,
+      # so a release that would publish without provenance - which is what #2235
+      # was - still looks clean here. Whether the versions being published exist on
+      # npm at all is checked separately, by npm-package-existence.yml.
