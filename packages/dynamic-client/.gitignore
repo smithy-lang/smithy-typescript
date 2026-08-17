@@ -1,0 +1,4 @@
+/dist-cjs/
+/dist-es/
+/dist-types/
+*.tsbuildinfo

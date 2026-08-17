@@ -1870,6 +1870,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/dynamic-client@workspace:packages/dynamic-client":
+  version: 0.0.0-use.local
+  resolution: "@smithy/dynamic-client@workspace:packages/dynamic-client"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/protocol-http": "workspace:^"
+    "@smithy/typecheck": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@smithy/util-endpoints": "workspace:^"
+    concurrently: "npm:7.0.0"
+    premove: "npm:4.0.0"
+    tslib: "npm:^2.6.2"
+  languageName: unknown
+  linkType: soft
+
 "@smithy/eventstream-codec@workspace:packages/eventstream-codec":
   version: 0.0.0-use.local
   resolution: "@smithy/eventstream-codec@workspace:packages/eventstream-codec"
@@ -2131,7 +2146,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/protocol-http@workspace:packages/protocol-http":
+"@smithy/protocol-http@workspace:^, @smithy/protocol-http@workspace:packages/protocol-http":
   version: 0.0.0-use.local
   resolution: "@smithy/protocol-http@workspace:packages/protocol-http"
   dependencies:
@@ -2321,7 +2336,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/typecheck@workspace:packages/typecheck":
+"@smithy/typecheck@workspace:^, @smithy/typecheck@workspace:packages/typecheck":
   version: 0.0.0-use.local
   resolution: "@smithy/typecheck@workspace:packages/typecheck"
   dependencies:
@@ -2470,7 +2485,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@smithy/util-endpoints@workspace:packages/util-endpoints":
+"@smithy/util-endpoints@workspace:^, @smithy/util-endpoints@workspace:packages/util-endpoints":
   version: 0.0.0-use.local
   resolution: "@smithy/util-endpoints@workspace:packages/util-endpoints"
   dependencies:

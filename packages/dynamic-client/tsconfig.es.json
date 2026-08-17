@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": [],
+    "outDir": "dist-es",
+    "rootDir": "src"
+  },
+  "extends": "../../tsconfig.es.json",
+  "include": ["src/"],
+  "exclude": ["**/*.spec.ts", "**/*.fixture.ts", "vitest.*"]
+}

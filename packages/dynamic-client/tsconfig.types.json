@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "declarationDir": "dist-types",
+    "rootDir": "src"
+  },
+  "extends": "../../tsconfig.types.json",
+  "include": ["src/"],
+  "exclude": ["**/*.spec.ts", "**/*.fixture.ts", "vitest.*"]
+}

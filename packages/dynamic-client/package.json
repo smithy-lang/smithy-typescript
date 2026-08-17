@@ -1,0 +1,55 @@
+{
+  "name": "@smithy/dynamic-client",
+  "version": "1.0.0",
+  "description": "Runtime factory that converts a Smithy JSON AST into a schema-based client",
+  "keywords": [
+    "client",
+    "dynamic",
+    "schema",
+    "smithy"
+  ],
+  "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/dynamic-client",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS SDK for JavaScript Team",
+    "url": "https://aws.amazon.com/sdk-for-javascript/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/dynamic-client"
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "scripts": {
+    "build": "concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
+    "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
+    "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
+    "clean": "premove dist-cjs dist-es dist-types",
+    "extract:docs": "api-extractor run --local",
+    "test": "yarn g:vitest run",
+    "test:watch": "yarn g:vitest watch",
+    "test:integration": "yarn g:vitest run -c vitest.config.integ.mts",
+    "test:integration:watch": "yarn g:vitest watch -c vitest.config.integ.mts"
+  },
+  "dependencies": {
+    "@smithy/core": "workspace:^",
+    "@smithy/protocol-http": "workspace:^",
+    "@smithy/typecheck": "workspace:^",
+    "@smithy/types": "workspace:^",
+    "@smithy/util-endpoints": "workspace:^",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "concurrently": "7.0.0",
+    "premove": "4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
