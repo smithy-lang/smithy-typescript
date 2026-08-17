@@ -1,0 +1,60 @@
+name: release-dry-run
+
+on:
+  # Run everything release-npm-packages.yml does except the publish itself, for
+  # verification: a packaging problem then fails a check on the release PR instead
+  # of surfacing part-way through a release. Changesets has no built-in `publish
+  # --dry-run` (changesets/changesets#614), so `changeset publish-plan` and
+  # `changeset pack` stand in for it. Provenance and trusted publishing are not
+  # covered, since both need an actual upload from a push to main.
+  #
+  # Keep this workflow listed in EXPECTED_WORKFLOWS in create-release-pr.yml,
+  # which is what approves the runs awaiting approval on the release PR.
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run-release:
+    name: Dry-run the release
+    runs-on: ubuntu-latest
+    if: github.head_ref == 'changeset-release/main'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install
+      # Written under $RUNNER_TEMP rather than the workspace, so nothing packed here
+      # can be mistaken for a change to the tree under test. Set in a step because
+      # the runner context is not available in the job's `env`.
+      - name: Set up dry-run paths
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/release-dry-run"
+          echo "PUBLISH_PLAN=$dir/publish-plan.json" >> "$GITHUB_ENV"
+          echo "PACK_DIR=$dir/pack" >> "$GITHUB_ENV"
+      # Before the build, since it needs no artifacts: an unresolvable plan then
+      # fails in seconds rather than after a full build. Written out so the pack
+      # below releases exactly this plan.
+      - name: Resolve the publish plan
+        run: yarn changeset publish-plan --output "$PUBLISH_PLAN"
+      - name: Build Release Artifacts
+        run: yarn build:release
+      # Runs the same per-package pack that `changeset publish` would, which is
+      # where a package.json that publishes only in theory gives way: the
+      # publishConfig.directory incompatibility that broke a release in #2235 fails
+      # this step.
+      - name: Pack every package the release would publish
+        run: yarn changeset pack --from-publish-plan "$PUBLISH_PLAN" --out-dir "$PACK_DIR"
+      # Packing an unbuilt tree matches no files and still succeeds, so the step
+      # above passing is not by itself evidence that the tarballs are usable.
+      - name: Verify the packed tarballs
+        run: node ./scripts/npm-packages/verify-packed-tarballs.mts "$PACK_DIR"
