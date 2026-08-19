@@ -220,26 +220,42 @@ function readTag(ns: NormalizedSchema): any {
 
   if (tagNumber === 4) {
     const docSchema = NormalizedSchema.of(15 satisfies DocumentSchema);
-    const pair = readValue(docSchema) as [number, number | bigint];
-    const [exponent, mantissa] = pair;
+    const pair = readValue(docSchema) as [number | bigint, number | bigint];
+    const [rawExponent, mantissa] = pair;
     const normalizer = mantissa < 0 ? -1 : 1;
-    const mantissaStr = "0".repeat(Math.abs(exponent) + 1) + String(BigInt(normalizer) * BigInt(mantissa));
-
-    let numericString: string;
+    const absMantissa = BigInt(normalizer) * BigInt(mantissa);
+    const mantissaDigits = String(absMantissa);
     const sign = mantissa < 0 ? "-" : "";
 
-    numericString =
-      exponent === 0
-        ? mantissaStr
-        : mantissaStr.slice(0, mantissaStr.length + exponent) + "." + mantissaStr.slice(exponent);
-    numericString = numericString.replace(/^0+/g, "");
-    if (numericString === "") {
-      numericString = "0";
+    let numericString: string;
+
+    const isSmallExponent = typeof rawExponent === "number" && Math.abs(rawExponent) <= 2 ** 28;
+    if (isSmallExponent) {
+      const exponent = rawExponent as number;
+      const mantissaStr = "0".repeat(Math.abs(exponent) + 1) + mantissaDigits;
+
+      numericString =
+        exponent === 0
+          ? mantissaStr
+          : mantissaStr.slice(0, mantissaStr.length + exponent) + "." + mantissaStr.slice(exponent);
+      numericString = numericString.replace(/^0+/g, "");
+      if (numericString === "") {
+        numericString = "0";
+      }
+      if (numericString[0] === ".") {
+        numericString = "0" + numericString;
+      }
+      numericString = sign + numericString;
+    } else {
+      // Exponent too large to expand into a decimal string; emit scientific notation.
+      const bigExponent = BigInt(rawExponent);
+      if (mantissaDigits.length === 1) {
+        numericString = sign + mantissaDigits + "e" + String(bigExponent);
+      } else {
+        const adjustedExp = bigExponent + BigInt(mantissaDigits.length - 1);
+        numericString = sign + mantissaDigits[0] + "." + mantissaDigits.slice(1) + "e" + String(adjustedExp);
+      }
     }
-    if (numericString[0] === ".") {
-      numericString = "0" + numericString;
-    }
-    numericString = sign + numericString;
 
     return nv(numericString);
   }

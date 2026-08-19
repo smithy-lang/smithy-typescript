@@ -322,6 +322,52 @@ describe("cbor", () => {
       ]);
     });
 
+    it("should round-trip NumericValue with exponent notation", () => {
+      for (const bigDecimal of ["1.5e10", "3E-20", "-2.0e+5", "100E3", "1e2", ".5e3"]) {
+        const numericValue = new NumericValue(bigDecimal, "bigDecimal");
+        const serialized = cbor.serialize(numericValue);
+
+        const major = serialized[0] >> 5;
+        expect(major).toEqual(0b110); // 6
+
+        const tag = serialized[0] & 0b11111;
+        expect(tag).toEqual(0b0100); // 4
+
+        const deserialized = cbor.deserialize(serialized);
+        expect(deserialized).toBeInstanceOf(NumericValue);
+      }
+    });
+
+    it("should round-trip NumericValue with exponent exceeding safe integer range", () => {
+      for (const bigDecimal of ["1e99999999999999999999", "-1e99999999999999999999"]) {
+        const numericValue = new NumericValue(bigDecimal, "bigDecimal");
+        const serialized = cbor.serialize(numericValue);
+
+        const major = serialized[0] >> 5;
+        expect(major).toEqual(0b110); // 6
+
+        const tag = serialized[0] & 0b11111;
+        expect(tag).toEqual(0b0100); // 4
+
+        const deserialized = cbor.deserialize(serialized);
+        expect(deserialized).toBeInstanceOf(NumericValue);
+        // Verify the exponent is preserved exactly (not lossy via Number coercion)
+        expect(deserialized.string).toContain("99999999999999999999");
+      }
+    });
+
+    it("should round-trip NumericValue with exponent exceeding string expansion limit", () => {
+      // Exponents larger than 2^28 cannot be expanded via "0".repeat() without
+      // throwing a RangeError. Verify they fall through to scientific notation.
+      for (const bigDecimal of ["1e300000000", "-5e300000000"]) {
+        const numericValue = new NumericValue(bigDecimal, "bigDecimal");
+        const serialized = cbor.serialize(numericValue);
+        const deserialized = cbor.deserialize(serialized);
+        expect(deserialized).toBeInstanceOf(NumericValue);
+        expect(deserialized.string).toContain("300000000");
+      }
+    });
+
     it("should round-trip sequences of big numbers", () => {
       const sequence = {
         map: {

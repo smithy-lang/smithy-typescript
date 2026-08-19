@@ -188,6 +188,90 @@ describe("CborShapeSerializer2", () => {
       expect(cbor.deserialize(singleBytes)).toEqual(cbor.deserialize(multiBytes));
     });
 
+    it("serializes NumericValue with exponent notation", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      const cases = ["1.5e10", "3E-20", "-2.0e+5", "100E3", "1e2", ".5e3"];
+      for (const str of cases) {
+        const data = { value: nv(str) };
+
+        multiPass.write(schema, data);
+        const multiBytes = multiPass.flush();
+
+        singlePass.write(schema, data);
+        const singleBytes = singlePass.flush();
+
+        const multiResult = cbor.deserialize(multiBytes);
+        const singleResult = cbor.deserialize(singleBytes);
+        expect(singleResult).toEqual(multiResult);
+        expect(singleResult.value.string).toEqual(multiResult.value.string);
+      }
+    });
+
+    it("serializes NumericValue with exponent exceeding safe integer range", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      const cases = ["1e99999999999999999999", "-1e99999999999999999999"];
+      for (const str of cases) {
+        const data = { value: nv(str) };
+
+        multiPass.write(schema, data);
+        const multiBytes = multiPass.flush();
+
+        singlePass.write(schema, data);
+        const singleBytes = singlePass.flush();
+
+        const multiResult = cbor.deserialize(multiBytes);
+        const singleResult = cbor.deserialize(singleBytes);
+        expect(singleResult).toEqual(multiResult);
+        // Verify the exponent is preserved exactly (not lossy via Number coercion)
+        expect(singleResult.value.string).toContain("99999999999999999999");
+      }
+    });
+
+    it("serializes NumericValue with exponent exceeding string expansion limit", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      // Exponents larger than 2^28 cannot be expanded via "0".repeat() without
+      // throwing a RangeError. Verify they fall through to scientific notation.
+      const cases = ["1e300000000", "-5e300000000"];
+      for (const str of cases) {
+        const data = { value: nv(str) };
+
+        multiPass.write(schema, data);
+        const multiBytes = multiPass.flush();
+
+        singlePass.write(schema, data);
+        const singleBytes = singlePass.flush();
+
+        const multiResult = cbor.deserialize(multiBytes);
+        const singleResult = cbor.deserialize(singleBytes);
+        expect(singleResult).toEqual(multiResult);
+        expect(singleResult.value.string).toContain("300000000");
+      }
+    });
+
     it("serializes unions with $unknown", () => {
       const unionSchema = [4, "ns", "Union", 0, ["a", "b"], [0, 0]] satisfies StaticUnionSchema;
       const data = { $unknown: ["c", "hello"] };
@@ -389,6 +473,65 @@ describe("CborShapeDeserializer2", () => {
       const data = { price: nv("0.99") };
       const result = assertEquivalentDeserialization(schema, data);
       expect(result).toEqual(data);
+    });
+
+    it("deserializes NumericValue with exponent notation", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      const cases = ["1.5e10", "3E-20", "-2.0e+5", "100E3", "1e2", ".5e3"];
+      for (const str of cases) {
+        const data = { value: nv(str) };
+        const result = assertEquivalentDeserialization(schema, data);
+        expect(result.value).toBeInstanceOf(Object);
+        expect(result.value.string).toBeDefined();
+      }
+    });
+
+    it("deserializes NumericValue with exponent exceeding safe integer range", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      const cases = ["1e99999999999999999999", "-1e99999999999999999999", "1e-99999999999999999999"];
+      for (const str of cases) {
+        const data = { value: nv(str) };
+        const result = assertEquivalentDeserialization(schema, data);
+        expect(result.value).toBeInstanceOf(Object);
+        expect(result.value.string).toContain("99999999999999999999");
+      }
+    });
+
+    it("deserializes NumericValue with exponent exceeding string expansion limit", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      // Exponents larger than 2^28 cannot be expanded via "0".repeat() without
+      // throwing a RangeError. Verify they fall through to scientific notation.
+      const cases = ["1e300000000", "-5e300000000", "1e-300000000"];
+      for (const str of cases) {
+        const data = { value: nv(str) };
+        const result = assertEquivalentDeserialization(schema, data);
+        expect(result.value).toBeInstanceOf(Object);
+        expect(result.value.string).toContain("300000000");
+      }
     });
 
     it("deserializes unknown union members to $unknown", () => {

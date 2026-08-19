@@ -179,14 +179,24 @@ export function encode(_input: any): void {
       continue;
     } else if (typeof input === "object") {
       if (input instanceof NumericValue) {
-        const decimalIndex = input.string.indexOf(".");
-        const exponent = decimalIndex === -1 ? 0 : decimalIndex - input.string.length + 1;
-        const mantissa = BigInt(input.string.replace(".", ""));
+        let str = input.string;
+        let expOffset = BigInt(0);
+
+        const eIndex = str.search(/[eE]/);
+        if (eIndex !== -1) {
+          expOffset = BigInt(str.slice(eIndex + 1));
+          str = str.slice(0, eIndex);
+        }
+
+        const decimalIndex = str.indexOf(".");
+        const fractionDigits = decimalIndex === -1 ? 0 : str.length - decimalIndex - 1;
+        const exponent = expOffset - BigInt(fractionDigits);
+        const mantissa = BigInt(str.replace(".", ""));
 
         data[cursor++] = 0b110_00100; // major 6, tag 4.
         encodeInteger(majorList, 2);
         encodeStack.push(mantissa);
-        encodeStack.push(exponent);
+        encodeStack.push(exponent >= -0x20000000000000n && exponent <= 0x1fffffffffffffn ? Number(exponent) : exponent);
         continue;
       }
       if (input[tagSymbol]) {

@@ -701,16 +701,30 @@ function writeTag(tagValue: number | bigint, innerValue: unknown): void {
 }
 
 function writeNumericValue(nv: NumericValue): void {
-  const decimalIndex = nv.string.indexOf(".");
-  const exponent = decimalIndex === -1 ? 0 : decimalIndex - nv.string.length + 1;
-  const mantissa = BigInt(nv.string.replace(".", ""));
+  let str = nv.string;
+  let expOffset = BigInt(0);
+
+  const eIndex = str.search(/[eE]/);
+  if (eIndex !== -1) {
+    expOffset = BigInt(str.slice(eIndex + 1));
+    str = str.slice(0, eIndex);
+  }
+
+  const decimalIndex = str.indexOf(".");
+  const fractionDigits = decimalIndex === -1 ? 0 : str.length - decimalIndex - 1;
+  const exponent = expOffset - BigInt(fractionDigits);
+  const mantissa = BigInt(str.replace(".", ""));
 
   ensure(9);
   buf[cursor++] = 0b110_00100; // major 6, tag 4
   encodeHeader(majorList, 2);
 
   ensure(9);
-  writeInteger(exponent);
+  if (exponent >= -0x20000000000000n && exponent <= 0x1fffffffffffffn) {
+    writeInteger(Number(exponent));
+  } else {
+    writeBigInt(exponent);
+  }
   writeBigInt(mantissa);
 }
 
