@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.2.4
+
+### Patch Changes
+
+- a825452: switch for-in loops to guarded
+- Updated dependencies [e82a22b]
+- Updated dependencies [a825452]
+  - @smithy/core@3.33.3
+
 ## 3.2.3
 
 ### Patch Changes
