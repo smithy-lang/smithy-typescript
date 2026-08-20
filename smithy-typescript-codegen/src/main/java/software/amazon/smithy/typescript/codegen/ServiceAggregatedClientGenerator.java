@@ -135,6 +135,22 @@ final class ServiceAggregatedClientGenerator implements Runnable {
 
         writer.write("");
 
+        // Per-request options accepted by the aggregated client convenience methods.
+        // Superset of the transport options that also carries a call-site MetricsRecorder.
+        String requestOptionsType = aggregateClientName + "RequestOptions";
+        writer.addTypeImport("MetricsRecorder", "__MetricsRecorder", TypeScriptDependency.SMITHY_TYPES);
+        writer.writeDocs("@public");
+        writer.openBlock(
+            "export interface $L extends $T {",
+            "}",
+            requestOptionsType,
+            applicationProtocol.getOptionsType(),
+            () -> {
+                writer.write("recorder?: __MetricsRecorder<any>;");
+            }
+        );
+        writer.write("");
+
         // Generate an aggregated client interface.
         writer.openBlock("export interface $L {", "}", aggregateClientName, () -> {
             for (OperationShape operation : containedOperations) {
@@ -157,7 +173,7 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                     """
                     $1L(
                       args: $2T,
-                      options?: $3T
+                      options?: $3L
                     ): Promise<$4T>;
                     $1L(
                       args: $2T,
@@ -165,12 +181,12 @@ final class ServiceAggregatedClientGenerator implements Runnable {
                     ): void;
                     $1L(
                       args: $2T,
-                      options: $3T,
+                      options: $3L,
                       cb: (err: any, data?: $4T) => void
                     ): void;""",
                     methodName,
                     input,
-                    applicationProtocol.getOptionsType(),
+                    requestOptionsType,
                     output
                 );
                 writer.write("");
