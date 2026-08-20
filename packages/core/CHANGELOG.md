@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.33.3
+
+### Patch Changes
+
+- e82a22b: fix: handle exponent notation when serializing NumericValue wrappers
+- a825452: switch for-in loops to guarded
+
 ## 3.33.2
 
 ### Patch Changes
