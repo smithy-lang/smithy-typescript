@@ -116,9 +116,11 @@ export class NodeHttp2ConnectionManager implements ConnectionManager<ClientHttp2
     session.on("frameError", ensureDestroyed);
     session.on("close", ensureDestroyed);
 
-    if (connectionConfiguration.requestTimeout) {
-      session.setTimeout(connectionConfiguration.requestTimeout, ensureDestroyed);
-    }
+    // Arm a session timeout as a safety net to reap orphaned sessions.
+    // Uses the configured sessionTimeout if provided, otherwise defaults to
+    // 5 minutes to prevent indefinite leaks when other cleanup paths fail.
+    const timeout = connectionConfiguration.requestTimeout ?? 300_000;
+    session.setTimeout(timeout, ensureDestroyed);
 
     ref.retain();
     return ref;
