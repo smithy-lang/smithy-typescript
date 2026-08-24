@@ -1,0 +1,104 @@
+---
+name: "🐛 Bug Report"
+description: Report a bug in smithy-typescript runtime packages or code generation
+title: "(short issue description)"
+labels: [bug, needs-triage]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Note:** The `@smithy/*` runtime packages in this repo power the [AWS SDK for JavaScript (v3)](https://github.com/aws/aws-sdk-js-v3). If your issue relates to AWS SDK usage, please [open it there](https://github.com/aws/aws-sdk-js-v3/issues/new/choose) instead.
+  - type: checkboxes
+    attributes:
+      label: Checkboxes for prior research
+      options:
+        - label:
+            I've searched for [previous similar issues](https://github.com/smithy-lang/smithy-typescript/issues)
+            and didn't find any solution.
+          required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of issue
+      description: Is this a runtime package issue or a code generation issue?
+      options:
+        - "Runtime (@smithy/* packages)"
+        - "Code generation (smithy-typescript-codegen)"
+        - "Both / Unsure"
+    validations:
+      required: true
+  - type: input
+    id: package
+    attributes:
+      label: Package name
+      description: Which package is affected?
+      placeholder: "@smithy/core, @smithy/util-stream, codegen, etc."
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: What is the problem?
+      placeholder: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: checkboxes
+    id: regression
+    attributes:
+      label: Regression Issue
+      description: If this worked in a previous version but doesn't now, select this option and note the working version.
+      options:
+        - label: Select this option if this issue appears to be a regression.
+          required: false
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: The version of the affected package.
+      placeholder: "@smithy/core@3.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: |
+        Provide a self-contained, concise snippet of code that reproduces the issue.
+        For codegen issues, include the relevant Smithy model snippet and the generated output that is incorrect.
+    validations:
+      required: true
+  - type: textarea
+    id: observed-behavior
+    attributes:
+      label: Observed Behavior
+      description: |
+        What actually happened?
+        Include full errors, uncaught exceptions, stack traces, and relevant logs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Possible Solution
+      description: Suggest a fix/reason for the bug.
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Information/Context
+      description: |
+        Anything else that might be relevant for troubleshooting this bug.
+        For runtime issues: Node.js version, runtime environment (browser, React Native, etc.).
+        For codegen issues: Smithy model version, build tool version.
+    validations:
+      required: false

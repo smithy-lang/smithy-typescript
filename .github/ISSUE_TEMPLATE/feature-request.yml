@@ -1,0 +1,62 @@
+---
+name: "🚀 Feature Request"
+description: Suggest an idea for smithy-typescript
+title: "(short issue description)"
+labels: [feature-request, needs-triage]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Note:** The `@smithy/*` runtime packages in this repo power the [AWS SDK for JavaScript (v3)](https://github.com/aws/aws-sdk-js-v3). If your request relates to AWS SDK usage, please [open it there](https://github.com/aws/aws-sdk-js-v3/issues/new/choose) instead.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Is this a runtime or code generation feature?
+      options:
+        - "Runtime (@smithy/* packages)"
+        - "Code generation (smithy-typescript-codegen)"
+        - "Both / Unsure"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the feature
+      description: A clear and concise description of the feature you are proposing.
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: |
+        Why do you need this feature? For example: "I'm always frustrated when..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: |
+        Suggest how to implement the addition or change. Include prototype/workaround/sketch/reference implementation if possible.
+    validations:
+      required: false
+  - type: textarea
+    id: other
+    attributes:
+      label: Other Information
+      description: |
+        Any alternative solutions or features you considered, a more detailed explanation, related issues, links for context, etc.
+    validations:
+      required: false
+  - type: checkboxes
+    id: ack
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: I may be able to implement this feature request
+          required: false
+        - label: This feature might incur a breaking change
+          required: false
