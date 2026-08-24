@@ -82,6 +82,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
     const requestTimeoutInMs = requestTimeout ?? this.config!.requestTimeout;
     const keepAlive = this.config!.keepAlive === true;
     const credentials = this.config!.credentials as RequestInit["credentials"];
+    const fetchFn = this.config!.customFetch ?? fetch;
 
     // if the request was already aborted, prevent doing extra work
     if (abortSignal?.aborted) {
@@ -144,7 +145,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
 
     const fetchRequest = createRequest(url, requestOptions);
     const raceOfPromises = [
-      fetch(fetchRequest).then((response) => {
+      fetchFn(fetchRequest).then((response) => {
         const fetchHeaders: any = response.headers;
         const transformedHeaders: HeaderBag = {};
 

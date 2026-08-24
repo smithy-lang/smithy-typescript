@@ -133,6 +133,21 @@ export interface FetchHttpHandlerOptions {
    * ```
    */
   requestInit?: (httpRequest: IHttpRequest) => RequestInit;
+
+  /**
+   * An optional custom fetch implementation to use in place of the
+   * global fetch function.
+   *
+   * @example
+   * ```js
+   * new Client({
+   *   requestHandler: {
+   *     customFetch: (request) => myFetchImplementation(request)
+   *   }
+   * });
+   * ```
+   */
+  customFetch?: typeof fetch;
 }
 
 declare global {

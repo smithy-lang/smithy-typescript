@@ -90,6 +90,26 @@ vi.spyOn(global, "fetch").mockImplementation((async () => {
       expect(requestArgs[1]!.keepalive).toEqual(true);
     });
 
+    it("uses customFetch instead of global fetch when provided", async () => {
+      const customFetch = vi.fn(async () => ({
+        headers: {
+          entries() {
+            return [];
+          },
+        },
+        async blob() {
+          return undefined;
+        },
+      })) as unknown as typeof fetch;
+      const fetchHttpHandler = new FetchHttpHandler({ customFetch });
+
+      const mockHttpRequest = getMockHttpRequest({});
+      await fetchHttpHandler.handle(mockHttpRequest);
+
+      expect(customFetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
     it(`builds querystring if provided`, async () => {
       const fetchHttpHandler = new FetchHttpHandler();
 
