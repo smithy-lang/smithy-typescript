@@ -2,6 +2,23 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.53.0 (2026-08-24)
+
+### Features
+
+- Added event stream support to server-common ([#2226](https://github.com/smithy-lang/smithy-typescript/pull/2226))
+
+### Bug Fixes
+
+- Generated operation-level defaults for endpointParams ([#2218](https://github.com/smithy-lang/smithy-typescript/pull/2218))
+- Omitted staticContextParams on ClientInputEndpointParameters ([#2216](https://github.com/smithy-lang/smithy-typescript/pull/2216))
+
+### Chores
+
+- Updated smithyVersion to 1.73.0 ([#2244](https://github.com/smithy-lang/smithy-typescript/pull/2244))
+- Upgraded to TypeScript 7 ([#2220](https://github.com/smithy-lang/smithy-typescript/pull/2220))
+- Upgraded to TypeScript 6 ([#2217](https://github.com/smithy-lang/smithy-typescript/pull/2217))
+
 ## 0.52.0 (2026-08-07)
 
 ### Features
