@@ -92,6 +92,21 @@ export const Hash = no;
 
 // @smithy/util-stream
 export class Uint8ArrayBlobAdapter extends bindUint8ArrayBlobAdapter(toUtf8, fromUtf8, toBase64, fromBase64) {}
+export { AwsChunkedDecodeError } from "./util-stream/aws-chunked/AwsChunkedDecodeError";
+export {
+  AwsChunkedParser,
+  type AwsChunkedParserOptions,
+  type AwsChunkedParserState,
+  MAX_CHUNK_CONTROL_LINE_LENGTH,
+  MAX_TRAILER_FIELD_COUNT,
+  MAX_TRAILER_LINE_LENGTH,
+  MAX_TRAILER_SECTION_LENGTH,
+} from "./util-stream/aws-chunked/awsChunkedParser";
+export { createAwsChunkedResponseDecoder } from "./util-stream/aws-chunked/createAwsChunkedResponseDecoder.browser";
+export type {
+  AwsChunkedResponseDecoderOptions,
+  AwsChunkedResponseDecoderResult,
+} from "./util-stream/aws-chunked/types";
 export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream.browser";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream.browser";
 export { createBufferedReadable } from "./util-stream/createBufferedReadable.browser";
