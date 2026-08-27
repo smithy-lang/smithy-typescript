@@ -543,8 +543,19 @@ describe(ChecksumStream.name, () => {
         })()
       ).rejects.toThrow(/Checksum mismatch/);
 
-      // The final byte was never delivered.
-      expect(toUtf8(new Uint8Array(seen))).toEqual(canonicalUtf8.slice(0, 25));
+      /**
+       * The withheld final byte was never delivered. Everything delivered is a
+       * prefix of the preceding bytes: destroying the stream discards whatever
+       * is still in its readable buffer, and how much that is depends on the
+       * consumer's read granularity, which is not the same across Node
+       * versions. Node 26 changed read() without a size to return one buffered
+       * chunk rather than the whole buffer concatenated, so the amount that
+       * reaches the consumer before the mismatch is not asserted here.
+       * @see https://github.com/nodejs/node/pull/60441
+       */
+      const delivered = toUtf8(new Uint8Array(seen));
+      expect(canonicalUtf8.slice(0, 25).startsWith(delivered)).toBe(true);
+      expect(delivered).not.toContain("z");
     });
 
     it("should compare without a withheld chunk for an empty payload", async () => {
