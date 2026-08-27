@@ -66,6 +66,7 @@ Hello\r
 5\r
 World\r
 0\r
+\r
 `);
           resolve();
         });
