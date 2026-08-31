@@ -422,6 +422,39 @@ import { createChecksumStream } from "./createChecksumStream.browser";
           );
         });
 
+        it("should stay pending when a one-chunk stream is never read", async () => {
+          const onResult = vi.fn();
+          const source = new ReadableStream({
+            start(controller) {
+              controller.enqueue(canonicalUtf8);
+              controller.close();
+            },
+          });
+
+          const checksumStream = createChecksumStream({
+            expectedChecksum: canonicalBase64,
+            checksum: new Appender(),
+            checksumSourceLocation: "my-header",
+            source,
+            onResult,
+          });
+
+          await new Promise((r) => setTimeout(r, 50));
+
+          // Without consumer demand or cancellation, validation cannot reach a terminal state.
+          expect(onResult).not.toHaveBeenCalled();
+
+          const reader = checksumStream.getReader();
+          let result;
+          do {
+            result = await reader.read();
+          } while (!result.done);
+
+          expect(onResult).toHaveBeenCalledWith(
+            expect.objectContaining({ status: "SUCCEEDED", validationPerformed: true })
+          );
+        });
+
         it("should stay pending when the stream is abandoned without cancellation", async () => {
           const onResult = vi.fn();
           const checksumStream = createChecksumStream({

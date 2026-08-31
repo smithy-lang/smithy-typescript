@@ -184,12 +184,30 @@ export const createChecksumStream = ({
    * that do not pass onResult keep the original single-hop pipeline.
    */
   const reader = readable.getReader();
-  const observed = new ReadableStream({
-    async pull(controller) {
-      let result;
-      try {
-        result = await reader.read();
-      } catch (error) {
+  const observed = new ReadableStream(
+    {
+      async pull(controller) {
+        let result;
+        try {
+          result = await reader.read();
+        } catch (error) {
+          heldChunk = undefined;
+          settle({
+            status: "INCOMPLETE",
+            validationPerformed: false,
+            validationAlgorithm: algorithm,
+            source: checksumSource,
+          });
+          throw error;
+        }
+        const { value, done } = result;
+        if (done) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(value);
+      },
+      cancel(reason) {
         heldChunk = undefined;
         settle({
           status: "INCOMPLETE",
@@ -197,26 +215,11 @@ export const createChecksumStream = ({
           validationAlgorithm: algorithm,
           source: checksumSource,
         });
-        throw error;
-      }
-      const { value, done } = result;
-      if (done) {
-        controller.close();
-        return;
-      }
-      controller.enqueue(value);
+        return reader.cancel(reason);
+      },
     },
-    cancel(reason) {
-      heldChunk = undefined;
-      settle({
-        status: "INCOMPLETE",
-        validationPerformed: false,
-        validationAlgorithm: algorithm,
-        source: checksumSource,
-      });
-      return reader.cancel(reason);
-    },
-  });
+    { highWaterMark: 0 }
+  );
 
   Object.setPrototypeOf(observed, ChecksumStream.prototype);
   return observed;
