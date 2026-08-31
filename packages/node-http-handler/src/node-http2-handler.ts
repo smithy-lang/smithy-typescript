@@ -248,6 +248,13 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           // Gracefully closes the Http2Session, allowing any existing streams to complete
           // on their own and preventing new Http2Stream instances from being created.
           session.close();
+
+          // Ensure the isolated session is destroyed when the response body stream ends.
+          // The stream "close" event (below) is the primary cleanup path, but it may not
+          // fire if the consumer never reads the body. This provides a secondary cleanup path.
+          clientHttp2Stream.on("end", () => {
+            ref.destroy();
+          });
         }
       });
 
@@ -261,7 +268,13 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           this.connectionManager.release(requestContext, ref);
         }
         if (!fulfilled) {
-          rejectWithDestroy(new Error("Unexpected error: http2 request did not get a response"));
+          // If the session was destroyed (e.g. by sessionTimeout) before the response
+          // arrived, type it as a Timeout so the retry logic kicks in.
+          const error = new Error("Unexpected error: http2 request did not get a response");
+          if (session.destroyed) {
+            error.name = "TimeoutError";
+          }
+          rejectWithDestroy(error);
         }
       });
 
