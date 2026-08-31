@@ -86,6 +86,15 @@ export const createChecksumStream = ({
         return;
       }
       /**
+       * Empty chunks contain no payload bytes to withhold. Forward them without
+       * displacing the most recent non-empty chunk, which must remain held
+       * until the checksum comparison succeeds.
+       */
+      if (chunk.byteLength === 0) {
+        controller.enqueue(chunk);
+        return;
+      }
+      /**
        * Release the previously withheld chunk and withhold the new one.
        */
       const release = heldChunk;

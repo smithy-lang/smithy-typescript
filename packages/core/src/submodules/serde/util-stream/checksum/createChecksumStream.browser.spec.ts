@@ -190,6 +190,38 @@ import { createChecksumStream } from "./createChecksumStream.browser";
           // The final byte was discarded rather than delivered.
           expect(toUtf8(new Uint8Array(seen))).toEqual(canonicalUtf8.slice(0, 25));
         });
+
+        it("should retain the final non-empty chunk when followed by an empty chunk", async () => {
+          const source = new ReadableStream({
+            start(controller) {
+              controller.enqueue(canonicalData);
+              controller.enqueue(new Uint8Array(0));
+              controller.close();
+            },
+          });
+          const checksumStream = createChecksumStream({
+            expectedChecksum: "different-expected-checksum",
+            checksum: new Appender(),
+            checksumSourceLocation: "my-header",
+            source,
+            holdBackLastChunk: true,
+          });
+
+          const reader = checksumStream.getReader();
+          const seen: number[] = [];
+          const readAll = async () => {
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) {
+                return;
+              }
+              seen.push(...value);
+            }
+          };
+
+          await expect(readAll()).rejects.toHaveProperty("name", "ChecksumMismatchError");
+          expect(seen).toEqual([]);
+        });
       });
 
       describe("onResult", () => {
