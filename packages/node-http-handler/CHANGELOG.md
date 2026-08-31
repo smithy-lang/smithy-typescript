@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.12.0
+
+### Minor Changes
+
+- bb68484: destroy isolated http2 session and manage timeout
+
 ## 4.11.3
 
 ### Patch Changes
