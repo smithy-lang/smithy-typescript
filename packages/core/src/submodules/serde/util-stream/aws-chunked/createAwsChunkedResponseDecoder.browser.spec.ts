@@ -89,6 +89,26 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
       await expect(collect(body)).rejects.toThrow(AwsChunkedDecodeError);
     });
 
+    it("should cancel and unlock the source without replacing a parser error", async () => {
+      let cancelReason: unknown;
+      const source = new ReadableStream({
+        start(controller) {
+          controller.enqueue(fromUtf8(`zz\r\n`));
+        },
+        cancel(reason) {
+          cancelReason = reason;
+          throw new Error("source cancellation failed");
+        },
+      });
+      const { body, trailers } = createAwsChunkedResponseDecoder({ source });
+
+      const bodyError = await collect(body).catch((e) => e);
+      expect(bodyError).toBeInstanceOf(AwsChunkedDecodeError);
+      expect(cancelReason).toBe(bodyError);
+      expect(source.locked).toBe(false);
+      await expect(trailers).rejects.toBe(bodyError);
+    });
+
     it("should reject the trailers with the same error the body surfaces", async () => {
       const { body, trailers } = createAwsChunkedResponseDecoder({ source: makeSource(`zz\r\n`) });
 

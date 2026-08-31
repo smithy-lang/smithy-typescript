@@ -87,6 +87,10 @@ export const createAwsChunkedResponseDecoder = ({
           decoded = parser.write(result.value);
         } catch (e: unknown) {
           settle(e as Error);
+          const cancellation = reader.cancel(e);
+          reader.releaseLock();
+          // Cancellation failure must not replace the more useful decoding error.
+          cancellation.catch(() => {});
           throw e;
         }
 
