@@ -116,7 +116,7 @@ export class AwsChunkedParser {
   private trailerSectionLength = 0;
   private trailerFieldCount = 0;
 
-  private readonly parsedTrailers: Record<string, string> = {};
+  private readonly parsedTrailers: Record<string, string> = Object.create(null);
   private readonly declaredTrailers: readonly string[];
   private readonly decodedContentLength?: number;
 

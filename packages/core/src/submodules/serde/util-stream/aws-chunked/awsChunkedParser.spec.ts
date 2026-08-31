@@ -152,12 +152,32 @@ describe(AwsChunkedParser.name, () => {
       expect(() => decode(`0\r\na:1\r\na:2\r\n\r\n`, Infinity)).toThrow(/repeated with a conflicting value/);
     });
 
+    it.each(["constructor", "__proto__"])(
+      "should accept a trailer whose name collides with Object.prototype: %s",
+      (name) => {
+        const parser = new AwsChunkedParser({ declaredTrailers: [name] });
+        decode(`0\r\n${name}:value\r\n\r\n`, Infinity, parser);
+        expect(Object.prototype.hasOwnProperty.call(parser.trailers, name)).toBe(true);
+        expect(parser.trailers[name]).toBe("value");
+      }
+    );
+
     it("should reject a declared trailer that never arrives", () => {
       const parser = new AwsChunkedParser({ declaredTrailers: ["x-amz-checksum-crc32"] });
       expect(() => decode(`0\r\nx-amz-other:1\r\n\r\n`, Infinity, parser)).toThrow(
         /declared trailer "x-amz-checksum-crc32" was not present/
       );
     });
+
+    it.each(["constructor", "__proto__"])(
+      "should reject an omitted declared trailer whose name collides with Object.prototype: %s",
+      (name) => {
+        const parser = new AwsChunkedParser({ declaredTrailers: [name] });
+        expect(() => decode(`0\r\n\r\n`, Infinity, parser)).toThrow(
+          `declared trailer "${name}" was not present in the trailer section.`
+        );
+      }
+    );
 
     it("should match declared trailers case-insensitively", () => {
       const parser = new AwsChunkedParser({ declaredTrailers: ["X-Amz-Checksum-CRC32"] });
