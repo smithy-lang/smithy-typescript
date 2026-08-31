@@ -297,6 +297,61 @@ import { createChecksumStream } from "./createChecksumStream.browser";
           });
         });
 
+        it("should report FAILED without a comparison when checksum.digest rejects", async () => {
+          const error = new Error("digest failed");
+          const checksum = new Appender();
+          vi.spyOn(checksum, "digest").mockRejectedValue(error);
+          const onResult = vi.fn();
+          const checksumStream = createChecksumStream({
+            expectedChecksum: canonicalBase64,
+            checksum,
+            checksumSourceLocation: "my-header",
+            source: makeStream(),
+            algorithm: "CRC32",
+            checksumSource: "STORED",
+            onResult,
+          });
+
+          await expect(headStream(checksumStream, Infinity)).rejects.toBe(error);
+
+          expect(onResult).toHaveBeenCalledTimes(1);
+          expect(onResult).toHaveBeenCalledWith({
+            status: "FAILED",
+            validationPerformed: false,
+            validationAlgorithm: "CRC32",
+            source: "STORED",
+          });
+        });
+
+        it("should report FAILED without a comparison when the Base64 encoder throws", async () => {
+          const error = new Error("encoding failed");
+          const base64Encoder = vi.fn((_input: Uint8Array): string => {
+            throw error;
+          });
+          const onResult = vi.fn();
+          const checksumStream = createChecksumStream({
+            expectedChecksum: canonicalBase64,
+            checksum: new Appender(),
+            checksumSourceLocation: "my-header",
+            source: makeStream(),
+            base64Encoder,
+            algorithm: "CRC32",
+            checksumSource: "STORED",
+            onResult,
+          });
+
+          await expect(headStream(checksumStream, Infinity)).rejects.toBe(error);
+
+          expect(base64Encoder).toHaveBeenCalledTimes(1);
+          expect(onResult).toHaveBeenCalledTimes(1);
+          expect(onResult).toHaveBeenCalledWith({
+            status: "FAILED",
+            validationPerformed: false,
+            validationAlgorithm: "CRC32",
+            source: "STORED",
+          });
+        });
+
         it("should report INCOMPLETE when checksum.update throws", async () => {
           const error = new Error("checksum update failed");
           const checksum = new Appender();

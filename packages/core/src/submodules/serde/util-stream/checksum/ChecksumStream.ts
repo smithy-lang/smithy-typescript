@@ -148,8 +148,8 @@ export class ChecksumStream extends Readable {
       const digest: Uint8Array = await this.checksum.digest();
       received = this.base64Encoder(digest);
     } catch (e: unknown) {
-      // The expected value could not be obtained or the digest failed, so no
-      // comparison took place.
+      // The expected value could not be obtained, the digest failed, or the
+      // digest could not be encoded, so no comparison took place.
       this.heldChunk = undefined;
       this.settle({
         status: "FAILED",

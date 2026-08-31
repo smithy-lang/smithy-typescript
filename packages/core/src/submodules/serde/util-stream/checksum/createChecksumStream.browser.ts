@@ -111,8 +111,8 @@ export const createChecksumStream = ({
         const digest: Uint8Array = await checksum.digest();
         received = encoder(digest);
       } catch (e: unknown) {
-        // The expected value could not be obtained or the digest failed, so no
-        // comparison took place.
+        // The expected value could not be obtained, the digest failed, or the
+        // digest could not be encoded, so no comparison took place.
         heldChunk = undefined;
         settle({
           status: "FAILED",
