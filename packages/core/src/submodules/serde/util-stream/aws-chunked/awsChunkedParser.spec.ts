@@ -225,8 +225,8 @@ describe(AwsChunkedParser.name, () => {
     });
 
     it("should reject a missing trailer terminator", () => {
-      // The upload-side encoder emits "0\r\n" with no terminating blank line
-      // when there is no checksum, which this rejects as truncated.
+      // A terminal zero-sized chunk must be followed by a trailer section
+      // terminator, even when the trailer section is empty.
       expect(() => decode(`3\r\nabc\r\n0\r\n`, Infinity)).toThrow(/framing is truncated/);
     });
 
