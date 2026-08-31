@@ -177,7 +177,20 @@ export const createChecksumStream = ({
   const reader = readable.getReader();
   const observed = new ReadableStream({
     async pull(controller) {
-      const { value, done } = await reader.read();
+      let result;
+      try {
+        result = await reader.read();
+      } catch (error) {
+        heldChunk = undefined;
+        settle({
+          status: "INCOMPLETE",
+          validationPerformed: false,
+          validationAlgorithm: algorithm,
+          source: checksumSource,
+        });
+        throw error;
+      }
+      const { value, done } = result;
       if (done) {
         controller.close();
         return;

@@ -265,6 +265,34 @@ import { createChecksumStream } from "./createChecksumStream.browser";
           });
         });
 
+        it("should report INCOMPLETE when checksum.update throws", async () => {
+          const error = new Error("checksum update failed");
+          const checksum = new Appender();
+          vi.spyOn(checksum, "update").mockImplementation(() => {
+            throw error;
+          });
+          const onResult = vi.fn();
+          const checksumStream = createChecksumStream({
+            expectedChecksum: canonicalBase64,
+            checksum,
+            checksumSourceLocation: "my-header",
+            source: makeStream(),
+            algorithm: "CRC32",
+            checksumSource: "STREAM",
+            onResult,
+          });
+
+          await expect(checksumStream.getReader().read()).rejects.toBe(error);
+
+          expect(onResult).toHaveBeenCalledTimes(1);
+          expect(onResult).toHaveBeenCalledWith({
+            status: "INCOMPLETE",
+            validationPerformed: false,
+            validationAlgorithm: "CRC32",
+            source: "STREAM",
+          });
+        });
+
         it("should report INCOMPLETE when the stream is cancelled through a reader", async () => {
           const onResult = vi.fn();
           const checksumStream = createChecksumStream({
