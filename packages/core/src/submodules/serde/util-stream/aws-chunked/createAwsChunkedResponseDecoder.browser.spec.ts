@@ -138,6 +138,19 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
         await expect(trailers).rejects.toThrow(/cancelled before the framing was complete/);
       });
 
+      it("should validate completed framing before it can be cancelled", async () => {
+        const source = new ReadableStream({
+          start(controller) {
+            controller.enqueue(fromUtf8(frame("abc")));
+          },
+        });
+        const { body, trailers } = createAwsChunkedResponseDecoder({ source, decodedContentLength: 4 });
+
+        const reader = body.getReader();
+        await expect(reader.read()).rejects.toThrow(/does not match the declared/);
+        await expect(trailers).rejects.toThrow(/does not match the declared/);
+      });
+
       it("should not reject the trailers when cancelled after the framing completed", async () => {
         const { body, trailers } = createAwsChunkedResponseDecoder({
           source: makeSource(frame(alphabet)),

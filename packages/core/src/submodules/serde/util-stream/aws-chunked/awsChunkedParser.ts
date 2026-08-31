@@ -221,14 +221,18 @@ export class AwsChunkedParser {
   /**
    * Signal that the source reached its end.
    *
-   * @throws AwsChunkedDecodeError if the framing is truncated, a declared
-   *   trailer never arrived, or the decoded byte count disagrees with the
-   *   declared decoded length.
+   * @throws AwsChunkedDecodeError if the framing is truncated.
    */
   public end(): void {
     if (this.state !== "COMPLETE") {
       throw new AwsChunkedDecodeError(`source ended while in state ${this.state}; framing is truncated.`);
     }
+  }
+
+  /**
+   * Validate source-wide invariants before exposing the framing as complete.
+   */
+  private completeFraming(): void {
     if (this.decodedContentLength !== undefined && this.decodedByteCount !== this.decodedContentLength) {
       throw new AwsChunkedDecodeError(
         `decoded byte count ${this.decodedByteCount} does not match the declared` +
@@ -240,6 +244,7 @@ export class AwsChunkedParser {
         throw new AwsChunkedDecodeError(`declared trailer "${name}" was not present in the trailer section.`);
       }
     }
+    this.state = "COMPLETE";
   }
 
   /**
@@ -331,7 +336,7 @@ export class AwsChunkedParser {
     }
 
     if (content.byteLength === 0) {
-      this.state = "COMPLETE";
+      this.completeFraming();
       return;
     }
 
