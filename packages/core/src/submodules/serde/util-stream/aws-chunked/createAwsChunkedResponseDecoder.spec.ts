@@ -173,36 +173,41 @@ describe(createAwsChunkedResponseDecoder.name, () => {
     });
 
     it("should preserve backpressure over a large body", async () => {
-      Readable.setDefaultHighWaterMark(false, 16_384);
-      let sourceBuffered = 0;
-      const payload = "x".repeat(16_384);
-      const encoded = `${(16_384).toString(16)}\r\n${payload}\r\n`.repeat(50) + `0\r\n\r\n`;
-      const bytes = fromUtf8(encoded);
+      const defaultHighWaterMark = Readable.getDefaultHighWaterMark(false);
+      try {
+        Readable.setDefaultHighWaterMark(false, 16_384);
+        let sourceBuffered = 0;
+        const payload = "x".repeat(16_384);
+        const encoded = `${(16_384).toString(16)}\r\n${payload}\r\n`.repeat(50) + `0\r\n\r\n`;
+        const bytes = fromUtf8(encoded);
 
-      const source = Readable.from(
-        {
-          async *[Symbol.asyncIterator]() {
-            for (let i = 0; i < bytes.byteLength; i += 16_384) {
-              const part = bytes.subarray(i, Math.min(i + 16_384, bytes.byteLength));
-              sourceBuffered += part.byteLength;
-              yield Buffer.from(part);
-            }
+        const source = Readable.from(
+          {
+            async *[Symbol.asyncIterator]() {
+              for (let i = 0; i < bytes.byteLength; i += 16_384) {
+                const part = bytes.subarray(i, Math.min(i + 16_384, bytes.byteLength));
+                sourceBuffered += part.byteLength;
+                yield Buffer.from(part);
+              }
+            },
           },
-        },
-        { highWaterMark: 1 }
-      );
+          { highWaterMark: 1 }
+        );
 
-      const { body } = createAwsChunkedResponseDecoder({ source });
-      const ait = body[Symbol.asyncIterator]();
+        const { body } = createAwsChunkedResponseDecoder({ source });
+        const ait = body[Symbol.asyncIterator]();
 
-      await ait.next();
-      // Only a bounded amount of encoded data has been pulled from the source.
-      expect(sourceBuffered).toBeLessThanOrEqual(16_384 * 4);
+        await ait.next();
+        // Only a bounded amount of encoded data has been pulled from the source.
+        expect(sourceBuffered).toBeLessThanOrEqual(16_384 * 4);
 
-      await new Promise((r) => setTimeout(r, 100));
-      expect(sourceBuffered).toBeLessThanOrEqual(16_384 * 5);
+        await new Promise((r) => setTimeout(r, 100));
+        expect(sourceBuffered).toBeLessThanOrEqual(16_384 * 5);
 
-      body.destroy();
+        body.destroy();
+      } finally {
+        Readable.setDefaultHighWaterMark(false, defaultHighWaterMark);
+      }
     });
   });
 });
