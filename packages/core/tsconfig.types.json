@@ -13,7 +13,8 @@
       "@smithy/core/schema": ["./src/submodules/schema/index.ts"],
       "@smithy/core/event-streams": ["./src/submodules/event-streams/index.ts"],
       "@smithy/core/endpoints": ["./src/submodules/endpoints/index.ts"],
-      "@smithy/core/transport": ["./src/submodules/transport/index.ts"]
+      "@smithy/core/transport": ["./src/submodules/transport/index.ts"],
+      "@smithy/core/errors": ["./src/submodules/errors/index.ts"]
     }
   },
   "extends": "../../tsconfig.types.json",

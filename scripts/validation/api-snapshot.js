@@ -73,6 +73,35 @@ const program = ts.createProgram(allDtsPaths, {
 const checker = program.getTypeChecker();
 
 /**
+ * Determine whether an export symbol is exposed as a type only because of a
+ * `type` modifier on its export/import specifier, e.g. `export { type Foo }`,
+ * `import type { Foo }`, or a fully `type`-only export/import declaration.
+ *
+ * This is distinct from the resolved symbol's flags: a `type`-only re-export of
+ * a *class* still resolves (after getAliasedSymbol) to a class symbol, whose
+ * flags carry no Interface/TypeAlias bit. Such an export contributes only a
+ * type to the public surface (the value side is erased), so it must be tracked
+ * as a type export even though the target is a class.
+ */
+function isTypeOnlyAliasExport(sym) {
+  if (!(sym.flags & ts.SymbolFlags.Alias)) return false;
+  for (const decl of sym.getDeclarations() || []) {
+    // `export { type Foo }` / `import { type Foo }` -> specifier isTypeOnly
+    if ((ts.isExportSpecifier(decl) || ts.isImportSpecifier(decl)) && decl.isTypeOnly) {
+      return true;
+    }
+    // `export type { Foo }` / `import type { Foo }` -> declaration isTypeOnly
+    if (ts.isExportSpecifier(decl) && decl.parent?.parent?.isTypeOnly) {
+      return true;
+    }
+    if (ts.isImportSpecifier(decl) && decl.parent?.parent?.parent?.isTypeOnly) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Extract type-only exports from a .d.ts entry point using the shared program.
  */
 function getTypeExports(dtsPath) {
@@ -85,12 +114,15 @@ function getTypeExports(dtsPath) {
 
   const exports = checker.getExportsOfModule(moduleSymbol);
   for (const sym of exports) {
+    const typeOnlyAlias = isTypeOnlyAliasExport(sym);
+
     let resolved = sym;
     if (resolved.flags & ts.SymbolFlags.Alias) {
       resolved = checker.getAliasedSymbol(resolved);
     }
     const flags = resolved.flags;
     const isTypeOnly =
+      typeOnlyAlias ||
       !!(flags & ts.SymbolFlags.Interface) ||
       !!(flags & ts.SymbolFlags.TypeAlias) ||
       (!!(flags & ts.SymbolFlags.Enum) && !(flags & ts.SymbolFlags.RegularEnum));
@@ -107,6 +139,11 @@ function getTypeExports(dtsPath) {
         else if (type.flags & ts.TypeFlags.Boolean) kind = "type(boolean)";
         else if (type.flags & ts.TypeFlags.Object) kind = "type(object)";
         else kind = "type(alias)";
+      } else if (flags & ts.SymbolFlags.Class) {
+        // A `type`-only re-export of a class: only the instance type is public.
+        kind = "type(class)";
+      } else if (typeOnlyAlias) {
+        kind = "type(alias)";
       } else {
         kind = "type(?)";
       }
