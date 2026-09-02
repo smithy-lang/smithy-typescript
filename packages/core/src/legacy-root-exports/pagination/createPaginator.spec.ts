@@ -343,8 +343,7 @@ describe(createPaginator.name, () => {
 
 describe(createItemsPaginator.name, () => {
   // A fake page paginator yielding the given pages, so item extraction is tested in isolation.
-  const pagesOf =
-    (...pages: any[]) =>
+  const pagesOf = (...pages: any[]) =>
     async function* () {
       yield* pages;
       return undefined;
