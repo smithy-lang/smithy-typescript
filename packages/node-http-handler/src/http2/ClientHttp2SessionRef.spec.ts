@@ -7,6 +7,7 @@ const createMockSession = (destroyed = false) => {
   const session = {
     ref: vi.fn(),
     unref: vi.fn(),
+    setTimeout: vi.fn(),
     destroy: vi.fn(() => {
       (session as any).destroyed = true;
     }),
@@ -86,10 +87,23 @@ describe(ClientHttp2SessionRef.name, () => {
     expect(session.destroy).toHaveBeenCalledTimes(1);
   });
 
+  it("destroy() clears the session timeout before destroying (prevents #2258 retention)", () => {
+    const session = createMockSession();
+    const ref = new ClientHttp2SessionRef(session);
+    ref.destroy();
+    // Node retains a session with an armed timeout until it fires, even after
+    // destroy(). Clearing the timer with setTimeout(0) lets it be collected.
+    expect(session.setTimeout).toHaveBeenCalledWith(0);
+    const clearOrder = vi.mocked(session.setTimeout).mock.invocationCallOrder[0];
+    const destroyOrder = vi.mocked(session.destroy).mock.invocationCallOrder[0];
+    expect(clearOrder).toBeLessThan(destroyOrder);
+  });
+
   it("destroy() is safe to call on already-destroyed session", () => {
     const session = createMockSession(true);
     const ref = new ClientHttp2SessionRef(session);
     ref.destroy();
     expect(session.destroy).not.toHaveBeenCalled();
+    expect(session.setTimeout).not.toHaveBeenCalled();
   });
 });

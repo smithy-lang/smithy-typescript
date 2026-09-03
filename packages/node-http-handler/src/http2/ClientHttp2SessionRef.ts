@@ -83,6 +83,10 @@ export class ClientHttp2SessionRef {
   public destroy(): void {
     this.refs = 0;
     if (!this.session.destroyed) {
+      // Clear any armed session timeout before destroying. In Node, a Http2Session
+      // with an active timeout is retained until that timer fires, even after
+      // destroy()
+      this.session.setTimeout(0);
       this.session.destroy();
     }
   }
