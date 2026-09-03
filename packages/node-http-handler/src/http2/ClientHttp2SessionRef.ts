@@ -83,6 +83,7 @@ export class ClientHttp2SessionRef {
   public destroy(): void {
     this.refs = 0;
     if (!this.session.destroyed) {
+      this.session.setTimeout(0);
       this.session.destroy();
     }
   }
