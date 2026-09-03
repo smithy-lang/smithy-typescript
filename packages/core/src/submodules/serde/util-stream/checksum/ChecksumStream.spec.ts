@@ -396,7 +396,7 @@ describe(ChecksumStream.name, () => {
       expect("$retryable" in error).toBe(false);
     });
 
-    it("should round-trip through toJSON for transfer across a worker boundary", async () => {
+    it("should round-trip through JSON for transfer across a worker boundary", async () => {
       const checksumStream = new ChecksumStream({
         expectedChecksum: "different-expected-checksum",
         checksum: new Appender(),

@@ -3,10 +3,12 @@ import type { ChecksumSource } from "@smithy/types";
 /**
  * The structured fields of a {@link ChecksumMismatchError}.
  *
- * This is also the shape returned by {@link ChecksumMismatchError.toJSON}, so
- * an error transferred across a boundary that does not preserve custom error
- * properties (for example `postMessage` between a worker and the main thread)
- * can be reconstructed with `new ChecksumMismatchError(json)`.
+ * Every field is assigned as an enumerable own property on the error, so
+ * `JSON.stringify` emits all of them and `new ChecksumMismatchError(json)`
+ * reconstructs an equivalent error, `message` included. `stack` is not
+ * preserved. Note that `postMessage` uses structured clone rather than JSON:
+ * it keeps `message` and `stack` but drops these fields and yields a plain
+ * `Error`, so a worker that needs them must serialize explicitly.
  *
  * @internal
  */
@@ -72,19 +74,5 @@ export class ChecksumMismatchError extends Error {
     this.sourceLocation = init.sourceLocation;
     this.algorithm = init.algorithm;
     this.source = init.source;
-  }
-
-  /**
-   * The structured fields of this error, for transfer across boundaries that
-   * drop custom error properties.
-   */
-  public toJSON(): ChecksumMismatchErrorInit {
-    return {
-      receivedChecksum: this.receivedChecksum,
-      calculatedChecksum: this.calculatedChecksum,
-      sourceLocation: this.sourceLocation,
-      algorithm: this.algorithm,
-      source: this.source,
-    };
   }
 }
