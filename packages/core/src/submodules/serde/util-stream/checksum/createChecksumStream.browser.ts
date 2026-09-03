@@ -1,5 +1,6 @@
 import type { ChecksumValidationResult } from "@smithy/types";
 
+import { fromBase64 } from "../../util-base64/fromBase64.browser";
 import { toBase64 } from "../../util-base64/toBase64.browser";
 import { isReadableStream } from "../stream-type-check";
 import { ChecksumMismatchError } from "./ChecksumMismatchError";
@@ -120,7 +121,13 @@ export const createChecksumStream = ({
       let expected: string;
       let received: string;
       try {
-        expected = typeof expectedChecksum === "function" ? await expectedChecksum() : expectedChecksum;
+        if (typeof expectedChecksum === "function") {
+          expected = await expectedChecksum();
+          // Validate deferred trailer Base64 before comparison; the decoded bytes are not needed.
+          fromBase64(expected);
+        } else {
+          expected = expectedChecksum;
+        }
         const digest: Uint8Array = await checksum.digest();
         received = encoder(digest);
       } catch (e: unknown) {

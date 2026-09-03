@@ -449,15 +449,16 @@ describe(ChecksumStream.name, () => {
     });
 
     it("should report a mismatch against the provider's value", async () => {
+      const expected = toBase64("trailer-value");
       const checksumStream = new ChecksumStream({
-        expectedChecksum: () => Promise.resolve("trailer-value"),
+        expectedChecksum: () => Promise.resolve(expected),
         checksum: new Appender(),
         checksumSourceLocation: "x-amz-trailer",
         source: makeSource(),
       });
 
       await expect(collect(checksumStream)).rejects.toThrow(
-        `Checksum mismatch: expected "trailer-value" but received "${canonicalBase64}"` +
+        `Checksum mismatch: expected "${expected}" but received "${canonicalBase64}"` +
           ` in response header "x-amz-trailer".`
       );
     });
