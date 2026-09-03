@@ -1,6 +1,6 @@
 {
   "name": "@smithy/types",
-  "version": "4.17.2",
+  "version": "4.18.0",
   "homepage": "https://github.com/smithy-lang/smithy-typescript/tree/main/packages/types",
   "license": "Apache-2.0",
   "author": {
