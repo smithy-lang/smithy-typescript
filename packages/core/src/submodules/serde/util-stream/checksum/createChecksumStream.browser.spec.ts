@@ -101,7 +101,6 @@ import { createChecksumStream } from "./createChecksumStream.browser";
 
         await expect(headStream(checksumStream, Infinity)).rejects.toMatchObject({
           name: "ChecksumMismatchError",
-          code: "CHECKSUM_MISMATCH",
           algorithm: "CRC32",
           source: "STREAM",
           receivedChecksum: "different-expected-checksum",

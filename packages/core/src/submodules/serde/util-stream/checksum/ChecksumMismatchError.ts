@@ -1,12 +1,6 @@
 import type { ChecksumSource } from "@smithy/types";
 
 /**
- * Stable error code for a checksum mismatch.
- * @internal
- */
-export const CHECKSUM_MISMATCH = "CHECKSUM_MISMATCH";
-
-/**
  * The structured fields of a {@link ChecksumMismatchError}.
  *
  * This is also the shape returned by {@link ChecksumMismatchError.toJSON}, so
@@ -55,11 +49,6 @@ export interface ChecksumMismatchErrorInit {
  * @internal
  */
 export class ChecksumMismatchError extends Error {
-  /**
-   * Stable error code, for consumers that cannot rely on `instanceof` across
-   * realm or module boundaries.
-   */
-  public readonly code: typeof CHECKSUM_MISMATCH;
   public readonly receivedChecksum: string;
   public readonly calculatedChecksum: string;
   public readonly sourceLocation: string;
@@ -78,7 +67,6 @@ export class ChecksumMismatchError extends Error {
         ` in response header "${init.sourceLocation}".`
     );
     this.name = "ChecksumMismatchError";
-    this.code = CHECKSUM_MISMATCH;
     this.receivedChecksum = init.receivedChecksum;
     this.calculatedChecksum = init.calculatedChecksum;
     this.sourceLocation = init.sourceLocation;

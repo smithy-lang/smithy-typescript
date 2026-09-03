@@ -386,7 +386,6 @@ describe(ChecksumStream.name, () => {
       expect(error).toBeInstanceOf(Error);
       expect(error).toBeInstanceOf(ChecksumMismatchError);
       expect(error.name).toEqual("ChecksumMismatchError");
-      expect(error.code).toEqual("CHECKSUM_MISMATCH");
       expect(error.algorithm).toEqual("CRC32");
       expect(error.source).toEqual("STREAM");
       // The wire value, versus the value calculated locally.
@@ -418,7 +417,6 @@ describe(ChecksumStream.name, () => {
       const reconstructed = new ChecksumMismatchError(transferred);
 
       expect(reconstructed.name).toEqual(error.name);
-      expect(reconstructed.code).toEqual(error.code);
       expect(reconstructed.message).toEqual(error.message);
       expect(reconstructed.algorithm).toEqual("CRC64NVME");
       expect(reconstructed.source).toEqual("STORED");
