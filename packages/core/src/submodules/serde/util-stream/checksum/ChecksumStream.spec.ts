@@ -179,19 +179,32 @@ describe(ChecksumStream.name, () => {
   });
 
   describe("error propagation", () => {
-    it("should surface errors thrown by checksum.update", async () => {
+    it("should report FAILED when checksum.update throws", async () => {
+      const error = new Error("update failed");
       const checksum = new Appender();
       vi.spyOn(checksum, "update").mockImplementation(() => {
-        throw new Error("update failed");
+        throw error;
       });
+      const onResult = vi.fn();
       const checksumStream = new ChecksumStream({
         expectedChecksum: canonicalBase64,
         checksum,
         checksumSourceLocation: "my-header",
         source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
       });
 
-      await expect(collect(checksumStream)).rejects.toThrow("update failed");
+      await expect(collect(checksumStream)).rejects.toBe(error);
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
     });
 
     it("should surface errors thrown by checksum.digest", async () => {
