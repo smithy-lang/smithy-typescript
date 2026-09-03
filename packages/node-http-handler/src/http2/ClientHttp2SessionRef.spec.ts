@@ -87,7 +87,7 @@ describe(ClientHttp2SessionRef.name, () => {
     expect(session.destroy).toHaveBeenCalledTimes(1);
   });
 
-  it("destroy() clears the session timeout before destroying (prevents #2258 retention)", () => {
+  it("destroy() clears the session timeout before destroying", () => {
     const session = createMockSession();
     const ref = new ClientHttp2SessionRef(session);
     ref.destroy();
