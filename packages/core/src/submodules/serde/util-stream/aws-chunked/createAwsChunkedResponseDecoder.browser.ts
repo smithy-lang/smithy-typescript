@@ -58,9 +58,28 @@ export const createAwsChunkedResponseDecoder = ({
   };
 
   const reader = source.getReader();
+  let pendingPayloads: Uint8Array[] = [];
+  let pendingPayloadIndex = 0;
+
+  const enqueueNextPayload = (controller: ReadableStreamDefaultController<Uint8Array>): boolean => {
+    if (pendingPayloadIndex >= pendingPayloads.length) {
+      return false;
+    }
+
+    controller.enqueue(pendingPayloads[pendingPayloadIndex++]);
+    if (pendingPayloadIndex === pendingPayloads.length) {
+      pendingPayloads = [];
+      pendingPayloadIndex = 0;
+    }
+    return true;
+  };
 
   const body = new ReadableStream({
     async pull(controller) {
+      if (enqueueNextPayload(controller)) {
+        return;
+      }
+
       while (true) {
         let result: ReadableStreamReadResult<Uint8Array>;
         try {
@@ -98,9 +117,8 @@ export const createAwsChunkedResponseDecoder = ({
         }
 
         if (decoded.length > 0) {
-          for (const payload of decoded) {
-            controller.enqueue(payload);
-          }
+          pendingPayloads = decoded;
+          enqueueNextPayload(controller);
           return;
         }
         // The source chunk held only framing bytes, so read again rather than
