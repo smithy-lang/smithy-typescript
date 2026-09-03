@@ -38,6 +38,7 @@ export class ChecksumStream extends Readable {
   private readonly algorithm?: string;
   private readonly checksumSource?: ChecksumSource;
   private readonly holdBackLastChunk: boolean;
+  private readonly isProtocolError?: (error: unknown) => boolean;
   private readonly onResult?: (result: ChecksumValidationResult) => void;
 
   /**
@@ -60,6 +61,7 @@ export class ChecksumStream extends Readable {
     algorithm,
     checksumSource,
     holdBackLastChunk,
+    isProtocolError,
     onResult,
   }: ChecksumStreamInit<Readable>) {
     super();
@@ -77,6 +79,7 @@ export class ChecksumStream extends Readable {
     this.algorithm = algorithm;
     this.checksumSource = checksumSource;
     this.holdBackLastChunk = holdBackLastChunk ?? false;
+    this.isProtocolError = isProtocolError;
     this.onResult = onResult;
 
     // Observe the source, updating the running checksum and forwarding each
@@ -112,6 +115,13 @@ export class ChecksumStream extends Readable {
     try {
       this.checksum.update(chunk);
     } catch (e: unknown) {
+      this.heldChunk = undefined;
+      this.settle({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: this.algorithm,
+        source: this.checksumSource,
+      });
       this.destroy(e as Error);
       return;
     }
@@ -202,9 +212,19 @@ export class ChecksumStream extends Readable {
   };
 
   /**
-   * Surface source errors on this stream.
+   * Surface source errors on this stream. Protocol errors make validation
+   * fail; transport errors continue through destruction as incomplete.
    */
   private onSourceError = (error: Error): void => {
+    if (this.isProtocolError?.(error)) {
+      this.heldChunk = undefined;
+      this.settle({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: this.algorithm,
+        source: this.checksumSource,
+      });
+    }
     this.destroy(error);
   };
 

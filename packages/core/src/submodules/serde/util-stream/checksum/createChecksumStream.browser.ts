@@ -38,6 +38,7 @@ export const createChecksumStream = ({
   algorithm,
   checksumSource,
   holdBackLastChunk,
+  isProtocolError,
   onResult,
 }: ChecksumStreamInit): ReadableStreamType => {
   if (!isReadableStream(source)) {
@@ -79,7 +80,19 @@ export const createChecksumStream = ({
        * When the upstream source flows data to this stream,
        * calculate a step update of the checksum.
        */
-      checksum.update(chunk);
+      try {
+        checksum.update(chunk);
+      } catch (error) {
+        heldChunk = undefined;
+        settle({
+          status: "FAILED",
+          validationPerformed: false,
+          validationAlgorithm: algorithm,
+          source: checksumSource,
+        });
+        controller.error(error);
+        return;
+      }
 
       if (!holdBackLastChunk) {
         controller.enqueue(chunk);
@@ -191,9 +204,11 @@ export const createChecksumStream = ({
         try {
           result = await reader.read();
         } catch (error) {
+          // Protocol errors indicate malformed framing. Other source read
+          // failures are transport interruptions and remain incomplete.
           heldChunk = undefined;
           settle({
-            status: "INCOMPLETE",
+            status: isProtocolError?.(error) ? "FAILED" : "INCOMPLETE",
             validationPerformed: false,
             validationAlgorithm: algorithm,
             source: checksumSource,

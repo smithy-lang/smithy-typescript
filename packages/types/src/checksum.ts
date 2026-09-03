@@ -95,8 +95,9 @@ export type ChecksumSource = "STORED" | "STREAM";
  * - `INCOMPLETE`: the body was cancelled, destroyed, or closed before its
  *   normal end of stream, so no comparison ran.
  * - `FAILED`: the comparison ran and the checksums differed, or it could not
- *   run because the expected value could not be obtained, the digest could
- *   not be calculated, or the digest could not be Base64-encoded.
+ *   run because the response framing could not be decoded, the expected value
+ *   could not be obtained, the digest could not be calculated, or the digest
+ *   could not be Base64-encoded.
  *
  * @public
  */
@@ -117,9 +118,9 @@ export interface ChecksumValidationResult {
   /**
    * Whether a checksum comparison actually ran. This is `true` only for
    * `SUCCEEDED` and for a `FAILED` mismatch; it is `false` when no checksum
-   * was eligible, when the body ended early, when the expected value could not
-   * be obtained, when the digest could not be calculated, or when the digest
-   * could not be Base64-encoded.
+   * was eligible, when the body ended early, when response framing could not
+   * be decoded, when the expected value could not be obtained, when the digest
+   * could not be calculated, or when the digest could not be Base64-encoded.
    */
   validationPerformed: boolean;
 

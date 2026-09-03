@@ -352,7 +352,7 @@ import { createChecksumStream } from "./createChecksumStream.browser";
           });
         });
 
-        it("should report INCOMPLETE when checksum.update throws", async () => {
+        it("should report FAILED when checksum.update throws", async () => {
           const error = new Error("checksum update failed");
           const checksum = new Appender();
           vi.spyOn(checksum, "update").mockImplementation(() => {
@@ -373,7 +373,7 @@ import { createChecksumStream } from "./createChecksumStream.browser";
 
           expect(onResult).toHaveBeenCalledTimes(1);
           expect(onResult).toHaveBeenCalledWith({
-            status: "INCOMPLETE",
+            status: "FAILED",
             validationPerformed: false,
             validationAlgorithm: "CRC32",
             source: "STREAM",

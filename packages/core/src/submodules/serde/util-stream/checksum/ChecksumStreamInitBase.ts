@@ -63,6 +63,15 @@ export interface ChecksumStreamInitBase {
   holdBackLastChunk?: boolean;
 
   /**
+   * Identifies source errors caused by malformed protocol framing rather than
+   * cancellation, destruction, or a transport interruption.
+   *
+   * Protocol errors settle validation as `FAILED`; other source errors settle
+   * as `INCOMPLETE`. This callback must not throw.
+   */
+  isProtocolError?: (error: unknown) => boolean;
+
+  /**
    * Called exactly once when validation settles, with the terminal outcome.
    *
    * It is not called at all if the stream is abandoned without being destroyed
