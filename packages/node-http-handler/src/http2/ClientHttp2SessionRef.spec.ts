@@ -10,6 +10,7 @@ const createMockSession = (destroyed = false) => {
     destroy: vi.fn(() => {
       (session as any).destroyed = true;
     }),
+    setTimeout: vi.fn(),
     destroyed,
   } as unknown as ClientHttp2Session;
   return session;
@@ -91,5 +92,17 @@ describe(ClientHttp2SessionRef.name, () => {
     const ref = new ClientHttp2SessionRef(session);
     ref.destroy();
     expect(session.destroy).not.toHaveBeenCalled();
+    expect(session.setTimeout).not.toHaveBeenCalled();
+  });
+
+  it("destroy() clears the session timeout before destroying the session", () => {
+    const session = createMockSession();
+    const ref = new ClientHttp2SessionRef(session);
+    ref.destroy();
+    expect(session.setTimeout).toHaveBeenCalledTimes(1);
+    expect(session.setTimeout).toHaveBeenCalledWith(0);
+    expect((session.setTimeout as any).mock.invocationCallOrder[0]).toBeLessThan(
+      (session.destroy as any).mock.invocationCallOrder[0]
+    );
   });
 });
