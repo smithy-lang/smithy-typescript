@@ -526,6 +526,58 @@ describe(NodeHttp2Handler.name, () => {
         expect(session?.destroyed).toBe(true);
       });
     });
+
+    describe("clears the session timer when a session is destroyed", () => {
+      // Node keeps a destroyed Http2Session reachable until a pending setTimeout fires, and
+      // Http2Session.setTimeout(0) is a no-op once the session is destroyed. Isolated sessions
+      // get a 300s default timer, so without clearing it every completed request is retained
+      // for 5 minutes. `session.timeout` is the last value set while the session was alive.
+      it.each([
+        ["object provider", async () => ({ disableConcurrentStreams: true })],
+        ["static object", { disableConcurrentStreams: true }],
+      ])(
+        "isolated session with the default timer, disableConcurrentStreams: true in constructor parameter of %s",
+        async (_, options) => {
+          let session: any;
+
+          nodeH2Handler = new NodeHttp2Handler(options);
+
+          const connectReal = http2.connect;
+          vi.spyOn(http2, "connect").mockImplementation((...args: any[]) => {
+            session = connectReal(args[0], args[1]);
+            return session;
+          });
+
+          mockH2Server.removeAllListeners("request");
+          mockH2Server.on("request", (request: any, response: any) => {
+            createResponseFunction(mockResponse)(request, response);
+          });
+          const { response } = await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
+
+          expect(session.timeout).toBe(300_000);
+
+          const closed = new Promise((resolve) => session.once("close", resolve));
+          (response.body as ClientHttp2Stream).resume();
+          await closed;
+
+          expect(session.destroyed).toBe(true);
+          expect(session.timeout).toBe(0);
+        }
+      );
+
+      it("pooled session with a configured sessionTimeout, on handler destroy", async () => {
+        nodeH2Handler = new NodeHttp2Handler({ sessionTimeout });
+        await nodeH2Handler.handle(new HttpRequest(getMockReqOptions()), {});
+
+        const session: any = getFirstSession(nodeH2Handler, authority).deref();
+        expect(session.timeout).toBe(sessionTimeout);
+
+        nodeH2Handler.destroy();
+
+        expect(session.destroyed).toBe(true);
+        expect(session.timeout).toBe(0);
+      });
+    });
   });
 
   describe("maxConcurrency", () => {
