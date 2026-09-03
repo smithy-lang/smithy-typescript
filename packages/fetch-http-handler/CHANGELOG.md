@@ -1,5 +1,16 @@
 # Change Log
 
+## 5.8.0
+
+### Minor Changes
+
+- 016389b: Allow passing custom fetch function to fetch-http-handler
+
+### Patch Changes
+
+- Updated dependencies [016389b]
+  - @smithy/types@4.18.0
+
 ## 5.7.2
 
 ### Patch Changes

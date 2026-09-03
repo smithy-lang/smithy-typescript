@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.18.0
+
+### Minor Changes
+
+- 016389b: Allow passing custom fetch function to fetch-http-handler
+
 ## 4.17.2
 
 ### Patch Changes

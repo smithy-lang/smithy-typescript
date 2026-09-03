@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.12.1
+
+### Patch Changes
+
+- 1d85108: Clear the HTTP/2 session timeout before destroying a session. Node keeps a destroyed `Http2Session` reachable until its pending `setTimeout` fires, so with the default 300 s timer on isolated sessions every completed request was retained for 5 minutes.
+- Updated dependencies [016389b]
+  - @smithy/types@4.18.0
+
 ## 4.12.0
 
 ### Minor Changes
