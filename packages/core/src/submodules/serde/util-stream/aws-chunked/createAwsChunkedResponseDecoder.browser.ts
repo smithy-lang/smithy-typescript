@@ -67,6 +67,7 @@ export const createAwsChunkedResponseDecoder = ({
           result = await reader.read();
         } catch (e: unknown) {
           settle(e as Error);
+          reader.releaseLock();
           throw e;
         }
 
@@ -76,6 +77,8 @@ export const createAwsChunkedResponseDecoder = ({
           } catch (e: unknown) {
             settle(e as Error);
             throw e;
+          } finally {
+            reader.releaseLock();
           }
           settle();
           controller.close();
@@ -110,7 +113,9 @@ export const createAwsChunkedResponseDecoder = ({
           ? undefined
           : new AwsChunkedDecodeError("the decoded stream was cancelled before the framing was complete.")
       );
-      return reader.cancel(reason);
+      const cancellation = reader.cancel(reason);
+      reader.releaseLock();
+      return cancellation;
     },
   });
 
