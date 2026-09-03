@@ -211,9 +211,8 @@ export class ChecksumStream extends Readable {
     });
 
     if (this.heldChunk !== undefined) {
-      const release = this.heldChunk;
+      this.push(this.heldChunk);
       this.heldChunk = undefined;
-      this.push(release);
     }
     this.push(null);
   };
