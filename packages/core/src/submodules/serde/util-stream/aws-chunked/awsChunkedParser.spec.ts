@@ -68,7 +68,7 @@ describe(AwsChunkedParser.name, () => {
       },
       {
         name: "data and terminal extensions",
-        encoded: `3 \t; repeated ; repeated = token ; quoted = "a\\\"b\\\\c"\r\nabc\r\n0; end = "yes"\r\n\r\n`,
+        encoded: `3 \t; repeated ; repeated = token ; quoted = "a\\"b\\\\c"\r\nabc\r\n0; end = "yes"\r\n\r\n`,
         payload: "abc",
       },
       {
