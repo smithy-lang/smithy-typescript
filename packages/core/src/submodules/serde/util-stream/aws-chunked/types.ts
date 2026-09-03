@@ -1,4 +1,17 @@
 /**
+ * A trailer field parsed from an `aws-chunked` response.
+ *
+ * Field order, original name spelling, and duplicates are preserved. Consumers
+ * perform case-insensitive lookup without collapsing the ordered fields.
+ *
+ * @internal
+ */
+export interface TrailerField {
+  readonly name: string;
+  readonly value: string;
+}
+
+/**
  * Options for decoding an `aws-chunked` response body.
  *
  * @internal
@@ -10,16 +23,16 @@ export interface AwsChunkedResponseDecoderOptions<StreamType> {
   source: StreamType;
 
   /**
-   * Trailer field names the response declared, which must all arrive before the
-   * framing is considered complete. Compared case-insensitively.
+   * Trailer field names declared by the response. Every trailer field that
+   * arrives must have a matching declaration. Compared case-insensitively.
    */
-  declaredTrailers?: readonly string[];
+  declaredTrailers: readonly string[];
 
   /**
-   * The decoded payload length the response declared, if any. The decoded byte
-   * count is verified against it.
+   * The decoded payload length declared by the response. The decoded byte count
+   * is verified against it.
    */
-  decodedContentLength?: number;
+  decodedContentLength: number;
 }
 
 /**
@@ -35,13 +48,14 @@ export interface AwsChunkedResponseDecoderResult<StreamType> {
   body: StreamType;
 
   /**
-   * The parsed trailer fields, keyed by lowercased field name.
+   * The parsed trailer fields in wire order, retaining original field-name
+   * spelling and duplicates.
    *
-   * This is an internal channel. It resolves when the terminal trailer section
-   * has been consumed, and rejects with the same error the body surfaces, so a
+   * This is an internal channel. It resolves after the underlying source
+   * reaches normal EOF, and rejects with the same error the body surfaces, so a
    * caller that only observes the body still sees every failure. It is
    * pre-handled internally, so ignoring it does not produce an unhandled
    * rejection.
    */
-  trailers: Promise<Record<string, string>>;
+  trailers: Promise<readonly TrailerField[]>;
 }

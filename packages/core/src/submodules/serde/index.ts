@@ -104,6 +104,7 @@ export { createAwsChunkedResponseDecoder } from "./util-stream/aws-chunked/creat
 export type {
   AwsChunkedResponseDecoderOptions,
   AwsChunkedResponseDecoderResult,
+  TrailerField,
 } from "./util-stream/aws-chunked/types";
 export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream";

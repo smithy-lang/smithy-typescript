@@ -6,11 +6,11 @@ import {
   createAwsChunkedResponseDecoder as createAwsChunkedResponseDecoderWeb,
   type ReadableStreamType,
 } from "./createAwsChunkedResponseDecoder.browser";
-import type { AwsChunkedResponseDecoderOptions, AwsChunkedResponseDecoderResult } from "./types";
+import type { AwsChunkedResponseDecoderOptions, AwsChunkedResponseDecoderResult, TrailerField } from "./types";
 
 /**
  * Removes `aws-chunked` framing from a response body, returning the decoded
- * payload and the trailer section that followed it.
+ * payload and the ordered trailer section that followed it.
  *
  * Decoding is driven by the response's content encoding rather than by whether
  * a checksum is being validated, so an encoded body is decoded even when no
@@ -39,9 +39,9 @@ export function createAwsChunkedResponseDecoder(
 
   const { source, declaredTrailers, decodedContentLength } = options as AwsChunkedResponseDecoderOptions<Readable>;
 
-  let resolveTrailers!: (trailers: Record<string, string>) => void;
+  let resolveTrailers!: (trailers: readonly TrailerField[]) => void;
   let rejectTrailers!: (error: Error) => void;
-  const trailers = new Promise<Record<string, string>>((resolve, reject) => {
+  const trailers = new Promise<readonly TrailerField[]>((resolve, reject) => {
     resolveTrailers = resolve;
     rejectTrailers = reject;
   });

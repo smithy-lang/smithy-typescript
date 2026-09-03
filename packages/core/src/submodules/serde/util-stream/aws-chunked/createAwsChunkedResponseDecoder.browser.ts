@@ -1,6 +1,6 @@
 import { AwsChunkedDecodeError } from "./AwsChunkedDecodeError";
 import { AwsChunkedParser } from "./awsChunkedParser";
-import type { AwsChunkedResponseDecoderOptions, AwsChunkedResponseDecoderResult } from "./types";
+import type { AwsChunkedResponseDecoderOptions, AwsChunkedResponseDecoderResult, TrailerField } from "./types";
 
 /**
  * Alias prevents compiler from turning
@@ -33,9 +33,9 @@ export const createAwsChunkedResponseDecoder = ({
   // rather than surfacing on the stream.
   const parser = new AwsChunkedParser({ declaredTrailers, decodedContentLength });
 
-  let resolveTrailers!: (trailers: Record<string, string>) => void;
+  let resolveTrailers!: (trailers: readonly TrailerField[]) => void;
   let rejectTrailers!: (error: Error) => void;
-  const trailers = new Promise<Record<string, string>>((resolve, reject) => {
+  const trailers = new Promise<readonly TrailerField[]>((resolve, reject) => {
     resolveTrailers = resolve;
     rejectTrailers = reject;
   });

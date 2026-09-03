@@ -30,6 +30,14 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
       });
     };
 
+    const decodeResponse = (
+      source: ReadableStream,
+      {
+        declaredTrailers = [],
+        decodedContentLength = alphabet.length,
+      }: { declaredTrailers?: readonly string[]; decodedContentLength?: number } = {}
+    ) => createAwsChunkedResponseDecoder({ source, declaredTrailers, decodedContentLength });
+
     const collect = async (stream: ReadableStream): Promise<string> => {
       const reader = stream.getReader();
       const out: number[] = [];
@@ -48,44 +56,44 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
     };
 
     it("should return a ReadableStream", () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeSource(frame(alphabet)) });
+      const { body } = decodeResponse(makeSource(frame(alphabet)));
       expect(body).toBeInstanceOf(ReadableStream);
     });
 
     it("should decode the payload and remove all framing", async () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeSource(frame(alphabet)) });
+      const { body } = decodeResponse(makeSource(frame(alphabet)));
       expect(await collect(body)).toEqual(alphabet);
     });
 
-    it("should resolve the trailers once the body is consumed", async () => {
-      const { body, trailers } = createAwsChunkedResponseDecoder({
-        source: makeSource(frame(alphabet, { "x-amz-stream-checksum-crc32": "AAAAAA==" })),
-        declaredTrailers: ["x-amz-stream-checksum-crc32"],
-      });
+    it("should resolve ordered trailers after normal EOF", async () => {
+      const { body, trailers } = decodeResponse(
+        makeSource(frame(alphabet, { "X-Amz-Stream-Checksum-CRC32": "AAAAAA==" })),
+        { declaredTrailers: ["x-amz-stream-checksum-crc32"] }
+      );
 
       expect(await collect(body)).toEqual(alphabet);
-      expect(await trailers).toEqual({ "x-amz-stream-checksum-crc32": "AAAAAA==" });
+      expect(await trailers).toEqual([{ name: "X-Amz-Stream-Checksum-CRC32", value: "AAAAAA==" }]);
     });
 
     it("should decode an empty payload", async () => {
-      const { body, trailers } = createAwsChunkedResponseDecoder({ source: makeSource(frame("")) });
+      const { body, trailers } = decodeResponse(makeSource(frame("")), { decodedContentLength: 0 });
       expect(await collect(body)).toEqual("");
-      expect(await trailers).toEqual({});
+      expect(await trailers).toEqual([]);
     });
 
     for (const splitSize of [1, 2, 3, 8, Infinity]) {
       it(`should decode identically with ${splitSize} bytes per source chunk`, async () => {
-        const { body, trailers } = createAwsChunkedResponseDecoder({
-          source: makeSource(frame(alphabet, { "x-amz-checksum-crc32": "AAAAAA==" }), splitSize),
-          decodedContentLength: 26,
-        });
+        const { body, trailers } = decodeResponse(
+          makeSource(frame(alphabet, { "x-amz-checksum-crc32": "AAAAAA==" }), splitSize),
+          { declaredTrailers: ["x-amz-checksum-crc32"] }
+        );
         expect(await collect(body)).toEqual(alphabet);
-        expect(await trailers).toEqual({ "x-amz-checksum-crc32": "AAAAAA==" });
+        expect(await trailers).toEqual([{ name: "x-amz-checksum-crc32", value: "AAAAAA==" }]);
       });
     }
 
     it("should produce the same malformed-response error as the Node adapter", async () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeSource(`zz\r\nabc\r\n0\r\n\r\n`) });
+      const { body } = decodeResponse(makeSource(`zz\r\nabc\r\n0\r\n\r\n`));
       await expect(collect(body)).rejects.toThrow(AwsChunkedDecodeError);
     });
 
@@ -100,7 +108,7 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
           throw new Error("source cancellation failed");
         },
       });
-      const { body, trailers } = createAwsChunkedResponseDecoder({ source });
+      const { body, trailers } = decodeResponse(source);
 
       const bodyError = await collect(body).catch((e) => e);
       expect(bodyError).toBeInstanceOf(AwsChunkedDecodeError);
@@ -110,7 +118,7 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
     });
 
     it("should reject the trailers with the same error the body surfaces", async () => {
-      const { body, trailers } = createAwsChunkedResponseDecoder({ source: makeSource(`zz\r\n`) });
+      const { body, trailers } = decodeResponse(makeSource(`zz\r\n`));
 
       const bodyError = await collect(body).catch((e) => e);
       const trailerError = await trailers.catch((e) => e);
@@ -118,12 +126,12 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
     });
 
     it("should reject a truncated body", async () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeSource(`3\r\nab`) });
+      const { body } = decodeResponse(makeSource(`3\r\nab`));
       await expect(collect(body)).rejects.toThrow(/framing is truncated/);
     });
 
     it("should not raise an unhandled rejection when the trailers are ignored", async () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeSource(`zz\r\n`) });
+      const { body } = decodeResponse(makeSource(`zz\r\n`));
       await expect(collect(body)).rejects.toThrow(AwsChunkedDecodeError);
       await new Promise((r) => setTimeout(r, 50));
     });
@@ -134,14 +142,14 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
           controller.error(new Error("source failure"));
         },
       });
-      const { body } = createAwsChunkedResponseDecoder({ source });
+      const { body } = decodeResponse(source);
       await expect(collect(body)).rejects.toThrow("source failure");
     });
 
     describe("cancellation", () => {
       it("should cancel the source and reject the trailers when cancelled through a reader", async () => {
         const source = makeSource(frame(alphabet), 4);
-        const { body, trailers } = createAwsChunkedResponseDecoder({ source });
+        const { body, trailers } = decodeResponse(source);
 
         const reader = body.getReader();
         await reader.read();
@@ -151,40 +159,54 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
       });
 
       it("should reject the trailers when the body itself is cancelled", async () => {
-        const { body, trailers } = createAwsChunkedResponseDecoder({ source: makeSource(frame(alphabet), 4) });
+        const { body, trailers } = decodeResponse(makeSource(frame(alphabet), 4));
 
         await body.cancel("consumer stopped");
 
         await expect(trailers).rejects.toThrow(/cancelled before the framing was complete/);
       });
 
-      it("should validate completed framing before it can be cancelled", async () => {
+      it("should validate decoded length only after normal EOF", async () => {
+        const source = new ReadableStream({
+          start(controller) {
+            controller.enqueue(fromUtf8(frame("abc")));
+            controller.close();
+          },
+        });
+        const { body, trailers } = decodeResponse(source, { decodedContentLength: 4 });
+
+        const reader = body.getReader();
+        expect(toUtf8((await reader.read()).value!)).toEqual("abc");
+        await expect(reader.read()).rejects.toThrow(/does not match the declared/);
+        await expect(trailers).rejects.toThrow(/does not match the declared/);
+      });
+
+      it("should reject the trailers when cancelled after framing but before source EOF", async () => {
         const source = new ReadableStream({
           start(controller) {
             controller.enqueue(fromUtf8(frame("abc")));
           },
         });
-        const { body, trailers } = createAwsChunkedResponseDecoder({ source, decodedContentLength: 4 });
+        const { body, trailers } = decodeResponse(source, { decodedContentLength: 3 });
 
         const reader = body.getReader();
-        await expect(reader.read()).rejects.toThrow(/does not match the declared/);
-        await expect(trailers).rejects.toThrow(/does not match the declared/);
+        expect(toUtf8((await reader.read()).value!)).toEqual("abc");
+        await reader.cancel("consumer stopped before EOF");
+
+        await expect(trailers).rejects.toThrow(/cancelled before the framing was complete/);
       });
 
-      it("should not reject the trailers when cancelled after the framing completed", async () => {
-        const { body, trailers } = createAwsChunkedResponseDecoder({
-          source: makeSource(frame(alphabet)),
-        });
+      it("should not reject the trailers when cancelled after normal EOF", async () => {
+        const { body, trailers } = decodeResponse(makeSource(frame(alphabet)));
 
         expect(await collect(body)).toEqual(alphabet);
         await body.cancel("done");
 
-        expect(await trailers).toEqual({});
+        expect(await trailers).toEqual([]);
       });
     });
 
     it("should read again rather than stall when a source chunk holds only framing", async () => {
-      // The first source chunk is the size line alone, which yields no payload.
       const source = new ReadableStream({
         start(controller) {
           controller.enqueue(fromUtf8("3\r\n"));
@@ -193,7 +215,7 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
           controller.close();
         },
       });
-      const { body } = createAwsChunkedResponseDecoder({ source });
+      const { body } = decodeResponse(source, { decodedContentLength: 3 });
 
       const reader = body.getReader();
       const first = await reader.read();

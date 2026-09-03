@@ -2,6 +2,7 @@ import { Readable } from "node:stream";
 
 import { AwsChunkedDecodeError } from "./AwsChunkedDecodeError";
 import { AwsChunkedParser, type AwsChunkedParserOptions } from "./awsChunkedParser";
+import type { TrailerField } from "./types";
 
 /**
  * @internal
@@ -13,7 +14,7 @@ export interface AwsChunkedDecodingStreamInit extends AwsChunkedParserOptions {
    * Called with the parsed trailers once the terminal trailer section has been
    * consumed.
    */
-  onTrailers?: (trailers: Record<string, string>) => void;
+  onTrailers?: (trailers: readonly TrailerField[]) => void;
 
   /**
    * Called if the framing could not be decoded, or the source failed.
@@ -34,7 +35,7 @@ export interface AwsChunkedDecodingStreamInit extends AwsChunkedParserOptions {
 export class AwsChunkedDecodingStream extends Readable {
   private source: Readable;
   private readonly parser: AwsChunkedParser;
-  private readonly onTrailers?: (trailers: Record<string, string>) => void;
+  private readonly onTrailers?: (trailers: readonly TrailerField[]) => void;
   private readonly onError?: (error: Error) => void;
   private settled = false;
 

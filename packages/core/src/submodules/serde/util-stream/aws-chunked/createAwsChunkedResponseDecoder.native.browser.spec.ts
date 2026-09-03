@@ -18,10 +18,6 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
       return `${chunk}0\r\n${trailerLines}\r\n`;
     };
 
-    /**
-     * fromUtf8 returns Uint8Array<ArrayBufferLike>, but BlobPart requires the
-     * buffer to be a plain ArrayBuffer. Copy into a fresh view to narrow it.
-     */
     const toBlobPart = (bytes: Uint8Array): Uint8Array<ArrayBuffer> => new Uint8Array(bytes);
 
     const collect = async (stream: ReadableStream): Promise<string> => {
@@ -41,59 +37,71 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
       return toUtf8(new Uint8Array(out));
     };
 
-    /**
-     * A Blob without stream(), which is the case this adapter exists for.
-     */
     const makeStreamlessBlob = (encoded: string): Blob => {
       const blob = new Blob([toBlobPart(fromUtf8(encoded))]);
       Object.defineProperty(blob, "stream", { value: undefined });
       return blob;
     };
 
+    const decodeResponse = (
+      source: ReadableStream | Blob,
+      {
+        declaredTrailers = [],
+        decodedContentLength = alphabet.length,
+      }: { declaredTrailers?: readonly string[]; decodedContentLength?: number } = {}
+    ) => createAwsChunkedResponseDecoder({ source, declaredTrailers, decodedContentLength });
+
     it("should decode a Blob that can produce a stream", async () => {
-      const blob = new Blob([toBlobPart(fromUtf8(frame(alphabet, { "x-amz-checksum-crc32": "AAAAAA==" })))]);
+      const blob = new Blob([toBlobPart(fromUtf8(frame(alphabet, { "X-Amz-Checksum-CRC32": "AAAAAA==" })))]);
       if (typeof blob.stream !== "function") {
         return;
       }
 
-      const { body, trailers } = createAwsChunkedResponseDecoder({
-        source: blob,
-        declaredTrailers: ["x-amz-checksum-crc32"],
-      });
+      const { body, trailers } = decodeResponse(blob, { declaredTrailers: ["x-amz-checksum-crc32"] });
 
       expect(await collect(body)).toEqual(alphabet);
-      expect(await trailers).toEqual({ "x-amz-checksum-crc32": "AAAAAA==" });
+      expect(await trailers).toEqual([{ name: "X-Amz-Checksum-CRC32", value: "AAAAAA==" }]);
     });
 
     it("should decode a Blob without stream() by collecting it", async () => {
-      const { body, trailers } = createAwsChunkedResponseDecoder({
-        source: makeStreamlessBlob(frame(alphabet, { "x-amz-checksum-crc32": "AAAAAA==" })),
-        declaredTrailers: ["x-amz-checksum-crc32"],
-        decodedContentLength: 26,
-      });
+      const { body, trailers } = decodeResponse(
+        makeStreamlessBlob(frame(alphabet, { "x-amz-checksum-crc32": "AAAAAA==" })),
+        { declaredTrailers: ["x-amz-checksum-crc32"] }
+      );
 
       expect(await collect(body)).toEqual(alphabet);
-      expect(await trailers).toEqual({ "x-amz-checksum-crc32": "AAAAAA==" });
+      expect(await trailers).toEqual([{ name: "x-amz-checksum-crc32", value: "AAAAAA==" }]);
     });
 
     it("should decode an empty payload from a collected Blob", async () => {
-      const { body, trailers } = createAwsChunkedResponseDecoder({ source: makeStreamlessBlob(frame("")) });
+      const { body, trailers } = decodeResponse(makeStreamlessBlob(frame("")), { decodedContentLength: 0 });
       expect(await collect(body)).toEqual("");
-      expect(await trailers).toEqual({});
+      expect(await trailers).toEqual([]);
+    });
+
+    it("should expose decoded bytes before an EOF-time length mismatch", async () => {
+      const { body, trailers } = decodeResponse(makeStreamlessBlob(frame("abc")), {
+        decodedContentLength: 4,
+      });
+
+      const reader = body.getReader();
+      expect(toUtf8((await reader.read()).value!)).toEqual("abc");
+      await expect(reader.read()).rejects.toThrow(/does not match the declared/);
+      await expect(trailers).rejects.toThrow(/does not match the declared/);
     });
 
     it("should produce the same malformed-response error for a collected Blob", async () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeStreamlessBlob(`zz\r\nabc\r\n0\r\n\r\n`) });
+      const { body } = decodeResponse(makeStreamlessBlob(`zz\r\nabc\r\n0\r\n\r\n`));
       await expect(collect(body)).rejects.toThrow(AwsChunkedDecodeError);
     });
 
     it("should reject a truncated collected Blob", async () => {
-      const { body } = createAwsChunkedResponseDecoder({ source: makeStreamlessBlob(`3\r\nab`) });
+      const { body } = decodeResponse(makeStreamlessBlob(`3\r\nab`));
       await expect(collect(body)).rejects.toThrow(/framing is truncated/);
     });
 
     it("should reject the trailers when a collected Blob is malformed", async () => {
-      const { body, trailers } = createAwsChunkedResponseDecoder({ source: makeStreamlessBlob(`zz\r\n`) });
+      const { body, trailers } = decodeResponse(makeStreamlessBlob(`zz\r\n`));
       await expect(collect(body)).rejects.toThrow(AwsChunkedDecodeError);
       await expect(trailers).rejects.toThrow(AwsChunkedDecodeError);
     });
@@ -107,7 +115,7 @@ import { createAwsChunkedResponseDecoder } from "./createAwsChunkedResponseDecod
         },
       });
 
-      const { body } = createAwsChunkedResponseDecoder({ source });
+      const { body } = decodeResponse(source);
       expect(await collect(body)).toEqual(alphabet);
     });
   }

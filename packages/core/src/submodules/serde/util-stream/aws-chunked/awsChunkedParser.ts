@@ -1,4 +1,5 @@
 import { AwsChunkedDecodeError } from "./AwsChunkedDecodeError";
+import type { TrailerField } from "./types";
 
 /**
  * Maximum length, in bytes, of a chunk-size line including its delimiter.
@@ -24,26 +25,36 @@ export const MAX_TRAILER_SECTION_LENGTH = 64 * 1024;
  */
 export const MAX_TRAILER_FIELD_COUNT = 100;
 
+const HTAB = 0x09;
+const SP = 0x20;
+const DQUOTE = 0x22;
+const COLON = 0x3a;
+const SEMICOLON = 0x3b;
+const EQUALS = 0x3d;
+const BACKSLASH = 0x5c;
 const CR = 0x0d;
 const LF = 0x0a;
-const SEMICOLON = 0x3b;
-const COLON = 0x3a;
 
 const EMPTY = new Uint8Array(0);
 
 /**
  * @internal
  */
-export type AwsChunkedParserState = "CHUNK_SIZE" | "CHUNK_DATA" | "CHUNK_DATA_CRLF" | "TRAILER_LINES" | "COMPLETE";
+export type AwsChunkedParserState =
+  | "CHUNK_SIZE"
+  | "CHUNK_DATA"
+  | "CHUNK_DATA_CRLF"
+  | "TRAILER_LINES"
+  | "AWAIT_EOF"
+  | "COMPLETE";
 
 /**
  * @internal
  */
 export interface AwsChunkedParserOptions {
   /**
-   * Trailer field names that the response declared and that must therefore
-   * arrive before the framing is considered complete. Compared
-   * case-insensitively.
+   * Trailer field names declared by the response. Every trailer field that
+   * arrives must have a matching declaration. Compared case-insensitively.
    */
   declaredTrailers?: readonly string[];
 
@@ -68,11 +79,11 @@ const concat = (a: Uint8Array, b: Uint8Array): Uint8Array => {
 };
 
 /**
- * Decode ASCII bytes without pulling in a UTF-8 decoder. Control data in
- * `aws-chunked` framing is ASCII by definition, and any byte outside that range
- * would fail the syntax checks that follow.
+ * Decode control bytes without pulling in a UTF-8 decoder. HTTP field values
+ * can contain obs-text, so this intentionally preserves each octet as the
+ * corresponding code point.
  */
-const toAscii = (bytes: Uint8Array): string => {
+const toByteString = (bytes: Uint8Array): string => {
   let out = "";
   for (let i = 0; i < bytes.byteLength; ++i) {
     out += String.fromCharCode(bytes[i]);
@@ -83,14 +94,65 @@ const toAscii = (bytes: Uint8Array): string => {
 const isHexDigit = (code: number): boolean =>
   (code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x46) || (code >= 0x61 && code <= 0x66);
 
+const isOws = (code: number): boolean => code === SP || code === HTAB;
+
+/** RFC 9110 tchar. */
+const isTokenCharacter = (code: number): boolean =>
+  (code >= 0x30 && code <= 0x39) ||
+  (code >= 0x41 && code <= 0x5a) ||
+  (code >= 0x61 && code <= 0x7a) ||
+  code === 0x21 ||
+  code === 0x23 ||
+  code === 0x24 ||
+  code === 0x25 ||
+  code === 0x26 ||
+  code === 0x27 ||
+  code === 0x2a ||
+  code === 0x2b ||
+  code === 0x2d ||
+  code === 0x2e ||
+  code === 0x5e ||
+  code === 0x5f ||
+  code === 0x60 ||
+  code === 0x7c ||
+  code === 0x7e;
+
+/** RFC 9110 qdtext. */
+const isQuotedText = (code: number): boolean =>
+  code === HTAB ||
+  code === SP ||
+  code === 0x21 ||
+  (code >= 0x23 && code <= 0x5b) ||
+  (code >= 0x5d && code <= 0x7e) ||
+  code >= 0x80;
+
+/** RFC 9110 quoted-pair payload. */
+const isQuotedPairCharacter = (code: number): boolean =>
+  code === HTAB || code === SP || (code >= 0x21 && code <= 0x7e) || code >= 0x80;
+
+/** HTTP field-vchar plus SP and HTAB. */
+const isFieldValueCharacter = (code: number): boolean => code === HTAB || (code >= SP && code <= 0x7e) || code >= 0x80;
+
+const trimOws = (value: string): string => {
+  let start = 0;
+  let end = value.length;
+  while (start < end && isOws(value.charCodeAt(start))) {
+    ++start;
+  }
+  while (end > start && isOws(value.charCodeAt(end - 1))) {
+    --end;
+  }
+  return value.slice(start, end);
+};
+
 /**
  * A single-pass `aws-chunked` framing parser.
  *
  * The parser is runtime independent and operates on `Uint8Array`, so that the
  * Node.js, web, and Blob adapters share identical framing and
  * malformed-response behaviour. Source bytes may be delivered in arbitrary
- * fragments: a size line, payload, delimiter, or trailer line may be split
- * across any number of writes.
+ * fragments: a size line, extension, payload, delimiter, or trailer line may
+ * be split across any number of writes.
  *
  * Only bytes from the `CHUNK_DATA` state are emitted. Framing bytes and trailer
  * bytes are consumed and never surface to the caller, so a checksum computed
@@ -107,21 +169,19 @@ export class AwsChunkedParser {
    */
   private pending: Uint8Array = EMPTY;
 
-  /**
-   * Payload bytes still expected for the chunk being read.
-   */
+  /** Payload bytes still expected for the chunk being read. */
   private chunkRemaining = 0;
 
   private decodedByteCount = 0;
   private trailerSectionLength = 0;
   private trailerFieldCount = 0;
 
-  private readonly parsedTrailers: Record<string, string> = Object.create(null);
-  private readonly declaredTrailers: readonly string[];
+  private readonly parsedTrailers: TrailerField[] = [];
+  private readonly declaredTrailers: ReadonlySet<string>;
   private readonly decodedContentLength?: number;
 
   public constructor({ declaredTrailers, decodedContentLength }: AwsChunkedParserOptions = {}) {
-    this.declaredTrailers = (declaredTrailers ?? []).map((name) => name.trim().toLowerCase());
+    this.declaredTrailers = new Set((declaredTrailers ?? []).map((name) => trimOws(name).toLowerCase()));
     this.decodedContentLength = decodedContentLength;
 
     if (decodedContentLength !== undefined && !Number.isSafeInteger(decodedContentLength)) {
@@ -134,24 +194,20 @@ export class AwsChunkedParser {
     }
   }
 
-  /**
-   * Whether the terminal trailer section has been consumed.
-   */
+  /** Whether the terminal trailer section has been consumed. */
   public get complete(): boolean {
     return this.state === "COMPLETE";
   }
 
   /**
-   * The parsed trailer fields, keyed by lowercased field name. Only meaningful
-   * once {@link complete} is true.
+   * Parsed trailer fields in wire order, preserving original name spelling and
+   * duplicates. Only meaningful once {@link complete} is true.
    */
-  public get trailers(): Record<string, string> {
+  public get trailers(): readonly TrailerField[] {
     return this.parsedTrailers;
   }
 
-  /**
-   * The number of decoded payload bytes emitted so far.
-   */
+  /** The number of decoded payload bytes emitted so far. */
   public get decodedBytes(): number {
     return this.decodedByteCount;
   }
@@ -166,7 +222,7 @@ export class AwsChunkedParser {
     let cursor = 0;
 
     while (cursor < bytes.byteLength) {
-      if (this.state === "COMPLETE") {
+      if (this.state === "COMPLETE" || this.state === "AWAIT_EOF") {
         throw new AwsChunkedDecodeError("received data after the terminal trailer section.");
       }
 
@@ -175,6 +231,9 @@ export class AwsChunkedParser {
         const take = Math.min(this.chunkRemaining, available);
         const payload = bytes.subarray(cursor, cursor + take);
 
+        if (take > Number.MAX_SAFE_INTEGER - this.decodedByteCount) {
+          throw new AwsChunkedDecodeError("cumulative decoded byte count exceeds the maximum safe integer.");
+        }
         this.decodedByteCount += take;
         if (this.decodedContentLength !== undefined && this.decodedByteCount > this.decodedContentLength) {
           throw new AwsChunkedDecodeError(
@@ -191,8 +250,9 @@ export class AwsChunkedParser {
         continue;
       }
 
-      const limit = this.state === "TRAILER_LINES" ? MAX_TRAILER_LINE_LENGTH : MAX_CHUNK_CONTROL_LINE_LENGTH;
-      const line = this.takeLine(bytes, cursor, limit);
+      const trailerLine = this.state === "TRAILER_LINES";
+      const limit = trailerLine ? MAX_TRAILER_LINE_LENGTH : MAX_CHUNK_CONTROL_LINE_LENGTH;
+      const line = this.takeLine(bytes, cursor, limit, trailerLine);
       if (line === null) {
         // The line is split across writes; the remainder is buffered.
         return out;
@@ -224,25 +284,22 @@ export class AwsChunkedParser {
    * @throws AwsChunkedDecodeError if the framing is truncated.
    */
   public end(): void {
+    if (this.state === "AWAIT_EOF") {
+      this.completeFraming();
+      return;
+    }
     if (this.state !== "COMPLETE") {
       throw new AwsChunkedDecodeError(`source ended while in state ${this.state}; framing is truncated.`);
     }
   }
 
-  /**
-   * Validate source-wide invariants before exposing the framing as complete.
-   */
+  /** Validate source-wide invariants before exposing the framing as complete. */
   private completeFraming(): void {
     if (this.decodedContentLength !== undefined && this.decodedByteCount !== this.decodedContentLength) {
       throw new AwsChunkedDecodeError(
         `decoded byte count ${this.decodedByteCount} does not match the declared` +
           ` decoded content length of ${this.decodedContentLength}.`
       );
-    }
-    for (const name of this.declaredTrailers) {
-      if (!(name in this.parsedTrailers)) {
-        throw new AwsChunkedDecodeError(`declared trailer "${name}" was not present in the trailer section.`);
-      }
     }
     this.state = "COMPLETE";
   }
@@ -251,13 +308,14 @@ export class AwsChunkedParser {
    * Read up to and including the next CRLF, buffering across writes.
    *
    * Returns null when the delimiter has not arrived yet. The returned `content`
-   * excludes the delimiter, while `consumed` counts it, so that limit
-   * accounting includes delimiter bytes.
+   * excludes the delimiter, while `consumed` counts it, so limit accounting
+   * includes delimiter bytes.
    */
   private takeLine(
     bytes: Uint8Array,
     cursor: number,
-    limit: number
+    limit: number,
+    trailerLine: boolean
   ): { content: Uint8Array; consumed: number; cursor: number } | null {
     let lf = -1;
     for (let i = cursor; i < bytes.byteLength; ++i) {
@@ -269,17 +327,13 @@ export class AwsChunkedParser {
 
     if (lf === -1) {
       const buffered = this.pending.byteLength + (bytes.byteLength - cursor);
-      if (buffered > limit) {
-        throw new AwsChunkedDecodeError(`control line exceeds the ${limit} byte limit.`);
-      }
+      this.assertLineLimits(buffered, limit, trailerLine);
       this.pending = concat(this.pending, bytes.subarray(cursor));
       return null;
     }
 
     const consumed = this.pending.byteLength + (lf + 1 - cursor);
-    if (consumed > limit) {
-      throw new AwsChunkedDecodeError(`control line exceeds the ${limit} byte limit.`);
-    }
+    this.assertLineLimits(consumed, limit, trailerLine);
 
     const raw = concat(this.pending, bytes.subarray(cursor, lf + 1));
     this.pending = EMPTY;
@@ -295,29 +349,32 @@ export class AwsChunkedParser {
     };
   }
 
-  private onChunkSizeLine(content: Uint8Array): void {
-    // Chunk extensions are permitted and ignored. They still count toward the
-    // control line limit because the whole line is measured.
-    let end = content.byteLength;
-    for (let i = 0; i < content.byteLength; ++i) {
-      if (content[i] === SEMICOLON) {
-        end = i;
-        break;
-      }
+  /** Enforce line and aggregate limits before buffering additional bytes. */
+  private assertLineLimits(length: number, limit: number, trailerLine: boolean): void {
+    if (length > limit) {
+      const kind = trailerLine ? "trailer" : "control";
+      throw new AwsChunkedDecodeError(`${kind} line exceeds the ${limit} byte limit.`);
     }
+    if (trailerLine && length > MAX_TRAILER_SECTION_LENGTH - this.trailerSectionLength) {
+      throw new AwsChunkedDecodeError(`trailer section exceeds the ${MAX_TRAILER_SECTION_LENGTH} byte limit.`);
+    }
+  }
 
-    if (end === 0) {
+  private onChunkSizeLine(content: Uint8Array): void {
+    let cursor = 0;
+    while (cursor < content.byteLength && isHexDigit(content[cursor])) {
+      ++cursor;
+    }
+    if (cursor === 0) {
       throw new AwsChunkedDecodeError("chunk size line is missing its hexadecimal size.");
     }
-    for (let i = 0; i < end; ++i) {
-      if (!isHexDigit(content[i])) {
-        throw new AwsChunkedDecodeError(`chunk size line contains a non-hexadecimal byte: "${toAscii(content)}".`);
-      }
-    }
 
-    const size = Number.parseInt(toAscii(content.subarray(0, end)), 16);
+    const sizeTokenEnd = cursor;
+    this.validateChunkExtensions(content, cursor);
+
+    const size = Number.parseInt(toByteString(content.subarray(0, sizeTokenEnd)), 16);
     if (!Number.isSafeInteger(size)) {
-      throw new AwsChunkedDecodeError(`chunk size exceeds the maximum safe integer: "${toAscii(content)}".`);
+      throw new AwsChunkedDecodeError(`chunk size exceeds the maximum safe integer: "${toByteString(content)}".`);
     }
 
     if (size === 0) {
@@ -329,14 +386,95 @@ export class AwsChunkedParser {
     this.state = "CHUNK_DATA";
   }
 
+  /** Validate RFC 9112 chunk extensions while intentionally ignoring semantics. */
+  private validateChunkExtensions(content: Uint8Array, start: number): void {
+    let cursor = start;
+    while (cursor < content.byteLength) {
+      const bwsStart = cursor;
+      cursor = this.skipOws(content, cursor);
+      if (cursor === content.byteLength) {
+        throw new AwsChunkedDecodeError(
+          bwsStart === cursor
+            ? "chunk size line contains an invalid byte after its hexadecimal size."
+            : "chunk size line has trailing whitespace not followed by an extension."
+        );
+      }
+      if (content[cursor] !== SEMICOLON) {
+        throw new AwsChunkedDecodeError("chunk extension must begin with a semicolon.");
+      }
+      ++cursor;
+      cursor = this.skipOws(content, cursor);
+
+      const nameStart = cursor;
+      while (cursor < content.byteLength && isTokenCharacter(content[cursor])) {
+        ++cursor;
+      }
+      if (cursor === nameStart) {
+        throw new AwsChunkedDecodeError("chunk extension has an empty or invalid name.");
+      }
+
+      const valueBwsStart = cursor;
+      cursor = this.skipOws(content, cursor);
+      if (cursor === content.byteLength && cursor !== valueBwsStart) {
+        throw new AwsChunkedDecodeError("chunk extension has trailing whitespace not followed by another extension.");
+      }
+      if (cursor < content.byteLength && content[cursor] === EQUALS) {
+        ++cursor;
+        cursor = this.skipOws(content, cursor);
+        if (cursor === content.byteLength) {
+          throw new AwsChunkedDecodeError("chunk extension is missing its value.");
+        }
+
+        if (content[cursor] === DQUOTE) {
+          cursor = this.consumeQuotedString(content, cursor + 1);
+        } else {
+          const valueStart = cursor;
+          while (cursor < content.byteLength && isTokenCharacter(content[cursor])) {
+            ++cursor;
+          }
+          if (cursor === valueStart) {
+            throw new AwsChunkedDecodeError("chunk extension has an invalid token value.");
+          }
+        }
+      }
+    }
+  }
+
+  private skipOws(content: Uint8Array, start: number): number {
+    let cursor = start;
+    while (cursor < content.byteLength && isOws(content[cursor])) {
+      ++cursor;
+    }
+    return cursor;
+  }
+
+  /** Consume a quoted-string after its opening quote and return the next index. */
+  private consumeQuotedString(content: Uint8Array, start: number): number {
+    let cursor = start;
+    while (cursor < content.byteLength) {
+      const code = content[cursor++];
+      if (code === DQUOTE) {
+        return cursor;
+      }
+      if (code === BACKSLASH) {
+        if (cursor === content.byteLength || !isQuotedPairCharacter(content[cursor])) {
+          throw new AwsChunkedDecodeError("chunk extension contains an invalid quoted-string escape.");
+        }
+        ++cursor;
+        continue;
+      }
+      if (!isQuotedText(code)) {
+        throw new AwsChunkedDecodeError("chunk extension contains an invalid quoted-string byte.");
+      }
+    }
+    throw new AwsChunkedDecodeError("chunk extension contains an unterminated quoted string.");
+  }
+
   private onTrailerLine(content: Uint8Array, consumed: number): void {
     this.trailerSectionLength += consumed;
-    if (this.trailerSectionLength > MAX_TRAILER_SECTION_LENGTH) {
-      throw new AwsChunkedDecodeError(`trailer section exceeds the ${MAX_TRAILER_SECTION_LENGTH} byte limit.`);
-    }
 
     if (content.byteLength === 0) {
-      this.completeFraming();
+      this.state = "AWAIT_EOF";
       return;
     }
 
@@ -348,25 +486,30 @@ export class AwsChunkedParser {
       }
     }
     if (colon <= 0) {
-      throw new AwsChunkedDecodeError(`trailer line is not a "name:value" pair: "${toAscii(content)}".`);
+      throw new AwsChunkedDecodeError(`trailer line is not a "name:value" pair: "${toByteString(content)}".`);
+    }
+    for (let i = 0; i < colon; ++i) {
+      if (!isTokenCharacter(content[i])) {
+        throw new AwsChunkedDecodeError("trailer field name contains an invalid byte or whitespace before the colon.");
+      }
+    }
+    for (let i = colon + 1; i < content.byteLength; ++i) {
+      if (!isFieldValueCharacter(content[i])) {
+        throw new AwsChunkedDecodeError("trailer field value contains a prohibited control character.");
+      }
     }
 
     if (++this.trailerFieldCount > MAX_TRAILER_FIELD_COUNT) {
       throw new AwsChunkedDecodeError(`trailer section exceeds the ${MAX_TRAILER_FIELD_COUNT} field limit.`);
     }
 
-    // Field names are case-insensitive. Values keep their bytes, less the
-    // optional surrounding whitespace that HTTP permits.
-    const name = toAscii(content.subarray(0, colon)).trim().toLowerCase();
-    const value = toAscii(content.subarray(colon + 1)).trim();
-
-    if (name.length === 0) {
-      throw new AwsChunkedDecodeError("trailer line has an empty field name.");
-    }
-    if (name in this.parsedTrailers && this.parsedTrailers[name] !== value) {
-      throw new AwsChunkedDecodeError(`trailer "${name}" was repeated with a conflicting value.`);
+    const name = toByteString(content.subarray(0, colon));
+    const normalizedName = name.toLowerCase();
+    if (!this.declaredTrailers.has(normalizedName)) {
+      throw new AwsChunkedDecodeError(`trailer "${name}" was not declared by the response.`);
     }
 
-    this.parsedTrailers[name] = value;
+    const value = trimOws(toByteString(content.subarray(colon + 1)));
+    this.parsedTrailers.push({ name, value });
   }
 }

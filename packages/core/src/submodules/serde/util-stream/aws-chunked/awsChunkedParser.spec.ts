@@ -10,24 +10,17 @@ import {
   MAX_TRAILER_LINE_LENGTH,
   MAX_TRAILER_SECTION_LENGTH,
 } from "./awsChunkedParser";
+import type { TrailerField } from "./types";
 
 describe(AwsChunkedParser.name, () => {
-  /**
-   * Frame a payload as a single aws-chunked chunk with an optional trailer
-   * section, matching what the upload-side encoder produces.
-   */
-  const frame = (payload: string, trailers: Record<string, string> = {}): string => {
+  const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+  const frame = (payload: string, trailers: readonly TrailerField[] = []): string => {
     const chunk = payload.length > 0 ? `${payload.length.toString(16)}\r\n${payload}\r\n` : "";
-    const trailerLines = Object.entries(trailers)
-      .map(([name, value]) => `${name}:${value}\r\n`)
-      .join("");
+    const trailerLines = trailers.map(({ name, value }) => `${name}:${value}\r\n`).join("");
     return `${chunk}0\r\n${trailerLines}\r\n`;
   };
 
-  /**
-   * Feed an encoded body to the parser in fragments of the given size and
-   * return the concatenated decoded payload.
-   */
   const decode = (encoded: string, splitSize: number, parser = new AwsChunkedParser()): string => {
     const bytes = fromUtf8(encoded);
     const out: number[] = [];
@@ -40,76 +33,78 @@ describe(AwsChunkedParser.name, () => {
     return toUtf8(new Uint8Array(out));
   };
 
-  const alphabet = "abcdefghijklmnopqrstuvwxyz";
+  describe("accepted response vectors", () => {
+    const vectors: Array<{
+      name: string;
+      encoded: string;
+      payload: string;
+      declarations?: string[];
+      trailers?: TrailerField[];
+    }> = [
+      {
+        name: "single chunk",
+        encoded: `3\r\nabc\r\n0\r\n\r\n`,
+        payload: "abc",
+      },
+      {
+        name: "multiple chunks",
+        encoded: `3\r\nabc\r\n3\r\ndef\r\n1\r\ng\r\n0\r\n\r\n`,
+        payload: "abcdefg",
+      },
+      {
+        name: "CRLF in payload",
+        encoded: `4\r\na\r\nb\r\n0\r\n\r\n`,
+        payload: "a\r\nb",
+      },
+      {
+        name: "empty payload",
+        encoded: `000;terminal=ok\r\n\r\n`,
+        payload: "",
+      },
+      {
+        name: "mixed-case and leading-zero hexadecimal",
+        encoded: `000A\r\n0123456789\r\n0\r\n\r\n`,
+        payload: "0123456789",
+      },
+      {
+        name: "data and terminal extensions",
+        encoded: `3 \t; repeated ; repeated = token ; quoted = "a\\\"b\\\\c"\r\nabc\r\n0; end = "yes"\r\n\r\n`,
+        payload: "abc",
+      },
+      {
+        name: "ordered duplicate trailers",
+        encoded: `0\r\nX-First:  one  \r\nx-duplicate:two\r\nX-Duplicate:\tthree\t\r\n\r\n`,
+        payload: "",
+        declarations: ["x-first", "x-duplicate"],
+        trailers: [
+          { name: "X-First", value: "one" },
+          { name: "x-duplicate", value: "two" },
+          { name: "X-Duplicate", value: "three" },
+        ],
+      },
+    ];
 
-  describe("framing", () => {
-    it("should decode a single chunk", () => {
-      expect(decode(frame(alphabet), Infinity)).toEqual(alphabet);
-    });
-
-    it("should decode multiple chunks", () => {
-      const encoded = `3\r\nabc\r\n3\r\ndef\r\n1\r\ng\r\n0\r\n\r\n`;
-      expect(decode(encoded, Infinity)).toEqual("abcdefg");
-    });
-
-    it("should decode an empty payload", () => {
-      expect(decode(`0\r\n\r\n`, Infinity)).toEqual("");
-    });
-
-    it("should not emit the zero-sized chunk as payload", () => {
-      const parser = new AwsChunkedParser();
-      const emitted = parser.write(fromUtf8(`0\r\n\r\n`));
-      expect(emitted.reduce((n, c) => n + c.byteLength, 0)).toEqual(0);
-      expect(parser.complete).toBe(true);
-    });
-
-    it("should accept uppercase hexadecimal chunk sizes", () => {
-      // 0x1A is the 26-byte alphabet.
-      expect(decode(`1A\r\n${alphabet}\r\n0\r\n\r\n`, Infinity)).toEqual(alphabet);
-    });
-
-    it("should accept and ignore chunk extensions", () => {
-      expect(decode(`3;foo=bar\r\nabc\r\n0\r\n\r\n`, Infinity)).toEqual("abc");
-    });
-
-    it("should count decoded bytes", () => {
-      const parser = new AwsChunkedParser();
-      decode(frame(alphabet), 4, parser);
-      expect(parser.decodedBytes).toEqual(26);
-    });
-  });
-
-  describe("source split patterns", () => {
-    const encoded = frame(alphabet, {
-      "x-amz-stream-checksum-crc32": "AAAAAA==",
-      "x-amz-other": "value",
-    });
-
-    for (const splitSize of [1, 2, 3, 7, 16, Infinity]) {
-      it(`should decode identically with ${splitSize} bytes per source chunk`, () => {
-        const parser = new AwsChunkedParser({
-          declaredTrailers: ["x-amz-stream-checksum-crc32"],
-          decodedContentLength: 26,
+    for (const vector of vectors) {
+      for (const splitSize of [1, 2, Infinity]) {
+        it(`should decode ${vector.name} with source chunks of ${splitSize} byte(s)`, () => {
+          const parser = new AwsChunkedParser({ declaredTrailers: vector.declarations });
+          expect(decode(vector.encoded, splitSize, parser)).toEqual(vector.payload);
+          expect(parser.trailers).toEqual(vector.trailers ?? []);
         });
-        expect(decode(encoded, splitSize, parser)).toEqual(alphabet);
-        expect(parser.trailers).toEqual({
-          "x-amz-stream-checksum-crc32": "AAAAAA==",
-          "x-amz-other": "value",
-        });
-      });
+      }
     }
 
-    it("should report the same error regardless of where a malformed body is split", () => {
-      const malformed = `3\r\nabc\r\nZZ\r\n0\r\n\r\n`;
-      for (const splitSize of [1, 2, 5, Infinity]) {
-        expect(() => decode(malformed, splitSize)).toThrow(AwsChunkedDecodeError);
-      }
-    });
-
-    it("should handle a split inside every byte position of a valid body", () => {
+    it("should handle a split at every byte position", () => {
+      const encoded = frame(alphabet, [
+        { name: "x-amz-stream-checksum-crc32", value: "AAAAAA==" },
+        { name: "x-amz-other", value: "value" },
+      ]);
       const bytes = fromUtf8(encoded);
       for (let cut = 1; cut < bytes.byteLength; ++cut) {
-        const parser = new AwsChunkedParser();
+        const parser = new AwsChunkedParser({
+          declaredTrailers: ["x-amz-stream-checksum-crc32", "x-amz-other"],
+          decodedContentLength: alphabet.length,
+        });
         const out: number[] = [];
         for (const part of [bytes.subarray(0, cut), bytes.subarray(cut)]) {
           for (const payload of parser.write(part)) {
@@ -122,127 +117,138 @@ describe(AwsChunkedParser.name, () => {
     });
   });
 
-  describe("trailers", () => {
-    it("should parse field names case-insensitively and preserve values", () => {
-      const parser = new AwsChunkedParser();
-      decode(`0\r\nX-Amz-Checksum-CRC32:AbC/dEf=\r\n\r\n`, Infinity, parser);
-      expect(parser.trailers).toEqual({ "x-amz-checksum-crc32": "AbC/dEf=" });
+  describe("chunk-size and extension grammar", () => {
+    it.each([
+      ["empty", `\r\n`],
+      ["signed", `+3\r\n`],
+      ["negative", `-3\r\n`],
+      ["0x-prefixed", `0x3\r\n`],
+      ["partial hexadecimal", `3g\r\n`],
+      ["non-ASCII", `３\r\n`],
+      ["whitespace without extension", `3 \r\n`],
+    ])("should reject a %s chunk size", (_name, line) => {
+      expect(() => decode(`${line}abc\r\n0\r\n\r\n`, Infinity)).toThrow(AwsChunkedDecodeError);
     });
 
-    it("should trim optional whitespace around values", () => {
-      const parser = new AwsChunkedParser();
-      decode(`0\r\nx-amz-trailer:  spaced  \r\n\r\n`, Infinity, parser);
-      expect(parser.trailers).toEqual({ "x-amz-trailer": "spaced" });
+    it.each([
+      ["empty name", `3;\r\nabc\r\n0\r\n\r\n`],
+      ["empty name after BWS", `3 ; \t=foo\r\nabc\r\n0\r\n\r\n`],
+      ["invalid name", `3;foo/bar\r\nabc\r\n0\r\n\r\n`],
+      ["missing value", `3;foo=\r\nabc\r\n0\r\n\r\n`],
+      ["invalid token value", `3;foo=(bar)\r\nabc\r\n0\r\n\r\n`],
+      ["unterminated quote", `3;foo="bar\r\nabc\r\n0\r\n\r\n`],
+      ["invalid escape", `3;foo="bar\\\u0001"\r\nabc\r\n0\r\n\r\n`],
+      ["raw control", `3;foo="bar\u0001"\r\nabc\r\n0\r\n\r\n`],
+      ["trailing BWS", `3;foo \r\nabc\r\n0\r\n\r\n`],
+    ])("should reject an extension with %s", (_name, encoded) => {
+      expect(() => decode(encoded, Infinity)).toThrow(AwsChunkedDecodeError);
+    });
+
+    it("should accept a chunk size at Number.MAX_SAFE_INTEGER", () => {
+      expect(() => decode(`1fffffffffffff\r\nabc`, Infinity)).toThrow(/framing is truncated/);
+    });
+
+    it("should reject a chunk size above Number.MAX_SAFE_INTEGER", () => {
+      expect(() => decode(`20000000000000\r\n`, Infinity)).toThrow(/exceeds the maximum safe integer/);
+    });
+  });
+
+  describe("trailer field grammar", () => {
+    it("should trim only surrounding SP and HTAB and preserve internal whitespace and colons", () => {
+      const parser = new AwsChunkedParser({ declaredTrailers: ["x-value"] });
+      decode(`0\r\nX-Value:\t  first:\tsecond  \t\r\n\r\n`, Infinity, parser);
+      expect(parser.trailers).toEqual([{ name: "X-Value", value: "first:\tsecond" }]);
     });
 
     it("should accept an empty trailer value", () => {
-      // An empty value is valid framing. It becomes a mismatch when compared.
       const parser = new AwsChunkedParser({ declaredTrailers: ["x-amz-checksum-crc32"] });
       decode(`0\r\nx-amz-checksum-crc32:\r\n\r\n`, Infinity, parser);
-      expect(parser.trailers).toEqual({ "x-amz-checksum-crc32": "" });
+      expect(parser.trailers).toEqual([{ name: "x-amz-checksum-crc32", value: "" }]);
     });
 
-    it("should accept a repeated trailer with an identical value", () => {
-      const parser = new AwsChunkedParser();
-      decode(`0\r\na:1\r\na:1\r\n\r\n`, Infinity, parser);
-      expect(parser.trailers).toEqual({ a: "1" });
+    it("should preserve duplicate fields even when values differ", () => {
+      const parser = new AwsChunkedParser({ declaredTrailers: ["a"] });
+      decode(`0\r\na:1\r\nA:2\r\na:1\r\n\r\n`, Infinity, parser);
+      expect(parser.trailers).toEqual([
+        { name: "a", value: "1" },
+        { name: "A", value: "2" },
+        { name: "a", value: "1" },
+      ]);
     });
 
-    it("should reject a repeated trailer with a conflicting value", () => {
-      expect(() => decode(`0\r\na:1\r\na:2\r\n\r\n`, Infinity)).toThrow(/repeated with a conflicting value/);
+    it("should allow a declared generic trailer to be absent", () => {
+      const parser = new AwsChunkedParser({ declaredTrailers: ["x-optional"] });
+      expect(decode(`0\r\n\r\n`, Infinity, parser)).toEqual("");
     });
 
-    it.each(["constructor", "__proto__"])(
-      "should accept a trailer whose name collides with Object.prototype: %s",
-      (name) => {
-        const parser = new AwsChunkedParser({ declaredTrailers: [name] });
-        decode(`0\r\n${name}:value\r\n\r\n`, Infinity, parser);
-        expect(Object.prototype.hasOwnProperty.call(parser.trailers, name)).toBe(true);
-        expect(parser.trailers[name]).toBe("value");
-      }
-    );
-
-    it("should reject a declared trailer that never arrives", () => {
-      const parser = new AwsChunkedParser({ declaredTrailers: ["x-amz-checksum-crc32"] });
-      expect(() => decode(`0\r\nx-amz-other:1\r\n\r\n`, Infinity, parser)).toThrow(
-        /declared trailer "x-amz-checksum-crc32" was not present/
-      );
-    });
-
-    it.each(["constructor", "__proto__"])(
-      "should reject an omitted declared trailer whose name collides with Object.prototype: %s",
-      (name) => {
-        const parser = new AwsChunkedParser({ declaredTrailers: [name] });
-        expect(() => decode(`0\r\n\r\n`, Infinity, parser)).toThrow(
-          `declared trailer "${name}" was not present in the trailer section.`
-        );
-      }
-    );
-
-    it("should match declared trailers case-insensitively", () => {
+    it("should match declarations case-insensitively", () => {
       const parser = new AwsChunkedParser({ declaredTrailers: ["X-Amz-Checksum-CRC32"] });
       expect(decode(`0\r\nx-amz-checksum-crc32:v\r\n\r\n`, Infinity, parser)).toEqual("");
     });
 
-    it("should reject a trailer line without a colon", () => {
-      expect(() => decode(`0\r\nnot-a-pair\r\n\r\n`, Infinity)).toThrow(/not a "name:value" pair/);
+    it("should reject an undeclared actual trailer", () => {
+      const parser = new AwsChunkedParser({ declaredTrailers: ["x-declared"] });
+      expect(() => decode(`0\r\nx-other:value\r\n\r\n`, Infinity, parser)).toThrow(/was not declared/);
     });
 
-    it("should reject a trailer line with an empty field name", () => {
-      expect(() => decode(`0\r\n:value\r\n\r\n`, Infinity)).toThrow(/not a "name:value" pair/);
+    it.each([
+      ["missing colon", `not-a-pair`],
+      ["empty name", `:value`],
+      ["whitespace before colon", `name :value`],
+      ["invalid name", `bad(name):value`],
+      ["obs-fold", ` continuation:value`],
+      ["control in value", `name:bad\u0001value`],
+      ["DEL in value", `name:bad\u007fvalue`],
+    ])("should reject a trailer with %s", (_name, line) => {
+      const parser = new AwsChunkedParser({ declaredTrailers: ["name", "bad(name)", "continuation"] });
+      expect(() => decode(`0\r\n${line}\r\n\r\n`, Infinity, parser)).toThrow(AwsChunkedDecodeError);
     });
   });
 
-  describe("malformed framing", () => {
-    it("should reject a non-hexadecimal chunk size", () => {
-      expect(() => decode(`zz\r\nabc\r\n0\r\n\r\n`, Infinity)).toThrow(/non-hexadecimal byte/);
+  describe("terminal framing and source EOF", () => {
+    it("should not emit the zero-sized chunk as payload", () => {
+      const parser = new AwsChunkedParser();
+      const emitted = parser.write(fromUtf8(`0\r\n\r\n`));
+      expect(emitted.reduce((n, chunk) => n + chunk.byteLength, 0)).toEqual(0);
+      expect(parser.complete).toBe(false);
+      parser.end();
+      expect(parser.complete).toBe(true);
     });
 
-    it("should reject an empty chunk size", () => {
-      expect(() => decode(`\r\nabc\r\n0\r\n\r\n`, Infinity)).toThrow(/missing its hexadecimal size/);
+    it.each([
+      ["bare LF", `3\nabc\r\n0\r\n\r\n`],
+      ["broken data CRLF", `3\r\nabcXX\r\n0\r\n\r\n`],
+      ["truncated data", `3\r\nab`],
+      ["missing final empty line", `3\r\nabc\r\n0\r\n`],
+      ["truncated trailer", `0\r\na:1\r\n`],
+      ["multiple terminal chunks", `0\r\n0\r\n\r\n`],
+      ["same-chunk trailing bytes", `0\r\n\r\nextra`],
+      ["concatenated messages", `0\r\n\r\n0\r\n\r\n`],
+    ])("should reject %s", (_name, encoded) => {
+      expect(() => decode(encoded, Infinity, new AwsChunkedParser({ declaredTrailers: ["a"] }))).toThrow(
+        AwsChunkedDecodeError
+      );
     });
 
-    it("should reject a chunk size above the maximum safe integer", () => {
-      expect(() => decode(`20000000000000\r\n`, Infinity)).toThrow(/exceeds the maximum safe integer/);
+    it("should reject trailing bytes delivered in a later write", () => {
+      const parser = new AwsChunkedParser();
+      parser.write(fromUtf8(`0\r\n\r\n`));
+      expect(() => parser.write(fromUtf8("extra"))).toThrow(/data after the terminal trailer section/);
     });
 
-    it("should accept a chunk size at the maximum safe integer boundary", () => {
-      // 0x1fffffffffffff is Number.MAX_SAFE_INTEGER; the body is truncated, so
-      // the size itself must be what is accepted before the truncation error.
-      expect(() => decode(`1fffffffffffff\r\nabc`, Infinity)).toThrow(/framing is truncated/);
-    });
-
-    it("should reject a bare LF line delimiter", () => {
-      expect(() => decode(`3\nabc\r\n0\r\n\r\n`, Infinity)).toThrow(/bare LF/);
-    });
-
-    it("should reject data that is not followed by CRLF", () => {
-      expect(() => decode(`3\r\nabcXX\r\n0\r\n\r\n`, Infinity)).toThrow(/expected CRLF immediately after chunk data/);
-    });
-
-    it("should reject a truncated body", () => {
-      expect(() => decode(`3\r\nab`, Infinity)).toThrow(/framing is truncated/);
-    });
-
-    it("should reject a missing trailer terminator", () => {
-      // A terminal zero-sized chunk must be followed by a trailer section
-      // terminator, even when the trailer section is empty.
-      expect(() => decode(`3\r\nabc\r\n0\r\n`, Infinity)).toThrow(/framing is truncated/);
-    });
-
-    it("should reject bytes after the terminal trailer section", () => {
-      expect(() => decode(`0\r\n\r\nextra`, Infinity)).toThrow(/data after the terminal trailer section/);
-    });
-
-    it("should reject a premature end in the middle of the trailer section", () => {
-      expect(() => decode(`0\r\na:1\r\n`, Infinity)).toThrow(/framing is truncated/);
+    it("should report the same malformed error for arbitrary fragmentation", () => {
+      const malformed = `3\r\nabc\r\nZZ\r\n0\r\n\r\n`;
+      for (const splitSize of [1, 2, 5, Infinity]) {
+        expect(() => decode(malformed, splitSize)).toThrow(AwsChunkedDecodeError);
+      }
     });
   });
 
   describe("decoded content length", () => {
-    it("should accept a matching declared length", () => {
-      const parser = new AwsChunkedParser({ decodedContentLength: 26 });
+    it("should count decoded bytes and accept a matching declaration", () => {
+      const parser = new AwsChunkedParser({ decodedContentLength: alphabet.length });
       expect(decode(frame(alphabet), 3, parser)).toEqual(alphabet);
+      expect(parser.decodedBytes).toEqual(alphabet.length);
     });
 
     it("should reject a declared length that is too small", () => {
@@ -255,91 +261,105 @@ describe(AwsChunkedParser.name, () => {
       expect(() => decode(frame(alphabet), Infinity, parser)).toThrow(/does not match the declared/);
     });
 
-    it("should accept a declared length of zero for an empty payload", () => {
-      const parser = new AwsChunkedParser({ decodedContentLength: 0 });
-      expect(decode(`0\r\n\r\n`, Infinity, parser)).toEqual("");
+    it("should accept zero for an empty payload", () => {
+      expect(decode(`0\r\n\r\n`, Infinity, new AwsChunkedParser({ decodedContentLength: 0 }))).toEqual("");
     });
 
-    it("should reject a negative declared length at construction", () => {
+    it("should reject invalid declared lengths", () => {
       expect(() => new AwsChunkedParser({ decodedContentLength: -1 })).toThrow(/is negative/);
-    });
-
-    it("should reject a non-integer declared length at construction", () => {
       expect(() => new AwsChunkedParser({ decodedContentLength: 1.5 })).toThrow(/not a safe non-negative integer/);
-    });
-
-    it("should reject a declared length above the maximum safe integer", () => {
       expect(() => new AwsChunkedParser({ decodedContentLength: Number.MAX_SAFE_INTEGER + 2 })).toThrow(
         /not a safe non-negative integer/
       );
     });
+
+    it("should reject cumulative decoded-byte overflow before addition", () => {
+      const parser = new AwsChunkedParser();
+      const state = parser as unknown as {
+        state: string;
+        chunkRemaining: number;
+        decodedByteCount: number;
+      };
+      state.state = "CHUNK_DATA";
+      state.chunkRemaining = 1;
+      state.decodedByteCount = Number.MAX_SAFE_INTEGER;
+      expect(() => parser.write(Uint8Array.of(0))).toThrow(/cumulative decoded byte count/);
+      expect(parser.decodedBytes).toEqual(Number.MAX_SAFE_INTEGER);
+    });
   });
 
   describe("resource limits", () => {
-    it("should accept a control line at the limit", () => {
-      // Pad with chunk extension bytes so the line reaches exactly the limit.
-      const padding = "x".repeat(MAX_CHUNK_CONTROL_LINE_LENGTH - "3;".length - "\r\n".length);
-      expect(decode(`3;${padding}\r\nabc\r\n0\r\n\r\n`, Infinity)).toEqual("abc");
+    it("should accept a valid control line exactly at the limit", () => {
+      const extensionName = "x".repeat(MAX_CHUNK_CONTROL_LINE_LENGTH - "3;".length - "\r\n".length);
+      expect(decode(`3;${extensionName}\r\nabc\r\n0\r\n\r\n`, Infinity)).toEqual("abc");
     });
 
     it("should reject a control line one byte over the limit", () => {
-      const padding = "x".repeat(MAX_CHUNK_CONTROL_LINE_LENGTH - "3;".length - "\r\n".length + 1);
-      expect(() => decode(`3;${padding}\r\nabc\r\n0\r\n\r\n`, Infinity)).toThrow(
+      const extensionName = "x".repeat(MAX_CHUNK_CONTROL_LINE_LENGTH - "3;".length - "\r\n".length + 1);
+      expect(() => decode(`3;${extensionName}\r\nabc\r\n0\r\n\r\n`, Infinity)).toThrow(
         new RegExp(`control line exceeds the ${MAX_CHUNK_CONTROL_LINE_LENGTH} byte limit`)
       );
     });
 
-    it("should accept a trailer line at the limit", () => {
+    it("should accept a trailer line exactly at the limit", () => {
       const value = "v".repeat(MAX_TRAILER_LINE_LENGTH - "a:".length - "\r\n".length);
-      const parser = new AwsChunkedParser();
+      const parser = new AwsChunkedParser({ declaredTrailers: ["a"] });
       decode(`0\r\na:${value}\r\n\r\n`, Infinity, parser);
-      expect(parser.trailers.a).toHaveLength(value.length);
+      expect(parser.trailers[0].value).toHaveLength(value.length);
     });
 
     it("should reject a trailer line one byte over the limit", () => {
       const value = "v".repeat(MAX_TRAILER_LINE_LENGTH - "a:".length - "\r\n".length + 1);
-      expect(() => decode(`0\r\na:${value}\r\n\r\n`, Infinity)).toThrow(
-        new RegExp(`control line exceeds the ${MAX_TRAILER_LINE_LENGTH} byte limit`)
-      );
+      expect(() =>
+        decode(`0\r\na:${value}\r\n\r\n`, Infinity, new AwsChunkedParser({ declaredTrailers: ["a"] }))
+      ).toThrow(new RegExp(`trailer line exceeds the ${MAX_TRAILER_LINE_LENGTH} byte limit`));
     });
 
-    it("should reject a trailer section over the aggregate limit", () => {
-      // Each line is under the per-line limit but together they exceed 64 KiB.
-      const value = "v".repeat(4 * 1024);
-      let lines = "";
-      for (let i = 0; i < 20; ++i) {
-        lines += `field-${i}:${value}\r\n`;
+    const aggregateTrailerSection = (lastLineLength: number): { declarations: string[]; section: string } => {
+      const declarations: string[] = [];
+      let section = "";
+      for (let i = 0; i < 8; ++i) {
+        const name = `f${i}`;
+        declarations.push(name);
+        const lineLength = i === 7 ? lastLineLength : MAX_TRAILER_LINE_LENGTH;
+        const value = "v".repeat(lineLength - `${name}:`.length - "\r\n".length);
+        section += `${name}:${value}\r\n`;
       }
-      expect(() => decode(`0\r\n${lines}\r\n`, Infinity)).toThrow(
-        new RegExp(`trailer section exceeds the ${MAX_TRAILER_SECTION_LENGTH} byte limit`)
-      );
+      return { declarations, section };
+    };
+
+    it("should accept a trailer section exactly at the aggregate limit", () => {
+      const { declarations, section } = aggregateTrailerSection(MAX_TRAILER_LINE_LENGTH - 2);
+      const parser = new AwsChunkedParser({ declaredTrailers: declarations });
+      expect(decode(`0\r\n${section}\r\n`, Infinity, parser)).toEqual("");
+      expect(parser.trailers).toHaveLength(8);
     });
 
-    it("should accept the maximum number of trailer fields", () => {
-      let lines = "";
-      for (let i = 0; i < MAX_TRAILER_FIELD_COUNT; ++i) {
-        lines += `field-${i}:v\r\n`;
-      }
-      const parser = new AwsChunkedParser();
+    it("should reject a trailer section one byte over the aggregate limit", () => {
+      const { declarations, section } = aggregateTrailerSection(MAX_TRAILER_LINE_LENGTH - 1);
+      expect(() =>
+        decode(`0\r\n${section}\r\n`, Infinity, new AwsChunkedParser({ declaredTrailers: declarations }))
+      ).toThrow(new RegExp(`trailer section exceeds the ${MAX_TRAILER_SECTION_LENGTH} byte limit`));
+    });
+
+    it("should accept exactly the maximum number of physical trailer fields", () => {
+      const lines = `a:v\r\n`.repeat(MAX_TRAILER_FIELD_COUNT);
+      const parser = new AwsChunkedParser({ declaredTrailers: ["a"] });
       decode(`0\r\n${lines}\r\n`, Infinity, parser);
-      expect(Object.keys(parser.trailers)).toHaveLength(MAX_TRAILER_FIELD_COUNT);
+      expect(parser.trailers).toHaveLength(MAX_TRAILER_FIELD_COUNT);
     });
 
-    it("should reject one trailer field over the limit", () => {
-      let lines = "";
-      for (let i = 0; i < MAX_TRAILER_FIELD_COUNT + 1; ++i) {
-        lines += `field-${i}:v\r\n`;
-      }
-      expect(() => decode(`0\r\n${lines}\r\n`, Infinity)).toThrow(
+    it("should reject one physical trailer field over the limit", () => {
+      const lines = `a:v\r\n`.repeat(MAX_TRAILER_FIELD_COUNT + 1);
+      expect(() => decode(`0\r\n${lines}\r\n`, Infinity, new AwsChunkedParser({ declaredTrailers: ["a"] }))).toThrow(
         new RegExp(`trailer section exceeds the ${MAX_TRAILER_FIELD_COUNT} field limit`)
       );
     });
 
-    it("should enforce the control line limit across writes", () => {
+    it("should enforce line limits before growing a split buffer", () => {
       const parser = new AwsChunkedParser();
       const filler = fromUtf8("x".repeat(1024));
       expect(() => {
-        // No delimiter ever arrives, so the buffered line grows past the limit.
         for (let i = 0; i < 16; ++i) {
           parser.write(filler);
         }
@@ -347,16 +367,14 @@ describe(AwsChunkedParser.name, () => {
     });
   });
 
-  describe("error type", () => {
-    it("should throw AwsChunkedDecodeError with a stable code", () => {
-      try {
-        decode(`zz\r\n`, Infinity);
-        throw new Error("expected a decode error");
-      } catch (e: unknown) {
-        expect(e).toBeInstanceOf(AwsChunkedDecodeError);
-        expect((e as AwsChunkedDecodeError).name).toEqual("AwsChunkedDecodeError");
-        expect((e as AwsChunkedDecodeError).code).toEqual("AWS_CHUNKED_MALFORMED");
-      }
-    });
+  it("should throw AwsChunkedDecodeError with a stable code", () => {
+    try {
+      decode(`zz\r\n`, Infinity);
+      throw new Error("expected a decode error");
+    } catch (e: unknown) {
+      expect(e).toBeInstanceOf(AwsChunkedDecodeError);
+      expect((e as AwsChunkedDecodeError).name).toEqual("AwsChunkedDecodeError");
+      expect((e as AwsChunkedDecodeError).code).toEqual("AWS_CHUNKED_MALFORMED");
+    }
   });
 });

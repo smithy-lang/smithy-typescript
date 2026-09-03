@@ -1,10 +1,11 @@
+import { isBlob } from "../stream-type-check";
+import { AwsChunkedDecodeError } from "./AwsChunkedDecodeError";
 import { AwsChunkedParser } from "./awsChunkedParser";
 import {
   createAwsChunkedResponseDecoder as createAwsChunkedResponseDecoderWeb,
   type ReadableStreamType,
 } from "./createAwsChunkedResponseDecoder.browser";
-import type { AwsChunkedResponseDecoderOptions, AwsChunkedResponseDecoderResult } from "./types";
-import { isBlob } from "../stream-type-check";
+import type { AwsChunkedResponseDecoderOptions, AwsChunkedResponseDecoderResult, TrailerField } from "./types";
 
 /**
  * Read a Blob into a single byte array.
@@ -63,28 +64,71 @@ export function createAwsChunkedResponseDecoder(
     // Constructed eagerly so an invalid declared length throws to the caller.
     const parser = new AwsChunkedParser({ declaredTrailers, decodedContentLength });
 
-    const decoded = (async (): Promise<Uint8Array[]> => {
-      const payloads = parser.write(await collectBlob(source));
-      parser.end();
-      return payloads;
-    })();
+    const decoded = collectBlob(source).then((bytes) => parser.write(bytes));
+    // Collection and parsing begin eagerly. Mark the intermediate promise as
+    // handled until the decoded body is consumed.
+    decoded.catch(() => {});
 
-    const trailers = decoded.then(() => parser.trailers);
-    // Mark as handled so a caller that never reads the trailers does not raise
-    // an unhandled rejection. Real awaiters still observe the rejection.
+    let resolveTrailers!: (trailers: readonly TrailerField[]) => void;
+    let rejectTrailers!: (error: Error) => void;
+    const trailers = new Promise<readonly TrailerField[]>((resolve, reject) => {
+      resolveTrailers = resolve;
+      rejectTrailers = reject;
+    });
     trailers.catch(() => {});
 
+    let payloadsEmitted = false;
+    let settled = false;
+    const settle = (error?: Error): void => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (error) {
+        rejectTrailers(error);
+      } else {
+        resolveTrailers(parser.trailers);
+      }
+    };
+
     const body = new ReadableStream({
-      async start(controller) {
-        try {
-          for (const payload of await decoded) {
+      async pull(controller) {
+        if (!payloadsEmitted) {
+          let payloads: Uint8Array[];
+          try {
+            payloads = await decoded;
+          } catch (e: unknown) {
+            settle(e as Error);
+            controller.error(e);
+            return;
+          }
+          payloadsEmitted = true;
+          for (const payload of payloads) {
             controller.enqueue(payload);
           }
+          if (payloads.length > 0) {
+            // Match streaming adapters by exposing decoded bytes before the
+            // subsequent pull validates normal source EOF.
+            return;
+          }
+        }
+
+        try {
+          parser.end();
         } catch (e: unknown) {
+          settle(e as Error);
           controller.error(e);
           return;
         }
+        settle();
         controller.close();
+      },
+      cancel() {
+        settle(
+          parser.complete
+            ? undefined
+            : new AwsChunkedDecodeError("the decoded stream was cancelled before the framing was complete.")
+        );
       },
     });
 
