@@ -8,7 +8,7 @@ export const AWS_CHUNKED_MALFORMED = "AWS_CHUNKED_MALFORMED";
  * Raised when `aws-chunked` response framing cannot be decoded.
  *
  * This covers malformed chunk-size lines, missing delimiters, truncated
- * framing, resource-limit violations, a declared trailer that never arrived,
+ * framing, resource-limit violations, trailer fields that were not declared,
  * and a decoded byte count that disagrees with the declared decoded length.
  *
  * Callers are expected to surface this as a protocol deserialization failure.
