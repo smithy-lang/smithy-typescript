@@ -590,6 +590,164 @@ describe(ChecksumStream.name, () => {
   });
 
   describe("onResult", () => {
+    it("should report FAILED for a source deserialization error", async () => {
+      const sourceError = new Error("decoder failed");
+      const source = makeManualSource();
+      const isProtocolError = vi.fn((error: unknown) => error === sourceError);
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source,
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        isProtocolError,
+        onResult,
+      });
+      const streamError = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
+
+      source.emit("error", sourceError);
+
+      expect(await streamError).toBe(sourceError);
+      expect(isProtocolError).toHaveBeenCalledTimes(1);
+      expect(isProtocolError).toHaveBeenCalledWith(sourceError);
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report INCOMPLETE for a transport source error", async () => {
+      const sourceError = new Error("socket reset");
+      const source = makeManualSource();
+      const isProtocolError = vi.fn(() => false);
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source,
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        isProtocolError,
+        onResult,
+      });
+      const streamError = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
+
+      source.emit("error", sourceError);
+
+      expect(await streamError).toBe(sourceError);
+      expect(isProtocolError).toHaveBeenCalledTimes(1);
+      expect(isProtocolError).toHaveBeenCalledWith(sourceError);
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "INCOMPLETE",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report a malformed deferred Base64 value as a deserialization failure", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.resolve("!!!!"),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      const error = await collect(checksumStream).catch((error: unknown) => error);
+
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(ChecksumMismatchError);
+      expect(error).toMatchObject({ message: "Invalid base64 string." });
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report an empty deferred Base64 value as a mismatch", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.resolve(""),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      const error = await collect(checksumStream).catch((error: unknown) => error);
+
+      expect(error).toBeInstanceOf(ChecksumMismatchError);
+      expect(error).toMatchObject({
+        receivedChecksum: "",
+        calculatedChecksum: canonicalBase64,
+      });
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: true,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+        receivedChecksum: "",
+        calculatedChecksum: canonicalBase64,
+      });
+    });
+
+    it("should report exactly one INCOMPLETE result when cancelled while the provider is pending", async () => {
+      let resolveExpectedChecksum: (value: string) => void = () => {};
+      const expectedChecksum = vi.fn(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveExpectedChecksum = resolve;
+          })
+      );
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum,
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+      checksumStream.resume();
+
+      await tick();
+      expect(expectedChecksum).toHaveBeenCalledTimes(1);
+
+      checksumStream.destroy();
+      await tick();
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "INCOMPLETE",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+
+      resolveExpectedChecksum(canonicalBase64);
+      await tick();
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+    });
+
     it("should report SUCCEEDED with the algorithm, source and both values", async () => {
       const onResult = vi.fn();
       const checksumStream = new ChecksumStream({
