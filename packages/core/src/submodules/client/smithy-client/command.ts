@@ -91,6 +91,7 @@ export abstract class Command<
         ...smithyContext,
       },
       ...additionalContext,
+      recorder: options?.recorder,
     };
     const { requestHandler } = configuration;
     let requestOptions = options ?? {};

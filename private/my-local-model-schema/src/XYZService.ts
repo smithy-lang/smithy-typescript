@@ -2,6 +2,7 @@
 import { type WaiterResult, createAggregatedClient } from "@smithy/core/client";
 import type {
   HttpHandlerOptions as __HttpHandlerOptions,
+  MetricsRecorder as __MetricsRecorder,
   PaginationConfiguration,
   Paginator,
   WaiterConfiguration,
@@ -76,13 +77,20 @@ const waiters = {
   waitUntilNumbersWhatDoTheyDoAnyway,
 };
 
+/**
+ * @public
+ */
+export interface XYZServiceRequestOptions extends __HttpHandlerOptions {
+  recorder?: __MetricsRecorder<any>;
+}
+
 export interface XYZService {
   /**
    * @see {@link HttpLabelCommandCommand}
    */
   httpLabelCommand(
     args: HttpLabelCommandCommandInput,
-    options?: __HttpHandlerOptions
+    options?: XYZServiceRequestOptions
   ): Promise<HttpLabelCommandCommandOutput>;
   httpLabelCommand(
     args: HttpLabelCommandCommandInput,
@@ -90,7 +98,7 @@ export interface XYZService {
   ): void;
   httpLabelCommand(
     args: HttpLabelCommandCommandInput,
-    options: __HttpHandlerOptions,
+    options: XYZServiceRequestOptions,
     cb: (err: any, data?: HttpLabelCommandCommandOutput) => void
   ): void;
 
@@ -100,7 +108,7 @@ export interface XYZService {
   camelCaseOperation(): Promise<CamelCaseOperationCommandOutput>;
   camelCaseOperation(
     args: CamelCaseOperationCommandInput,
-    options?: __HttpHandlerOptions
+    options?: XYZServiceRequestOptions
   ): Promise<CamelCaseOperationCommandOutput>;
   camelCaseOperation(
     args: CamelCaseOperationCommandInput,
@@ -108,7 +116,7 @@ export interface XYZService {
   ): void;
   camelCaseOperation(
     args: CamelCaseOperationCommandInput,
-    options: __HttpHandlerOptions,
+    options: XYZServiceRequestOptions,
     cb: (err: any, data?: CamelCaseOperationCommandOutput) => void
   ): void;
 
@@ -118,7 +126,7 @@ export interface XYZService {
   getNumbers(): Promise<GetNumbersCommandOutput>;
   getNumbers(
     args: GetNumbersCommandInput,
-    options?: __HttpHandlerOptions
+    options?: XYZServiceRequestOptions
   ): Promise<GetNumbersCommandOutput>;
   getNumbers(
     args: GetNumbersCommandInput,
@@ -126,7 +134,7 @@ export interface XYZService {
   ): void;
   getNumbers(
     args: GetNumbersCommandInput,
-    options: __HttpHandlerOptions,
+    options: XYZServiceRequestOptions,
     cb: (err: any, data?: GetNumbersCommandOutput) => void
   ): void;
 
@@ -135,7 +143,7 @@ export interface XYZService {
    */
   hostPrefixOperation(
     args: HostPrefixOperationCommandInput,
-    options?: __HttpHandlerOptions
+    options?: XYZServiceRequestOptions
   ): Promise<HostPrefixOperationCommandOutput>;
   hostPrefixOperation(
     args: HostPrefixOperationCommandInput,
@@ -143,7 +151,7 @@ export interface XYZService {
   ): void;
   hostPrefixOperation(
     args: HostPrefixOperationCommandInput,
-    options: __HttpHandlerOptions,
+    options: XYZServiceRequestOptions,
     cb: (err: any, data?: HostPrefixOperationCommandOutput) => void
   ): void;
 
@@ -189,7 +197,7 @@ export interface XYZService {
   tradeEventStream(): Promise<TradeEventStreamCommandOutput>;
   tradeEventStream(
     args: TradeEventStreamCommandInput,
-    options?: __HttpHandlerOptions
+    options?: XYZServiceRequestOptions
   ): Promise<TradeEventStreamCommandOutput>;
   tradeEventStream(
     args: TradeEventStreamCommandInput,
@@ -197,7 +205,7 @@ export interface XYZService {
   ): void;
   tradeEventStream(
     args: TradeEventStreamCommandInput,
-    options: __HttpHandlerOptions,
+    options: XYZServiceRequestOptions,
     cb: (err: any, data?: TradeEventStreamCommandOutput) => void
   ): void;
 

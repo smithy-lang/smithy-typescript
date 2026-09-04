@@ -90,4 +90,32 @@ describe(Command.name, () => {
       requestTimeout: 5000,
     });
   });
+
+  it("places the call-site recorder on the handler execution context", async () => {
+    let capturedContext: any;
+
+    class MyCommand extends Command.classBuilder<any, any, any, any, any>()
+      .m(function () {
+        return [];
+      })
+      .s("MyClient", "MyOp", {})
+      .n("MyClient", "MyOp")
+      .f()
+      .ser(async (_) => ({ ..._, headers: {}, method: "POST", protocol: "https:", hostname: "localhost", path: "/" }))
+      .de(async (_) => ({ $metadata: {} }))
+      .build() {}
+
+    const recorder = { addCount: vi.fn() };
+    const cmd = new MyCommand({});
+    cmd.resolveMiddleware(
+      { concat: () => ({ resolve: (fn: any, ctx: any) => ((capturedContext = ctx), fn) }) } as any,
+      {
+        logger: {} as any,
+        requestHandler: { handle: vi.fn().mockResolvedValue({ response: {} }) },
+      },
+      { recorder }
+    );
+
+    expect(capturedContext.recorder).toBe(recorder);
+  });
 });
