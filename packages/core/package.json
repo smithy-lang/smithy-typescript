@@ -24,6 +24,8 @@
     "./config.js",
     "./endpoints.d.ts",
     "./endpoints.js",
+    "./errors.d.ts",
+    "./errors.js",
     "./event-streams.d.ts",
     "./event-streams.js",
     "./protocols.d.ts",
@@ -212,6 +214,13 @@
       "node": "./dist-cjs/submodules/transport/index.js",
       "import": "./dist-es/submodules/transport/index.js",
       "require": "./dist-cjs/submodules/transport/index.js"
+    },
+    "./errors": {
+      "types": "./dist-types/submodules/errors/index.d.ts",
+      "module": "./dist-es/submodules/errors/index.js",
+      "node": "./dist-cjs/submodules/errors/index.js",
+      "import": "./dist-es/submodules/errors/index.js",
+      "require": "./dist-cjs/submodules/errors/index.js"
     }
   },
   "scripts": {

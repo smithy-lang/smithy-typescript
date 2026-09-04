@@ -296,6 +296,12 @@
     "toEndpointV1": "function",
     "TreeRuleObject": "type(object)"
   },
+  "@smithy/core/errors": {
+    "errors": "object",
+    "SmithyError": "type(class)",
+    "SmithyRangeError": "type(class)",
+    "SmithyTypeError": "type(class)"
+  },
   "@smithy/core/event-streams": {
     "BinaryHeaderValue": "type(object)",
     "BooleanHeaderValue": "type(object)",
