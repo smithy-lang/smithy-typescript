@@ -86,8 +86,8 @@ class SchemaTraitWriter {
                 }
                 buffer.append(
                     """
-                    [%s]: %s,\s""".formatted(
-                        stringStore.var(shapeId.getName()),
+                    "%s": %s,\s""".formatted(
+                        shapeId.getName(),
                         traitGenerator.serializeTraitData(trait, stringStore)
                     )
                 );
