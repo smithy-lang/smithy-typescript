@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, test as it, vi } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, test as it, vi } from "vitest";
+import type { MetricsRecorder } from "@smithy/types";
 
-import { Client } from "./client";
+import { Client, type SmithyClientRequestOptions } from "./client";
 
 describe("SmithyClient", () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -81,5 +82,26 @@ describe("SmithyClient", () => {
       client.destroy();
       expect(privateAccess()).toBeUndefined();
     });
+  });
+
+  it("preserves permissive empty handler options and adds metrics to known handler options", () => {
+    expectTypeOf<{ arbitraryOption: true }>().toExtend<SmithyClientRequestOptions<{}>>();
+    expectTypeOf<{ requestTimeout: number; metricsRecorder: MetricsRecorder<unknown> }>().toExtend<
+      SmithyClientRequestOptions<{ requestTimeout?: number }>
+    >();
+
+    type DisjointHandlerOptions = { timeout?: number } | { priority?: number };
+    const metricsRecorder = {} as MetricsRecorder<unknown>;
+    const timeoutOptions: SmithyClientRequestOptions<DisjointHandlerOptions> = {
+      timeout: 1,
+      metricsRecorder,
+    };
+    const priorityOptions: SmithyClientRequestOptions<DisjointHandlerOptions> = {
+      priority: 1,
+      metricsRecorder,
+    };
+
+    expectTypeOf(timeoutOptions).toExtend<{ timeout?: number; metricsRecorder?: MetricsRecorder<unknown> }>();
+    expectTypeOf(priorityOptions).toExtend<{ priority?: number; metricsRecorder?: MetricsRecorder<unknown> }>();
   });
 });

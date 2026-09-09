@@ -21,7 +21,12 @@ export {
 } from "./util-waiter/waiter";
 
 // @smithy/smithy-client
-export { Client, type SmithyConfiguration, type SmithyResolvedConfiguration } from "./smithy-client/client";
+export {
+  Client,
+  type SmithyClientRequestOptions,
+  type SmithyConfiguration,
+  type SmithyResolvedConfiguration,
+} from "./smithy-client/client";
 export { Command, type CommandImpl } from "./smithy-client/command";
 export { SENSITIVE_STRING } from "./smithy-client/constants";
 export { createAggregatedClient } from "./smithy-client/create-aggregated-client";

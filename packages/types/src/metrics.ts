@@ -44,10 +44,11 @@ export type MetricUnit =
 
 /**
  * Backend-agnostic recorder for per-request metrics. The framework drives the
- * lifecycle and records request-level metrics through this interface; user
- * handlers record their own business metrics through the same methods. Concrete
- * recorders (e.g. an EMF recorder, or a future OpenTelemetry recorder) translate
- * these abstract calls into their own primitives.
+ * lifecycle of recorders obtained from a factory and records request-level
+ * metrics through this interface; user handlers record their own business
+ * metrics through the same methods. Concrete recorders (e.g. an EMF recorder,
+ * or a future OpenTelemetry recorder) translate these abstract calls into their
+ * own primitives.
  *
  * @typeParam Native - the concrete backend handle returned by
  *   {@link MetricsRecorder.getMetrics}, e.g. an OpenTelemetry `Meter`. The
@@ -59,14 +60,14 @@ export type MetricUnit =
 export interface MetricsRecorder<Native> {
   /**
    * Open the recorder for the current request. Called by the framework once at
-   * the start of request handling.
+   * the start of request handling when it owns the recorder.
    */
   begin(): void;
 
   /**
    * Close the recorder for the current request. Called by the framework once at
-   * the end of request handling; this is where an implementation typically
-   * flushes its event.
+   * the end of request handling when it owns the recorder; this is where an
+   * implementation typically flushes its event.
    */
   end(): void;
 

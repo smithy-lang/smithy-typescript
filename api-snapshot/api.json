@@ -156,6 +156,7 @@
     "ServiceException": "function",
     "ServiceExceptionOptions": "type(interface)",
     "SimpleValueInstruction": "type(object)",
+    "SmithyClientRequestOptions": "type(alias)",
     "SmithyConfiguration": "type(interface)",
     "SmithyResolvedConfiguration": "type(object)",
     "SourceMappingInstruction": "type(object)",
