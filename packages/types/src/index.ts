@@ -21,7 +21,14 @@ export type {
   BrowserRuntimeBlobTypes,
   NodeJsRuntimeBlobTypes,
 } from "./blob/blob-payload-input-types";
-export type { Checksum, ChecksumConstructor } from "./checksum";
+export type {
+  Checksum,
+  ChecksumConstructor,
+  ChecksumSource,
+  ChecksumValidationHandle,
+  ChecksumValidationResult,
+  ChecksumValidationStatus,
+} from "./checksum";
 export type {
   CheckOptionalClientConfig,
   Client,
