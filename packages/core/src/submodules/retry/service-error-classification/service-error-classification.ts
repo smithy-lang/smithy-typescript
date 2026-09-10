@@ -53,18 +53,23 @@ export const isThrottlingError = (error: SdkError) =>
  * included here because there is an error scenario with unknown root
  * cause where the NodeHttpHandler does not decorate the Error with
  * the name "TimeoutError" to be checked by the TRANSIENT_ERROR_CODES condition.
+ *
+ * Errors named "AbortError" are considered terminal. AbortSignal.timeout()
+ * produces an underlying cause which would otherwise be considered retryable as
+ * a TimeoutError.
  */
 export const isTransientError = (error: SdkError, depth = 0): boolean =>
-  isRetryableByTrait(error) ||
-  isClockSkewCorrectedError(error) ||
-  (error.name === "InvalidSignatureException" && error.message?.includes("Signature expired")) ||
-  TRANSIENT_ERROR_CODES.includes(error.name) ||
-  NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
-  NODEJS_NETWORK_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
-  TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
-  isBrowserNetworkError(error) ||
-  isNodeJsHttp2TransientError(error) ||
-  (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1));
+  error?.name !== "AbortError" &&
+  (isRetryableByTrait(error) ||
+    isClockSkewCorrectedError(error) ||
+    (error.name === "InvalidSignatureException" && error.message?.includes("Signature expired")) ||
+    TRANSIENT_ERROR_CODES.includes(error.name) ||
+    NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
+    NODEJS_NETWORK_ERROR_CODES.includes((error as { code?: string })?.code || "") ||
+    TRANSIENT_ERROR_STATUS_CODES.includes(error.$metadata?.httpStatusCode || 0) ||
+    isBrowserNetworkError(error) ||
+    isNodeJsHttp2TransientError(error) ||
+    (error.cause !== undefined && depth <= 10 && isTransientError(error.cause, depth + 1)));
 
 export const isServerError = (error: SdkError) => {
   if (error.$metadata?.httpStatusCode !== undefined) {
