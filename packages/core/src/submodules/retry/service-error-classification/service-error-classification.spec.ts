@@ -164,6 +164,28 @@ describe("isTransientError", () => {
       checkForErrorType(isTransientError, { code }, true);
     });
   });
+
+  describe("AbortError (issue #2268)", () => {
+    it("should not declare an AbortError to be a Transient error", () => {
+      checkForErrorType(isTransientError, { name: "AbortError" }, false);
+    });
+
+    it("should not declare an AbortError with a TimeoutError cause to be a Transient error", () => {
+      // This is what AbortSignal.timeout() produces: an AbortError whose
+      // reason/cause is a DOMException named "TimeoutError".
+      checkForErrorType(isTransientError, { name: "AbortError", cause: { name: "TimeoutError" } }, false);
+    });
+
+    it("should not declare an AbortError with a transient network-code cause to be a Transient error", () => {
+      const cause = Object.assign(new Error("socket hang up"), { code: "ECONNRESET" });
+      const error = Object.assign(new Error("Request aborted"), { name: "AbortError", $metadata: {}, cause });
+      expect(isTransientError(error as SdkError)).toBe(false);
+    });
+
+    it("should still classify a standalone TimeoutError (not wrapped in an abort) as Transient", () => {
+      checkForErrorType(isTransientError, { name: "TimeoutError" }, true);
+    });
+  });
 });
 
 describe("isServerError", () => {
