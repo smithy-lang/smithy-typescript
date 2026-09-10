@@ -47,7 +47,8 @@ final class RuntimeConfigGenerator {
         "requestHandler",
         writer -> {
             writer.addImport("NodeHttpHandler", "RequestHandler", TypeScriptDependency.AWS_SDK_NODE_HTTP_HANDLER);
-            writer.write("RequestHandler.create(config?.requestHandler ?? defaultConfigProvider)");
+            writer.write(
+                "RequestHandler.create(config?.requestHandler ?? defaultConfigProvider, clientSharedValues.logger)");
         },
         "bodyLengthChecker",
         writer -> {

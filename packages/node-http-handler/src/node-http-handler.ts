@@ -52,14 +52,15 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
    * or instantiates a new instance of this handler.
    */
   public static create(
-    instanceOrOptions?: HttpHandler<any> | NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>
+    instanceOrOptions?: HttpHandler<any> | NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>,
+    logger?: Logger
   ) {
     if (typeof (instanceOrOptions as any)?.handle === "function") {
       // is already an instance of HttpHandler.
       return instanceOrOptions as HttpHandler<any>;
     }
     // input is ctor options or undefined.
-    return new NodeHttpHandler(instanceOrOptions as NodeHttpHandlerOptions);
+    return new NodeHttpHandler(instanceOrOptions as NodeHttpHandlerOptions, logger);
   }
 
   /**
@@ -117,16 +118,16 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     return socketWarningTimestamp;
   }
 
-  constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>) {
+  constructor(options?: NodeHttpHandlerOptions | Provider<NodeHttpHandlerOptions | void>, clientLogger?: Logger) {
     this.configProvider = new Promise((resolve, reject) => {
       if (typeof options === "function") {
         options()
           .then((_options) => {
-            resolve(this.resolveDefaultConfig(_options));
+            resolve(this.resolveDefaultConfig(_options, clientLogger));
           })
           .catch(reject);
       } else {
-        resolve(this.resolveDefaultConfig(options));
+        resolve(this.resolveDefaultConfig(options, clientLogger));
       }
     });
   }
@@ -343,7 +344,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     return this.config ?? {};
   }
 
-  private resolveDefaultConfig(options?: NodeHttpHandlerOptions | void): ResolvedNodeHttpHandlerConfig {
+  private resolveDefaultConfig(
+    options?: NodeHttpHandlerOptions | void,
+    clientLogger?: Logger
+  ): ResolvedNodeHttpHandlerConfig {
     const {
       requestTimeout,
       connectionTimeout,
@@ -382,7 +386,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         }
         return new node_https.Agent({ keepAlive, maxSockets, ...httpsAgent });
       })(),
-      logger,
+      logger: logger ?? clientLogger,
     };
   }
 }
