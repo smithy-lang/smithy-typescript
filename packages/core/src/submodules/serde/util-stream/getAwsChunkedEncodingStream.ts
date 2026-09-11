@@ -36,8 +36,14 @@ export function getAwsChunkedEncodingStream(
     streamHasher !== undefined;
   const digest = checksumRequired ? streamHasher!(checksumAlgorithmFn!, readable) : undefined;
 
+  // Observe so a source-error rejection isn't orphaned; value is read again in "end".
+  digest?.catch(() => {});
+
+  // Pull-driven, so the encoder respects consumer demand.
   const awsChunkedEncodingStream = new Readable({
-    read: () => {},
+    read() {
+      readable.resume();
+    },
   });
   readable.on("data", (data) => {
     const length = bodyLengthChecker(data) || 0;
@@ -46,16 +52,29 @@ export function getAwsChunkedEncodingStream(
     }
     awsChunkedEncodingStream.push(`${length.toString(16)}\r\n`);
     awsChunkedEncodingStream.push(data);
-    awsChunkedEncodingStream.push("\r\n");
-  });
-  readable.on("end", async () => {
-    awsChunkedEncodingStream.push(`0\r\n`);
-    if (checksumRequired) {
-      const checksum = base64Encoder!(await digest!);
-      awsChunkedEncodingStream.push(`${checksumLocationName}:${checksum}\r\n`);
-      awsChunkedEncodingStream.push(`\r\n`);
+    if (!awsChunkedEncodingStream.push("\r\n")) {
+      readable.pause();
     }
-    awsChunkedEncodingStream.push(null);
+  });
+  // Forward source errors so consumers see "error" instead of hanging.
+  readable.on("error", (err) => {
+    awsChunkedEncodingStream.destroy(err);
+  });
+  // Attaching "data" flowed the source; pause until the first read.
+  readable.pause();
+  readable.on("end", async () => {
+    try {
+      awsChunkedEncodingStream.push(`0\r\n`);
+      if (checksumRequired) {
+        const checksum = base64Encoder!(await digest!);
+        awsChunkedEncodingStream.push(`${checksumLocationName}:${checksum}\r\n`);
+        awsChunkedEncodingStream.push(`\r\n`);
+      }
+      awsChunkedEncodingStream.push(null);
+    } catch (err) {
+      // Digest rejected after a clean end: fail the stream, don't leak.
+      awsChunkedEncodingStream.destroy(err as Error);
+    }
   });
   return awsChunkedEncodingStream;
 }

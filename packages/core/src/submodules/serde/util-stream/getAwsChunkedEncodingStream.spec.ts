@@ -148,4 +148,72 @@ mockChecksumLocationName:mockChecksum\r
     });
     await promise;
   });
+
+  describe("stream lifecycle", () => {
+    it("forwards a source error as an 'error' event instead of hanging", async () => {
+      const source = Readable.from(
+        (async function* () {
+          yield "partial";
+          throw new Error("source failed");
+        })()
+      );
+      // The hasher rejects when the source errors, mirroring readableStreamHasher.
+      const rejectingHasher = vi.fn().mockRejectedValue(new Error("source failed"));
+      const awsChunkedEncodingStream = getAwsChunkedEncodingStream(source, {
+        ...mockOptions,
+        bodyLengthChecker: (c: any) => (c ? c.length : 0),
+        streamHasher: rejectingHasher,
+      });
+
+      const error = await new Promise<Error>((resolve, reject) => {
+        awsChunkedEncodingStream.on("error", resolve);
+        awsChunkedEncodingStream.on("end", () => reject(new Error("expected 'error', got 'end'")));
+        awsChunkedEncodingStream.resume();
+      });
+      expect(error.message).toBe("source failed");
+    });
+
+    it("surfaces a post-end digest rejection as an 'error' event", async () => {
+      const readableStream = getMockReadableStream();
+      const rejectingHasher = vi.fn().mockRejectedValue(new Error("digest failed"));
+      const awsChunkedEncodingStream = getAwsChunkedEncodingStream(readableStream, {
+        ...mockOptions,
+        bodyLengthChecker: () => mockBodyLength,
+        streamHasher: rejectingHasher,
+      });
+
+      const error = await new Promise<Error>((resolve, reject) => {
+        awsChunkedEncodingStream.on("error", resolve);
+        awsChunkedEncodingStream.on("end", () => reject(new Error("expected 'error', got 'end'")));
+        awsChunkedEncodingStream.resume();
+      });
+      expect(error.message).toBe("digest failed");
+    });
+
+    it("honors backpressure and does not drain the source without demand", async () => {
+      let generated = 0;
+      const chunkSize = 64 * 1024;
+      const source = Readable.from(
+        (async function* () {
+          for (let i = 0; i < 512; i++) {
+            generated++;
+            yield Buffer.alloc(chunkSize);
+          }
+        })()
+      );
+      const awsChunkedEncodingStream = getAwsChunkedEncodingStream(source, {
+        bodyLengthChecker: (c: any) => (c ? c.length : 0),
+      });
+
+      // Never read from the encoded stream; give it time to (not) drain.
+      await new Promise((r) => setTimeout(r, 100));
+
+      // Without backpressure this would be 512 (full drain) and the buffer
+      // would hold the entire ~32 MiB body. With backpressure, consumption
+      // stops well before the source is exhausted.
+      expect(generated).toBeLessThan(512);
+      expect(awsChunkedEncodingStream.readableLength).toBeLessThan(512 * chunkSize);
+      awsChunkedEncodingStream.destroy();
+    });
+  });
 });

@@ -17,6 +17,9 @@ export const getAwsChunkedEncodingStream: GetAwsChunkedEncodingStream<ReadableSt
     streamHasher !== undefined;
   const digest = checksumRequired ? streamHasher!(checksumAlgorithmFn!, readableStream) : undefined;
 
+  // Observe so a source-error rejection isn't orphaned; value is read again in pull().
+  digest?.catch(() => {});
+
   // ToDo: Validate the ReadableStream and getReader() is accessible before calling.
   // ReactNative doesn't support ReadableStream. They might not be available in older browsers, or some polyfills.
   const reader = readableStream.getReader();
