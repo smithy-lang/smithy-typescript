@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.34.1
+
+### Patch Changes
+
+- 90e722f: error and backpressure fixes for AWS chunked encoding streams
+
 ## 3.34.0
 
 ### Minor Changes
