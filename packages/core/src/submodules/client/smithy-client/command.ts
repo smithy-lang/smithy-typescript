@@ -80,20 +80,27 @@ export abstract class Command<
     }
     const stack = clientStack.concat(this.middlewareStack);
     const { logger } = configuration;
+    const additionalSmithyContext = additionalContext[SMITHY_CONTEXT_KEY];
     const handlerExecutionContext: HandlerExecutionContext = {
       logger,
       clientName,
       commandName,
       inputFilterSensitiveLog,
       outputFilterSensitiveLog,
+      ...additionalContext,
       [SMITHY_CONTEXT_KEY]: {
+        ...additionalSmithyContext,
         commandInstance: this,
         ...smithyContext,
+        ...(options?.metricsRecorder === undefined ? {} : { metricsRecorder: options.metricsRecorder }),
       },
-      ...additionalContext,
     };
     const { requestHandler } = configuration;
     let requestOptions = options ?? {};
+    if (requestOptions.metricsRecorder) {
+      requestOptions = { ...requestOptions };
+      delete requestOptions.metricsRecorder;
+    }
     if (smithyContext.eventStream) {
       requestOptions = {
         isEventStream: true,

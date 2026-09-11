@@ -4,6 +4,7 @@ import type { Command } from "./command";
 import type { EndpointV2 } from "./endpoint";
 import type { SmithyFeatures } from "./feature-ids";
 import type { Logger } from "./logger";
+import type { MetricsRecorder } from "./metrics";
 import type { UserAgent } from "./util";
 
 /**
@@ -576,6 +577,10 @@ export interface HandlerExecutionContext {
     commandInstance?: Command<any, any, any, any, any>;
     selectedHttpAuthScheme?: SelectedHttpAuthScheme;
     features?: SmithyFeatures;
+    /**
+     * Transferred from request options to the Smithy context.
+     */
+    metricsRecorder?: MetricsRecorder<unknown>;
     /**
      * @deprecated
      * Do not assign arbitrary members to the Smithy Context,

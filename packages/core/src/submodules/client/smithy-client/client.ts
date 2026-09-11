@@ -8,12 +8,26 @@ import type {
   Handler,
   Client as IClient,
   MetadataBearer,
+  MetricsRecorder,
   MiddlewareStack,
   NodeHttpHandlerOptions,
   RequestHandler,
 } from "@smithy/types";
 
 import { constructStack } from "../middleware-stack/MiddlewareStack";
+
+/**
+ * Options accepted for an individual Smithy client request.
+ *
+ * @public
+ */
+export type SmithyClientRequestOptions<HandlerOptions> = unknown extends HandlerOptions
+  ? HandlerOptions
+  : HandlerOptions extends unknown
+    ? keyof HandlerOptions extends never
+      ? HandlerOptions
+      : HandlerOptions & { metricsRecorder?: MetricsRecorder<unknown> }
+    : never;
 
 /**
  * @public
@@ -125,7 +139,7 @@ export class Client<
 
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
-    options?: HandlerOptions
+    options?: SmithyClientRequestOptions<HandlerOptions>
   ): Promise<OutputType>;
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
@@ -133,12 +147,12 @@ export class Client<
   ): void;
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
-    options: HandlerOptions,
+    options: SmithyClientRequestOptions<HandlerOptions>,
     cb: (err: any, data?: OutputType) => void
   ): void;
   send<InputType extends ClientInput, OutputType extends ClientOutput>(
     command: Command<ClientInput, InputType, ClientOutput, OutputType, SmithyResolvedConfiguration<HandlerOptions>>,
-    optionsOrCb?: HandlerOptions | ((err: any, data?: OutputType) => void),
+    optionsOrCb?: SmithyClientRequestOptions<HandlerOptions> | ((err: any, data?: OutputType) => void),
     cb?: (err: any, data?: OutputType) => void
   ): Promise<OutputType> | void {
     const options = typeof optionsOrCb !== "function" ? optionsOrCb : undefined;

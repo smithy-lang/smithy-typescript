@@ -1,4 +1,5 @@
 import { describe, expect, test as it, vi } from "vitest";
+import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 
 import { Command } from "./command";
 
@@ -89,5 +90,71 @@ describe(Command.name, () => {
       isEventStream: true,
       requestTimeout: 5000,
     });
+  });
+
+  it("places an externally owned recorder in the Smithy context and does not pass it to the transport", async () => {
+    let capturedContext: any;
+    const handleFn = vi.fn().mockResolvedValue({ response: {} });
+    const existingMetricsRecorder = { addCount: vi.fn() };
+
+    class MyCommand extends Command.classBuilder<any, any, any, any, any>()
+      .m(function () {
+        return [];
+      })
+      .s("MyClient", "MyOp", {
+        service: "generatedService",
+        operation: "generatedOperation",
+        conflictingContext: "generated",
+      })
+      .c({
+        [SMITHY_CONTEXT_KEY]: {
+          service: "userService",
+          operation: "userOperation",
+          commandInstance: "userCommand",
+          customContext: true,
+          conflictingContext: "user",
+          metricsRecorder: existingMetricsRecorder,
+        },
+      } as any)
+      .n("MyClient", "MyOp")
+      .f()
+      .ser(async (_) => ({ ..._, headers: {}, method: "POST", protocol: "https:", hostname: "localhost", path: "/" }))
+      .de(async (_) => ({ $metadata: {} }))
+      .build() {}
+
+    const metricsRecorder = { addCount: vi.fn() };
+    const cmd = new MyCommand({});
+    const handler = cmd.resolveMiddleware(
+      { concat: () => ({ resolve: (fn: any, ctx: any) => ((capturedContext = ctx), fn) }) } as any,
+      {
+        logger: {} as any,
+        requestHandler: { handle: handleFn },
+      },
+      { metricsRecorder, requestTimeout: 5000 }
+    );
+
+    await handler({ input: {} });
+
+    expect(capturedContext[SMITHY_CONTEXT_KEY]).toMatchObject({
+      service: "generatedService",
+      operation: "generatedOperation",
+      commandInstance: cmd,
+      customContext: true,
+      conflictingContext: "generated",
+      metricsRecorder,
+    });
+    expect(capturedContext.metricsRecorder).toBeUndefined();
+    expect(handleFn).toHaveBeenCalledWith(undefined, { requestTimeout: 5000 });
+
+    new MyCommand({}).resolveMiddleware(
+      { concat: () => ({ resolve: (fn: any, ctx: any) => ((capturedContext = ctx), fn) }) } as any,
+      {
+        logger: {} as any,
+        requestHandler: { handle: handleFn },
+      },
+      {}
+    );
+
+    expect(capturedContext[SMITHY_CONTEXT_KEY].metricsRecorder).toBe(existingMetricsRecorder);
   });
 });
