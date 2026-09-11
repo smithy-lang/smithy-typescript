@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.35.0
+
+### Minor Changes
+
+- 596456b: add per-request MetricsRecorder support through `client.send(command, { metricsRecorder })`
+
+### Patch Changes
+
+- Updated dependencies [596456b]
+  - @smithy/types@4.19.0
+
 ## 3.34.1
 
 ### Patch Changes
