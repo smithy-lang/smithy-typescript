@@ -36,8 +36,9 @@ export function getAwsChunkedEncodingStream(
     streamHasher !== undefined;
   const digest = checksumRequired ? streamHasher!(checksumAlgorithmFn!, readable) : undefined;
 
-  // Observe so a source-error rejection isn't orphaned; value is read again in "end".
-  digest?.catch(() => {});
+  Promise.resolve(digest).catch(() => {
+    // Block unhandled rejection; the original promise is awaited later.
+  });
 
   // Pull-driven, so the encoder respects consumer demand.
   const awsChunkedEncodingStream = new Readable({
