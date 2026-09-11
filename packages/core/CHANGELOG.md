@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.34.0
+
+### Minor Changes
+
+- c45b1ba: Add custom error classes to identify and differentiate Smithy runtime errors from other errors.
+
+### Patch Changes
+
+- fbcc573: identify AbortError as terminal
+
 ## 3.33.3
 
 ### Patch Changes
