@@ -14,7 +14,7 @@ export {
   httpSigningMiddlewareOptions,
 } from "./legacy-root-exports/middleware-http-signing";
 export { normalizeProvider } from "./normalizeProvider";
-export { createPaginator } from "./legacy-root-exports/pagination/createPaginator";
+export { createItemsPaginator, createPaginator } from "./legacy-root-exports/pagination/createPaginator";
 /**
  * Backwards compatibility re-export.
  * @internal
