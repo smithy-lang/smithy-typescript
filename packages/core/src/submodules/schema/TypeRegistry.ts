@@ -10,21 +10,27 @@ import type { ErrorSchema } from "./schemas/ErrorSchema";
 export class TypeRegistry {
   public static readonly registries = new Map<string, TypeRegistry>();
 
-  private constructor(
+  public constructor(
     public readonly namespace: string,
     private schemas: Map<string, ISchema> = new Map(),
     private exceptions: Map<StaticErrorSchema, any> = new Map()
-  ) {}
+  ) {
+    if (!TypeRegistry.registries.has(namespace)) {
+      /**
+       * Still setting a publicly created registry into the
+       * global map, in case code relies on it being accessible
+       * via TypeRegistry::for().
+       */
+      TypeRegistry.registries.set(namespace, this);
+    }
+  }
 
   /**
    * @param namespace - specifier.
-   * @returns the schema for that namespace, creating it if necessary.
+   * @returns the TypeRegistry for that namespace, creating it if necessary.
    */
   public static for(namespace: string): TypeRegistry {
-    if (!TypeRegistry.registries.has(namespace)) {
-      TypeRegistry.registries.set(namespace, new TypeRegistry(namespace));
-    }
-    return TypeRegistry.registries.get(namespace)!;
+    return TypeRegistry.registries.get(namespace) ?? new TypeRegistry(namespace);
   }
 
   /**
@@ -56,7 +62,9 @@ export class TypeRegistry {
   public register(shapeId: string, schema: ISchema) {
     const qualifiedName = this.normalizeShapeId(shapeId);
     for (const r of [this, TypeRegistry.for(qualifiedName.split("#")[0])]) {
-      r.schemas.set(qualifiedName, schema);
+      if (!r.schemas.has(qualifiedName)) {
+        r.schemas.set(qualifiedName, schema);
+      }
     }
   }
 
@@ -90,9 +98,12 @@ export class TypeRegistry {
   public registerError(es: ErrorSchema | StaticErrorSchema, ctor: any) {
     const $error = es as StaticErrorSchema;
     const ns = $error[1];
+    const qualifiedName = ns + "#" + $error[2];
     for (const r of [this, TypeRegistry.for(ns)]) {
-      r.schemas.set(ns + "#" + $error[2], $error);
-      r.exceptions.set($error, ctor);
+      if (!r.schemas.has(qualifiedName) && !r.exceptions.has($error)) {
+        r.schemas.set(qualifiedName, $error);
+        r.exceptions.set($error, ctor);
+      }
     }
   }
 

@@ -20,7 +20,7 @@ UnmodeledServiceException:
 
 --- [error object] ---
 {
-  $fault: "client",
+  $fault: "server",
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 500,
@@ -58,7 +58,7 @@ UnmodeledServiceException: __Message__
 
 --- [error object] ---
 {
-  $fault: "client",
+  $fault: "server",
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 500,
@@ -89,7 +89,7 @@ Unknown:
 --- [error object] ---
 {
   0: (number) 110,
-  $fault: "client",
+  $fault: "server",
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 500,

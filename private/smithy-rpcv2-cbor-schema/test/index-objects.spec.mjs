@@ -40,9 +40,14 @@ import {
   RpcV2CborListInputOutput$,
   RpcV2CborLists$,
   RpcV2CborListsCommand,
+  RpcV2CborNestedUnion$,
   RpcV2CborSparseMaps$,
   RpcV2CborSparseMapsCommand,
   RpcV2CborSparseMapsInputOutput$,
+  RpcV2CborUnion$,
+  RpcV2CborUnionInputOutput$,
+  RpcV2CborUnions$,
+  RpcV2CborUnionsCommand,
   RpcV2Protocol,
   RpcV2ProtocolClient,
   RpcV2ProtocolServiceException,
@@ -87,6 +92,8 @@ assert(typeof RpcV2CborListsCommand === "function");
 assert(typeof RpcV2CborLists$ === "object");
 assert(typeof RpcV2CborSparseMapsCommand === "function");
 assert(typeof RpcV2CborSparseMaps$ === "object");
+assert(typeof RpcV2CborUnionsCommand === "function");
+assert(typeof RpcV2CborUnions$ === "object");
 assert(typeof SimpleScalarPropertiesCommand === "function");
 assert(typeof SimpleScalarProperties$ === "object");
 assert(typeof SparseNullsOperationCommand === "function");
@@ -107,7 +114,10 @@ assert(typeof RecursiveShapesInputOutputNested1$ === "object");
 assert(typeof RecursiveShapesInputOutputNested2$ === "object");
 assert(typeof RpcV2CborDenseMapsInputOutput$ === "object");
 assert(typeof RpcV2CborListInputOutput$ === "object");
+assert(typeof RpcV2CborNestedUnion$ === "object");
 assert(typeof RpcV2CborSparseMapsInputOutput$ === "object");
+assert(typeof RpcV2CborUnion$ === "object");
+assert(typeof RpcV2CborUnionInputOutput$ === "object");
 assert(typeof SimpleScalarStructure$ === "object");
 assert(typeof SimpleStructure$ === "object");
 assert(typeof SparseNullsOperationInputOutput$ === "object");

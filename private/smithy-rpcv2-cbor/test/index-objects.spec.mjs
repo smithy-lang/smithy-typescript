@@ -14,6 +14,7 @@ import {
   RpcV2CborDenseMapsCommand,
   RpcV2CborListsCommand,
   RpcV2CborSparseMapsCommand,
+  RpcV2CborUnionsCommand,
   RpcV2Protocol,
   RpcV2ProtocolClient,
   RpcV2ProtocolServiceException,
@@ -39,6 +40,7 @@ assert(typeof RecursiveShapesCommand === "function");
 assert(typeof RpcV2CborDenseMapsCommand === "function");
 assert(typeof RpcV2CborListsCommand === "function");
 assert(typeof RpcV2CborSparseMapsCommand === "function");
+assert(typeof RpcV2CborUnionsCommand === "function");
 assert(typeof SimpleScalarPropertiesCommand === "function");
 assert(typeof SparseNullsOperationCommand === "function");
 // structural schemas

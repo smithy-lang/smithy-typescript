@@ -47,7 +47,7 @@ import type { StaticErrorSchema, StaticListSchema, StaticStructureSchema, Static
 import { BirdError } from "../models/errors";
 
 /* eslint no-var: 0 */
-const n0_registry = TypeRegistry.for(n0);
+const n0_registry = new TypeRegistry(n0);
 export var BirdError$: StaticErrorSchema = [-3, n0, _BE,
   { [_e]: _c },
   [_m, _r],

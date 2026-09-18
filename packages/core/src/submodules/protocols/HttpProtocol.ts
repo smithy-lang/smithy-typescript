@@ -21,6 +21,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticErrorSchema,
 } from "@smithy/types";
 
 import { SerdeContext } from "./SerdeContext";
@@ -52,7 +53,7 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
     }
   ) {
     super();
-    this.compositeErrorRegistry = TypeRegistry.for(options.defaultNamespace);
+    this.compositeErrorRegistry = new TypeRegistry(options.defaultNamespace);
     for (const etr of options.errorTypeRegistries ?? []) {
       this.compositeErrorRegistry.copyFrom(etr);
     }
@@ -187,6 +188,63 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
   }
 
   /**
+   * For a given error short name, a list of preferred namespaces, and a list of preferred registries,
+   * find the error's schema and class.
+   *
+   * @param name - short error shape id.
+   * @param namespaces - must contain '*' to allow matching against an undeclared namespace.
+   * @param registries - in which to look.
+   * @returns matched error schema and constructor, with worst case being the least-descriptive DocumentSchema and native Error.
+   */
+  protected resolveError(
+    name: string,
+    namespaces: string[],
+    registries: TypeRegistry[]
+  ): [StaticErrorSchema, any, "modeled" | "synthetic" | "native"] {
+    const defaultErrorSchema = [-3, "", "Error", 0, [], [], 0] satisfies StaticErrorSchema;
+    let schema: StaticErrorSchema | undefined;
+    for (const registry of registries) {
+      for (const ns of namespaces) {
+        try {
+          if (ns === "*") {
+            schema = registry.getSchema(name) as StaticErrorSchema;
+          } else {
+            schema = registry.getSchema(ns + "#" + name) as StaticErrorSchema;
+          }
+          const errorCtor = registry.getErrorCtor(schema);
+          if (errorCtor) {
+            return [schema, errorCtor, "modeled"];
+          } else {
+            const syntheticErrorSchema = registry.getBaseException();
+            if (syntheticErrorSchema) {
+              const syntheticErrorCtor = registry.getErrorCtor(syntheticErrorSchema);
+              if (syntheticErrorCtor) {
+                return [schema, syntheticErrorCtor, "synthetic"];
+              }
+            }
+          }
+        } catch (ignored) {
+          // schema not found, continue.
+        }
+      }
+    }
+
+    // at this point, no schema was found, so we'll take a preferred registry's
+    // synthetic base error.
+    for (const registry of registries) {
+      const syntheticErrorSchema = registry.getBaseException();
+      if (syntheticErrorSchema) {
+        const syntheticErrorCtor = registry.getErrorCtor(syntheticErrorSchema);
+        if (syntheticErrorCtor) {
+          return [syntheticErrorSchema, syntheticErrorCtor, "synthetic"];
+        }
+      }
+    }
+
+    return [defaultErrorSchema, Error, "native"];
+  }
+
+  /**
    * @param eventStream - the iterable provided by the caller.
    * @param requestSchema - the schema of the event stream container (struct).
    * @param [initialRequest] - only provided if the initial-request is part of the event stream (RPC).
@@ -251,19 +309,6 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
   }
 
   /**
-   * Returns a platform-specific EventStreamMarshaller.
-   * Prefers user-injected marshaller from serdeContext (via client config),
-   * falls back to the dynamically imported provider.
-   */
-  private resolveEventStreamMarshaller(importedProvider: EventStreamSerdeProvider): EventStreamMarshaller {
-    const context = this.serdeContext as unknown as EventStreamSerdeContext;
-    if (context.eventStreamMarshaller) {
-      return context.eventStreamMarshaller;
-    }
-    return importedProvider(this.serdeContext as any);
-  }
-
-  /**
    * @returns content-type default header value for event stream events and other documents.
    */
   protected getDefaultContentType(): string {
@@ -313,5 +358,18 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       throw new Error("@smithy/core - HttpProtocol: eventStreamMarshaller missing in serdeContext.");
     }
     return context.eventStreamMarshaller;
+  }
+
+  /**
+   * Returns a platform-specific EventStreamMarshaller.
+   * Prefers user-injected marshaller from serdeContext (via client config),
+   * falls back to the dynamically imported provider.
+   */
+  private resolveEventStreamMarshaller(importedProvider: EventStreamSerdeProvider): EventStreamMarshaller {
+    const context = this.serdeContext as unknown as EventStreamSerdeContext;
+    if (context.eventStreamMarshaller) {
+      return context.eventStreamMarshaller;
+    }
+    return importedProvider(this.serdeContext as any);
   }
 }

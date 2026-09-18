@@ -1,4 +1,4 @@
-import { op, type TypeRegistry } from "@smithy/core/schema";
+import { op, TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type {
   $SchemaRef,
@@ -408,6 +408,237 @@ describe(SmithyRpcV2CborProtocol.name, () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect.assertions(1);
+    });
+  });
+
+  // Exercises HttpProtocol#resolveError through its concrete implementation
+  // (SmithyRpcV2CborProtocol#handleError). These cases target the registry/namespace
+  // scanning branches that the "error handling" block above does not distinguish:
+  // the "*" wildcard namespace, the parsed-namespace lookup, resolution from a
+  // non-composite preferred registry, and the "schema found but no ctor -> synthetic"
+  // path. The three resolution modes ("modeled", "synthetic", "native") are all hit.
+  describe("resolveError (via handleError)", () => {
+    const defaultNamespace = "resolve.default";
+    const protocol = new SmithyRpcV2CborProtocol({ defaultNamespace });
+
+    const staticOperation = [
+      9,
+      defaultNamespace,
+      "OperationWithModeledException",
+      {},
+      [3, defaultNamespace, "Input", 0, [], []],
+      [3, defaultNamespace, "Output", 0, [], []],
+    ] satisfies StaticOperationSchema;
+
+    const operation = op(
+      staticOperation[1],
+      staticOperation[2],
+      staticOperation[3],
+      staticOperation[4],
+      staticOperation[5]
+    );
+
+    const serdeContext = {};
+
+    class ServiceBaseException extends Error {
+      public readonly $fault: "client" | "server" = "client";
+      public $response?: HttpResponse;
+      public $metadata: ResponseMetadata = {};
+    }
+    class ModeledExceptionCtor extends ServiceBaseException {
+      public modeledProperty = "";
+    }
+
+    // Namespaces touched by these tests. registerError/register write into both the
+    // composite registry AND TypeRegistry.for(ns) (the global map), which persists
+    // across tests, so every touched namespace registry must be cleared each time.
+    const touchedNamespaces = [
+      defaultNamespace,
+      "resolve.wild",
+      "resolve.qualified",
+      "resolve.nsonly",
+      "resolve.noctor",
+      "smithy.ts.sdk.synthetic." + defaultNamespace,
+      "smithy.ts.sdk.synthetic.resolve.noctor",
+    ];
+
+    const composite = (protocol as any as { compositeErrorRegistry: TypeRegistry }).compositeErrorRegistry;
+
+    beforeEach(() => {
+      composite.clear();
+      for (const ns of touchedNamespaces) {
+        TypeRegistry.for(ns).clear();
+      }
+    });
+
+    const errorWith = (type: string | undefined, statusCode = 400) =>
+      new HttpResponse({
+        statusCode,
+        headers: {},
+        body: cbor.serialize({
+          ...(type !== undefined ? { __type: type } : {}),
+          modeledProperty: "detail",
+          message: "boom",
+        }),
+      });
+
+    it("resolves an unqualified discriminator via the '*' wildcard namespace (modeled)", async () => {
+      // Schema lives under a namespace that is neither the parsed namespace (there is
+      // none) nor the default. Only the "*" branch, which does an unqualified lookup,
+      // can find it, and only because it is the single candidate ending in "#Name".
+      const schema = [-3, "resolve.wild", "WildcardException", 0, ["modeledProperty"], [0]] satisfies StaticErrorSchema;
+      composite.registerError(schema, ModeledExceptionCtor);
+
+      await expect(
+        protocol.deserializeResponse(operation, serdeContext as any, errorWith("WildcardException"))
+      ).rejects.toBeInstanceOf(ModeledExceptionCtor);
+    });
+
+    it("resolves a namespace-qualified discriminator that differs from the default (modeled)", async () => {
+      const schema = [
+        -3,
+        "resolve.qualified",
+        "QualifiedException",
+        0,
+        ["modeledProperty"],
+        [0],
+      ] satisfies StaticErrorSchema;
+      composite.registerError(schema, ModeledExceptionCtor);
+
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(
+          operation,
+          serdeContext as any,
+          errorWith("resolve.qualified#QualifiedException")
+        );
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(ModeledExceptionCtor);
+      expect(caught.modeledProperty).toEqual("detail");
+    });
+
+    it("resolves from a preferred registry other than the composite (default-namespace registry)", async () => {
+      // Register only into TypeRegistry.for(defaultNamespace) - NOT the composite.
+      // The composite is scanned first and misses; resolution must fall through to the
+      // third registry in the preferred list.
+      const schema = [-3, defaultNamespace, "NsOnlyException", 0, ["modeledProperty"], [0]] satisfies StaticErrorSchema;
+      TypeRegistry.for(defaultNamespace).registerError(schema, ModeledExceptionCtor);
+      // Guard: the schema is not in the composite.
+      expect(() => composite.getSchema(defaultNamespace + "#NsOnlyException")).toThrow();
+
+      await expect(
+        protocol.deserializeResponse(operation, serdeContext as any, errorWith(defaultNamespace + "#NsOnlyException"))
+      ).rejects.toBeInstanceOf(ModeledExceptionCtor);
+    });
+
+    it("falls back to the synthetic base exception when a schema is found but has no ctor", async () => {
+      // A plain (non-error) schema claims the qualified key via register(), so getSchema
+      // succeeds but getErrorCtor returns undefined. A synthetic base exception is present,
+      // so resolveError returns mode "synthetic".
+      const listSchema = [1, "resolve.noctor", "NoCtorException", 0, 0] as any;
+      composite.register("resolve.noctor#NoCtorException", listSchema);
+      const baseSchema = [
+        -3,
+        "smithy.ts.sdk.synthetic.resolve.noctor",
+        "BaseServiceException",
+        0,
+        [],
+        [],
+      ] satisfies StaticErrorSchema;
+      composite.registerError(baseSchema, ServiceBaseException);
+
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorWith("resolve.noctor#NoCtorException"));
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(ServiceBaseException);
+      // synthetic path copies dataObject onto the thrown error.
+      expect(caught.message).toEqual("boom");
+    });
+
+    it("falls back to a native Error when no schema and no base exception are available (native)", async () => {
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorWith("resolve.qualified#Absent"));
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(Error);
+      expect(caught).not.toBeInstanceOf(ServiceBaseException);
+      // native path constructs new Error(errorShapeName), but dataObject is then
+      // assigned over it, so dataObject.message wins.
+      expect(caught.message).toEqual("boom");
+    });
+
+    it("uses the error shape name as the native Error message when the body has none", async () => {
+      // No __type and no message in the body: discriminator becomes "Unknown",
+      // and the native Error keeps that name since dataObject has no message to assign.
+      const response = new HttpResponse({
+        statusCode: 400,
+        headers: {},
+        body: cbor.serialize({ modeledProperty: "detail" }),
+      });
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, response);
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(Error);
+      expect(caught).not.toBeInstanceOf(ServiceBaseException);
+      expect(caught.message).toEqual("Unknown");
+    });
+
+    it("uses a preferred registry's base exception when no schema matches at all (post-scan synthetic)", async () => {
+      // No schema is registered for the discriminator anywhere, so the first
+      // registry/namespace scan finds nothing. The second loop then returns the
+      // default-namespace registry's synthetic base exception.
+      const baseSchema = [
+        -3,
+        "smithy.ts.sdk.synthetic." + defaultNamespace,
+        "BaseServiceException",
+        0,
+        [],
+        [],
+      ] satisfies StaticErrorSchema;
+      TypeRegistry.for(defaultNamespace).registerError(baseSchema, ServiceBaseException);
+
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(
+          operation,
+          serdeContext as any,
+          errorWith("resolve.qualified#TotallyUnknown")
+        );
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(ServiceBaseException);
+      expect(caught.message).toEqual("boom");
+    });
+
+    it("classifies status code 500 as a server fault", async () => {
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorWith("resolve.qualified#Absent", 500));
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught.$fault).toEqual("server");
+    });
+
+    it("classifies status code 499 as a client fault", async () => {
+      let caught: any;
+      try {
+        await protocol.deserializeResponse(operation, serdeContext as any, errorWith("resolve.qualified#Absent", 499));
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught.$fault).toEqual("client");
     });
   });
 });

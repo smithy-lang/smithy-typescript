@@ -10,7 +10,6 @@ import type {
   OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
-  StaticErrorSchema,
 } from "@smithy/types";
 
 import { CborCodec } from "./CborCodec";
@@ -99,47 +98,49 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     dataObject: any,
     metadata: ResponseMetadata
   ): Promise<never> {
-    const errorName = loadSmithyRpcV2CborErrorCode(response, dataObject) ?? "Unknown";
+    const errorIdentifier = loadSmithyRpcV2CborErrorCode(response, dataObject) ?? "Unknown";
+    const preferredNamespaces = ["*"];
+
+    const { defaultNamespace } = this.options;
+    preferredNamespaces.unshift(defaultNamespace);
+
+    const [namespace, errorShapeName] = (() => {
+      if (errorIdentifier.includes("#")) {
+        return errorIdentifier.split("#");
+      }
+      return [undefined, errorIdentifier];
+    })();
+    if (namespace) {
+      preferredNamespaces.unshift(namespace);
+    }
 
     const errorMetadata = {
       $metadata: metadata,
-      $fault: response.statusCode <= 500 ? ("client" as const) : ("server" as const),
+      $fault: response.statusCode < 500 ? ("client" as const) : ("server" as const),
     };
 
-    let namespace = this.options.defaultNamespace;
-    if (errorName.includes("#")) {
-      [namespace] = errorName.split("#");
+    const preferredRegistries = [this.compositeErrorRegistry];
+    if (namespace) {
+      preferredRegistries.push(TypeRegistry.for(namespace));
     }
+    preferredRegistries.push(TypeRegistry.for(defaultNamespace));
 
-    const registry = this.compositeErrorRegistry;
+    const [errorSchema, ErrorCtor, errorMode] = this.resolveError(
+      errorShapeName,
+      preferredNamespaces,
+      preferredRegistries
+    );
 
-    const nsRegistry = TypeRegistry.for(namespace);
-    // Composition required for backwards compatibility.
-    // Previous generated clients did not export errorTypeRegistries.
-    registry.copyFrom(nsRegistry);
-
-    let errorSchema: StaticErrorSchema;
-    try {
-      errorSchema = registry.getSchema(errorName) as StaticErrorSchema;
-    } catch (ignored) {
+    if (errorMode === "native" || errorMode === "synthetic") {
       if (dataObject.Message) {
         dataObject.message = dataObject.Message;
       }
-      const syntheticRegistry = TypeRegistry.for("smithy.ts.sdk.synthetic." + namespace);
-      // Composition required for backwards compatibility.
-      // Previous generated clients did not export errorTypeRegistries.
-      registry.copyFrom(syntheticRegistry);
-
-      const baseExceptionSchema = registry.getBaseException();
-      if (baseExceptionSchema) {
-        const ErrorCtor = registry.getErrorCtor(baseExceptionSchema);
-        throw Object.assign(new ErrorCtor({ name: errorName }), errorMetadata, dataObject);
-      }
-      throw Object.assign(new Error(errorName), errorMetadata, dataObject);
+      const error: Error =
+        errorMode === "synthetic" ? new ErrorCtor({ name: errorShapeName }) : new Error(errorShapeName);
+      throw Object.assign(error, errorMetadata, dataObject);
     }
 
     const ns = NormalizedSchema.of(errorSchema);
-    const ErrorCtor = registry.getErrorCtor(errorSchema);
     const message = dataObject.message ?? dataObject.Message ?? "Unknown";
     const exception = new ErrorCtor({});
 

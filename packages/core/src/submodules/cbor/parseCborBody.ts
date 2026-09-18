@@ -50,6 +50,9 @@ export const parseCborErrorBody = async (errorBody: any, context: SerdeContext) 
 };
 
 /**
+ * Trims error.__type
+ * "com.a.b#Error:Sender,tag" -> "com.a.b#Error"
+ *
  * @internal
  */
 export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): string | undefined => {
@@ -64,26 +67,11 @@ export const loadSmithyRpcV2CborErrorCode = (output: HttpResponse, data: any): s
     if (cleanValue.indexOf(":") >= 0) {
       cleanValue = cleanValue.split(":")[0];
     }
-    if (cleanValue.indexOf("#") >= 0) {
-      cleanValue = cleanValue.split("#")[1];
-    }
     return cleanValue;
   };
 
   if (data["__type"] !== undefined) {
     return sanitizeErrorCode(data["__type"]);
-  }
-
-  let codeKey: string | undefined;
-  for (const key in data) {
-    if (!hasOwn(data, key)) continue;
-    if (key.toLowerCase() === "code") {
-      codeKey = key;
-      break;
-    }
-  }
-  if (codeKey && data[codeKey] !== undefined) {
-    return sanitizeErrorCode(data[codeKey]);
   }
 };
 
