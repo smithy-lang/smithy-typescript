@@ -32,13 +32,33 @@ describe("buildHttpRpcRequest", () => {
 });
 
 describe(loadSmithyRpcV2CborErrorCode.name, () => {
-  it("should read the code field case-insensitively", () => {
+  it("should preserve the absolute shape id from __type", () => {
     const code = loadSmithyRpcV2CborErrorCode(
-      { statusCode: 200, headers: {} },
+      { statusCode: 400, headers: {} },
+      {
+        __type: "com.example#OhNoException",
+      }
+    );
+    expect(code).toEqual("com.example#OhNoException");
+  });
+
+  it("should trim a trailing tag/version suffix but keep the namespace", () => {
+    const code = loadSmithyRpcV2CborErrorCode(
+      { statusCode: 400, headers: {} },
+      {
+        __type: "com.example#OhNoException:Sender",
+      }
+    );
+    expect(code).toEqual("com.example#OhNoException");
+  });
+
+  it("should not use a Code/code body field (spec forbids it)", () => {
+    const code = loadSmithyRpcV2CborErrorCode(
+      { statusCode: 400, headers: {} },
       {
         cOdE: "OhNoException:Sender",
       }
     );
-    expect(code).toEqual("OhNoException");
+    expect(code).toBeUndefined();
   });
 });

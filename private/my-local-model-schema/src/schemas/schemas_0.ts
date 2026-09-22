@@ -136,10 +136,10 @@ import {
 import { XYZServiceSyntheticServiceException } from "../models/XYZServiceSyntheticServiceException";
 
 /* eslint no-var: 0 */
-const _s_registry = TypeRegistry.for(_s);
+const _s_registry = new TypeRegistry(_s);
 export var XYZServiceSyntheticServiceException$: StaticErrorSchema = [-3, _s, "XYZServiceSyntheticServiceException", 0, [], []];
 _s_registry.registerError(XYZServiceSyntheticServiceException$, XYZServiceSyntheticServiceException);
-const n0_registry = TypeRegistry.for(n0);
+const n0_registry = new TypeRegistry(n0);
 export var CodedThrottlingError$: StaticErrorSchema = [-3, n0, _CTE,
   { [_e]: _c, [_hE]: 429 },
   [],

@@ -184,7 +184,7 @@ public class SchemaGenerator implements Runnable {
                 writer.addImportSubmodule("TypeRegistry", null, TypeScriptDependency.SMITHY_CORE, "/schema");
                 writer.write(
                     """
-                    const $L = TypeRegistry.for($L);""",
+                    const $L = new TypeRegistry($L);""",
                     errorRegistryVarName,
                     ns
                 );
@@ -259,7 +259,7 @@ public class SchemaGenerator implements Runnable {
 
         writer.write(
             """
-            const $L = TypeRegistry.for($L);""",
+            const $L = new TypeRegistry($L);""",
             syntheticNamespaceTypeRegistry,
             syntheticNamespace
         );
