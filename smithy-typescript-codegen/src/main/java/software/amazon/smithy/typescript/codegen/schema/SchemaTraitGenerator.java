@@ -44,6 +44,7 @@ import software.amazon.smithy.model.traits.XmlNamespaceTrait;
 import software.amazon.smithy.typescript.codegen.util.StringStore;
 import software.amazon.smithy.utils.SetUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Creates the string representing a trait's data.
@@ -106,7 +107,7 @@ public class SchemaTraitGenerator {
         } else if (DATA_TRAITS.contains(trait.toShapeId())) {
             if (trait instanceof EndpointTrait endpointTrait) {
                 return """
-                       ["%s"]""".formatted(endpointTrait.getHostPrefix());
+                       [%s]""".formatted(StringUtils.escapeJavaString(endpointTrait.getHostPrefix(), ""));
             } else if (trait instanceof XmlNamespaceTrait xmlNamespaceTrait) {
                 return """
                        [%s, %s]""".formatted(
@@ -117,7 +118,10 @@ public class SchemaTraitGenerator {
                 return Objects.toString(httpError.getCode());
             } else if (trait instanceof HttpTrait httpTrait) {
                 return """
-                       ["%s", "%s", %s]""".formatted(httpTrait.getMethod(), httpTrait.getUri(), httpTrait.getCode());
+                       [%s, %s, %s]""".formatted(
+                    StringUtils.escapeJavaString(httpTrait.getMethod(), ""),
+                    StringUtils.escapeJavaString(httpTrait.getUri().toString(), ""),
+                    httpTrait.getCode());
             }
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {
             return SchemaTraitExtension.INSTANCE.render(trait);

@@ -9,6 +9,7 @@ import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.util.PropertyAccessor;
+import software.amazon.smithy.utils.StringUtils;
 
 public class RuleSetSerializer {
 
@@ -67,11 +68,10 @@ public class RuleSetSerializer {
             }
         } else if (node.isStringNode()) {
             String stringValue = node.expectStringNode().getValue();
-            if (stringValue.contains("\"")) {
-                writer.write("`$L`,", stringValue.replaceAll("`", "\\\\`"));
-            } else {
-                writer.write("\"$L\",", stringValue);
-            }
+            // Escape via escapeJavaString; the previous backtick fallback left `${`
+            // live for template interpolation. Passed as a $L argument, any `$` in the
+            // literal is not re-parsed by CodeWriter. See #2279.
+            writer.write("$L,", StringUtils.escapeJavaString(stringValue, ""));
         }
     }
 }

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.utils.SmithyInternalApi;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Serializes Smithy {@link Node} values to JavaScript object/array literals.
@@ -26,7 +27,8 @@ public final class JavaScriptObjectWriter {
             String members = obj.getMembers()
                 .entrySet()
                 .stream()
-                .map(e -> "\"%s\": %s".formatted(e.getKey().getValue(), serialize(e.getValue())))
+                .map(e -> "%s: %s".formatted(
+                    StringUtils.escapeJavaString(e.getKey().getValue(), ""), serialize(e.getValue())))
                 .collect(Collectors.joining(", "));
             return "{" + members + "}";
         }
@@ -43,13 +45,9 @@ public final class JavaScriptObjectWriter {
         }
         if (node.isStringNode()) {
             String value = node.expectStringNode().getValue();
-            if (value.contains("\"")) {
-                if (value.contains("`")) {
-                    return "\"%s\"".formatted(value.replace("\"", "\\\""));
-                }
-                return "`%s`".formatted(value);
-            }
-            return "\"%s\"".formatted(value);
+            // Escape via escapeJavaString; the previous backtick fallback left `${`
+            // live for template interpolation and never escaped backslashes. See #2279.
+            return StringUtils.escapeJavaString(value, "");
         }
         if (node.isNumberNode()) {
             return node.expectNumberNode().getValue().toString();
@@ -66,17 +64,19 @@ public final class JavaScriptObjectWriter {
         if (node.isObjectNode()) {
             ObjectNode obj = node.expectObjectNode();
             if (obj.getMember("ref").isPresent()) {
-                return "[1, \"%s\"]".formatted(obj.expectStringMember("ref").getValue());
+                return "[1, %s]".formatted(
+                    StringUtils.escapeJavaString(obj.expectStringMember("ref").getValue(), ""));
             }
             if (obj.getMember("fn").isPresent()) {
                 String fn = obj.expectStringMember("fn").getValue();
                 String argv = serializeEndpointNode(obj.expectArrayMember("argv"));
-                return "[0, \"%s\", %s]".formatted(fn, argv);
+                return "[0, %s, %s]".formatted(StringUtils.escapeJavaString(fn, ""), argv);
             }
             String members = obj.getMembers()
                 .entrySet()
                 .stream()
-                .map(e -> "\"%s\": %s".formatted(e.getKey().getValue(), serializeEndpointNode(e.getValue())))
+                .map(e -> "%s: %s".formatted(
+                    StringUtils.escapeJavaString(e.getKey().getValue(), ""), serializeEndpointNode(e.getValue())))
                 .collect(Collectors.joining(", "));
             return "{" + members + "}";
         }

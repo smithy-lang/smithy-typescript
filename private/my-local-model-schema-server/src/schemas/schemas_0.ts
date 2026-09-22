@@ -119,7 +119,7 @@ const _xme = "x-max-events";
 const _xsi = "x-subscription-id";
 const _xsi_ = "x-session-id";
 const _zC = "zipCode";
-const _zZzZzZ = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+const _zZzZzZ = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 const n0 = "org.xyz.v1";
 const n1 = "org.xyz.secondary";
 
