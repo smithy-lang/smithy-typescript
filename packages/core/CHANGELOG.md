@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.35.0
+
+### Minor Changes
+
+- 596456b: add per-request MetricsRecorder support through `client.send(command, { metricsRecorder })`
+
+### Patch Changes
+
+- 77e63b9: CBOR spec error handling fixes: the error identifier namespace is no longer incorrectly removed during error lookup. Code property from the body is no longer used as a fallback for error identification. Status code 500 is now classified as server fault.
+- Updated dependencies [596456b]
+  - @smithy/types@4.19.0
+
 ## 3.34.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.19.0
+
+### Minor Changes
+
+- 596456b: add per-request MetricsRecorder support through `client.send(command, { metricsRecorder })`
+
 ## 4.18.0
 
 ### Minor Changes
