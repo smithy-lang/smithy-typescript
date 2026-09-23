@@ -16,6 +16,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import software.amazon.smithy.utils.SmithyInternalApi;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Intended for use at the
@@ -80,7 +81,10 @@ public class StringStore {
             String variable = entry.getKey();
             String literal = entry.getValue();
             if (writeLog.add(variable)) {
-                sourceCode.append(String.format("const %s = \"%s\";%n", variable, literal));
+                // Escape model-supplied values so they cannot corrupt the emitted
+                // literal (e.g. @pattern, @jsonName, @mediaType). See #2279.
+                sourceCode.append(String.format("const %s = %s;%n", variable,
+                    StringUtils.escapeJavaString(literal, "")));
             }
         }
         return sourceCode.toString();

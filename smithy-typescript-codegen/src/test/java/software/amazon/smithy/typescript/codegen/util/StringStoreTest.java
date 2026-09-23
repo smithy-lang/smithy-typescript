@@ -124,4 +124,57 @@ class StringStoreTest {
             );
         }
     }
+
+    @Test
+    void escapesSpecialCharacters() {
+        // Regression for #2279: model-supplied trait values (e.g. @pattern, @mediaType,
+        // @jsonName) containing backslashes, quotes, or control characters must be escaped
+        // so the generated TypeScript is valid and the decoded value round-trips.
+        StringStore subject = new StringStore();
+
+        // @pattern with an anchored escaped dot: IDL "\\." -> trait value "\." must
+        // survive as "\\." in the emitted literal so it decodes back to "\.".
+        String patternVar = subject.var("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+        // @mediaType with an embedded double quote.
+        String mediaTypeVar = subject.var("text/plain; charset=\"utf-8\"");
+        // @jsonName with a backslash.
+        String jsonNameVar = subject.var("a\\bc");
+        // Control characters.
+        String newlineVar = subject.var("line1\nline2");
+        String tabVar = subject.var("a\tb");
+
+        String flushed = subject.flushVariableDeclarationCode();
+
+        assertTrue(
+            flushed.contains(
+                "const " + patternVar
+                    + " = \"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$\";"
+            ),
+            "backslash before dot must be escaped as \\\\.; got:\n" + flushed
+        );
+        assertTrue(
+            flushed.contains("const " + mediaTypeVar + " = \"text/plain; charset=\\\"utf-8\\\"\";"),
+            "embedded double quote must be escaped; got:\n" + flushed
+        );
+        assertTrue(
+            flushed.contains("const " + jsonNameVar + " = \"a\\\\bc\";"),
+            "backslash must be escaped; got:\n" + flushed
+        );
+        assertTrue(
+            flushed.contains("const " + newlineVar + " = \"line1\\nline2\";"),
+            "newline must be escaped; got:\n" + flushed
+        );
+        assertTrue(
+            flushed.contains("const " + tabVar + " = \"a\\tb\";"),
+            "tab must be escaped; got:\n" + flushed
+        );
+
+        // The value payloads must contain no raw control characters: strip the per-declaration
+        // line separator (String.format's %n, which is \r\n on Windows) before checking, so this
+        // asserts the escaping of values, not the platform's line terminator.
+        String values = flushed.replace(System.lineSeparator(), "");
+        assertFalse(values.contains("\n"), "no raw newline in a value; got:\n" + flushed);
+        assertFalse(values.contains("\r"), "no raw CR in a value; got:\n" + flushed);
+        assertFalse(values.contains("\t"), "no raw tab in a value; got:\n" + flushed);
+    }
 }
