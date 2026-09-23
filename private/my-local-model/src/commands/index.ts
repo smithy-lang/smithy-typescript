@@ -6,4 +6,5 @@ export * from "./HttpLabelCommandCommand";
 export * from "./PublishEventsCommand";
 export * from "./SubscribeToEventsCommand";
 export * from "./TradeEventStreamCommand";
+export * from "./UnionMemberCollisionOperationCommand";
 export * from "./ValidatedOperationCommand";

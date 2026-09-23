@@ -54,6 +54,10 @@ import type {
 } from "../commands/SubscribeToEventsCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "../commands/TradeEventStreamCommand";
 import type {
+  UnionMemberCollisionOperationCommandInput,
+  UnionMemberCollisionOperationCommandOutput,
+} from "../commands/UnionMemberCollisionOperationCommand";
+import type {
   ValidatedOperationCommandInput,
   ValidatedOperationCommandOutput,
 } from "../commands/ValidatedOperationCommand";
@@ -71,6 +75,7 @@ import {
   type CamelCaseOperationOutput,
   type ConstrainedAddress,
   type DifferentShapeName,
+  type Gadget,
   type Gamma,
   type GammaPayload,
   type GetNumbersRequest,
@@ -83,8 +88,11 @@ import {
   type NotificationEvent,
   type SubscribeEventStream,
   type SubscribeToEventsRequest,
+  type Thing,
+  type UnionMemberCollisionInput,
   type Unit,
   type ValidatedInput,
+  type WidgetMember,
   PublishEventStream,
   TradeEvents,
 } from "../models/models_0";
@@ -198,6 +206,19 @@ export const se_TradeEventStreamCommand = async (
   let body: any;
   body = se_TradeEvents(input.eventStream, context);
   return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/TradeEventStream", undefined, body);
+};
+
+/**
+ * serializeRpcv2cborUnionMemberCollisionOperationCommand
+ */
+export const se_UnionMemberCollisionOperationCommand = async (
+  input: UnionMemberCollisionOperationCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const headers: __HeaderBag = SHARED_HEADERS;
+  let body: any;
+  body = cbor.serialize(_json(input));
+  return buildHttpRpcRequest(context, headers, "/service/XYZService/operation/UnionMemberCollisionOperation", undefined, body);
 };
 
 /**
@@ -355,6 +376,28 @@ export const de_TradeEventStreamCommand = async (
 
   const contents = { eventStream: de_TradeEvents(output.body, context) };
   const response: TradeEventStreamCommandOutput = {
+    $metadata: deserializeMetadata(output), ...contents,
+  };
+  return response;
+
+};
+
+/**
+ * deserializeRpcv2cborUnionMemberCollisionOperationCommand
+ */
+export const de_UnionMemberCollisionOperationCommand = async (
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<UnionMemberCollisionOperationCommandOutput> => {
+  cr(output);
+  if (output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+
+  const data: any = await parseBody(output.body, context)
+  let contents: any = {};
+  contents = _json(data);
+  const response: UnionMemberCollisionOperationCommandOutput = {
     $metadata: deserializeMetadata(output), ...contents,
   };
   return response;
@@ -776,6 +819,8 @@ const se_Alpha_event = (
 
             // se_DifferentShapeName omitted.
 
+            // se_Gadget omitted.
+
             // se_GammaPayload omitted.
 
             /**
@@ -843,9 +888,15 @@ const se_Alpha_event = (
 
             // se_TagList omitted.
 
+            // se_Thing omitted.
+
+            // se_UnionMemberCollisionInput omitted.
+
             // se_UniqueTagList omitted.
 
             // se_ValidatedInput omitted.
+
+            // se_WidgetMember omitted.
 
             // se_Unit omitted.
 
@@ -891,6 +942,8 @@ const se_Alpha_event = (
             // de_CodedThrottlingError omitted.
 
             // de_DifferentShapeName omitted.
+
+            // de_Gadget omitted.
 
             // de_GammaPayload omitted.
 
@@ -956,7 +1009,13 @@ const se_Alpha_event = (
               return collection;
             }
 
+            // de_Thing omitted.
+
+            // de_UnionMemberCollisionOutput omitted.
+
             // de_ValidatedOutput omitted.
+
+            // de_WidgetMember omitted.
 
             // de_XYZServiceServiceException omitted.
 

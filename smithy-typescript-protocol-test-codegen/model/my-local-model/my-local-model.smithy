@@ -143,10 +143,43 @@ service XYZService {
         HttpLabelCommand
         HostPrefixOperation
         ValidatedOperation
+        UnionMemberCollisionOperation
     ]
     errors: [
         MainServiceLinkedError
     ]
+}
+
+/// Regression coverage for union variant interface shadowing (#2280).
+@http(method: "POST", uri: "/union-member-collision", code: 200)
+operation UnionMemberCollisionOperation {
+    input: UnionMemberCollisionInput
+    output: UnionMemberCollisionOutput
+}
+
+@input
+structure UnionMemberCollisionInput {
+    thing: Thing
+}
+
+@output
+structure UnionMemberCollisionOutput {
+    thing: Thing
+}
+
+union Thing {
+    // Variant interface collides with the target structure `WidgetMember` (#2280).
+    widget: WidgetMember
+
+    gadget: Gadget
+}
+
+structure WidgetMember {
+    widgetId: String
+}
+
+structure Gadget {
+    gadgetId: String
 }
 
 @error("client")

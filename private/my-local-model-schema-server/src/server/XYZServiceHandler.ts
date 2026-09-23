@@ -20,6 +20,8 @@ import type {
   SubscribeToEventsResponse,
   TradeEventStreamRequest,
   TradeEventStreamResponse,
+  UnionMemberCollisionInput,
+  UnionMemberCollisionOutput,
   Unit,
   ValidatedInput,
   ValidatedOutput,
@@ -32,6 +34,7 @@ import {
   PublishEvents$,
   SubscribeToEvents$,
   TradeEventStream$,
+  UnionMemberCollisionOperation$,
   ValidatedOperation$,
 } from "../schemas/schemas_0";
 
@@ -44,6 +47,7 @@ const OPERATION_SCHEMAS: StaticOperationSchema[] = [
   PublishEvents$,
   SubscribeToEvents$,
   TradeEventStream$,
+  UnionMemberCollisionOperation$,
   ValidatedOperation$,
 ];
 
@@ -63,6 +67,7 @@ export class XYZServiceHandler<Context = {}> extends SchemaServiceHandler<Contex
       PublishEvents: (input: PublishEventsRequest, context: ServerRequestContext, userContext: Context) => Promise<PublishEventsResponse>;
       SubscribeToEvents: (input: SubscribeToEventsRequest, context: ServerRequestContext, userContext: Context) => Promise<SubscribeToEventsResponse>;
       TradeEventStream: (input: TradeEventStreamRequest, context: ServerRequestContext, userContext: Context) => Promise<TradeEventStreamResponse>;
+      UnionMemberCollisionOperation: (input: UnionMemberCollisionInput, context: ServerRequestContext, userContext: Context) => Promise<UnionMemberCollisionOutput>;
       ValidatedOperation: (input: ValidatedInput, context: ServerRequestContext, userContext: Context) => Promise<ValidatedOutput>;
     };
   }) {

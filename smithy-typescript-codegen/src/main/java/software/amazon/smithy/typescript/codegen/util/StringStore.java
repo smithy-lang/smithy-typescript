@@ -83,8 +83,13 @@ public class StringStore {
             if (writeLog.add(variable)) {
                 // Escape model-supplied values so they cannot corrupt the emitted
                 // literal (e.g. @pattern, @jsonName, @mediaType). See #2279.
-                sourceCode.append(String.format("const %s = %s;%n", variable,
-                    StringUtils.escapeJavaString(literal, "")));
+                sourceCode.append(
+                    String.format(
+                        "const %s = %s;%n",
+                        variable,
+                        StringUtils.escapeJavaString(literal, "")
+                    )
+                );
             }
         }
         return sourceCode.toString();

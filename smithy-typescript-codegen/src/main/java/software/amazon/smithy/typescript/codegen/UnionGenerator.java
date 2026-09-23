@@ -4,7 +4,9 @@
  */
 package software.amazon.smithy.typescript.codegen;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -162,8 +164,21 @@ final class UnionGenerator implements Runnable {
         sensitiveDataFinder = new SensitiveDataFinder(model);
 
         variantMap = new TreeMap<>();
+        // A variant interface is declared inside `namespace <UnionName>`, so a target
+        // structure of the same name would be shadowed and become self-referential (#2280).
+        Set<String> targetSymbolNames = new HashSet<>();
+        for (MemberShape member : shape.getAllMembers().values()) {
+            targetSymbolNames.add(symbolProvider.toSymbol(member).getName());
+        }
+        Set<String> usedVariantNames = new HashSet<>();
         for (MemberShape member : shape.getAllMembers().values()) {
             String variant = StringUtils.capitalize(symbolProvider.toMemberName(member)) + "Member";
+            // Deconflict only on collision; leaving non-colliding names intact keeps
+            // output backwards compatible.
+            while (targetSymbolNames.contains(variant) || usedVariantNames.contains(variant)) {
+                variant = "_" + variant;
+            }
+            usedVariantNames.add(variant);
             variantMap.put(member.getMemberName(), variant);
         }
         this.schemaMode = schemaMode;

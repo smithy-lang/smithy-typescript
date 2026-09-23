@@ -44,6 +44,11 @@ import {
   TradeEventStreamCommand,
 } from "./commands/TradeEventStreamCommand";
 import {
+  type UnionMemberCollisionOperationCommandInput,
+  type UnionMemberCollisionOperationCommandOutput,
+  UnionMemberCollisionOperationCommand,
+} from "./commands/UnionMemberCollisionOperationCommand";
+import {
   type ValidatedOperationCommandInput,
   type ValidatedOperationCommandOutput,
   ValidatedOperationCommand,
@@ -65,6 +70,7 @@ const commands = {
   PublishEventsCommand,
   SubscribeToEventsCommand,
   TradeEventStreamCommand,
+  UnionMemberCollisionOperationCommand,
   ValidatedOperationCommand,
 };
 const paginators = {
@@ -207,6 +213,24 @@ export interface XYZService {
     args: TradeEventStreamCommandInput,
     options: XYZServiceRequestOptions,
     cb: (err: any, data?: TradeEventStreamCommandOutput) => void
+  ): void;
+
+  /**
+   * @see {@link UnionMemberCollisionOperationCommand}
+   */
+  unionMemberCollisionOperation(): Promise<UnionMemberCollisionOperationCommandOutput>;
+  unionMemberCollisionOperation(
+    args: UnionMemberCollisionOperationCommandInput,
+    options?: XYZServiceRequestOptions
+  ): Promise<UnionMemberCollisionOperationCommandOutput>;
+  unionMemberCollisionOperation(
+    args: UnionMemberCollisionOperationCommandInput,
+    cb: (err: any, data?: UnionMemberCollisionOperationCommandOutput) => void
+  ): void;
+  unionMemberCollisionOperation(
+    args: UnionMemberCollisionOperationCommandInput,
+    options: XYZServiceRequestOptions,
+    cb: (err: any, data?: UnionMemberCollisionOperationCommandOutput) => void
   ): void;
 
   /**

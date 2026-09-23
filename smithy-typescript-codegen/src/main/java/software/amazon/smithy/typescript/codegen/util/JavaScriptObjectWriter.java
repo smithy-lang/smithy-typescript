@@ -27,8 +27,12 @@ public final class JavaScriptObjectWriter {
             String members = obj.getMembers()
                 .entrySet()
                 .stream()
-                .map(e -> "%s: %s".formatted(
-                    StringUtils.escapeJavaString(e.getKey().getValue(), ""), serialize(e.getValue())))
+                .map(
+                    e -> "%s: %s".formatted(
+                        StringUtils.escapeJavaString(e.getKey().getValue(), ""),
+                        serialize(e.getValue())
+                    )
+                )
                 .collect(Collectors.joining(", "));
             return "{" + members + "}";
         }
@@ -65,7 +69,8 @@ public final class JavaScriptObjectWriter {
             ObjectNode obj = node.expectObjectNode();
             if (obj.getMember("ref").isPresent()) {
                 return "[1, %s]".formatted(
-                    StringUtils.escapeJavaString(obj.expectStringMember("ref").getValue(), ""));
+                    StringUtils.escapeJavaString(obj.expectStringMember("ref").getValue(), "")
+                );
             }
             if (obj.getMember("fn").isPresent()) {
                 String fn = obj.expectStringMember("fn").getValue();
@@ -75,8 +80,12 @@ public final class JavaScriptObjectWriter {
             String members = obj.getMembers()
                 .entrySet()
                 .stream()
-                .map(e -> "%s: %s".formatted(
-                    StringUtils.escapeJavaString(e.getKey().getValue(), ""), serializeEndpointNode(e.getValue())))
+                .map(
+                    e -> "%s: %s".formatted(
+                        StringUtils.escapeJavaString(e.getKey().getValue(), ""),
+                        serializeEndpointNode(e.getValue())
+                    )
+                )
                 .collect(Collectors.joining(", "));
             return "{" + members + "}";
         }

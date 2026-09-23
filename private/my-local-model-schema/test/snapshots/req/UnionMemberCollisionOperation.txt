@@ -1,0 +1,24 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/UnionMemberCollisionOperation
+
+x-api-key: [object Object]
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+content-length: 38
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[Uint8Array (cbor object view)]
+{
+  "thing": {
+    "gadget": {
+      "gadgetId": "__gadgetId__"
+    }
+  }
+}
+
+[actual bytes]
+161, 101, 116, 104, 105, 110, 103, 161, 102, 103, 97, 100, 103, 101, 116, 161, 104, 103, 97, 100, 103, 101, 116, 73,
+100, 108, 95, 95, 103, 97, 100, 103, 101, 116, 73, 100, 95, 95
