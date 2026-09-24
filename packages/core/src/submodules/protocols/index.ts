@@ -52,3 +52,7 @@ export { parseQueryString } from "@smithy/core/transport";
 
 // @smithy/url-parser
 export { parseUrl } from "@smithy/core/transport";
+
+export { SmithyRpcV2JsonProtocol } from "./json/SmithyRpcV2JsonProtocol";
+export { parseJsonBody, parseJsonErrorBody, loadJsonRpcErrorCode, loadRestJsonErrorCode } from "./json/parseJsonBody";
+export { JsonCodec2 } from "./json/codec-v2/JsonCodec2";
