@@ -1429,7 +1429,11 @@ public final class HttpProtocolTestGenerator implements Runnable {
                 """
                 expect(
                   r[param],
-                  `The output field $${param} should have been defined in $${JSON.stringify(r, null, 2)}`
+                  `The output field $${param} should have been defined in $${JSON.stringify(
+                    r,
+                    (_, v) => (typeof v === "bigint" ? v.toString() : v),
+                    2
+                  )}`
                 ).toBeDefined();"""
             );
             if (hasStreamingPayloadBlob) {
@@ -1557,6 +1561,15 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // Also handle that a Date in TS takes milliseconds, so add 000 to the end.
             if (workingShape.isTimestampShape()) {
                 writer.write("new Date($L000),", node.getValue());
+            } else if (workingShape.isBigIntegerShape()) {
+                // Preserve arbitrary precision: emit a BigInt from the exact digit
+                // string rather than a bare JS number literal, which would round.
+                writer.write("BigInt($S),", node.getValue().toString());
+            } else if (workingShape.isBigDecimalShape()) {
+                // Preserve arbitrary precision: emit a NumericValue from the exact
+                // digit string rather than a bare JS number literal, which would round.
+                writer.addImportSubmodule("nv", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
+                writer.write("nv($S),", node.getValue().toString());
             } else {
                 writer.write("$L,", node.getValue().toString());
             }
@@ -1789,6 +1802,15 @@ public final class HttpProtocolTestGenerator implements Runnable {
             // Also handle that a Date in TS takes milliseconds, so add * 1000 to the end.
             if (workingShape.isTimestampShape()) {
                 writer.write("new Date($L * 1000),", node.getValue());
+            } else if (workingShape.isBigIntegerShape()) {
+                // Preserve arbitrary precision: emit a BigInt from the exact digit
+                // string rather than a bare JS number literal, which would round.
+                writer.write("BigInt($S),", node.getValue().toString());
+            } else if (workingShape.isBigDecimalShape()) {
+                // Preserve arbitrary precision: emit a NumericValue from the exact
+                // digit string rather than a bare JS number literal, which would round.
+                writer.addImportSubmodule("nv", null, TypeScriptDependency.SMITHY_CORE, SmithyCoreSubmodules.SERDE);
+                writer.write("nv($S),", node.getValue().toString());
             } else {
                 writer.write("$L,", node.getValue().toString());
             }
