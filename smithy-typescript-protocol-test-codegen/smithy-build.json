@@ -80,6 +80,45 @@
         }
       }
     },
+    "smithy-rpcv2-json-schema": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": [
+              "smithy.protocoltests.rpcv2Json#RpcV2JsonProtocol"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@smithy/smithy-rpcv2-json-schema",
+          "packageManager": "npm",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "Smithy team",
+              "url": "https://smithy.io/"
+            },
+            "scripts": {},
+            "license": "Apache-2.0"
+          },
+          "private": true,
+          "generateSchemas": true,
+          "generateIndexTests": true,
+          "generateSnapshotTests": true,
+          "tsconfig": {
+            "types": {
+              "compilerOptions": {
+                "isolatedModules": true
+              }
+            }
+          },
+          "typescriptVersion": "~7.0.2"
+        }
+      }
+    },
     "my-local-model": {
       "transforms": [
         {

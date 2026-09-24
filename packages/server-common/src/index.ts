@@ -96,6 +96,7 @@ export {
 export { RestServerProtocol } from "./protocols-schema/layer-1-abstracts/RestServerProtocol";
 export { RpcServerProtocol } from "./protocols-schema/layer-1-abstracts/RpcServerProtocol";
 export { SmithyRpcV2CborServerProtocol } from "./protocols-schema/layer-2-protocols/SmithyRpcV2CborServerProtocol";
+export { SmithyRpcV2JsonServerProtocol } from "./protocols-schema/layer-2-protocols/SmithyRpcV2JsonServerProtocol";
 export { AwsRestJsonServerProtocol } from "./protocols-schema/layer-2-protocols/AwsRestJsonServerProtocol";
 export { AwsJsonRpcServerProtocol } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
 export type { AwsJsonRpcServerProtocolOptions } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
