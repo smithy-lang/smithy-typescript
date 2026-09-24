@@ -119,8 +119,8 @@ public class EventStreamGenerator {
             new TreeSet<>((a, b) -> Objects.compare(a.getRight(), b.getRight(), StructureShape::compareTo));
 
         for (OperationShape operation : operations) {
-            if (hasEventStreamInput(context, operation)) {
-                UnionShape eventsUnion = getEventStreamInputShape(context, operation);
+            if (hasEventStreamOutput(context, operation)) {
+                UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
                 eventUnionsToSerialize.add(eventsUnion);
                 eventsUnion
                     .members()
@@ -180,8 +180,8 @@ public class EventStreamGenerator {
         TreeSet<StructureShape> eventShapesToUnmarshall = new TreeSet<>();
 
         for (OperationShape operation : operations) {
-            if (hasEventStreamOutput(context, operation)) {
-                UnionShape eventsUnion = getEventStreamOutputShape(context, operation);
+            if (hasEventStreamInput(context, operation)) {
+                UnionShape eventsUnion = getEventStreamInputShape(context, operation);
                 eventUnionsToDeserialize.add(eventsUnion);
                 Set<StructureShape> eventShapes = eventsUnion
                     .members()
