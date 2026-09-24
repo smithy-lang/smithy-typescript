@@ -65,6 +65,13 @@ export interface DifferentShapeName {
 /**
  * @public
  */
+export interface Gadget {
+  gadgetId?: string | undefined;
+}
+
+/**
+ * @public
+ */
 export interface GammaPayload {
   message?: string | undefined;
   values?: number[] | undefined;
@@ -362,6 +369,59 @@ export const SubscribeToEventsResponseFilterSensitiveLog = (obj: SubscribeToEven
 /**
  * @public
  */
+export interface WidgetMember {
+  widgetId?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export type Thing =
+  | Thing.GadgetMember
+  | Thing._WidgetMember
+  | Thing.$UnknownMember;
+
+/**
+ * @public
+ */
+export namespace Thing {
+  export interface _WidgetMember {
+    widget: WidgetMember;
+    gadget?: never;
+    $unknown?: never;
+  }
+
+  export interface GadgetMember {
+    widget?: never;
+    gadget: Gadget;
+    $unknown?: never;
+  }
+
+  /**
+   * @public
+   */
+  export interface $UnknownMember {
+    widget?: never;
+    gadget?: never;
+    $unknown: [string, any];
+  }
+
+  export interface Visitor<T> {
+    widget: (value: WidgetMember) => T;
+    gadget: (value: Gadget) => T;
+    _: (name: string, value: any) => T;
+  }
+
+  export const visit = <T>(value: Thing, visitor: Visitor<T>): T => {
+    if (value.widget !== undefined) return visitor.widget(value.widget);
+    if (value.gadget !== undefined) return visitor.gadget(value.gadget);
+    return visitor._(value.$unknown[0], value.$unknown[1]);
+  };
+}
+
+/**
+ * @public
+ */
 export interface Unit {}
 
 /**
@@ -499,6 +559,20 @@ export const TradeEventStreamResponseFilterSensitiveLog = (obj: TradeEventStream
     'STREAMING_CONTENT'
   }),
 })
+
+/**
+ * @public
+ */
+export interface UnionMemberCollisionInput {
+  thing?: Thing | undefined;
+}
+
+/**
+ * @public
+ */
+export interface UnionMemberCollisionOutput {
+  thing?: Thing | undefined;
+}
 
 /**
  * @public

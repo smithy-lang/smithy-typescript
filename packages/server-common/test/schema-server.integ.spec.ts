@@ -102,6 +102,9 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           message: `Hello, ${input.username}! You are ${input.age} years old.`,
         };
       },
+      async UnionMemberCollisionOperation(input) {
+        return { thing: input.thing };
+      },
     },
   });
 
@@ -458,6 +461,9 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           async ValidatedOperation(input) {
             return { message: `Hello, ${input.username}!` };
           },
+          async UnionMemberCollisionOperation(input) {
+            return { thing: input.thing };
+          },
         },
       });
 
@@ -768,6 +774,9 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           },
           async ValidatedOperation(input) {
             return { message: `Hello, ${input.username}!` };
+          },
+          async UnionMemberCollisionOperation(input) {
+            return { thing: input.thing };
           },
         },
       });

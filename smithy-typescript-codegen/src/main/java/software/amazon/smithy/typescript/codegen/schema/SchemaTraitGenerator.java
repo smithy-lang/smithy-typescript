@@ -121,7 +121,8 @@ public class SchemaTraitGenerator {
                        [%s, %s, %s]""".formatted(
                     StringUtils.escapeJavaString(httpTrait.getMethod(), ""),
                     StringUtils.escapeJavaString(httpTrait.getUri().toString(), ""),
-                    httpTrait.getCode());
+                    httpTrait.getCode()
+                );
             }
         } else if (SchemaTraitExtension.INSTANCE.contains(trait)) {
             return SchemaTraitExtension.INSTANCE.render(trait);

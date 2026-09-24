@@ -5,12 +5,14 @@
 package software.amazon.smithy.typescript.codegen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 
 public class UnionGeneratorTest {
@@ -107,5 +109,69 @@ public class UnionGeneratorTest {
             """,
             output
         );
+    }
+
+    @Test
+    public void deconflictsVariantInterfaceWhenTargetShadowsIt() {
+        // Regression for #2280: a member targeting a structure named `<Member>Member`
+        // would be shadowed by its own variant interface.
+        StructureShape widgetMember = StructureShape.builder()
+            .id("com.foo#WidgetMember")
+            .addMember(
+                MemberShape.builder()
+                    .id("com.foo#WidgetMember$widgetId")
+                    .target("smithy.api#String")
+                    .build()
+            )
+            .build();
+        StructureShape gadget = StructureShape.builder()
+            .id("com.foo#Gadget")
+            .addMember(
+                MemberShape.builder()
+                    .id("com.foo#Gadget$gadgetId")
+                    .target("smithy.api#String")
+                    .build()
+            )
+            .build();
+        MemberShape widget = MemberShape.builder()
+            .id("com.foo#Example$widget")
+            .target("com.foo#WidgetMember")
+            .build();
+        MemberShape gadgetMember = MemberShape.builder()
+            .id("com.foo#Example$gadget")
+            .target("com.foo#Gadget")
+            .build();
+        UnionShape unionShape = UnionShape.builder()
+            .id("com.foo#Example")
+            .addMember(widget)
+            .addMember(gadgetMember)
+            .build();
+        Model model = Model.assembler()
+            .addImport(getClass().getResource("simple-service.smithy"))
+            .addShapes(unionShape, widget, gadgetMember, widgetMember, gadget)
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build()
+        );
+        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
+        TypeScriptWriter writer = new TypeScriptWriter("./Example");
+        new UnionGenerator(model, symbolProvider, writer, unionShape).run();
+        String output = writer.toString();
+
+        // The colliding variant is renamed; its field still targets the real structure.
+        assertTrue(output.contains("| Example._WidgetMember"), output);
+        assertTrue(output.contains("export interface _WidgetMember {"), output);
+        assertTrue(output.contains("widget: WidgetMember;"), output);
+        // The non-colliding variant is unchanged.
+        assertTrue(output.contains("| Example.GadgetMember"), output);
+        assertTrue(output.contains("export interface GadgetMember {"), output);
+        assertTrue(output.contains("gadget: Gadget;"), output);
+        assertTrue(output.contains("widget: (value: WidgetMember) => T;"), output);
+        assertTrue(output.contains("gadget: (value: Gadget) => T;"), output);
     }
 }

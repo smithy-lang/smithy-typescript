@@ -8,6 +8,7 @@ import {
   CodedThrottlingError$,
   ConstrainedAddress$,
   DifferentShapeName$,
+  Gadget$,
   Gamma$,
   GammaPayload$,
   GetNumbers$,
@@ -45,11 +46,16 @@ import {
   SubscribeToEventsCommand,
   SubscribeToEventsRequest$,
   SubscribeToEventsResponse$,
+  Thing$,
   TradeEvents$,
   TradeEventStream$,
   TradeEventStreamCommand,
   TradeEventStreamRequest$,
   TradeEventStreamResponse$,
+  UnionMemberCollisionInput$,
+  UnionMemberCollisionOperation$,
+  UnionMemberCollisionOperationCommand,
+  UnionMemberCollisionOutput$,
   ValidatedInput$,
   ValidatedOperation$,
   ValidatedOperationCommand,
@@ -60,6 +66,7 @@ import {
   waitUntilNumbersAligned,
   waitUntilNumbersMisaligned,
   waitUntilNumbersWhatDoTheyDoAnyway,
+  WidgetMember$,
   XYZService,
   XYZServiceClient,
   XYZServiceServiceException,
@@ -85,6 +92,8 @@ assert(typeof SubscribeToEventsCommand === "function");
 assert(typeof SubscribeToEvents$ === "object");
 assert(typeof TradeEventStreamCommand === "function");
 assert(typeof TradeEventStream$ === "object");
+assert(typeof UnionMemberCollisionOperationCommand === "function");
+assert(typeof UnionMemberCollisionOperation$ === "object");
 assert(typeof ValidatedOperationCommand === "function");
 assert(typeof ValidatedOperation$ === "object");
 // structural schemas
@@ -95,6 +104,7 @@ assert(typeof camelCaseOperationInput$ === "object");
 assert(typeof camelCaseOperationOutput$ === "object");
 assert(typeof ConstrainedAddress$ === "object");
 assert(typeof DifferentShapeName$ === "object");
+assert(typeof Gadget$ === "object");
 assert(typeof Gamma$ === "object");
 assert(typeof GammaPayload$ === "object");
 assert(typeof GetNumbersRequest$ === "object");
@@ -110,11 +120,15 @@ assert(typeof PublishEventStream$ === "object");
 assert(typeof SubscribeEventStream$ === "object");
 assert(typeof SubscribeToEventsRequest$ === "object");
 assert(typeof SubscribeToEventsResponse$ === "object");
+assert(typeof Thing$ === "object");
 assert(typeof TradeEvents$ === "object");
 assert(typeof TradeEventStreamRequest$ === "object");
 assert(typeof TradeEventStreamResponse$ === "object");
+assert(typeof UnionMemberCollisionInput$ === "object");
+assert(typeof UnionMemberCollisionOutput$ === "object");
 assert(typeof ValidatedInput$ === "object");
 assert(typeof ValidatedOutput$ === "object");
+assert(typeof WidgetMember$ === "object");
 // errors
 assert(CodedThrottlingError.prototype instanceof XYZServiceSyntheticServiceException);
 assert(typeof CodedThrottlingError$ === "object");

@@ -23,6 +23,8 @@ import {
   SubscribeToEventsCommand,
   TradeEventStream$,
   TradeEventStreamCommand,
+  UnionMemberCollisionOperation$,
+  UnionMemberCollisionOperationCommand,
   ValidatedOperation$,
   ValidatedOperationCommand,
   XYZServiceClient,
@@ -54,6 +56,7 @@ describe("XYZServiceClient" + ` (${mode})`, () => {
       [PublishEvents$, PublishEventsCommand],
       [SubscribeToEvents$, SubscribeToEventsCommand],
       [TradeEventStream$, TradeEventStreamCommand],
+      [UnionMemberCollisionOperation$, UnionMemberCollisionOperationCommand],
       [ValidatedOperation$, ValidatedOperationCommand],
     ]),
     errors: [

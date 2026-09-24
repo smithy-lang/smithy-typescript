@@ -3,11 +3,12 @@ const _AI = "AccountId";
 const _CA = "ConstrainedAddress";
 const _CTE = "CodedThrottlingError";
 const _DSN = "DifferentShapeName";
-const _G = "Gamma";
+const _G = "Gadget";
 const _GN = "GetNumbers";
 const _GNR = "GetNumbersRequest";
 const _GNRe = "GetNumbersResponse";
 const _GP = "GammaPayload";
+const _Ga = "Gamma";
 const _HE = "HaltError";
 const _HEe = "HeartbeatEvent";
 const _HLC = "HttpLabelCommand";
@@ -32,13 +33,18 @@ const _SIM = "SparseIntegerMap";
 const _STE = "SubscribeToEvents";
 const _STER = "SubscribeToEventsRequest";
 const _STERu = "SubscribeToEventsResponse";
+const _T = "Thing";
 const _TE = "TradeEvents";
 const _TES = "TradeEventStream";
 const _TESR = "TradeEventStreamRequest";
 const _TESRr = "TradeEventStreamResponse";
+const _UMCI = "UnionMemberCollisionInput";
+const _UMCO = "UnionMemberCollisionOutput";
+const _UMCOn = "UnionMemberCollisionOperation";
 const _VI = "ValidatedInput";
 const _VO = "ValidatedOutput";
 const _VOa = "ValidatedOperation";
+const _WM = "WidgetMember";
 const _XYZSSE = "XYZServiceServiceException";
 const _a = "age";
 const _ad = "address";
@@ -66,7 +72,9 @@ const _en = "endpoint";
 const _ev = "events";
 const _fWM = "fieldWithoutMessage";
 const _fWMi = "fieldWithMessage";
-const _g = "gamma";
+const _g = "gadget";
+const _gI = "gadgetId";
+const _ga = "gamma";
 const _h = "heartbeat";
 const _hE = "httpError";
 const _hH = "httpHeader";
@@ -99,12 +107,15 @@ const _st = "state";
 const _str = "streaming";
 const _t = "timestamp";
 const _ta = "tags";
+const _th = "thing";
 const _to = "token";
 const _top = "topic";
 const _u = "username";
 const _uT = "uniqueTags";
 const _v = "values";
 const _va = "value";
+const _w = "widget";
+const _wI = "widgetId";
 const _xc = "x-channel";
 const _xec = "x-event-count";
 const _xme = "x-max-events";
@@ -220,7 +231,12 @@ export var DifferentShapeName$: StaticStructureSchema = [3, n0, _DSN,
   [_n, _nu],
   [0, 1]
 ];
-export var Gamma$: StaticStructureSchema = [3, n0, _G,
+export var Gadget$: StaticStructureSchema = [3, n0, _G,
+  0,
+  [_gI],
+  [0]
+];
+export var Gamma$: StaticStructureSchema = [3, n0, _Ga,
   0,
   [_sN, _p],
   [[1, { [_eH]: 1 }], [() => GammaPayload$, { [_eP]: 1 }]]
@@ -295,6 +311,16 @@ export var TradeEventStreamResponse$: StaticStructureSchema = [3, n0, _TESRr,
   [_sIe, _eS],
   [[0, { [_hH]: _xsi_ }], [() => TradeEvents$, 16]]
 ];
+export var UnionMemberCollisionInput$: StaticStructureSchema = [3, n0, _UMCI,
+  0,
+  [_th],
+  [() => Thing$]
+];
+export var UnionMemberCollisionOutput$: StaticStructureSchema = [3, n0, _UMCO,
+  0,
+  [_th],
+  [() => Thing$]
+];
 export var ValidatedInput$: StaticStructureSchema = [3, n0, _VI,
   0,
   [_u, _a, _em, _ta, _uT, _ad],
@@ -303,6 +329,11 @@ export var ValidatedInput$: StaticStructureSchema = [3, n0, _VI,
 export var ValidatedOutput$: StaticStructureSchema = [3, n0, _VO,
   0,
   [_m],
+  [0]
+];
+export var WidgetMember$: StaticStructureSchema = [3, n0, _WM,
+  0,
+  [_wI],
   [0]
 ];
 var __Unit = "unit" as const;
@@ -327,9 +358,14 @@ export var SubscribeEventStream$: StaticUnionSchema = [4, n0, _SES,
   [_no, _h],
   [() => NotificationEvent$, () => HeartbeatEvent$]
 ];
+export var Thing$: StaticUnionSchema = [4, n0, _T,
+  0,
+  [_w, _g],
+  [() => WidgetMember$, () => Gadget$]
+];
 export var TradeEvents$: StaticUnionSchema = [4, n0, _TE,
   { [_str]: 1 },
-  [_al, _b, _g, _d],
+  [_al, _b, _ga, _d],
   [() => Alpha$, () => __Unit, [() => Gamma$, 0], () => DifferentShapeName$]
 ];
 export var HttpLabelCommand$: StaticOperationSchema = [9, n1, _HLC,
@@ -352,6 +388,9 @@ export var SubscribeToEvents$: StaticOperationSchema = [9, n0, _STE,
 ];
 export var TradeEventStream$: StaticOperationSchema = [9, n0, _TES,
   { [_ht]: ["POST", "/trade-event-stream", 200] }, () => TradeEventStreamRequest$, () => TradeEventStreamResponse$
+];
+export var UnionMemberCollisionOperation$: StaticOperationSchema = [9, n0, _UMCOn,
+  { [_ht]: ["POST", "/union-member-collision", 200] }, () => UnionMemberCollisionInput$, () => UnionMemberCollisionOutput$
 ];
 export var ValidatedOperation$: StaticOperationSchema = [9, n0, _VOa,
   { [_ht]: ["POST", "/validated", 200] }, () => ValidatedInput$, () => ValidatedOutput$

@@ -229,8 +229,11 @@ public class RuleSetParameterFinder {
                             if (paramNode != null && paramNode.containsMember("default")) {
                                 Node defaultValue = paramNode.getMember("default").get();
                                 if (defaultValue.isStringNode()) {
-                                    writer.write("$L: $L,", paramName,
-                                        StringUtils.escapeJavaString(defaultValue.expectStringNode().getValue(), ""));
+                                    writer.write(
+                                        "$L: $L,",
+                                        paramName,
+                                        StringUtils.escapeJavaString(defaultValue.expectStringNode().getValue(), "")
+                                    );
                                 } else if (defaultValue.isBooleanNode()) {
                                     writer.write("$L: $L,", paramName, defaultValue.expectBooleanNode().getValue());
                                 }

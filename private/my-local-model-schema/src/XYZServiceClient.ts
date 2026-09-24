@@ -62,6 +62,10 @@ import type {
 } from "./commands/SubscribeToEventsCommand";
 import type { TradeEventStreamCommandInput, TradeEventStreamCommandOutput } from "./commands/TradeEventStreamCommand";
 import type {
+  UnionMemberCollisionOperationCommandInput,
+  UnionMemberCollisionOperationCommandOutput,
+} from "./commands/UnionMemberCollisionOperationCommand";
+import type {
   ValidatedOperationCommandInput,
   ValidatedOperationCommandOutput,
 } from "./commands/ValidatedOperationCommand";
@@ -87,6 +91,7 @@ export type ServiceInputTypes =
   | PublishEventsCommandInput
   | SubscribeToEventsCommandInput
   | TradeEventStreamCommandInput
+  | UnionMemberCollisionOperationCommandInput
   | ValidatedOperationCommandInput;
 
 /**
@@ -100,6 +105,7 @@ export type ServiceOutputTypes =
   | PublishEventsCommandOutput
   | SubscribeToEventsCommandOutput
   | TradeEventStreamCommandOutput
+  | UnionMemberCollisionOperationCommandOutput
   | ValidatedOperationCommandOutput;
 
 /**
