@@ -2,6 +2,18 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.54.0 (2026-09-24)
+
+### Features
+
+- Added MetricsRecorder support to client middleware ([#2149](https://github.com/smithy-lang/smithy-typescript/pull/2149))
+
+### Bug Fixes
+
+- Fixed error registry scanning ([#2281](https://github.com/smithy-lang/smithy-typescript/pull/2281))
+- Escaped string literals in schema-mode codegen ([#2282](https://github.com/smithy-lang/smithy-typescript/pull/2282))
+- Fixed union member name collisions ([#2283](https://github.com/smithy-lang/smithy-typescript/pull/2283))
+
 ## 0.53.0 (2026-08-24)
 
 ### Features
