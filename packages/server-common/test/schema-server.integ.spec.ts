@@ -12,11 +12,13 @@ import {
 } from "xyz-schema";
 import {
   SmithyRpcV2CborServerProtocol,
+  SmithyRpcV2JsonServerProtocol,
   AwsRestJsonServerProtocol,
   AwsJsonRpcServerProtocol,
   SchemaServiceHandler,
 } from "../src/index";
-import { HttpRequest } from "@smithy/core/protocols";
+import { HttpRequest, SmithyRpcV2JsonProtocol } from "@smithy/core/protocols";
+import { nv } from "@smithy/core/serde";
 import { AwsRestJsonProtocol, AwsJson1_0Protocol } from "@aws-sdk/core/protocols";
 import { GetNumbers$, camelCaseOperation$ } from "xyz-schema-server";
 import { convertRequest, writeResponse } from "@smithy/server-node";
@@ -36,11 +38,13 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
   let cborClient: XYZServiceClient;
   let jsonClient: XYZServiceClient;
   let jsonRpcClient: XYZServiceClient;
+  let rpcV2JsonClient: XYZServiceClient;
   let baseUrl: string;
 
   const handler = new XYZServiceHandler({
     protocols: [
       new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+      new SmithyRpcV2JsonServerProtocol({ defaultNamespace: "org.xyz.v1" }),
       new AwsRestJsonServerProtocol({ defaultNamespace: "org.xyz.v1" }),
       new AwsJsonRpcServerProtocol({ defaultNamespace: "org.xyz.v1" }),
     ],
@@ -52,6 +56,8 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           numbers: doubled,
           nextToken: input.startToken ? `next-${input.startToken}` : undefined,
           bigInteger: input.bigInteger ? input.bigInteger * BigInt(2) : undefined,
+          // Echo bigDecimal back unchanged to exercise arbitrary-precision round-trip.
+          bigDecimal: input.bigDecimal,
         };
       },
       async camelCaseOperation(input) {
@@ -149,12 +155,24 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       },
       requestHandler: new NodeHttpHandler(),
     });
+
+    // Smithy RPCv2 JSON client — overrides protocol.
+    rpcV2JsonClient = new XYZServiceClient({
+      endpoint: baseUrl,
+      apiKey: { apiKey: "test-key" },
+      protocol: SmithyRpcV2JsonProtocol,
+      protocolSettings: {
+        defaultNamespace: "org.xyz.v1",
+      },
+      requestHandler: new NodeHttpHandler(),
+    });
   });
 
   afterAll(async () => {
     cborClient.destroy();
     jsonClient.destroy();
     jsonRpcClient.destroy();
+    rpcV2JsonClient.destroy();
     await new Promise<void>((resolve, reject) => {
       server.close((err) => (err ? reject(err) : resolve()));
     });
@@ -308,16 +326,91 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
     });
   });
 
+  describe("rpcv2Json protocol (smithy.protocols#rpcv2Json)", () => {
+    it("GetNumbers: doubles input numbers", async () => {
+      const response = await rpcV2JsonClient.send(
+        new GetNumbersCommand({
+          numbers: { p: 6, q: 9 },
+          startToken: "json-tok",
+        })
+      );
+      expect(response.numbers).toEqual([12, 18]);
+      expect(response.nextToken).toBe("next-json-tok");
+    });
+
+    it("GetNumbers: returns empty list when no input", async () => {
+      const response = await rpcV2JsonClient.send(new GetNumbersCommand({}));
+      expect(response.numbers).toEqual([]);
+      expect(response.nextToken).toBeUndefined();
+    });
+
+    it("camelCaseOperation: reverses the token", async () => {
+      const response = await rpcV2JsonClient.send(new CamelCaseOperationCommand({ token: "rpcv2json" }));
+      expect(response.token).toBe("nosj2vcpr");
+    });
+
+    it("GetNumbers: bigInteger round-trips with full precision (exceeds Number range)", async () => {
+      // Value larger than Number.MAX_SAFE_INTEGER; RPCv2 JSON transmits it as a
+      // string, so precision must survive the client -> server -> client round-trip.
+      const response = await rpcV2JsonClient.send(
+        new GetNumbersCommand({
+          bigInteger: BigInt("9223372036854775807"),
+        })
+      );
+      // Server doubles it: 9223372036854775807 * 2 = 18446744073709551614.
+      expect(response.bigInteger).toBe(BigInt("18446744073709551614"));
+    });
+
+    it("GetNumbers: bigDecimal round-trips with full precision", async () => {
+      // High-precision decimal transmitted as a JSON string per the spec; the
+      // server echoes it back unchanged.
+      const response = await rpcV2JsonClient.send(
+        new GetNumbersCommand({
+          bigDecimal: nv("0.10000000000000000000000054321"),
+        })
+      );
+      expect(response.bigDecimal?.string).toBe("0.10000000000000000000000054321");
+    });
+
+    it("ValidatedOperation: accepts valid input", async () => {
+      const response = await rpcV2JsonClient.send(
+        new ValidatedOperationCommand({
+          username: "dana",
+          age: 33,
+          email: "dana@test.com",
+          tags: ["dev"],
+          address: { zipCode: "10001", state: "NY" },
+        })
+      );
+      expect(response.message).toBe("Hello, dana! You are 33 years old.");
+    });
+
+    it("ValidatedOperation: server rejects invalid input", async () => {
+      await expect(
+        rpcV2JsonClient.send(
+          new ValidatedOperationCommand({
+            username: "",
+            age: 0,
+            email: "bad",
+            tags: [],
+          })
+        )
+      ).rejects.toThrow();
+    });
+  });
+
   describe("protocol routing", () => {
-    it("same server handles CBOR, restJson1, and awsJson1_0 requests concurrently", async () => {
-      const [cborResult, jsonResult, rpcResult] = await Promise.all([
+    it("same server handles CBOR, restJson1, awsJson1_0, and rpcv2Json requests concurrently", async () => {
+      const [cborResult, jsonResult, rpcResult, rpcV2JsonResult] = await Promise.all([
         cborClient.send(new CamelCaseOperationCommand({ token: "cbor" })),
         jsonClient.send(new CamelCaseOperationCommand({ token: "json" })),
         jsonRpcClient.send(new CamelCaseOperationCommand({ token: "rpc1" })),
+        rpcV2JsonClient.send(new CamelCaseOperationCommand({ token: "jsonv2" })),
       ]);
       expect(cborResult.token).toBe("robc");
       expect(jsonResult.token).toBe("nosj");
       expect(rpcResult.token).toBe("1cpr");
+      expect(rpcV2JsonResult.token).toBe("2vnosj");
     });
   });
 
