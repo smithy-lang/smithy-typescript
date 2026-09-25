@@ -1,0 +1,104 @@
+======================== minimal response ========================
+[status] 500
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "org.xyz.secondary#UnmodeledServiceException"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 120, 43, 111, 114, 103, 46, 120, 121, 122, 46, 115, 101, 99, 111, 110, 100,
+97, 114, 121, 35, 85, 110, 109, 111, 100, 101, 108, 101, 100, 83, 101, 114, 118, 105, 99, 101, 69, 120, 99, 101,
+112, 116, 105, 111, 110
+
+
+--- [error name & message] ---
+UnmodeledServiceException: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "UnmodeledServiceException",
+  __type: "org.xyz.secondary#UnmodeledServiceException"
+}
+
+======================== w/ optional fields ========================
+[status] 500
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "Message": "__Message__",
+  "__type": "org.xyz.secondary#UnmodeledServiceException"
+}
+
+[actual bytes]
+162, 103, 77, 101, 115, 115, 97, 103, 101, 107, 95, 95, 77, 101, 115, 115, 97, 103, 101, 95, 95, 102, 95, 95,
+116, 121, 112, 101, 120, 43, 111, 114, 103, 46, 120, 121, 122, 46, 115, 101, 99, 111, 110, 100, 97, 114, 121, 35,
+85, 110, 109, 111, 100, 101, 108, 101, 100, 83, 101, 114, 118, 105, 99, 101, 69, 120, 99, 101, 112, 116, 105, 111,
+110
+
+
+--- [error name & message] ---
+UnmodeledServiceException: __Message__
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "UnmodeledServiceException",
+  Message: "__Message__",
+  __type: "org.xyz.secondary#UnmodeledServiceException",
+  message: "__Message__"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+Unknown: 
+
+--- [error object] ---
+{
+  0: (number) 110,
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "Unknown"
+}
+

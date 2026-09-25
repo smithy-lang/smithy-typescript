@@ -1,0 +1,145 @@
+======================== minimal response ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[Uint8Array (json)]
+{
+  "message": "__message__",
+  "fieldList": [
+    {
+      "path": "__path__",
+      "message": "__message__"
+    },
+    {
+      "path": "__path__",
+      "message": "__message__"
+    },
+    {
+      "path": "__path__",
+      "message": "__message__"
+    }
+  ],
+  "__type": "smithy.framework#ValidationException"
+}
+
+
+--- [error name & message] ---
+ValidationException: __message__
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "ValidationException",
+  fieldList: [
+    {
+      path: "__path__",
+      message: "__message__"
+    },
+    {
+      path: "__path__",
+      message: "__message__"
+    },
+    {
+      path: "__path__",
+      message: "__message__"
+    }
+  ],
+  message: "__message__"
+}
+
+======================== w/ optional fields ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[Uint8Array (json)]
+{
+  "message": "__message__",
+  "fieldList": [
+    {
+      "path": "__path__",
+      "message": "__message__"
+    },
+    {
+      "path": "__path__",
+      "message": "__message__"
+    },
+    {
+      "path": "__path__",
+      "message": "__message__"
+    }
+  ],
+  "__type": "smithy.framework#ValidationException"
+}
+
+
+--- [error name & message] ---
+ValidationException: __message__
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "ValidationException",
+  fieldList: [
+    {
+      path: "__path__",
+      message: "__message__"
+    },
+    {
+      path: "__path__",
+      message: "__message__"
+    },
+    {
+      path: "__path__",
+      message: "__message__"
+    }
+  ],
+  message: "__message__"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+SyntaxError: Unexpected token A in JSON at position 0
+  Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object.
+
+--- [error object] ---
+{
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

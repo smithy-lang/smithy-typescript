@@ -1,0 +1,100 @@
+======================== minimal response ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "__type": "org.xyz.v1#HaltError"
+}
+
+[actual bytes]
+161, 102, 95, 95, 116, 121, 112, 101, 116, 111, 114, 103, 46, 120, 121, 122, 46, 118, 49, 35, 72, 97, 108, 116,
+69, 114, 114, 111, 114
+
+
+--- [error name & message] ---
+HaltError: undefined
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "HaltError",
+  message: (undefined)
+}
+
+======================== w/ optional fields ========================
+[status] 400
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "message": "__message__",
+  "__type": "org.xyz.v1#HaltError"
+}
+
+[actual bytes]
+162, 103, 109, 101, 115, 115, 97, 103, 101, 107, 95, 95, 109, 101, 115, 115, 97, 103, 101, 95, 95, 102, 95, 95,
+116, 121, 112, 101, 116, 111, 114, 103, 46, 120, 121, 122, 46, 118, 49, 35, 72, 97, 108, 116, 69, 114, 114, 111,
+114
+
+
+--- [error name & message] ---
+HaltError: __message__
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 400,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "HaltError",
+  message: "__message__"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+Unknown: 
+
+--- [error object] ---
+{
+  0: (number) 110,
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "Unknown"
+}
+

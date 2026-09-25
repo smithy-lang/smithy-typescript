@@ -1,0 +1,56 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{}
+
+[actual bytes]
+160
+
+
+--- [output object] ---
+{
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-cbor
+content-type: application/cbor
+
+[Uint8Array (cbor object view)]
+{
+  "eventCount": 0,
+  "message": "__message__"
+}
+
+[actual bytes]
+162, 106, 101, 118, 101, 110, 116, 67, 111, 117, 110, 116, 0, 103, 109, 101, 115, 115, 97, 103, 101, 107, 95, 95,
+109, 101, 115, 115, 97, 103, 101, 95, 95
+
+
+--- [output object] ---
+{
+  eventCount: (number) 0,
+  message: "__message__",
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

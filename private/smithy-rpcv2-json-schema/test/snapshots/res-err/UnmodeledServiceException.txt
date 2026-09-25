@@ -1,0 +1,90 @@
+======================== minimal response ========================
+[status] 500
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[Uint8Array (json)]
+{
+  "__type": "smithy.protocoltests.rpcv2Json#UnmodeledServiceException"
+}
+
+
+--- [error name & message] ---
+UnmodeledServiceException: 
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "UnmodeledServiceException",
+  __type: "smithy.protocoltests.rpcv2Json#UnmodeledServiceException"
+}
+
+======================== w/ optional fields ========================
+[status] 500
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[Uint8Array (json)]
+{
+  "Message": "__Message__",
+  "__type": "smithy.protocoltests.rpcv2Json#UnmodeledServiceException"
+}
+
+
+--- [error name & message] ---
+UnmodeledServiceException: __Message__
+
+--- [error object] ---
+{
+  $fault: "client",
+  $retryable: (undefined),
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  },
+  name: "UnmodeledServiceException",
+  Message: "__Message__",
+  __type: "smithy.protocoltests.rpcv2Json#UnmodeledServiceException",
+  message: "__Message__"
+}
+
+======================== frontend error ========================
+[status] 500
+  
+content-type: text/html
+
+[Uint8Array (text)]
+An unmodeled error occurred in a front end layer.
+
+
+--- [error name & message] ---
+SyntaxError: Unexpected token A in JSON at position 0
+  Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object.
+
+--- [error object] ---
+{
+  $metadata: {
+    httpStatusCode: (number) 500,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

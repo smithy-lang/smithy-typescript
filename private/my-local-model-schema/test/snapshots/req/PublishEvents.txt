@@ -1,0 +1,70 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/PublishEvents
+
+x-api-key: [object Object]
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 122 [header-size] 85 [prelude-crc] 3443622524
+:event-type: initial-request
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "channel": "__channel__"
+}
+
+[actual bytes]
+161, 103, 99, 104, 97, 110, 110, 101, 108, 107, 95, 95, 99, 104, 97, 110, 110, 101, 108, 95, 95
+
+[message-crc] 1729834264
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 126 [header-size] 73 [prelude-crc] 750811379
+:event-type: log
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "level": "__level__",
+  "message": "__message__"
+}
+
+[actual bytes]
+162, 101, 108, 101, 118, 101, 108, 105, 95, 95, 108, 101, 118, 101, 108, 95, 95, 103, 109, 101, 115, 115, 97, 103,
+101, 107, 95, 95, 109, 101, 115, 115, 97, 103, 101, 95, 95
+
+[message-crc] 1425231269
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 114 [header-size] 76 [prelude-crc] 2572837245
+:event-type: metric
+:message-type: event
+:content-type: application/cbor
+
+[cbor object view]
+{
+  "name": "__name__",
+  "value": 0
+}
+
+[actual bytes]
+162, 100, 110, 97, 109, 101, 104, 95, 95, 110, 97, 109, 101, 95, 95, 101, 118, 97, 108, 117, 101, 0
+
+[message-crc] 2310491168
+============================================================
+
+[chunk (b64)]
+Cg==
+

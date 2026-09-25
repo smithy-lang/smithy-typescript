@@ -1,0 +1,141 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[Uint8Array (json)]
+{}
+
+
+--- [output object] ---
+{
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[Uint8Array (json)]
+{
+  "sparseStructMap": {
+    "key1": {
+      "hi": "__hi__"
+    },
+    "key2": {
+      "hi": "__hi__"
+    },
+    "key3": {
+      "hi": "__hi__"
+    },
+    "sparse": null
+  },
+  "sparseNumberMap": {
+    "key1": 0,
+    "key2": 0,
+    "key3": 0,
+    "sparse": null
+  },
+  "sparseBooleanMap": {
+    "key1": false,
+    "key2": false,
+    "key3": false,
+    "sparse": null
+  },
+  "sparseStringMap": {
+    "key1": "__value__",
+    "key2": "__value__",
+    "key3": "__value__",
+    "sparse": null
+  },
+  "sparseSetMap": {
+    "key1": [
+      "__member__",
+      "__member__",
+      "__member__"
+    ],
+    "key2": [
+      "__member__",
+      "__member__",
+      "__member__"
+    ],
+    "key3": [
+      "__member__",
+      "__member__",
+      "__member__"
+    ],
+    "sparse": null
+  }
+}
+
+
+--- [output object] ---
+{
+  sparseStructMap: {
+    key1: {
+      hi: "__hi__"
+    },
+    key2: {
+      hi: "__hi__"
+    },
+    key3: {
+      hi: "__hi__"
+    },
+    sparse: (null)
+  },
+  sparseNumberMap: {
+    key1: (number) 0,
+    key2: (number) 0,
+    key3: (number) 0,
+    sparse: (null)
+  },
+  sparseBooleanMap: {
+    key1: (boolean) false,
+    key2: (boolean) false,
+    key3: (boolean) false,
+    sparse: (null)
+  },
+  sparseStringMap: {
+    key1: "__value__",
+    key2: "__value__",
+    key3: "__value__",
+    sparse: (null)
+  },
+  sparseSetMap: {
+    key1: [
+      "__member__",
+      "__member__",
+      "__member__"
+    ],
+    key2: [
+      "__member__",
+      "__member__",
+      "__member__"
+    ],
+    key3: [
+      "__member__",
+      "__member__",
+      "__member__"
+    ],
+    sparse: (null)
+  },
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
