@@ -1,5 +1,11 @@
 # Change Log
 
+## 5.7.4
+
+### Patch Changes
+
+- 2033184: preserve non-ASCII whitespace in canonical headers
+
 ## 5.7.3
 
 ### Patch Changes
