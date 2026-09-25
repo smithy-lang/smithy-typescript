@@ -1,0 +1,29 @@
+// smithy-typescript generated code
+import { loadConfigsForDefaultMode } from "@smithy/core/client";
+import { resolveDefaultsModeConfig } from "@smithy/core/config";
+import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/core/retry";
+import { calculateBodyLength } from "@smithy/core/serde";
+import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
+
+import type { RpcV2JsonProtocolClientConfig } from "./RpcV2JsonProtocolClient";
+import { getRuntimeConfig as getSharedRuntimeConfig } from "./runtimeConfig.shared";
+
+/**
+ * @internal
+ */
+export const getRuntimeConfig = (config: RpcV2JsonProtocolClientConfig) => {
+  const defaultsMode = resolveDefaultsModeConfig(config);
+  const defaultConfigProvider = () => defaultsMode().then(loadConfigsForDefaultMode);
+  const clientSharedValues = getSharedRuntimeConfig(config);
+  return {
+    ...clientSharedValues,
+    ...config,
+    runtime: "browser",
+    defaultsMode,
+    bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+    maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
+    requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
+    retryMode: config?.retryMode ?? (async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE),
+    streamCollector: config?.streamCollector ?? streamCollector,
+  };
+};

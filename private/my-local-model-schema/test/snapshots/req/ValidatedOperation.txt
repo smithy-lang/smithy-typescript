@@ -1,0 +1,42 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/ValidatedOperation
+
+x-api-key: [object Object]
+content-type: application/cbor
+smithy-protocol: rpc-v2-cbor
+accept: application/cbor
+content-length: 173
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[Uint8Array (cbor object view)]
+{
+  "username": "__username__",
+  "age": 0,
+  "email": "__email__",
+  "tags": [
+    "__member__",
+    "__member__",
+    "__member__"
+  ],
+  "uniqueTags": [
+    "__member__",
+    "__member__",
+    "__member__"
+  ],
+  "address": {
+    "zipCode": "__zipCode__",
+    "state": "__state__"
+  }
+}
+
+[actual bytes]
+166, 104, 117, 115, 101, 114, 110, 97, 109, 101, 108, 95, 95, 117, 115, 101, 114, 110, 97, 109, 101, 95, 95, 99,
+97, 103, 101, 0, 101, 101, 109, 97, 105, 108, 105, 95, 95, 101, 109, 97, 105, 108, 95, 95, 100, 116, 97, 103,
+115, 131, 106, 95, 95, 109, 101, 109, 98, 101, 114, 95, 95, 106, 95, 95, 109, 101, 109, 98, 101, 114, 95, 95,
+106, 95, 95, 109, 101, 109, 98, 101, 114, 95, 95, 106, 117, 110, 105, 113, 117, 101, 84, 97, 103, 115, 131, 106,
+95, 95, 109, 101, 109, 98, 101, 114, 95, 95, 106, 95, 95, 109, 101, 109, 98, 101, 114, 95, 95, 106, 95, 95,
+109, 101, 109, 98, 101, 114, 95, 95, 103, 97, 100, 100, 114, 101, 115, 115, 162, 103, 122, 105, 112, 67, 111, 100,
+101, 107, 95, 95, 122, 105, 112, 67, 111, 100, 101, 95, 95, 101, 115, 116, 97, 116, 101, 105, 95, 95, 115, 116,
+97, 116, 101, 95, 95
