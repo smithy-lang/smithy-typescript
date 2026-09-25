@@ -28,7 +28,12 @@ export const getCanonicalHeaders = (
       }
     }
 
-    canonical[canonicalHeaderName] = headers[headerName].trim().replace(/\s+/g, " ");
+    // https://www.rfc-editor.org/rfc/rfc9110.html#name-field-values
+    // https://www.rfc-editor.org/rfc/rfc9110.html#section-5.6.3
+    canonical[canonicalHeaderName] = headers[headerName]
+      .replace(/[\r\n]/g, " ")
+      .replace(/[ \t]+/g, " ")
+      .replace(/^ | $/g, "");
   }
 
   return canonical;

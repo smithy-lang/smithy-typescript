@@ -75,6 +75,67 @@ describe("getCanonicalHeaders", () => {
     expect(getCanonicalHeaders(request)).toEqual(headers);
   });
 
+  it("should trim and collapse ASCII space and tab", () => {
+    const request = new HttpRequest({
+      method: "POST",
+      protocol: "https:",
+      path: "/",
+      headers: {
+        host: "foo.us-east-1.amazonaws.com",
+        foo: "  bar   baz\tqux  ",
+      },
+      hostname: "foo.us-east-1.amazonaws.com",
+    });
+
+    expect(getCanonicalHeaders(request).foo).toBe("bar baz qux");
+  });
+
+  it("should not fold U+00A0 (NBSP) into an ASCII space", () => {
+    const value = "before\u00a0after";
+    const request = new HttpRequest({
+      method: "POST",
+      protocol: "https:",
+      path: "/",
+      headers: {
+        host: "foo.us-east-1.amazonaws.com",
+        "x-amz-meta-filename": value,
+      },
+      hostname: "foo.us-east-1.amazonaws.com",
+    });
+
+    expect(getCanonicalHeaders(request)["x-amz-meta-filename"]).toBe(value);
+  });
+
+  it("should replace \\r and \\n with SP", () => {
+    const request = new HttpRequest({
+      method: "POST",
+      protocol: "https:",
+      path: "/",
+      headers: {
+        host: "foo.us-east-1.amazonaws.com",
+        foo: "a\nb\rc",
+      },
+      hostname: "foo.us-east-1.amazonaws.com",
+    });
+
+    expect(getCanonicalHeaders(request).foo).toBe("a b c");
+  });
+
+  it("should retain other CTL characters and replace \r", () => {
+    const request = new HttpRequest({
+      method: "POST",
+      protocol: "https:",
+      path: "/",
+      headers: {
+        host: "foo.us-east-1.amazonaws.com",
+        foo: "a\fb\vc\rd",
+      },
+      hostname: "foo.us-east-1.amazonaws.com",
+    });
+
+    expect(getCanonicalHeaders(request).foo).toBe("a\fb\vc d");
+  });
+
   it("should allow specifying custom unsignable headers", () => {
     const request = new HttpRequest({
       method: "POST",
