@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.35.1
+
+### Patch Changes
+
+- 4734e1c: fix for SDK ServiceException instanceof detection relating to mangled class names
+- 4f51625: restore a compat name-string fallback in ServiceException instanceof for clients predating shapeId stamping, gated on a class-name length of at least 6
+
 ## 3.35.0
 
 ### Minor Changes
