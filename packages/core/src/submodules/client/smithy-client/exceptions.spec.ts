@@ -145,20 +145,23 @@ describe("Exception Hierarchy Tests", () => {
       expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
 
-    it("object with ClientServiceException name and $-props should be instanceof ServiceException and ClientServiceException", () => {
+    it("object with ClientServiceException name and $-props is instanceof ServiceException only", () => {
+      // A plain object carries no prototype chain and no stamped shapeId, so it
+      // matches the duck-typed base but no named subclass. Name-based subclass
+      // matching was removed: it is not minification-safe.
       const obj = { name: "ClientServiceException", $fault: "client" as const, $metadata: {} };
       expect(obj instanceof Error).toBe(false);
       expect(obj instanceof ServiceException).toBe(true);
-      expect(obj instanceof ClientServiceException).toBe(true);
+      expect(obj instanceof ClientServiceException).toBe(false);
       expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
 
-    it("object with ModeledClientServiceException name and $-props should be instanceof ServiceException and ModeledClientServiceException", () => {
+    it("object with ModeledClientServiceException name and $-props is instanceof ServiceException only", () => {
       const obj = { name: "ModeledClientServiceException", $fault: "client" as const, $metadata: {} };
       expect(obj instanceof Error).toBe(false);
       expect(obj instanceof ServiceException).toBe(true);
       expect(obj instanceof ClientServiceException).toBe(false);
-      expect(obj instanceof ModeledClientServiceException).toBe(true);
+      expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
   });
 });

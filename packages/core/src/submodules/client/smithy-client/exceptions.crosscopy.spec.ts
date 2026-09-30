@@ -2,16 +2,16 @@ import { describe, expect, test as it } from "vitest";
 
 import { ServiceException } from "./exceptions";
 
-// Simulate two duplicate package copies of the same service's classes.
-// Each copy has its own base class object, distinct from the other's.
 const makeCopy = () => {
   class STSServiceException extends ServiceException {
+    static shapeId = "smithy.ts.sdk.synthetic.com.amazonaws.sts#STSServiceException";
     constructor(opts: any) {
       super(opts);
       Object.setPrototypeOf(this, STSServiceException.prototype);
     }
   }
   class ExpiredTokenException extends STSServiceException {
+    static shapeId = "com.amazonaws.sts#ExpiredTokenException";
     readonly name = "ExpiredTokenException" as const;
     constructor(opts: any) {
       super({ name: "ExpiredTokenException", ...opts });
@@ -38,16 +38,17 @@ describe("ServiceException cross-copy instanceof", () => {
     expect(inst).toBeInstanceOf(clientCopy.STSServiceException);
   });
 
-  it("matches the other copy's same-named modeled class (name arm)", () => {
+  it("matches the other copy's same-named modeled class (shapeId)", () => {
     expect(inst).toBeInstanceOf(nestedCopy.ExpiredTokenException);
   });
 
-  it("matches the other copy's BASE class via prototype-chain name walk", () => {
+  it("matches the other copy's BASE class via prototype-chain shapeId walk", () => {
     expect(inst).toBeInstanceOf(nestedCopy.STSServiceException);
   });
 
   it("does not match an unrelated differently-named class", () => {
     class DynamoDBServiceException extends ServiceException {
+      static shapeId = "smithy.ts.sdk.synthetic.com.amazonaws.dynamodb#DynamoDBServiceException";
       constructor(opts: any) {
         super(opts);
         Object.setPrototypeOf(this, DynamoDBServiceException.prototype);

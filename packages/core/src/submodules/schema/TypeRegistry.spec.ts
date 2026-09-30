@@ -92,6 +92,46 @@ describe(TypeRegistry.name, () => {
       expect(TypeRegistry.for("com.err.c").getSchema("com.err.c#CrossNs")).toBe(err);
       expect(TypeRegistry.for("com.err.c").getErrorCtor(err)).toBe(CrossCtor);
     });
+
+    it("backfills shapeId on a ctor that has none", () => {
+      const tr = TypeRegistry.for("com.err.d");
+      const err = makeErr("com.err.d", "NoId");
+      class NoIdCtor extends Error {}
+
+      tr.registerError(err, NoIdCtor);
+
+      expect((NoIdCtor as any).shapeId).toBe("com.err.d#NoId");
+    });
+
+    it("does not overwrite a ctor's own shapeId (codegen-emitted wins)", () => {
+      const tr = TypeRegistry.for("com.err.e");
+      const err = makeErr("com.err.e", "HasId");
+      class HasIdCtor extends Error {
+        static shapeId = "com.err.e#HasId";
+      }
+
+      tr.registerError(err, HasIdCtor);
+
+      expect((HasIdCtor as any).shapeId).toBe("com.err.e#HasId");
+    });
+
+    it("backfills a subclass that only INHERITS a shapeId (own-property gate)", () => {
+      const tr = TypeRegistry.for("com.err.f");
+      class BaseCtor extends Error {
+        static shapeId = "com.err.f#Base";
+      }
+      // Leaf owns no shapeId; it inherits Base's via the static chain.
+      class LeafCtor extends BaseCtor {}
+      const err = makeErr("com.err.f", "Leaf");
+
+      tr.registerError(err, LeafCtor);
+
+      // Its own id is stamped, not left as the inherited base id.
+      expect(Object.prototype.hasOwnProperty.call(LeafCtor, "shapeId")).toBe(true);
+      expect((LeafCtor as any).shapeId).toBe("com.err.f#Leaf");
+      // Base is untouched.
+      expect((BaseCtor as any).shapeId).toBe("com.err.f#Base");
+    });
   });
 
   describe("unqualified shapeId lookup", () => {

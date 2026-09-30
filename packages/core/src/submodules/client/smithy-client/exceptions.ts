@@ -24,6 +24,7 @@ export interface ServiceExceptionOptions extends SmithyException, MetadataBearer
  * @public
  */
 export class ServiceException extends Error implements SmithyException, MetadataBearer {
+  public static readonly shapeId: string = "smithy.ts.sdk.synthetic.nonamespace.client#ServiceException";
   readonly $fault: "client" | "server";
 
   $response?: HttpResponse;
@@ -63,28 +64,26 @@ export class ServiceException extends Error implements SmithyException, Metadata
     if (this === ServiceException) {
       return ServiceException.isInstance(instance);
     }
-    // For subclasses, check both prototype chain and name match
-    // Note: instance must be ServiceException first (having $-props)
     if (ServiceException.isInstance(instance)) {
       if (this.prototype.isPrototypeOf(instance)) {
         return true;
       }
-      const targetName = this.name;
-      if (!targetName || !candidate.name) {
-        return false;
-      }
-      if (candidate.name === targetName) {
-        return true;
-      }
-      let proto = Object.getPrototypeOf(candidate);
-      while (proto && proto !== Object.prototype) {
-        const ctorName = proto.constructor?.name;
-        if (ctorName && ctorName !== "Error" && ctorName === targetName) {
-          return true;
+
+      const targetId: string | undefined = Object.prototype.hasOwnProperty.call(this, "shapeId")
+        ? this.shapeId
+        : undefined;
+      if (targetId) {
+        let proto = Object.getPrototypeOf(candidate);
+        while (proto && proto !== Object.prototype) {
+          const candidateId: string | undefined = Object.prototype.hasOwnProperty.call(proto.constructor, "shapeId")
+            ? proto.constructor?.shapeId
+            : undefined;
+          if (candidateId && candidateId === targetId) {
+            return true;
+          }
+          proto = Object.getPrototypeOf(proto);
         }
-        proto = Object.getPrototypeOf(proto);
       }
-      return false;
     }
     return false;
   }

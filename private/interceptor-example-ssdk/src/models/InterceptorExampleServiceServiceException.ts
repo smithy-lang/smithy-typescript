@@ -14,6 +14,7 @@ export { __ServiceException };
  * Base exception class for all service exceptions from InterceptorExampleService service.
  */
 export class InterceptorExampleServiceServiceException extends __ServiceException {
+  public static readonly shapeId: string = "smithy.ts.sdk.synthetic.example.interceptors#InterceptorExampleServiceServiceException";
   /**
    * @internal
    */

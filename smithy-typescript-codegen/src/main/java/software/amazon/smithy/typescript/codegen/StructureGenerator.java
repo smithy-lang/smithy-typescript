@@ -285,6 +285,7 @@ final class StructureGenerator implements Runnable {
         writer.writeShapeDocs(shape);
         boolean isServerSdk = this.includeValidation;
         writer.openBlock("export class $T extends $L {", symbol, "__BaseException");
+        writer.write("public static readonly shapeId: string = $1S;", shape.getId().toString());
         writer.write("readonly name = $1S as const;", shape.getId().getName());
         writer.write("readonly $$fault = $1S as const;", errorTrait.getValue());
         if (!isServerSdk) {
