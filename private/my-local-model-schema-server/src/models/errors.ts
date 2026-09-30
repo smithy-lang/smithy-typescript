@@ -6,6 +6,7 @@ import { ServiceException as __BaseException } from "@smithy/server-common";
  * @public
  */
 export class MainServiceLinkedError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#MainServiceLinkedError";
   readonly name = "MainServiceLinkedError" as const;
   readonly $fault = "client" as const;
   constructor(opts: __ExceptionOptionType<MainServiceLinkedError, __BaseException>) {
@@ -22,6 +23,7 @@ export class MainServiceLinkedError extends __BaseException {
  * @public
  */
 export class CodedThrottlingError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#CodedThrottlingError";
   readonly name = "CodedThrottlingError" as const;
   readonly $fault = "client" as const;
   constructor(opts: __ExceptionOptionType<CodedThrottlingError, __BaseException>) {
@@ -38,6 +40,7 @@ export class CodedThrottlingError extends __BaseException {
  * @public
  */
 export class HaltError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#HaltError";
   readonly name = "HaltError" as const;
   readonly $fault = "client" as const;
   constructor(opts: __ExceptionOptionType<HaltError, __BaseException>) {
@@ -54,6 +57,7 @@ export class HaltError extends __BaseException {
  * @public
  */
 export class MysteryThrottlingError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#MysteryThrottlingError";
   readonly name = "MysteryThrottlingError" as const;
   readonly $fault = "client" as const;
   constructor(opts: __ExceptionOptionType<MysteryThrottlingError, __BaseException>) {
@@ -70,6 +74,7 @@ export class MysteryThrottlingError extends __BaseException {
  * @public
  */
 export class RetryableError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#RetryableError";
   readonly name = "RetryableError" as const;
   readonly $fault = "client" as const;
   constructor(opts: __ExceptionOptionType<RetryableError, __BaseException>) {
@@ -86,6 +91,7 @@ export class RetryableError extends __BaseException {
  * @public
  */
 export class XYZServiceServiceException extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#XYZServiceServiceException";
   readonly name = "XYZServiceServiceException" as const;
   readonly $fault = "client" as const;
   constructor(opts: __ExceptionOptionType<XYZServiceServiceException, __BaseException>) {

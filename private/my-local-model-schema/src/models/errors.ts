@@ -7,6 +7,7 @@ import { XYZServiceSyntheticServiceException as __BaseException } from "./XYZSer
  * @public
  */
 export class MainServiceLinkedError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#MainServiceLinkedError";
   readonly name = "MainServiceLinkedError" as const;
   readonly $fault = "client" as const;
   /**
@@ -26,6 +27,7 @@ export class MainServiceLinkedError extends __BaseException {
  * @public
  */
 export class CodedThrottlingError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#CodedThrottlingError";
   readonly name = "CodedThrottlingError" as const;
   readonly $fault = "client" as const;
   $retryable = {
@@ -48,6 +50,7 @@ export class CodedThrottlingError extends __BaseException {
  * @public
  */
 export class HaltError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#HaltError";
   readonly name = "HaltError" as const;
   readonly $fault = "client" as const;
   /**
@@ -67,6 +70,7 @@ export class HaltError extends __BaseException {
  * @public
  */
 export class MysteryThrottlingError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#MysteryThrottlingError";
   readonly name = "MysteryThrottlingError" as const;
   readonly $fault = "client" as const;
   $retryable = {
@@ -89,6 +93,7 @@ export class MysteryThrottlingError extends __BaseException {
  * @public
  */
 export class RetryableError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#RetryableError";
   readonly name = "RetryableError" as const;
   readonly $fault = "client" as const;
   $retryable = {};
@@ -109,6 +114,7 @@ export class RetryableError extends __BaseException {
  * @public
  */
 export class XYZServiceServiceException extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.v1#XYZServiceServiceException";
   readonly name = "XYZServiceServiceException" as const;
   readonly $fault = "client" as const;
   /**

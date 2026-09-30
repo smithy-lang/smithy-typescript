@@ -4,9 +4,7 @@
  */
 
 export class ServiceException extends Error {
-  /**
-   * Whether the client or server are at fault.
-   */
+  public static readonly shapeId: string = "smithy.ts.sdk.synthetic.nonamespace.server#ServiceException";
   readonly $fault: "client" | "server";
 
   constructor(options: { name: string; $fault: "client" | "server"; message?: string }) {
@@ -14,6 +12,53 @@ export class ServiceException extends Error {
     Object.setPrototypeOf(this, ServiceException.prototype);
     this.name = options.name;
     this.$fault = options.$fault;
+  }
+
+  /**
+   * Checks if a value is an instance of ServiceException (duck typed)
+   */
+  public static isInstance(value: unknown): value is ServiceException {
+    if (!value) return false;
+    const candidate = value as ServiceException;
+    return (
+      ServiceException.prototype.isPrototypeOf(candidate) ||
+      (Boolean(candidate.$fault) && (candidate.$fault === "client" || candidate.$fault === "server"))
+    );
+  }
+
+  /**
+   * Custom instanceof check to support the operator for ServiceException base class
+   */
+  public static [Symbol.hasInstance](instance: unknown): boolean {
+    if (!instance) {
+      return false;
+    }
+    const candidate = instance as ServiceException;
+    if (this === ServiceException) {
+      return ServiceException.isInstance(instance);
+    }
+    if (ServiceException.isInstance(instance)) {
+      if (this.prototype.isPrototypeOf(instance)) {
+        return true;
+      }
+
+      const targetId: string | undefined = Object.prototype.hasOwnProperty.call(this, "shapeId")
+        ? this.shapeId
+        : undefined;
+      if (targetId) {
+        let proto = Object.getPrototypeOf(candidate);
+        while (proto && proto !== Object.prototype) {
+          const candidateId: string | undefined = Object.prototype.hasOwnProperty.call(proto.constructor, "shapeId")
+            ? proto.constructor?.shapeId
+            : undefined;
+          if (candidateId && candidateId === targetId) {
+            return true;
+          }
+          proto = Object.getPrototypeOf(proto);
+        }
+      }
+    }
+    return false;
   }
 }
 

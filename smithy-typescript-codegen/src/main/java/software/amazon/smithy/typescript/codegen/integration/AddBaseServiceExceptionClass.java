@@ -53,6 +53,7 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
         if (isClientSdk || isSchemaServer) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
             String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
+            String serviceNamespace = settings.getService(model).getId().getNamespace();
             writerFactory.accept(
                 Paths.get(CodegenUtils.SOURCE_FOLDER, "models", serviceExceptionName + ".ts").toString(),
                 writer -> {
@@ -77,6 +78,12 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
                             + " service."
                     );
                     writer.openBlock("export class $L extends __ServiceException {", serviceExceptionName);
+                    // Codegen-emitted so the id is present before TypeRegistry
+                    // registration runs; registration backfills the same value.
+                    writer.write(
+                        "public static readonly shapeId: string = $S;",
+                        "smithy.ts.sdk.synthetic." + serviceNamespace + "#" + serviceExceptionName
+                    );
                     writer.writeDocs("@internal");
                     writer.openBlock("constructor(options: __ServiceExceptionOptions) {");
                     writer.write("super(options);");

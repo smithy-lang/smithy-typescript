@@ -27,6 +27,7 @@ public class StructureGeneratorTest {
             "error-test-empty.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               /**
@@ -51,6 +52,7 @@ public class StructureGeneratorTest {
             "error-test-optional-message.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               /**
@@ -75,6 +77,7 @@ public class StructureGeneratorTest {
             "error-test-required-message.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               /**
@@ -99,6 +102,7 @@ public class StructureGeneratorTest {
             "error-test-optional-member-no-message.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               foo?: string | undefined;
@@ -125,6 +129,7 @@ public class StructureGeneratorTest {
             "error-test-required-member-no-message.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               foo: string | undefined;
@@ -151,6 +156,7 @@ public class StructureGeneratorTest {
             "error-test-retryable.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               $retryable = {};
@@ -176,6 +182,7 @@ public class StructureGeneratorTest {
             "error-test-retryable-throttling.smithy",
             """
             export class Err extends __BaseException {
+              public static readonly shapeId: string = "smithy.example#Err";
               readonly name = "Err" as const;
               readonly $fault = "client" as const;
               $retryable = {

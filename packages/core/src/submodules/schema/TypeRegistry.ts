@@ -99,6 +99,10 @@ export class TypeRegistry {
     const $error = es as StaticErrorSchema;
     const ns = $error[1];
     const qualifiedName = ns + "#" + $error[2];
+    if (!ctor.hasOwnProperty?.("shapeId")) {
+      // Backfill for older generated clients.
+      ctor.shapeId = qualifiedName;
+    }
     for (const r of [this, TypeRegistry.for(ns)]) {
       if (!r.schemas.has(qualifiedName) && !r.exceptions.has($error)) {
         r.schemas.set(qualifiedName, $error);

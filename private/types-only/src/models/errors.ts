@@ -10,6 +10,7 @@ import {
  * @public
  */
 export class BirdError extends __BaseException {
+  public static readonly shapeId: string = "org.xyz.types#BirdError";
   readonly name = "BirdError" as const;
   readonly $fault = "client" as const;
   reason?: string | undefined;
