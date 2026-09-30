@@ -145,23 +145,71 @@ describe("Exception Hierarchy Tests", () => {
       expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
 
-    it("object with ClientServiceException name and $-props is instanceof ServiceException only", () => {
-      // A plain object carries no prototype chain and no stamped shapeId, so it
-      // matches the duck-typed base but no named subclass. Name-based subclass
-      // matching was removed: it is not minification-safe.
+    it("object with ClientServiceException name and $-props matches the base and same-named subclass", () => {
+      // A plain object has no prototype chain and no stamped shapeId, so it can only
+      // match via the compat name fallback (name length >= 6). Predates shapeId stamping.
       const obj = { name: "ClientServiceException", $fault: "client" as const, $metadata: {} };
       expect(obj instanceof Error).toBe(false);
       expect(obj instanceof ServiceException).toBe(true);
-      expect(obj instanceof ClientServiceException).toBe(false);
+      expect(obj instanceof ClientServiceException).toBe(true);
       expect(obj instanceof ModeledClientServiceException).toBe(false);
     });
 
-    it("object with ModeledClientServiceException name and $-props is instanceof ServiceException only", () => {
+    it("object with ModeledClientServiceException name and $-props matches the base and same-named subclass", () => {
       const obj = { name: "ModeledClientServiceException", $fault: "client" as const, $metadata: {} };
       expect(obj instanceof Error).toBe(false);
       expect(obj instanceof ServiceException).toBe(true);
       expect(obj instanceof ClientServiceException).toBe(false);
-      expect(obj instanceof ModeledClientServiceException).toBe(false);
+      expect(obj instanceof ModeledClientServiceException).toBe(true);
+    });
+
+    it("name fallback is gated on length >= 6: a short name does not match", () => {
+      class Halt extends ServiceException {
+        constructor() {
+          super({ name: "Halt", $fault: "client", $metadata: {} });
+          Object.setPrototypeOf(this, Halt.prototype);
+        }
+      }
+      const obj = { name: "Halt", $fault: "client" as const, $metadata: {} };
+      expect(obj instanceof ServiceException).toBe(true);
+      expect(obj instanceof Halt).toBe(false);
+    });
+
+    it("both sides stamped with differing shapeIds do not fall through to the name match", () => {
+      // Same class name, distinct shapeIds: schema-serde id comparison is authoritative.
+      class StampedErrorA extends ServiceException {
+        static readonly shapeId = "ns.a#StampedError";
+        constructor() {
+          super({ name: "StampedError", $fault: "client", $metadata: {} });
+          Object.setPrototypeOf(this, StampedErrorA.prototype);
+        }
+      }
+      class StampedErrorB extends ServiceException {
+        static readonly shapeId = "ns.b#StampedError";
+        constructor() {
+          super({ name: "StampedError", $fault: "client", $metadata: {} });
+          Object.setPrototypeOf(this, StampedErrorB.prototype);
+        }
+      }
+      expect(new StampedErrorA() instanceof StampedErrorB).toBe(false);
+    });
+
+    it("cross-copy unstamped subclasses (pre-schema-serde) still match by name", () => {
+      // Two distinct class objects, neither stamped, sharing a name: the name fallback
+      // must still bridge them since neither side is schema-serde.
+      const make = () => {
+        class NoSuchBucket extends ServiceException {
+          constructor() {
+            super({ name: "NoSuchBucket", $fault: "client", $metadata: {} });
+            Object.setPrototypeOf(this, NoSuchBucket.prototype);
+          }
+        }
+        return NoSuchBucket;
+      };
+      const CopyA = make();
+      const CopyB = make();
+      expect(CopyA).not.toBe(CopyB);
+      expect(new CopyA() instanceof CopyB).toBe(true);
     });
   });
 });

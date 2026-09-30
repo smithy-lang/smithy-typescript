@@ -72,13 +72,41 @@ export class ServiceException extends Error implements SmithyException, Metadata
       const targetId: string | undefined = Object.prototype.hasOwnProperty.call(this, "shapeId")
         ? this.shapeId
         : undefined;
+      let candidateHasShapeId = false;
       if (targetId) {
         let proto = Object.getPrototypeOf(candidate);
         while (proto && proto !== Object.prototype) {
-          const candidateId: string | undefined = Object.prototype.hasOwnProperty.call(proto.constructor, "shapeId")
-            ? proto.constructor?.shapeId
-            : undefined;
-          if (candidateId && candidateId === targetId) {
+          const ctor = proto.constructor;
+          const candidateId: string | undefined =
+            ctor !== ServiceException && Object.prototype.hasOwnProperty.call(ctor, "shapeId")
+              ? ctor?.shapeId
+              : undefined;
+          if (candidateId) {
+            candidateHasShapeId = true;
+            if (candidateId === targetId) {
+              return true;
+            }
+          }
+          proto = Object.getPrototypeOf(proto);
+        }
+      }
+
+      // candidate stamped means do not proceed to name-comparison fallback.
+      if (targetId && candidateHasShapeId) {
+        return false;
+      }
+
+      // This part is only for pre-schema clients that don't register error schemas.
+      // We will require that the name length is at least 6.
+      const targetName = this.name;
+      if (targetName && targetName.length >= 6) {
+        if (candidate.name === targetName) {
+          return true;
+        }
+        let proto = Object.getPrototypeOf(candidate);
+        while (proto && proto !== Object.prototype) {
+          const ctorName: string | undefined = proto.constructor?.name;
+          if (ctorName && ctorName !== "Error" && ctorName === targetName) {
             return true;
           }
           proto = Object.getPrototypeOf(proto);
