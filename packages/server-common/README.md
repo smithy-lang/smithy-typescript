@@ -81,10 +81,9 @@ structure ServiceError {
 
 ## Generating a Schema-Based Server SDK
 
-The schema-based server SDK is generated using the `typescript-server-codegen`
-plugin with `generateServerSchemas` set to `true`. This mode produces a
-lightweight server package that uses static operation schemas for routing, serde,
-and validation.
+The `typescript-server-codegen` plugin always generates a schema-based server
+SDK. The generated package uses static operation schemas for routing, serde, and
+validation.
 
 Add the following to your `smithy-build.json`:
 
@@ -101,8 +100,7 @@ Add the following to your `smithy-build.json`:
         "typescript-server-codegen": {
           "service": "com.example.greeting#GreetingService",
           "package": "@example/greeting-service-server",
-          "packageVersion": "0.0.1",
-          "generateServerSchemas": true
+          "packageVersion": "0.0.1"
         }
       }
     }
@@ -119,9 +117,9 @@ smithy build
 The generated server SDK will be in
 `build/smithy/server/typescript-server-codegen/`. It includes:
 
-- **`src/server/GreetingServiceHandler.ts`** — A generated subclass of
-  `SchemaServiceHandler` with typed constructor requiring handler
-  implementations for every operation. All operation schemas are pre-wired.
+- **`src/server/GreetingServiceHandler.ts`** — A generated factory and typed
+  options requiring handler implementations for every operation. Operation
+  schemas and modeled protocol defaults are pre-wired.
 - **`src/schemas/schemas_0.ts`** — Static operation schema tuples
   (`StaticOperationSchema[]`) describing each operation's HTTP binding,
   input/output structure shapes, and constraint metadata.
@@ -129,37 +127,25 @@ The generated server SDK will be in
   shape.
 - **`src/index.ts`** — Barrel export of the handler, schemas, models, and errors.
 
-The generated handler is a class that allows you to provide async functions that
-work directly on typed input and output shapes,
-abstracting away the handling of the HTTP request and HTTP response transformations.
+The generated handler factory allows you to provide async functions that work
+directly on typed input and output shapes, abstracting away HTTP request and
+response transformations.
 
 You supply one handler function per modeled operation:
 
 ```typescript
-// Generated code
-export class GreetingServiceHandler<Context = {}> extends SchemaServiceHandler<Context> {
-  constructor(
-    options: SchemaServiceHandlerOptions<Context> & {
-      handlers: {
-        SayHello: (
-          input: SayHelloInput,
-          context: ServerRequestContext,
-          userContext: Context
-        ) => Promise<SayHelloOutput>;
-        GetItem: (input: GetItemInput, context: ServerRequestContext, userContext: Context) => Promise<GetItemOutput>;
-      };
-    }
-  ) {
-    super({
-      ...options,
-      validationEnabled: options.validationEnabled ?? true,
-      // OPERATION_SCHEMAS come from the generated model.
-      operationSchemas: options.operationSchemas ?? OPERATION_SCHEMAS,
-    });
-  }
+// Simplified generated API
+export type GreetingServiceHandlerOptions = {
+  handlers: {
+    SayHello: ServerOperation<SayHelloInput, SayHelloOutput>;
+    GetItem: ServerOperation<GetItemInput, GetItemOutput>;
+  };
+  // Interceptors, auth schemes, metrics, and optional protocol overrides.
+};
 
-  // automatic Smithy HTTP interface inherited from base class.
-  public async handle(request: HttpRequest, context: Context): Promise<HttpResponse>;
+export function createGreetingServiceHandler(options: GreetingServiceHandlerOptions): SchemaServiceHandler {
+  // Generated operation schemas and modeled protocol defaults are supplied here.
+  return new SchemaServiceHandler(/* ... */);
 }
 ```
 
@@ -188,8 +174,7 @@ From the same Smithy model, you can also generate a client SDK using the
         "typescript-server-codegen": {
           "service": "com.example.greeting#GreetingService",
           "package": "@example/greeting-service-server",
-          "packageVersion": "0.0.1",
-          "generateServerSchemas": true
+          "packageVersion": "0.0.1"
         }
       }
     },
@@ -237,10 +222,10 @@ console.log(response.greeting); // "Hello, World!"
 ## Using the Generated Server with the API Gateway Adapter
 
 The `@smithy/server-apigateway` package adapts the schema-based service handler
-to run as an AWS Lambda function behind API Gateway. It converts API
-Gateway proxy events (v1 and v2) into `HttpRequest` objects and converts
-`HttpResponse` objects back into the proxy result format that API Gateway
-expects.
+to run as an AWS Lambda function behind API Gateway. It converts API Gateway
+proxy events (v1 and v2) into framework-owned `ServerRequest` objects and
+converts `HttpResponse` objects back into the proxy result format that API
+Gateway expects.
 
 ### Installation
 
@@ -263,22 +248,22 @@ The integration involves three steps:
 
 1. Instantiate the generated service handler with your operation
    implementations.
-2. Convert the incoming API Gateway event to an `HttpRequest` using
-   `convertEvent`.
+2. Convert the incoming API Gateway event to a `ServerRequest` using
+   `createServerRequest`.
 3. Handle the request and convert the response back to API Gateway format.
 
 ```typescript
-import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from "aws-lambda";
 
 // generated handler
-import { GreetingServiceHandler } from "@example/greeting-service-server";
+import { createGreetingServiceHandler } from "@example/greeting-service-server";
 
 // converters for APIG
-import { convertEvent, convertVersion2Response } from "@smithy/server-apigateway";
+import { createServerRequest, convertVersion2Response } from "@smithy/server-apigateway";
 
 // Create the handler once outside the Lambda entry point so it is reused
 // across warm invocations.
-const serviceHandler = new GreetingServiceHandler({
+const serviceHandler = createGreetingServiceHandler({
   handlers: {
     async SayHello(input) {
       return {
@@ -306,9 +291,9 @@ const serviceHandler = new GreetingServiceHandler({
 });
 
 // Lambda entry point
-export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const httpRequest = convertEvent(event);
-  const httpResponse = await serviceHandler.handle(httpRequest, {});
+export async function handler(event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyResultV2> {
+  const serverRequest = createServerRequest(event, context);
+  const httpResponse = await serviceHandler.handle(serverRequest);
   return convertVersion2Response(httpResponse);
 }
 ```
@@ -326,7 +311,7 @@ import {
   AwsJsonRpcServerProtocol,
 } from "@smithy/server-common";
 
-const serviceHandler = new GreetingServiceHandler({
+const serviceHandler = createGreetingServiceHandler({
   // you can provide 1 or more ServerProtocols. This is optional!
   // If you don't provide a "protocols" array, the handler will
   // automatically identify and support all known wire protocols.
@@ -369,12 +354,12 @@ const client2 = new GreetingServiceClient({
 For API Gateway REST APIs using the v1 payload format, use `convertVersion1Response`:
 
 ```typescript
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { convertEvent, convertVersion1Response } from "@smithy/server-apigateway";
+import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { createServerRequest, convertVersion1Response } from "@smithy/server-apigateway";
 
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const httpRequest = convertEvent(event);
-  const httpResponse = await serviceHandler.handle(httpRequest, {});
+export async function handler(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
+  const serverRequest = createServerRequest(event, context);
+  const httpResponse = await serviceHandler.handle(serverRequest);
   return convertVersion1Response(httpResponse);
 }
 ```
@@ -464,7 +449,7 @@ types. To consume an incoming stream, iterate it with `for await`. To produce
 an outgoing stream, return an async generator.
 
 ```typescript
-const serviceHandler = new MyServiceHandler({
+const serviceHandler = createMyServiceHandler({
   protocols: [/* ... */],
   handlers: {
     // Output-only: return an async generator for the response stream.
@@ -592,36 +577,31 @@ event stream itself. The event stream member must carry `@httpPayload`.
 > operations. Use `@smithy/server-node` with an HTTP/2 server for full
 > event stream support.
 
-### Passing User Context
+### Passing Request-Scoped Attributes
 
-The `handle` method's second argument is a user-defined context object that
-flows through to every operation handler. Use it to pass request-scoped data
-like the Lambda context or pre-resolved identity information:
+Each `ServerRequest` contains a mutable `userAttributes` map for
+request-scoped application data. Operation handlers can read the map from
+their framework-provided context:
 
 ```typescript
-interface MyContext {
-  lambdaRequestId: string;
-  accountId: string;
-}
+export async function handler(event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyResultV2> {
+  const serverRequest = createServerRequest(event, context);
+  serverRequest.userAttributes.set("lambdaRequestId", context.awsRequestId);
+  serverRequest.userAttributes.set("accountId", event.requestContext.accountId);
 
-export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
-  const httpRequest = convertEvent(event);
-  const context: MyContext = {
-    lambdaRequestId: event.requestContext.requestId,
-    accountId: event.requestContext.accountId,
-  };
-  const httpResponse = await serviceHandler.handle(httpRequest, context);
+  const httpResponse = await serviceHandler.handle(serverRequest);
   return convertVersion2Response(httpResponse);
 }
 ```
 
-Your operation handlers receive this as the third argument (after the framework-
-provided `ServerRequestContext`):
+Operation handlers receive the framework context as their second argument:
 
 ```typescript
 handlers: {
-  async SayHello(input, requestContext, userContext) {
-    console.log(`Request ${userContext.lambdaRequestId} from ${userContext.accountId}`);
+  async SayHello(input, requestContext) {
+    const lambdaRequestId = requestContext.userAttributes.get("lambdaRequestId");
+    const accountId = requestContext.userAttributes.get("accountId");
+    console.log(`Request ${lambdaRequestId} from ${accountId}`);
     console.log(`Operation: ${requestContext.operation}`);
     return { greeting: `Hello, ${input.name}!` };
   },
@@ -631,9 +611,12 @@ handlers: {
 The `requestContext` (second argument) is always provided by the framework and
 contains:
 
-- `request` — the original HTTP request metadata (method, path, query, headers)
+- `request` — the original framework request state
 - `operation` — the resolved operation name
-- `caller` — the authenticated caller identity (if auth schemes are configured)
+- `operationDefinition` — the generated schema for the operation
+- `identity` — the request identity, including an authenticated caller when present
+- `userAttributes` — request-scoped application data
+- `metricsRecorder` — the request metrics recorder, when configured
 
 ### Input Validation
 
@@ -652,7 +635,7 @@ When validation fails, the framework returns a `ValidationException` error
 response to the client without calling your handler. To disable validation:
 
 ```typescript
-const serviceHandler = new GreetingServiceHandler({
+const serviceHandler = createGreetingServiceHandler({
   protocols: [/* ... */],
   handlers: {/* ... */},
   validationEnabled: false,
@@ -661,25 +644,29 @@ const serviceHandler = new GreetingServiceHandler({
 
 ### Adding Auth Schemes
 
-Register auth schemes to authenticate requests before they reach deserialization.
-Schemes are tried in registration order; the first to return a non-null `Caller`
-wins. If all schemes return null, the framework responds with
-`UnauthenticatedException`:
+Configure auth schemes when creating the service handler. Schemes are tried in
+array order; the first to return a non-null `Caller` wins. If all schemes return
+null, the framework responds with `UnauthenticatedException`:
 
 ```typescript
-serviceHandler.withAuth({
-  name: "api-key",
-  async authenticate(request, context) {
-    const key = request.headers["x-api-key"];
-    if (!key) return null; // decline — try next scheme
-    const principal = await validateApiKey(key);
-    return { principal };
-  },
+const serviceHandler = createGreetingServiceHandler({
+  handlers: {/* ... */},
+  authSchemes: [
+    {
+      name: "api-key",
+      async authenticate(request) {
+        const key = request.headers["x-api-key"];
+        if (!key) return null; // decline — try next scheme
+        const principal = await validateApiKey(key);
+        return { principal };
+      },
+    },
+  ],
 });
 ```
 
-The authenticated `Caller` is available via `requestContext.caller` in your
-handlers.
+The authenticated `Caller` is available via
+`requestContext.identity.caller` in your handlers.
 
 ### Adding Interceptors
 
@@ -690,24 +677,29 @@ are two kinds of hooks:
 - **Modify hooks** (`modify*`) — return a replacement value for the next step.
 
 ```typescript
-serviceHandler.addInterceptor({
-  readBeforeExecution({ request }) {
-    console.log(`→ ${request.method} ${request.path}`);
-  },
-  modifyBeforeValidation({ input, operation }) {
-    // Normalize input before validation runs
-    if (operation === "SayHello" && typeof (input as any).name === "string") {
-      return { ...(input as any), name: (input as any).name.trim() };
-    }
-    return input;
-  },
-  modifyBeforeSerialization({ output, operation }) {
-    // Add a computed field to every response
-    return { ...(output as any), servedAt: new Date().toISOString() };
-  },
-  readAfterExecution({ operation, error }) {
-    if (error) console.error(`✗ ${operation}:`, error);
-  },
+const serviceHandler = createGreetingServiceHandler({
+  handlers: {/* ... */},
+  interceptors: [
+    {
+      readBeforeExecution({ request }) {
+        console.log(`→ ${request.method} ${request.path}`);
+      },
+      modifyBeforeValidation({ input, operation }) {
+        // Normalize input before validation runs
+        if (operation === "SayHello" && typeof (input as any).name === "string") {
+          return { ...(input as any), name: (input as any).name.trim() };
+        }
+        return input;
+      },
+      modifyBeforeSerialization({ output, operation }) {
+        // Add a computed field to every response
+        return { ...(output as any), servedAt: new Date().toISOString() };
+      },
+      readAfterExecution({ operation, error }) {
+        if (error) console.error(`✗ ${operation}:`, error);
+      },
+    },
+  ],
 });
 ```
 
@@ -728,25 +720,16 @@ The full interceptor hook order is:
 
 ### Metrics
 
-Register a `MetricsRecorderFactory` to record per-request lifecycle timings:
+Configure a `MetricsRecorderFactory` when creating the service handler. The
+framework creates one recorder per request and records lifecycle timings:
 
 ```typescript
-serviceHandler.withMetrics({
-  create() {
-    return {
-      begin() {
-        /* request started */
-      },
-      recordTimed(phase, durationMs) {
-        /* e.g. "Deserialize", "Invoke" */
-      },
-      recordRequestOutcome(outcome, totalMs) {
-        /* "Success" or "Fault" */
-      },
-      end() {
-        /* request completed */
-      },
-    };
+const serviceHandler = createGreetingServiceHandler({
+  handlers: {/* ... */},
+  metricsRecorderFactory: {
+    create() {
+      return createMetricsRecorder();
+    },
   },
 });
 ```
@@ -756,7 +739,7 @@ serviceHandler.withMetrics({
 The `onError` callback lets you intercept errors before they are serialized:
 
 ```typescript
-const serviceHandler = new GreetingServiceHandler({
+const serviceHandler = createGreetingServiceHandler({
   protocols: [/* ... */],
   handlers: {/* ... */},
   onError(operation, error) {
@@ -784,9 +767,9 @@ request.
 
 ### Request Pipeline
 
-When a request arrives, `convertEvent()` transforms the API Gateway event into
-a Smithy `HttpRequest`, and the `SchemaServiceHandler` executes the following steps in
-order:
+When a request arrives, `createServerRequest()` transforms the API Gateway
+event into framework-owned request state, and the `SchemaServiceHandler`
+executes the following steps in order:
 
 1. **Route** — Inspect request headers and path to determine which registered
    protocol claims the request, then resolve the target operation name.

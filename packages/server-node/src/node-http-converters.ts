@@ -6,6 +6,7 @@
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
 import { URL, type URLSearchParams } from "node:url";
 import { HttpRequest, type HeaderBag, type HttpResponse } from "@smithy/core/protocols";
+import type { RequestIdentity, ServerRequest } from "@smithy/server-common";
 import type { QueryParameterBag } from "@smithy/types";
 
 function convertHeaders(headers: IncomingHttpHeaders): HeaderBag {
@@ -39,6 +40,22 @@ export function convertRequest(req: IncomingMessage): HttpRequest {
     query: convertQueryString(url.searchParams),
     headers: convertHeaders(req.headers),
     body: req,
+  });
+}
+
+export function createServerRequest(req: IncomingMessage): ServerRequest<RequestIdentity>;
+export function createServerRequest(req: HttpRequest): ServerRequest<RequestIdentity>;
+/**
+ * Creates the framework-owned request consumed by schema service handlers.
+ *
+ * A pre-converted HttpRequest can be supplied for Node.js transports such as
+ * HTTP/2 that do not use IncomingMessage.
+ */
+export function createServerRequest(req: IncomingMessage | HttpRequest): ServerRequest<RequestIdentity> {
+  return Object.freeze({
+    request: HttpRequest.isInstance(req) ? req : convertRequest(req),
+    identity: Object.freeze({}),
+    userAttributes: new Map(),
   });
 }
 

@@ -4,47 +4,83 @@
  */
 
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
+import type { MetricsRecorder } from "@smithy/types";
 
-import type { SmithyFrameworkException } from "../validation/errors";
+import type { IdentityCaller, RequestIdentity } from "../identity";
+import type { ReadonlyUserAttributes } from "../service-handler/types";
 
 /**
- * Identity established by the authenticate step. The shape is service-defined;
- * a successful auth scheme returns a value with at least a principal.
+ * Framework state available at the beginning of request execution.
+ *
+ * @public
  */
-export interface Caller {
-  readonly principal: string;
+export interface RequestHook<Identity extends RequestIdentity = RequestIdentity, MetricsNative = unknown> {
+  readonly request: Readonly<HttpRequest>;
+  readonly identity: Readonly<Identity>;
+  readonly metricsRecorder?: MetricsRecorder<MetricsNative>;
+  readonly userAttributes: ReadonlyUserAttributes;
 }
 
 /**
- * Read-only views passed to hooks. Each carries the fields populated at its
- * position. Fields are readonly; to change a value, return it from a modify hook.
+ * Framework state available after authentication.
+ *
+ * @public
  */
-export interface RequestHook<UserContext> {
-  readonly request: HttpRequest;
-  readonly context: UserContext;
-}
-
-export interface AuthHook<UserContext> extends RequestHook<UserContext> {
+export interface AuthHook<
+  Identity extends RequestIdentity = RequestIdentity,
+  MetricsNative = unknown,
+> extends RequestHook<Identity, MetricsNative> {
   readonly authScheme: string;
-  readonly caller: Caller;
+  readonly caller: Readonly<IdentityCaller<Identity>>;
 }
 
-export interface InputHook<UserContext> extends RequestHook<UserContext> {
+/**
+ * Framework state available after request deserialization.
+ *
+ * @public
+ */
+export interface InputHook<
+  Identity extends RequestIdentity = RequestIdentity,
+  MetricsNative = unknown,
+> extends RequestHook<Identity, MetricsNative> {
   readonly operation: string;
   readonly input: unknown;
 }
 
-export interface OutputHook<UserContext> extends InputHook<UserContext> {
+/**
+ * Framework state available after operation invocation.
+ *
+ * @public
+ */
+export interface OutputHook<
+  Identity extends RequestIdentity = RequestIdentity,
+  MetricsNative = unknown,
+> extends InputHook<Identity, MetricsNative> {
   readonly output: unknown;
 }
 
-export interface ResponseHook<UserContext> extends OutputHook<UserContext> {
+/**
+ * Framework state available after response serialization.
+ *
+ * @public
+ */
+export interface ResponseHook<
+  Identity extends RequestIdentity = RequestIdentity,
+  MetricsNative = unknown,
+> extends OutputHook<Identity, MetricsNative> {
   readonly response: HttpResponse;
 }
 
-export interface ExecutionHook<UserContext> {
-  readonly request: HttpRequest;
-  readonly context: UserContext;
+/**
+ * Final request state supplied to readAfterExecution.
+ *
+ * @public
+ */
+export interface ExecutionHook<Identity extends RequestIdentity = RequestIdentity, MetricsNative = unknown> {
+  readonly request: Readonly<HttpRequest>;
+  readonly identity: Readonly<Identity>;
+  readonly metricsRecorder?: MetricsRecorder<MetricsNative>;
+  readonly userAttributes: ReadonlyUserAttributes;
   readonly operation?: string;
   readonly input?: unknown;
   readonly output?: unknown;
@@ -53,47 +89,39 @@ export interface ExecutionHook<UserContext> {
 }
 
 /**
- * A service interceptor. Implement only the hooks you need.
+ * A service interceptor. Implement only the hooks needed by the application.
  *
- * Read hooks observe and cannot replace a framework step. Modify hooks return
- * the value the next framework step runs on. Hooks are synchronous.
+ * Read hooks observe framework state. Modify hooks replace the value supplied
+ * to the next pipeline step.
+ *
+ * @public
  */
-export interface ServerInterceptor<UserContext = {}> {
-  readBeforeExecution?(hook: RequestHook<UserContext>): void;
-  readAfterAuthentication?(hook: AuthHook<UserContext>): void;
-  readAfterDeserialization?(hook: InputHook<UserContext>): void;
-  readAfterValidation?(hook: InputHook<UserContext>): void;
-  readBeforeInvocation?(hook: InputHook<UserContext>): void;
-  readAfterInvocation?(hook: OutputHook<UserContext>): void;
-  readAfterSerialization?(hook: ResponseHook<UserContext>): void;
-  readAfterExecution?(hook: ExecutionHook<UserContext>): void;
+export interface ServerInterceptor<Identity extends RequestIdentity = RequestIdentity, MetricsNative = unknown> {
+  readBeforeExecution?(hook: RequestHook<Identity, MetricsNative>): void;
+  readAfterAuthentication?(hook: AuthHook<Identity, MetricsNative>): void;
+  readAfterDeserialization?(hook: InputHook<Identity, MetricsNative>): void;
+  readAfterValidation?(hook: InputHook<Identity, MetricsNative>): void;
+  readBeforeInvocation?(hook: InputHook<Identity, MetricsNative>): void;
+  readAfterInvocation?(hook: OutputHook<Identity, MetricsNative>): void;
+  readAfterSerialization?(hook: ResponseHook<Identity, MetricsNative>): void;
+  readAfterExecution?(hook: ExecutionHook<Identity, MetricsNative>): void;
 
-  modifyBeforeDeserialization?(hook: RequestHook<UserContext>): HttpRequest;
-  modifyBeforeValidation?(hook: InputHook<UserContext>): unknown;
-  modifyBeforeSerialization?(hook: OutputHook<UserContext>): unknown;
-  modifyBeforeCompletion?(hook: ResponseHook<UserContext>): HttpResponse;
+  modifyBeforeDeserialization?(hook: RequestHook<Identity, MetricsNative>): HttpRequest;
+  modifyBeforeValidation?(hook: InputHook<Identity, MetricsNative>): unknown;
+  modifyBeforeSerialization?(hook: OutputHook<Identity, MetricsNative>): unknown;
+  modifyBeforeCompletion?(hook: ResponseHook<Identity, MetricsNative>): HttpResponse;
 }
 
 /**
- * An auth scheme run at the authenticate step. Returns a Caller on success, or
- * null/undefined to decline so the next registered scheme is tried.
+ * An authentication scheme. Schemes run in constructor order; the first
+ * non-null caller wins.
+ *
+ * @public
  */
-export interface AuthScheme<UserContext = {}> {
+export interface AuthScheme<Identity extends RequestIdentity = RequestIdentity> {
   readonly name: string;
-  authenticate(request: HttpRequest, context: UserContext): Promise<Caller | null | undefined>;
-}
-
-/**
- * The framework steps, generated per handler. They run in a fixed pipeline order
- * and are not intended to be implemented by service teams; the generated handler
- * supplies them to its pipeline.
- */
-export interface FrameworkSteps<Context> {
-  route(request: HttpRequest): string | undefined;
-  deserialize(operation: string, request: HttpRequest): Promise<unknown>;
-  validate(operation: string, input: unknown): void;
-  invoke(operation: string, input: unknown, context: Context): Promise<unknown>;
-  serialize(operation: string, output: unknown): Promise<HttpResponse>;
-  serializeError(operation: string | undefined, error: unknown): Promise<HttpResponse> | undefined;
-  serializeFrameworkException(e: SmithyFrameworkException): Promise<HttpResponse>;
+  authenticate(
+    request: Readonly<HttpRequest>,
+    identity: Readonly<Identity>
+  ): Promise<Readonly<IdentityCaller<Identity>> | null | undefined>;
 }

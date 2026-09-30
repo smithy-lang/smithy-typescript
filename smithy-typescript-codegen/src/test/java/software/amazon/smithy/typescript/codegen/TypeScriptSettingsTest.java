@@ -79,6 +79,22 @@ public class TypeScriptSettingsTest {
     }
 
     @Test
+    public void serverModeAlwaysGeneratesSchemas() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.fromWithModes(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .withMember("modes", Node.fromStrings("server"))
+                .withMember("generateSchemas", Node.from(false))
+                .build()
+        );
+
+        assertTrue(settings.generateSchemas());
+    }
+
+    @Test
     public void modeStringsAreCaseInsensitive() {
         Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
         TypeScriptSettings settings = TypeScriptSettings.fromWithModes(

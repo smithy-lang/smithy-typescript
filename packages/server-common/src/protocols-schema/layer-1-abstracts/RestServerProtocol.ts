@@ -3,6 +3,7 @@ import { collectBody, type FromStringShapeDeserializer, HttpResponse } from "@sm
 import type {
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
+  Logger,
   SerdeFunctions,
   StaticOperationSchema,
 } from "@smithy/types";
@@ -18,6 +19,70 @@ export abstract class RestServerProtocol extends HttpServerProtocol {
    * Deserializer for string-encoded values (headers, query params, path labels).
    */
   protected abstract stringDeserializer: FromStringShapeDeserializer;
+
+  /**
+   * REST protocols have no universal wire discriminator. They claim requests
+   * without explicit RPC signals, then resolve the operation later.
+   */
+  public override claim(request: IHttpRequest, logger?: Logger): boolean {
+    const hasRpcSignal =
+      this.getHeaderValue(request, "smithy-protocol") !== undefined ||
+      this.getHeaderValue(request, "x-amz-target") !== undefined ||
+      this.getHeaderValue(request, "x-amzn-target") !== undefined;
+    if (hasRpcSignal) {
+      logger?.debug?.(`@smithy/server-common::${this.constructor.name}: explicit RPC signal found.`);
+      return false;
+    }
+
+    logger?.debug?.(`@smithy/server-common::${this.constructor.name}: protocol claimed as HTTP binding fallback.`);
+    return true;
+  }
+
+  /**
+   * Resolves an operation by matching its modeled HTTP binding.
+   */
+  public override route(
+    request: IHttpRequest,
+    operationSchemas: Readonly<Record<string, StaticOperationSchema>>,
+    logger?: Logger
+  ): string | undefined {
+    const logPrefix = `@smithy/server-common::${this.constructor.name}`;
+    const method = request.method.toUpperCase();
+    const requestPath = request.path.split("?", 1)[0] ?? request.path;
+    const candidates: Array<{ operationName: string; regex: RegExp; rank: number }> = [];
+
+    for (const [operationName, schema] of Object.entries(operationSchemas)) {
+      const traits = NormalizedSchema.of(schema).getMergedTraits();
+      if (!traits.http) {
+        continue;
+      }
+
+      const [operationMethod, templatePath] = traits.http as [string, string, number];
+      if (operationMethod.toUpperCase() !== method) {
+        continue;
+      }
+
+      const pathOnly = templatePath.split("?", 1)[0] ?? templatePath;
+      const segments = pathOnly.split("/").filter(Boolean);
+      const rank = segments.filter((segment) => !segment.startsWith("{")).length;
+      const regexSource = pathOnly.replace(/\{(\w+)\+\}/g, "(.+)").replace(/\{(\w+)\}/g, "([^/]+)");
+      candidates.push({
+        operationName,
+        regex: new RegExp(`^${regexSource}$`),
+        rank,
+      });
+    }
+
+    candidates.sort((left, right) => right.rank - left.rank);
+    const match = candidates.find((candidate) => candidate.regex.test(requestPath));
+    if (!match) {
+      logger?.debug?.(`${logPrefix}: request did not match an operation.`);
+      return undefined;
+    }
+
+    logger?.debug?.(`${logPrefix}: routed operation ${match.operationName}.`);
+    return match.operationName;
+  }
 
   /**
    * Deserializes a REST request. Input members are bound across

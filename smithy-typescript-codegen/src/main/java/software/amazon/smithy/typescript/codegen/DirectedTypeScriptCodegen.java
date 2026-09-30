@@ -206,10 +206,6 @@ final class DirectedTypeScriptCodegen
         if (settings.generateServerSdk()) {
             // Schema-mode servers handle validation at runtime via validateServerSchema()
             // and don't need smithy.framework#ValidationException in the model.
-            if (!SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-                checkValidationSettings(settings, model, service);
-            }
-
             LongValidator validator = new LongValidator(settings);
             List<ValidationEvent> events = validator.validate(model);
             System.err.println(
@@ -222,49 +218,39 @@ final class DirectedTypeScriptCodegen
             generateClient(directive);
         }
 
-        boolean schemaServerMode = settings.generateServerSdk()
-            && SchemaGenerationAllowlist.allows(service.getId(), settings);
-
-        if (settings.generateClient() || (settings.generateServerSdk() && !schemaServerMode)) {
+        if (settings.generateClient()) {
             generateCommands(directive);
             generateEndpointV2(directive);
         }
 
-        if (settings.generateServerSdk() && !schemaServerMode) {
-            generateServiceInterface(directive);
-        }
-
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         SymbolProvider symbolProvider = directive.symbolProvider();
+
+        if (settings.generateServerSdk()) {
+            if (!settings.isDisableDefaultValidation()) {
+                SchemaTraitFilterIndex.of(model).enableConstraintTraits();
+            }
+
+            new SchemaGenerator(
+                model,
+                directive.fileManifest(),
+                settings,
+                symbolProvider
+            ).run();
+
+            String handlerFileName = Paths.get(
+                CodegenUtils.SOURCE_FOLDER,
+                "server",
+                service.getId().getName() + "Handler.ts"
+            ).toString();
+            delegator.useFileWriter(handlerFileName, writer -> {
+                new SchemaServerGenerator(model, service, settings, symbolProvider, writer).generate();
+            });
+            return;
+        }
+
         if (protocolGenerator != null) {
             if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-                if (settings.generateServerSdk()) {
-                    // Enable constraint traits (length, range, pattern, uniqueItems) in schemas
-                    // for server-side validation. These are omitted from client schemas
-                    // and when disableDefaultValidation is true.
-                    if (!settings.isDisableDefaultValidation()) {
-                        SchemaTraitFilterIndex.of(model).enableConstraintTraits();
-                    }
-
-                    // Generate operation schemas needed by the server handler.
-                    new SchemaGenerator(
-                        model,
-                        directive.fileManifest(),
-                        settings,
-                        symbolProvider
-                    ).run();
-
-                    // Schema-based server generation: emit a protocol-agnostic handler
-                    // that delegates to ServerProtocol instances using operation schemas.
-                    String handlerFileName = Paths.get(
-                        CodegenUtils.SOURCE_FOLDER,
-                        "server",
-                        service.getId().getName() + "Handler.ts"
-                    ).toString();
-                    delegator.useFileWriter(handlerFileName, writer -> {
-                        new SchemaServerGenerator(model, service, settings, symbolProvider, writer).generate();
-                    });
-                }
                 return;
             }
             LOGGER.info("Generating serde for protocol " + protocolGenerator.getName() + " on " + service.getId());
@@ -285,30 +271,10 @@ final class DirectedTypeScriptCodegen
                     protocolGenerator.generateRequestSerializers(context);
                     protocolGenerator.generateResponseDeserializers(context);
                 }
-                if (context.getSettings().generateServerSdk()) {
-                    protocolGenerator.generateRequestDeserializers(context);
-                    protocolGenerator.generateResponseSerializers(context);
-                    protocolGenerator.generateFrameworkErrorSerializer(context);
-                    delegator.useShapeWriter(service, w -> {
-                        protocolGenerator.generateServiceHandlerFactory(context.withWriter(w));
-                    });
-                    for (OperationShape operation : TopDownIndex.of(model).getContainedOperations(service)) {
-                        delegator.useShapeWriter(operation, w -> {
-                            protocolGenerator.generateOperationHandlerFactory(context.withWriter(w), operation);
-                        });
-                    }
-                }
                 protocolGenerator.generateSharedComponents(context);
             });
         }
 
-        if (settings.generateServerSdk() && !SchemaGenerationAllowlist.allows(service.getId(), settings)) {
-            for (OperationShape operation : directive.operations()) {
-                delegator.useShapeWriter(operation, w -> {
-                    ServerGenerator.generateOperationHandler(symbolProvider, service, operation, w);
-                });
-            }
-        }
     }
 
     @Override
@@ -476,7 +442,6 @@ final class DirectedTypeScriptCodegen
                 directive.settings(),
                 directive.model(),
                 directive.symbolProvider(),
-                directive.context().protocolGenerator(),
                 writer,
                 modelIndexer
             );
@@ -530,16 +495,6 @@ final class DirectedTypeScriptCodegen
             });
         }
 
-        if (directive.settings().generateServerSdk() && !allowsSchemaGeneration(directive.settings())) {
-            // Generate index for server
-            IndexGenerator.writeServerIndex(
-                directive.settings(),
-                directive.model(),
-                directive.symbolProvider(),
-                directive.fileManifest()
-            );
-        }
-
         // Generate protocol tests IFF found in the model.
         // Skip for schema-based server SDKs — the old protocol test format references
         // per-operation serializers and handler factories that don't exist in schema mode.
@@ -571,7 +526,6 @@ final class DirectedTypeScriptCodegen
                 directive.settings(),
                 directive.model(),
                 directive.symbolProvider(),
-                null,
                 writer,
                 modelIndexer
             );
@@ -765,10 +719,6 @@ final class DirectedTypeScriptCodegen
         if (settings.generateClient()) {
             CommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
         }
-        if (settings.generateServerSdk()) {
-            ServerCommandGenerator.writeIndex(model, service, symbolProvider, fileManifest);
-        }
-
         // Generate commandBuilder.ts with deduplicated params and middleware (schema mode only).
         CommandBuilderGenerator commandBuilderGenerator = null;
         if (
@@ -806,42 +756,11 @@ final class DirectedTypeScriptCodegen
                 );
             }
 
-            if (settings.generateServerSdk()) {
-                delegator.useShapeWriter(
-                    operation,
-                    commandWriter -> new ServerCommandGenerator(
-                        settings,
-                        model,
-                        operation,
-                        symbolProvider,
-                        commandWriter,
-                        protocolGenerator,
-                        applicationProtocol
-                    ).run()
-                );
-            }
         }
     }
 
     private void generateEndpointV2(GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive) {
         new EndpointsV2Generator(directive.context().writerDelegator(), directive.settings(), directive.model()).run();
-    }
-
-    private void generateServiceInterface(
-        GenerateServiceDirective<TypeScriptCodegenContext, TypeScriptSettings> directive
-    ) {
-        ServiceShape service = directive.shape();
-        SymbolProvider symbolProvider = directive.symbolProvider();
-        Set<OperationShape> operations = directive.operations();
-
-        directive
-            .context()
-            .writerDelegator()
-            .useShapeWriter(service, writer -> {
-                ServerGenerator.generateOperationsType(symbolProvider, service, operations, writer);
-                ServerGenerator.generateServerInterfaces(symbolProvider, service, operations, writer);
-                ServerGenerator.generateServiceHandler(symbolProvider, service, operations, writer);
-            });
     }
 
     private static String generateTsconfigTypes(TypeScriptSettings settings) {

@@ -6,8 +6,8 @@
  *
  * @packageDocumentation
  */
-export * as Fakeprotocol from "./protocols/Fakeprotocol";
-export * from "./server/index";
+export * from "./server/InterceptorExampleHandler";
+export * from "./schemas/schemas_0";
 
 export * from "./models/models_0";
 

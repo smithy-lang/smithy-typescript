@@ -4,10 +4,10 @@
  */
 
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
-import type { MetricsRecorderFactory, SerdeContext } from "@smithy/types";
+import type { SerdeContext } from "@smithy/types";
 
-import type { ServiceException } from "./validation/errors";
-import type { AuthScheme, ServerInterceptor } from "./interceptors/types";
+import type { RequestIdentity } from "./identity";
+import type { ServerRequest } from "./service-handler/types";
 
 export { HttpBindingMux, UriSpec } from "./httpbinding/mux";
 export type {
@@ -35,6 +35,7 @@ export {
   SerializationException,
   UnsupportedMediaTypeException,
   NotAcceptableException,
+  ValidationException,
   UnauthenticatedException,
   isFrameworkException,
 } from "./validation/errors";
@@ -45,15 +46,14 @@ export { recordSafely, recordTimed, recordTimedSync } from "./metrics/metrics";
 export type {
   AuthHook,
   AuthScheme,
-  Caller,
   ExecutionHook,
-  FrameworkSteps,
   InputHook,
   OutputHook,
   RequestHook,
   ResponseHook,
   ServerInterceptor,
 } from "./interceptors/types";
+export type { Caller, IdentityCaller, RequestIdentity } from "./identity";
 
 export {
   CompositeValidator,
@@ -100,41 +100,8 @@ export { AwsRestJsonServerProtocol } from "./protocols-schema/layer-2-protocols/
 export { AwsJsonRpcServerProtocol } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
 export type { AwsJsonRpcServerProtocolOptions } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
 
-export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
-
-export type OperationInput<T> = T extends Operation<infer I, any, any> ? I : never;
-export type OperationOutput<T> = T extends Operation<any, infer O, any> ? O : never;
-
-export interface OperationSerializer<T, K extends keyof T, E extends ServiceException> {
-  serialize(input: OperationOutput<T[K]>, ctx: ServerSerdeContext): Promise<HttpResponse>;
-  deserialize(input: HttpRequest, ctx: SerdeContext): Promise<OperationInput<T[K]>>;
-  isOperationError(error: any): error is E;
-  serializeError(error: E, ctx: ServerSerdeContext): Promise<HttpResponse>;
-}
-
-export interface ServiceHandler<Context = {}, RequestType = HttpRequest, ResponseType = HttpResponse> {
-  handle(request: RequestType, context: Context): Promise<ResponseType>;
-
-  /**
-   * Register a metrics recorder factory. The framework creates one recorder per request and
-   * records the request lifecycle and phase timings into it.
-   */
-  withMetrics<Native>(metricsRecorderFactory: MetricsRecorderFactory<Native>): this;
-
-  /**
-   * Register auth schemes.
-   */
-  withAuth(...schemes: AuthScheme<Context>[]): this;
-
-  /**
-   * Register a single interceptor. Later registrations run before earlier ones.
-   */
-  addInterceptor(interceptor: ServerInterceptor<Context>): this;
-
-  /**
-   * Register multiple interceptors. Later registrations run before earlier ones.
-   */
-  addInterceptors(...interceptors: ServerInterceptor<Context>[]): this;
+export interface ServiceHandler<Identity extends RequestIdentity = RequestIdentity, ResponseType = HttpResponse> {
+  handle(request: ServerRequest<Identity>): Promise<ResponseType>;
 }
 
 export interface ServiceCoordinate<S extends string, O extends string> {
@@ -147,6 +114,13 @@ export interface Mux<S extends string, O extends string> {
 
 export interface ServerSerdeContext extends Omit<SerdeContext, "endpoint"> {}
 
-export type { RouterFunction, RouteResult } from "./service-handler/routing";
 export { type SchemaServiceHandlerOptions, SchemaServiceHandler } from "./service-handler/SchemaServiceHandler";
-export type { RequestMetadata, ServerRequestContext } from "./service-handler/SchemaServiceHandler";
+export type {
+  OperationDefinition,
+  ReadonlyUserAttributes,
+  ServerOperation,
+  ServerOperationContext,
+  ServerRequest,
+  UserAttributeKey,
+  UserAttributes,
+} from "./service-handler/types";
