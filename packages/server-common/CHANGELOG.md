@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.3
+
+### Patch Changes
+
+- 4734e1c: fix for SDK ServiceException instanceof detection relating to mangled class names
+- Updated dependencies [4734e1c]
+- Updated dependencies [4f51625]
+  - @smithy/core@3.35.1
+
 ## 0.4.2
 
 ### Patch Changes
