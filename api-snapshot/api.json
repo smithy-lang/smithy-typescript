@@ -836,7 +836,8 @@
   "@smithy/server-apigateway": {
     "convertEvent": "function",
     "convertVersion1Response": "function",
-    "convertVersion2Response": "function"
+    "convertVersion2Response": "function",
+    "createServerRequest": "function"
   },
   "@smithy/server-common": {
     "acceptMatches": "function",
@@ -942,6 +943,7 @@
   },
   "@smithy/server-node": {
     "convertRequest": "function",
+    "createServerRequest": "function",
     "writeResponse": "function"
   },
   "@smithy/service-client-documentation-generator": {

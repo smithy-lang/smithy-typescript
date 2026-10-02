@@ -15,19 +15,12 @@ import {
   AwsRestJsonServerProtocol,
   AwsJsonRpcServerProtocol,
   SchemaServiceHandler,
-  type ServerRequest,
 } from "../src/index";
 import { HttpRequest } from "@smithy/core/protocols";
 import { AwsRestJsonProtocol, AwsJson1_0Protocol } from "@aws-sdk/core/protocols";
 import { GetNumbers$, camelCaseOperation$ } from "xyz-schema-server";
-import { convertRequest, writeResponse } from "@smithy/server-node";
+import { createServerRequest, writeResponse } from "@smithy/server-node";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
-
-const createTestServerRequest = (request: HttpRequest): ServerRequest => ({
-  request,
-  identity: {},
-  userAttributes: new Map(),
-});
 
 /**
  * End-to-end integration test that stands up a real Node.js HTTP server
@@ -117,7 +110,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
 
   beforeAll(async () => {
     server = http.createServer(async (req, res) => {
-      const httpResponse = await handler.handle(createTestServerRequest(convertRequest(req)));
+      const httpResponse = await handler.handle(createServerRequest(req));
       writeResponse(httpResponse, res);
     });
 
@@ -493,7 +486,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
         });
 
         try {
-          const httpResponse = await h2Handler.handle(createTestServerRequest(httpRequest));
+          const httpResponse = await h2Handler.handle(createServerRequest(httpRequest));
 
           const responseHeaders: Record<string, string | number> = {
             ":status": httpResponse.statusCode,
@@ -815,7 +808,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       });
 
       interceptorServer = http.createServer(async (req, res) => {
-        const httpResponse = await interceptorHandler.handle(createTestServerRequest(convertRequest(req)));
+        const httpResponse = await interceptorHandler.handle(createServerRequest(req));
         writeResponse(httpResponse, res);
       });
 
@@ -889,7 +882,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       });
 
       directServer = http.createServer(async (req, res) => {
-        const httpResponse = await directHandler.handle(createTestServerRequest(convertRequest(req)));
+        const httpResponse = await directHandler.handle(createServerRequest(req));
         writeResponse(httpResponse, res);
       });
 

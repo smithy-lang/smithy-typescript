@@ -32,11 +32,13 @@
     "build:types": "premove dist-types && yarn g:tsc -p tsconfig.types.json",
     "build:types:downlevel": "premove dist-types/ts3.4 && downlevel-dts dist-types dist-types/ts3.4",
     "clean": "premove dist-cjs dist-es dist-types",
+    "extract:docs": "api-extractor run --local",
     "test": "vitest run",
     "test:watch": "vitest watch"
   },
   "dependencies": {
     "@smithy/core": "workspace:^",
+    "@smithy/server-common": "workspace:^",
     "@smithy/types": "workspace:^",
     "tslib": "^2.6.2"
   },

@@ -2166,6 +2166,7 @@ __metadata:
   resolution: "@smithy/server-apigateway@workspace:packages/server-apigateway"
   dependencies:
     "@smithy/core": "workspace:^"
+    "@smithy/server-common": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/aws-lambda": "npm:^8.10.72"
     "@types/node": "npm:^18.11.9"
@@ -2199,6 +2200,7 @@ __metadata:
   resolution: "@smithy/server-node@workspace:packages/server-node"
   dependencies:
     "@smithy/core": "workspace:^"
+    "@smithy/server-common": "workspace:^"
     "@smithy/types": "workspace:^"
     "@types/node": "npm:^18.11.9"
     concurrently: "npm:7.0.0"
