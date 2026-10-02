@@ -15,7 +15,7 @@ import type {
 } from "@smithy/types";
 
 import { JsonCodec2 } from "./codec-v2/JsonCodec2";
-import { JsonShapeDeserializer2 } from "./codec-v2/JsonShapeDeserializer2";
+import type { JsonShapeDeserializer2 } from "./codec-v2/JsonShapeDeserializer2";
 import { loadJsonRpcErrorCode } from "./parseJsonBody";
 
 /**

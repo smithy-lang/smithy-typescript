@@ -25,6 +25,7 @@ import { jsonReviver } from "../jsonReviver";
 import { needsReviver } from "../needsReviver";
 import { parseJsonBody } from "../parseJsonBody";
 import { writeKey } from "../../writeKey";
+import { hasOwn } from "@smithy/core/transport";
 
 /**
  * Performance-optimized JSON deserializer.
@@ -98,6 +99,7 @@ export class JsonShapeDeserializer2 extends SerdeContextConfig implements ShapeD
         const map = value as Record<string, unknown>;
         if (this.needsTransform(mapMember)) {
           for (const k in map) {
+            if (!hasOwn(map, k)) continue;
             if (k === "__proto__") {
               writeKey(map);
             }
@@ -176,6 +178,7 @@ export class JsonShapeDeserializer2 extends SerdeContextConfig implements ShapeD
         } else {
           const doc = value as Record<string, unknown>;
           for (const k in doc) {
+            if (!hasOwn(doc, k)) continue;
             if (k === "__proto__") {
               writeKey(doc);
             }
@@ -225,6 +228,7 @@ export class JsonShapeDeserializer2 extends SerdeContextConfig implements ShapeD
       unionSerde!.writeUnknown();
     } else if (hasType) {
       for (const k in record) {
+        if (!hasOwn(record, k)) continue;
         const v = record[k];
         const t = jsonName ? (nameMap![k] ?? k) : k;
         if (!(t in out)) {

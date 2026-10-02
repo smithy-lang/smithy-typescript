@@ -153,7 +153,7 @@ describe(JsonBytesStringAdapter.name, () => {
       const adapter = create();
       const first = adapter.toString();
       const second = adapter.toString();
-      const third = adapter.includes("x");
+      const _third = adapter.includes("x");
       // Same string reference returned each time — proves caching.
       expect(first).toBe(second);
       expect(first).toEqual(json);
