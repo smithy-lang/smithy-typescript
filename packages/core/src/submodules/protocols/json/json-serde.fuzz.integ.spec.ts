@@ -11,7 +11,6 @@ import type {
   StaticStructureSchema,
   StaticUnionSchema,
   StringSchema,
-  TimestampDefaultSchema,
   TimestampEpochSecondsSchema,
   TimestampDateTimeSchema,
   TimestampHttpDateSchema,
@@ -620,7 +619,7 @@ describe.skipIf(process.env.CODEBUILD_BUILD_ID || process.env.AWS_EXECUTION_ENV)
         fc.asyncProperty(nestedStruct, async (data) => {
           byteSerializer.write(nestingStruct, data);
           const bytes = byteSerializer.flush();
-          const json = decoder.decode(bytes);
+          const _json = decoder.decode(bytes);
           // Round-trip through reference to normalize (dates→epoch, blobs→base64→Uint8Array)
           const refJson = serializeRef(nestingStruct, data);
           const expected = await deserializeRef(nestingStruct, refJson);

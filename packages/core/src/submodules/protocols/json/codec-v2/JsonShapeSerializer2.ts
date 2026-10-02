@@ -12,7 +12,7 @@ import type {
 
 import { SerdeContextConfig } from "../../ConfigurableSerdeContext";
 import type { JsonSettings } from "../JsonSettings";
-import { writeKey } from "../../writeKey";
+import { hasOwn } from "@smithy/core/transport";
 import { JsonBytesStringAdapter } from "./JsonBytesStringAdapter";
 
 const encoder = new TextEncoder();
@@ -595,6 +595,7 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
       if (valueSchema.isStringSchema() || valueSchema.isNumericSchema() || valueSchema.isBooleanSchema()) {
         let modifications: Record<string, number | null> | undefined;
         for (const k in value) {
+          if (!hasOwn(value, k)) continue;
           const v = value[k];
           if (Number.isNaN(v) || v === Infinity || v === -Infinity) {
             (modifications ??= {})[k] = v as number;
@@ -619,6 +620,7 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
     let first = true;
 
     for (const k in value) {
+      if (!hasOwn(value, k)) continue;
       const v = value[k];
       if (isDocument ? v === undefined : v == null && !sparse) {
         continue;
