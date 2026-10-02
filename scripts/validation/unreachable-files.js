@@ -185,6 +185,9 @@ async function main() {
     "[@smithy/smithy-rpcv2-cbor-schema] dist-cjs/extensionConfiguration.js",
     "[@smithy/smithy-rpcv2-cbor-schema] dist-cjs/runtimeConfig.browser.js",
     "[@smithy/smithy-rpcv2-cbor-schema] dist-cjs/runtimeConfig.native.js",
+    "[@smithy/smithy-rpcv2-json-schema] dist-cjs/extensionConfiguration.js",
+    "[@smithy/smithy-rpcv2-json-schema] dist-cjs/runtimeConfig.browser.js",
+    "[@smithy/smithy-rpcv2-json-schema] dist-cjs/runtimeConfig.native.js",
   ]);
 
   const packages = getPackageDirs();
