@@ -19,6 +19,9 @@ export class HeaderMarshaller {
     for (const headerName in headers) {
       if (!hasOwn(headers, headerName)) continue;
       const bytes = this.fromUtf8(headerName);
+      if (bytes.byteLength > 255) {
+        throw new Error(`@smithy/core/event-streams - header name exceeds 255 bytes: ${bytes.byteLength}`);
+      }
       chunks.push(Uint8Array.from([bytes.byteLength]), bytes, this.formatHeaderValue(headers[headerName]));
     }
 
@@ -54,6 +57,11 @@ export class HeaderMarshaller {
         longBytes.set(header.value.bytes, 1);
         return longBytes;
       case "binary":
+        if (header.value.byteLength > 65535) {
+          throw new Error(
+            `@smithy/core/event-streams - header value (binary) exceeds 65535 bytes: ${header.value.byteLength}`
+          );
+        }
         const binView = new DataView(new ArrayBuffer(3 + header.value.byteLength));
         binView.setUint8(0, HEADER_VALUE_TYPE.byteArray);
         binView.setUint16(1, header.value.byteLength, false);
@@ -62,6 +70,11 @@ export class HeaderMarshaller {
         return binBytes;
       case "string":
         const utf8Bytes = this.fromUtf8(header.value);
+        if (utf8Bytes.byteLength > 65535) {
+          throw new Error(
+            `@smithy/core/event-streams - header value (string) exceeds 65535 bytes: ${utf8Bytes.byteLength}`
+          );
+        }
         const strView = new DataView(new ArrayBuffer(3 + utf8Bytes.byteLength));
         strView.setUint8(0, HEADER_VALUE_TYPE.string);
         strView.setUint16(1, utf8Bytes.byteLength, false);

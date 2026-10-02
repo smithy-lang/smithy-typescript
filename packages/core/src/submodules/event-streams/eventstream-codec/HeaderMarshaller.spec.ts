@@ -225,6 +225,45 @@ describe("HeaderMarshaller", () => {
         })
       ).toThrowError("Invalid UUID received");
     });
+
+    describe("size validation", () => {
+      it("should format a 65535-byte string value", () => {
+        expect(() => marshaller.format({ h: { type: "string", value: "a".repeat(65535) } })).not.toThrow();
+      });
+
+      it("should throw on a 65536-byte string value", () => {
+        expect(() => marshaller.format({ h: { type: "string", value: "a".repeat(65536) } })).toThrowError(
+          "@smithy/core/event-streams - header value (string) exceeds 65535 bytes: 65536"
+        );
+      });
+
+      it("should validate string byte length, not character count", () => {
+        // "🦄" is 1 code point but 4 UTF-8 bytes; 16384 * 4 = 65536 bytes.
+        expect(() => marshaller.format({ h: { type: "string", value: "🦄".repeat(16384) } })).toThrowError(
+          "@smithy/core/event-streams - header value (string) exceeds 65535 bytes: 65536"
+        );
+      });
+
+      it("should format a 65535-byte binary value", () => {
+        expect(() => marshaller.format({ h: { type: "binary", value: new Uint8Array(65535) } })).not.toThrow();
+      });
+
+      it("should throw on a 65536-byte binary value", () => {
+        expect(() => marshaller.format({ h: { type: "binary", value: new Uint8Array(65536) } })).toThrowError(
+          "@smithy/core/event-streams - header value (binary) exceeds 65535 bytes: 65536"
+        );
+      });
+
+      it("should format a 255-byte header name", () => {
+        expect(() => marshaller.format({ ["a".repeat(255)]: { type: "boolean", value: true } })).not.toThrow();
+      });
+
+      it("should throw on a 256-byte header name", () => {
+        expect(() => marshaller.format({ ["a".repeat(256)]: { type: "boolean", value: true } })).toThrowError(
+          "@smithy/core/event-streams - header name exceeds 255 bytes: 256"
+        );
+      });
+    });
   });
 
   describe("#parse", () => {
