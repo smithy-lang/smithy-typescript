@@ -6,8 +6,8 @@
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 import type { MetricsRecorderFactory, SerdeContext } from "@smithy/types";
 
-import type { ServiceException } from "./validation/errors";
 import type { AuthScheme, ServerInterceptor } from "./interceptors/types";
+import type { ServiceException } from "./validation/errors";
 
 export { HttpBindingMux, UriSpec } from "./httpbinding/mux";
 export type {
@@ -35,17 +35,18 @@ export {
   SerializationException,
   UnsupportedMediaTypeException,
   NotAcceptableException,
+  ValidationException,
   UnauthenticatedException,
   isFrameworkException,
+  isSchemaFrameworkException,
 } from "./validation/errors";
-export type { SmithyFrameworkException } from "./validation/errors";
+export type { SchemaFrameworkException, SmithyFrameworkException } from "./validation/errors";
 
 export { recordSafely, recordTimed, recordTimedSync } from "./metrics/metrics";
 
 export type {
   AuthHook,
   AuthScheme,
-  Caller,
   ExecutionHook,
   FrameworkSteps,
   InputHook,
@@ -54,6 +55,18 @@ export type {
   ResponseHook,
   ServerInterceptor,
 } from "./interceptors/types";
+export type {
+  AuthenticationResultHook,
+  ExecutionResultHook,
+  OperationInputHook,
+  OperationOutputHook,
+  RequestCompletionHook,
+  RequestStartHook,
+  SchemaAuthScheme,
+  SchemaServerInterceptor,
+  SerializedResponseHook,
+} from "./interceptors/schema-types";
+export type { Caller, IdentityCaller, RequestIdentity } from "./identity";
 
 export {
   CompositeValidator,
@@ -147,6 +160,13 @@ export interface Mux<S extends string, O extends string> {
 
 export interface ServerSerdeContext extends Omit<SerdeContext, "endpoint"> {}
 
-export type { RouterFunction, RouteResult } from "./service-handler/routing";
 export { type SchemaServiceHandlerOptions, SchemaServiceHandler } from "./service-handler/SchemaServiceHandler";
-export type { RequestMetadata, ServerRequestContext } from "./service-handler/SchemaServiceHandler";
+export type {
+  OperationDefinition,
+  ReadonlyUserAttributes,
+  ServerOperation,
+  ServerOperationContext,
+  ServerRequest,
+  UserAttributeKey,
+  UserAttributes,
+} from "./service-handler/types";

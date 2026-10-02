@@ -70,7 +70,14 @@ export type SmithyFrameworkException =
   | NotAcceptableException
   | UnauthenticatedException;
 
-export const isFrameworkException = (error: any): error is SmithyFrameworkException => {
+/**
+ * Framework exceptions used by the schema-based server pipeline.
+ *
+ * @public
+ */
+export type SchemaFrameworkException = SmithyFrameworkException | ValidationException;
+
+const hasFrameworkErrorMarker = (error: any): boolean => {
   if (error == null || (typeof error !== "object" && typeof error !== "function")) {
     return false;
   }
@@ -79,6 +86,17 @@ export const isFrameworkException = (error: any): error is SmithyFrameworkExcept
   }
   return error.$frameworkError;
 };
+
+export const isFrameworkException = (error: any): error is SmithyFrameworkException =>
+  hasFrameworkErrorMarker(error) && error.name !== "ValidationException";
+
+/**
+ * Checks for framework exceptions emitted by the schema-based server pipeline.
+ *
+ * @public
+ */
+export const isSchemaFrameworkException = (error: any): error is SchemaFrameworkException =>
+  hasFrameworkErrorMarker(error);
 
 export class InternalFailureException {
   readonly name = "InternalFailure";
@@ -113,6 +131,23 @@ export class NotAcceptableException {
   readonly $fault = "client";
   readonly statusCode = 406;
   readonly $frameworkError = true;
+}
+
+/**
+ * Framework exception returned when input validation fails.
+ *
+ * @public
+ */
+export class ValidationException extends Error {
+  readonly name = "ValidationException";
+  readonly $fault = "client";
+  readonly statusCode = 400;
+  readonly $frameworkError = true;
+
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, ValidationException.prototype);
+  }
 }
 
 export class UnauthenticatedException {

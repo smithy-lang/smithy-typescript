@@ -5,7 +5,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { InternalFailureException, SerializationException, isFrameworkException } from "./errors";
+import {
+  InternalFailureException,
+  SerializationException,
+  ValidationException,
+  isFrameworkException,
+  isSchemaFrameworkException,
+} from "./errors";
 
 describe("isFrameworkException", () => {
   it("returns true for a framework exception", () => {
@@ -28,5 +34,10 @@ describe("isFrameworkException", () => {
     expect(isFrameworkException(42)).toBe(false);
     expect(isFrameworkException(true)).toBe(false);
     expect(isFrameworkException(Symbol("s"))).toBe(false);
+  });
+
+  it("does not broaden the legacy framework exception contract", () => {
+    expect(isFrameworkException(new ValidationException())).toBe(false);
+    expect(isSchemaFrameworkException(new ValidationException())).toBe(true);
   });
 });
