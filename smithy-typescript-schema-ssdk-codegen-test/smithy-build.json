@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "imports": [
+    "../smithy-typescript-codegen-test/model/common",
+    "../smithy-typescript-codegen-test/model/interceptors"
+  ],
+  "projections": {
+    "interceptor-example": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": [
+              "example.interceptors#InterceptorExample"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-schema-ssdk-codegen": {
+          "service": "example.interceptors#InterceptorExample",
+          "package": "interceptor-example-schema-ssdk",
+          "packageVersion": "0.0.1",
+          "packageJson": {
+            "license": "Apache-2.0",
+            "private": true
+          },
+          "disableDefaultValidation": true,
+          "typescriptVersion": "~7.0.2"
+        }
+      }
+    }
+  }
+}

@@ -49,23 +49,16 @@ final class IndexGenerator {
             writeClientExports(settings, model, symbolProvider, writer);
         }
 
-        if (settings.generateServerSdk() && protocolGenerator != null) {
-            if (
-                !SchemaGenerationAllowlist.allows(
-                    settings.getOptionalService().orElse(null),
-                    settings
-                )
-            ) {
-                writeProtocolExports(protocolGenerator, writer);
-            }
-            boolean schemaMode = SchemaGenerationAllowlist.allows(
-                settings.getOptionalService().orElse(null),
-                settings
-            );
+        boolean schemaMode = SchemaGenerationAllowlist.allows(
+            settings.getOptionalService().orElse(null),
+            settings
+        );
+        if (settings.generateServerSdk()) {
             if (schemaMode) {
                 String serviceName = settings.getService(model).getId().getName();
                 writer.write("export * from \"./server/$LHandler\";", serviceName);
-            } else {
+            } else if (protocolGenerator != null) {
+                writeProtocolExports(protocolGenerator, writer);
                 writer.write("export * from \"./server/index\";");
             }
         }

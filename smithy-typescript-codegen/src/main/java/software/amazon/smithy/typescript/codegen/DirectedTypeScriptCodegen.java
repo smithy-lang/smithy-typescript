@@ -236,6 +236,29 @@ final class DirectedTypeScriptCodegen
 
         ProtocolGenerator protocolGenerator = directive.context().protocolGenerator();
         SymbolProvider symbolProvider = directive.symbolProvider();
+        if (schemaServerMode) {
+            if (!settings.isDisableDefaultValidation()) {
+                SchemaTraitFilterIndex.of(model).enableConstraintTraits();
+            }
+
+            new SchemaGenerator(
+                model,
+                directive.fileManifest(),
+                settings,
+                symbolProvider
+            ).run();
+
+            String handlerFileName = Paths.get(
+                CodegenUtils.SOURCE_FOLDER,
+                "server",
+                service.getId().getName() + "Handler.ts"
+            ).toString();
+            delegator.useFileWriter(handlerFileName, writer -> {
+                new SchemaServerGenerator(model, service, settings, symbolProvider, writer).generate();
+            });
+            return;
+        }
+
         if (protocolGenerator != null) {
             if (SchemaGenerationAllowlist.allows(service.getId(), settings)) {
                 if (settings.generateServerSdk()) {

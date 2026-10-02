@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 rootProject.name = "smithy-typescript"
 include(":smithy-typescript-codegen")
 include(":smithy-typescript-codegen-test")
+include(":smithy-typescript-schema-ssdk-codegen-test")
 include(":smithy-typescript-protocol-test-codegen")
 include(":smithy-typescript-codegen-test:example-weather-customizations")
 include(":smithy-typescript-codegen-test:released-version-test")

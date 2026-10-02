@@ -4,6 +4,7 @@
  */
 package software.amazon.smithy.typescript.codegen;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
@@ -168,14 +169,14 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @return Returns the writer.
      */
     public TypeScriptWriter addRelativeImport(String name, String as, Path from) {
-        return this.addImport(name, as, from.toString());
+        return this.addImport(name, as, from.toString().replace(File.separatorChar, '/'));
     }
 
     /**
      * Type-only version of {@link #addRelativeImport}.
      */
     public TypeScriptWriter addRelativeTypeImport(String name, String as, Path from) {
-        return this.addTypeImport(name, as, from.toString());
+        return this.addTypeImport(name, as, from.toString().replace(File.separatorChar, '/'));
     }
 
     /**

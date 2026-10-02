@@ -48,8 +48,8 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
     ) {
         boolean isClientSdk = settings.generateClient();
         boolean isSchemaServer = settings.generateServerSdk()
-            && settings.getProtocol() != null
-            && settings.generateSchemas();
+            && (settings.generateServerSchemas()
+                || (settings.getProtocol() != null && settings.generateSchemas()));
         if (isClientSdk || isSchemaServer) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
             String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);
@@ -103,8 +103,8 @@ public final class AddBaseServiceExceptionClass implements TypeScriptIntegration
     ) {
         boolean isClientSdk = settings.generateClient();
         boolean isSchemaServer = settings.generateServerSdk()
-            && settings.getProtocol() != null
-            && settings.generateSchemas();
+            && (settings.generateServerSchemas()
+                || (settings.getProtocol() != null && settings.generateSchemas()));
         if (isClientSdk || isSchemaServer) {
             String serviceName = CodegenUtils.getServiceName(settings, model, symbolProvider);
             String serviceExceptionName = CodegenUtils.getSyntheticBaseExceptionName(serviceName, model);

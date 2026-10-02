@@ -48,6 +48,7 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/jsdom": "20.0.1",
+    "@types/node": "^18.11.9",
     "esbuild": "^0.25.9",
     "fast-check": "3.22.0",
     "get-port": "^7.1.0",

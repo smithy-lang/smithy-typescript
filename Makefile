@@ -43,12 +43,15 @@ generate-protocol-tests:
 
 generate-server-tests:
 	rm -rf ./smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test
-	./gradlew :smithy-typescript-codegen-test:build
+	rm -rf ./smithy-typescript-schema-ssdk-codegen-test/build/smithyprojections/smithy-typescript-schema-ssdk-codegen-test
+	./gradlew :smithy-typescript-codegen-test:build :smithy-typescript-schema-ssdk-codegen-test:build
 	rm -rf ./private/interceptor-example-ssdk
 	cp -r ./smithy-typescript-codegen-test/build/smithyprojections/smithy-typescript-codegen-test/interceptor-example/typescript-server-codegen/ ./private/interceptor-example-ssdk
+	rm -rf ./private/interceptor-example-schema-ssdk
+	cp -r ./smithy-typescript-schema-ssdk-codegen-test/build/smithyprojections/smithy-typescript-schema-ssdk-codegen-test/interceptor-example/typescript-schema-ssdk-codegen/ ./private/interceptor-example-schema-ssdk
 	node ./scripts/post-protocol-test-codegen
 	yarn
-	yarn turbo run build -F="./private/interceptor-example-ssdk"
+	yarn turbo run build -F="./private/interceptor-example-ssdk" -F="./private/interceptor-example-schema-ssdk"
 
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals && yarn test:index)
