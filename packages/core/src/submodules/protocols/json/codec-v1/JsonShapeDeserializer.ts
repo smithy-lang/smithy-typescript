@@ -8,6 +8,7 @@ import {
   parseRfc7231DateTime,
 } from "@smithy/core/serde";
 import { fromBase64 } from "@smithy/core/serde";
+import { hasOwn } from "@smithy/core/transport";
 import type {
   DocumentType,
   Schema,
@@ -85,6 +86,7 @@ export class JsonShapeDeserializer extends SerdeContextConfig implements ShapeDe
           // This if-block is for backwards compatibility support and should not be copied
           // to other implementations.
           for (const k in record) {
+            if (!hasOwn(record, k)) continue;
             const v = record[k];
             const t = jsonName ? (nameMap![k] ?? k) : k;
             if (!(t in out)) {
@@ -107,6 +109,7 @@ export class JsonShapeDeserializer extends SerdeContextConfig implements ShapeDe
         const mapMember = ns.getValueSchema();
         const out = {} as any;
         for (const _k in value) {
+          if (!hasOwn(value as Record<string, unknown>, _k)) continue;
           if (_k === "__proto__") {
             writeKey(out);
           }
@@ -175,6 +178,7 @@ export class JsonShapeDeserializer extends SerdeContextConfig implements ShapeDe
       if (isObject) {
         const out = Array.isArray(value) ? [] : ({} as any);
         for (const k in value) {
+          if (!hasOwn(value as Record<string, unknown>, k)) continue;
           if (k === "__proto__") {
             writeKey(out);
           }
