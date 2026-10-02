@@ -1,0 +1,65 @@
+{
+  "name": "@smithy/smithy-rpcv2-json-schema",
+  "description": "@smithy/smithy-rpcv2-json-schema client",
+  "version": "1.0.0-alpha.1",
+  "scripts": {
+    "build": "concurrently 'npm:build:cjs' 'npm:build:es' 'npm:build:types'",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+    "test:index": "tsc -p tsconfig.test.json && node ./test/index-objects.spec.mjs",
+    "clean": "premove dist-cjs dist-es dist-types tsconfig.cjs.tsbuildinfo tsconfig.es.tsbuildinfo tsconfig.types.tsbuildinfo",
+    "prepack": "npm run clean && npm run build",
+    "test": "npx vitest run --passWithNoTests",
+    "test:watch": "npx vitest watch --passWithNoTests",
+    "test:integration": "npx vitest run --passWithNoTests -c vitest.config.integ.mts",
+    "test:integration:watch": "npx vitest watch --passWithNoTests -c vitest.config.integ.mts"
+  },
+  "main": "./dist-cjs/index.js",
+  "types": "./dist-types/index.d.ts",
+  "module": "./dist-es/index.js",
+  "sideEffects": false,
+  "dependencies": {
+    "@smithy/core": "workspace:^",
+    "@smithy/fetch-http-handler": "workspace:^",
+    "@smithy/node-http-handler": "workspace:^",
+    "@smithy/types": "workspace:^",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "@smithy/snapshot-testing": "workspace:^",
+    "@tsconfig/node20": "20.1.8",
+    "@types/node": "^20.14.8",
+    "concurrently": "7.0.0",
+    "downlevel-dts": "0.10.1",
+    "premove": "4.0.0",
+    "typescript": "~7.0.2",
+    "vitest": "^4.0.17"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "typesVersions": {
+    "<4.5": {
+      "dist-types/*": [
+        "dist-types/ts3.4/*"
+      ]
+    }
+  },
+  "files": [
+    "dist-*/**"
+  ],
+  "author": {
+    "name": "Smithy team",
+    "url": "https://smithy.io/"
+  },
+  "license": "Apache-2.0",
+  "browser": {
+    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
+  },
+  "react-native": {
+    "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+  },
+  "private": true
+}
