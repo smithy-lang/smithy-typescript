@@ -39,6 +39,52 @@ describe("SmithyRpcV2CborServerProtocol", () => {
     });
   });
 
+  describe("request claiming", () => {
+    it("claims a request with the protocol signal", () => {
+      expect(protocol.claim(makeRequest({ "smithy-protocol": "rpc-v2-cbor" }))).toBe(true);
+    });
+
+    it("does not claim a request without the protocol signal", () => {
+      expect(protocol.claim(makeRequest())).toBe(false);
+    });
+  });
+
+  describe("operation routing", () => {
+    const operationSchemas = {
+      MyOp: makeUnitOpSchema(),
+    };
+
+    it("routes a matching operation", () => {
+      expect(protocol.route(makeRequest({ "smithy-protocol": "rpc-v2-cbor" }), operationSchemas)).toBe("MyOp");
+    });
+
+    it("returns undefined for an unknown operation", () => {
+      expect(
+        protocol.route(
+          {
+            ...makeRequest({ "smithy-protocol": "rpc-v2-cbor" }),
+            path: "/service/MyService/operation/Unknown",
+          },
+          operationSchemas
+        )
+      ).toBeUndefined();
+    });
+
+    it("does not route inherited Object prototype names", () => {
+      const request = {
+        ...makeRequest({ "smithy-protocol": "rpc-v2-cbor" }),
+        path: "/service/MyService/operation/toString",
+      };
+
+      expect(protocol.route(request, operationSchemas)).toBeUndefined();
+      expect(
+        protocol.route(request, {
+          toString: makeUnitOpSchema(),
+        })
+      ).toBe("toString");
+    });
+  });
+
   describe("request validation - Smithy-Protocol header", () => {
     it("rejects requests without Smithy-Protocol header", async () => {
       const request = makeRequest({ "content-type": "application/cbor" });

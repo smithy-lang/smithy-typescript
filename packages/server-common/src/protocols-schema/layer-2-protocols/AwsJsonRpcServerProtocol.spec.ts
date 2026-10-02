@@ -41,6 +41,63 @@ describe("AwsJsonRpcServerProtocol", () => {
       });
     });
 
+    describe("request claiming", () => {
+      it("claims a matching protocol request", () => {
+        expect(
+          protocol.claim(
+            makeRequest({
+              "content-type": "application/x-amz-json-1.0",
+              "x-amz-target": "ExampleService.MyOp",
+            })
+          )
+        ).toBe(true);
+      });
+
+      it("claims independently of whether the operation is known", () => {
+        expect(
+          protocol.claim(
+            makeRequest({
+              "content-type": "application/x-amz-json-1.0",
+              "x-amz-target": "ExampleService.Unknown",
+            })
+          )
+        ).toBe(true);
+      });
+
+      it("does not claim another AWS JSON version", () => {
+        expect(
+          protocol.claim(
+            makeRequest({
+              "content-type": "application/x-amz-json-1.1",
+              "x-amz-target": "ExampleService.MyOp",
+            })
+          )
+        ).toBe(false);
+      });
+    });
+
+    describe("operation routing", () => {
+      const operationSchemas = {
+        MyOp: makeUnitOpSchema(),
+      };
+
+      it("routes a matching operation", () => {
+        const request = makeRequest({
+          "content-type": "application/x-amz-json-1.0",
+          "x-amz-target": "ExampleService.MyOp",
+        });
+        expect(protocol.route(request, operationSchemas)).toBe("MyOp");
+      });
+
+      it("returns undefined for an unknown operation", () => {
+        const request = makeRequest({
+          "content-type": "application/x-amz-json-1.0",
+          "x-amz-target": "ExampleService.Unknown",
+        });
+        expect(protocol.route(request, operationSchemas)).toBeUndefined();
+      });
+    });
+
     describe("content-type validation", () => {
       it("accepts application/x-amz-json-1.0", async () => {
         const request = makeRequest({ "content-type": "application/x-amz-json-1.0" });
@@ -165,6 +222,22 @@ describe("AwsJsonRpcServerProtocol", () => {
     describe("protocol identification", () => {
       it("returns correct shape ID for 1.1", () => {
         expect(protocol.getShapeId()).toBe("aws.protocols#awsJson1_1");
+      });
+    });
+
+    describe("request claiming", () => {
+      it("claims only the 1.1 content type", () => {
+        const matchingRequest = makeRequest({
+          "content-type": "application/x-amz-json-1.1",
+          "x-amz-target": "ExampleService.MyOp",
+        });
+        const otherVersionRequest = makeRequest({
+          "content-type": "application/x-amz-json-1.0",
+          "x-amz-target": "ExampleService.MyOp",
+        });
+
+        expect(protocol.claim(matchingRequest)).toBe(true);
+        expect(protocol.claim(otherVersionRequest)).toBe(false);
       });
     });
 
