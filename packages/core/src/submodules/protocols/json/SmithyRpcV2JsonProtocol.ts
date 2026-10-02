@@ -10,6 +10,8 @@ import type {
   OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
+  ShapeDeserializer,
+  ShapeSerializer,
   StaticErrorSchema,
   TimestampEpochSecondsSchema,
 } from "@smithy/types";
@@ -39,8 +41,10 @@ export class SmithyRpcV2JsonProtocol extends RpcProtocol {
     // RPCv2 JSON serializes bigInteger/bigDecimal as JSON strings (SEP).
     bigNumberAsString: true,
   });
-  protected serializer = this.codec.createSerializer();
-  protected deserializer = this.codec.createDeserializer();
+  // Explicit non-generic Uint8Array annotations: the emitted .d.ts must not use
+  // the TS 5.7+ generic form `Uint8Array<ArrayBufferLike>` (static-analysis gate).
+  protected serializer: ShapeSerializer<string | Uint8Array> = this.codec.createSerializer();
+  protected deserializer: ShapeDeserializer<string | Uint8Array> = this.codec.createDeserializer();
 
   public constructor({
     defaultNamespace,
