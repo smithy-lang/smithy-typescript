@@ -15,6 +15,7 @@ import type {
 } from "@smithy/types";
 
 import { ServiceException } from "../../validation/errors";
+import { resolveErrorStatusCode } from "../error-status";
 import { RestServerProtocol } from "../layer-1-abstracts/RestServerProtocol";
 
 /**
@@ -86,9 +87,7 @@ export class AwsRestJsonServerProtocol extends RestServerProtocol {
     error: E
   ): Promise<IHttpResponse> {
     const errorName = (error as any).name ?? "UnknownError";
-    const fault: string | undefined = (error as any).$fault;
-    const statusCode =
-      (error as any).$metadata?.httpStatusCode ?? (error as any).statusCode ?? (fault === "client" ? 400 : 500);
+    const statusCode = resolveErrorStatusCode(error);
 
     const errorBody: Record<string, any> = {};
 

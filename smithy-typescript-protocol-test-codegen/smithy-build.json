@@ -169,7 +169,7 @@
         }
       ],
       "plugins": {
-        "typescript-server-codegen": {
+        "typescript-schema-ssdk-codegen": {
           "service": "org.xyz.v1#XYZService",
           "package": "xyz-schema-server",
           "packageManager": "npm",
@@ -177,7 +177,6 @@
           "packageJson": {
             "private": true
           },
-          "generateServerSchemas": true,
           "disableDefaultValidation": false,
           "typescriptVersion": "~7.0.2"
         }

@@ -9,9 +9,10 @@ import http, { type IncomingMessage, type RequestOptions, type Server, type Serv
 const { createServer, request } = http;
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Readable } from "node:stream";
+import { Readable } from "node:stream";
+import { HttpRequest } from "@smithy/core/protocols";
 
-import { convertRequest, writeResponse } from "./node-http-converters";
+import { convertRequest, createServerRequest, writeResponse } from "./node-http-converters";
 
 let socketPath: string;
 let promiseResolve: ([req, res]: [IncomingMessage, ServerResponse]) => void;
@@ -144,6 +145,40 @@ describe("convertRequest", () => {
     for (const value of Object.values(convertedReq.headers)) {
       expect(value).not.toBeUndefined();
     }
+  });
+});
+
+describe("createServerRequest", () => {
+  it("creates framework request state from an IncomingMessage", async () => {
+    const req = Object.assign(Readable.from([]), {
+      url: "/resource",
+      method: "GET",
+      headers: { host: "example.com" },
+    }) as IncomingMessage;
+
+    const serverRequest = createServerRequest(req);
+
+    expect(serverRequest.request.path).toEqual("/resource");
+    expect(serverRequest.identity).toEqual({});
+    expect(Object.isFrozen(serverRequest)).toBe(true);
+    expect(Object.isFrozen(serverRequest.identity)).toBe(true);
+    expect(serverRequest.userAttributes).toBeInstanceOf(Map);
+    expect(await streamToString(serverRequest.request.body as Readable)).toEqual("");
+  });
+
+  it("creates framework request state from a pre-converted HttpRequest", () => {
+    const httpRequest = new HttpRequest({
+      method: "POST",
+      hostname: "example.com",
+      path: "/stream",
+      headers: {},
+    });
+
+    const serverRequest = createServerRequest(httpRequest);
+
+    expect(serverRequest.request).toBe(httpRequest);
+    serverRequest.userAttributes.set("transport", "h2");
+    expect(serverRequest.userAttributes.get("transport")).toEqual("h2");
   });
 });
 

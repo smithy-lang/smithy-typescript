@@ -30,6 +30,7 @@ import software.amazon.smithy.utils.StringUtils;
 final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements SymbolProvider {
 
     static final String SERVER_FOLDER = "server";
+    private static final String OPERATIONS_FOLDER = "operations";
     private static final Logger LOGGER = Logger.getLogger(ServerSymbolVisitor.class.getName());
 
     private final Model model;
@@ -128,7 +129,7 @@ final class ServerSymbolVisitor extends ShapeVisitor.Default<Symbol> implements 
             if (shape.getType() == ShapeType.SERVICE) {
                 return Paths.get(SERVER_FOLDER, name).toString();
             } else if (shape.getType() == ShapeType.OPERATION) {
-                return Paths.get(SERVER_FOLDER, ServerCommandGenerator.COMMANDS_FOLDER, name).toString();
+                return Paths.get(SERVER_FOLDER, OPERATIONS_FOLDER, name).toString();
             }
 
             throw new IllegalArgumentException("Unsupported shape type: " + shape.getType());

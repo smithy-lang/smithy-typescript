@@ -32,12 +32,41 @@ public class IndexGeneratorTest {
         TypeScriptWriter writer = new TypeScriptWriter("");
         TypeScriptWriter modelIndexer = new TypeScriptWriter("");
 
-        IndexGenerator.writeIndex(settings, model, symbolProvider, null, writer, modelIndexer);
+        IndexGenerator.writeIndex(settings, model, symbolProvider, writer, modelIndexer);
 
         String contents = writer.toString();
         assertThat(contents, containsString("export * from \"./Example\";"));
         assertThat(contents, containsString("export * from \"./ExampleClient\";"));
         assertThat(contents, containsString("export * from \"./commands\";"));
         assertThat(contents, containsString("export { Command as $Command } from \"@smithy/core/client\";"));
+    }
+
+    @Test
+    public void writesOnlySchemaServerFacadeForServerSdk() {
+        Model model = Model.assembler()
+            .addImport(getClass().getResource("simple-service-with-operation.smithy"))
+            .assemble()
+            .unwrap();
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("service", Node.from("smithy.example#Example"))
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build(),
+            TypeScriptSettings.ArtifactType.SSDK
+        );
+        SymbolProvider symbolProvider = new ServerSymbolVisitor(
+            model,
+            new SymbolVisitor(model, settings)
+        );
+        TypeScriptWriter writer = new TypeScriptWriter("");
+        TypeScriptWriter modelIndexer = new TypeScriptWriter("");
+
+        IndexGenerator.writeIndex(settings, model, symbolProvider, writer, modelIndexer);
+
+        String contents = writer.toString();
+        assertThat(contents, containsString("export * from \"./server/ExampleHandler\";"));
+        assertThat(contents, containsString("export * from \"./schemas/schemas_0\";"));
     }
 }

@@ -28,6 +28,14 @@ class TestProtocol extends HttpServerProtocol {
     return "test#Protocol";
   }
 
+  public claim(): boolean {
+    return false;
+  }
+
+  public route(): undefined {
+    return undefined;
+  }
+
   protected getDefaultContentType(): string {
     return "application/json";
   }

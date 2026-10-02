@@ -6,6 +6,7 @@ import type {
   SerdeFunctions,
   StaticOperationSchema,
 } from "@smithy/types";
+import { resolveErrorStatusCode } from "../error-status";
 import { HttpServerProtocol } from "../layer-0-interface-and-base/HttpServerProtocol";
 
 /**
@@ -144,7 +145,7 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
     error: E
   ): Promise<IHttpResponse> {
     const errorName = (error as any).name ?? "UnknownError";
-    const statusCode = (error as any).statusCode ?? (error as any).$metadata?.httpStatusCode ?? 500;
+    const statusCode = resolveErrorStatusCode(error);
 
     const errorBody: Record<string, any> = {
       __type: errorName,

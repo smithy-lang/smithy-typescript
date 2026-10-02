@@ -5,10 +5,12 @@
 
 import { JsonCodec2 } from "@aws-sdk/core/protocols";
 import { HttpResponse } from "@smithy/core/protocols";
+import { hasOwn } from "@smithy/core/serde";
 import type {
   DocumentSchema,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
+  Logger,
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
@@ -16,6 +18,7 @@ import type {
 } from "@smithy/types";
 
 import { ServiceException, UnsupportedMediaTypeException } from "../../validation/errors";
+import { resolveErrorStatusCode } from "../error-status";
 import { RpcServerProtocol } from "../layer-1-abstracts/RpcServerProtocol";
 
 /**
@@ -84,6 +87,52 @@ export class AwsJsonRpcServerProtocol extends RpcServerProtocol {
     return this.isVersion1_1 ? "aws.protocols#awsJson1_1" : "aws.protocols#awsJson1_0";
   }
 
+  public override claim(request: IHttpRequest, logger?: Logger): boolean {
+    const logPrefix = `@smithy/server-common::AwsJsonRpcServerProtocol`;
+    if (request.method.toUpperCase() !== "POST") {
+      return false;
+    }
+
+    const contentType = this.getHeaderValue(request, "content-type");
+    if (contentType !== undefined && contentType !== this.getDefaultContentType()) {
+      logger?.debug?.(`${logPrefix}: content-type did not match ${this.getShapeId()}.`);
+      return false;
+    }
+
+    const target = this.getHeaderValue(request, "x-amz-target");
+    if (!target) {
+      logger?.debug?.(`${logPrefix}: X-Amz-Target header not found.`);
+      return false;
+    }
+
+    logger?.debug?.(`${logPrefix}: protocol claimed.`);
+    return true;
+  }
+
+  public override route(
+    request: IHttpRequest,
+    operationSchemas: Readonly<Record<string, StaticOperationSchema>>,
+    logger?: Logger
+  ): string | undefined {
+    const logPrefix = `@smithy/server-common::AwsJsonRpcServerProtocol`;
+    const target = this.getHeaderValue(request, "x-amz-target");
+    if (!target) {
+      logger?.debug?.(`${logPrefix}: X-Amz-Target header not found while routing.`);
+      return undefined;
+    }
+
+    const separator = target.lastIndexOf(".");
+    if (separator < 0) {
+      logger?.debug?.(`${logPrefix}: malformed X-Amz-Target header.`);
+      return undefined;
+    }
+
+    const requestedOperation = target.slice(separator + 1);
+    const operationName = hasOwn(operationSchemas, requestedOperation) ? requestedOperation : undefined;
+    logger?.debug?.(`${logPrefix}: routed ${operationName ? `operation ${operationName}` : "an unknown operation"}.`);
+    return operationName;
+  }
+
   protected override getDefaultContentType(): string {
     return this.isVersion1_1 ? "application/x-amz-json-1.1" : "application/x-amz-json-1.0";
   }
@@ -116,7 +165,8 @@ export class AwsJsonRpcServerProtocol extends RpcServerProtocol {
    * - The body SHOULD contain a `__type` field.
    * - For 1.0: `__type` contains the full Shape ID (e.g., `smithy.example#FooError`).
    * - For 1.1: `__type` contains only the shape name (e.g., `FooError`).
-   * - The HTTP status code comes from the error's $fault or explicit status.
+   * - The HTTP status code comes from explicit runtime status, the modeled
+   *   @httpError trait, or the error's $fault.
    */
   protected override async serializeError<E extends Error>(
     _operationSchema: StaticOperationSchema,
@@ -124,9 +174,7 @@ export class AwsJsonRpcServerProtocol extends RpcServerProtocol {
     error: E
   ): Promise<IHttpResponse> {
     const errorName = (error as any).name ?? "UnknownError";
-    const fault: string | undefined = (error as any).$fault;
-    const statusCode =
-      (error as any).$metadata?.httpStatusCode ?? (error as any).statusCode ?? (fault === "client" ? 400 : 500);
+    const statusCode = resolveErrorStatusCode(error);
 
     // For 1.0, use the full shape ID; for 1.1, use only the shape name.
     const namespace = (this as any).options?.defaultNamespace;

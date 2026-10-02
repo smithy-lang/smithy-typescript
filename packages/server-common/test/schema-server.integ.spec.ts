@@ -1,7 +1,7 @@
 import http from "node:http";
 import http2 from "node:http2";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { XYZServiceHandler } from "xyz-schema-server";
+import { createXYZServiceHandler } from "xyz-schema-server";
 import {
   XYZServiceClient,
   GetNumbersCommand,
@@ -19,7 +19,7 @@ import {
 import { HttpRequest } from "@smithy/core/protocols";
 import { AwsRestJsonProtocol, AwsJson1_0Protocol } from "@aws-sdk/core/protocols";
 import { GetNumbers$, camelCaseOperation$ } from "xyz-schema-server";
-import { convertRequest, writeResponse } from "@smithy/server-node";
+import { createServerRequest, writeResponse } from "@smithy/server-node";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 /**
@@ -38,7 +38,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
   let jsonRpcClient: XYZServiceClient;
   let baseUrl: string;
 
-  const handler = new XYZServiceHandler({
+  const handler = createXYZServiceHandler({
     protocols: [
       new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
       new AwsRestJsonServerProtocol({ defaultNamespace: "org.xyz.v1" }),
@@ -110,8 +110,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
 
   beforeAll(async () => {
     server = http.createServer(async (req, res) => {
-      const httpRequest = convertRequest(req);
-      const httpResponse = await handler.handle(httpRequest, {});
+      const httpResponse = await handler.handle(createServerRequest(req));
       writeResponse(httpResponse, res);
     });
 
@@ -393,7 +392,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
     }
 
     beforeAll(async () => {
-      const h2Handler = new XYZServiceHandler({
+      const h2Handler = createXYZServiceHandler({
         protocols: [
           new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
           new AwsJsonRpcServerProtocol({ defaultNamespace: "org.xyz.v1" }),
@@ -487,7 +486,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
         });
 
         try {
-          const httpResponse = await h2Handler.handle(httpRequest, {});
+          const httpResponse = await h2Handler.handle(createServerRequest(httpRequest));
 
           const responseHeaders: Record<string, string | number> = {
             ":status": httpResponse.statusCode,
@@ -746,8 +745,35 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
     const hooksCalled: string[] = [];
 
     beforeAll(async () => {
-      const interceptorHandler = new XYZServiceHandler({
+      const interceptorHandler = createXYZServiceHandler({
         protocols: [new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" })],
+        interceptors: [
+          {
+            modifyBeforeDeserialization(hook) {
+              hooksCalled.push("modifyBeforeDeserialization");
+              return hook.request as HttpRequest;
+            },
+            modifyBeforeValidation(hook) {
+              hooksCalled.push("modifyBeforeValidation");
+              if (hook.operation === "camelCaseOperation" && (hook.input as any).token === "intercept-me") {
+                return { ...(hook.input as any), token: "intercepted" };
+              }
+              return hook.input;
+            },
+            modifyBeforeSerialization(hook) {
+              hooksCalled.push("modifyBeforeSerialization");
+              if (hook.operation === "camelCaseOperation") {
+                return { ...(hook.output as any), token: (hook.output as any).token + "-modified" };
+              }
+              return hook.output;
+            },
+            modifyBeforeCompletion(hook) {
+              hooksCalled.push("modifyBeforeCompletion");
+              hook.response.headers["x-intercepted"] = "true";
+              return hook.response;
+            },
+          },
+        ],
         handlers: {
           async GetNumbers(input) {
             return {
@@ -781,38 +807,8 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
         },
       });
 
-      interceptorHandler.addInterceptor({
-        modifyBeforeDeserialization(hook) {
-          hooksCalled.push("modifyBeforeDeserialization");
-          return hook.request; // pass through unchanged
-        },
-        modifyBeforeValidation(hook) {
-          hooksCalled.push("modifyBeforeValidation");
-          // Inject a modified token to prove the hook runs before the handler
-          if (hook.operation === "camelCaseOperation" && (hook.input as any).token === "intercept-me") {
-            return { ...(hook.input as any), token: "intercepted" };
-          }
-          return hook.input;
-        },
-        modifyBeforeSerialization(hook) {
-          hooksCalled.push("modifyBeforeSerialization");
-          // Append a suffix to prove the hook modifies output before serialization
-          if (hook.operation === "camelCaseOperation") {
-            return { ...(hook.output as any), token: (hook.output as any).token + "-modified" };
-          }
-          return hook.output;
-        },
-        modifyBeforeCompletion(hook) {
-          hooksCalled.push("modifyBeforeCompletion");
-          // Add a custom header to prove the hook can modify the response
-          hook.response.headers["x-intercepted"] = "true";
-          return hook.response;
-        },
-      });
-
       interceptorServer = http.createServer(async (req, res) => {
-        const httpRequest = convertRequest(req);
-        const httpResponse = await interceptorHandler.handle(httpRequest, {});
+        const httpResponse = await interceptorHandler.handle(createServerRequest(req));
         writeResponse(httpResponse, res);
       });
 
@@ -886,8 +882,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       });
 
       directServer = http.createServer(async (req, res) => {
-        const httpRequest = convertRequest(req);
-        const httpResponse = await directHandler.handle(httpRequest, {});
+        const httpResponse = await directHandler.handle(createServerRequest(req));
         writeResponse(httpResponse, res);
       });
 
@@ -935,35 +930,6 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           })
         )
       ).rejects.toThrow();
-    });
-
-    it("dynamically adds an operation via addOperation", async () => {
-      const dynamicHandler = new SchemaServiceHandler({
-        protocols: [new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" })],
-        operationSchemas: [GetNumbers$],
-        handlers: {
-          GetNumbers: async () => ({ numbers: [99] }),
-        },
-      });
-
-      // Dynamically add camelCaseOperation
-      dynamicHandler.addOperation(camelCaseOperation$, async (input: any) => ({
-        token: `added-${input.token ?? ""}`,
-      }));
-
-      const request = new HttpRequest({
-        method: "POST",
-        path: `/service/org.xyz.v1%23XYZService/operation/camelCaseOperation`,
-        headers: {
-          "content-type": "application/cbor",
-          "smithy-protocol": "rpc-v2-cbor",
-          accept: "application/cbor",
-        },
-        body: new Uint8Array(0),
-      });
-
-      const response = await dynamicHandler.handle(request, {});
-      expect(response.statusCode).toBeLessThan(400);
     });
   });
 });

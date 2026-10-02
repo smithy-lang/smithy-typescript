@@ -42,7 +42,7 @@ public abstract class SchemaGenerationAllowlist {
         boolean allowedByProtocol = PROTOCOLS.contains(settings.getProtocol());
         boolean allowedByName = ALLOWED.contains(serviceShapeId);
         boolean clientAllowed = generateClient && settings.generateSchemas() && (allowedByProtocol || allowedByName);
-        boolean serverAllowed = generateServer && settings.generateServerSchemas();
+        boolean serverAllowed = generateServer;
         return clientAllowed || serverAllowed;
     }
 

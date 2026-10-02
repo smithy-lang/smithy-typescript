@@ -68,6 +68,7 @@ export type SmithyFrameworkException =
   | SerializationException
   | UnsupportedMediaTypeException
   | NotAcceptableException
+  | ValidationException
   | UnauthenticatedException;
 
 export const isFrameworkException = (error: any): error is SmithyFrameworkException => {
@@ -113,6 +114,18 @@ export class NotAcceptableException {
   readonly $fault = "client";
   readonly statusCode = 406;
   readonly $frameworkError = true;
+}
+
+export class ValidationException extends Error {
+  readonly name = "ValidationException";
+  readonly $fault = "client";
+  readonly statusCode = 400;
+  readonly $frameworkError = true;
+
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, ValidationException.prototype);
+  }
 }
 
 export class UnauthenticatedException {

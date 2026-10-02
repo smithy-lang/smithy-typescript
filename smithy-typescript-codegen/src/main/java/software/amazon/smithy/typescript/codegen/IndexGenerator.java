@@ -4,10 +4,8 @@
  */
 package software.amazon.smithy.typescript.codegen;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -16,7 +14,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.PaginatedTrait;
-import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.typescript.codegen.schema.SchemaGenerationAllowlist;
 import software.amazon.smithy.typescript.codegen.validation.ReplaceLast;
 import software.amazon.smithy.utils.SmithyInternalApi;
@@ -34,7 +31,6 @@ final class IndexGenerator {
         TypeScriptSettings settings,
         Model model,
         SymbolProvider symbolProvider,
-        ProtocolGenerator protocolGenerator,
         TypeScriptWriter writer,
         TypeScriptWriter modelIndexer
     ) {
@@ -49,25 +45,9 @@ final class IndexGenerator {
             writeClientExports(settings, model, symbolProvider, writer);
         }
 
-        if (settings.generateServerSdk() && protocolGenerator != null) {
-            if (
-                !SchemaGenerationAllowlist.allows(
-                    settings.getOptionalService().orElse(null),
-                    settings
-                )
-            ) {
-                writeProtocolExports(protocolGenerator, writer);
-            }
-            boolean schemaMode = SchemaGenerationAllowlist.allows(
-                settings.getOptionalService().orElse(null),
-                settings
-            );
-            if (schemaMode) {
-                String serviceName = settings.getService(model).getId().getName();
-                writer.write("export * from \"./server/$LHandler\";", serviceName);
-            } else {
-                writer.write("export * from \"./server/index\";");
-            }
+        if (settings.generateServerSdk()) {
+            String serviceName = settings.getService(model).getId().getName();
+            writer.write("export * from \"./server/$LHandler\";", serviceName);
         }
 
         if (
@@ -86,31 +66,6 @@ final class IndexGenerator {
         writer.write(
             // the header comment is already present in the upper writer.
             modelIndexer.toString().replace("// smithy-typescript generated code", "")
-        );
-    }
-
-    private static void writeProtocolExports(ProtocolGenerator protocolGenerator, TypeScriptWriter writer) {
-        String protocolName = ProtocolGenerator.getSanitizedName(protocolGenerator.getName());
-        writer.write("export * as $L from \"./protocols/$L\";", protocolName, protocolName);
-    }
-
-    static void writeServerIndex(
-        TypeScriptSettings settings,
-        Model model,
-        SymbolProvider symbolProvider,
-        FileManifest fileManifest
-    ) {
-        TypeScriptWriter writer = new TypeScriptWriter("");
-        ServiceShape service = settings.getService(model);
-        Symbol symbol = symbolProvider.toSymbol(service);
-
-        // Write export statement for operations.
-        writer.write("export * from \"./operations\";");
-
-        writer.write("export * from \"./$L\"", symbol.getName());
-        fileManifest.writeFile(
-            Paths.get(CodegenUtils.SOURCE_FOLDER, ServerSymbolVisitor.SERVER_FOLDER, "index.ts").toString(),
-            writer.toString()
         );
     }
 

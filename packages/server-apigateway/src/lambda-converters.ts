@@ -6,6 +6,7 @@
 import { Readable } from "node:stream";
 import { HttpRequest, type HeaderBag, type HttpResponse } from "@smithy/core/protocols";
 import type { QueryParameterBag } from "@smithy/types";
+import type { RequestIdentity, ServerRequest } from "@smithy/server-common";
 import type {
   APIGatewayProxyEvent,
   APIGatewayProxyEventMultiValueHeaders,
@@ -13,10 +14,12 @@ import type {
   APIGatewayProxyEventV2,
   APIGatewayProxyResult,
   APIGatewayProxyResultV2,
+  Context,
 } from "aws-lambda";
 
 export function convertEvent(event: APIGatewayProxyEvent): HttpRequest;
 export function convertEvent(event: APIGatewayProxyEventV2): HttpRequest;
+export function convertEvent(event: APIGatewayProxyEvent | APIGatewayProxyEventV2): HttpRequest;
 
 /**
  * Converts an API Gateway proxy event (v1 or v2) into an HttpRequest.
@@ -26,6 +29,23 @@ export function convertEvent(event: APIGatewayProxyEvent | APIGatewayProxyEventV
     return convertV2Event(event);
   }
   return convertV1Event(event);
+}
+
+/**
+ * Creates the framework-owned request consumed by schema service handlers.
+ *
+ * API Gateway creates an empty identity. The framework authentication step
+ * adds the caller when authentication succeeds.
+ */
+export function createServerRequest(
+  event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
+  _lambdaContext: Context
+): ServerRequest<RequestIdentity> {
+  return Object.freeze({
+    request: convertEvent(event),
+    identity: Object.freeze({}),
+    userAttributes: new Map(),
+  });
 }
 
 /**
