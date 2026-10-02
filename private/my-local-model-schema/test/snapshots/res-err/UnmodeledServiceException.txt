@@ -20,11 +20,7 @@ UnmodeledServiceException:
 
 --- [error object] ---
 {
-<<<<<<< HEAD
   $fault: "server",
-=======
-  $fault: "client",
->>>>>>> 8b8831cfa (work in progress)
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 500,
@@ -62,11 +58,7 @@ UnmodeledServiceException: __Message__
 
 --- [error object] ---
 {
-<<<<<<< HEAD
   $fault: "server",
-=======
-  $fault: "client",
->>>>>>> 8b8831cfa (work in progress)
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 500,
@@ -97,11 +89,7 @@ Unknown:
 --- [error object] ---
 {
   0: (number) 110,
-<<<<<<< HEAD
   $fault: "server",
-=======
-  $fault: "client",
->>>>>>> 8b8831cfa (work in progress)
   $retryable: (undefined),
   $metadata: {
     httpStatusCode: (number) 500,

@@ -14,6 +14,7 @@ export { __ServiceException };
  * Base exception class for all service exceptions from RpcV2JsonProtocol service.
  */
 export class RpcV2JsonProtocolServiceException extends __ServiceException {
+  public static readonly shapeId: string = "smithy.ts.sdk.synthetic.smithy.protocoltests.rpcv2Json#RpcV2JsonProtocolServiceException";
   /**
    * @internal
    */

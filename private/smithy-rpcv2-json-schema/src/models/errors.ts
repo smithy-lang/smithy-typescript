@@ -11,6 +11,7 @@ import { RpcV2JsonProtocolServiceException as __BaseException } from "./RpcV2Jso
  * @public
  */
 export class ValidationException extends __BaseException {
+  public static readonly shapeId: string = "smithy.framework#ValidationException";
   readonly name = "ValidationException" as const;
   readonly $fault = "client" as const;
   /**
@@ -39,6 +40,7 @@ export class ValidationException extends __BaseException {
  * @public
  */
 export class ComplexError extends __BaseException {
+  public static readonly shapeId: string = "smithy.protocoltests.rpcv2Json#ComplexError";
   readonly name = "ComplexError" as const;
   readonly $fault = "client" as const;
   TopLevel?: string | undefined;
@@ -63,6 +65,7 @@ export class ComplexError extends __BaseException {
  * @public
  */
 export class InvalidGreeting extends __BaseException {
+  public static readonly shapeId: string = "smithy.protocoltests.rpcv2Json#InvalidGreeting";
   readonly name = "InvalidGreeting" as const;
   readonly $fault = "client" as const;
   Message?: string | undefined;
