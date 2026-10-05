@@ -50,6 +50,7 @@ function findGlobalBufferRefs(code) {
 
   const polyfillRanges = collectPolyfillRanges(ast);
   const guardedRanges = collectGuardedRanges(ast);
+  addSelfGuardingFunctions(ast, guardedRanges);
   addGuardedCallTargets(ast, guardedRanges);
   const typeofArgPositions = collectTypeofArgPositions(ast);
 
@@ -267,6 +268,41 @@ function collectTypeofArgPositions(ast) {
     },
   });
   return positions;
+}
+
+/**
+ * Names of functions that internally guard their own global `Buffer` usage
+ * (e.g. via a `typeof Buffer` check plus try/catch for runtime capability
+ * detection). A reference to `Buffer` inside such a function is safe, but a
+ * bundler/minifier may rewrite the `typeof Buffer` guard into a shape that
+ * {@link collectGuardedRanges} no longer recognizes. Treat the entire body of
+ * these functions as a guarded range so a call to them counts as guarded
+ * Buffer usage.
+ */
+const SELF_GUARDING_BUFFER_FUNCTIONS = new Set(["detectBufferParsing"]);
+
+/**
+ * Adds the bodies of known self-guarding Buffer functions (see
+ * {@link SELF_GUARDING_BUFFER_FUNCTIONS}) to the guarded ranges array.
+ */
+function addSelfGuardingFunctions(ast, guardedRanges) {
+  walk.simple(ast, {
+    FunctionDeclaration(node) {
+      if (node.id && node.id.type === IDENTIFIER && SELF_GUARDING_BUFFER_FUNCTIONS.has(node.id.name)) {
+        guardedRanges.push({ start: node.start, end: node.end });
+      }
+    },
+    VariableDeclarator(node) {
+      if (
+        node.id.type === IDENTIFIER &&
+        SELF_GUARDING_BUFFER_FUNCTIONS.has(node.id.name) &&
+        node.init &&
+        (node.init.type === FUNCTION_EXPRESSION || node.init.type === ARROW_FUNCTION_EXPRESSION)
+      ) {
+        guardedRanges.push({ start: node.init.start, end: node.init.end });
+      }
+    },
+  });
 }
 
 /**
