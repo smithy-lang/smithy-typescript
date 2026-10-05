@@ -58,7 +58,7 @@ export class JsonShapeDeserializer2 extends SerdeContextConfig implements ShapeD
         return {};
       }
       parsed = JSON.parse(data, reviver);
-    } else if (data instanceof Uint8Array && detectBufferParsing()) {
+    } else if (detectBufferParsing() && typeof Buffer === "function") {
       if (data.byteLength === 0) {
         return {};
       }
