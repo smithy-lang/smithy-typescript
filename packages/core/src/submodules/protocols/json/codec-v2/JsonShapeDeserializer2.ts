@@ -58,13 +58,12 @@ export class JsonShapeDeserializer2 extends SerdeContextConfig implements ShapeD
         return {};
       }
       parsed = JSON.parse(data, reviver);
-    } else if (data instanceof Uint8Array && detectBufferParsing() && typeof Buffer === "function") {
+    } else if (data instanceof Uint8Array && detectBufferParsing()) {
       if (data.byteLength === 0) {
         return {};
       }
-      // The `typeof Buffer === "function"` guard keeps this branch out of
-      // browser bundles; detectBufferParsing() additionally confirms the
-      // runtime can JSON.parse a Buffer directly (Node 22+).
+      // detectBufferParsing() returns true only when the global Buffer exists
+      // and can be JSON.parsed directly (Node 22+), so Buffer is guaranteed here.
       const buf = Buffer.isBuffer(data) ? data : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
       parsed = JSON.parse(buf as any, reviver);
     } else {
