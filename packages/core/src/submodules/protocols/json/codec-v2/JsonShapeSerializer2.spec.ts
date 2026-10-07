@@ -70,6 +70,28 @@ describe(JsonShapeSerializer2.name, () => {
     });
   });
 
+  // ─── Null handling ──────────────────────────────────────────────────────────
+
+  describe("null handling", () => {
+    it("serializes a top-level null in document context", () => {
+      const docSchema = 15;
+      serializer.write(docSchema, null);
+      expect(decode(serializer.flush())).toEqual("null");
+    });
+
+    it("serializes null document object values", () => {
+      const docSchema = 15;
+      serializer.write(docSchema, { a: null, b: "set" });
+      expect(JSON.parse(decode(serializer.flush()))).toEqual({ a: null, b: "set" });
+    });
+
+    it("serializes nested null document values", () => {
+      const docSchema = 15;
+      serializer.write(docSchema, { outer: { inner: null }, list: [null, 1] });
+      expect(JSON.parse(decode(serializer.flush()))).toEqual({ outer: { inner: null }, list: [null, 1] });
+    });
+  });
+
   // ─── String escaping ──────────────────────────────────────────────────────
 
   describe("string escaping", () => {
