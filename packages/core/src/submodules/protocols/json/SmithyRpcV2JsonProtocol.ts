@@ -18,7 +18,7 @@ import type {
 
 import { JsonCodec2 } from "./codec-v2/JsonCodec2";
 import type { JsonShapeDeserializer2 } from "./codec-v2/JsonShapeDeserializer2";
-import { loadJsonRpcErrorCode } from "./parseJsonBody";
+import { loadSmithyRpcV2JsonErrorCode } from "./parseJsonBody";
 
 /**
  * Client protocol for Smithy RPCv2 JSON.
@@ -109,7 +109,7 @@ export class SmithyRpcV2JsonProtocol extends RpcProtocol {
     dataObject: any,
     metadata: ResponseMetadata
   ): Promise<never> {
-    const errorName = loadJsonRpcErrorCode(response, dataObject) ?? "Unknown";
+    const errorName = loadSmithyRpcV2JsonErrorCode(response, dataObject) ?? "Unknown";
 
     const errorMetadata = {
       $metadata: metadata,
