@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { createPaginator } from "@smithy/core";
+import { createItemsPaginator, createPaginator } from "@smithy/core";
 import type { Paginator } from "@smithy/types";
 
 import {
@@ -22,3 +22,16 @@ export const paginatecamelCaseOperation: (
   CamelCaseOperationCommandInput,
   CamelCaseOperationCommandOutput
 >(XYZServiceClient, CamelCaseOperationCommand, "token", "token", "");
+
+/**
+ * @public
+ */
+export const paginatecamelCaseOperationItems: (
+  config: XYZServicePaginationConfiguration,
+  input: CamelCaseOperationCommandInput,
+  ...rest: any[]
+) => Paginator<Uint8Array> = createItemsPaginator<
+  XYZServicePaginationConfiguration,
+  CamelCaseOperationCommandInput,
+  Uint8Array
+>(paginatecamelCaseOperation, "results");
