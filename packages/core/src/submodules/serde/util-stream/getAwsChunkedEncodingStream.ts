@@ -69,8 +69,11 @@ export function getAwsChunkedEncodingStream(
       if (checksumRequired) {
         const checksum = base64Encoder!(await digest!);
         awsChunkedEncodingStream.push(`${checksumLocationName}:${checksum}\r\n`);
-        awsChunkedEncodingStream.push(`\r\n`);
       }
+      // The trailer section is always terminated by a blank line, whether or not
+      // it carried any trailers. Without it the framing is incomplete and a
+      // decoder cannot distinguish the end of the stream from a truncated body.
+      awsChunkedEncodingStream.push(`\r\n`);
       awsChunkedEncodingStream.push(null);
     } catch (err) {
       // Digest rejected after a clean end: fail the stream, don't leak.
