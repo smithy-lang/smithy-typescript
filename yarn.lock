@@ -2307,6 +2307,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/smithy-rpcv2-json-schema@workspace:private/smithy-rpcv2-json-schema":
+  version: 0.0.0-use.local
+  resolution: "@smithy/smithy-rpcv2-json-schema@workspace:private/smithy-rpcv2-json-schema"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/fetch-http-handler": "workspace:^"
+    "@smithy/node-http-handler": "workspace:^"
+    "@smithy/snapshot-testing": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    premove: "npm:4.0.0"
+    tslib: "npm:^2.6.2"
+    typescript: "npm:~7.0.2"
+    vitest: "npm:^4.0.17"
+  languageName: unknown
+  linkType: soft
+
 "@smithy/snapshot-testing@workspace:^, @smithy/snapshot-testing@workspace:packages/snapshot-testing":
   version: 0.0.0-use.local
   resolution: "@smithy/snapshot-testing@workspace:packages/snapshot-testing"

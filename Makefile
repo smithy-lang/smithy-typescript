@@ -25,12 +25,14 @@ generate-protocol-tests:
 	./gradlew :smithy-typescript-protocol-test-codegen:build
 	rm -rf ./private/smithy-rpcv2-cbor
 	rm -rf ./private/smithy-rpcv2-cbor-schema
+	rm -rf ./private/smithy-rpcv2-json-schema
 	rm -rf ./private/my-local-model
 	rm -rf ./private/my-local-model-schema
 	rm -rf ./private/my-local-model-schema-server
 	rm -rf ./private/types-only
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-cbor/typescript-codegen ./private/smithy-rpcv2-cbor
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-cbor-schema/typescript-codegen ./private/smithy-rpcv2-cbor-schema
+	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-json-schema/typescript-codegen ./private/smithy-rpcv2-json-schema
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model/typescript-client-codegen/ ./private/my-local-model
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema/typescript-client-codegen/ ./private/my-local-model-schema
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema-server/typescript-server-codegen/ ./private/my-local-model-schema-server
@@ -53,8 +55,10 @@ generate-server-tests:
 test-protocols:
 	(cd ./private/smithy-rpcv2-cbor && npx vitest run --globals && yarn test:index)
 	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals && yarn test:index)
+	(cd ./private/smithy-rpcv2-json-schema && npx vitest run --globals && yarn test:index)
 	(cd ./private/my-local-model-schema && npx vitest run --globals && yarn test:index)
 	(cd ./private/smithy-rpcv2-cbor-schema && yarn test:integration)
+	(cd ./private/smithy-rpcv2-json-schema && yarn test:integration)
 	(cd ./private/my-local-model-schema && yarn test:integration)
 
 benchmark:
