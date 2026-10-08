@@ -64,6 +64,20 @@ describe(EndpointCache.name, () => {
     expect(cache.size()).toEqual(0);
   });
 
+  it("distinguishes an empty-string param from an absent one", () => {
+    const cache = new EndpointCache({
+      size: 50,
+      params: ["A", "B"],
+    });
+
+    expect(cache.get({ A: "b", B: "" }, () => endpoint1)).toBe(endpoint1);
+    expect(cache.get({ A: "b" }, () => endpoint2)).toBe(endpoint2);
+    expect(cache.get({ A: "b", B: "" }, () => endpoint2)).toBe(endpoint1);
+    expect(cache.get({ A: "b" }, () => endpoint1)).toBe(endpoint2);
+
+    expect(cache.size()).toEqual(2);
+  });
+
   it("should be an LRU cache", () => {
     const cache = new EndpointCache({
       size: 5,
