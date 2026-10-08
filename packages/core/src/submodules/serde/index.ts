@@ -90,6 +90,7 @@ export { Hash } from "./hash-node/hash-node";
 
 // @smithy/util-stream
 export class Uint8ArrayBlobAdapter extends bindUint8ArrayBlobAdapter(toUtf8, fromUtf8, toBase64, fromBase64) {}
+export { ChecksumMismatchError } from "./util-stream/checksum/ChecksumMismatchError";
 export { ChecksumStream, type ChecksumStreamInit } from "./util-stream/checksum/ChecksumStream";
 export { createChecksumStream } from "./util-stream/checksum/createChecksumStream";
 export { createBufferedReadable } from "./util-stream/createBufferedReadable";
