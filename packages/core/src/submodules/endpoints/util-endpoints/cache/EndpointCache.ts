@@ -67,7 +67,8 @@ export class EndpointCache {
       return false;
     }
     for (const param of parameters) {
-      const val = String(endpointParams[param] ?? "");
+      const raw = endpointParams[param];
+      const val = raw == null ? "\0" : String(raw);
       if (val.includes("|;")) {
         return false;
       }
