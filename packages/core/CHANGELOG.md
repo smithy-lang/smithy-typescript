@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.35.2
+
+### Patch Changes
+
+- d74fb5f: fix endpoint cache key collision between empty-string and absent parameters
+
 ## 3.35.1
 
 ### Patch Changes
