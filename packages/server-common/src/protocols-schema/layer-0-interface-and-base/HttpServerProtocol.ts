@@ -3,6 +3,7 @@ import type {
   ConfigurableSerdeContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
+  Logger,
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
@@ -50,6 +51,14 @@ export abstract class HttpServerProtocol
   }
 
   public abstract getShapeId(): string;
+
+  public abstract claim(request: IHttpRequest, logger?: Logger): boolean;
+
+  public abstract route(
+    request: IHttpRequest,
+    operationSchemas: Readonly<Record<string, StaticOperationSchema>>,
+    logger?: Logger
+  ): string | undefined;
 
   /**
    * @returns the content-type this protocol uses for request/response bodies.

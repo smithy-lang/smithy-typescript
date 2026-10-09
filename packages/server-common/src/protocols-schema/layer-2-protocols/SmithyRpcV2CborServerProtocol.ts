@@ -1,7 +1,15 @@
 import { CborCodec } from "@smithy/core/cbor";
-import type { HttpRequest as IHttpRequest, HttpResponse as IHttpResponse } from "@smithy/types";
+import { hasOwn } from "@smithy/core/serde";
+import type {
+  HttpRequest as IHttpRequest,
+  HttpResponse as IHttpResponse,
+  Logger,
+  StaticOperationSchema,
+} from "@smithy/types";
 import { RpcServerProtocol } from "../layer-1-abstracts/RpcServerProtocol";
 import { SerializationException } from "../../validation/errors";
+
+const RPC_ROUTE = /\/service\/[^/]+\/operation\/([^/?]+)/;
 
 /**
  * Server protocol implementation for Smithy RPCv2 CBOR.
@@ -22,6 +30,40 @@ export class SmithyRpcV2CborServerProtocol extends RpcServerProtocol {
 
   public override getShapeId(): string {
     return "smithy.protocols#rpcv2Cbor";
+  }
+
+  public override claim(request: IHttpRequest, logger?: Logger): boolean {
+    const logPrefix = `@smithy/server-common::SmithyRpcV2CborServerProtocol`;
+    if (this.getHeaderValue(request, "smithy-protocol") !== "rpc-v2-cbor") {
+      logger?.debug?.(`${logPrefix}: smithy-protocol header not matched.`);
+      return false;
+    }
+
+    logger?.debug?.(`${logPrefix}: protocol claimed.`);
+    return true;
+  }
+
+  public override route(
+    request: IHttpRequest,
+    operationSchemas: Readonly<Record<string, StaticOperationSchema>>,
+    logger?: Logger
+  ): string | undefined {
+    const logPrefix = `@smithy/server-common::SmithyRpcV2CborServerProtocol`;
+    const match = RPC_ROUTE.exec(request.path);
+    if (!match) {
+      logger?.debug?.(`${logPrefix}: request path not matched.`);
+      return undefined;
+    }
+
+    const requestedOperation = match[1];
+    if (!requestedOperation) {
+      logger?.debug?.(`${logPrefix}: request operation not found.`);
+      return undefined;
+    }
+
+    const operationName = hasOwn(operationSchemas, requestedOperation) ? requestedOperation : undefined;
+    logger?.debug?.(`${logPrefix}: routed ${operationName ? `operation ${operationName}` : "an unknown operation"}.`);
+    return operationName;
   }
 
   protected override getDefaultContentType(): string {

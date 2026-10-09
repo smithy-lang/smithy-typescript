@@ -93,6 +93,41 @@ describe("RestServerProtocol", () => {
     protocol = new TestRestProtocol();
   });
 
+  describe("request claiming", () => {
+    const makeOpSchema = (name: string, method: string, uri: string): StaticOperationSchema => [
+      9,
+      "test",
+      name,
+      { http: [method, uri, 200] },
+      "unit",
+      "unit",
+    ];
+
+    it("claims as the fallback and routes the most specific HTTP binding", () => {
+      const operationSchemas = {
+        ById: makeOpSchema("ById", "GET", "/items/{id}"),
+        Special: makeOpSchema("Special", "GET", "/items/special"),
+      };
+
+      const request = makeRequest({ method: "GET", path: "/items/special" });
+      expect(protocol.claim(request)).toBe(true);
+      expect(protocol.route(request, operationSchemas)).toBe("Special");
+    });
+
+    it("claims as the fallback but returns undefined when no operation matches", () => {
+      const request = makeRequest({ method: "POST", path: "/items/special" });
+      const operationSchemas = { Special: makeOpSchema("Special", "GET", "/items/special") };
+      expect(protocol.claim(request)).toBe(true);
+      expect(protocol.route(request, operationSchemas)).toBeUndefined();
+    });
+
+    it("does not claim requests with an explicit RPC signal", () => {
+      expect(protocol.claim(makeRequest({ headers: { "x-amz-target": "Service.Operation" } }))).toBe(false);
+      expect(protocol.claim(makeRequest({ headers: { "smithy-protocol": "rpc-v2-cbor" } }))).toBe(false);
+      expect(protocol.claim(makeRequest({ headers: { "x-amzn-target": "Service.Operation" } }))).toBe(false);
+    });
+  });
+
   describe("extractPathLabels", () => {
     function makeOpSchema(uri: string): StaticOperationSchema {
       return [9, "test", "TestOp", { http: ["GET", uri, 200] }, "unit", "unit"] satisfies StaticOperationSchema;
