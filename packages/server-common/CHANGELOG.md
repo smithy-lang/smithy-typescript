@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0
+
+### Minor Changes
+
+- 1287f77: Add framework-owned request state and constructor configuration for schema service handlers while preserving legacy server runtime contracts.
+- ad1c37c: Add protocol-owned request claiming and operation routing for schema servers.
+
+### Patch Changes
+
+- ad1c37c: Resolve schema-server response status codes from modeled httpError traits.
+
 ## 0.4.3
 
 ### Patch Changes
