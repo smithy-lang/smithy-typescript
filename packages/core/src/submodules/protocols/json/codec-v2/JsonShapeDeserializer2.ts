@@ -241,7 +241,13 @@ export class JsonShapeDeserializer2 extends SerdeContextConfig implements ShapeD
   }
 
   private needsTransform(ns: NormalizedSchema): boolean {
-    if (ns.isBlobSchema() || ns.isTimestampSchema() || ns.isBigIntegerSchema() || ns.isBigDecimalSchema()) {
+    if (
+      ns.isBlobSchema() ||
+      ns.isTimestampSchema() ||
+      ns.isBigIntegerSchema() ||
+      ns.isBigDecimalSchema() ||
+      ns.isNumericSchema()
+    ) {
       return true;
     }
     if (ns.isDocumentSchema() || ns.isStructSchema() || ns.isListSchema() || ns.isMapSchema()) {

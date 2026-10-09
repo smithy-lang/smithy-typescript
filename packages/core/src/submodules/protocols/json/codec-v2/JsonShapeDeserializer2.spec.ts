@@ -1,5 +1,11 @@
 import { nv, NumericValue } from "@smithy/core/serde";
-import type { StaticStructureSchema, TimestampEpochSecondsSchema } from "@smithy/types";
+import type {
+  NumericSchema,
+  StaticListSchema,
+  StaticMapSchema,
+  StaticStructureSchema,
+  TimestampEpochSecondsSchema,
+} from "@smithy/types";
 import { describe, expect, test as it } from "vitest";
 
 import { createNestingWidget, nestingWidget, unionStruct, unionStructControl, widget } from "../../test-schema.spec";
@@ -155,6 +161,52 @@ describe(JsonShapeDeserializer2.name, () => {
     expect(await deserializer.read(widget, JSON.stringify({ scalar: "Infinity" }))).toEqual({ scalar: Infinity });
     expect(await deserializer.read(widget, JSON.stringify({ scalar: "-Infinity" }))).toEqual({ scalar: -Infinity });
     expect(await deserializer.read(widget, JSON.stringify({ scalar: "NaN" }))).toEqual({ scalar: NaN });
+  });
+
+  describe("non-finite numerics in collections", () => {
+    // Struct holding a list<float> and a map<string, float>, so numeric members
+    // are reached through the list/map transform path rather than as a scalar.
+    const numericCollections: StaticStructureSchema = [
+      3,
+      "ns",
+      "NumericCollections",
+      0,
+      ["floatList", "floatMap"],
+      [
+        [1, "ns", "FloatList", 0, 1 satisfies NumericSchema] satisfies StaticListSchema,
+        [2, "ns", "FloatMap", 0, 0, 1 satisfies NumericSchema] satisfies StaticMapSchema,
+      ],
+    ];
+
+    it("deserializes non-finite values inside list<float>", async () => {
+      const json = JSON.stringify({
+        floatList: ["Infinity", "-Infinity", "NaN", 1.5],
+      });
+      const result = await deserializer.read(numericCollections, json);
+      expect(result).toEqual({
+        floatList: [Infinity, -Infinity, NaN, 1.5],
+      });
+    });
+
+    it("deserializes non-finite values inside map<string, float>", async () => {
+      const json = JSON.stringify({
+        floatMap: {
+          pos: "Infinity",
+          neg: "-Infinity",
+          nan: "NaN",
+          finite: 2.25,
+        },
+      });
+      const result = await deserializer.read(numericCollections, json);
+      expect(result).toEqual({
+        floatMap: {
+          pos: Infinity,
+          neg: -Infinity,
+          nan: NaN,
+          finite: 2.25,
+        },
+      });
+    });
   });
 
   it("deserializes $unknown union members", async () => {
