@@ -55,13 +55,7 @@ export { parseUrl } from "@smithy/core/transport";
 
 // Smithy RPC v2 JSON
 export { SmithyRpcV2JsonProtocol } from "./json/SmithyRpcV2JsonProtocol";
-export {
-  parseJsonBody,
-  parseJsonErrorBody,
-  loadJsonRpcErrorCode,
-  loadRestJsonErrorCode,
-  loadSmithyRpcV2JsonErrorCode,
-} from "./json/parseJsonBody";
+export { parseJsonBody, parseJsonErrorBody, loadJsonRpcErrorCode, loadRestJsonErrorCode } from "./json/parseJsonBody";
 export type { JsonSettings } from "./json/JsonSettings";
 export { JsonCodec } from "./json/codec-v1/JsonCodec";
 export { JsonShapeSerializer } from "./json/codec-v1/JsonShapeSerializer";

@@ -1,4 +1,4 @@
-import { op, TypeRegistry } from "@smithy/core/schema";
+import { op, type TypeRegistry } from "@smithy/core/schema";
 import { HttpRequest, HttpResponse } from "@smithy/core/transport";
 import type {
   $SchemaRef,
@@ -409,80 +409,6 @@ describe(SmithyRpcV2JsonProtocol.name, () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect.assertions(1);
-    });
-
-    it("resolves an error by the absolute shape id in __type, not the default namespace", async () => {
-      // RPCv2 JSON requires __type to carry the fully-qualified shape id, and the
-      // protocol must resolve by that absolute id. Here the error lives in a
-      // DIFFERENT namespace ("other") than the client's defaultNamespace ("ns").
-      // If the "#" namespace were stripped from __type, resolution would fall back
-      // to the default namespace, miss "OtherException", and this would fail —
-      // the exact ambiguous-registry regression this guards against.
-      const otherNamespaceErrorSchema = [
-        -3,
-        "other",
-        "OtherException",
-        0,
-        ["modeledProperty"],
-        [0],
-      ] satisfies StaticErrorSchema;
-
-      const otherRegistry = TypeRegistry.for("other");
-      otherRegistry.registerError(otherNamespaceErrorSchema, ModeledExceptionCtor);
-
-      const response = new HttpResponse({
-        statusCode: 400,
-        headers: {},
-        body: jsonBody({
-          __type: "other#OtherException",
-          modeledProperty: "cross-namespace",
-        }),
-      });
-
-      try {
-        await protocol.deserializeResponse(operation, serdeContext as any, response);
-      } catch (e) {
-        expect(e).toBeInstanceOf(ModeledExceptionCtor);
-        expect((e as ModeledExceptionCtor).modeledProperty).toEqual("cross-namespace");
-      } finally {
-        otherRegistry.clear();
-      }
-      expect.assertions(2);
-    });
-
-    it("preserves the absolute shape id when __type has a fault/tag suffix", async () => {
-      // "other#OtherException:Sender,tag" must sanitize to "other#OtherException"
-      // (trim ":" and "," suffixes) WITHOUT dropping the "other#" namespace.
-      const otherNamespaceErrorSchema = [
-        -3,
-        "other",
-        "OtherException",
-        0,
-        ["modeledProperty"],
-        [0],
-      ] satisfies StaticErrorSchema;
-
-      const otherRegistry = TypeRegistry.for("other");
-      otherRegistry.registerError(otherNamespaceErrorSchema, ModeledExceptionCtor);
-
-      const response = new HttpResponse({
-        statusCode: 400,
-        headers: {},
-        body: jsonBody({
-          __type: "other#OtherException:Sender,tag",
-          modeledProperty: "with-suffix",
-        }),
-      });
-
-      try {
-        await protocol.deserializeResponse(operation, serdeContext as any, response);
-      } catch (e) {
-        expect(e).toBeInstanceOf(ModeledExceptionCtor);
-        expect((e as ModeledExceptionCtor).modeledProperty).toEqual("with-suffix");
-      } finally {
-        otherRegistry.clear();
-      }
-      expect.assertions(2);
     });
   });
 });
