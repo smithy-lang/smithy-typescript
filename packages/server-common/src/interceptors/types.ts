@@ -5,15 +5,10 @@
 
 import type { HttpRequest, HttpResponse } from "@smithy/core/protocols";
 
+import type { Caller } from "../identity";
 import type { SmithyFrameworkException } from "../validation/errors";
 
-/**
- * Identity established by the authenticate step. The shape is service-defined;
- * a successful auth scheme returns a value with at least a principal.
- */
-export interface Caller {
-  readonly principal: string;
-}
+export type { Caller } from "../identity";
 
 /**
  * Read-only views passed to hooks. Each carries the fields populated at its

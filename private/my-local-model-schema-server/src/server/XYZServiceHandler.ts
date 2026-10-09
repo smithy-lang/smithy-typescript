@@ -1,8 +1,10 @@
 // smithy-typescript generated code
 import {
+  type RequestIdentity,
   type SchemaServiceHandlerOptions,
-  type ServerRequestContext,
+  type ServerOperation,
   SchemaServiceHandler,
+  SmithyRpcV2CborServerProtocol,
 } from "@smithy/server-common";
 import type { StaticOperationSchema } from "@smithy/types";
 
@@ -51,27 +53,50 @@ const OPERATION_SCHEMAS: StaticOperationSchema[] = [
   ValidatedOperation$,
 ];
 
+const createGeneratedProtocolDefaults = () => [
+  new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+];
+
+export type XYZServiceHandlerOptions<
+  Identity extends RequestIdentity = RequestIdentity,
+  MetricsNative = unknown,
+> = Omit<
+  SchemaServiceHandlerOptions<Identity, MetricsNative>,
+  "handlers" | "operationSchemas" | "protocols"
+> & {
+  handlers: {
+    HttpLabelCommand: ServerOperation<HttpLabelCommandInput, HttpLabelCommandOutput, Identity, MetricsNative>;
+    camelCaseOperation: ServerOperation<CamelCaseOperationInput, CamelCaseOperationOutput, Identity, MetricsNative>;
+    GetNumbers: ServerOperation<GetNumbersRequest, GetNumbersResponse, Identity, MetricsNative>;
+    HostPrefixOperation: ServerOperation<HostPrefixOperationInput, Unit, Identity, MetricsNative>;
+    PublishEvents: ServerOperation<PublishEventsRequest, PublishEventsResponse, Identity, MetricsNative>;
+    SubscribeToEvents: ServerOperation<SubscribeToEventsRequest, SubscribeToEventsResponse, Identity, MetricsNative>;
+    TradeEventStream: ServerOperation<TradeEventStreamRequest, TradeEventStreamResponse, Identity, MetricsNative>;
+    UnionMemberCollisionOperation: ServerOperation<UnionMemberCollisionInput, UnionMemberCollisionOutput, Identity, MetricsNative>;
+    ValidatedOperation: ServerOperation<ValidatedInput, ValidatedOutput, Identity, MetricsNative>;
+  };
+  protocols?: SchemaServiceHandlerOptions<Identity, MetricsNative>["protocols"];
+};
+
 /**
- * Schema-based service handler for XYZService.
- * Extends SchemaServiceHandler which provides protocol resolution, routing,
- * metrics, auth, and interceptor support.
+ * Creates the schema-based service handler for XYZService.
+ *
+ * Generated operation schemas and modeled protocol defaults are supplied by
+ * this facade. Applications provide business handlers and optional runtime
+ * configuration.
  *
  */
-export class XYZServiceHandler<Context = {}> extends SchemaServiceHandler<Context> {
-  constructor(options: SchemaServiceHandlerOptions<Context> & {
-    handlers: {
-      HttpLabelCommand: (input: HttpLabelCommandInput, context: ServerRequestContext, userContext: Context) => Promise<HttpLabelCommandOutput>;
-      camelCaseOperation: (input: CamelCaseOperationInput, context: ServerRequestContext, userContext: Context) => Promise<CamelCaseOperationOutput>;
-      GetNumbers: (input: GetNumbersRequest, context: ServerRequestContext, userContext: Context) => Promise<GetNumbersResponse>;
-      HostPrefixOperation: (input: HostPrefixOperationInput, context: ServerRequestContext, userContext: Context) => Promise<Unit>;
-      PublishEvents: (input: PublishEventsRequest, context: ServerRequestContext, userContext: Context) => Promise<PublishEventsResponse>;
-      SubscribeToEvents: (input: SubscribeToEventsRequest, context: ServerRequestContext, userContext: Context) => Promise<SubscribeToEventsResponse>;
-      TradeEventStream: (input: TradeEventStreamRequest, context: ServerRequestContext, userContext: Context) => Promise<TradeEventStreamResponse>;
-      UnionMemberCollisionOperation: (input: UnionMemberCollisionInput, context: ServerRequestContext, userContext: Context) => Promise<UnionMemberCollisionOutput>;
-      ValidatedOperation: (input: ValidatedInput, context: ServerRequestContext, userContext: Context) => Promise<ValidatedOutput>;
-    };
-  }) {
-    super({ ...options, validationEnabled: options.validationEnabled ?? true, operationSchemas: options.operationSchemas ?? OPERATION_SCHEMAS });
-  }
-
+export function createXYZServiceHandler<
+  Identity extends RequestIdentity = RequestIdentity,
+  MetricsNative = unknown,
+>(
+  options: XYZServiceHandlerOptions<Identity, MetricsNative>
+): SchemaServiceHandler<Identity, MetricsNative> {
+  const { protocols, ...runtimeOptions } = options;
+  return new SchemaServiceHandler<Identity, MetricsNative>({
+    ...runtimeOptions,
+    validationEnabled: runtimeOptions.validationEnabled ?? true,
+    operationSchemas: OPERATION_SCHEMAS,
+    protocols: protocols ?? createGeneratedProtocolDefaults(),
+  });
 }
