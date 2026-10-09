@@ -4,10 +4,15 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
+import type { APIGatewayProxyEvent, APIGatewayProxyEventV2, Context } from "aws-lambda";
 import type { HttpResponse } from "@smithy/core/protocols";
 
-import { convertEvent, convertVersion1Response, convertVersion2Response } from "./lambda-converters";
+import {
+  convertEvent,
+  convertVersion1Response,
+  convertVersion2Response,
+  createServerRequest,
+} from "./lambda-converters";
 
 function makeV2Event(overrides: Partial<APIGatewayProxyEventV2> = {}): APIGatewayProxyEventV2 {
   return {
@@ -164,6 +169,23 @@ describe("convertEvent", () => {
       const request = convertEvent(event);
       expect(request.headers).toEqual({});
     });
+  });
+});
+
+describe("createServerRequest", () => {
+  it.each([
+    ["v1", makeV1Event()],
+    ["v2", makeV2Event()],
+  ])("creates framework request state for a %s event", (_version, event) => {
+    const serverRequest = createServerRequest(event, {} as Context);
+
+    expect(serverRequest.request.path).toBe("/test");
+    expect(serverRequest.identity).toEqual({});
+    expect(Object.isFrozen(serverRequest)).toBe(true);
+    expect(Object.isFrozen(serverRequest.identity)).toBe(true);
+    expect(serverRequest.userAttributes).toBeInstanceOf(Map);
+    serverRequest.userAttributes.set("customId", "request-scoped");
+    expect(serverRequest.userAttributes.get("customId")).toBe("request-scoped");
   });
 });
 

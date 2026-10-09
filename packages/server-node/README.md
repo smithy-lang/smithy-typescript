@@ -11,20 +11,19 @@ minor versions in the `0.x` range.
 
 ```typescript
 import { createServer } from "node:http";
-import { convertRequest, writeResponse } from "@smithy/server-node";
+import { createServerRequest, writeResponse } from "@smithy/server-node";
 
 // This is instantiated from your generated Server SDK package.
-// It is either a ServiceHandler type or SchemaServiceHandler extension,
-// both of which have a method `handle(HttpRequest): Promise<HttpResponse>`.
+// It has a method `handle(ServerRequest): Promise<HttpResponse>`.
 const serviceHandler = ...
 
 const server = createServer(async (req, res) => {
-  // Convert NodeJS's http request to an HttpRequest (a Smithy type).
-  const httpRequest = convertRequest(req);
+  // Convert NodeJS's HTTP request into framework-owned request state.
+  const serverRequest = createServerRequest(req);
 
   // Call the service handler, which will route the request to the
   // implementation and then serialize the response to an HttpResponse (Smithy).
-  const httpResponse = await serviceHandler.handle(httpRequest, {});
+  const httpResponse = await serviceHandler.handle(serverRequest);
 
   // Write the HttpResponse to NodeJS http's response expected format.
   writeResponse(httpResponse, res);
@@ -46,11 +45,12 @@ event stream responses), automatically piping chunks to the response.
 ```typescript
 import { createServer } from "node:http2";
 import { HttpRequest } from "@smithy/core/protocols";
+import { createServerRequest } from "@smithy/server-node";
 
 // Generated server SDK handler — supports event stream operations.
-import { MyServiceHandler } from "@example/my-service-server";
+import { createMyServiceHandler } from "@example/my-service-server";
 
-const serviceHandler = new MyServiceHandler({
+const serviceHandler = createMyServiceHandler({
   handlers: {
     // Output-only stream example.
     async SubscribeToEvents(input) {
@@ -102,7 +102,7 @@ server.on("stream", async (stream, headers) => {
   });
 
   try {
-    const httpResponse = await serviceHandler.handle(httpRequest, {});
+    const httpResponse = await serviceHandler.handle(createServerRequest(httpRequest));
 
     // Send response headers.
     const responseHeaders: Record<string, string | number> = {

@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { convertRequest, writeResponse } from "./node-http-converters";
+export { convertRequest, createServerRequest, writeResponse } from "./node-http-converters";
