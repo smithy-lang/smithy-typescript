@@ -385,6 +385,7 @@
     "JsonShapeSerializer2": "function",
     "loadJsonRpcErrorCode": "function",
     "loadRestJsonErrorCode": "function",
+    "loadSmithyRpcV2JsonErrorCode": "function",
     "parseJsonBody": "function",
     "parseJsonErrorBody": "function",
     "parseQueryString": "function",
