@@ -224,9 +224,12 @@ code generation and TypeScript that either need to be implemented or consumed fr
 The `typescript-codegen` plugin is the unified entry point that interprets the
 `modes` setting. It supports `["client"]`, `["server"]`, and `["types"]`; when
 `modes` is omitted, it defaults to client generation for backward compatibility.
-The specialized `typescript-client-codegen`, `typescript-server-codegen`, and
-deprecated `typescript-ssdk-codegen` plugins retain their fixed historical modes
-and do not accept `modes`.
+The specialized `typescript-client-codegen`, `typescript-server-codegen`,
+`typescript-schema-ssdk-codegen`, and deprecated `typescript-ssdk-codegen`
+plugins retain their fixed modes and do not accept `modes`.
+
+Use `typescript-schema-ssdk-codegen` as the dedicated entry point for
+schema-based server SDK generation.
 
 Types-only generation is driven by a named
 [shape closure](https://smithy.io/2.0/spec/model.html#shape-closures) rather than a

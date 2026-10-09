@@ -137,6 +137,118 @@ public class TypeScriptCodegenPluginTest {
     }
 
     @Test
+    public void generatesServerFromDedicatedSchemaPlugin() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+            .model(model)
+            .fileManifest(manifest)
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("service", Node.from("smithy.example#Example"))
+                    .withMember("package", Node.from("example"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .build()
+            )
+            .build();
+
+        SmithyBuildPlugin plugin = new TypeScriptSchemaSSDKCodegenPlugin();
+        assertThat(plugin.getName(), equalTo("typescript-schema-ssdk-codegen"));
+
+        plugin.execute(context);
+
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/server/ExampleHandler.ts"));
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/schemas/schemas_0.ts"));
+        assertFalse(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/ExampleClient.ts"));
+    }
+
+    @Test
+    public void legacyServerPluginDoesNotEnableSchemaMode() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+            .model(model)
+            .fileManifest(manifest)
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("service", Node.from("smithy.example#Example"))
+                    .withMember("package", Node.from("example"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .build()
+            )
+            .build();
+
+        new TypeScriptSSDKCodegenPlugin().execute(context);
+
+        assertTrue(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/server/ExampleService.ts"));
+        assertFalse(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/server/ExampleHandler.ts"));
+        assertFalse(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/schemas/schemas_0.ts"));
+        assertFalse(manifest.hasFile(CodegenUtils.SOURCE_FOLDER + "/models/ExampleServiceException.ts"));
+    }
+
+    @Test
+    public void dedicatedPluginGeneratesSchemaServerBaseExceptionWithoutProtocolGenerator() {
+        Model model = Model.assembler()
+            .addUnparsedModel(
+                "custom-protocol.smithy",
+                """
+                $version: "2"
+                namespace example
+
+                use smithy.api#protocolDefinition
+                use smithy.api#trait
+
+                @trait(selector: "service")
+                @protocolDefinition
+                structure customProtocol {}
+
+                @customProtocol
+                service Custom {
+                    version: "1"
+                    operations: [Echo]
+                }
+
+                operation Echo {
+                    input := { value: String }
+                    output := { value: String }
+                }
+                """
+            )
+            .assemble()
+            .unwrap();
+        MockManifest manifest = new MockManifest();
+        PluginContext context = PluginContext.builder()
+            .model(model)
+            .fileManifest(manifest)
+            .pluginClassLoader(getClass().getClassLoader())
+            .settings(
+                Node.objectNodeBuilder()
+                    .withMember("service", Node.from("example#Custom"))
+                    .withMember("package", Node.from("custom-server"))
+                    .withMember("packageVersion", Node.from("1.0.0"))
+                    .withMember("disableDefaultValidation", Node.from(true))
+                    .build()
+            )
+            .build();
+
+        new TypeScriptSchemaSSDKCodegenPlugin().execute(context);
+
+        String exceptionFile = CodegenUtils.SOURCE_FOLDER + "/models/CustomServiceServiceException.ts";
+        String schemasFile = CodegenUtils.SOURCE_FOLDER + "/schemas/schemas_0.ts";
+        String handlerFile = CodegenUtils.SOURCE_FOLDER + "/server/CustomHandler.ts";
+        assertTrue(manifest.hasFile(exceptionFile));
+        assertTrue(manifest.hasFile(schemasFile));
+        assertTrue(manifest.hasFile(handlerFile));
+        assertThat(
+            manifest.getFileString(schemasFile).get(),
+            containsString("from \"../models/CustomServiceServiceException\"")
+        );
+
+        ObjectNode packageJson = Node.parse(manifest.getFileString("package.json").get()).expectObjectNode();
+        assertTrue(packageJson.expectObjectMember("dependencies").getMember("@smithy/core").isPresent());
+    }
+
+    @Test
     public void invokesOnWriterCustomizations() {
         // TODO
     }
@@ -424,6 +536,7 @@ public class TypeScriptCodegenPluginTest {
         List<SmithyBuildPlugin> plugins = List.of(
             new TypeScriptClientCodegenPlugin(),
             new TypeScriptServerCodegenPlugin(),
+            new TypeScriptSchemaSSDKCodegenPlugin(),
             new TypeScriptSSDKCodegenPlugin()
         );
         for (SmithyBuildPlugin plugin : plugins) {

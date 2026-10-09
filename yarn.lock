@@ -4911,6 +4911,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"interceptor-example-schema-ssdk@workspace:private/interceptor-example-schema-ssdk":
+  version: 0.0.0-use.local
+  resolution: "interceptor-example-schema-ssdk@workspace:private/interceptor-example-schema-ssdk"
+  dependencies:
+    "@smithy/core": "workspace:^"
+    "@smithy/server-common": "workspace:^"
+    "@smithy/types": "workspace:^"
+    "@tsconfig/node20": "npm:20.1.8"
+    "@types/node": "npm:^20.14.8"
+    concurrently: "npm:7.0.0"
+    downlevel-dts: "npm:0.10.1"
+    premove: "npm:4.0.0"
+    tslib: "npm:^2.6.2"
+    typescript: "npm:~7.0.2"
+  languageName: unknown
+  linkType: soft
+
 "interceptor-example-ssdk@workspace:private/interceptor-example-ssdk":
   version: 0.0.0-use.local
   resolution: "interceptor-example-ssdk@workspace:private/interceptor-example-ssdk"
@@ -6508,6 +6525,7 @@ __metadata:
     "@rollup/plugin-node-resolve": "npm:^16.0.1"
     "@rollup/plugin-typescript": "npm:^12.1.4"
     "@types/jsdom": "npm:20.0.1"
+    "@types/node": "npm:^18.11.9"
     esbuild: "npm:^0.25.9"
     fast-check: "npm:3.22.0"
     get-port: "npm:^7.1.0"

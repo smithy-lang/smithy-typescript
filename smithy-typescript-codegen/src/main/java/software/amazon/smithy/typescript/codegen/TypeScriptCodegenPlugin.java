@@ -18,9 +18,9 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * Unified plugin for TypeScript code generation.
  *
  * <p>This is the central entry point that owns mode dispatch. The specialized
- * {@link TypeScriptClientCodegenPlugin}, {@link TypeScriptServerCodegenPlugin}, and (deprecated)
- * {@link TypeScriptSSDKCodegenPlugin} plugins retain their fixed historical modes and reject the
- * {@code modes} setting.
+ * {@link TypeScriptClientCodegenPlugin}, {@link TypeScriptServerCodegenPlugin},
+ * {@link TypeScriptSchemaSSDKCodegenPlugin}, and deprecated {@link TypeScriptSSDKCodegenPlugin}
+ * plugins retain their fixed modes and reject the {@code modes} setting.
  *
  * <p>The {@code modes} setting selects what is generated and how generation is driven:
  * <ul>
@@ -63,7 +63,7 @@ public class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
     }
 
     /**
-     * Runs codegen in a fixed mode for a specialized legacy plugin.
+     * Runs codegen in a fixed mode for a specialized plugin.
      *
      * @param context the plugin context.
      * @param artifactType the fixed artifact type to generate.
@@ -77,7 +77,7 @@ public class TypeScriptCodegenPlugin implements SmithyBuildPlugin {
         execute(context, settings);
     }
 
-    private void execute(PluginContext context, TypeScriptSettings settings) {
+    void execute(PluginContext context, TypeScriptSettings settings) {
         if (settings.generateTypes() && !settings.isTypesOnly()) {
             // TODO: Combined mode (types alongside client/server) requires generating schemas over
             // the full connected-shape closure. Keep the mode set in settings so dispatch can be
