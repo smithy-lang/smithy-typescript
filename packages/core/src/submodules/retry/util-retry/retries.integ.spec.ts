@@ -9,7 +9,6 @@ import { XYZService } from "xyz";
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { StandardRetryStrategy } from "./StandardRetryStrategy";
 import { MAXIMUM_RETRY_DELAY } from "./constants";
-import { Retry } from "./retries-2026-config";
 
 class DeterministicRetryBackoffStrategy extends DefaultRetryBackoffStrategy {
   public computeNextBackoffDelay(i: number): number {
@@ -156,6 +155,47 @@ describe("retries", () => {
     // stopped at the second error.
     expect(response.$metadata.attempts).toEqual(2);
   });
+
+  it("should use the 2026 standard retry defaults", async () => {
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    try {
+      const client = new XYZService({
+        endpoint: "https://localhost/nowhere",
+        apiKey: { apiKey: "test-api-key" },
+      });
+
+      requireRequestsFrom(client)
+        .toMatch({
+          hostname: /localhost/,
+        })
+        .respondWith(
+          createCborResponse(
+            {
+              __type: "RetryableError",
+            },
+            500
+          ),
+          createCborResponse(
+            {
+              __type: "CodedThrottlingError",
+            },
+            429
+          ),
+          createCborResponse("", 200)
+        );
+
+      const response = await client.getNumbers().catch((e) => e);
+
+      expect(response.$metadata.attempts).toEqual(3);
+      // jitter fixed at 0.5: transient 50ms * 0.5 = 25ms, then throttling 1000ms * 2 * 0.5 = 1000ms.
+      expect(response.$metadata.totalRetryDelay).toEqual(1025);
+      // transient retry costs 14, throttling retry costs 5 and is refunded on success.
+      const retryStrategy = (await client.config.retryStrategy()) as StandardRetryStrategy;
+      expect(retryStrategy.getCapacity()).toEqual(500 - 14);
+    } finally {
+      random.mockRestore();
+    }
+  });
 });
 
 describe(StandardRetryStrategy.name, () => {
@@ -180,89 +220,88 @@ describe(StandardRetryStrategy.name, () => {
       name: string;
       timings: [RetryErrorType, number, number | undefined, number, boolean][];
       scope?: string;
-      v2026?: boolean;
     }> = [
       {
         name: "3x - transient",
         timings: [
-          ["TRANSIENT", 0, undefined, 100, false],
-          ["TRANSIENT", 1, 10, 100, false],
-          ["TRANSIENT", 2, 10, 200, false],
+          ["TRANSIENT", 0, undefined, 50, false],
+          ["TRANSIENT", 1, 14, 50, false],
+          ["TRANSIENT", 2, 14, 100, false],
         ],
       },
       {
         name: "3x - throttling",
         timings: [
-          ["THROTTLING", 0, undefined, 100, false],
-          ["THROTTLING", 1, 5, 500, false],
-          ["THROTTLING", 2, 5, 1000, false],
+          ["THROTTLING", 0, undefined, 50, false],
+          ["THROTTLING", 1, 5, 1000, false],
+          ["THROTTLING", 2, 5, 2000, false],
         ],
       },
       {
         name: "3x - throttling mixed",
         timings: [
-          ["THROTTLING", 0, undefined, 100, false],
-          ["TRANSIENT", 1, 10, 100, false],
-          ["THROTTLING", 2, 5, 1000, false],
+          ["THROTTLING", 0, undefined, 50, false],
+          ["TRANSIENT", 1, 14, 50, false],
+          ["THROTTLING", 2, 5, 2000, false],
         ],
       },
       {
         name: "3x - transient mixed",
         timings: [
-          ["TRANSIENT", 0, undefined, 100, false],
-          ["THROTTLING", 1, 5, 500, false],
-          ["TRANSIENT", 2, 10, 200, false],
+          ["TRANSIENT", 0, undefined, 50, false],
+          ["THROTTLING", 1, 5, 1000, false],
+          ["TRANSIENT", 2, 14, 100, false],
         ],
       },
       {
         name: "8x - transient",
         timings: [
-          ["TRANSIENT", 0, undefined, 100, false],
-          ["TRANSIENT", 1, 10, 100, false],
-          ["TRANSIENT", 2, 10, 200, false],
-          ["TRANSIENT", 3, 10, 400, false],
-          ["TRANSIENT", 4, 10, 800, false],
-          ["TRANSIENT", 5, 10, 1600, false],
-          ["TRANSIENT", 6, 10, 3200, false],
-          ["TRANSIENT", 7, 10, 6400, false],
+          ["TRANSIENT", 0, undefined, 50, false],
+          ["TRANSIENT", 1, 14, 50, false],
+          ["TRANSIENT", 2, 14, 100, false],
+          ["TRANSIENT", 3, 14, 200, false],
+          ["TRANSIENT", 4, 14, 400, false],
+          ["TRANSIENT", 5, 14, 800, false],
+          ["TRANSIENT", 6, 14, 1600, false],
+          ["TRANSIENT", 7, 14, 3200, false],
         ],
       },
       {
         name: "8x - throttling",
         timings: [
-          ["THROTTLING", 0, undefined, 100, false],
-          ["THROTTLING", 1, 5, 500, false],
-          ["THROTTLING", 2, 5, 1000, false],
-          ["THROTTLING", 3, 5, 2000, false],
-          ["THROTTLING", 4, 5, 4000, false],
-          ["THROTTLING", 5, 5, 8000, false],
-          ["THROTTLING", 6, 5, 16000, false],
+          ["THROTTLING", 0, undefined, 50, false],
+          ["THROTTLING", 1, 5, 1000, false],
+          ["THROTTLING", 2, 5, 2000, false],
+          ["THROTTLING", 3, 5, 4000, false],
+          ["THROTTLING", 4, 5, 8000, false],
+          ["THROTTLING", 5, 5, 16000, false],
+          ["THROTTLING", 6, 5, 20000, false],
           ["THROTTLING", 7, 5, 20000, false],
         ],
       },
       {
         name: "8x - transient mixed",
         timings: [
-          ["TRANSIENT", 0, undefined, 100, false],
-          ["THROTTLING", 1, 5, 500, false],
-          ["THROTTLING", 2, 5, 1000, false],
-          ["TRANSIENT", 3, 10, 400, false],
-          ["TRANSIENT", 4, 10, 800, false],
-          ["TRANSIENT", 5, 10, 1600, false],
-          ["TRANSIENT", 6, 10, 3200, false],
+          ["TRANSIENT", 0, undefined, 50, false],
+          ["THROTTLING", 1, 5, 1000, false],
+          ["THROTTLING", 2, 5, 2000, false],
+          ["TRANSIENT", 3, 14, 200, false],
+          ["TRANSIENT", 4, 14, 400, false],
+          ["TRANSIENT", 5, 14, 800, false],
+          ["TRANSIENT", 6, 14, 1600, false],
           ["THROTTLING", 7, 5, 20000, false],
         ],
       },
       {
         name: "8x - throttling mixed",
         timings: [
-          ["TRANSIENT", 0, undefined, 100, false],
-          ["TRANSIENT", 1, 10, 100, false],
-          ["THROTTLING", 2, 5, 1000, false],
-          ["THROTTLING", 3, 5, 2000, false],
-          ["THROTTLING", 4, 5, 4000, false],
-          ["THROTTLING", 5, 5, 8000, false],
-          ["TRANSIENT", 6, 10, 3200, false],
+          ["TRANSIENT", 0, undefined, 50, false],
+          ["TRANSIENT", 1, 14, 50, false],
+          ["THROTTLING", 2, 5, 2000, false],
+          ["THROTTLING", 3, 5, 4000, false],
+          ["THROTTLING", 4, 5, 8000, false],
+          ["THROTTLING", 5, 5, 16000, false],
+          ["TRANSIENT", 6, 14, 1600, false],
           ["THROTTLING", 7, 5, 20000, false],
         ],
       },
@@ -270,88 +309,27 @@ describe(StandardRetryStrategy.name, () => {
         name: "12x - throttling mixed longpoll",
         scope: ":longpoll",
         timings: [
-          ["TRANSIENT", 0, undefined, 100, false],
-          ["TRANSIENT", 1, 10, 100, false],
-          ["THROTTLING", 2, 5, 1000, false],
-          ["THROTTLING", 3, 5, 2000, false],
-          ["THROTTLING", 4, 5, 4000, false],
-          ["THROTTLING", 5, 5, 8000, false],
-          ["TRANSIENT", 6, 10, 3200, false],
-          ["THROTTLING", 7, 5, 20000, false],
-          ["THROTTLING", 8, 5, 20000, false],
-          ["THROTTLING", 9, 5, 20000, false],
-          ["THROTTLING", 10, 5, 20000, false],
-          ["THROTTLING", 11, 5, 20000, false],
+          ["TRANSIENT", 0, undefined, 50, true],
+          ["TRANSIENT", 1, 14, 50, true],
+          ["THROTTLING", 2, 5, 2000, true],
+          ["THROTTLING", 3, 5, 4000, true],
+          ["THROTTLING", 4, 5, 8000, true],
+          ["THROTTLING", 5, 5, 16000, true],
+          ["TRANSIENT", 6, 14, 1600, true],
+          ["THROTTLING", 7, 5, 20000, true],
+          ["THROTTLING", 8, 5, 20000, true],
+          ["THROTTLING", 9, 5, 20000, true],
+          ["THROTTLING", 10, 5, 20000, true],
+          ["THROTTLING", 11, 5, 20000, true],
         ],
       },
     ];
 
-    testCases.push(
-      ...(
-        [
-          {
-            name: "8x - transient mixed",
-            timings: [
-              ["TRANSIENT", 0, undefined, 50, false],
-              ["THROTTLING", 1, 5, 1000, false],
-              ["THROTTLING", 2, 5, 2000, false],
-              ["TRANSIENT", 3, 14, 200, false],
-              ["TRANSIENT", 4, 14, 400, false],
-              ["TRANSIENT", 5, 14, 800, false],
-              ["TRANSIENT", 6, 14, 1600, false],
-              ["THROTTLING", 7, 5, 20000, false],
-            ],
-          },
-          {
-            name: "8x - throttling mixed",
-            timings: [
-              ["TRANSIENT", 0, undefined, 50, false],
-              ["TRANSIENT", 1, 14, 50, false],
-              ["THROTTLING", 2, 5, 2000, false],
-              ["THROTTLING", 3, 5, 4000, false],
-              ["THROTTLING", 4, 5, 8000, false],
-              ["THROTTLING", 5, 5, 16000, false],
-              ["TRANSIENT", 6, 14, 1600, false],
-              ["THROTTLING", 7, 5, 20000, false],
-            ],
-          },
-          {
-            name: "12x - throttling mixed longpoll",
-            scope: ":longpoll",
-            timings: [
-              ["TRANSIENT", 0, undefined, 50, true],
-              ["TRANSIENT", 1, 14, 50, true],
-              ["THROTTLING", 2, 5, 2000, true],
-              ["THROTTLING", 3, 5, 4000, true],
-              ["THROTTLING", 4, 5, 8000, true],
-              ["THROTTLING", 5, 5, 16000, true],
-              ["TRANSIENT", 6, 14, 1600, true],
-              ["THROTTLING", 7, 5, 20000, true],
-              ["THROTTLING", 8, 5, 20000, true],
-              ["THROTTLING", 9, 5, 20000, true],
-              ["THROTTLING", 10, 5, 20000, true],
-              ["THROTTLING", 11, 5, 20000, true],
-            ],
-          },
-        ] as typeof testCases
-      ).map((c) => {
-        c.v2026 = true;
-        return c;
-      })
-    );
-
-    for (const { name, timings, scope, v2026 } of testCases) {
-      describe(name + (v2026 ? " (2026)" : ""), async () => {
+    for (const { name, timings, scope } of testCases) {
+      describe(name, async () => {
         let retryStrategy!: StandardRetryStrategy;
 
         beforeAll(() => {
-          if (v2026) {
-            process.env.SMITHY_NEW_RETRIES_2026 = "true";
-            Retry.v2026 = true;
-          } else {
-            delete process.env.SMITHY_NEW_RETRIES_2026;
-            Retry.v2026 = false;
-          }
           retryStrategy = new StandardRetryStrategy({
             maxAttempts: timings.length,
             backoff: new DeterministicRetryBackoffStrategy(),
@@ -496,21 +474,6 @@ describe("specification tests", () => {
       ],
     },
   ];
-
-  let defaultRetryV2026Flag: boolean;
-
-  beforeAll(() => {
-    defaultRetryV2026Flag = Retry.v2026;
-    Retry.v2026 = true;
-    process.env.SMITHY_NEW_RETRIES_2026 = "true";
-  });
-
-  afterAll(() => {
-    Retry.v2026 = defaultRetryV2026Flag;
-    if (!defaultRetryV2026Flag) {
-      delete process.env.SMITHY_NEW_RETRIES_2026;
-    }
-  });
 
   describe("StandardRetryStrategy unit tests", () => {
     beforeAll(() => {
