@@ -50,6 +50,7 @@ function findGlobalBufferRefs(code) {
 
   const polyfillRanges = collectPolyfillRanges(ast);
   const guardedRanges = collectGuardedRanges(ast);
+  addSelfGuardingFunctions(ast, guardedRanges);
   addGuardedCallTargets(ast, guardedRanges);
   const typeofArgPositions = collectTypeofArgPositions(ast);
 
@@ -235,17 +236,20 @@ function collectGuardedRanges(ast) {
   const ranges = [];
   walk.simple(ast, {
     ConditionalExpression(node) {
-      if (containsTypeofBuffer(node.test) || isTypeofBufferVar(node.test)) {
+      if (containsTypeofBuffer(node.test) || isTypeofBufferVar(node.test) || containsGuardCall(node.test)) {
         ranges.push(node);
       }
     },
     IfStatement(node) {
-      if (containsTypeofBuffer(node.test) || isTypeofBufferVar(node.test)) {
+      if (containsTypeofBuffer(node.test) || isTypeofBufferVar(node.test) || containsGuardCall(node.test)) {
         ranges.push(node);
       }
     },
     LogicalExpression(node) {
-      if (node.operator === LOGICAL_AND && (containsTypeofBuffer(node.left) || isTypeofBufferVar(node.left))) {
+      if (
+        node.operator === LOGICAL_AND &&
+        (containsTypeofBuffer(node.left) || isTypeofBufferVar(node.left) || containsGuardCall(node.left))
+      ) {
         ranges.push(node);
       }
     },
@@ -267,6 +271,41 @@ function collectTypeofArgPositions(ast) {
     },
   });
   return positions;
+}
+
+/**
+ * Names of functions that internally guard their own global `Buffer` usage
+ * (e.g. via a `typeof Buffer` check plus try/catch for runtime capability
+ * detection). A reference to `Buffer` inside such a function is safe, but a
+ * bundler/minifier may rewrite the `typeof Buffer` guard into a shape that
+ * {@link collectGuardedRanges} no longer recognizes. Treat the entire body of
+ * these functions as a guarded range so a call to them counts as guarded
+ * Buffer usage.
+ */
+const SELF_GUARDING_BUFFER_FUNCTIONS = new Set(["detectBufferParsing"]);
+
+/**
+ * Adds the bodies of known self-guarding Buffer functions (see
+ * {@link SELF_GUARDING_BUFFER_FUNCTIONS}) to the guarded ranges array.
+ */
+function addSelfGuardingFunctions(ast, guardedRanges) {
+  walk.simple(ast, {
+    FunctionDeclaration(node) {
+      if (node.id && node.id.type === IDENTIFIER && SELF_GUARDING_BUFFER_FUNCTIONS.has(node.id.name)) {
+        guardedRanges.push({ start: node.start, end: node.end });
+      }
+    },
+    VariableDeclarator(node) {
+      if (
+        node.id.type === IDENTIFIER &&
+        SELF_GUARDING_BUFFER_FUNCTIONS.has(node.id.name) &&
+        node.init &&
+        (node.init.type === FUNCTION_EXPRESSION || node.init.type === ARROW_FUNCTION_EXPRESSION)
+      ) {
+        guardedRanges.push({ start: node.init.start, end: node.init.end });
+      }
+    },
+  });
 }
 
 /**
@@ -380,6 +419,68 @@ function containsTypeofBuffer(node) {
   }
   if (node.type === BINARY_EXPRESSION || node.type === LOGICAL_EXPRESSION) {
     return containsTypeofBuffer(node.left) || containsTypeofBuffer(node.right);
+  }
+  return false;
+}
+
+/**
+ * Names of capability-detector functions whose truthy return implies the
+ * global `Buffer` exists. A call to one of these in a guard condition (e.g.
+ * `if (detectBufferParsing()) { Buffer.from(...) }`) is treated the same as a
+ * `typeof Buffer` check: the detector internally verifies `typeof Buffer` and
+ * returns false when Buffer is absent, so the guarded branch can never run a
+ * bare `Buffer` reference without Buffer present.
+ *
+ * NOTE: unlike `typeof Buffer`, a bundler cannot statically evaluate these
+ * calls, so a branch guarded only by one of them is NOT tree-shaken out of a
+ * browser bundle — it merely cannot crash at runtime. Accepting them here
+ * reflects a deliberate choice to treat such calls as sufficient guards.
+ */
+const GUARD_CALL_FUNCTIONS = new Set(["detectBufferParsing"]);
+
+/**
+ * Whether a call's callee resolves to one of {@link GUARD_CALL_FUNCTIONS}.
+ *
+ * Bundlers rewrite a bare `detectBufferParsing()` into several shapes:
+ *   - `detectBufferParsing()`                       (Identifier callee)
+ *   - `ns.detectBufferParsing()`                    (MemberExpression callee)
+ *   - `(0, ns.detectBufferParsing)()`               (webpack indirect-call via
+ *                                                    SequenceExpression)
+ * so the callee is matched by its final property/identifier name, not by
+ * requiring a plain identifier.
+ */
+function isGuardCallee(callee) {
+  if (!callee) {
+    return false;
+  }
+  if (callee.type === IDENTIFIER) {
+    return GUARD_CALL_FUNCTIONS.has(callee.name);
+  }
+  if (callee.type === MEMBER_EXPRESSION && callee.property && callee.property.type === IDENTIFIER) {
+    return GUARD_CALL_FUNCTIONS.has(callee.property.name);
+  }
+  if (callee.type === "SequenceExpression" && callee.expressions.length > 0) {
+    return isGuardCallee(callee.expressions[callee.expressions.length - 1]);
+  }
+  return false;
+}
+
+/**
+ * Whether `node` is (or contains, within a logical/binary/unary expression) a
+ * call to one of {@link GUARD_CALL_FUNCTIONS}.
+ */
+function containsGuardCall(node) {
+  if (!node) {
+    return false;
+  }
+  if (node.type === "CallExpression" && isGuardCallee(node.callee)) {
+    return true;
+  }
+  if (node.type === BINARY_EXPRESSION || node.type === LOGICAL_EXPRESSION) {
+    return containsGuardCall(node.left) || containsGuardCall(node.right);
+  }
+  if (node.type === UNARY_EXPRESSION) {
+    return containsGuardCall(node.argument);
   }
   return false;
 }
