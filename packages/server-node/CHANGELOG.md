@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.4
+
+### Patch Changes
+
+- af7d026: Add framework-owned ServerRequest adapters for Node.js and API Gateway.
+- Updated dependencies [ad1c37c]
+- Updated dependencies [1287f77]
+- Updated dependencies [22b8a6e]
+- Updated dependencies [ad1c37c]
+  - @smithy/server-common@0.5.0
+  - @smithy/core@3.36.0
+
 ## 0.3.3
 
 ### Patch Changes
