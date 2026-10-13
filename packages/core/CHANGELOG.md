@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.36.0
+
+### Minor Changes
+
+- 22b8a6e: Add JSON codec (protocols/json) with v1/v2 serializers and deserializers, reviver/replacer precision handling, benchmarks, and the client protocol.
+
 ## 3.35.2
 
 ### Patch Changes
