@@ -1,5 +1,5 @@
 // smithy-typescript generated code
-import { createPaginator } from "@smithy/core";
+import { createItemsPaginator, createPaginator } from "@smithy/core";
 import type { Paginator } from "@smithy/types";
 
 import { GetNumbersCommand, GetNumbersCommandInput, GetNumbersCommandOutput } from "../commands/GetNumbersCommand";
@@ -18,3 +18,16 @@ export const paginateGetNumbers: (
   GetNumbersCommandInput,
   GetNumbersCommandOutput
 >(XYZServiceClient, GetNumbersCommand, "startToken", "nextToken", "maxResults");
+
+/**
+ * @public
+ */
+export const paginateGetNumbersItems: (
+  config: XYZServicePaginationConfiguration,
+  input: GetNumbersCommandInput,
+  ...rest: any[]
+) => Paginator<number> = createItemsPaginator<
+  XYZServicePaginationConfiguration,
+  GetNumbersCommandInput,
+  number
+>(paginateGetNumbers, "numbers");

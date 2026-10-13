@@ -27,6 +27,7 @@ const EXCEPTIONS = new Set([
 // Function names that are reused across many exports (e.g. all paginators share one factory name).
 const NAMING_EXCEPTIONS = new Set([
   "paginateOperation",
+  "paginateItems", // item paginators share the createItemsPaginator factory's inner function name
   "readableStreamToIterable", // readableStreamtoIterable (typo alias)
   "fromValue", // fromStatic is aliased from fromValue
   "Md5Node", // exported as Md5 from @smithy/md5-js, internal class name
