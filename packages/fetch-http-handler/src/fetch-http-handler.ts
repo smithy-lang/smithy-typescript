@@ -3,6 +3,7 @@ import type { FetchHttpHandlerOptions, HeaderBag, HttpHandlerOptions, Provider }
 
 import { createRequest } from "./create-request";
 import { requestTimeout as requestTimeoutFn } from "./request-timeout";
+import { createSocketTimeoutMonitor } from "./socket-timeout";
 
 declare let AbortController: any;
 
@@ -80,6 +81,8 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
       this.config = await this.configProvider;
     }
     const requestTimeoutInMs = requestTimeout ?? this.config!.requestTimeout;
+    // JS-7140: the download-inactivity window.
+    const socketTimeoutInMs = this.config!.socketTimeout;
     const keepAlive = this.config!.keepAlive === true;
     const credentials = this.config!.credentials as RequestInit["credentials"];
     const fetchFn = this.config!.customFetch ?? fetch;
@@ -143,9 +146,39 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
 
     let removeSignalEventListener = () => {};
 
+    // JS-7140: arm the download-inactivity monitor at dispatch, so the wait
+    // before the first byte is covered. Only engaged for a positive value.
+    const socketTimeoutMonitor =
+      socketTimeoutInMs && socketTimeoutInMs > 0 && typeof AbortController !== "undefined"
+        ? createSocketTimeoutMonitor(socketTimeoutInMs)
+        : undefined;
+    // A monitored stream owns the timer (re-arms per chunk, clears on end), so the
+    // race's finally must not clear it; every other settle path does.
+    let monitoredStreamOwnsTimer = false;
+    if (socketTimeoutMonitor) {
+      // The signal fetch would otherwise receive: the caller's abortSignal, or one
+      // supplied through requestInit. Forward its abort to the monitor's controller,
+      // and keep forwarding until the monitor settles so a caller abort still cancels
+      // a monitored body mid-download. Signals without addEventListener (legacy) are
+      // not forwarded; the race below still rejects on them as before.
+      const upstreamSignal = requestOptions.signal as AbortSignal | null | undefined;
+      requestOptions.signal = socketTimeoutMonitor.controller.signal;
+      if (upstreamSignal && typeof upstreamSignal.addEventListener === "function") {
+        const forwardAbort = () => socketTimeoutMonitor.controller.abort(buildAbortError(upstreamSignal));
+        if (upstreamSignal.aborted) {
+          forwardAbort();
+        } else {
+          upstreamSignal.addEventListener("abort", forwardAbort, { once: true });
+          socketTimeoutMonitor.onSettled(() => upstreamSignal.removeEventListener("abort", forwardAbort));
+        }
+      }
+    }
+
     const fetchRequest = createRequest(url, requestOptions);
     const raceOfPromises = [
       fetchFn(fetchRequest).then((response) => {
+        // Response headers are activity: restart the window before the body wait.
+        socketTimeoutMonitor?.reset();
         const fetchHeaders: any = response.headers;
         const transformedHeaders: HeaderBag = {};
 
@@ -158,27 +191,40 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
 
         // Return the response with buffered body
         if (!hasReadableStream) {
-          return response.blob().then((body) => ({
-            response: new HttpResponse({
-              headers: transformedHeaders,
-              reason: response.statusText,
-              statusCode: response.status,
-              body,
-            }),
-          }));
+          // No streaming body (stock React Native): no chunks to reset on, so the
+          // dispatch-armed window stands alone. Clear it once the body is in hand.
+          return response.blob().then((body) => {
+            socketTimeoutMonitor?.clear();
+            return {
+              response: new HttpResponse({
+                headers: transformedHeaders,
+                reason: response.statusText,
+                statusCode: response.status,
+                body,
+              }),
+            };
+          });
         }
-        // Return the response with streaming body
+        // Streaming body: wrap it so each chunk resets the window; it owns the timer now.
+        let body = response.body;
+        if (socketTimeoutMonitor && body) {
+          body = socketTimeoutMonitor.monitor(body);
+          monitoredStreamOwnsTimer = true;
+        }
         return {
           response: new HttpResponse({
             headers: transformedHeaders,
             reason: response.statusText,
             statusCode: response.status,
-            body: response.body,
+            body,
           }),
         };
       }),
       requestTimeoutFn(requestTimeoutInMs),
     ];
+    if (socketTimeoutMonitor) {
+      raceOfPromises.push(socketTimeoutMonitor.timeoutPromise);
+    }
     if (abortSignal) {
       raceOfPromises.push(
         new Promise<never>((resolve, reject) => {
@@ -198,7 +244,13 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
         })
       );
     }
-    return Promise.race(raceOfPromises).finally(removeSignalEventListener);
+    return Promise.race(raceOfPromises).finally(() => {
+      removeSignalEventListener();
+      // A monitored stream clears the timer on its own end; otherwise clear here.
+      if (!monitoredStreamOwnsTimer) {
+        socketTimeoutMonitor?.clear();
+      }
+    });
   }
 
   updateHttpClientConfig(key: keyof FetchHttpHandlerOptions, value: FetchHttpHandlerOptions[typeof key]): void {

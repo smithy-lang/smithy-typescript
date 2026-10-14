@@ -11,6 +11,7 @@ import { node_https } from "./node-https";
 import { setConnectionTimeout } from "./set-connection-timeout";
 import { setRequestTimeout } from "./set-request-timeout";
 import { setSocketKeepAlive } from "./set-socket-keep-alive";
+import { setDefaultSocketTimeout } from "./set-default-socket-timeout";
 import { setSocketTimeout } from "./set-socket-timeout";
 import { timing } from "./timing";
 import { writeRequestBody } from "./write-request-body";
@@ -18,6 +19,11 @@ import { writeRequestBody } from "./write-request-body";
 export type { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
+  /**
+   * JS-7140: service default idle timeout from generated clients, applied only when
+   * socketTimeout is unset.
+   */
+  defaultSocketTimeout?: number;
   httpAgentProvider: () => Promise<hAgentType>;
   httpAgent?: hAgentType;
   httpsAgent: hsAgentType;
@@ -299,7 +305,13 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         config.throwOnRequestTimeout,
         logger ?? console
       );
-      socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
+      if (config.socketTimeout === undefined && config.defaultSocketTimeout) {
+        // JS-7140: the service default replaces the deferred setSocketTimeout, whose
+        // unset-timeout path would otherwise reset the socket timeout to 0 after 3 s.
+        setDefaultSocketTimeout(req, reject, config.defaultSocketTimeout);
+      } else {
+        socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
+      }
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;
@@ -357,10 +369,13 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     const keepAlive = true;
     const maxSockets = 50;
 
+    const serviceDefault = (options as { defaultSocketTimeout?: unknown } | void)?.defaultSocketTimeout;
+
     return {
       connectionTimeout,
       requestTimeout,
       socketTimeout,
+      defaultSocketTimeout: typeof serviceDefault === "number" && serviceDefault > 0 ? serviceDefault : undefined,
       socketAcquisitionWarningTimeout,
       throwOnRequestTimeout,
       httpAgentProvider: async () => {

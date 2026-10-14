@@ -91,6 +91,20 @@ export interface FetchHttpHandlerOptions {
   requestTimeout?: number;
 
   /**
+   * The number of milliseconds a request may go without any download activity
+   * before being aborted (JS-7140). The timer is armed when the request is
+   * dispatched and reset on each downloaded chunk, so it covers both a server
+   * that accepts the connection and never responds and a download that stalls
+   * mid-stream. This is the fetch-side analog of the Node handler's socket idle
+   * timeout. It observes the download direction only (fetch does not expose
+   * upload progress), and the mid-stream reset applies only where the fetch
+   * implementation streams `response.body`; where it does not (stock React
+   * Native), only the dispatch-armed window applies. Defaults to 0, which means
+   * no timeout.
+   */
+  socketTimeout?: number;
+
+  /**
    * Whether to allow the request to outlive the page. Default value is false.
    *
    * There may be limitations to the payload size, number of concurrent requests,
