@@ -4,10 +4,6 @@ import { HttpResponse, type HttpHandler } from "@smithy/core/protocols";
 import { describe, expect, test as it } from "vitest";
 import { GetNumbersCommand, XYZService } from "xyz-schema";
 
-import { Retry } from "./util-retry/retries-2026-config";
-
-Retry.v2026 = true;
-
 class ThrottlingHandler implements HttpHandler {
   public readonly metadata = { handlerProtocol: "http/1.1" };
   public timestamps: number[] = [];
