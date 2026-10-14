@@ -126,9 +126,20 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       }
     }
 
-    const { requestTimeout: configRequestTimeout, disableConcurrentStreams } = this.config;
+    const { requestTimeout: configRequestTimeout, disableConcurrentStreams, sessionTimeout } = this.config;
     const useIsolatedSession = disableConcurrentStreams || isEventStream;
     const effectiveRequestTimeout = requestTimeout ?? configRequestTimeout;
+    // JS-7140: a service default idle timeout, passed by generated clients as the
+    // untyped `defaultSocketTimeout` option. It runs on its own timer, separate from
+    // requestTimeout, and applies only when the caller set neither idle timeout.
+    const serviceDefault = (this.config as { defaultSocketTimeout?: unknown }).defaultSocketTimeout;
+    const defaultSocketTimeout =
+      effectiveRequestTimeout === undefined &&
+      sessionTimeout === undefined &&
+      typeof serviceDefault === "number" &&
+      serviceDefault > 0
+        ? serviceDefault
+        : undefined;
 
     return new Promise((_resolve, _reject) => {
       // It's redundant to track fulfilled because promises use the first resolution/rejection
@@ -203,6 +214,28 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           timeoutError.name = "TimeoutError";
           rejectWithDestroy(timeoutError);
         });
+      } else if (defaultSocketTimeout) {
+        // JS-7140: the service default uses its own timer rather than the requestTimeout
+        // path above, which is left unchanged. That path's close() ends a response body
+        // cleanly when the stream stalls after headers (truncated data reported as
+        // success), does not count response headers as activity, and reports upload
+        // stalls as a generic Error. Unifying the two paths is a separate follow-up.
+        clientHttp2Stream.setTimeout(defaultSocketTimeout, () => {
+          const timeoutError = new Error(`Stream timed out because of no activity for ${defaultSocketTimeout} ms`);
+          timeoutError.name = "TimeoutError";
+          // Reject first: destroy() synchronously emits "aborted"/"error", whose
+          // handlers would otherwise settle the request with a generic error.
+          fulfilled = true;
+          reject(timeoutError);
+          // Destroy with the error so a response body already handed to the caller
+          // fails with TimeoutError rather than ending as if complete.
+          clientHttp2Stream.destroy(timeoutError);
+          if (useIsolatedSession) {
+            ref.destroy();
+          }
+        });
+        // Response headers are activity; the stream timer counts only data frames.
+        clientHttp2Stream.once("response", () => clientHttp2Stream.setTimeout(defaultSocketTimeout));
       }
 
       if (abortSignal) {
