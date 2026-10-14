@@ -73,7 +73,8 @@ public final class AddClientRuntimeConfig implements TypeScriptIntegration {
             .writeDocs(
                 """
                 Specifies which retry algorithm to use.
-                @see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-smithy-util-retry/Enum/RETRY_MODES/
+                Accepted values are "standard" and "adaptive".
+                @see https://docs.aws.amazon.com/sdkref/latest/guide/feature-retry-behavior.html
                 """
             )
             .write("retryMode?: string | __Provider<string>;\n");
