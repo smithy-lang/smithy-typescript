@@ -11,6 +11,7 @@ import { node_https } from "./node-https";
 import { setConnectionTimeout } from "./set-connection-timeout";
 import { setRequestTimeout } from "./set-request-timeout";
 import { setSocketKeepAlive } from "./set-socket-keep-alive";
+import { resolveDefaultSocketTimeout } from "./set-default-socket-timeout";
 import { setSocketTimeout } from "./set-socket-timeout";
 import { timing } from "./timing";
 import { writeRequestBody } from "./write-request-body";
@@ -18,6 +19,11 @@ import { writeRequestBody } from "./write-request-body";
 export type { NodeHttpHandlerOptions };
 
 interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "httpAgent" | "httpsAgent"> {
+  /**
+   * Service default idle timeout from generated clients, applied only when
+   * socketTimeout is unset.
+   */
+  defaultSocketTimeout?: number;
   httpAgentProvider: () => Promise<hAgentType>;
   httpAgent?: hAgentType;
   httpsAgent: hsAgentType;
@@ -299,7 +305,14 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         config.throwOnRequestTimeout,
         logger ?? console
       );
-      socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
+      // Re-validated here because updateHttpClientConfig can set the untyped option directly.
+      const defaultSocketTimeout = config.socketTimeout === undefined ? resolveDefaultSocketTimeout(config) : undefined;
+      if (defaultSocketTimeout) {
+        // Service default: fail the body with TimeoutError on a post-headers stall.
+        socketTimeoutId = setSocketTimeout(req, reject, defaultSocketTimeout, true);
+      } else {
+        socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
+      }
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137
       const httpAgent = nodeHttpsOptions.agent;
@@ -361,6 +374,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       connectionTimeout,
       requestTimeout,
       socketTimeout,
+      defaultSocketTimeout: resolveDefaultSocketTimeout(options),
       socketAcquisitionWarningTimeout,
       throwOnRequestTimeout,
       httpAgentProvider: async () => {
