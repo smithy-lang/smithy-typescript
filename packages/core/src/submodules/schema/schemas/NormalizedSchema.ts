@@ -33,6 +33,7 @@ import type {
 } from "@smithy/types";
 
 import { deref } from "../deref";
+import type { SchemaExtensionKey } from "../SchemaExtension";
 import { translateTraits } from "./translateTraits";
 
 /**
@@ -367,6 +368,21 @@ export class NormalizedSchema implements INormalizedSchema {
    */
   public getOwnTraits(): SchemaTraitsObject {
     return translateTraits(this.traits);
+  }
+
+  /**
+   * Gets lazily-computed extension data associated with this schema.
+   *
+   * Root static schemas share their extension cache across normalized wrappers.
+   * Member schemas retain a distinct cache because their traits and names are
+   * specific to their containing structure.
+   *
+   * @internal
+   */
+  public getExtension<Extension>(key: SchemaExtensionKey<NormalizedSchema, Extension>): Extension {
+    const schema = this.getSchema();
+    const cacheOwner = !this.isMemberSchema() && typeof schema === "object" && schema !== null ? schema : this;
+    return key.get(this, cacheOwner);
   }
 
   /**
