@@ -7,7 +7,9 @@ import type {
   ShapeSerializer,
 } from "@smithy/types";
 
+import type { HttpBindingValueMetadata } from "../HttpBindingSchemaExtension";
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
+import type { HttpBindingValueLocation } from "./determineTimestampFormat";
 
 /**
  * This serializer decides whether to dispatch to a string serializer or a codec serializer
@@ -40,12 +42,36 @@ export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeS
   public write(schema: ISchema, value: unknown): void {
     const ns = NormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
-    if (traits.httpHeader || traits.httpLabel || traits.httpQuery) {
-      this.stringSerializer.write(ns, value);
-      this.buffer = this.stringSerializer.flush();
+    const location = traits.httpHeader ? "header" : traits.httpLabel ? "label" : traits.httpQuery ? "query" : undefined;
+    if (location) {
+      this.writeHttpBinding(ns, value, location);
       return;
     }
-    return this.codecSerializer.write(ns, value);
+    this.writeCodec(ns, value);
+  }
+
+  /**
+   * Serializes a value whose HTTP binding location has already been resolved.
+   *
+   * @internal
+   */
+  public writeHttpBinding(
+    schema: ISchema,
+    value: unknown,
+    location: HttpBindingValueLocation,
+    metadata?: HttpBindingValueMetadata
+  ): void {
+    this.stringSerializer.writeHttpBinding(schema, value, location, metadata);
+    this.buffer = this.stringSerializer.flush();
+  }
+
+  /**
+   * Serializes a value directly with the payload codec.
+   *
+   * @internal
+   */
+  public writeCodec(schema: ISchema, value: unknown): void {
+    this.codecSerializer.write(schema, value);
   }
 
   public flush(): string | Uint8Array {
