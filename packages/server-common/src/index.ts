@@ -112,6 +112,7 @@ export { SmithyRpcV2CborServerProtocol } from "./protocols-schema/layer-2-protoc
 export { AwsRestJsonServerProtocol } from "./protocols-schema/layer-2-protocols/AwsRestJsonServerProtocol";
 export { AwsJsonRpcServerProtocol } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
 export type { AwsJsonRpcServerProtocolOptions } from "./protocols-schema/layer-2-protocols/AwsJsonRpcServerProtocol";
+export { SmithyRpcV2JsonServerProtocol } from "./protocols-schema/layer-2-protocols/SmithyRpcV2JsonServerProtocol";
 
 export type Operation<I, O, Context = {}> = (input: I, context: Context) => Promise<O>;
 

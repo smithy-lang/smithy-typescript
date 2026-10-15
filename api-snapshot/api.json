@@ -941,6 +941,7 @@
     "SingleConstraintValidator": "type(interface)",
     "SmithyFrameworkException": "type(union)",
     "SmithyRpcV2CborServerProtocol": "function",
+    "SmithyRpcV2JsonServerProtocol": "function",
     "UnauthenticatedException": "function",
     "UniqueItemsValidationFailure": "type(interface)",
     "UniqueItemsValidator": "function",
