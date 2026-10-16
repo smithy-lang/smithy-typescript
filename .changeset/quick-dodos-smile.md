@@ -2,4 +2,4 @@
 "@smithy/core": minor
 ---
 
-Add cached schema extensions and dedicated HTTP binding serializers and deserializers.
+Cache HTTP member binding information on structure schemas to improve serialization and deserialization performance.
