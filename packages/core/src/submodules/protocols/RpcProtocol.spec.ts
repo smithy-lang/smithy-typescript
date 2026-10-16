@@ -167,4 +167,41 @@ describe(RpcProtocol.name, () => {
       expect(request.body).toEqual("{}");
     }
   });
+
+  describe("error response detection (default behavior)", () => {
+    const outputOp = op(
+      "",
+      "",
+      0,
+      "unit",
+      [3, "ns", "Struct", 0, [], []] satisfies StaticStructureSchema
+    );
+    const makeResponse = (statusCode: number): IHttpResponse => ({
+      statusCode,
+      headers: {},
+      body: undefined,
+    });
+    const context = {} as any;
+
+    // TestRpcProtocol.handleError throws "Method not implemented.", so a status
+    // treated as an error rejects with that message, while a success status
+    // proceeds and resolves.
+
+    it("treats status >= 300 as an error (default predicate)", async () => {
+      const protocol = new TestRpcProtocol();
+      await expect(protocol.deserializeResponse(outputOp, context, makeResponse(300))).rejects.toThrow(
+        "Method not implemented."
+      );
+      await expect(protocol.deserializeResponse(outputOp, context, makeResponse(404))).rejects.toThrow(
+        "Method not implemented."
+      );
+    });
+
+    it("treats status < 300 as success (default predicate), including 2xx non-200", async () => {
+      const protocol = new TestRpcProtocol();
+      await expect(protocol.deserializeResponse(outputOp, context, makeResponse(200))).resolves.toBeDefined();
+      await expect(protocol.deserializeResponse(outputOp, context, makeResponse(204))).resolves.toBeDefined();
+      await expect(protocol.deserializeResponse(outputOp, context, makeResponse(299))).resolves.toBeDefined();
+    });
+  });
 });
