@@ -472,8 +472,6 @@
     "OperationSchema": "function",
     "Schema": "function",
     "SCHEMA": "object",
-    "SchemaExtensionKey": "function",
-    "SchemaExtensionProvider": "type(interface)",
     "serializerMiddlewareOption": "object",
     "sim": "function",
     "simAdapter": "function",
