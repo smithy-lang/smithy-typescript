@@ -345,6 +345,7 @@
     "UuidHeaderValue": "type(object)"
   },
   "@smithy/core/protocols": {
+    "AbstractRpcV2Protocol": "function",
     "buildQueryString": "function",
     "collectBody": "function",
     "contentLengthMiddleware": "function",

@@ -1,12 +1,9 @@
-import { RpcProtocol } from "@smithy/core/protocols";
-import { NormalizedSchema, TypeRegistry, deref } from "@smithy/core/schema";
-import { getSmithyContext } from "@smithy/core/transport";
+import { AbstractRpcV2Protocol } from "@smithy/core/protocols";
+import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
-  EndpointBearer,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
-  MetadataBearer,
   OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
@@ -20,24 +17,10 @@ import { loadSmithyRpcV2CborErrorCode } from "./parseCborBody";
  *
  * @public
  */
-export class SmithyRpcV2CborProtocol extends RpcProtocol {
-  /**
-   * @override
-   */
-  declare protected compositeErrorRegistry: TypeRegistry;
+export class SmithyRpcV2CborProtocol extends AbstractRpcV2Protocol {
   private codec = new CborCodec();
   protected serializer = this.codec.createSerializer();
   protected deserializer = this.codec.createDeserializer();
-
-  public constructor({
-    defaultNamespace,
-    errorTypeRegistries,
-  }: {
-    defaultNamespace: string;
-    errorTypeRegistries?: TypeRegistry[];
-  }) {
-    super({ defaultNamespace, errorTypeRegistries });
-  }
 
   public getShapeId(): string {
     return "smithy.protocols#rpcv2Cbor";
@@ -47,58 +30,18 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     return this.codec;
   }
 
-  public async serializeRequest<Input extends object>(
-    operationSchema: OperationSchema,
-    input: Input,
-    context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
-  ): Promise<IHttpRequest> {
-    const request = await super.serializeRequest(operationSchema, input, context);
-    Object.assign(request.headers, {
-      "content-type": this.getDefaultContentType(),
-      "smithy-protocol": "rpc-v2-cbor",
-      accept: this.getDefaultContentType(),
-    });
-    if (deref(operationSchema.input) === "unit") {
-      delete request.body;
-      delete request.headers["content-type"];
-    } else {
-      if (!request.body) {
-        this.serializer.write(15, {});
-        request.body = this.serializer.flush();
-      }
-      if (request.body instanceof Uint8Array) {
-        request.headers["content-length"] = String(request.body.byteLength);
-      }
-    }
-    const { service, operation } = getSmithyContext(context) as {
-      service: string;
-      operation: string;
-    };
-    const path = `/service/${service}/operation/${operation}`;
-    if (request.path.endsWith("/")) {
-      request.path += path.slice(1);
-    } else {
-      request.path += path;
-    }
-    return request;
+  protected getSmithyProtocolHeaderValue(): string {
+    return "rpc-v2-cbor";
   }
 
-  public async deserializeResponse<Output extends MetadataBearer>(
-    operationSchema: OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
-    response: IHttpResponse
-  ): Promise<Output> {
-    return super.deserializeResponse<Output>(operationSchema, context, response);
-  }
-
-  /**
-   * @override
-   *
-   * Per the Smithy RPC v2 CBOR specification, the only successful response
-   * status code is 200; any other status code MUST be handled as an error.
-   */
-  protected override isErrorResponse(statusCode: number): boolean {
-    return statusCode !== 200;
+  protected applyEmptyBody(request: IHttpRequest): void {
+    if (!request.body) {
+      this.serializer.write(15, {});
+      request.body = this.serializer.flush();
+    }
+    if (request.body instanceof Uint8Array) {
+      request.headers["content-length"] = String(request.body.byteLength);
+    }
   }
 
   protected async handleError(
