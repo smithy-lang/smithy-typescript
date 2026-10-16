@@ -61,6 +61,7 @@ test-protocols:
 	(cd ./private/smithy-rpcv2-json-schema && npx vitest run --globals && yarn test:index)
 	(cd ./private/my-local-model-schema && npx vitest run --globals && yarn test:index)
 	(cd ./private/smithy-rpcv2-cbor-schema && yarn test:integration)
+	(cd ./private/smithy-rpcv2-json-schema && yarn test:integration)
 	(cd ./private/my-local-model-schema && yarn test:integration)
 
 benchmark:
