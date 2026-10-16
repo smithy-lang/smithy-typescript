@@ -409,6 +409,36 @@ describe(SmithyRpcV2CborProtocol.name, () => {
       }
       expect.assertions(1);
     });
+
+    it("treats a 2xx non-200 response as an error (only 200 is success per the SEP)", async () => {
+      // Per the Smithy RPC v2 CBOR spec, the only successful status is 200; any
+      // other status (including 2xx such as 204) MUST be handled as an error.
+      registry.registerError(baseServiceExceptionSchema, ServiceBaseException);
+
+      const nonErrorLookingResponse = new HttpResponse({
+        statusCode: 204,
+        headers: {},
+        body: cbor.serialize({
+          __type: "ns#ModeledException",
+          modeledProperty: "treated as error",
+        }),
+      });
+
+      await expect(
+        protocol.deserializeResponse(operation, serdeContext as any, nonErrorLookingResponse)
+      ).rejects.toBeInstanceOf(ServiceBaseException);
+    });
+
+    it("treats a 200 response as success", async () => {
+      const okResponse = new HttpResponse({
+        statusCode: 200,
+        headers: {},
+        body: cbor.serialize({}),
+      });
+
+      const output = await protocol.deserializeResponse(operation, serdeContext as any, okResponse);
+      expect(output).toBeDefined();
+    });
   });
 
   // Exercises HttpProtocol#resolveError through its concrete implementation

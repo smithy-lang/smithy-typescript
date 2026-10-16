@@ -91,6 +91,16 @@ export class SmithyRpcV2CborProtocol extends RpcProtocol {
     return super.deserializeResponse<Output>(operationSchema, context, response);
   }
 
+  /**
+   * @override
+   *
+   * Per the Smithy RPC v2 CBOR specification, the only successful response
+   * status code is 200; any other status code MUST be handled as an error.
+   */
+  protected override isErrorResponse(statusCode: number): boolean {
+    return statusCode !== 200;
+  }
+
   protected async handleError(
     operationSchema: OperationSchema,
     context: HandlerExecutionContext & SerdeFunctions,
