@@ -4,6 +4,7 @@ namespace org.xyz.v1
 
 use org.xyz.secondary#HttpLabelCommand
 use smithy.protocols#rpcv2Cbor
+use smithy.protocols#rpcv2Json
 use smithy.rules#clientContextParams
 use smithy.rules#contextParam
 use smithy.rules#endpointRuleSet
@@ -16,6 +17,7 @@ use smithy.waiters#waitable
     http: ["h2", "http/1.1"]
     eventStreamHttp: ["h2"]
 )
+@rpcv2Json
 @documentation("xyz interfaces")
 @httpApiKeyAuth(name: "X-Api-Key", in: "header")
 @clientContextParams(
