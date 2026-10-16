@@ -10,7 +10,6 @@ export { OperationSchema, op } from "./schemas/OperationSchema";
 export { operation } from "./schemas/operation";
 export { ErrorSchema, error } from "./schemas/ErrorSchema";
 export { NormalizedSchema, isStaticSchema, simpleSchemaCacheN, simpleSchemaCacheS } from "./schemas/NormalizedSchema";
-export { SchemaExtensionKey, type SchemaExtensionProvider } from "./SchemaExtension";
 export { Schema } from "./schemas/Schema";
 export { SimpleSchema, sim, simAdapter } from "./schemas/SimpleSchema";
 export { StructureSchema, struct } from "./schemas/StructureSchema";
