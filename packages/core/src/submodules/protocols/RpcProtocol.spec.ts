@@ -169,13 +169,7 @@ describe(RpcProtocol.name, () => {
   });
 
   describe("error response detection (default behavior)", () => {
-    const outputOp = op(
-      "",
-      "",
-      0,
-      "unit",
-      [3, "ns", "Struct", 0, [], []] satisfies StaticStructureSchema
-    );
+    const outputOp = op("", "", 0, "unit", [3, "ns", "Struct", 0, [], []] satisfies StaticStructureSchema);
     const makeResponse = (statusCode: number): IHttpResponse => ({
       statusCode,
       headers: {},
