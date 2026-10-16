@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.protocol.traits.Rpcv2CborTrait;
+import software.amazon.smithy.protocol.traits.Rpcv2JsonTrait;
 import software.amazon.smithy.typescript.codegen.CodegenUtils;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
@@ -42,6 +43,22 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
 
         String namespace = settings.getService().getNamespace();
 
+        Consumer<TypeScriptWriter> protocolSettingsWriter = writer -> {
+            writer.addRelativeImport(
+                "errorTypeRegistries",
+                null,
+                Paths.get(".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0")
+            );
+            writer.write(
+                """
+                {
+                  defaultNamespace: $S,
+                  errorTypeRegistries,
+                }""",
+                namespace
+            );
+        };
+
         switch (target) {
             case SHARED:
                 if (Objects.equals(settings.getProtocol(), Rpcv2CborTrait.ID)) {
@@ -57,21 +74,23 @@ public final class AddProtocolConfig implements TypeScriptIntegration {
                             writer.write("SmithyRpcV2CborProtocol");
                         },
                         "protocolSettings",
+                        protocolSettingsWriter
+                    );
+                }
+                if (Objects.equals(settings.getProtocol(), Rpcv2JsonTrait.ID)) {
+                    return MapUtils.of(
+                        "protocol",
                         writer -> {
-                            writer.addRelativeImport(
-                                "errorTypeRegistries",
+                            writer.addImportSubmodule(
+                                "SmithyRpcV2JsonProtocol",
                                 null,
-                                Paths.get(".", CodegenUtils.SOURCE_FOLDER, SCHEMAS_FOLDER, "schemas_0")
+                                TypeScriptDependency.SMITHY_CORE,
+                                "/protocols"
                             );
-                            writer.write(
-                                """
-                                {
-                                  defaultNamespace: $S,
-                                  errorTypeRegistries,
-                                }""",
-                                namespace
-                            );
-                        }
+                            writer.write("SmithyRpcV2JsonProtocol");
+                        },
+                        "protocolSettings",
+                        protocolSettingsWriter
                     );
                 }
             case BROWSER:

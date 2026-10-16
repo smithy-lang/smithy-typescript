@@ -101,7 +101,7 @@ export abstract class RpcProtocol extends HttpProtocol {
 
     const dataObject: any = {};
 
-    if (response.statusCode >= 300) {
+    if (this.isErrorResponse(response.statusCode)) {
       const bytes: Uint8Array = await collectBody(response.body, context as SerdeFunctions);
       if (bytes.byteLength > 0) {
         Object.assign(dataObject, await deserializer.read(15 satisfies DocumentSchema, bytes));
@@ -133,5 +133,20 @@ export abstract class RpcProtocol extends HttpProtocol {
 
     dataObject.$metadata = this.deserializeMetadata(response);
     return dataObject;
+  }
+
+  /**
+   * Determines whether a response status code indicates an error response that
+   * should be routed to {@link handleError} rather than deserialized as output.
+   *
+   * The default treats any status code of 300 or greater as an error,
+   * preserving the historical behavior for RPC-over-HTTP protocols. Subclasses
+   * whose specification is stricter SHOULD override this.
+   *
+   * @param statusCode - the HTTP response status code.
+   * @returns true if the response should be handled as an error.
+   */
+  protected isErrorResponse(statusCode: number): boolean {
+    return statusCode >= 300;
   }
 }
