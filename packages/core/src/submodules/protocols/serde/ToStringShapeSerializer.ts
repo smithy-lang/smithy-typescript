@@ -9,8 +9,14 @@ import type {
   TimestampHttpDateSchema,
 } from "@smithy/types";
 
+import {
+  getHttpBindingCollectionValue,
+  getHttpBindingLocation,
+  getHttpBindingValue,
+  type HttpBindingLocation,
+  type HttpBindingValue,
+} from "../HttpBindingSchemaExtension";
 import { SerdeContext } from "../SerdeContext";
-import { determineTimestampFormat } from "./determineTimestampFormat";
 
 /**
  * Serializes a shape to string.
@@ -26,13 +32,25 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
 
   public write(schema: Schema, value: unknown): void {
     const ns = NormalizedSchema.of(schema);
+    const traits = ns.getMergedTraits();
+    const location = getHttpBindingLocation(traits);
+    this.writeHttpBinding(getHttpBindingValue(ns, location, traits), value, location);
+  }
+
+  /** @internal */
+  public writeHttpBinding(
+    [ns, flags, collectionValue]: HttpBindingValue,
+    value: unknown,
+    location: HttpBindingLocation
+  ) {
+    const schema = flags & 0xff;
     switch (typeof value) {
       case "object":
         if (value === null) {
           this.stringBuffer = "null";
           return;
         }
-        if (ns.isTimestampSchema()) {
+        if (schema >= 4 && schema <= 7) {
           if (!(value instanceof Date)) {
             throw new Error(
               `@smithy/core/protocols - received non-Date value ${value} when schema expected Date in ${ns.getName(
@@ -40,7 +58,13 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
               )}`
             );
           }
-          const format = determineTimestampFormat(ns, this.settings);
+          const bindingFormat = this.settings.httpBindings ? (flags >> 14) & 0b11 : 0;
+          const format =
+            this.settings.timestampFormat.useTrait && schema > 4
+              ? schema
+              : bindingFormat
+                ? bindingFormat + 4
+                : this.settings.timestampFormat.default;
           switch (format) {
             case 5 satisfies TimestampDateTimeSchema:
               this.stringBuffer = value.toISOString().replace(".000Z", "Z");
@@ -57,20 +81,20 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
           }
           return;
         }
-        if (ns.isBlobSchema() && "byteLength" in (value as Uint8Array)) {
+        if ((schema === 21 || schema === 42) && "byteLength" in (value as Uint8Array)) {
           this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(value as Uint8Array);
           return;
         }
-        if (ns.isListSchema() && Array.isArray(value)) {
+        if ((schema & 0b1100_0000) === 0b0100_0000 && Array.isArray(value)) {
+          collectionValue ??= getHttpBindingCollectionValue(ns, location);
+          const valueSchemaType = collectionValue[1] & 0xff;
+          const isTimestamp = valueSchemaType >= 4 && valueSchemaType <= 7;
           let buffer = "";
           for (const item of value) {
-            this.write([ns.getValueSchema(), ns.getMergedTraits()], item);
+            this.writeHttpBinding(collectionValue, item, location);
             const headerItem = this.flush();
-            const serialized = ns.getValueSchema().isTimestampSchema() ? headerItem : quoteHeader(headerItem);
-            if (buffer !== "") {
-              buffer += ", ";
-            }
-            buffer += serialized;
+            if (buffer) buffer += ", ";
+            buffer += isTimestamp ? headerItem : quoteHeader(headerItem);
           }
           this.stringBuffer = buffer;
           return;
@@ -78,26 +102,17 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
         this.stringBuffer = JSON.stringify(value, null, 2);
         break;
       case "string":
-        const mediaType = ns.getMergedTraits().mediaType;
+        const media = (flags >> 8) & 0b11;
         let intermediateValue: string | LazyJsonString = value;
-        if (mediaType) {
-          const isJson = mediaType === "application/json" || mediaType.endsWith("+json");
-          if (isJson) {
-            intermediateValue = LazyJsonString.from(intermediateValue);
-          }
-          if (ns.getMergedTraits().httpHeader) {
-            this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(intermediateValue.toString());
-            return;
-          }
+        if (media === 2) intermediateValue = LazyJsonString.from(intermediateValue);
+        if (media && (location & 0b110) === 0b110) {
+          this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(intermediateValue.toString());
+          return;
         }
         this.stringBuffer = value;
         break;
       default:
-        if (ns.isIdempotencyToken()) {
-          this.stringBuffer = generateIdempotencyToken();
-        } else {
-          this.stringBuffer = String(value);
-        }
+        this.stringBuffer = (flags >> 10) & 1 ? generateIdempotencyToken() : String(value);
     }
   }
 
