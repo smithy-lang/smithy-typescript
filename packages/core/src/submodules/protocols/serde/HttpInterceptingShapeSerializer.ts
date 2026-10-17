@@ -7,6 +7,14 @@ import type {
   ShapeSerializer,
 } from "@smithy/types";
 
+import {
+  getHttpBindingValue,
+  type HttpBindingLocation,
+  type HttpBindingValue,
+  type HttpHeader,
+  type HttpLabel,
+  type HttpQuery,
+} from "../HttpBindingSchemaExtension";
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
 
 /**
@@ -40,12 +48,30 @@ export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeS
   public write(schema: ISchema, value: unknown): void {
     const ns = NormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
-    if (traits.httpHeader || traits.httpLabel || traits.httpQuery) {
-      this.stringSerializer.write(ns, value);
-      this.buffer = this.stringSerializer.flush();
+    const location = traits.httpHeader
+      ? (0b100_110 satisfies HttpHeader)
+      : traits.httpLabel
+        ? (0b100_001 satisfies HttpLabel)
+        : traits.httpQuery
+          ? (0b100_010 satisfies HttpQuery)
+          : undefined;
+    if (location !== undefined) {
+      const binding = getHttpBindingValue(ns, location, traits);
+      this.writeHttpBinding(binding, value, location);
       return;
     }
-    return this.codecSerializer.write(ns, value);
+    this.writeCodec(ns, value);
+  }
+
+  /** @internal */
+  public writeHttpBinding(binding: HttpBindingValue, value: unknown, location: HttpBindingLocation): void {
+    this.stringSerializer.writeHttpBinding(binding, value, location);
+    this.buffer = this.stringSerializer.flush();
+  }
+
+  /** @internal */
+  public writeCodec(schema: ISchema, value: unknown): void {
+    this.codecSerializer.write(schema, value);
   }
 
   public flush(): string | Uint8Array {
