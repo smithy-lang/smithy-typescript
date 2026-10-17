@@ -1,7 +1,6 @@
-import { hasOwn } from "@smithy/core/transport";
+import { hasOwn, HttpRequest, HttpResponse, isValidHostname } from "@smithy/core/transport";
 import type { EventStreamSerde } from "@smithy/core/event-streams";
-import { NormalizedSchema, TypeRegistry, translateTraits } from "@smithy/core/schema";
-import { HttpRequest, HttpResponse, isValidHostname } from "@smithy/core/transport";
+import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   ClientProtocol,
   Codec,
@@ -25,6 +24,7 @@ import type {
 } from "@smithy/types";
 
 import { SerdeContext } from "./SerdeContext";
+import { getHttpBindings, getHttpOperationBindings } from "./HttpBindingSchemaExtension";
 
 /**
  * Abstract base for HTTP-based client protocols.
@@ -140,32 +140,25 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
   protected setHostPrefix<Input extends object>(
     request: IHttpRequest,
     operationSchema: OperationSchema,
-    input: Input
+    input: Input,
+    operation = getHttpOperationBindings(operationSchema)
   ): void {
-    if (this.serdeContext?.disableHostPrefix) {
-      return;
-    }
-    const inputNs = NormalizedSchema.of(operationSchema.input);
-    const opTraits = translateTraits(operationSchema.traits ?? {});
+    if (this.serdeContext?.disableHostPrefix) return;
+    const hostPrefix = operation[4];
+    if (typeof hostPrefix !== "string") return;
 
-    if (opTraits.endpoint) {
-      let hostPrefix = opTraits.endpoint?.[0];
-      if (typeof hostPrefix === "string") {
-        for (const [name, member] of inputNs.structIterator()) {
-          if (!member.getMergedTraits().hostLabel) {
-            continue;
-          }
-          const replacement = input[name as keyof typeof input];
-          if (typeof replacement !== "string") {
-            throw new Error(`@smithy/core/schema - ${name} in input must be a string as hostLabel.`);
-          }
-          hostPrefix = hostPrefix.replace(`{${name}}`, replacement);
-        }
-        request.hostname = hostPrefix + request.hostname;
-        if (!isValidHostname(request.hostname)) {
-          throw new Error(`[${request.hostname}] is not a valid hostname.`);
-        }
+    let resolvedHostPrefix = hostPrefix;
+    for (const [name, [, flags]] of getHttpBindings(NormalizedSchema.of(operationSchema.input))) {
+      if (!((flags >> 17) & 1)) continue;
+      const replacement = input[name as keyof typeof input];
+      if (typeof replacement !== "string") {
+        throw new Error(`@smithy/core/schema - ${name} in input must be a string as hostLabel.`);
       }
+      resolvedHostPrefix = resolvedHostPrefix.replace(`{${name}}`, replacement);
+    }
+    request.hostname = resolvedHostPrefix + request.hostname;
+    if (!isValidHostname(request.hostname)) {
+      throw new Error(`[${request.hostname}] is not a valid hostname.`);
     }
   }
 
