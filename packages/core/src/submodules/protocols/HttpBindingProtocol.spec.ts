@@ -198,7 +198,7 @@ describe(HttpBindingProtocol.name, () => {
     const response = new HttpResponse({
       statusCode: 200,
       headers: {
-        "x-timestamplist": "Mon, 16 Nov 2019 23:48:18 GMT, Mon, 16 Dec 2019 23:48:18 GMT",
+        "X-TimestampList": "Mon, 16 Nov 2019 23:48:18 GMT, Mon, 16 Dec 2019 23:48:18 GMT",
       },
     });
 
@@ -293,15 +293,18 @@ describe(HttpBindingProtocol.name, () => {
       response: IHttpResponse,
       dataObject: any
     ) => Promise<string[]>;
+    const deserializer = new FromStringShapeDeserializer({
+      httpBindings: true,
+      timestampFormat: {
+        useTrait: true,
+        default: 7 satisfies TimestampEpochSecondsSchema,
+      },
+    });
+    const read = deserializer.read.bind(deserializer);
+    deserializer.read = async (schema, data) => read(schema, data);
     const deserializeHttpMessage = ((StringRestProtocol.prototype as any).deserializeHttpMessage as TestSignature).bind(
       {
-        deserializer: new FromStringShapeDeserializer({
-          httpBindings: true,
-          timestampFormat: {
-            useTrait: true,
-            default: 7 satisfies TimestampEpochSecondsSchema,
-          },
-        }),
+        deserializer,
       }
     );
     const httpResponse: IHttpResponse = {
