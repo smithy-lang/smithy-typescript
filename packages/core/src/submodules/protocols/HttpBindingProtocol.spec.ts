@@ -198,7 +198,7 @@ describe(HttpBindingProtocol.name, () => {
     const response = new HttpResponse({
       statusCode: 200,
       headers: {
-        "x-timestamplist": "Mon, 16 Nov 2019 23:48:18 GMT, Mon, 16 Dec 2019 23:48:18 GMT",
+        "X-TimestampList": "Mon, 16 Nov 2019 23:48:18 GMT, Mon, 16 Dec 2019 23:48:18 GMT",
       },
     });
 
@@ -286,6 +286,26 @@ describe(HttpBindingProtocol.name, () => {
     expect(request.path).toEqual("/custom/Operation");
   });
 
+  it("preserves inherited and non-enumerable HTTP binding values", async () => {
+    const protocol = new StringRestProtocol();
+    const operation = op(
+      "",
+      "",
+      { http: ["GET", "/", 200] },
+      [3, "", "Input", 0, ["value"], [[0, { httpHeader: "x-value" }]]],
+      "unit"
+    );
+    const inherited = Object.create({ value: "inherited" });
+    const nonEnumerable = {};
+    Object.defineProperty(nonEnumerable, "value", { value: "non-enumerable" });
+    const context = { endpoint: async () => parseUrl("https://localhost") } as any;
+
+    expect((await protocol.serializeRequest(operation, inherited, context)).headers["x-value"]).toBe("inherited");
+    expect((await protocol.serializeRequest(operation, nonEnumerable, context)).headers["x-value"]).toBe(
+      "non-enumerable"
+    );
+  });
+
   it("can deserialize a prefix header binding and header binding from the same header", async () => {
     type TestSignature = (
       schema: $Schema,
@@ -293,15 +313,18 @@ describe(HttpBindingProtocol.name, () => {
       response: IHttpResponse,
       dataObject: any
     ) => Promise<string[]>;
+    const deserializer = new FromStringShapeDeserializer({
+      httpBindings: true,
+      timestampFormat: {
+        useTrait: true,
+        default: 7 satisfies TimestampEpochSecondsSchema,
+      },
+    });
+    const read = deserializer.read.bind(deserializer);
+    deserializer.read = async (schema, data) => read(schema, data);
     const deserializeHttpMessage = ((StringRestProtocol.prototype as any).deserializeHttpMessage as TestSignature).bind(
       {
-        deserializer: new FromStringShapeDeserializer({
-          httpBindings: true,
-          timestampFormat: {
-            useTrait: true,
-            default: 7 satisfies TimestampEpochSecondsSchema,
-          },
-        }),
+        deserializer,
       }
     );
     const httpResponse: IHttpResponse = {
@@ -333,6 +356,57 @@ describe(HttpBindingProtocol.name, () => {
       },
       header: "header-value",
     });
+  });
+
+  it("serializes list-valued query parameter and prefix header maps", async () => {
+    const stringLists: any = [2, "", "Map", 0, 0, [1, "", "List", 0, 0]];
+    const request = await new StringRestProtocol().serializeRequest(
+      op(
+        "",
+        "",
+        { http: ["GET", "/", 200] },
+        [
+          3,
+          "",
+          "Input",
+          0,
+          ["query", "headers"],
+          [
+            [stringLists, { httpQueryParams: 1 }],
+            [stringLists, { httpPrefixHeaders: "x-" }],
+          ],
+        ],
+        "unit"
+      ),
+      { query: { query: ["a", "b"] }, headers: { header: ["c", "d"] } },
+      { endpoint: async () => parseUrl("https://localhost") } as any
+    );
+
+    expect(request.query?.query).toEqual(["a", "b"]);
+    expect(request.headers["x-header"]).toBe("c, d");
+  });
+
+  it("preserves schema-order precedence for prefix header collisions", async () => {
+    const request = await new StringRestProtocol().serializeRequest(
+      op(
+        "",
+        "",
+        { http: ["GET", "/", 200] },
+        [
+          3,
+          "",
+          "Input",
+          0,
+          ["extras", "header", "a", "b", "c", "d"],
+          [[[2, "", "Headers", 0, 0, 0], { httpPrefixHeaders: "x-" }], [0, { httpHeader: "x-value" }], 0, 0, 0, 0],
+        ],
+        "unit"
+      ),
+      { header: "explicit", extras: { value: "map" } },
+      { endpoint: async () => parseUrl("https://localhost") } as any
+    );
+
+    expect(request.headers["x-value"]).toBe("explicit");
   });
 
   it("should fill in undefined idempotency tokens", async () => {
@@ -370,6 +444,37 @@ describe(HttpBindingProtocol.name, () => {
     expect(request.query?.token).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     expect(request.path).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
     expect(request.headers?.["header-token"]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  it("should omit undefined values from non-sparse query lists", async () => {
+    const protocol = new StringRestProtocol();
+    let value: unknown;
+    (protocol as any).serializer = {
+      write: (_schema: unknown, input: unknown) => (value = input),
+      flush: () => value,
+      setSerdeContext: () => {},
+    };
+
+    const request = await protocol.serializeRequest(
+      op(
+        "",
+        "",
+        { http: ["GET", "/", 200] },
+        [
+          3,
+          "ns",
+          "Struct",
+          0,
+          ["values"],
+          [[(64 satisfies ListSchemaModifier) | (0 satisfies StringSchema), { httpQuery: "value" }]],
+        ],
+        "unit"
+      ),
+      { values: [undefined, "present"] },
+      { endpoint: async () => parseUrl("https://localhost") } as any
+    );
+
+    expect(request.query?.value).toEqual(["present"]);
   });
 
   it("should not serialize http-location-bound idempotency tokens into the body", async () => {
@@ -429,7 +534,7 @@ describe(HttpBindingProtocol.name, () => {
       } as any,
       new HttpResponse({
         statusCode: 200,
-        headers: {},
+        headers: { constructor: "ignored" },
         body: Readable.from({
           async *[Symbol.asyncIterator]() {
             yield "@";

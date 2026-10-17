@@ -7,6 +7,12 @@ import type {
   ShapeSerializer,
 } from "@smithy/types";
 
+import {
+  getHttpBindingLocation,
+  getHttpBindingValue,
+  type HttpBindingLocation,
+  type HttpBindingValue,
+} from "../HttpBindingSchemaExtension";
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
 
 /**
@@ -41,11 +47,22 @@ export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeS
     const ns = NormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
     if (traits.httpHeader || traits.httpLabel || traits.httpQuery) {
-      this.stringSerializer.write(ns, value);
-      this.buffer = this.stringSerializer.flush();
+      const location = getHttpBindingLocation(traits);
+      this.writeHttpBinding(getHttpBindingValue(ns, location, traits), value, location);
       return;
     }
-    return this.codecSerializer.write(ns, value);
+    this.writeCodec(ns, value);
+  }
+
+  /** @internal */
+  public writeHttpBinding(binding: HttpBindingValue, value: unknown, location: HttpBindingLocation): void {
+    this.stringSerializer.writeHttpBinding(binding, value, location);
+    this.buffer = this.stringSerializer.flush();
+  }
+
+  /** @internal */
+  public writeCodec(schema: ISchema, value: unknown): void {
+    this.codecSerializer.write(schema, value);
   }
 
   public flush(): string | Uint8Array {
