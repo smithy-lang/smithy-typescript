@@ -189,12 +189,15 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
    * Fast-path for ASCII, falls back to TextEncoder for multi-byte.
    */
   protected writeJsonString(s: string): void {
-    // Worst case: every char needs \uXXXX (6 bytes) + 2 quotes
-    // But we'll grow dynamically, so just ensure a reasonable amount
-    this.ensure(s.length * 3 + 2);
+    const z = s.length;
+    // Reserve 3 bytes per UTF-16 code unit plus the two quotes. Every branch below
+    // writes at most 3 bytes per code unit except the 6-byte escapes, which call
+    // ensure() with the remainder of the string included, so the invariant
+    // "at least 3 bytes per remaining code unit plus the closing quote is reserved"
+    // holds before every unchecked write.
+    this.ensure(z * 3 + 2);
     this.json[this.i++] = QUOTE;
 
-    const z = s.length;
     for (let j = 0; j < z; ++j) {
       const c = s.charCodeAt(j);
 
@@ -205,7 +208,9 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
         // ASCII range — check if it needs escaping
         const esc = ESCAPE_TABLE[c];
         if (esc !== null) {
-          this.ensure(esc.length + 1);
+          // The escape is up to 6 bytes, above the 3-byte budget of this code unit.
+          // Re-reserve for it plus the remaining code units and the closing quote.
+          this.ensure(esc.length + 1 + (z - j - 1) * 3 + 1);
           this.json[this.i++] = BACKSLASH;
           for (let k = 0; k < esc.length; k++) {
             this.json[this.i++] = esc.charCodeAt(k);
@@ -222,12 +227,12 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
           this.i += written!;
           ++j; // skip the low surrogate in the loop
         } else {
-          this.ensure(6);
+          this.ensure(6 + (z - j - 1) * 3 + 1);
           this.writeUnicodeEscape(c);
         }
       } else if (c >= 0xdc00 && c <= 0xdfff) {
         // Lone low surrogate — escape
-        this.ensure(6);
+        this.ensure(6 + (z - j - 1) * 3 + 1);
         this.writeUnicodeEscape(c);
       } else {
         let { i, json } = this;

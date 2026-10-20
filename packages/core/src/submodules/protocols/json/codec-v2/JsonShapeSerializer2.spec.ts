@@ -186,6 +186,30 @@ describe(JsonShapeSerializer2.name, () => {
       expect(JSON.parse(decode(serializer.flush()))).toEqual({ long: longStr });
     });
 
+    it("keeps the buffer reservation when 6-byte escapes precede multi-byte characters", () => {
+      // Each control character serializes to 6 bytes but the up-front reservation
+      // budgets 3 bytes per code unit. The trailing 3-byte characters must still be
+      // written in full, and the output must contain only bytes from the input.
+      const docSchema = 15;
+      const value = "\u0001".repeat(675) + "\u4e2d".repeat(200) + "\u0001" + "END";
+      serializer.write(docSchema, { s: value });
+      const out = decode(serializer.flush());
+      expect(out).toEqual(JSON.stringify({ s: value }));
+    });
+
+    it("matches JSON.stringify for every control-run length across the buffer boundary", () => {
+      const docSchema = 15;
+      const tails = ["\u4e2d".repeat(64), "a".repeat(64), "\udc00" + "\u00e9".repeat(64), "\ud83c\udf0d".repeat(32)];
+      for (let n = 600; n < 760; n++) {
+        for (const tail of tails) {
+          const value = "\u0001".repeat(n) + tail + "END";
+          serializer.write(docSchema, { s: value });
+          const out = decode(serializer.flush());
+          expect(out).toEqual(JSON.stringify({ s: value }));
+        }
+      }
+    });
+
     it("handles many small writes without corruption", () => {
       const docSchema = 15;
       for (let i = 0; i < 100; i++) {
