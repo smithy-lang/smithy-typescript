@@ -1,7 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { TypeRegistry } from "@smithy/core/schema";
+
 import { SmithyRpcV2JsonServerProtocol } from "./SmithyRpcV2JsonServerProtocol";
 import { SerializationException, UnsupportedMediaTypeException } from "../../validation/errors";
-import type { HttpRequest as IHttpRequest, StaticOperationSchema } from "@smithy/types";
+import type {
+  BigIntegerSchema,
+  HttpRequest as IHttpRequest,
+  StaticErrorSchema,
+  StaticOperationSchema,
+  StringSchema,
+} from "@smithy/types";
 
 function makeRequest(headers: Record<string, string> = {}, body?: any): IHttpRequest {
   return {
@@ -209,6 +217,87 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
 
     it("does not claim a request whose path is not an RPC v2 route", () => {
       expect(protocol.claim(claimable({ path: "/some/other/path" }))).toBe(false);
+    });
+  });
+
+  describe("serializeError - modeled error schema", () => {
+    const decode = (body: any) => JSON.parse(new TextDecoder().decode(body));
+
+    it("uses the absolute Shape ID from the modeled schema, even in another namespace", async () => {
+      // The service's default namespace is "test" (see beforeEach), but the
+      // error is modeled in namespace "other". Serializing through the schema
+      // must produce __type "other#CrossNsError", NOT "test#CrossNsError".
+      const errorSchema = [
+        -3,
+        "other",
+        "CrossNsError",
+        0,
+        ["message"],
+        [0 satisfies StringSchema],
+      ] satisfies StaticErrorSchema;
+
+      class CrossNsError extends Error {
+        public readonly name = "CrossNsError";
+        public readonly $fault = "client" as const;
+      }
+
+      const registry = TypeRegistry.for("other");
+      registry.registerError(errorSchema, CrossNsError);
+
+      try {
+        const error = Object.assign(new CrossNsError(), { message: "boom" });
+        const response = await (protocol as any).serializeError(makeUnitOpSchema(), makeContext(), error);
+        const body = decode(response.body);
+        expect(body.__type).toBe("other#CrossNsError");
+        expect(body.message).toBe("boom");
+      } finally {
+        registry.clear();
+        TypeRegistry.registries.delete("other");
+      }
+    });
+
+    it("serializes a bigInteger member as a JSON string via the schema", async () => {
+      // RPCv2 JSON serializes bigInteger as a JSON string (SEP). Without the
+      // modeled schema this member would be emitted as a raw number/bigint.
+      const errorSchema = [
+        -3,
+        "other",
+        "BigError",
+        0,
+        ["message", "big"],
+        [0 satisfies StringSchema, 17 satisfies BigIntegerSchema],
+      ] satisfies StaticErrorSchema;
+
+      class BigError extends Error {
+        public readonly name = "BigError";
+        public readonly $fault = "client" as const;
+        public big?: bigint;
+      }
+
+      const registry = TypeRegistry.for("other");
+      registry.registerError(errorSchema, BigError);
+
+      try {
+        const error = Object.assign(new BigError(), {
+          message: "big one",
+          big: 1000000000000000000000000000000000000n,
+        });
+        const response = await (protocol as any).serializeError(makeUnitOpSchema(), makeContext(), error);
+        const body = decode(response.body);
+        expect(body.__type).toBe("other#BigError");
+        expect(body.big).toBe("1000000000000000000000000000000000000");
+      } finally {
+        registry.clear();
+        TypeRegistry.registries.delete("other");
+      }
+    });
+
+    it("falls back to default-namespace __type for an unmodeled error", async () => {
+      const error = Object.assign(new Error("nope"), { name: "UnregisteredError", $fault: "client" as const });
+      const response = await (protocol as any).serializeError(makeUnitOpSchema(), makeContext(), error);
+      const body = decode(response.body);
+      expect(body.__type).toBe("test#UnregisteredError");
+      expect(body.message).toBe("nope");
     });
   });
 });

@@ -4,7 +4,9 @@
  */
 
 import { HttpResponse, JsonCodec2 } from "@smithy/core/protocols";
+import type { JsonShapeSerializer2 } from "@smithy/core/protocols";
 import { hasOwn } from "@smithy/core/serde";
+import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   DocumentSchema,
   HttpRequest as IHttpRequest,
@@ -13,6 +15,7 @@ import type {
   SerdeFunctions,
   ShapeDeserializer,
   ShapeSerializer,
+  StaticErrorSchema,
   StaticOperationSchema,
 } from "@smithy/types";
 
@@ -200,34 +203,56 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
     _context: SerdeFunctions,
     error: E
   ): Promise<IHttpResponse> {
-    const errorName = (error as any).name ?? "UnknownError";
     const fault: string | undefined = (error as any).$fault;
     const statusCode =
       (error as any).$metadata?.httpStatusCode ?? (error as any).statusCode ?? (fault === "client" ? 400 : 500);
 
-    // RPCv2 JSON uses the absolute Shape ID for __type.
-    const namespace = (this as any).options?.defaultNamespace;
-    const errorType = errorName.includes("#") ? errorName : namespace ? `${namespace}#${errorName}` : errorName;
+    // Prefer serializing through the modeled error schema. The schema carries
+    // the error's absolute Shape ID (so __type is correct even for errors in a
+    // namespace other than the service default) and drives member encoding (so
+    // typed members like bigInteger/bigDecimal/blob/timestamp are serialized
+    // according to the RPCv2 JSON representation rather than as raw JS values).
+    const errorSchema = this.resolveErrorSchema(error);
 
-    const errorBody: Record<string, any> = {
-      __type: errorType,
-    };
-
-    if ((error as any).message) {
-      errorBody.message = (error as any).message;
-    }
-
-    // Include additional modeled members from ServiceException instances.
-    if (error instanceof ServiceException) {
-      for (const [key, value] of Object.entries(error)) {
-        if (key !== "name" && key !== "$fault" && key !== "$metadata" && key !== "message" && value !== undefined) {
-          errorBody[key] = value;
+    let body: Uint8Array;
+    if (errorSchema) {
+      const errorObject: Record<string, any> = {};
+      if ((error as any).message !== undefined) {
+        errorObject.message = (error as any).message;
+      }
+      const ns = NormalizedSchema.of(errorSchema);
+      for (const [memberName] of ns.structIterator()) {
+        const value = (error as any)[memberName];
+        if (value !== undefined) {
+          errorObject[memberName] = value;
         }
       }
-    }
+      // writeDiscriminatedDocument serializes the struct with its schema and
+      // injects __type as the schema's absolute Shape ID (namespace#name).
+      (this.serializer as unknown as JsonShapeSerializer2).writeDiscriminatedDocument(errorSchema, errorObject);
+      body = this.serializer.flush();
+    } else {
+      // Unmodeled / framework error: fall back to a bare document body. Without
+      // a schema the best available discriminator is the runtime error name,
+      // qualified with the service's default namespace when not already absolute.
+      const errorName = (error as any).name ?? "UnknownError";
+      const namespace = (this as any).options?.defaultNamespace;
+      const errorType = errorName.includes("#") ? errorName : namespace ? `${namespace}#${errorName}` : errorName;
 
-    this.serializer.write(15 satisfies DocumentSchema, errorBody);
-    const body = this.serializer.flush();
+      const errorBody: Record<string, any> = { __type: errorType };
+      if ((error as any).message) {
+        errorBody.message = (error as any).message;
+      }
+      if (error instanceof ServiceException) {
+        for (const [key, value] of Object.entries(error)) {
+          if (key !== "name" && key !== "$fault" && key !== "$metadata" && key !== "message" && value !== undefined) {
+            errorBody[key] = value;
+          }
+        }
+      }
+      this.serializer.write(15 satisfies DocumentSchema, errorBody);
+      body = this.serializer.flush();
+    }
 
     return new HttpResponse({
       statusCode,
@@ -237,6 +262,32 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
       },
       body,
     });
+  }
+
+  /**
+   * Resolves the modeled error schema for a thrown error by matching its
+   * prototype against the error constructors registered in the type
+   * registries. Mirrors the lookup used by `resolveErrorStatusCode`.
+   *
+   * @returns the matching StaticErrorSchema, or undefined for unmodeled errors.
+   */
+  private resolveErrorSchema(error: object): StaticErrorSchema | undefined {
+    const isStaticErrorSchema = (schema: unknown): schema is StaticErrorSchema =>
+      Array.isArray(schema) && schema[0] === -3;
+
+    for (const registry of TypeRegistry.registries.values()) {
+      const match = registry.find((schema) => {
+        if (!isStaticErrorSchema(schema)) {
+          return false;
+        }
+        const ctor = registry.getErrorCtor(schema);
+        return typeof ctor === "function" && ctor.prototype?.isPrototypeOf(error);
+      });
+      if (isStaticErrorSchema(match)) {
+        return match;
+      }
+    }
+    return undefined;
   }
 
   /**
