@@ -10,15 +10,11 @@ import type {
   ServiceOutputTypes,
 } from "./RpcV2JsonProtocolClient";
 
+
 /**
  * @internal
  */
-export const command = makeBuilder<RpcV2JsonProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>(
-  commonParams,
-  "RpcV2JsonProtocol",
-  "RpcV2JsonProtocolClient",
-  getEndpointPlugin
-);
+export const command = makeBuilder<RpcV2JsonProtocolClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>(commonParams, "RpcV2JsonProtocol", "RpcV2JsonProtocolClient", getEndpointPlugin);
 
 /**
  * @internal
@@ -28,4 +24,5 @@ export const _ep0: EndpointParameterInstructions = {};
 /**
  * @internal
  */
-export const _mw0 = (Command: any, cs: any, config: any, o: any) => [];
+export const _mw0 = (Command: any, cs: any, config: any, o: any) => [
+];

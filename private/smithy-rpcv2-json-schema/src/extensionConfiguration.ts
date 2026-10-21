@@ -8,4 +8,6 @@ import type { HttpAuthExtensionConfiguration } from "./auth/httpAuthExtensionCon
  * @internal
  */
 export interface RpcV2JsonProtocolExtensionConfiguration
-  extends HttpHandlerExtensionConfiguration, DefaultExtensionConfiguration, HttpAuthExtensionConfiguration {}
+  extends HttpHandlerExtensionConfiguration,
+    DefaultExtensionConfiguration,
+    HttpAuthExtensionConfiguration {}

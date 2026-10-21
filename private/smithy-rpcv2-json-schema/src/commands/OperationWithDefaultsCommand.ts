@@ -119,12 +119,14 @@ export interface OperationWithDefaultsCommandOutput extends OperationWithDefault
  *
  *
  */
-export class OperationWithDefaultsCommand extends command<
-  OperationWithDefaultsCommandInput,
-  OperationWithDefaultsCommandOutput
->(_ep0, _mw0, "OperationWithDefaults", OperationWithDefaults$) {
+export class OperationWithDefaultsCommand extends command<OperationWithDefaultsCommandInput, OperationWithDefaultsCommandOutput>(
+  _ep0,
+  _mw0,
+  "OperationWithDefaults",
+  OperationWithDefaults$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: OperationWithDefaultsInput;
       output: OperationWithDefaultsOutput;

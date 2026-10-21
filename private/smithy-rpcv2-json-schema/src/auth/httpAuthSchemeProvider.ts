@@ -20,12 +20,13 @@ export interface RpcV2JsonProtocolHttpAuthSchemeParameters extends HttpAuthSchem
 /**
  * @internal
  */
-export interface RpcV2JsonProtocolHttpAuthSchemeParametersProvider extends HttpAuthSchemeParametersProvider<
-  RpcV2JsonProtocolClientResolvedConfig,
-  HandlerExecutionContext,
-  RpcV2JsonProtocolHttpAuthSchemeParameters,
-  object
-> {}
+export interface RpcV2JsonProtocolHttpAuthSchemeParametersProvider
+  extends HttpAuthSchemeParametersProvider<
+    RpcV2JsonProtocolClientResolvedConfig,
+    HandlerExecutionContext,
+    RpcV2JsonProtocolHttpAuthSchemeParameters,
+    object
+  > {}
 
 /**
  * @internal
@@ -40,9 +41,7 @@ export const defaultRpcV2JsonProtocolHttpAuthSchemeParametersProvider = async (
   };
 };
 
-function createSmithyApiNoAuthHttpAuthOption(
-  authParameters: RpcV2JsonProtocolHttpAuthSchemeParameters
-): HttpAuthOption {
+function createSmithyApiNoAuthHttpAuthOption(authParameters: RpcV2JsonProtocolHttpAuthSchemeParameters): HttpAuthOption {
   return {
     schemeId: "smithy.api#noAuth",
   };
@@ -51,14 +50,13 @@ function createSmithyApiNoAuthHttpAuthOption(
 /**
  * @internal
  */
-export interface RpcV2JsonProtocolHttpAuthSchemeProvider extends HttpAuthSchemeProvider<RpcV2JsonProtocolHttpAuthSchemeParameters> {}
+export interface RpcV2JsonProtocolHttpAuthSchemeProvider
+  extends HttpAuthSchemeProvider<RpcV2JsonProtocolHttpAuthSchemeParameters> {}
 
 /**
  * @internal
  */
-export const defaultRpcV2JsonProtocolHttpAuthSchemeProvider: RpcV2JsonProtocolHttpAuthSchemeProvider = (
-  authParameters
-) => {
+export const defaultRpcV2JsonProtocolHttpAuthSchemeProvider: RpcV2JsonProtocolHttpAuthSchemeProvider = (authParameters) => {
   const options: HttpAuthOption[] = [];
   switch (authParameters.operation) {
     default: {

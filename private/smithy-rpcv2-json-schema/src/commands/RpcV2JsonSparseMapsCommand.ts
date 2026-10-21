@@ -96,12 +96,14 @@ export interface RpcV2JsonSparseMapsCommandOutput extends RpcV2JsonSparseMapsInp
  *
  *
  */
-export class RpcV2JsonSparseMapsCommand extends command<
-  RpcV2JsonSparseMapsCommandInput,
-  RpcV2JsonSparseMapsCommandOutput
->(_ep0, _mw0, "RpcV2JsonSparseMaps", RpcV2JsonSparseMaps$) {
+export class RpcV2JsonSparseMapsCommand extends command<RpcV2JsonSparseMapsCommandInput, RpcV2JsonSparseMapsCommandOutput>(
+  _ep0,
+  _mw0,
+  "RpcV2JsonSparseMaps",
+  RpcV2JsonSparseMaps$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: RpcV2JsonSparseMapsInputOutput;
       output: RpcV2JsonSparseMapsInputOutput;

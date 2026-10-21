@@ -58,7 +58,7 @@ export class EmptyInputOutputCommand extends command<EmptyInputOutputCommandInpu
   EmptyInputOutput$
 ) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: {};
       output: {};

@@ -141,7 +141,7 @@ export class RpcV2JsonListsCommand extends command<RpcV2JsonListsCommandInput, R
   RpcV2JsonLists$
 ) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: RpcV2JsonListInputOutput;
       output: RpcV2JsonListInputOutput;

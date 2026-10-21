@@ -86,7 +86,7 @@ export class RecursiveShapesCommand extends command<RecursiveShapesCommandInput,
   RecursiveShapes$
 ) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: RecursiveShapesInputOutput;
       output: RecursiveShapesInputOutput;

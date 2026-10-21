@@ -203,7 +203,10 @@ export interface RpcV2JsonProtocol {
     args: NoInputOutputCommandInput,
     options?: RpcV2JsonProtocolRequestOptions
   ): Promise<NoInputOutputCommandOutput>;
-  noInputOutput(args: NoInputOutputCommandInput, cb: (err: any, data?: NoInputOutputCommandOutput) => void): void;
+  noInputOutput(
+    args: NoInputOutputCommandInput,
+    cb: (err: any, data?: NoInputOutputCommandOutput) => void
+  ): void;
   noInputOutput(
     args: NoInputOutputCommandInput,
     options: RpcV2JsonProtocolRequestOptions,
@@ -254,7 +257,10 @@ export interface RpcV2JsonProtocol {
     args: RecursiveShapesCommandInput,
     options?: RpcV2JsonProtocolRequestOptions
   ): Promise<RecursiveShapesCommandOutput>;
-  recursiveShapes(args: RecursiveShapesCommandInput, cb: (err: any, data?: RecursiveShapesCommandOutput) => void): void;
+  recursiveShapes(
+    args: RecursiveShapesCommandInput,
+    cb: (err: any, data?: RecursiveShapesCommandOutput) => void
+  ): void;
   recursiveShapes(
     args: RecursiveShapesCommandInput,
     options: RpcV2JsonProtocolRequestOptions,
@@ -287,7 +293,10 @@ export interface RpcV2JsonProtocol {
     args: RpcV2JsonListsCommandInput,
     options?: RpcV2JsonProtocolRequestOptions
   ): Promise<RpcV2JsonListsCommandOutput>;
-  rpcV2JsonLists(args: RpcV2JsonListsCommandInput, cb: (err: any, data?: RpcV2JsonListsCommandOutput) => void): void;
+  rpcV2JsonLists(
+    args: RpcV2JsonListsCommandInput,
+    cb: (err: any, data?: RpcV2JsonListsCommandOutput) => void
+  ): void;
   rpcV2JsonLists(
     args: RpcV2JsonListsCommandInput,
     options: RpcV2JsonProtocolRequestOptions,

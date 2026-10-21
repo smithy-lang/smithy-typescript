@@ -55,12 +55,14 @@ export interface OptionalInputOutputCommandOutput extends SimpleStructure, __Met
  *
  *
  */
-export class OptionalInputOutputCommand extends command<
-  OptionalInputOutputCommandInput,
-  OptionalInputOutputCommandOutput
->(_ep0, _mw0, "OptionalInputOutput", OptionalInputOutput$) {
+export class OptionalInputOutputCommand extends command<OptionalInputOutputCommandInput, OptionalInputOutputCommandOutput>(
+  _ep0,
+  _mw0,
+  "OptionalInputOutput",
+  OptionalInputOutput$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: SimpleStructure;
       output: SimpleStructure;

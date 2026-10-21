@@ -45,40 +45,40 @@ const Client = RpcV2JsonProtocolClient;
 
 const mode = (process.env.SNAPSHOT_MODE as "write" | "compare") ?? "write";
 
-describe(
-  "RpcV2JsonProtocolClient" + ` (${mode})`,
-  () => {
-    const runner = new SnapshotRunner({
-      snapshotDirPath: join(__dirname, "snapshots"),
-      Client,
-      mode,
-      testCase(caseName: string, run: () => Promise<void>) {
-        it(caseName, run);
-      },
-      assertions(caseName: string, expected: string, actual: string): Promise<void> {
-        expect(actual).toEqual(expected);
-        return Promise.resolve();
-      },
-      schemas: new Map<any, any>([
-        [BigDecimalOperation$, BigDecimalOperationCommand],
-        [BigIntegerOperation$, BigIntegerOperationCommand],
-        [EmptyInputOutput$, EmptyInputOutputCommand],
-        [FractionalSeconds$, FractionalSecondsCommand],
-        [GreetingWithErrors$, GreetingWithErrorsCommand],
-        [NoInputOutput$, NoInputOutputCommand],
-        [OperationWithDefaults$, OperationWithDefaultsCommand],
-        [OptionalInputOutput$, OptionalInputOutputCommand],
-        [RecursiveShapes$, RecursiveShapesCommand],
-        [RpcV2JsonDenseMaps$, RpcV2JsonDenseMapsCommand],
-        [RpcV2JsonLists$, RpcV2JsonListsCommand],
-        [RpcV2JsonSparseMaps$, RpcV2JsonSparseMapsCommand],
-        [SimpleScalarProperties$, SimpleScalarPropertiesCommand],
-        [SparseNullsOperation$, SparseNullsOperationCommand],
-        [TimestampFormatIgnored$, TimestampFormatIgnoredCommand],
-      ]),
-      errors: [ValidationException$, ComplexError$, InvalidGreeting$],
-    });
-    runner.run();
-  },
-  30_000
-);
+describe("RpcV2JsonProtocolClient" + ` (${mode})`, () => {
+  const runner = new SnapshotRunner({
+    snapshotDirPath: join(__dirname, "snapshots"),
+    Client,
+    mode,
+    testCase(caseName: string, run: () => Promise<void>) {
+      it(caseName, run);
+    },
+    assertions(caseName: string, expected: string, actual: string): Promise<void> {
+      expect(actual).toEqual(expected);
+      return Promise.resolve();
+    },
+    schemas: new Map<any, any>([
+      [BigDecimalOperation$, BigDecimalOperationCommand],
+      [BigIntegerOperation$, BigIntegerOperationCommand],
+      [EmptyInputOutput$, EmptyInputOutputCommand],
+      [FractionalSeconds$, FractionalSecondsCommand],
+      [GreetingWithErrors$, GreetingWithErrorsCommand],
+      [NoInputOutput$, NoInputOutputCommand],
+      [OperationWithDefaults$, OperationWithDefaultsCommand],
+      [OptionalInputOutput$, OptionalInputOutputCommand],
+      [RecursiveShapes$, RecursiveShapesCommand],
+      [RpcV2JsonDenseMaps$, RpcV2JsonDenseMapsCommand],
+      [RpcV2JsonLists$, RpcV2JsonListsCommand],
+      [RpcV2JsonSparseMaps$, RpcV2JsonSparseMapsCommand],
+      [SimpleScalarProperties$, SimpleScalarPropertiesCommand],
+      [SparseNullsOperation$, SparseNullsOperationCommand],
+      [TimestampFormatIgnored$, TimestampFormatIgnoredCommand],
+    ]),
+    errors: [
+      ValidationException$,
+      ComplexError$,
+      InvalidGreeting$,
+    ],
+  });
+  runner.run();
+}, 30_000);

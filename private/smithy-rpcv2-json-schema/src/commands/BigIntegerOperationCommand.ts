@@ -55,12 +55,14 @@ export interface BigIntegerOperationCommandOutput extends BigIntegerStructure, _
  *
  *
  */
-export class BigIntegerOperationCommand extends command<
-  BigIntegerOperationCommandInput,
-  BigIntegerOperationCommandOutput
->(_ep0, _mw0, "BigIntegerOperation", BigIntegerOperation$) {
+export class BigIntegerOperationCommand extends command<BigIntegerOperationCommandInput, BigIntegerOperationCommandOutput>(
+  _ep0,
+  _mw0,
+  "BigIntegerOperation",
+  BigIntegerOperation$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: BigIntegerStructure;
       output: BigIntegerStructure;

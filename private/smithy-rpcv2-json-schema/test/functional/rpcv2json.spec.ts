@@ -225,9 +225,11 @@ it("RpcV2JsonRequestBigDecimalSimpleValue:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigDecimalOperationCommand({
-    value: nv("1.5"),
-  } as any);
+  const command = new BigDecimalOperationCommand(
+    {
+      value: nv("1.5"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -269,9 +271,11 @@ it("RpcV2JsonRequestBigDecimalHighPrecision:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigDecimalOperationCommand({
-    value: nv("0.100000000000000000000001"),
-  } as any);
+  const command = new BigDecimalOperationCommand(
+    {
+      value: nv("0.100000000000000000000001"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -314,9 +318,11 @@ it("RpcV2JsonRequestBigDecimalNegativeHighPrecision:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigDecimalOperationCommand({
-    value: nv("-0.100000000000000000000001"),
-  } as any);
+  const command = new BigDecimalOperationCommand(
+    {
+      value: nv("-0.100000000000000000000001"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -358,9 +364,11 @@ it("RpcV2JsonRequestBigDecimalLargeWithFraction:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigDecimalOperationCommand({
-    value: nv("100000000000000000000001.0"),
-  } as any);
+  const command = new BigDecimalOperationCommand(
+    {
+      value: nv("100000000000000000000001.0"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -597,9 +605,11 @@ it("RpcV2JsonRequestBigIntegerSimpleValue:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigIntegerOperationCommand({
-    value: BigInt("42"),
-  } as any);
+  const command = new BigIntegerOperationCommand(
+    {
+      value: BigInt("42"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -641,9 +651,11 @@ it("RpcV2JsonRequestBigIntegerExceedingLongRange:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigIntegerOperationCommand({
-    value: BigInt("9223372036854775808"),
-  } as any);
+  const command = new BigIntegerOperationCommand(
+    {
+      value: BigInt("9223372036854775808"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -685,9 +697,11 @@ it("RpcV2JsonRequestBigIntegerNegativeLargeValue:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new BigIntegerOperationCommand({
-    value: BigInt("-9223372036854775809"),
-  } as any);
+  const command = new BigIntegerOperationCommand(
+    {
+      value: BigInt("-9223372036854775809"),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -874,7 +888,10 @@ it("RpcV2JsonRequestEmptyInput:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new EmptyInputOutputCommand({} as any);
+  const command = new EmptyInputOutputCommand(
+    {
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1001,7 +1018,7 @@ it("RpcV2JsonResponseDateTimeWithFractionalSeconds:Response", async () => {
   expect(r.$metadata.httpStatusCode).toBe(200);
   const paramsToValidate: any = [
     {
-      datetime: new Date(9.46845296123e8 * 1000),
+      datetime: new Date(9.46845296123E8 * 1000),
     },
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
@@ -1303,9 +1320,12 @@ it.skip("RpcV2JsonRequestClientPopulatesDefaultValuesInInput:Request", async () 
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new OperationWithDefaultsCommand({
-    defaults: {} as any,
-  } as any);
+  const command = new OperationWithDefaultsCommand(
+    {
+      defaults: {
+      } as any,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1370,7 +1390,10 @@ it.skip("RpcV2JsonRequestClientSkipsTopLevelDefaultValuesInInput:Request", async
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new OperationWithDefaultsCommand({} as any);
+  const command = new OperationWithDefaultsCommand(
+    {
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1409,35 +1432,39 @@ it.skip("RpcV2JsonRequestClientUsesExplicitlyProvidedMemberValuesOverDefaults:Re
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new OperationWithDefaultsCommand({
-    defaults: {
-      defaultString: "bye",
-      defaultBoolean: true,
-      defaultList: ["a"],
-      defaultTimestamp: new Date(1000),
-      defaultBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
-      defaultByte: 2,
-      defaultShort: 2,
-      defaultInteger: 20,
-      defaultLong: 200,
-      defaultFloat: 2.0,
-      defaultDouble: 2.0,
-      defaultMap: {
-        name: "Jack",
+  const command = new OperationWithDefaultsCommand(
+    {
+      defaults: {
+        defaultString: "bye",
+        defaultBoolean: true,
+        defaultList: [
+          "a",
+        ],
+        defaultTimestamp: new Date(1000),
+        defaultBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
+        defaultByte: 2,
+        defaultShort: 2,
+        defaultInteger: 20,
+        defaultLong: 200,
+        defaultFloat: 2.0,
+        defaultDouble: 2.0,
+        defaultMap: {
+          name: "Jack",
+        } as any,
+        defaultEnum: "BAR",
+        defaultIntEnum: 2,
+        emptyString: "foo",
+        falseBoolean: true,
+        emptyBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
+        zeroByte: 1,
+        zeroShort: 1,
+        zeroInteger: 1,
+        zeroLong: 1,
+        zeroFloat: 1.0,
+        zeroDouble: 1.0,
       } as any,
-      defaultEnum: "BAR",
-      defaultIntEnum: 2,
-      emptyString: "foo",
-      falseBoolean: true,
-      emptyBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
-      zeroByte: 1,
-      zeroShort: 1,
-      zeroInteger: 1,
-      zeroLong: 1,
-      zeroFloat: 1.0,
-      zeroDouble: 1.0,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1502,10 +1529,12 @@ it.skip("RpcV2JsonRequestClientUsesExplicitlyProvidedValuesInTopLevel:Request", 
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new OperationWithDefaultsCommand({
-    topLevelDefault: "hi",
-    otherTopLevelDefault: 0,
-  } as any);
+  const command = new OperationWithDefaultsCommand(
+    {
+      topLevelDefault: "hi",
+      otherTopLevelDefault: 0,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1547,9 +1576,12 @@ it.skip("RpcV2JsonRequestClientIgnoresNonTopLevelDefaultsOnMembersWithClientOpti
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new OperationWithDefaultsCommand({
-    clientOptionalDefaults: {} as any,
-  } as any);
+  const command = new OperationWithDefaultsCommand(
+    {
+      clientOptionalDefaults: {
+      } as any,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1613,7 +1645,8 @@ it.skip("RpcV2JsonResponseClientPopulatesDefaultsValuesWhenMissingInResponse:Res
     {
       defaultString: "hi",
       defaultBoolean: true,
-      defaultList: [],
+      defaultList: [
+      ],
       defaultTimestamp: new Date(0 * 1000),
       defaultBlob: Uint8Array.from("abc", (c) => c.charCodeAt(0)),
       defaultByte: 1,
@@ -1622,7 +1655,8 @@ it.skip("RpcV2JsonResponseClientPopulatesDefaultsValuesWhenMissingInResponse:Res
       defaultLong: 100,
       defaultFloat: 1.0,
       defaultDouble: 1.0,
-      defaultMap: {},
+      defaultMap: {
+      },
       defaultEnum: "FOO",
       defaultIntEnum: 1,
       emptyString: "",
@@ -1705,7 +1739,9 @@ it.skip("RpcV2JsonResponseClientIgnoresDefaultValuesIfMemberValuesArePresentInRe
     {
       defaultString: "bye",
       defaultBoolean: false,
-      defaultList: ["a"],
+      defaultList: [
+        "a",
+      ],
       defaultTimestamp: new Date(2 * 1000),
       defaultBlob: Uint8Array.from("hi", (c) => c.charCodeAt(0)),
       defaultByte: 2,
@@ -1752,7 +1788,10 @@ it("RpcV2JsonRequestOptionalInput:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new OptionalInputOutputCommand({} as any);
+  const command = new OptionalInputOutputCommand(
+    {
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1822,20 +1861,22 @@ it("RpcV2JsonRequestRecursiveShapes:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RecursiveShapesCommand({
-    nested: {
-      foo: "Foo1",
+  const command = new RecursiveShapesCommand(
+    {
       nested: {
-        bar: "Bar1",
-        recursiveMember: {
-          foo: "Foo2",
-          nested: {
-            bar: "Bar2",
+        foo: "Foo1",
+        nested: {
+          bar: "Bar1",
+          recursiveMember: {
+            foo: "Foo2",
+            nested: {
+              bar: "Bar2",
+            } as any,
           } as any,
         } as any,
       } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -1957,16 +1998,18 @@ it("RpcV2JsonRequestMaps:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonDenseMapsCommand({
-    denseStructMap: {
-      foo: {
-        hi: "there",
-      } as any,
-      baz: {
-        hi: "bye",
+  const command = new RpcV2JsonDenseMapsCommand(
+    {
+      denseStructMap: {
+        foo: {
+          hi: "there",
+        } as any,
+        baz: {
+          hi: "bye",
+        } as any,
       } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2014,14 +2057,16 @@ it("RpcV2JsonRequestSerializesZeroValuesInMaps:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonDenseMapsCommand({
-    denseNumberMap: {
-      x: 0,
+  const command = new RpcV2JsonDenseMapsCommand(
+    {
+      denseNumberMap: {
+        x: 0,
+      } as any,
+      denseBooleanMap: {
+        x: false,
+      } as any,
     } as any,
-    denseBooleanMap: {
-      x: false,
-    } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2067,12 +2112,18 @@ it("RpcV2JsonRequestSerializesDenseSetMap:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonDenseMapsCommand({
-    denseSetMap: {
-      x: [],
-      y: ["a", "b"],
+  const command = new RpcV2JsonDenseMapsCommand(
+    {
+      denseSetMap: {
+        x: [
+        ],
+        y: [
+          "a",
+          "b",
+        ],
+      } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2263,8 +2314,12 @@ it("RpcV2JsonResponseDeserializesDenseSetMap:Response", async () => {
   const paramsToValidate: any = [
     {
       denseSetMap: {
-        x: [],
-        y: ["a", "b"],
+        x: [
+        ],
+        y: [
+          "a",
+          "b",
+        ],
       },
     },
   ][0];
@@ -2290,30 +2345,62 @@ it("RpcV2JsonRequestLists:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonListsCommand({
-    stringList: ["foo", "bar"],
-    stringSet: ["foo", "bar"],
-    integerList: [1, 2],
-    booleanList: [true, false],
-    timestampList: [new Date(1398796238000), new Date(1398796238000)],
-    enumList: ["Foo", "0"],
-    intEnumList: [1, 2],
-    nestedStringList: [
-      ["foo", "bar"],
-      ["baz", "qux"],
-    ],
-    structureList: [
-      {
-        a: "1",
-        b: "2",
-      } as any,
-      {
-        a: "3",
-        b: "4",
-      } as any,
-    ],
-    blobList: [Uint8Array.from("foo", (c) => c.charCodeAt(0)), Uint8Array.from("bar", (c) => c.charCodeAt(0))],
-  } as any);
+  const command = new RpcV2JsonListsCommand(
+    {
+      stringList: [
+        "foo",
+        "bar",
+      ],
+      stringSet: [
+        "foo",
+        "bar",
+      ],
+      integerList: [
+        1,
+        2,
+      ],
+      booleanList: [
+        true,
+        false,
+      ],
+      timestampList: [
+        new Date(1398796238000),
+        new Date(1398796238000),
+      ],
+      enumList: [
+        "Foo",
+        "0",
+      ],
+      intEnumList: [
+        1,
+        2,
+      ],
+      nestedStringList: [
+        [
+          "foo",
+          "bar",
+        ],
+        [
+          "baz",
+          "qux",
+        ],
+      ],
+      structureList: [
+        {
+          a: "1",
+          b: "2",
+        } as any,
+        {
+          a: "3",
+          b: "4",
+        } as any,
+      ],
+      blobList: [
+        Uint8Array.from("foo", (c) => c.charCodeAt(0)),
+        Uint8Array.from("bar", (c) => c.charCodeAt(0)),
+      ],
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2405,9 +2492,12 @@ it("RpcV2JsonRequestListsEmpty:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonListsCommand({
-    stringList: [],
-  } as any);
+  const command = new RpcV2JsonListsCommand(
+    {
+      stringList: [
+      ],
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2522,16 +2612,43 @@ it("RpcV2JsonResponseLists:Response", async () => {
   expect(r.$metadata.httpStatusCode).toBe(200);
   const paramsToValidate: any = [
     {
-      stringList: ["foo", "bar"],
-      stringSet: ["foo", "bar"],
-      integerList: [1, 2],
-      booleanList: [true, false],
-      timestampList: [new Date(1398796238 * 1000), new Date(1398796238 * 1000)],
-      enumList: ["Foo", "0"],
-      intEnumList: [1, 2],
+      stringList: [
+        "foo",
+        "bar",
+      ],
+      stringSet: [
+        "foo",
+        "bar",
+      ],
+      integerList: [
+        1,
+        2,
+      ],
+      booleanList: [
+        true,
+        false,
+      ],
+      timestampList: [
+        new Date(1398796238 * 1000),
+        new Date(1398796238 * 1000),
+      ],
+      enumList: [
+        "Foo",
+        "0",
+      ],
+      intEnumList: [
+        1,
+        2,
+      ],
       nestedStringList: [
-        ["foo", "bar"],
-        ["baz", "qux"],
+        [
+          "foo",
+          "bar",
+        ],
+        [
+          "baz",
+          "qux",
+        ],
       ],
       structureList: [
         {
@@ -2543,7 +2660,10 @@ it("RpcV2JsonResponseLists:Response", async () => {
           b: "4",
         },
       ],
-      blobList: [Uint8Array.from("foo", (c) => c.charCodeAt(0)), Uint8Array.from("bar", (c) => c.charCodeAt(0))],
+      blobList: [
+        Uint8Array.from("foo", (c) => c.charCodeAt(0)),
+        Uint8Array.from("bar", (c) => c.charCodeAt(0)),
+      ],
     },
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
@@ -2591,7 +2711,8 @@ it("RpcV2JsonResponseListsEmpty:Response", async () => {
   expect(r.$metadata.httpStatusCode).toBe(200);
   const paramsToValidate: any = [
     {
-      stringList: [],
+      stringList: [
+      ],
     },
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
@@ -2616,16 +2737,18 @@ it("RpcV2JsonRequestSparseMaps:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonSparseMapsCommand({
-    sparseStructMap: {
-      foo: {
-        hi: "there",
-      } as any,
-      baz: {
-        hi: "bye",
+  const command = new RpcV2JsonSparseMapsCommand(
+    {
+      sparseStructMap: {
+        foo: {
+          hi: "there",
+        } as any,
+        baz: {
+          hi: "bye",
+        } as any,
       } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2673,20 +2796,22 @@ it("RpcV2JsonRequestSerializesNullMapValues:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonSparseMapsCommand({
-    sparseBooleanMap: {
-      x: null,
+  const command = new RpcV2JsonSparseMapsCommand(
+    {
+      sparseBooleanMap: {
+        x: null,
+      } as any,
+      sparseNumberMap: {
+        x: null,
+      } as any,
+      sparseStringMap: {
+        x: null,
+      } as any,
+      sparseStructMap: {
+        x: null,
+      } as any,
     } as any,
-    sparseNumberMap: {
-      x: null,
-    } as any,
-    sparseStringMap: {
-      x: null,
-    } as any,
-    sparseStructMap: {
-      x: null,
-    } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2738,12 +2863,18 @@ it("RpcV2JsonRequestSerializesSparseSetMap:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonSparseMapsCommand({
-    sparseSetMap: {
-      x: [],
-      y: ["a", "b"],
+  const command = new RpcV2JsonSparseMapsCommand(
+    {
+      sparseSetMap: {
+        x: [
+        ],
+        y: [
+          "a",
+          "b",
+        ],
+      } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2787,13 +2918,19 @@ it("RpcV2JsonRequestSerializesSparseSetMapAndRetainsNull:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonSparseMapsCommand({
-    sparseSetMap: {
-      x: [],
-      y: ["a", "b"],
-      z: null,
+  const command = new RpcV2JsonSparseMapsCommand(
+    {
+      sparseSetMap: {
+        x: [
+        ],
+        y: [
+          "a",
+          "b",
+        ],
+        z: null,
+      } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -2838,14 +2975,16 @@ it("RpcV2JsonRequestSerializesZeroValuesInSparseMaps:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new RpcV2JsonSparseMapsCommand({
-    sparseNumberMap: {
-      x: 0,
+  const command = new RpcV2JsonSparseMapsCommand(
+    {
+      sparseNumberMap: {
+        x: 0,
+      } as any,
+      sparseBooleanMap: {
+        x: false,
+      } as any,
     } as any,
-    sparseBooleanMap: {
-      x: false,
-    } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3050,8 +3189,12 @@ it("RpcV2JsonResponseDeserializesSparseSetMap:Response", async () => {
   const paramsToValidate: any = [
     {
       sparseSetMap: {
-        x: [],
-        y: ["a", "b"],
+        x: [
+        ],
+        y: [
+          "a",
+          "b",
+        ],
       },
     },
   ][0];
@@ -3105,8 +3248,12 @@ it("RpcV2JsonResponseDeserializesSparseSetMapAndRetainsNull:Response", async () 
   const paramsToValidate: any = [
     {
       sparseSetMap: {
-        x: [],
-        y: ["a", "b"],
+        x: [
+        ],
+        y: [
+          "a",
+          "b",
+        ],
         z: null,
       },
     },
@@ -3191,18 +3338,20 @@ it("RpcV2JsonRequestSimpleScalarProperties:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SimpleScalarPropertiesCommand({
-    byteValue: 5,
-    doubleValue: 1.889,
-    falseBooleanValue: false,
-    floatValue: 7.625,
-    integerValue: 256,
-    longValue: 9873,
-    shortValue: 9898,
-    stringValue: "simple",
-    trueBooleanValue: true,
-    blobValue: Uint8Array.from("foo", (c) => c.charCodeAt(0)),
-  } as any);
+  const command = new SimpleScalarPropertiesCommand(
+    {
+      byteValue: 5,
+      doubleValue: 1.889,
+      falseBooleanValue: false,
+      floatValue: 7.625,
+      integerValue: 256,
+      longValue: 9873,
+      shortValue: 9898,
+      stringValue: "simple",
+      trueBooleanValue: true,
+      blobValue: Uint8Array.from("foo", (c) => c.charCodeAt(0)),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3252,9 +3401,11 @@ it("RpcV2JsonRequestClientDoesntSerializeNullStructureValues:Request", async () 
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SimpleScalarPropertiesCommand({
-    stringValue: null,
-  } as any);
+  const command = new SimpleScalarPropertiesCommand(
+    {
+      stringValue: null,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3293,10 +3444,12 @@ it("RpcV2JsonRequestSupportsNaNFloatInputs:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SimpleScalarPropertiesCommand({
-    doubleValue: NaN,
-    floatValue: NaN,
-  } as any);
+  const command = new SimpleScalarPropertiesCommand(
+    {
+      doubleValue: NaN,
+      floatValue: NaN,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3338,10 +3491,12 @@ it("RpcV2JsonRequestSupportsInfinityFloatInputs:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SimpleScalarPropertiesCommand({
-    doubleValue: Infinity,
-    floatValue: Infinity,
-  } as any);
+  const command = new SimpleScalarPropertiesCommand(
+    {
+      doubleValue: Infinity,
+      floatValue: Infinity,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3383,10 +3538,12 @@ it("RpcV2JsonRequestSupportsNegativeInfinityFloatInputs:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SimpleScalarPropertiesCommand({
-    doubleValue: -Infinity,
-    floatValue: -Infinity,
-  } as any);
+  const command = new SimpleScalarPropertiesCommand(
+    {
+      doubleValue: -Infinity,
+      floatValue: -Infinity,
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3747,11 +3904,13 @@ it("RpcV2JsonRequestSparseMapsSerializeNullValues:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SparseNullsOperationCommand({
-    sparseStringMap: {
-      foo: null,
+  const command = new SparseNullsOperationCommand(
+    {
+      sparseStringMap: {
+        foo: null,
+      } as any,
     } as any,
-  } as any);
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3794,9 +3953,13 @@ it("RpcV2JsonRequestSparseListsSerializeNull:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new SparseNullsOperationCommand({
-    sparseStringList: [null],
-  } as any);
+  const command = new SparseNullsOperationCommand(
+    {
+      sparseStringList: [
+        null,
+      ],
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");
@@ -3916,7 +4079,9 @@ it("RpcV2JsonResponseSparseListsDeserializeNull:Response", async () => {
   expect(r.$metadata.httpStatusCode).toBe(200);
   const paramsToValidate: any = [
     {
-      sparseStringList: [null],
+      sparseStringList: [
+        null,
+      ],
     },
   ][0];
   Object.keys(paramsToValidate).forEach((param) => {
@@ -3942,12 +4107,14 @@ it("RpcV2JsonRequestTimestampFormatIgnored:Request", async () => {
     requestHandler: new RequestSerializationTestHandler(),
   });
 
-  const command = new TimestampFormatIgnoredCommand({
-    dateTime: new Date(946845296000),
-    httpDate: new Date(946845296000),
-    epochSeconds: new Date(946845296000),
-    normal: new Date(946845296000),
-  } as any);
+  const command = new TimestampFormatIgnoredCommand(
+    {
+      dateTime: new Date(946845296000),
+      httpDate: new Date(946845296000),
+      epochSeconds: new Date(946845296000),
+      normal: new Date(946845296000),
+    } as any,
+  );
   try {
     await client.send(command);
     fail("Expected an EXPECTED_REQUEST_SERIALIZATION_ERROR to be thrown");

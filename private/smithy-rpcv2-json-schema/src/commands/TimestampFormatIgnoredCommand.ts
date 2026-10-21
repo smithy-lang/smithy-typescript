@@ -64,12 +64,14 @@ export interface TimestampFormatIgnoredCommandOutput extends TimestampFormatIgno
  *
  * @public
  */
-export class TimestampFormatIgnoredCommand extends command<
-  TimestampFormatIgnoredCommandInput,
-  TimestampFormatIgnoredCommandOutput
->(_ep0, _mw0, "TimestampFormatIgnored", TimestampFormatIgnored$) {
+export class TimestampFormatIgnoredCommand extends command<TimestampFormatIgnoredCommandInput, TimestampFormatIgnoredCommandOutput>(
+  _ep0,
+  _mw0,
+  "TimestampFormatIgnored",
+  TimestampFormatIgnored$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: TimestampFormatIgnoredIO;
       output: TimestampFormatIgnoredIO;

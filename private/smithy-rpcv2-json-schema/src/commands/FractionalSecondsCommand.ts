@@ -60,7 +60,7 @@ export class FractionalSecondsCommand extends command<FractionalSecondsCommandIn
   FractionalSeconds$
 ) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: {};
       output: FractionalSecondsOutput;

@@ -103,7 +103,7 @@ export class RpcV2JsonDenseMapsCommand extends command<RpcV2JsonDenseMapsCommand
   RpcV2JsonDenseMaps$
 ) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: RpcV2JsonDenseMapsInputOutput;
       output: RpcV2JsonDenseMapsInputOutput;

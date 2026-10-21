@@ -73,12 +73,14 @@ export interface SimpleScalarPropertiesCommandOutput extends SimpleScalarStructu
  *
  *
  */
-export class SimpleScalarPropertiesCommand extends command<
-  SimpleScalarPropertiesCommandInput,
-  SimpleScalarPropertiesCommandOutput
->(_ep0, _mw0, "SimpleScalarProperties", SimpleScalarProperties$) {
+export class SimpleScalarPropertiesCommand extends command<SimpleScalarPropertiesCommandInput, SimpleScalarPropertiesCommandOutput>(
+  _ep0,
+  _mw0,
+  "SimpleScalarProperties",
+  SimpleScalarProperties$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: SimpleScalarStructure;
       output: SimpleScalarStructure;

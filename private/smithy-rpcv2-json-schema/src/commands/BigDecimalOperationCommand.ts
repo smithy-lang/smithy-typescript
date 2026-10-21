@@ -55,12 +55,14 @@ export interface BigDecimalOperationCommandOutput extends BigDecimalStructure, _
  *
  *
  */
-export class BigDecimalOperationCommand extends command<
-  BigDecimalOperationCommandInput,
-  BigDecimalOperationCommandOutput
->(_ep0, _mw0, "BigDecimalOperation", BigDecimalOperation$) {
+export class BigDecimalOperationCommand extends command<BigDecimalOperationCommandInput, BigDecimalOperationCommandOutput>(
+  _ep0,
+  _mw0,
+  "BigDecimalOperation",
+  BigDecimalOperation$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: BigDecimalStructure;
       output: BigDecimalStructure;

@@ -57,7 +57,7 @@ export class NoInputOutputCommand extends command<NoInputOutputCommandInput, NoI
   NoInputOutput$
 ) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: {};
       output: {};

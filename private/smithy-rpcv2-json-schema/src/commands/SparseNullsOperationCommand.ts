@@ -65,12 +65,14 @@ export interface SparseNullsOperationCommandOutput extends SparseNullsOperationI
  *
  *
  */
-export class SparseNullsOperationCommand extends command<
-  SparseNullsOperationCommandInput,
-  SparseNullsOperationCommandOutput
->(_ep0, _mw0, "SparseNullsOperation", SparseNullsOperation$) {
+export class SparseNullsOperationCommand extends command<SparseNullsOperationCommandInput, SparseNullsOperationCommandOutput>(
+  _ep0,
+  _mw0,
+  "SparseNullsOperation",
+  SparseNullsOperation$
+) {
   /** @internal type navigation helper, not in runtime. */
-  declare protected static __types: {
+  protected declare static __types: {
     api: {
       input: SparseNullsOperationInputOutput;
       output: SparseNullsOperationInputOutput;
