@@ -974,4 +974,46 @@ describe(NodeHttp2Handler.name, () => {
       handler.destroy();
     });
   });
+
+  describe("isEventStream", () => {
+    const getIsolatedSpy = (handler: NodeHttp2Handler) =>
+      vi.spyOn(getConnectionManager(handler), "createIsolatedSession");
+    const getLeaseSpy = (handler: NodeHttp2Handler) => vi.spyOn(getConnectionManager(handler), "lease");
+
+    it("creates an isolated session for an event stream request", async () => {
+      const handler = new NodeHttp2Handler({});
+      const isolatedSpy = getIsolatedSpy(handler);
+      const leaseSpy = getLeaseSpy(handler);
+
+      await handler.handle(new HttpRequest(getMockReqOptions()), { isEventStream: true } as any);
+
+      expect(isolatedSpy).toHaveBeenCalledTimes(1);
+      expect(leaseSpy).not.toHaveBeenCalled();
+      // the flag is forwarded to the connection manager so the pool is bypassed.
+      expect(isolatedSpy.mock.calls[0][1]).toMatchObject({ isEventStream: true });
+      handler.destroy();
+    });
+
+    it("leases a pooled session for a non-event-stream request", async () => {
+      const handler = new NodeHttp2Handler({});
+      const isolatedSpy = getIsolatedSpy(handler);
+      const leaseSpy = getLeaseSpy(handler);
+
+      await handler.handle(new HttpRequest(getMockReqOptions()), {});
+
+      expect(leaseSpy).toHaveBeenCalledTimes(1);
+      expect(isolatedSpy).not.toHaveBeenCalled();
+      handler.destroy();
+    });
+
+    it("keeps event stream sessions out of the connection pool", async () => {
+      const handler = new NodeHttp2Handler({});
+
+      await handler.handle(new HttpRequest(getMockReqOptions()), { isEventStream: true } as any);
+
+      // an isolated session is never offered to a pool, so no pool is created for the authority.
+      expect(getConnectionPools(handler).get(authority)).toBeUndefined();
+      handler.destroy();
+    });
+  });
 });
