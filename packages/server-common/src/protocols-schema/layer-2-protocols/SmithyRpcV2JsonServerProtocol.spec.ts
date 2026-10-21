@@ -175,4 +175,40 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
       expect(result).toEqual({});
     });
   });
+
+  describe("claim", () => {
+    const claimable = (overrides: Partial<IHttpRequest> = {}): IHttpRequest =>
+      ({
+        method: "POST",
+        path: "/service/MyService/operation/MyOp",
+        headers: { "smithy-protocol": "rpc-v2-json" },
+        query: {},
+        body: undefined,
+        ...overrides,
+      }) as any;
+
+    it("claims a well-formed POST request with the rpc-v2-json header and matching path", () => {
+      expect(protocol.claim(claimable())).toBe(true);
+    });
+
+    it("does not claim a request with a non-POST method", () => {
+      expect(protocol.claim(claimable({ method: "GET" }))).toBe(false);
+    });
+
+    it("claims regardless of method casing (post)", () => {
+      expect(protocol.claim(claimable({ method: "post" }))).toBe(true);
+    });
+
+    it("does not claim a request missing the smithy-protocol header", () => {
+      expect(protocol.claim(claimable({ headers: {} }))).toBe(false);
+    });
+
+    it("does not claim a request with the wrong smithy-protocol value", () => {
+      expect(protocol.claim(claimable({ headers: { "smithy-protocol": "rpc-v2-cbor" } }))).toBe(false);
+    });
+
+    it("does not claim a request whose path is not an RPC v2 route", () => {
+      expect(protocol.claim(claimable({ path: "/some/other/path" }))).toBe(false);
+    });
+  });
 });

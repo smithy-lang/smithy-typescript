@@ -69,6 +69,22 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
       return false;
     }
 
+    // Per the SEP, every RPC v2 request MUST be sent with the POST method.
+    if (request.method?.toUpperCase() !== "POST") {
+      logger?.debug?.(`${logPrefix}: request method is not POST.`);
+      return false;
+    }
+
+    // The request path MUST match /service/{serviceName}/operation/{operationName}.
+    // Note: the {serviceName} segment is not yet verified against this service's
+    // shape name (the server protocol does not currently receive it), so a path
+    // for another service can still match here; operation resolution in route()
+    // provides a partial backstop.
+    if (!RPC_ROUTE.test(request.path)) {
+      logger?.debug?.(`${logPrefix}: request path not matched.`);
+      return false;
+    }
+
     logger?.debug?.(`${logPrefix}: protocol claimed.`);
     return true;
   }
