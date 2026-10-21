@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.36.2
+
+### Patch Changes
+
+- 76726da: Add event stream header size validations
+- 50f64b9: cache schema-based detection of event streams
+
 ## 3.36.1
 
 ### Patch Changes
