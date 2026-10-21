@@ -18,10 +18,17 @@ import {
   type RequestHandler,
   type SerdeContext,
   type StaticOperationSchema,
+  type StaticSchemaIdOperation,
 } from "@smithy/types";
 
 import { constructStack } from "../middleware-stack/MiddlewareStack";
 import { schemaLogFilter } from "./schemaLogFilter";
+import { NormalizedSchema } from "@smithy/core/schema";
+
+/**
+ * @internal
+ */
+const operationEventStreamMarker = Symbol.for("@smithy/op-event-stream");
 
 /**
  * @public
@@ -101,12 +108,27 @@ export abstract class Command<
       requestOptions = { ...requestOptions };
       delete requestOptions.metricsRecorder;
     }
-    if (smithyContext.eventStream) {
+    let isEventStream: boolean | undefined;
+    const schema = this.schema as undefined | (StaticOperationSchema & { [operationEventStreamMarker]: boolean });
+    const marker = schema?.[operationEventStreamMarker];
+    if (marker !== undefined) {
+      isEventStream = marker;
+    } else if (schema) {
+      if (Array.isArray(schema) && schema[0] === (9 satisfies StaticSchemaIdOperation)) {
+        const [, , , , input$, output$] = schema;
+        isEventStream = schema[operationEventStreamMarker] = Boolean(
+          NormalizedSchema.of(input$).getEventStreamMember() || NormalizedSchema.of(output$).getEventStreamMember()
+        );
+      }
+    }
+
+    if (isEventStream) {
       requestOptions = {
-        isEventStream: true,
+        isEventStream,
         ...requestOptions,
       };
     }
+
     return stack.resolve(
       (request: FinalizeHandlerArguments<any>) => requestHandler.handle(request.request as HttpRequest, requestOptions),
       handlerExecutionContext

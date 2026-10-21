@@ -1,7 +1,57 @@
 import { describe, expect, test as it, vi } from "vitest";
-import { SMITHY_CONTEXT_KEY } from "@smithy/types";
+import { NormalizedSchema } from "@smithy/core/schema";
+import {
+  SMITHY_CONTEXT_KEY,
+  type StaticOperationSchema,
+  type StaticStructureSchema,
+  type StaticUnionSchema,
+} from "@smithy/types";
 
 import { Command } from "./command";
+
+// A streaming union member marks an event stream; see NormalizedSchema.getEventStreamMember.
+const streamingUnion: StaticUnionSchema = [4, "ns", "Stream", { streaming: 1 }, [], []];
+const plainStruct: StaticStructureSchema = [3, "ns", "Plain", 0, ["x"], [1]];
+const structWith = (member: StaticUnionSchema): StaticStructureSchema => [3, "ns", "Wrap", 0, ["s"], [member]];
+const unit: StaticStructureSchema = [3, "smithy.api", "Unit", 0, [], []];
+
+const opSchema = (input: StaticStructureSchema, output: StaticStructureSchema): StaticOperationSchema => [
+  9,
+  "ns",
+  "Op",
+  0,
+  input,
+  output,
+];
+
+const eventStreamProbeCommand = (schema?: StaticOperationSchema) => {
+  const handleFn = vi.fn().mockResolvedValue({ response: {} });
+  const builder = Command.classBuilder<any, any, any, any, any>()
+    .m(function () {
+      return [];
+    })
+    .s("MyClient", "MyOp", {})
+    .n("MyClient", "MyOp")
+    .f()
+    .ser(async (_) => ({ ..._, headers: {}, method: "POST", protocol: "https:", hostname: "localhost", path: "/" }))
+    .de(async (_) => ({ $metadata: {} }));
+  if (schema) {
+    builder.sc(schema);
+  }
+  class ProbeCommand extends builder.build() {}
+  return { ProbeCommand, handleFn };
+};
+
+const dispatch = async (ProbeCommand: any, handleFn: any) => {
+  const cmd = new ProbeCommand({});
+  const handler = cmd.resolveMiddleware(
+    { concat: () => ({ resolve: (fn: any) => fn }) } as any,
+    { logger: {} as any, requestHandler: { handle: handleFn } },
+    { requestTimeout: 5000 }
+  );
+  await handler({ input: {} });
+  return handleFn.mock.calls[0][1];
+};
 
 describe(Command.name, () => {
   it("has optional argument if the input type has no required members", async () => {
@@ -58,38 +108,53 @@ describe(Command.name, () => {
     expect((myCommand as any).deserialize).toBeDefined();
   });
 
-  it("should spread requestOptions correctly for event stream commands", async () => {
-    const handleFn = vi.fn().mockResolvedValue({ response: {} });
+  it("flags an event stream from a streaming input member and spreads requestOptions", async () => {
+    const { ProbeCommand, handleFn } = eventStreamProbeCommand(opSchema(structWith(streamingUnion), unit));
+    const passedOptions = await dispatch(ProbeCommand, handleFn);
+    expect(passedOptions).toEqual({ isEventStream: true, requestTimeout: 5000 });
+  });
 
-    class MyEventStreamCommand extends Command.classBuilder<any, any, any, any, any>()
-      .m(function () {
-        return [];
-      })
-      .s("MyClient", "MyOp", { eventStream: true })
-      .n("MyClient", "MyOp")
-      .f()
-      .ser(async (_) => ({ ..._, headers: {}, method: "POST", protocol: "https:", hostname: "localhost", path: "/" }))
-      .de(async (_) => ({ $metadata: {} }))
-      .build() {}
+  it("flags an event stream from a streaming output member", async () => {
+    const { ProbeCommand, handleFn } = eventStreamProbeCommand(opSchema(unit, structWith(streamingUnion)));
+    const passedOptions = await dispatch(ProbeCommand, handleFn);
+    expect(passedOptions.isEventStream).toBe(true);
+  });
 
-    const cmd = new MyEventStreamCommand({});
-    const handler = cmd.resolveMiddleware(
-      { concat: () => ({ resolve: (fn: any, _ctx: any) => fn }) } as any,
-      {
-        logger: {} as any,
-        requestHandler: { handle: handleFn },
-      },
-      { requestTimeout: 5000 }
+  it("flags an event stream with both input and output streaming", async () => {
+    const { ProbeCommand, handleFn } = eventStreamProbeCommand(
+      opSchema(structWith(streamingUnion), structWith(streamingUnion))
     );
+    const passedOptions = await dispatch(ProbeCommand, handleFn);
+    expect(passedOptions.isEventStream).toBe(true);
+  });
 
-    await handler({ input: {} });
+  it("does not flag a non-event-stream operation", async () => {
+    const { ProbeCommand, handleFn } = eventStreamProbeCommand(opSchema(plainStruct, plainStruct));
+    const passedOptions = await dispatch(ProbeCommand, handleFn);
+    expect(passedOptions.isEventStream).toBeUndefined();
+    expect(passedOptions).toEqual({ requestTimeout: 5000 });
+  });
 
-    expect(handleFn).toHaveBeenCalledTimes(1);
-    const passedOptions = handleFn.mock.calls[0][1];
-    expect(passedOptions).toEqual({
-      isEventStream: true,
-      requestTimeout: 5000,
-    });
+  it("does not flag a command without an operation schema", async () => {
+    const { ProbeCommand, handleFn } = eventStreamProbeCommand(undefined);
+    const passedOptions = await dispatch(ProbeCommand, handleFn);
+    expect(passedOptions.isEventStream).toBeUndefined();
+  });
+
+  it("memoizes the event stream determination on the shared schema object", async () => {
+    const schema = opSchema(structWith(streamingUnion), unit);
+    const ofSpy = vi.spyOn(NormalizedSchema, "of");
+    const { ProbeCommand, handleFn } = eventStreamProbeCommand(schema);
+
+    await dispatch(ProbeCommand, handleFn);
+    const callsAfterFirst = ofSpy.mock.calls.length;
+    expect(callsAfterFirst).toBeGreaterThan(0);
+
+    // A second dispatch of the same command class reuses the cached marker and does not re-normalize.
+    await dispatch(ProbeCommand, vi.fn().mockResolvedValue({ response: {} }));
+    expect(ofSpy.mock.calls.length).toBe(callsAfterFirst);
+
+    ofSpy.mockRestore();
   });
 
   it("places an externally owned recorder in the Smithy context and does not pass it to the transport", async () => {
