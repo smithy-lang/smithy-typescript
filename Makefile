@@ -28,6 +28,7 @@ generate-protocol-tests:
 	rm -rf ./private/smithy-rpcv2-json-schema
 	rm -rf ./private/my-local-model
 	rm -rf ./private/my-local-model-schema
+	rm -rf ./private/my-local-model-schema-json
 	rm -rf ./private/my-local-model-schema-server
 	rm -rf ./private/types-only
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-cbor/typescript-codegen ./private/smithy-rpcv2-cbor
@@ -35,6 +36,7 @@ generate-protocol-tests:
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/smithy-rpcv2-json-schema/typescript-codegen ./private/smithy-rpcv2-json-schema
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model/typescript-client-codegen/ ./private/my-local-model
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema/typescript-client-codegen/ ./private/my-local-model-schema
+	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema-json/typescript-client-codegen/ ./private/my-local-model-schema-json
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/my-local-model-schema-server/typescript-server-codegen/ ./private/my-local-model-schema-server
 	cp -r ./smithy-typescript-protocol-test-codegen/build/smithyprojections/smithy-typescript-protocol-test-codegen/types-only/typescript-codegen/ ./private/types-only
 	node ./scripts/post-protocol-test-codegen
@@ -60,9 +62,11 @@ test-protocols:
 	(cd ./private/smithy-rpcv2-cbor-schema && npx vitest run --globals && yarn test:index)
 	(cd ./private/smithy-rpcv2-json-schema && npx vitest run --globals && yarn test:index)
 	(cd ./private/my-local-model-schema && npx vitest run --globals && yarn test:index)
+	(cd ./private/my-local-model-schema-json && npx vitest run --globals --passWithNoTests && yarn test:index)
 	(cd ./private/smithy-rpcv2-cbor-schema && yarn test:integration)
 	(cd ./private/smithy-rpcv2-json-schema && yarn test:integration)
 	(cd ./private/my-local-model-schema && yarn test:integration)
+	(cd ./private/my-local-model-schema-json && yarn test:integration)
 
 benchmark:
 	(cd ./private/my-local-model-schema && npx vitest run --globals)

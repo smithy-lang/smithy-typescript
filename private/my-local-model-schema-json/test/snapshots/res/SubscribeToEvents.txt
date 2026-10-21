@@ -1,0 +1,91 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[async_iterable (Object)]
+
+
+
+
+--- [output object] ---
+{
+  events: async_it[<empty>],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 143 [header-size] 82 [prelude-crc] 3555838194
+:event-type: notification
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "topic": "__topic__",
+  "payload": "__payload__"
+}
+
+[message-crc] 558047885
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 122 [header-size] 79 [prelude-crc] 807631622
+:event-type: heartbeat
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "timestamp": 946702799.999
+}
+
+[message-crc] 2916715813
+============================================================
+
+[chunk (b64)]
+Cg==
+
+
+
+--- [output object] ---
+{
+  events: async_it[
+    {
+      notification: {
+        topic: "__topic__",
+        payload: "__payload__"
+      }
+    },
+    {
+      heartbeat: {
+        timestamp: (Date) Fri, Dec 31, 1999, 20:59:59 Pacific Standard Time
+      }
+    }
+  ],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+

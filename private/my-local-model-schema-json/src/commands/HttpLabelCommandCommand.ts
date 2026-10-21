@@ -1,0 +1,75 @@
+// smithy-typescript generated code
+import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
+
+import { _ep3, _mw0, command } from "../commandBuilder";
+import type { HttpLabelCommandInput, HttpLabelCommandOutput } from "../models/models_0";
+import { HttpLabelCommand$ } from "../schemas/schemas_0";
+
+/**
+ * @public
+ */
+export type { __MetadataBearer };
+/**
+ * @public
+ *
+ * The input for {@link HttpLabelCommandCommand}.
+ */
+export interface HttpLabelCommandCommandInput extends HttpLabelCommandInput {}
+/**
+ * @public
+ *
+ * The output of {@link HttpLabelCommandCommand}.
+ */
+export interface HttpLabelCommandCommandOutput extends HttpLabelCommandOutput, __MetadataBearer {}
+
+/**
+ * @public
+ *
+ * @example
+ * Use a bare-bones client and the command you need to make an API call.
+ * ```javascript
+ * import { XYZServiceClient, HttpLabelCommandCommand } from "xyz-schema-json"; // ES Modules import
+ * // const { XYZServiceClient, HttpLabelCommandCommand } = require("xyz-schema-json"); // CommonJS import
+ * // import type { XYZServiceClientConfig } from "xyz-schema-json";
+ * const config = {}; // type is XYZServiceClientConfig
+ * const client = new XYZServiceClient(config);
+ * const input = { // HttpLabelCommandInput
+ *   LabelDoesNotApplyToRpcProtocol: "STRING_VALUE", // required
+ * };
+ * const command = new HttpLabelCommandCommand(input);
+ * const response = await client.send(command);
+ * // {};
+ *
+ * ```
+ *
+ * @param HttpLabelCommandCommandInput - {@link HttpLabelCommandCommandInput}
+ * @returns {@link HttpLabelCommandCommandOutput}
+ * @see {@link HttpLabelCommandCommandInput} for command's `input` shape.
+ * @see {@link HttpLabelCommandCommandOutput} for command's `response` shape.
+ * @see {@link XYZServiceClientResolvedConfig | config} for XYZServiceClient's `config` shape.
+ *
+ * @throws {@link MainServiceLinkedError} (client fault)
+ *
+ * @throws {@link XYZServiceSyntheticServiceException}
+ * <p>Base exception class for all service exceptions from XYZService service.</p>
+ *
+ *
+ */
+export class HttpLabelCommandCommand extends command<HttpLabelCommandCommandInput, HttpLabelCommandCommandOutput>(
+  _ep3,
+  _mw0,
+  "HttpLabelCommand",
+  HttpLabelCommand$
+) {
+  /** @internal type navigation helper, not in runtime. */
+  protected declare static __types: {
+    api: {
+      input: HttpLabelCommandInput;
+      output: {};
+    };
+    sdk: {
+      input: HttpLabelCommandCommandInput;
+      output: HttpLabelCommandCommandOutput;
+    };
+  };
+}
