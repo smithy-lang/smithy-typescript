@@ -6,6 +6,7 @@ import { buildAbortError } from "./build-abort-error";
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { node_http2 } from "./node-http2";
 import { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
+import { resolveDefaultSocketTimeout } from "./set-default-socket-timeout";
 import { writeRequestBody } from "./write-request-body";
 
 const { constants } = node_http2;
@@ -64,12 +65,20 @@ type EventStreamSignal = {
   isEventStream?: boolean;
 };
 
+interface ResolvedNodeHttp2HandlerConfig extends NodeHttp2HandlerOptions {
+  /**
+   * Service default idle timeout from generated clients, applied only when neither
+   * requestTimeout nor sessionTimeout is set.
+   */
+  defaultSocketTimeout?: number;
+}
+
 /**
  * A request handler using the node:http2 package.
  * @public
  */
 export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
-  private config?: NodeHttp2HandlerOptions;
+  private config?: ResolvedNodeHttp2HandlerConfig;
   private configProvider: Promise<NodeHttp2HandlerOptions>;
 
   public readonly metadata = { handlerProtocol: "h2" };
@@ -114,7 +123,8 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
     { abortSignal, requestTimeout, isEventStream }: HttpHandlerOptions & EventStreamSignal = {}
   ): Promise<{ response: HttpResponse }> {
     if (!this.config) {
-      this.config = await this.configProvider;
+      const config = await this.configProvider;
+      this.config = { ...config, defaultSocketTimeout: resolveDefaultSocketTimeout(config) };
       const { disableConcurrentStreams, maxConcurrentStreams, nodeHttp2ConnectOptions } = this.config;
 
       this.connectionManager.setDisableConcurrentStreams(disableConcurrentStreams ?? false);
@@ -126,9 +136,15 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
       }
     }
 
-    const { requestTimeout: configRequestTimeout, disableConcurrentStreams } = this.config;
+    const { requestTimeout: configRequestTimeout, disableConcurrentStreams, sessionTimeout } = this.config;
     const useIsolatedSession = disableConcurrentStreams || isEventStream;
     const effectiveRequestTimeout = requestTimeout ?? configRequestTimeout;
+    // Applies only when the caller set no idle timeout. Output-only event streams keep it:
+    // each event resets the window. Generated clients pass no default to bidirectional streams.
+    const defaultSocketTimeout =
+      effectiveRequestTimeout === undefined && sessionTimeout === undefined
+        ? this.config.defaultSocketTimeout
+        : undefined;
 
     return new Promise((_resolve, _reject) => {
       // It's redundant to track fulfilled because promises use the first resolution/rejection
@@ -203,6 +219,24 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           timeoutError.name = "TimeoutError";
           rejectWithDestroy(timeoutError);
         });
+      } else if (defaultSocketTimeout) {
+        // Same stream inactivity timer as requestTimeout above. The difference is how it fails:
+        // requestTimeout close()s the stream, so a body already handed to the caller can end as
+        // if complete. This destroys the stream with the TimeoutError so the body fails with it.
+        clientHttp2Stream.setTimeout(defaultSocketTimeout, () => {
+          const timeoutError = new Error(`Stream timed out because of no activity for ${defaultSocketTimeout} ms`);
+          timeoutError.name = "TimeoutError";
+          // Reject first: destroy() synchronously emits "aborted"/"error", whose
+          // handlers would otherwise settle the request with a generic error.
+          fulfilled = true;
+          reject(timeoutError);
+          clientHttp2Stream.destroy(timeoutError);
+          if (useIsolatedSession) {
+            ref.destroy();
+          }
+        });
+        // Re-arm on headers so the body phase gets a fresh inactivity window.
+        clientHttp2Stream.once("response", () => clientHttp2Stream.setTimeout(defaultSocketTimeout));
       }
 
       if (abortSignal) {

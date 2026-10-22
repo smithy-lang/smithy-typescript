@@ -70,6 +70,65 @@ describe("setSocketTimeout", () => {
     });
   });
 
+  describe("failResponseBody", () => {
+    const makeRequest = () => {
+      const listeners: Record<string, Function> = {};
+      return {
+        destroy: vi.fn(),
+        setTimeout: vi.fn(),
+        socket: { setTimeout: vi.fn(), removeListener: vi.fn() },
+        on: vi.fn(),
+        once: vi.fn((event: string, fn: Function) => (listeners[event] = fn)),
+        res: { destroy: vi.fn() },
+        emit(event: string) {
+          listeners[event]?.(event === "response" ? this.res : undefined);
+        },
+      } as any;
+    };
+
+    it("keeps the deferred registration when the handler clears its timeouts on headers", () => {
+      const request = makeRequest();
+      const id = setSocketTimeout(request, vi.fn(), 300000, true);
+      expect(id).toBe(0);
+      timing.clearTimeout(id);
+
+      vi.advanceTimersByTime(3000);
+      expect(request.socket.setTimeout).toHaveBeenCalledWith(297000, expect.any(Function));
+    });
+
+    it("registers nothing when the request closes within the deferral", () => {
+      const request = makeRequest();
+      setSocketTimeout(request, vi.fn(), 300000, true);
+      request.emit("close");
+
+      vi.runAllTimers();
+      expect(request.socket.setTimeout).not.toHaveBeenCalled();
+    });
+
+    it("fails the response body with the TimeoutError on timeout", () => {
+      const request = makeRequest();
+      const reject = vi.fn();
+      setSocketTimeout(request, reject, 300000, true);
+      request.emit("response");
+      vi.advanceTimersByTime(3000);
+
+      request.socket.setTimeout.mock.calls[0][1]();
+      const error = reject.mock.calls[0][0];
+      expect(error.name).toBe("TimeoutError");
+      expect(error.message).toContain("(service default socket timeout)");
+      expect(request.res.destroy).toHaveBeenCalledWith(error);
+      expect(request.destroy).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves the response alone without the option", () => {
+      const request = makeRequest();
+      setSocketTimeout(request, vi.fn(), 1000);
+
+      request.socket.setTimeout.mock.calls[0][1]();
+      expect(request.res.destroy).not.toHaveBeenCalled();
+    });
+  });
+
   it(`destroys the request on timeout`, () => {
     setSocketTimeout(clientRequest, vi.fn(), 1);
     expect(clientRequest.destroy).not.toHaveBeenCalled();
