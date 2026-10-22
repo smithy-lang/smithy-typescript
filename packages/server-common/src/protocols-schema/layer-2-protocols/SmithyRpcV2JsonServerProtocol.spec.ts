@@ -300,4 +300,33 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
       expect(body.message).toBe("nope");
     });
   });
+
+  describe("serializeSuccess - unit output", () => {
+    it("returns an empty body and no content-type for unit output", async () => {
+      // Per the SEP, an operation targeting the Unit output shape MUST NOT have
+      // a response body and MUST NOT set Content-Type.
+      const response = await (protocol as any).serializeSuccess(makeUnitOpSchema(), makeContext(), {});
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBeUndefined();
+      expect(response.headers["content-type"]).toBeUndefined();
+      expect(response.headers["smithy-protocol"]).toBe("rpc-v2-json");
+    });
+
+    it("still serializes a body and content-type for non-unit output", async () => {
+      // A struct output must produce a JSON body with the content-type set.
+      const structOutputOp = [
+        9,
+        "test",
+        "MyOp",
+        0,
+        "unit",
+        [3, "test", "Out", 0, ["value"], [0 satisfies StringSchema]],
+      ] satisfies StaticOperationSchema;
+      const response = await (protocol as any).serializeSuccess(structOutputOp, makeContext(), { value: "hello" });
+      expect(response.statusCode).toBe(200);
+      expect(response.headers["content-type"]).toBe("application/json");
+      expect(response.headers["smithy-protocol"]).toBe("rpc-v2-json");
+      expect(JSON.parse(new TextDecoder().decode(response.body))).toEqual({ value: "hello" });
+    });
+  });
 });

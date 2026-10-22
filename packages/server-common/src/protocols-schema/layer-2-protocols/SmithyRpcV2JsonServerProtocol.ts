@@ -177,12 +177,26 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
 
   /**
    * @override - Adds the smithy-protocol header to responses.
+   *
+   * Per the spec, an operation whose output targets the Unit shape MUST NOT
+   * contain a response body, and the Content-Type MUST NOT be set. The base
+   * serializeSuccess has no unit branch and would emit an empty JSON object
+   * ("{}") with a content-type, so handle unit output here.
    */
   protected override async serializeSuccess<Output extends object>(
     operationSchema: StaticOperationSchema,
     context: SerdeFunctions,
     output: Output
   ): Promise<IHttpResponse> {
+    if (NormalizedSchema.of(operationSchema[5]).getSchema() === "unit") {
+      return new HttpResponse({
+        statusCode: 200,
+        headers: {
+          "smithy-protocol": "rpc-v2-json",
+        },
+        body: undefined,
+      });
+    }
     const response = await super.serializeSuccess(operationSchema, context, output);
     response.headers["smithy-protocol"] = "rpc-v2-json";
     return response;
