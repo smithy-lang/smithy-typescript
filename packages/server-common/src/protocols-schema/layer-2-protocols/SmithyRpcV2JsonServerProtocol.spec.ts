@@ -349,6 +349,38 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
       expect(body.__type).toBe("test#UnregisteredError");
       expect(body.message).toBe("nope");
     });
+
+    it("uses the modeled @httpError status when the runtime error carries no status", async () => {
+      // The error has no $metadata.httpStatusCode / statusCode, only the modeled
+      // httpError trait (429). resolveErrorStatusCode must apply it rather than
+      // falling back to the fault default (400).
+      const errorSchema = [
+        -3,
+        "other",
+        "ThrottleError",
+        { httpError: 429 },
+        ["message"],
+        [0 satisfies StringSchema],
+      ] satisfies StaticErrorSchema;
+
+      class ThrottleError extends Error {
+        public readonly name = "ThrottleError";
+        public readonly $fault = "client" as const;
+      }
+
+      const registry = TypeRegistry.for("other");
+      registry.registerError(errorSchema, ThrottleError);
+
+      try {
+        const error = Object.assign(new ThrottleError(), { message: "slow down" });
+        const response = await (protocol as any).serializeError(makeUnitOpSchema(), makeContext(), error);
+        expect(response.statusCode).toBe(429);
+        expect(decode(response.body).__type).toBe("other#ThrottleError");
+      } finally {
+        registry.clear();
+        TypeRegistry.registries.delete("other");
+      }
+    });
   });
 
   describe("serializeSuccess - unit output", () => {

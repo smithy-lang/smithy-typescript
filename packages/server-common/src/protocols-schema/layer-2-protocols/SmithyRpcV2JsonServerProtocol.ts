@@ -21,6 +21,7 @@ import type {
 
 import { ServiceException, UnsupportedMediaTypeException } from "../../validation/errors";
 import { SerializationException } from "../../validation/errors";
+import { resolveErrorStatusCode } from "../error-status";
 import { RpcServerProtocol } from "../layer-1-abstracts/RpcServerProtocol";
 
 // Per the SEP, only the last four segments of the path are used for routing:
@@ -252,17 +253,18 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
    * - The body MUST contain a `__type` field whose value is the error's
    *   absolute Shape ID (namespace#name).
    * - The body SHOULD contain a `message` field.
-   * - The HTTP status code comes from `@httpError`, else 500 for a server
-   *   fault, else 400.
+   * - The HTTP status code is resolved by {@link resolveErrorStatusCode}: an
+   *   explicit runtime status, else the modeled `@httpError` trait, else 400
+   *   for a client fault / 500 for a server fault.
    */
   protected override async serializeError<E extends Error>(
     _operationSchema: StaticOperationSchema,
     _context: SerdeFunctions,
     error: E
   ): Promise<IHttpResponse> {
-    const fault: string | undefined = (error as any).$fault;
-    const statusCode =
-      (error as any).$metadata?.httpStatusCode ?? (error as any).statusCode ?? (fault === "client" ? 400 : 500);
+    // resolveErrorStatusCode honors an explicit runtime status, then the
+    // modeled @httpError trait, then the client/server fault default.
+    const statusCode = resolveErrorStatusCode(error);
 
     // Prefer serializing through the modeled error schema. The schema carries
     // the error's absolute Shape ID (so __type is correct even for errors in a
