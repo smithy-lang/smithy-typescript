@@ -260,7 +260,16 @@ public final class SchemaServerGenerator {
             return new ProtocolDefault("SmithyRpcV2CborServerProtocol", namespaceOption);
         }
         if (protocol.equals(RPC_V2_JSON)) {
-            return new ProtocolDefault("SmithyRpcV2JsonServerProtocol", namespaceOption);
+            // Pass the modeled service name so the protocol can match the full
+            // RPC v2 route (/service/{serviceName}/operation/{operationName}).
+            return new ProtocolDefault(
+                "SmithyRpcV2JsonServerProtocol",
+                "{ defaultNamespace: \""
+                    + service.getId().getNamespace()
+                    + "\", serviceName: \""
+                    + service.getId().getName()
+                    + "\" }"
+            );
         }
         if (protocol.equals(AWS_JSON_1_0)) {
             return new ProtocolDefault("AwsJsonRpcServerProtocol", namespaceOption);

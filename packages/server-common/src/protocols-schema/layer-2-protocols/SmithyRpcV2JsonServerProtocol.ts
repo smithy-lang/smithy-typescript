@@ -23,7 +23,12 @@ import { ServiceException, UnsupportedMediaTypeException } from "../../validatio
 import { SerializationException } from "../../validation/errors";
 import { RpcServerProtocol } from "../layer-1-abstracts/RpcServerProtocol";
 
-const RPC_ROUTE = /\/service\/[^/]+\/operation\/([^/?]+)/;
+// Per the SEP, only the last four segments of the path are used for routing:
+// {prefix?}/service/{serviceName}/operation/{operationName}. The route MUST end
+// at {operationName} (optionally a trailing slash / query string); trailing path
+// segments after the operation are NOT part of a valid RPC v2 route. Group 1 is
+// the service name, group 2 is the operation name.
+const RPC_ROUTE = /\/service\/([^/]+)\/operation\/([^/?]+)\/?(?:\?.*)?$/;
 
 /**
  * JSON settings for Smithy RPCv2 JSON.
@@ -57,8 +62,37 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
   protected serializer: ShapeSerializer<Uint8Array> = this.codec.createSerializer();
   protected deserializer: ShapeDeserializer<Uint8Array> = this.codec.createDeserializer() as ShapeDeserializer<any>;
 
-  public constructor(options: { defaultNamespace: string }) {
+  /**
+   * @param options.defaultNamespace - namespace used for error resolution.
+   * @param options.serviceName - optional modeled service shape name. When
+   *   provided, the protocol verifies the request path's `{serviceName}`
+   *   segment against it (the SEP also accepts the absolute shape id with `#`
+   *   replaced by `.`). When omitted, the service-name segment is not checked
+   *   (backward compatible).
+   */
+  public constructor(options: { defaultNamespace: string; serviceName?: string }) {
     super(options);
+    this.serviceName = options.serviceName;
+  }
+
+  private readonly serviceName?: string;
+
+  /**
+   * Returns true if the path's captured {serviceName} segment identifies this
+   * service. Accepts the bare shape name and the absolute shape id form where
+   * `#` is replaced by `.` (e.g. "com.example.TheService"), per the SEP. When
+   * no serviceName was configured, the check is skipped (returns true).
+   */
+  private serviceNameMatches(segment: string): boolean {
+    if (this.serviceName === undefined) {
+      return true;
+    }
+    if (segment === this.serviceName) {
+      return true;
+    }
+    // Absolute shape id form: "<namespace>.<ServiceName>".
+    const namespace = (this.options as { defaultNamespace: string }).defaultNamespace;
+    return !!namespace && segment === `${namespace}.${this.serviceName}`;
   }
 
   public override getShapeId(): string {
@@ -78,13 +112,17 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
       return false;
     }
 
-    // The request path MUST match /service/{serviceName}/operation/{operationName}.
-    // Note: the {serviceName} segment is not yet verified against this service's
-    // shape name (the server protocol does not currently receive it), so a path
-    // for another service can still match here; operation resolution in route()
-    // provides a partial backstop.
-    if (!RPC_ROUTE.test(request.path)) {
+    // The request path MUST end with /service/{serviceName}/operation/{operationName}.
+    const match = RPC_ROUTE.exec(request.path);
+    if (!match) {
       logger?.debug?.(`${logPrefix}: request path not matched.`);
+      return false;
+    }
+
+    // When the modeled service name is known, the {serviceName} segment MUST
+    // identify this service.
+    if (!this.serviceNameMatches(match[1])) {
+      logger?.debug?.(`${logPrefix}: request service name did not match.`);
       return false;
     }
 
@@ -104,7 +142,12 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
       return undefined;
     }
 
-    const requestedOperation = match[1];
+    if (!this.serviceNameMatches(match[1])) {
+      logger?.debug?.(`${logPrefix}: request service name did not match.`);
+      return undefined;
+    }
+
+    const requestedOperation = match[2];
     if (!requestedOperation) {
       logger?.debug?.(`${logPrefix}: request operation not found.`);
       return undefined;

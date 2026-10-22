@@ -218,6 +218,56 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
     it("does not claim a request whose path is not an RPC v2 route", () => {
       expect(protocol.claim(claimable({ path: "/some/other/path" }))).toBe(false);
     });
+
+    it("does not claim a path with trailing segments after the operation", () => {
+      // Backward-compat instance (no serviceName) still rejects trailing junk.
+      expect(protocol.claim(claimable({ path: "/service/MyService/operation/MyOp/extra" }))).toBe(false);
+    });
+  });
+
+  describe("claim/route - full route with modeled service name", () => {
+    // Constructed WITH serviceName, as generated servers now do.
+    const svcProtocol = new SmithyRpcV2JsonServerProtocol({
+      defaultNamespace: "org.xyz.v1",
+      serviceName: "XYZService",
+    });
+    const req = (path: string): IHttpRequest =>
+      ({
+        method: "POST",
+        path,
+        headers: { "smithy-protocol": "rpc-v2-json" },
+        query: {},
+        body: undefined,
+      }) as any;
+    const opSchemas = { MyOp: makeUnitOpSchema() } as Record<string, StaticOperationSchema>;
+
+    it("claims the exact /service/{name}/operation/{op} route", () => {
+      expect(svcProtocol.claim(req("/service/XYZService/operation/MyOp"))).toBe(true);
+    });
+
+    it("claims a route with an allowed prefix (last four segments used)", () => {
+      expect(svcProtocol.claim(req("/v1/service/XYZService/operation/MyOp"))).toBe(true);
+    });
+
+    it("accepts the absolute shape id form (namespace.Service)", () => {
+      expect(svcProtocol.claim(req("/service/org.xyz.v1.XYZService/operation/MyOp"))).toBe(true);
+    });
+
+    it("does not claim a path for a different service name", () => {
+      expect(svcProtocol.claim(req("/service/OtherService/operation/MyOp"))).toBe(false);
+    });
+
+    it("does not claim a path with trailing segments after the operation", () => {
+      expect(svcProtocol.claim(req("/service/XYZService/operation/MyOp/extra"))).toBe(false);
+    });
+
+    it("route returns the operation for the matching service", () => {
+      expect(svcProtocol.route(req("/service/XYZService/operation/MyOp"), opSchemas)).toBe("MyOp");
+    });
+
+    it("route returns undefined for a different service name", () => {
+      expect(svcProtocol.route(req("/service/OtherService/operation/MyOp"), opSchemas)).toBeUndefined();
+    });
   });
 
   describe("serializeError - modeled error schema", () => {
