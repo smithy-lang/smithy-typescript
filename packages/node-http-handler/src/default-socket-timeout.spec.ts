@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, test as it } from "vi
 import { NodeHttp2Handler } from "./node-http2-handler";
 import { NodeHttpHandler } from "./node-http-handler";
 import { createMockHttp2Server } from "./server.mock";
-import { resolveDefaultSocketTimeout } from "./set-default-socket-timeout";
+import { resolveDefaultSocketTimeout } from "./resolve-default-socket-timeout";
 
 /**
  * Generated clients pass a service default idle timeout as the untyped

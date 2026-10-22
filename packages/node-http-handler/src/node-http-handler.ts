@@ -11,7 +11,7 @@ import { node_https } from "./node-https";
 import { setConnectionTimeout } from "./set-connection-timeout";
 import { setRequestTimeout } from "./set-request-timeout";
 import { setSocketKeepAlive } from "./set-socket-keep-alive";
-import { resolveDefaultSocketTimeout } from "./set-default-socket-timeout";
+import { resolveDefaultSocketTimeout } from "./resolve-default-socket-timeout";
 import { setSocketTimeout } from "./set-socket-timeout";
 import { timing } from "./timing";
 import { writeRequestBody } from "./write-request-body";

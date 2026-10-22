@@ -70,7 +70,7 @@ describe("setSocketTimeout", () => {
     });
   });
 
-  describe("failResponseBody", () => {
+  describe("destroyResponseBodyOnTimeout", () => {
     const makeRequest = () => {
       const listeners: Record<string, Function> = {};
       return {

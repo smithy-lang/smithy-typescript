@@ -6,7 +6,7 @@ import { buildAbortError } from "./build-abort-error";
 import { getTransformedHeaders } from "./get-transformed-headers";
 import { node_http2 } from "./node-http2";
 import { NodeHttp2ConnectionManager } from "./node-http2-connection-manager";
-import { resolveDefaultSocketTimeout } from "./set-default-socket-timeout";
+import { resolveDefaultSocketTimeout } from "./resolve-default-socket-timeout";
 import { writeRequestBody } from "./write-request-body";
 
 const { constants } = node_http2;
