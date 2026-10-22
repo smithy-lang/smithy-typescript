@@ -220,8 +220,9 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           rejectWithDestroy(timeoutError);
         });
       } else if (defaultSocketTimeout) {
-        // Inactivity timeout, distinct from the requestTimeout deadline above: destroys the
-        // stream with the error and re-arms on headers.
+        // Same stream inactivity timer as requestTimeout above. The difference is how it fails:
+        // requestTimeout close()s the stream, so a body already handed to the caller can end as
+        // if complete. This destroys the stream with the TimeoutError so the body fails with it.
         clientHttp2Stream.setTimeout(defaultSocketTimeout, () => {
           const timeoutError = new Error(`Stream timed out because of no activity for ${defaultSocketTimeout} ms`);
           timeoutError.name = "TimeoutError";
@@ -229,8 +230,6 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
           // handlers would otherwise settle the request with a generic error.
           fulfilled = true;
           reject(timeoutError);
-          // Destroy with the error so a response body already handed to the caller
-          // fails with TimeoutError rather than ending as if complete.
           clientHttp2Stream.destroy(timeoutError);
           if (useIsolatedSession) {
             ref.destroy();
