@@ -27,9 +27,30 @@ import { RpcServerProtocol } from "../layer-1-abstracts/RpcServerProtocol";
 // Per the SEP, only the last four segments of the path are used for routing:
 // {prefix?}/service/{serviceName}/operation/{operationName}. The route MUST end
 // at {operationName} (optionally a trailing slash / query string); trailing path
-// segments after the operation are NOT part of a valid RPC v2 route. Group 1 is
-// the service name, group 2 is the operation name.
-const RPC_ROUTE = /\/service\/([^/]+)\/operation\/([^/?]+)\/?(?:\?.*)?$/;
+// segments after the operation are NOT part of a valid RPC v2 route.
+//
+// Implemented with a linear split rather than a regular expression: an
+// unanchored, end-anchored pattern backtracks polynomially on paths containing
+// many repeated "/service/x/operation/y" chunks, and the path is client input.
+const parseRpcRoute = (path: string): { service: string; operation: string } | undefined => {
+  const queryIndex = path.indexOf("?");
+  let p = queryIndex === -1 ? path : path.slice(0, queryIndex);
+  if (p.endsWith("/")) {
+    p = p.slice(0, -1);
+  }
+  const segments = p.split("/");
+  const n = segments.length;
+  // Leading empty segment from the initial "/" plus the four route segments.
+  if (n < 5 || segments[n - 4] !== "service" || segments[n - 2] !== "operation") {
+    return undefined;
+  }
+  const service = segments[n - 3];
+  const operation = segments[n - 1];
+  if (!service || !operation) {
+    return undefined;
+  }
+  return { service, operation };
+};
 
 /**
  * JSON settings for Smithy RPCv2 JSON.
@@ -114,15 +135,15 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
     }
 
     // The request path MUST end with /service/{serviceName}/operation/{operationName}.
-    const match = RPC_ROUTE.exec(request.path);
-    if (!match) {
+    const route = parseRpcRoute(request.path);
+    if (!route) {
       logger?.debug?.(`${logPrefix}: request path not matched.`);
       return false;
     }
 
     // When the modeled service name is known, the {serviceName} segment MUST
     // identify this service.
-    if (!this.serviceNameMatches(match[1])) {
+    if (!this.serviceNameMatches(route.service)) {
       logger?.debug?.(`${logPrefix}: request service name did not match.`);
       return false;
     }
@@ -137,18 +158,18 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
     logger?: Logger
   ): string | undefined {
     const logPrefix = `@smithy/server-common::SmithyRpcV2JsonServerProtocol`;
-    const match = RPC_ROUTE.exec(request.path);
-    if (!match) {
+    const route = parseRpcRoute(request.path);
+    if (!route) {
       logger?.debug?.(`${logPrefix}: request path not matched.`);
       return undefined;
     }
 
-    if (!this.serviceNameMatches(match[1])) {
+    if (!this.serviceNameMatches(route.service)) {
       logger?.debug?.(`${logPrefix}: request service name did not match.`);
       return undefined;
     }
 
-    const requestedOperation = match[2];
+    const requestedOperation = route.operation;
     if (!requestedOperation) {
       logger?.debug?.(`${logPrefix}: request operation not found.`);
       return undefined;

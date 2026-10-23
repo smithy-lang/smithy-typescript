@@ -268,6 +268,20 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
     it("route returns undefined for a different service name", () => {
       expect(svcProtocol.route(req("/service/OtherService/operation/MyOp"), opSchemas)).toBeUndefined();
     });
+
+    it("tolerates a trailing slash and a query string", () => {
+      expect(svcProtocol.claim(req("/service/XYZService/operation/MyOp/"))).toBe(true);
+      expect(svcProtocol.route(req("/service/XYZService/operation/MyOp?x=1"), opSchemas)).toBe("MyOp");
+    });
+
+    it("handles a long adversarial path in linear time", () => {
+      // Many repetitions of "/service/a/operation/b" followed by a mismatch would
+      // cause polynomial backtracking with an end-anchored regex.
+      const path = "/service/a/operation/b".repeat(50_000) + "/x";
+      const start = performance.now();
+      expect(svcProtocol.claim(req(path))).toBe(false);
+      expect(performance.now() - start).toBeLessThan(1_000);
+    });
   });
 
   describe("serializeError - modeled error schema", () => {
