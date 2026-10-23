@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- a90c7be: Add Smithy RPC v2 JSON protocol support: client protocol and JSON codec in @smithy/core, server protocol in @smithy/server-common, and the snapshot response serializer in @smithy/snapshot-testing.
+- a90c7be: Add SmithyRpcV2JsonServerProtocol, the server (SSDK) implementation of the Smithy RPC v2 JSON protocol.
+
+### Patch Changes
+
+- a90c7be: Tighten SmithyRpcV2JsonServerProtocol request claiming to require the POST method and an RPC v2 route-shaped path, per the Smithy RPC v2 specification, so a GET or an unrelated path is no longer claimed.
+- a90c7be: Resolve the concrete modeled error schema in SmithyRpcV2JsonServerProtocol.serializeError. The lookup now matches the thrown error's own class first (walking up the prototype chain only if it is not registered) instead of any registered ancestor, so a registered base service exception can no longer be selected for a subclass. The __type, serialized members, and @httpError status all come from the concrete schema.
+- a90c7be: Serialize RPC v2 JSON operation errors through the modeled error schema. This emits the error's absolute Shape ID as `__type` (fixing the wrong namespace for errors modeled outside the service's default namespace) and encodes members according to their modeled types (fixing lost type information for members such as bigInteger/bigDecimal). Unmodeled errors keep the previous document-based fallback.
+- a90c7be: Honor the modeled @httpError trait when resolving the status code for RPC v2 JSON error responses. serializeError now delegates to the shared resolveErrorStatusCode helper (explicit runtime status, then @httpError, then the fault default) instead of only checking runtime status and falling back to 400/500, so a modeled @httpError value is applied even when the runtime error carries no status.
+- a90c7be: Match the full RPC v2 JSON route in SmithyRpcV2JsonServerProtocol. The protocol now accepts an optional serviceName and verifies the request path's {serviceName} segment against it, and the route regex is anchored so paths for a different service or with trailing segments after the operation no longer match. Generated schema servers pass the modeled service name; when serviceName is omitted the service-name check is skipped (backward compatible).
+- a90c7be: Return an empty body and no Content-Type for RPC v2 JSON operations whose output targets the Unit shape, per the specification, instead of an empty JSON object with a Content-Type.
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+  - @smithy/core@3.37.0
+
 ## 0.5.0
 
 ### Minor Changes

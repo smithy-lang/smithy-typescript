@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.37.0
+
+### Minor Changes
+
+- a90c7be: Add AbstractRpcV2Protocol, a shared abstract base for the Smithy RPC v2 JSON and CBOR client protocols, deduplicating their request framing and response status handling.
+- a90c7be: Add Smithy RPC v2 JSON protocol support: client protocol and JSON codec in @smithy/core, server protocol in @smithy/server-common, and the snapshot response serializer in @smithy/snapshot-testing.
+
+### Patch Changes
+
+- a90c7be: Treat any non-200 response as an error in the Smithy RPC v2 JSON and CBOR client protocols, per the specification. RpcProtocol gains a protected isErrorResponse predicate (default unchanged: status >= 300) that both RPC v2 protocols override to status !== 200.
+
 ## 3.36.2
 
 ### Patch Changes
