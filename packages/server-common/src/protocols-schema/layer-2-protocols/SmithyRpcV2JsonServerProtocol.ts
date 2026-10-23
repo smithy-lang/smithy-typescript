@@ -274,25 +274,43 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
    * - The body MUST contain a `__type` field whose value is the error's
    *   absolute Shape ID (namespace#name).
    * - The body SHOULD contain a `message` field.
-   * - The HTTP status code is resolved by {@link resolveErrorStatusCode}: an
-   *   explicit runtime status, else the modeled `@httpError` trait, else 400
-   *   for a client fault / 500 for a server fault.
+   * - The HTTP status code is an explicit runtime status, else the concrete
+   *   error schema's `@httpError` trait, else 400 for a client fault / 500 for
+   *   a server fault. Unmodeled errors use {@link resolveErrorStatusCode}.
    */
   protected override async serializeError<E extends Error>(
     _operationSchema: StaticOperationSchema,
     _context: SerdeFunctions,
     error: E
   ): Promise<IHttpResponse> {
-    // resolveErrorStatusCode honors an explicit runtime status, then the
-    // modeled @httpError trait, then the client/server fault default.
-    const statusCode = resolveErrorStatusCode(error);
-
-    // Prefer serializing through the modeled error schema. The schema carries
-    // the error's absolute Shape ID (so __type is correct even for errors in a
-    // namespace other than the service default) and drives member encoding (so
-    // typed members like bigInteger/bigDecimal/blob/timestamp are serialized
-    // according to the RPCv2 JSON representation rather than as raw JS values).
+    // Prefer serializing through the concrete modeled error schema. The schema
+    // carries the error's absolute Shape ID (so __type is correct even for
+    // errors in a namespace other than the service default) and drives member
+    // encoding (so typed members like bigInteger/bigDecimal/blob/timestamp are
+    // serialized according to the RPCv2 JSON representation rather than as raw
+    // JS values).
     const errorSchema = this.resolveErrorSchema(error);
+
+    // Status precedence: explicit runtime status, then the modeled @httpError
+    // trait, then the client/server fault default. When the concrete schema is
+    // resolved, read @httpError from it so the status matches __type and the
+    // serialized members; otherwise defer to the shared resolver.
+    let statusCode: number;
+    if (errorSchema) {
+      const traits = NormalizedSchema.of(errorSchema).getOwnTraits();
+      const runtimeStatus = (error as any).$metadata?.httpStatusCode ?? (error as any).statusCode;
+      const fault = (error as any).$fault ?? traits.error;
+      statusCode =
+        typeof runtimeStatus === "number"
+          ? runtimeStatus
+          : typeof traits.httpError === "number"
+            ? traits.httpError
+            : fault === "client"
+              ? 400
+              : 500;
+    } else {
+      statusCode = resolveErrorStatusCode(error);
+    }
 
     let body: Uint8Array;
     if (errorSchema) {
@@ -345,9 +363,15 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
   }
 
   /**
-   * Resolves the modeled error schema for a thrown error by matching its
-   * prototype against the error constructors registered in the type
-   * registries. Mirrors the lookup used by `resolveErrorStatusCode`.
+   * Resolves the concrete modeled error schema for a thrown error.
+   *
+   * Walks the error's prototype chain from its own class upward and, at each
+   * level, looks for a registered error whose constructor prototype is exactly
+   * that level. This returns the most specific registered schema (the error's
+   * own class), falling back to the nearest registered ancestor only when the
+   * error's own class is not registered. An `isPrototypeOf` match is not used
+   * because it is also true for every ancestor (e.g. the service base
+   * exception), so registration order could select the base schema instead.
    *
    * @returns the matching StaticErrorSchema, or undefined for unmodeled errors.
    */
@@ -355,16 +379,18 @@ export class SmithyRpcV2JsonServerProtocol extends RpcServerProtocol {
     const isStaticErrorSchema = (schema: unknown): schema is StaticErrorSchema =>
       Array.isArray(schema) && schema[0] === -3;
 
-    for (const registry of TypeRegistry.registries.values()) {
-      const match = registry.find((schema) => {
-        if (!isStaticErrorSchema(schema)) {
-          return false;
+    for (
+      let proto = Object.getPrototypeOf(error);
+      proto && proto !== Error.prototype && proto !== Object.prototype;
+      proto = Object.getPrototypeOf(proto)
+    ) {
+      for (const registry of TypeRegistry.registries.values()) {
+        const match = registry.find(
+          (schema) => isStaticErrorSchema(schema) && registry.getErrorCtor(schema)?.prototype === proto
+        );
+        if (isStaticErrorSchema(match)) {
+          return match;
         }
-        const ctor = registry.getErrorCtor(schema);
-        return typeof ctor === "function" && ctor.prototype?.isPrototypeOf(error);
-      });
-      if (isStaticErrorSchema(match)) {
-        return match;
       }
     }
     return undefined;

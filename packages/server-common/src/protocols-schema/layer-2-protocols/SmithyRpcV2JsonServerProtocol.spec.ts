@@ -395,6 +395,58 @@ describe("SmithyRpcV2JsonServerProtocol", () => {
         TypeRegistry.registries.delete("other");
       }
     });
+
+    it("resolves the concrete subclass schema, not a registered base exception", async () => {
+      // The base is registered FIRST. An isPrototypeOf match would select it for
+      // the subclass too; the concrete lookup must pick the subclass's own schema
+      // for __type, members, and @httpError.
+      const baseSchema = [
+        -3,
+        "other",
+        "BaseServiceError",
+        { httpError: 500 },
+        ["message"],
+        [0 satisfies StringSchema],
+      ] satisfies StaticErrorSchema;
+      const derivedSchema = [
+        -3,
+        "other",
+        "NotFoundError",
+        { httpError: 404 },
+        ["message", "resource"],
+        [0 satisfies StringSchema, 0 satisfies StringSchema],
+      ] satisfies StaticErrorSchema;
+
+      class BaseServiceError extends Error {
+        public readonly name: string = "BaseServiceError";
+        public readonly $fault = "client" as const;
+      }
+      class NotFoundError extends BaseServiceError {
+        public readonly name: string = "NotFoundError";
+        public resource?: string;
+      }
+
+      const registry = TypeRegistry.for("other");
+      registry.registerError(baseSchema, BaseServiceError);
+      registry.registerError(derivedSchema, NotFoundError);
+
+      try {
+        const derived = Object.assign(new NotFoundError(), { message: "missing", resource: "widget-1" });
+        const derivedResponse = await (protocol as any).serializeError(makeUnitOpSchema(), makeContext(), derived);
+        const derivedBody = decode(derivedResponse.body);
+        expect(derivedBody.__type).toBe("other#NotFoundError");
+        expect(derivedBody.resource).toBe("widget-1");
+        expect(derivedResponse.statusCode).toBe(404);
+
+        const base = Object.assign(new BaseServiceError(), { message: "boom" });
+        const baseResponse = await (protocol as any).serializeError(makeUnitOpSchema(), makeContext(), base);
+        expect(decode(baseResponse.body).__type).toBe("other#BaseServiceError");
+        expect(baseResponse.statusCode).toBe(500);
+      } finally {
+        registry.clear();
+        TypeRegistry.registries.delete("other");
+      }
+    });
   });
 
   describe("serializeSuccess - unit output", () => {
