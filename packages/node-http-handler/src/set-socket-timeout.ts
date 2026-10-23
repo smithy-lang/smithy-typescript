@@ -6,17 +6,18 @@ const DEFER_EVENT_LISTENER_TIME = 3000;
 
 /**
  * @internal
- * @param failResponseBody - also fail the response body with TimeoutError (service default).
+ * @param destroyResponseBodyOnTimeout - set by the service default. On timeout the response
+ * body is destroyed with the TimeoutError, and the timeout stays armed through the body.
  */
 export const setSocketTimeout = (
   request: ClientRequest,
   reject: (err: Error) => void,
   timeoutInMs = 0,
-  failResponseBody = false
+  destroyResponseBodyOnTimeout = false
 ): NodeJS.Timeout | number => {
-  // Captured only when failResponseBody is set, to fail the body on a post-headers stall.
+  // Captured only for the service default, to fail the body on a post-headers stall.
   let response: IncomingMessage | undefined;
-  if (failResponseBody) {
+  if (destroyResponseBodyOnTimeout) {
     request.once("response", (res) => (response = res));
   }
 
@@ -26,12 +27,12 @@ export const setSocketTimeout = (
       const error = Object.assign(
         new Error(
           `@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (${
-            failResponseBody ? "service default socket timeout" : "configured by client requestHandler"
+            destroyResponseBodyOnTimeout ? "service default socket timeout" : "configured by client requestHandler"
           }).`
         ),
         { name: "TimeoutError" }
       );
-      if (failResponseBody) {
+      if (destroyResponseBodyOnTimeout) {
         response?.destroy(error);
       }
       request.destroy();
@@ -55,9 +56,9 @@ export const setSocketTimeout = (
     registerTimeout.bind(null, timeoutInMs === 0 ? 0 : DEFER_EVENT_LISTENER_TIME),
     DEFER_EVENT_LISTENER_TIME
   );
-  if (failResponseBody) {
-    // Not returned, so the handler's clearTimeouts() on headers cannot cancel it and the
-    // timeout stays in force through the body. Cancelled once the request closes instead.
+  if (destroyResponseBodyOnTimeout) {
+    // Return 0, not deferralId, so the handler's clearTimeouts() on headers cannot cancel the
+    // deferral and the timeout stays armed through the body. Cancelled on request close instead.
     request.once("close", () => timing.clearTimeout(deferralId));
     return 0;
   }
