@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+  - @smithy/core@3.37.0
+  - @smithy/server-common@0.6.0
+
 ## 0.3.4
 
 ### Patch Changes

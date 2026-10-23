@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.4.0
+
+### Minor Changes
+
+- a90c7be: Add Smithy RPC v2 JSON protocol support: client protocol and JSON codec in @smithy/core, server protocol in @smithy/server-common, and the snapshot response serializer in @smithy/snapshot-testing.
+
+### Patch Changes
+
+- Updated dependencies [ac9ae43]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+  - @smithy/node-http-handler@4.13.0
+  - @smithy/core@3.37.0
+
 ## 2.3.2
 
 ### Patch Changes

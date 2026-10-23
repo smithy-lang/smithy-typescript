@@ -1,5 +1,18 @@
 # Change Log
 
+## 4.13.0
+
+### Minor Changes
+
+- ac9ae43: Let NodeHttpHandler and NodeHttp2Handler apply a service default idle timeout on their own timers, leaving socketTimeout and requestTimeout unchanged.
+
+### Patch Changes
+
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+- Updated dependencies [a90c7be]
+  - @smithy/core@3.37.0
+
 ## 4.12.1
 
 ### Patch Changes
