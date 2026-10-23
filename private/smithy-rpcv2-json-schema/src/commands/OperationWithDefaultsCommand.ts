@@ -1,0 +1,139 @@
+// smithy-typescript generated code
+import type { MetadataBearer as __MetadataBearer } from "@smithy/types";
+
+import { _ep0, _mw0, command } from "../commandBuilder";
+import type { OperationWithDefaultsInput, OperationWithDefaultsOutput } from "../models/models_0";
+import { OperationWithDefaults$ } from "../schemas/schemas_0";
+
+/**
+ * @public
+ */
+export type { __MetadataBearer };
+/**
+ * @public
+ *
+ * The input for {@link OperationWithDefaultsCommand}.
+ */
+export interface OperationWithDefaultsCommandInput extends OperationWithDefaultsInput {}
+/**
+ * @public
+ *
+ * The output of {@link OperationWithDefaultsCommand}.
+ */
+export interface OperationWithDefaultsCommandOutput extends OperationWithDefaultsOutput, __MetadataBearer {}
+
+/**
+ * @public
+ *
+ * @example
+ * Use a bare-bones client and the command you need to make an API call.
+ * ```javascript
+ * import { RpcV2JsonProtocolClient, OperationWithDefaultsCommand } from "@smithy/smithy-rpcv2-json-schema"; // ES Modules import
+ * // const { RpcV2JsonProtocolClient, OperationWithDefaultsCommand } = require("@smithy/smithy-rpcv2-json-schema"); // CommonJS import
+ * // import type { RpcV2JsonProtocolClientConfig } from "@smithy/smithy-rpcv2-json-schema";
+ * const config = {}; // type is RpcV2JsonProtocolClientConfig
+ * const client = new RpcV2JsonProtocolClient(config);
+ * const input = { // OperationWithDefaultsInput
+ *   defaults: { // Defaults
+ *     defaultString: "STRING_VALUE",
+ *     defaultBoolean: true || false,
+ *     defaultList: [ // TestStringList
+ *       "STRING_VALUE",
+ *     ],
+ *     defaultTimestamp: new Date("TIMESTAMP"),
+ *     defaultBlob: new Uint8Array(), // e.g. Buffer.from("") or new TextEncoder().encode("")
+ *     defaultByte: 0, // BYTE_VALUE
+ *     defaultShort: Number("short"),
+ *     defaultInteger: Number("int"),
+ *     defaultLong: Number("long"),
+ *     defaultFloat: Number("float"),
+ *     defaultDouble: Number("double"),
+ *     defaultMap: { // TestStringMap
+ *       "<keys>": "STRING_VALUE",
+ *     },
+ *     defaultEnum: "FOO" || "BAR" || "BAZ",
+ *     defaultIntEnum: 1 || 2,
+ *     emptyString: "STRING_VALUE",
+ *     falseBoolean: true || false,
+ *     emptyBlob: new Uint8Array(), // e.g. Buffer.from("") or new TextEncoder().encode("")
+ *     zeroByte: 0, // BYTE_VALUE
+ *     zeroShort: Number("short"),
+ *     zeroInteger: Number("int"),
+ *     zeroLong: Number("long"),
+ *     zeroFloat: Number("float"),
+ *     zeroDouble: Number("double"),
+ *   },
+ *   clientOptionalDefaults: { // ClientOptionalDefaults
+ *     member: Number("int"),
+ *   },
+ *   topLevelDefault: "STRING_VALUE",
+ *   otherTopLevelDefault: Number("int"),
+ * };
+ * const command = new OperationWithDefaultsCommand(input);
+ * const response = await client.send(command);
+ * // { // OperationWithDefaultsOutput
+ * //   defaultString: "STRING_VALUE",
+ * //   defaultBoolean: true || false,
+ * //   defaultList: [ // TestStringList
+ * //     "STRING_VALUE",
+ * //   ],
+ * //   defaultTimestamp: new Date("TIMESTAMP"),
+ * //   defaultBlob: new Uint8Array(),
+ * //   defaultByte: 0, // BYTE_VALUE
+ * //   defaultShort: Number("short"),
+ * //   defaultInteger: Number("int"),
+ * //   defaultLong: Number("long"),
+ * //   defaultFloat: Number("float"),
+ * //   defaultDouble: Number("double"),
+ * //   defaultMap: { // TestStringMap
+ * //     "<keys>": "STRING_VALUE",
+ * //   },
+ * //   defaultEnum: "FOO" || "BAR" || "BAZ",
+ * //   defaultIntEnum: 1 || 2,
+ * //   emptyString: "STRING_VALUE",
+ * //   falseBoolean: true || false,
+ * //   emptyBlob: new Uint8Array(),
+ * //   zeroByte: 0, // BYTE_VALUE
+ * //   zeroShort: Number("short"),
+ * //   zeroInteger: Number("int"),
+ * //   zeroLong: Number("long"),
+ * //   zeroFloat: Number("float"),
+ * //   zeroDouble: Number("double"),
+ * // };
+ *
+ * ```
+ *
+ * @param OperationWithDefaultsCommandInput - {@link OperationWithDefaultsCommandInput}
+ * @returns {@link OperationWithDefaultsCommandOutput}
+ * @see {@link OperationWithDefaultsCommandInput} for command's `input` shape.
+ * @see {@link OperationWithDefaultsCommandOutput} for command's `response` shape.
+ * @see {@link RpcV2JsonProtocolClientResolvedConfig | config} for RpcV2JsonProtocolClient's `config` shape.
+ *
+ * @throws {@link ValidationException} (client fault)
+ *  A standard error for input validation failures.
+ * This should be thrown by services when a member of the input structure
+ * falls outside of the modeled or documented constraints.
+ *
+ * @throws {@link RpcV2JsonProtocolServiceException}
+ * <p>Base exception class for all service exceptions from RpcV2JsonProtocol service.</p>
+ *
+ *
+ */
+export class OperationWithDefaultsCommand extends command<OperationWithDefaultsCommandInput, OperationWithDefaultsCommandOutput>(
+  _ep0,
+  _mw0,
+  "OperationWithDefaults",
+  OperationWithDefaults$
+) {
+  /** @internal type navigation helper, not in runtime. */
+  protected declare static __types: {
+    api: {
+      input: OperationWithDefaultsInput;
+      output: OperationWithDefaultsOutput;
+    };
+    sdk: {
+      input: OperationWithDefaultsCommandInput;
+      output: OperationWithDefaultsCommandOutput;
+    };
+  };
+}

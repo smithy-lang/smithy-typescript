@@ -5,6 +5,7 @@ import {
   type ServerOperation,
   SchemaServiceHandler,
   SmithyRpcV2CborServerProtocol,
+  SmithyRpcV2JsonServerProtocol,
 } from "@smithy/server-common";
 import type { StaticOperationSchema } from "@smithy/types";
 
@@ -55,6 +56,7 @@ const OPERATION_SCHEMAS: StaticOperationSchema[] = [
 
 const createGeneratedProtocolDefaults = () => [
   new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+  new SmithyRpcV2JsonServerProtocol({ defaultNamespace: "org.xyz.v1", serviceName: "XYZService" }),
 ];
 
 export type XYZServiceHandlerOptions<

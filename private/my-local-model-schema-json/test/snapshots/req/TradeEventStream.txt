@@ -1,0 +1,92 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/TradeEventStream
+
+x-api-key: [object Object]
+content-type: application/json
+smithy-protocol: rpc-v2-json
+accept: application/json
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 130 [header-size] 85 [prelude-crc] 3037043168
+:event-type: initial-request
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "sessionId": "__sessionId__"
+}
+
+[message-crc] 1635254740
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 132 [header-size] 75 [prelude-crc] 3226095907
+:event-type: alpha
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "id": "__id__",
+  "timestamp": 946702799.999
+}
+
+[message-crc] 262397961
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 92 [header-size] 74 [prelude-crc] 248010029
+:event-type: beta
+:message-type: event
+:content-type: application/json
+
+[json]
+{}
+
+[message-crc] 1972267080
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 153 [header-size] 95 [prelude-crc] 1122031213
+:event-type: gamma
+:message-type: event
+:content-type: application/json
+sequenceNumber: 0 (integer)
+
+[json]
+{
+  "message": "__message__",
+  "values": [
+    0,
+    0,
+    0
+  ]
+}
+
+[message-crc] 3209413928
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 121 [header-size] 75 [prelude-crc] 1894696399
+:event-type: delta
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "name": "__name__",
+  "number": 0
+}
+
+[message-crc] 4058686936
+============================================================
+
+[chunk (b64)]
+Cg==
+

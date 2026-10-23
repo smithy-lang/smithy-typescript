@@ -23,9 +23,7 @@ export interface UnionMemberCollisionOperationCommandInput extends UnionMemberCo
 export interface UnionMemberCollisionOperationCommandOutput extends UnionMemberCollisionOutput, __MetadataBearer {}
 
 /**
- * Regression coverage for union variant interface shadowing: a union member
- * whose target structure is named `<CapitalizedMemberName>Member` collides with
- * the generated namespace-local variant interface name. See issue #2280.
+ * Regression coverage for union variant interface shadowing (#2280).
  * @example
  * Use a bare-bones client and the command you need to make an API call.
  * ```javascript

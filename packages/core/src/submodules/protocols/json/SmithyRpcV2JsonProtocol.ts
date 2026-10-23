@@ -1,12 +1,9 @@
-import { RpcProtocol } from "../RpcProtocol";
-import { NormalizedSchema, TypeRegistry, deref } from "@smithy/core/schema";
-import { getSmithyContext } from "@smithy/core/transport";
+import { AbstractRpcV2Protocol } from "../AbstractRpcV2Protocol";
+import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
-  EndpointBearer,
   HandlerExecutionContext,
   HttpRequest as IHttpRequest,
   HttpResponse as IHttpResponse,
-  MetadataBearer,
   OperationSchema,
   ResponseMetadata,
   SerdeFunctions,
@@ -25,11 +22,7 @@ import { loadSmithyRpcV2JsonErrorCode } from "./parseJsonBody";
  *
  * @public
  */
-export class SmithyRpcV2JsonProtocol extends RpcProtocol {
-  /**
-   * @override
-   */
-  declare protected compositeErrorRegistry: TypeRegistry;
+export class SmithyRpcV2JsonProtocol extends AbstractRpcV2Protocol {
   private codec = new JsonCodec2({
     timestampFormat: {
       // RPCv2 JSON always serializes timestamps as epoch-seconds and MUST NOT
@@ -46,16 +39,6 @@ export class SmithyRpcV2JsonProtocol extends RpcProtocol {
   protected serializer: ShapeSerializer<string | Uint8Array> = this.codec.createSerializer();
   protected deserializer: ShapeDeserializer<string | Uint8Array> = this.codec.createDeserializer();
 
-  public constructor({
-    defaultNamespace,
-    errorTypeRegistries,
-  }: {
-    defaultNamespace: string;
-    errorTypeRegistries?: TypeRegistry[];
-  }) {
-    super({ defaultNamespace, errorTypeRegistries });
-  }
-
   public getShapeId(): string {
     return "smithy.protocols#rpcv2Json";
   }
@@ -64,42 +47,14 @@ export class SmithyRpcV2JsonProtocol extends RpcProtocol {
     return this.codec;
   }
 
-  public async serializeRequest<Input extends object>(
-    operationSchema: OperationSchema,
-    input: Input,
-    context: HandlerExecutionContext & SerdeFunctions & EndpointBearer
-  ): Promise<IHttpRequest> {
-    const request = await super.serializeRequest(operationSchema, input, context);
-    Object.assign(request.headers, {
-      "content-type": this.getDefaultContentType(),
-      "smithy-protocol": "rpc-v2-json",
-      accept: this.getDefaultContentType(),
-    });
-    if (deref(operationSchema.input) === "unit") {
-      delete request.body;
-      delete request.headers["content-type"];
-    } else if (!request.body) {
-      request.body = "{}";
-    }
-    const { service, operation } = getSmithyContext(context) as {
-      service: string;
-      operation: string;
-    };
-    const path = `/service/${service}/operation/${operation}`;
-    if (request.path.endsWith("/")) {
-      request.path += path.slice(1);
-    } else {
-      request.path += path;
-    }
-    return request;
+  protected getSmithyProtocolHeaderValue(): string {
+    return "rpc-v2-json";
   }
 
-  public async deserializeResponse<Output extends MetadataBearer>(
-    operationSchema: OperationSchema,
-    context: HandlerExecutionContext & SerdeFunctions,
-    response: IHttpResponse
-  ): Promise<Output> {
-    return super.deserializeResponse<Output>(operationSchema, context, response);
+  protected applyEmptyBody(request: IHttpRequest): void {
+    if (!request.body) {
+      request.body = "{}";
+    }
   }
 
   protected async handleError(

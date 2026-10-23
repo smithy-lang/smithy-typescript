@@ -32,11 +32,13 @@ import software.amazon.smithy.utils.SmithyInternalApi;
 public final class SchemaServerGenerator {
 
     private static final ShapeId RPC_V2_CBOR = ShapeId.from("smithy.protocols#rpcv2Cbor");
+    private static final ShapeId RPC_V2_JSON = ShapeId.from("smithy.protocols#rpcv2Json");
     private static final ShapeId AWS_JSON_1_0 = ShapeId.from("aws.protocols#awsJson1_0");
     private static final ShapeId AWS_JSON_1_1 = ShapeId.from("aws.protocols#awsJson1_1");
     private static final ShapeId REST_JSON_1 = ShapeId.from("aws.protocols#restJson1");
     private static final List<ShapeId> DEFAULT_PROTOCOL_ORDER = List.of(
         RPC_V2_CBOR,
+        RPC_V2_JSON,
         AWS_JSON_1_0,
         AWS_JSON_1_1,
         REST_JSON_1
@@ -256,6 +258,18 @@ public final class SchemaServerGenerator {
         String namespaceOption = "{ defaultNamespace: \"" + service.getId().getNamespace() + "\" }";
         if (protocol.equals(RPC_V2_CBOR)) {
             return new ProtocolDefault("SmithyRpcV2CborServerProtocol", namespaceOption);
+        }
+        if (protocol.equals(RPC_V2_JSON)) {
+            // Pass the modeled service name so the protocol can match the full
+            // RPC v2 route (/service/{serviceName}/operation/{operationName}).
+            return new ProtocolDefault(
+                "SmithyRpcV2JsonServerProtocol",
+                "{ defaultNamespace: \""
+                    + service.getId().getNamespace()
+                    + "\", serviceName: \""
+                    + service.getId().getName()
+                    + "\" }"
+            );
         }
         if (protocol.equals(AWS_JSON_1_0)) {
             return new ProtocolDefault("AwsJsonRpcServerProtocol", namespaceOption);

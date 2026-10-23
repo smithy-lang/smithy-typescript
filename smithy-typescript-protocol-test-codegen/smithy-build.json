@@ -80,6 +80,45 @@
         }
       }
     },
+    "smithy-rpcv2-json-schema": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": [
+              "smithy.protocoltests.rpcv2Json#RpcV2JsonProtocol"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@smithy/smithy-rpcv2-json-schema",
+          "packageManager": "npm",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "Smithy team",
+              "url": "https://smithy.io/"
+            },
+            "scripts": {},
+            "license": "Apache-2.0"
+          },
+          "private": true,
+          "generateSchemas": true,
+          "generateIndexTests": true,
+          "generateSnapshotTests": true,
+          "tsconfig": {
+            "types": {
+              "compilerOptions": {
+                "isolatedModules": true
+              }
+            }
+          },
+          "typescriptVersion": "~7.0.2"
+        }
+      }
+    },
     "my-local-model": {
       "transforms": [
         {
@@ -136,6 +175,50 @@
           "packageManager": "npm",
           "packageVersion": "0.0.1",
           "versioningScheme": "@aws-sdk/client",
+          "packageJson": {
+            "private": true
+          },
+          "bigNumberMode": "native",
+          "generateSchemas": true,
+          "generateIndexTests": true,
+          "generateSnapshotTests": true,
+          "generateEndpointBdd": true,
+          "tsconfig": {
+            "types": {
+              "compilerOptions": {
+                "isolatedModules": true
+              }
+            }
+          },
+          "typescriptVersion": "~7.0.2"
+        }
+      }
+    },
+    "my-local-model-schema-json": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": [
+              "org.xyz.v1#XYZService",
+              "org.xyz.v1#UnusedService",
+              "org.xyz.secondary#TertiaryService"
+            ]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-client-codegen": {
+          "service": "org.xyz.v1#XYZService",
+          "package": "xyz-schema-json",
+          "packageManager": "npm",
+          "packageVersion": "0.0.1",
+          "versioningScheme": "@aws-sdk/client",
+          "serviceProtocolPriority": {
+            "org.xyz.v1#XYZService": [
+              "smithy.protocols#rpcv2Json"
+            ]
+          },
           "packageJson": {
             "private": true
           },

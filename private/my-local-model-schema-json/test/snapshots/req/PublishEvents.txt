@@ -1,0 +1,60 @@
+POST https://localhost 
+/mock-required-endpoint/service/XYZService/operation/PublishEvents
+
+x-api-key: [object Object]
+content-type: application/json
+smithy-protocol: rpc-v2-json
+accept: application/json
+amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
+amz-sdk-request: attempt=1; max=3
+X-Api-Key: MOCK_api_key
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 126 [header-size] 85 [prelude-crc] 952181948
+:event-type: initial-request
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "channel": "__channel__"
+}
+
+[message-crc] 407706780
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 134 [header-size] 73 [prelude-crc] 1417962351
+:event-type: log
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "level": "__level__",
+  "message": "__message__"
+}
+
+[message-crc] 1991178132
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 121 [header-size] 76 [prelude-crc] 4002041964
+:event-type: metric
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "name": "__name__",
+  "value": 0
+}
+
+[message-crc] 1551779352
+============================================================
+
+[chunk (b64)]
+Cg==
+

@@ -3,6 +3,7 @@ export { extendedEncodeURIComponent } from "./extended-encode-uri-component";
 export { HttpBindingProtocol } from "./HttpBindingProtocol";
 export { HttpProtocol } from "./HttpProtocol";
 export { RpcProtocol } from "./RpcProtocol";
+export { AbstractRpcV2Protocol } from "./AbstractRpcV2Protocol";
 export { RequestBuilder, requestBuilder } from "./requestBuilder";
 export { resolvedPath } from "./resolve-path";
 export { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";

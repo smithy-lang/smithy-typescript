@@ -345,6 +345,7 @@
     "UuidHeaderValue": "type(object)"
   },
   "@smithy/core/protocols": {
+    "AbstractRpcV2Protocol": "function",
     "buildQueryString": "function",
     "collectBody": "function",
     "contentLengthMiddleware": "function",
@@ -941,6 +942,7 @@
     "SingleConstraintValidator": "type(interface)",
     "SmithyFrameworkException": "type(union)",
     "SmithyRpcV2CborServerProtocol": "function",
+    "SmithyRpcV2JsonServerProtocol": "function",
     "UnauthenticatedException": "function",
     "UniqueItemsValidationFailure": "type(interface)",
     "UniqueItemsValidator": "function",

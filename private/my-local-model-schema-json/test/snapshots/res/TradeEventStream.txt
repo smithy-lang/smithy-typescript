@@ -1,0 +1,141 @@
+======================== minimal response ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[async_iterable (Object)]
+
+
+
+
+--- [output object] ---
+{
+  eventStream: async_it[<empty>],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
+======================== w/ optional fields ========================
+[status] 200
+  
+smithy-protocol: rpc-v2-json
+content-type: application/json
+
+[async_iterable (Readable)]
+
+[chunk (event-stream object view)]
+  [total-size] 132 [header-size] 75 [prelude-crc] 3226095907
+:event-type: alpha
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "id": "__id__",
+  "timestamp": 946702799.999
+}
+
+[message-crc] 262397961
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 92 [header-size] 74 [prelude-crc] 248010029
+:event-type: beta
+:message-type: event
+:content-type: application/json
+
+[json]
+{}
+
+[message-crc] 1972267080
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 153 [header-size] 95 [prelude-crc] 1122031213
+:event-type: gamma
+:message-type: event
+:content-type: application/json
+sequenceNumber: 0 (integer)
+
+[json]
+{
+  "message": "__message__",
+  "values": [
+    0,
+    0,
+    0
+  ]
+}
+
+[message-crc] 3209413928
+============================================================
+
+[chunk (event-stream object view)]
+  [total-size] 121 [header-size] 75 [prelude-crc] 1894696399
+:event-type: delta
+:message-type: event
+:content-type: application/json
+
+[json]
+{
+  "name": "__name__",
+  "number": 0
+}
+
+[message-crc] 4058686936
+============================================================
+
+[chunk (b64)]
+Cg==
+
+
+
+--- [output object] ---
+{
+  eventStream: async_it[
+    {
+      alpha: {
+        id: "__id__",
+        timestamp: (Date) Fri, Dec 31, 1999, 20:59:59 Pacific Standard Time
+      }
+    },
+    {
+      beta: {}
+    },
+    {
+      gamma: {
+        sequenceNumber: (number) 0,
+        payload: {
+          message: "__message__",
+          values: [
+            (number) 0,
+            (number) 0,
+            (number) 0
+          ]
+        }
+      }
+    },
+    {
+      delta: {
+        name: "__name__",
+        number: (number) 0
+      }
+    }
+  ],
+  $metadata: {
+    httpStatusCode: (number) 200,
+    requestId: (undefined),
+    extendedRequestId: (undefined),
+    cfId: (undefined),
+    attempts: (number) 1,
+    totalRetryDelay: (number) 0
+  }
+}
+
