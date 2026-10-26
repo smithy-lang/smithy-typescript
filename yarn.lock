@@ -2396,7 +2396,7 @@ __metadata:
     downlevel-dts: "npm:0.10.1"
     premove: "npm:4.0.0"
     tslib: "npm:^2.6.2"
-    undici: "npm:^7.0.0"
+    undici: "npm:^7.30.1"
   peerDependencies:
     undici: ">=7.0.0"
   languageName: unknown
@@ -7199,10 +7199,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^7.0.0":
-  version: 7.28.0
-  resolution: "undici@npm:7.28.0"
-  checksum: 10c0/fe781983a26098795e99bb1f64906cbb7d0bcaa029a26baade007b53ea67f2631d189b8f9671a31f4c8d0cb3773b7559608628ba54452fef51fec90e7c78bb0d
+"undici@npm:^7.30.1":
+  version: 7.30.1
+  resolution: "undici@npm:7.30.1"
+  checksum: 10c0/c838089b010e8e28a9a5358d4bf4621e0c8d7bb70058b23e819667349c4c0b6791a7c8bc9bbe94ff0923db132faae0d9d9592b9743eda4f2b49466fa57482213
   languageName: node
   linkType: hard
 
