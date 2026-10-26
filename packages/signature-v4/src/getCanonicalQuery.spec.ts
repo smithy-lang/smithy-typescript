@@ -129,4 +129,27 @@ describe("getCanonicalQuery", () => {
       )
     ).toBe("foo=bar");
   });
+
+  it("should serialize a query key named __proto__ like any other key", () => {
+    // JSON.parse creates "__proto__" as an own property, as parsing a URL query would.
+    expect(
+      getCanonicalQuery(
+        new HttpRequest({
+          ...httpRequestOptions,
+          query: JSON.parse('{"__proto__":"value","foo":"bar"}'),
+        })
+      )
+    ).toBe("__proto__=value&foo=bar");
+  });
+
+  it("should serialize array values of a query key named __proto__", () => {
+    expect(
+      getCanonicalQuery(
+        new HttpRequest({
+          ...httpRequestOptions,
+          query: JSON.parse('{"__proto__":["b","a"]}'),
+        })
+      )
+    ).toBe("__proto__=a&__proto__=b");
+  });
 });
