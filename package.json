@@ -52,7 +52,7 @@
     "esbuild": "^0.25.9",
     "fast-check": "3.22.0",
     "get-port": "^7.1.0",
-    "happy-dom": "20.8.9",
+    "happy-dom": "21.0.4",
     "husky": "^4.2.3",
     "oxc-parser": "^0.139.0",
     "oxc-transform": "^0.139.0",
