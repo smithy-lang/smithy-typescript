@@ -12,21 +12,25 @@ export abstract class Retry {
    *
    * @deprecated the 2026 retry behavior is always enabled. May be removed in a future major version.
    */
-  public static v2026 = true;
+  public static readonly v2026 = true;
 
   public static delay() {
-    return 50;
+    return 50 as const;
   }
 
   public static throttlingDelay() {
-    return 1_000;
+    return 1_000 as const;
   }
 
   public static cost() {
-    return 14;
+    return 14 as const;
   }
 
   public static throttlingCost() {
-    return 5;
+    return 5 as const;
+  }
+
+  public static modifiedCostType() {
+    return "THROTTLING" as const;
   }
 }

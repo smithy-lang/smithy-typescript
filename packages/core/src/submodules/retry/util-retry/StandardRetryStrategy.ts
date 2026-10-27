@@ -190,7 +190,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
   }
 
   private getCapacityCost(errorType: RetryErrorType) {
-    return errorType === "THROTTLING" ? Retry.throttlingCost() : Retry.cost();
+    return errorType === Retry.modifiedCostType() ? Retry.throttlingCost() : Retry.cost();
   }
 
   private isRetryableError(errorType: RetryErrorType): boolean {
