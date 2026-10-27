@@ -6,8 +6,8 @@ const DEFER_EVENT_LISTENER_TIME = 3000;
 
 /**
  * @internal
- * @param destroyResponseBodyOnTimeout - set by the service default. On timeout the response
- * body is destroyed with the TimeoutError, and the timeout stays armed through the body.
+ * @param destroyResponseBodyOnTimeout - set by the service default to retain its
+ * deferred registration offset and timeout diagnostic.
  */
 export const setSocketTimeout = (
   request: ClientRequest,
@@ -15,15 +15,15 @@ export const setSocketTimeout = (
   timeoutInMs = 0,
   destroyResponseBodyOnTimeout = false
 ): NodeJS.Timeout | number => {
-  // Captured only for the service default, to fail the body on a post-headers stall.
   let response: IncomingMessage | undefined;
-  if (destroyResponseBodyOnTimeout) {
-    request.once("response", (res) => (response = res));
-  }
+  request.once("response", (res) => (response = res));
 
   const registerTimeout = (offset: number) => {
     const timeout = timeoutInMs - offset;
     const onTimeout = () => {
+      if (response?.complete) {
+        return;
+      }
       const error = Object.assign(
         new Error(
           `@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (${
@@ -32,9 +32,7 @@ export const setSocketTimeout = (
         ),
         { name: "TimeoutError" }
       );
-      if (destroyResponseBodyOnTimeout) {
-        response?.destroy(error);
-      }
+      response?.destroy(error);
       request.destroy();
       reject(error);
     };
@@ -47,7 +45,7 @@ export const setSocketTimeout = (
     }
   };
 
-  if (0 < timeoutInMs && timeoutInMs < 6000) {
+  if (timeoutInMs > 0 && (!destroyResponseBodyOnTimeout || timeoutInMs < 6000)) {
     registerTimeout(0);
     return 0;
   }

@@ -7,6 +7,7 @@ describe("setSocketTimeout", () => {
   const clientRequest: any = {
     destroy: vi.fn(),
     setTimeout: vi.fn(),
+    once: vi.fn(),
   };
 
   vi.spyOn(timing, "setTimeout").mockImplementation(((fn: Function, ms: number) => {
@@ -53,15 +54,15 @@ describe("setSocketTimeout", () => {
       once: vi.fn(),
     };
 
-    it("calls setTimeout on the socket if it is available after deferral", async () => {
+    it("calls setTimeout on the socket if it is available after service-default deferral", async () => {
       const eventListenerMinimumTimeoutToDefer = 6000;
-      setSocketTimeout(clientRequestWithSocket, vi.fn(), eventListenerMinimumTimeoutToDefer);
+      setSocketTimeout(clientRequestWithSocket, vi.fn(), eventListenerMinimumTimeoutToDefer, true);
 
       vi.runAllTimers();
 
       expect(clientRequestWithSocket.socket.setTimeout).toHaveBeenCalledTimes(1);
       expect(clientRequestWithSocket.socket.setTimeout).toHaveBeenLastCalledWith(
-        eventListenerMinimumTimeoutToDefer,
+        eventListenerMinimumTimeoutToDefer - 3000,
         expect.any(Function)
       );
       expect(clientRequestWithSocket.on).toHaveBeenCalledTimes(1);
@@ -84,6 +85,20 @@ describe("setSocketTimeout", () => {
         },
       } as any;
     };
+
+    it.each([6000, 300000])("registers a configured %i ms timeout immediately", (timeoutInMs) => {
+      const request = makeRequest();
+      setSocketTimeout(request, vi.fn(), timeoutInMs);
+
+      expect(request.socket.setTimeout).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([6000, 300000])("arms the full configured %i ms window at registration", (timeoutInMs) => {
+      const request = makeRequest();
+      setSocketTimeout(request, vi.fn(), timeoutInMs);
+
+      expect(request.socket.setTimeout).toHaveBeenCalledWith(timeoutInMs, expect.any(Function));
+    });
 
     it("times out a stalled body after fast headers with the full configured idle window", () => {
       const request = makeRequest();
@@ -112,15 +127,29 @@ describe("setSocketTimeout", () => {
       expect(request.socket.setTimeout).toHaveBeenCalledWith(297000, expect.any(Function));
     });
 
+    it("registers nothing on early close for the service default", () => {
+      const request = makeRequest();
+      setSocketTimeout(request, vi.fn(), 300000, true);
+      request.emit("close");
+
+      vi.runAllTimers();
+      expect(request.socket.setTimeout).not.toHaveBeenCalled();
+    });
+
     it.each([false, true])(
-      "registers nothing on early close (destroyResponseBodyOnTimeout=%s)",
+      "preserves a response completed after registration (destroyResponseBodyOnTimeout=%s)",
       (destroyResponseBodyOnTimeout) => {
         const request = makeRequest();
-        setSocketTimeout(request, vi.fn(), 300000, destroyResponseBodyOnTimeout);
-        request.emit("close");
+        setSocketTimeout(request, vi.fn(), 6000, destroyResponseBodyOnTimeout);
+        request.emit("response");
+        vi.advanceTimersByTime(3000);
+        request.res.complete = true;
 
-        vi.runAllTimers();
-        expect(request.socket.setTimeout).not.toHaveBeenCalled();
+        request.socket.setTimeout.mock.calls[0][1]();
+        expect({ body: request.res.destroy.mock.calls, request: request.destroy.mock.calls }).toEqual({
+          body: [],
+          request: [],
+        });
       }
     );
 
@@ -139,12 +168,13 @@ describe("setSocketTimeout", () => {
       expect(request.destroy).toHaveBeenCalledTimes(1);
     });
 
-    it("leaves the response alone without the option", () => {
+    it("fails a configured response body with the TimeoutError", () => {
       const request = makeRequest();
       setSocketTimeout(request, vi.fn(), 1000);
+      request.emit("response");
 
       request.socket.setTimeout.mock.calls[0][1]();
-      expect(request.res.destroy).not.toHaveBeenCalled();
+      expect(request.res.destroy).toHaveBeenCalledWith(expect.objectContaining({ name: "TimeoutError" }));
     });
   });
 

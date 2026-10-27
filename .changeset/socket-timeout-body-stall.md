@@ -2,4 +2,6 @@
 "@smithy/node-http-handler": patch
 ---
 
-Keep configured socket idle timeouts armed through response bodies, and preserve their full idle window when registration is deferred.
+Register configured positive socket idle timeouts immediately with the full rolling idle window, and keep them armed through response bodies. Preserve completed but unread bodies for configured and service-default timeouts, and fail incomplete bodies with `TimeoutError`. Service-default timeout deferral and timing are unchanged.
+
+Socket inactivity includes caller pauses while reading an incomplete body, so consumer backpressure can still trigger `socketTimeout`.
