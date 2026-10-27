@@ -1,3 +1,4 @@
+import { EventEmitter } from "node:events";
 import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setSocketTimeout } from "./set-socket-timeout";
@@ -6,7 +7,8 @@ import { timing } from "./timing";
 describe("setSocketTimeout", () => {
   const clientRequest: any = {
     destroy: vi.fn(),
-    setTimeout: vi.fn(),
+    socket: { setTimeout: vi.fn() },
+    on: vi.fn(),
     once: vi.fn(),
   };
 
@@ -27,20 +29,51 @@ describe("setSocketTimeout", () => {
     vi.useRealTimers();
   });
 
-  it(`sets the request's timeout if provided`, () => {
+  it(`sets the socket's timeout if provided`, () => {
     setSocketTimeout(clientRequest, vi.fn(), 100);
 
-    expect(clientRequest.setTimeout).toHaveBeenCalledTimes(1);
-    expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(100, expect.any(Function));
+    expect(clientRequest.socket.setTimeout).toHaveBeenCalledTimes(1);
+    expect(clientRequest.socket.setTimeout).toHaveBeenLastCalledWith(100, expect.any(Function));
   });
 
-  it(`sets the request's timeout to 0 if not provided`, async () => {
+  it(`sets the socket's timeout to 0 if not provided`, async () => {
     setSocketTimeout(clientRequest, vi.fn());
 
     vi.runAllTimers();
 
-    expect(clientRequest.setTimeout).toHaveBeenCalledTimes(1);
-    expect(clientRequest.setTimeout).toHaveBeenLastCalledWith(0, expect.any(Function));
+    expect(clientRequest.socket.setTimeout).toHaveBeenCalledTimes(1);
+    expect(clientRequest.socket.setTimeout).toHaveBeenLastCalledWith(0, expect.any(Function));
+  });
+
+  it("keeps the socket timeout after an early response ends before the upload finishes", () => {
+    const socket = Object.assign(new EventEmitter(), {
+      setTimeout: vi.fn((ms: number, onTimeout: () => void) => socket.on("timeout", onTimeout)),
+      destroy: vi.fn(),
+    });
+    const request = Object.assign(new EventEmitter(), {
+      socket: undefined as typeof socket | undefined,
+      setTimeout: vi.fn(),
+      destroy: vi.fn(),
+      writableFinished: false,
+    });
+    const reject = vi.fn();
+    setSocketTimeout(request as any, reject, 1000);
+    request.socket = socket;
+    request.emit("socket", socket);
+    const response = { complete: true, destroy: vi.fn() };
+    request.emit("response", response);
+    // Node removes its request timeout forwarding listener when the response ends.
+    request.removeAllListeners("timeout");
+
+    expect(socket.setTimeout).toHaveBeenCalledWith(1000, expect.any(Function));
+    socket.emit("timeout");
+    expect(socket.destroy).toHaveBeenCalledTimes(1);
+    expect(request.destroy).not.toHaveBeenCalled();
+    expect(response.destroy).not.toHaveBeenCalled();
+    expect(reject).not.toHaveBeenCalled();
+
+    request.emit("close");
+    expect(socket.listenerCount("timeout")).toBe(0);
   });
 
   describe("event listener registration deferral", () => {
@@ -203,7 +236,7 @@ describe("setSocketTimeout", () => {
     expect(clientRequest.destroy).not.toHaveBeenCalled();
 
     // call setTimeout callback
-    clientRequest.setTimeout.mock.calls[0][1]();
+    clientRequest.socket.setTimeout.mock.calls[0][1]();
     expect(clientRequest.destroy).toHaveBeenCalledTimes(1);
   });
 
@@ -215,7 +248,7 @@ describe("setSocketTimeout", () => {
     expect(reject).not.toHaveBeenCalled();
 
     // call setTimeout callback
-    clientRequest.setTimeout.mock.calls[0][1]();
+    clientRequest.socket.setTimeout.mock.calls[0][1]();
     expect(reject).toHaveBeenCalledTimes(1);
     expect(reject).toHaveBeenCalledWith(
       Object.assign(

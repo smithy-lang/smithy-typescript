@@ -45,7 +45,8 @@ export const setSocketTimeout = (
       request.socket.setTimeout(timeout, onTimeout);
       request.on("close", () => request.socket?.removeListener("timeout", onTimeout));
     } else {
-      request.setTimeout(timeout, onTimeout);
+      // Node removes request.setTimeout() forwarding when an early response ends.
+      request.once("socket", () => registerTimeout(offset));
     }
   };
 
