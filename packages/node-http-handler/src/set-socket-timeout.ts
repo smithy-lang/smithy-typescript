@@ -22,6 +22,10 @@ export const setSocketTimeout = (
     const timeout = timeoutInMs - offset;
     const onTimeout = () => {
       if (response?.complete) {
+        if (!request.writableFinished) {
+          // request.destroy() discards the completed response's unread body.
+          request.socket?.destroy();
+        }
         return;
       }
       const error = Object.assign(

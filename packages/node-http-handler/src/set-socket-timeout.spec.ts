@@ -75,8 +75,9 @@ describe("setSocketTimeout", () => {
       const listeners: Record<string, Function> = {};
       return {
         destroy: vi.fn(),
+        writableFinished: true,
         setTimeout: vi.fn(),
-        socket: { setTimeout: vi.fn(), removeListener: vi.fn() },
+        socket: { setTimeout: vi.fn(), removeListener: vi.fn(), destroy: vi.fn() },
         on: vi.fn(),
         once: vi.fn((event: string, fn: Function) => (listeners[event] = fn)),
         res: { destroy: vi.fn() },
@@ -150,6 +151,25 @@ describe("setSocketTimeout", () => {
           body: [],
           request: [],
         });
+      }
+    );
+
+    it.each([false, true])(
+      "closes a stalled upload without destroying its complete response (destroyResponseBodyOnTimeout=%s)",
+      (destroyResponseBodyOnTimeout) => {
+        const request = makeRequest();
+        const reject = vi.fn();
+        request.writableFinished = false;
+        setSocketTimeout(request, reject, 6000, destroyResponseBodyOnTimeout);
+        request.emit("response");
+        vi.advanceTimersByTime(3000);
+        request.res.complete = true;
+
+        request.socket.setTimeout.mock.calls[0][1]();
+        expect(request.socket.destroy).toHaveBeenCalledTimes(1);
+        expect(request.res.destroy).not.toHaveBeenCalled();
+        expect(request.destroy).not.toHaveBeenCalled();
+        expect(reject).not.toHaveBeenCalled();
       }
     );
 
