@@ -83,6 +83,75 @@ public class TypeScriptWriterTest {
     }
 
     @Test
+    public void convertsHtmlInDocStringsToMarkdown() {
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeDocs("<p>A name for the <code>log</code> group.</p>");
+        String result = writer.toString();
+
+        assertThat(
+            result,
+            equalTo(CODEGEN_INDICATOR + "/**\n * A name for the `log` group.\n */\n")
+        );
+    }
+
+    @Test
+    public void convertsHtmlReachingWriteDocsFromAnyCaller() {
+        // Operation @throws sections, enum value docs and package docs all build their
+        // string and hand it to writeDocs, so converting there covers every caller.
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeDocs(
+            "@throws {@link InvalidParameterException} (client fault)\n"
+                + " <p>The parameter is invalid.</p>\n"
+        );
+        String result = writer.toString();
+
+        assertThat(result, containsString("@throws {@link InvalidParameterException} (client fault)"));
+        assertThat(result, containsString("The parameter is invalid."));
+        assertThat(result, not(containsString("<p>")));
+    }
+
+    @Test
+    public void leavesGeneratedExamplesUntouched() {
+        // CommandGenerator appends a usage example as a fenced block. Its indentation is
+        // significant, so the converter has to leave it alone.
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeDocs(
+            """
+            <p>Registers a task.</p>
+            @example
+            ```javascript
+            const input = {
+              family: "STRING_VALUE",
+            };
+            ```"""
+        );
+        String result = writer.toString();
+
+        assertThat(result, containsString(" * const input = {\n *   family: \"STRING_VALUE\",\n * };"));
+        assertThat(result, containsString(" * Registers a task."));
+    }
+
+    @Test
+    public void convertsHtmlInShapeDocs() {
+        StringShape shape = StringShape.builder()
+            .id(ShapeId.from("com.example#MyString"))
+            .addTrait(
+                new DocumentationTrait(
+                    "<p>See <a href=\"https://example.com/g\">the guide</a>.</p>"
+                )
+            )
+            .build();
+
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeShapeDocs(shape);
+        String result = writer.toString();
+
+        assertThat(result, containsString("See [the guide](https://example.com/g)."));
+        assertThat(result, containsString("@public"));
+        assertThat(result, not(containsString("<a href")));
+    }
+
+    @Test
     public void addImportSubmodule() {
         TypeScriptWriter writer = new TypeScriptWriter("foo");
         writer.addDependency(TypeScriptDependency.SMITHY_CORE);
