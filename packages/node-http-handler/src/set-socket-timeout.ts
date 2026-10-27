@@ -53,10 +53,10 @@ export const setSocketTimeout = (
   }
 
   const deferralId = timing.setTimeout(
-    registerTimeout.bind(null, timeoutInMs === 0 ? 0 : DEFER_EVENT_LISTENER_TIME),
+    registerTimeout.bind(null, destroyResponseBodyOnTimeout && timeoutInMs !== 0 ? DEFER_EVENT_LISTENER_TIME : 0),
     DEFER_EVENT_LISTENER_TIME
   );
-  if (destroyResponseBodyOnTimeout) {
+  if (timeoutInMs > 0) {
     // Return 0, not deferralId, so the handler's clearTimeouts() on headers cannot cancel the
     // deferral and the timeout stays armed through the body. Cancelled on request close instead.
     request.once("close", () => timing.clearTimeout(deferralId));

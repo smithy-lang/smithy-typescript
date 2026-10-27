@@ -50,19 +50,18 @@ describe("setSocketTimeout", () => {
         setTimeout: vi.fn(),
       },
       on: vi.fn(),
+      once: vi.fn(),
     };
 
     it("calls setTimeout on the socket if it is available after deferral", async () => {
       const eventListenerMinimumTimeoutToDefer = 6000;
-      const deferralTimeout = 3000;
-      const expectedDeferredSocketTimeout = eventListenerMinimumTimeoutToDefer - deferralTimeout;
       setSocketTimeout(clientRequestWithSocket, vi.fn(), eventListenerMinimumTimeoutToDefer);
 
       vi.runAllTimers();
 
       expect(clientRequestWithSocket.socket.setTimeout).toHaveBeenCalledTimes(1);
       expect(clientRequestWithSocket.socket.setTimeout).toHaveBeenLastCalledWith(
-        expectedDeferredSocketTimeout,
+        eventListenerMinimumTimeoutToDefer,
         expect.any(Function)
       );
       expect(clientRequestWithSocket.on).toHaveBeenCalledTimes(1);
@@ -86,6 +85,23 @@ describe("setSocketTimeout", () => {
       } as any;
     };
 
+    it("times out a stalled body after fast headers with the full configured idle window", () => {
+      const request = makeRequest();
+      const reject = vi.fn();
+      const id = setSocketTimeout(request, reject, 30000);
+
+      vi.advanceTimersByTime(100);
+      request.emit("response");
+      timing.clearTimeout(id);
+      vi.advanceTimersByTime(2900);
+
+      expect(request.socket.setTimeout).toHaveBeenCalledWith(30000, expect.any(Function));
+      expect(request.destroy).not.toHaveBeenCalled();
+      request.socket.setTimeout.mock.calls[0][1]();
+      expect(request.destroy).toHaveBeenCalledTimes(1);
+      expect(reject).toHaveBeenCalledWith(expect.objectContaining({ name: "TimeoutError" }));
+    });
+
     it("keeps the deferred registration when the handler clears its timeouts on headers", () => {
       const request = makeRequest();
       const id = setSocketTimeout(request, vi.fn(), 300000, true);
@@ -96,14 +112,17 @@ describe("setSocketTimeout", () => {
       expect(request.socket.setTimeout).toHaveBeenCalledWith(297000, expect.any(Function));
     });
 
-    it("registers nothing when the request closes within the deferral", () => {
-      const request = makeRequest();
-      setSocketTimeout(request, vi.fn(), 300000, true);
-      request.emit("close");
+    it.each([false, true])(
+      "registers nothing on early close (destroyResponseBodyOnTimeout=%s)",
+      (destroyResponseBodyOnTimeout) => {
+        const request = makeRequest();
+        setSocketTimeout(request, vi.fn(), 300000, destroyResponseBodyOnTimeout);
+        request.emit("close");
 
-      vi.runAllTimers();
-      expect(request.socket.setTimeout).not.toHaveBeenCalled();
-    });
+        vi.runAllTimers();
+        expect(request.socket.setTimeout).not.toHaveBeenCalled();
+      }
+    );
 
     it("fails the response body with the TimeoutError on timeout", () => {
       const request = makeRequest();
