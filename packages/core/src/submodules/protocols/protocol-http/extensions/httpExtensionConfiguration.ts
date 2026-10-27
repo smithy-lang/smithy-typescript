@@ -25,7 +25,7 @@ export type HttpHandlerExtensionConfigType<HandlerConfig extends object = {}> = 
  * @internal
  */
 export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { logger?: Logger }>(
-  runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig> & { logger?: Logger }
+  runtimeConfig: HttpHandlerExtensionConfigType<HandlerConfig> & { logger?: Logger; defaultSocketTimeout?: number }
 ) => {
   // Offer the client's logger under `Symbol.for("logger")`. A symbol keeps this
   // off the handlers' public options types, and being a symbol already
@@ -39,6 +39,14 @@ export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { log
     runtimeConfig.requestHandler?.updateHttpClientConfig?.(
       Symbol.for("logger") as unknown as keyof HandlerConfig,
       runtimeConfig.logger as HandlerConfig[keyof HandlerConfig]
+    );
+  }
+
+  // Offered the same way: the handler keeps its own defaultSocketTimeout if it has one.
+  if (runtimeConfig.defaultSocketTimeout) {
+    runtimeConfig.requestHandler?.updateHttpClientConfig?.(
+      Symbol.for("defaultSocketTimeout") as unknown as keyof HandlerConfig,
+      runtimeConfig.defaultSocketTimeout as HandlerConfig[keyof HandlerConfig]
     );
   }
 

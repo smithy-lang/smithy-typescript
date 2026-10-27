@@ -157,4 +157,47 @@ public class RuntimeConfigGeneratorTest {
         assertThat(runtimeConfigContents, containsString("config?.syn ?? syn: 'ack2',"));
         assertThat(runtimeConfigSharedContents, containsString("config?.foo ?? foo: 'bar',"));
     }
+
+    @Test
+    public void writesDefaultSocketTimeoutWithoutClientConfigFallback() {
+        Model model = Model.assembler().addImport(getClass().getResource("simple-service.smithy")).assemble().unwrap();
+        MockManifest manifest = new MockManifest();
+
+        List<TypeScriptIntegration> integrations = List.of(
+            new TypeScriptIntegration() {
+                @Override
+                public Map<String, Consumer<TypeScriptWriter>> getRuntimeConfigWriters(
+                    TypeScriptSettings settings,
+                    Model model,
+                    SymbolProvider symbolProvider,
+                    LanguageTarget target
+                ) {
+                    return Map.of("defaultSocketTimeout", writer -> writer.write("300000"));
+                }
+            }
+        );
+
+        TypeScriptSettings settings = TypeScriptSettings.from(
+            model,
+            Node.objectNodeBuilder()
+                .withMember("service", Node.from("smithy.example#Example"))
+                .withMember("package", Node.from("example"))
+                .withMember("packageVersion", Node.from("1.0.0"))
+                .build()
+        );
+        SymbolProvider symbolProvider = new SymbolVisitor(model, settings);
+        TypeScriptDelegator delegator = new TypeScriptDelegator(manifest, symbolProvider);
+        new RuntimeConfigGenerator(
+            settings,
+            model,
+            symbolProvider,
+            delegator,
+            integrations,
+            ApplicationProtocol.createDefaultHttpApplicationProtocol()
+        ).generate(LanguageTarget.NODE);
+        delegator.flushWriters();
+
+        String runtimeConfigContents = manifest.getFileString(CodegenUtils.SOURCE_FOLDER + "/runtimeConfig.ts").get();
+        assertThat(runtimeConfigContents, containsString("defaultSocketTimeout: 300000,"));
+    }
 }

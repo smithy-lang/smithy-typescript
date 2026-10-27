@@ -11,7 +11,8 @@ import { createMockHttp2Server } from "./server.mock";
 import { resolveDefaultSocketTimeout } from "./resolve-default-socket-timeout";
 
 /**
- * Generated clients pass a service default idle timeout as the untyped
+ * Generated clients offer a service default idle timeout through
+ * updateHttpClientConfig, and it can also arrive as the untyped
  * `defaultSocketTimeout` option. NodeHttp2Handler applies it on its own stream idle
  * timer, separate from requestTimeout, unless the caller set an idle timeout. The
  * AWS SDK decides whether to pass it (feature gate); the handler only applies it.
@@ -20,6 +21,9 @@ import { resolveDefaultSocketTimeout } from "./resolve-default-socket-timeout";
 // The default arrives untyped, as it does from generated runtimeConfig providers.
 const withDefault = <T extends object>(options: T, defaultSocketTimeout: number) =>
   ({ ...options, defaultSocketTimeout }) as T;
+
+// Matches the key a client offers its service default under.
+const FALLBACK_DEFAULT_SOCKET_TIMEOUT = Symbol.for("defaultSocketTimeout") as any;
 
 // Real-timer windows with wide margins so a loaded CI event loop cannot flip a result.
 const WINDOW = 500; // the service default under test
@@ -350,6 +354,54 @@ describe("NodeHttpHandler default socket timeout", () => {
     await sleep(WINDOW + 300);
     const second = await handler.handle(request("/slow?chunks=1&gap=10"), {});
     expect(await readBody(second.response.body)).toBe("c0;");
+  });
+
+  it("applies a default the client offers under the fallback key", async () => {
+    handler = new NodeHttpHandler({});
+    handler.updateHttpClientConfig(FALLBACK_DEFAULT_SOCKET_TIMEOUT, WINDOW as any);
+    const { response } = await handler.handle(request("/headers-then-stall"), {});
+    await expect(readBody(response.body)).rejects.toMatchObject({ name: "TimeoutError" });
+  });
+});
+
+describe.each([
+  ["NodeHttpHandler", (options?: object) => new NodeHttpHandler(options)],
+  ["NodeHttp2Handler", (options?: object) => new NodeHttp2Handler(options)],
+])("%s offered defaultSocketTimeout", (_, create) => {
+  const resolved = (handler: unknown) =>
+    (handler as { configProvider: Promise<{ defaultSocketTimeout?: number }> }).configProvider;
+
+  it("takes the offered default when the handler has none", async () => {
+    const handler = create();
+    handler.updateHttpClientConfig(FALLBACK_DEFAULT_SOCKET_TIMEOUT, 300000 as any);
+    expect((await resolved(handler)).defaultSocketTimeout).toBe(300000);
+  });
+
+  it("keeps the handler's own default over the offered one", async () => {
+    const handler = create(withDefault({}, 1000));
+    handler.updateHttpClientConfig(FALLBACK_DEFAULT_SOCKET_TIMEOUT, 300000 as any);
+    expect((await resolved(handler)).defaultSocketTimeout).toBe(1000);
+  });
+
+  it("takes the offered default over an invalid one of its own", async () => {
+    const handler = create(withDefault({}, -1));
+    handler.updateHttpClientConfig(FALLBACK_DEFAULT_SOCKET_TIMEOUT, 300000 as any);
+    expect((await resolved(handler)).defaultSocketTimeout).toBe(300000);
+  });
+
+  it("takes the offered default over an invalid one set through updateHttpClientConfig", async () => {
+    const handler = create();
+    handler.updateHttpClientConfig("defaultSocketTimeout" as any, -1 as any);
+    handler.updateHttpClientConfig(FALLBACK_DEFAULT_SOCKET_TIMEOUT, 300000 as any);
+    expect((await resolved(handler)).defaultSocketTimeout).toBe(300000);
+  });
+
+  it("accepts the offer while config resolves asynchronously", async () => {
+    let resolveOptions: (o: object) => void;
+    const handler = create(() => new Promise<object>((resolve) => (resolveOptions = resolve)));
+    handler.updateHttpClientConfig(FALLBACK_DEFAULT_SOCKET_TIMEOUT, 300000 as any);
+    resolveOptions!(withDefault({}, 1000));
+    expect((await resolved(handler)).defaultSocketTimeout).toBe(1000);
   });
 });
 
