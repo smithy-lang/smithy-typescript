@@ -1,6 +1,6 @@
 import { hasOwn, HttpRequest, HttpResponse, isValidHostname } from "@smithy/core/transport";
 import type { EventStreamSerde } from "@smithy/core/event-streams";
-import { NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
+import { type NormalizedSchema, TypeRegistry } from "@smithy/core/schema";
 import type {
   ClientProtocol,
   Codec,
@@ -24,7 +24,7 @@ import type {
 } from "@smithy/types";
 
 import { SerdeContext } from "./SerdeContext";
-import { getHttpBindings, getHttpOperationBindings } from "./HttpBindingSchemaExtension";
+import { getHttpOperationBindings, HttpBindingNormalizedSchema } from "./HttpBindingNormalizedSchema";
 
 /**
  * Abstract base for HTTP-based client protocols.
@@ -147,13 +147,19 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
     input: Input,
     operation = getHttpOperationBindings(operationSchema)
   ): void {
-    if (this.serdeContext?.disableHostPrefix) return;
+    if (this.serdeContext?.disableHostPrefix) {
+      return;
+    }
     const hostPrefix = operation[4];
-    if (typeof hostPrefix !== "string") return;
+    if (typeof hostPrefix !== "string") {
+      return;
+    }
 
     let resolvedHostPrefix = hostPrefix;
-    for (const [name, [, flags]] of getHttpBindings(NormalizedSchema.of(operationSchema.input))) {
-      if (!((flags >> 17) & 1)) continue;
+    for (const [name, [, flags]] of HttpBindingNormalizedSchema.of(operationSchema.input).getHttpBindings()) {
+      if (!((flags >> 17) & 1)) {
+        continue;
+      }
       const replacement = input[name as keyof typeof input];
       if (typeof replacement !== "string") {
         throw new Error(`@smithy/core/schema - ${name} in input must be a string as hostLabel.`);

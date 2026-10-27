@@ -1,14 +1,13 @@
-import { NormalizedSchema } from "@smithy/core/schema";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
 import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
 
 import {
-  getHttpBindingValue,
+  HttpBindingNormalizedSchema,
   type HttpBindingLocation,
   type HttpBindingValue,
   type HttpHeader,
   type HttpPayload,
-} from "../HttpBindingSchemaExtension";
+} from "../HttpBindingNormalizedSchema";
 import { SerdeContext } from "../SerdeContext";
 import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";
 
@@ -45,15 +44,15 @@ export class HttpInterceptingShapeDeserializer<CodecShapeDeserializer extends Sh
   }
 
   public read(schema: Schema, data: string | Uint8Array): any | Promise<any> {
-    const ns = NormalizedSchema.of(schema);
+    const ns = HttpBindingNormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
 
     if (traits.httpHeader || traits.httpResponseCode) {
-      const value = getHttpBindingValue(ns, 0b100_110 satisfies HttpHeader, traits);
+      const value = ns.getHttpBindingValue(0b100_110 satisfies HttpHeader, traits);
       return this.readHttpBinding(value, data, 0b100_110 satisfies HttpHeader);
     }
     if (traits.httpPayload) {
-      return this.readPayload(getHttpBindingValue(ns, 0b100_100 satisfies HttpPayload, traits), data);
+      return this.readPayload(ns.getHttpBindingValue(0b100_100 satisfies HttpPayload, traits), data);
     }
     return this.readCodec(ns, data);
   }

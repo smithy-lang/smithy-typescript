@@ -1,4 +1,3 @@
-import { NormalizedSchema } from "@smithy/core/schema";
 import type {
   CodecSettings,
   ConfigurableSerdeContext,
@@ -8,11 +7,10 @@ import type {
 } from "@smithy/types";
 
 import {
-  getHttpBindingLocation,
-  getHttpBindingValue,
+  HttpBindingNormalizedSchema,
   type HttpBindingLocation,
   type HttpBindingValue,
-} from "../HttpBindingSchemaExtension";
+} from "../HttpBindingNormalizedSchema";
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
 
 /**
@@ -44,11 +42,11 @@ export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeS
   }
 
   public write(schema: ISchema, value: unknown): void {
-    const ns = NormalizedSchema.of(schema);
+    const ns = HttpBindingNormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
     if (traits.httpHeader || traits.httpLabel || traits.httpQuery) {
-      const location = getHttpBindingLocation(traits);
-      this.writeHttpBinding(getHttpBindingValue(ns, location, traits), value, location);
+      const location = ns.getHttpBindingLocation(traits);
+      this.writeHttpBinding(ns.getHttpBindingValue(location, traits), value, location);
       return;
     }
     this.writeCodec(ns, value);

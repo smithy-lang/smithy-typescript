@@ -1,18 +1,18 @@
-import { NormalizedSchema, op } from "@smithy/core/schema";
+import { op } from "@smithy/core/schema";
 import type { ListSchemaModifier, MapSchemaModifier, StaticStructureSchema, StringSchema } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
 import {
-  getHttpBindings,
   getHttpOperationBindings,
   hasHttpBindingUnstructuredPayload,
+  HttpBindingNormalizedSchema,
   resolveHttpBindingContentType,
-} from "./HttpBindingSchemaExtension";
+} from "./HttpBindingNormalizedSchema";
 
 const struct = (name: string, members: Record<string, any>) =>
   [3, "example", name, 0, Object.keys(members), Object.values(members)] as StaticStructureSchema;
 
-describe("HTTP binding schema extension", () => {
+describe(HttpBindingNormalizedSchema.name, () => {
   const structure = struct("Bindings", {
     body: 0,
     label: [0, { httpLabel: 1, hostLabel: 1 }],
@@ -25,10 +25,11 @@ describe("HTTP binding schema extension", () => {
   });
 
   it("caches member binding information on the structure schema", () => {
-    const first = getHttpBindings(NormalizedSchema.of(structure));
+    const schema = HttpBindingNormalizedSchema.of(structure);
+    const first = schema.getHttpBindings();
 
-    expect(getHttpBindings(NormalizedSchema.of(() => structure))).toBe(first);
-    expect((structure as any)[Symbol.for("@smithy/schema-x")]).toBe(first);
+    expect(HttpBindingNormalizedSchema.of(() => structure)).toBe(schema);
+    expect((structure as any)[Symbol.for("@smithy/schema-x")]).toBe(schema);
     expect(first.map(([, , location]) => location)).toEqual([
       0b100_000, 0b100_001, 0b100_110, 0b100_111, 0b100_010, 0b100_011, 0b100_100, 0b100_101,
     ]);
@@ -45,24 +46,21 @@ describe("HTTP binding schema extension", () => {
   });
 
   it("resolves content types and payload kinds from the cached binding", () => {
-    const schema = NormalizedSchema.of(structure);
+    const schema = HttpBindingNormalizedSchema.of(structure);
     expect(resolveHttpBindingContentType("application/json", schema)).toBe("application/octet-stream");
     expect(hasHttpBindingUnstructuredPayload(schema)).toBe(true);
 
-    const document = NormalizedSchema.of(struct("Document", { value: 0 }));
+    const document = HttpBindingNormalizedSchema.of(struct("Document", { value: 0 }));
     expect(resolveHttpBindingContentType("application/json", document)).toBe("application/json");
     expect(hasHttpBindingUnstructuredPayload(document)).toBe(false);
-    expect(getHttpBindings(document).responseBody.discardResponseBody).toBe(true);
+    expect(document.getHttpBindings().responseBody.discardResponseBody).toBe(true);
   });
 
   it("caches operation HTTP and endpoint traits", () => {
     const operation = op(
       "example",
       "Operation",
-      {
-        http: ["PUT", "/{bucket}/{key+}?acl=", 200],
-        endpoint: ["{bucket}."],
-      },
+      { http: ["PUT", "/{bucket}/{key+}?acl=", 200], endpoint: ["{bucket}."] },
       structure,
       "unit"
     );
@@ -84,7 +82,7 @@ describe("HTTP binding schema extension", () => {
   });
 
   it("caches value type and trait flags", () => {
-    const schema = NormalizedSchema.of(
+    const schema = HttpBindingNormalizedSchema.of(
       struct("Values", {
         token: [0, { httpHeader: "X-Token", idempotencyToken: 1, mediaType: "application/json" }],
         dates: [(64 satisfies ListSchemaModifier) | 4, { httpHeader: "X-Dates" }],
@@ -93,7 +91,7 @@ describe("HTTP binding schema extension", () => {
         events: [[3, "example", "Events", { streaming: 1 }, [], []], { httpPayload: 1 }],
       })
     );
-    const [token, dates, sparse, stream, events] = getHttpBindings(schema);
+    const [token, dates, sparse, stream, events] = schema.getHttpBindings();
 
     expect(token[1][1] & 0xff).toBe(0);
     expect((token[1][1] >> 8) & 0b11).toBe(2);
@@ -111,7 +109,7 @@ describe("HTTP binding schema extension", () => {
     let recursiveList: any;
     recursiveList = [1, "example", "RecursiveList", 0, () => recursiveList];
 
-    const [body] = getHttpBindings(NormalizedSchema.of(struct("Recursive", { body: () => recursiveList })));
+    const [body] = HttpBindingNormalizedSchema.of(struct("Recursive", { body: () => recursiveList })).getHttpBindings();
 
     expect(body[1][2]).toBeUndefined();
   });
