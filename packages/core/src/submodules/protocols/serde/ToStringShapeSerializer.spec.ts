@@ -9,7 +9,7 @@ import type {
 } from "@smithy/types";
 import { describe, expect, it, vi } from "vitest";
 
-import { getHttpBindings } from "../HttpBindingSchemaExtension";
+import { HttpBindingNormalizedSchema } from "../HttpBindingNormalizedSchema";
 import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";
 import { ToStringShapeSerializer } from "./ToStringShapeSerializer";
 
@@ -61,7 +61,7 @@ describe(ToStringShapeSerializer.name, () => {
       ["value"],
       [[4 satisfies TimestampDefaultSchema, { httpPayload: 1 }]],
     ] satisfies StaticStructureSchema;
-    const [, value, location] = getHttpBindings(NormalizedSchema.of(structure))[0];
+    const [, value, location] = HttpBindingNormalizedSchema.of(structure).getHttpBindings()[0];
     vi.spyOn(value[0], "getMergedTraits").mockImplementation(() => {
       throw new Error("unexpected trait lookup");
     });
@@ -82,7 +82,7 @@ describe(ToStringShapeSerializer.name, () => {
       ["value"],
       [[4 satisfies TimestampDefaultSchema, { httpHeader: "x-value" }]],
     ] satisfies StaticStructureSchema;
-    const [, value, location] = getHttpBindings(NormalizedSchema.of(structure))[0];
+    const [, value, location] = HttpBindingNormalizedSchema.of(structure).getHttpBindings()[0];
     const nonHttpSettings = { ...settings, httpBindings: false };
     const serializer = new ToStringShapeSerializer(nonHttpSettings);
 

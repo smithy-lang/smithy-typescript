@@ -1,4 +1,3 @@
-import { NormalizedSchema } from "@smithy/core/schema";
 import { LazyJsonString, dateToUtcString, generateIdempotencyToken, quoteHeader, toBase64 } from "@smithy/core/serde";
 import type {
   CodecSettings,
@@ -10,12 +9,10 @@ import type {
 } from "@smithy/types";
 
 import {
-  getHttpBindingCollectionValue,
-  getHttpBindingLocation,
-  getHttpBindingValue,
+  HttpBindingNormalizedSchema,
   type HttpBindingLocation,
   type HttpBindingValue,
-} from "../HttpBindingSchemaExtension";
+} from "../HttpBindingNormalizedSchema";
 import { SerdeContext } from "../SerdeContext";
 
 /**
@@ -31,10 +28,10 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
   }
 
   public write(schema: Schema, value: unknown): void {
-    const ns = NormalizedSchema.of(schema);
+    const ns = HttpBindingNormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
-    const location = getHttpBindingLocation(traits);
-    this.writeHttpBinding(getHttpBindingValue(ns, location, traits), value, location);
+    const location = ns.getHttpBindingLocation(traits);
+    this.writeHttpBinding(ns.getHttpBindingValue(location, traits), value, location);
   }
 
   /** @internal */
@@ -86,14 +83,16 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
           return;
         }
         if ((schema & 0b1100_0000) === 0b0100_0000 && Array.isArray(value)) {
-          collectionValue ??= getHttpBindingCollectionValue(ns, location);
+          collectionValue ??= ns.getHttpBindingCollectionValue(location);
           const valueSchemaType = collectionValue[1] & 0xff;
           const isTimestamp = valueSchemaType >= 4 && valueSchemaType <= 7;
           let buffer = "";
           for (const item of value) {
             this.writeHttpBinding(collectionValue, item, location);
             const headerItem = this.flush();
-            if (buffer) buffer += ", ";
+            if (buffer) {
+              buffer += ", ";
+            }
             buffer += isTimestamp ? headerItem : quoteHeader(headerItem);
           }
           this.stringBuffer = buffer;
@@ -104,7 +103,9 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
       case "string":
         const media = (flags >> 8) & 0b11;
         let intermediateValue: string | LazyJsonString = value;
-        if (media === 2) intermediateValue = LazyJsonString.from(intermediateValue);
+        if (media === 2) {
+          intermediateValue = LazyJsonString.from(intermediateValue);
+        }
         if (media && (location & 0b110) === 0b110) {
           this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(intermediateValue.toString());
           return;

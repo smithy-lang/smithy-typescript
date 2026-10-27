@@ -124,7 +124,9 @@ export const _parseRfc7231DateTime = (value: unknown): Date | undefined => {
     throw new TypeError("RFC7231 timestamps must be strings.");
   }
 
-  if (IMF_FIXDATE_NATIVE.test(value)) return new Date(value);
+  if (IMF_FIXDATE_NATIVE.test(value)) {
+    return new Date(value);
+  }
 
   let day!: string;
   let month!: string;

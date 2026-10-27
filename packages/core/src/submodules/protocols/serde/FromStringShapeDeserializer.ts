@@ -1,4 +1,3 @@
-import { NormalizedSchema } from "@smithy/core/schema";
 import {
   LazyJsonString,
   NumericValue,
@@ -19,12 +18,10 @@ import type {
 } from "@smithy/types";
 
 import {
-  getHttpBindingCollectionValue,
-  getHttpBindingLocation,
-  getHttpBindingValue,
+  HttpBindingNormalizedSchema,
   type HttpBindingLocation,
   type HttpBindingValue,
-} from "../HttpBindingSchemaExtension";
+} from "../HttpBindingNormalizedSchema";
 import { SerdeContext } from "../SerdeContext";
 
 /**
@@ -38,10 +35,10 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
   }
 
   public read(_schema: Schema, data: string): any {
-    const ns = NormalizedSchema.of(_schema);
+    const ns = HttpBindingNormalizedSchema.of(_schema);
     const traits = ns.getMergedTraits();
-    const location = getHttpBindingLocation(traits);
-    return this.readHttpBinding(getHttpBindingValue(ns, location, traits), data, location);
+    const location = ns.getHttpBindingLocation(traits);
+    return this.readHttpBinding(ns.getHttpBindingValue(location, traits), data, location);
   }
 
   /** @internal */
@@ -52,7 +49,7 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
   ): any {
     const schema = flags & 0xff;
     if ((schema & 0b1100_0000) === 0b0100_0000) {
-      collectionValue ??= getHttpBindingCollectionValue(ns, location);
+      collectionValue ??= ns.getHttpBindingCollectionValue(location);
       return splitHeader(data).map((item) => this.readHttpBinding(collectionValue!, item, location));
     }
 
@@ -86,7 +83,9 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
       }
       case 0: {
         const media = (flags >> 8) & 0b11;
-        if (!media) return data;
+        if (!media) {
+          return data;
+        }
         let intermediateValue: string | LazyJsonString = data;
         if ((location & 0b110) === 0b110) {
           intermediateValue = (this.serdeContext?.utf8Encoder ?? toUtf8)(

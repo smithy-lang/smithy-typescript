@@ -92,7 +92,7 @@ export class NormalizedSchema implements INormalizedSchema {
    * @param ref - a polymorphic SchemaRef to be dereferenced/normalized.
    * @param memberName - optional memberName if this NormalizedSchema should be considered a member schema.
    */
-  private constructor(
+  protected constructor(
     readonly ref: $SchemaRef,
     private readonly memberName?: string
   ) {
