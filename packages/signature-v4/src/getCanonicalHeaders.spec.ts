@@ -29,6 +29,20 @@ describe("getCanonicalHeaders", () => {
     });
   });
 
+  it.each(["constructor", "__proto__"])("should canonicalize the %s header", (headerName) => {
+    const headers = Object.create(null) as HeaderBag;
+    headers[headerName] = "value";
+
+    const canonical = getCanonicalHeaders(
+      new HttpRequest({
+        headers,
+      })
+    );
+
+    expect(hasOwn(canonical, headerName)).toBe(true);
+    expect(canonical[headerName]).toBe("value");
+  });
+
   it("should remove all unsignable headers", () => {
     const request = new HttpRequest({
       method: "POST",

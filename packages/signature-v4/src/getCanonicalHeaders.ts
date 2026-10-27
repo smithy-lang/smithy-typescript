@@ -10,7 +10,7 @@ export const getCanonicalHeaders = (
   unsignableHeaders?: Set<string>,
   signableHeaders?: Set<string>
 ): HeaderBag => {
-  const canonical: HeaderBag = {};
+  const canonical: HeaderBag = Object.create(null);
   for (const headerName of Object.keys(headers).sort()) {
     if (headers[headerName] == undefined) {
       continue;
@@ -18,7 +18,7 @@ export const getCanonicalHeaders = (
 
     const canonicalHeaderName = headerName.toLowerCase();
     if (
-      canonicalHeaderName in ALWAYS_UNSIGNABLE_HEADERS ||
+      Object.prototype.hasOwnProperty.call(ALWAYS_UNSIGNABLE_HEADERS, canonicalHeaderName) ||
       unsignableHeaders?.has(canonicalHeaderName) ||
       PROXY_HEADER_PATTERN.test(canonicalHeaderName) ||
       SEC_HEADER_PATTERN.test(canonicalHeaderName)
