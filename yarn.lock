@@ -2398,7 +2398,7 @@ __metadata:
     tslib: "npm:^2.6.2"
     undici: "npm:^7.30.1"
   peerDependencies:
-    undici: ">=7.0.0"
+    undici: ">=7.30.1"
   languageName: unknown
   linkType: soft
 
