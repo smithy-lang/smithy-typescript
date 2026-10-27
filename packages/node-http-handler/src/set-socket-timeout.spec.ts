@@ -45,6 +45,23 @@ describe("setSocketTimeout", () => {
     expect(clientRequest.socket.setTimeout).toHaveBeenLastCalledWith(0, expect.any(Function));
   });
 
+  it("waits for a connecting socket before starting its idle timeout", () => {
+    for (const assigned of [true, false]) {
+      const socket = Object.assign(new EventEmitter(), { connecting: true, setTimeout: vi.fn() });
+      const request = Object.assign(new EventEmitter(), { socket: assigned ? socket : undefined });
+      setSocketTimeout(request as any, vi.fn(), 1000);
+      if (!assigned) {
+        request.socket = socket;
+        request.emit("socket", socket);
+      }
+
+      expect(socket.setTimeout).not.toHaveBeenCalled();
+      socket.connecting = false;
+      socket.emit("connect");
+      expect(socket.setTimeout).toHaveBeenCalledExactlyOnceWith(1000, expect.any(Function));
+    }
+  });
+
   it("keeps the socket timeout after an early response ends before the upload finishes", () => {
     const socket = Object.assign(new EventEmitter(), {
       setTimeout: vi.fn((ms: number, onTimeout: () => void) => socket.on("timeout", onTimeout)),

@@ -41,7 +41,9 @@ export const setSocketTimeout = (
       reject(error);
     };
 
-    if (request.socket) {
+    if (request.socket?.connecting) {
+      request.socket.once("connect", () => registerTimeout(offset));
+    } else if (request.socket) {
       request.socket.setTimeout(timeout, onTimeout);
       request.on("close", () => request.socket?.removeListener("timeout", onTimeout));
     } else {
