@@ -15,19 +15,19 @@ export abstract class Retry {
   public static readonly v2026 = true;
 
   public static delay() {
-    return 50 as const;
+    return 50;
   }
 
   public static throttlingDelay() {
-    return 1_000 as const;
+    return 1_000;
   }
 
   public static cost() {
-    return 14 as const;
+    return 14;
   }
 
   public static throttlingCost() {
-    return 5 as const;
+    return 5;
   }
 
   public static modifiedCostType() {
