@@ -2,6 +2,19 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.55.0 (2026-10-27)
+
+### Features
+
+- Adopted framework-owned request state in schema-generated servers ([#2300](https://github.com/smithy-lang/smithy-typescript/pull/2300))
+- Added a schema server codegen plugin ([#2302](https://github.com/smithy-lang/smithy-typescript/pull/2302))
+- Added Smithy RPC v2 JSON server protocol support ([#2313](https://github.com/smithy-lang/smithy-typescript/pull/2313))
+
+### Bug Fixes
+
+- Preserved service exception `instanceof` behavior when class names are mangled ([#2289](https://github.com/smithy-lang/smithy-typescript/pull/2289))
+- Replaced the outdated retry mode documentation link ([#2310](https://github.com/smithy-lang/smithy-typescript/pull/2310))
+
 ## 0.54.0 (2026-09-24)
 
 ### Features
