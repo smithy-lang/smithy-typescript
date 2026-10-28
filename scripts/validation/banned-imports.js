@@ -140,7 +140,9 @@ async function validate(packageDir) {
           let foundDynamic = false;
           while (queue.length && !foundDynamic) {
             const n = queue.pop();
-            if (!n || typeof n !== "object") continue;
+            if (!n || typeof n !== "object") {
+              continue;
+            }
             if (Array.isArray(n)) {
               queue.push(...n);
               continue;
@@ -153,10 +155,15 @@ async function validate(packageDir) {
               break;
             }
             for (const key of Object.keys(n)) {
-              if (key === "type") continue;
+              if (key === "type") {
+                continue;
+              }
               const val = n[key];
-              if (Array.isArray(val)) queue.push(...val);
-              else if (val && typeof val === "object" && val.type) queue.push(val);
+              if (Array.isArray(val)) {
+                queue.push(...val);
+              } else if (val && typeof val === "object" && val.type) {
+                queue.push(val);
+              }
             }
           }
         }

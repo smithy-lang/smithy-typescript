@@ -152,7 +152,7 @@ cwti:
 	@:
 
 lint:
-	npx oxlint -c .oxlintrc.json --fix packages
+	npx oxlint -c .oxlintrc.json --fix packages scripts
 
 format:
 	npx oxfmt packages scripts testbed

@@ -8,7 +8,9 @@ const singlePkg =
 const submodulePackages = process.argv.includes("--all")
   ? fs.readdirSync(path.join(__dirname, "..", "..", "packages")).filter((pkg) => {
       const dir = path.join(__dirname, "..", "..", "packages", pkg);
-      if (!fs.existsSync(path.join(dir, "package.json"))) return false;
+      if (!fs.existsSync(path.join(dir, "package.json"))) {
+        return false;
+      }
       return (
         fs.existsSync(path.join(dir, "src", "submodules")) &&
         "exports" in JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf-8"))
@@ -160,8 +162,12 @@ const submodulePackages = process.argv.includes("--all")
           if (entry.isDirectory()) {
             scanDir(path.join(dir, entry.name));
           } else if (!entry.name.includes(".spec.") && !entry.name.includes(".integ.")) {
-            if (entry.name.endsWith(".browser.ts")) hasBrowserVariant = true;
-            if (entry.name.endsWith(".native.ts")) hasNativeVariant = true;
+            if (entry.name.endsWith(".browser.ts")) {
+              hasBrowserVariant = true;
+            }
+            if (entry.name.endsWith(".native.ts")) {
+              hasNativeVariant = true;
+            }
           }
         }
       };

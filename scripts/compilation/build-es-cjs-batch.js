@@ -28,13 +28,17 @@ const concurrency = (() => {
 })();
 
 const all = args.includes("--all");
-if (all) args.splice(args.indexOf("--all"), 1);
+if (all) {
+  args.splice(args.indexOf("--all"), 1);
+}
 
 function getAllPackages() {
   const packages = [];
   for (const pkg of listFolders(path.join(root, "packages"))) {
     const pkgJsonPath = path.join(root, "packages", pkg, "package.json");
-    if (!fs.existsSync(pkgJsonPath)) continue;
+    if (!fs.existsSync(pkgJsonPath)) {
+      continue;
+    }
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
     if (pkgJson.scripts && pkgJson.scripts["build:es:cjs"]) {
       packages.push(pkg);
@@ -46,7 +50,9 @@ function getAllPackages() {
 function resolvePackageDir(pkg) {
   const candidates = [path.join(root, "packages", pkg), path.join(root, "private", pkg)];
   for (const dir of candidates) {
-    if (fs.existsSync(dir)) return dir;
+    if (fs.existsSync(dir)) {
+      return dir;
+    }
   }
   return null;
 }
