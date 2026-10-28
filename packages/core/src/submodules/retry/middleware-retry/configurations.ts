@@ -22,7 +22,9 @@ export const CONFIG_MAX_ATTEMPTS = "max_attempts";
 export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS: LoadedConfigSelectors<number> = {
   environmentVariableSelector: (env) => {
     const value = env[ENV_MAX_ATTEMPTS];
-    if (!value) return undefined;
+    if (!value) {
+      return undefined;
+    }
     const maxAttempt = parseInt(value);
     if (Number.isNaN(maxAttempt)) {
       throw new Error(`Environment variable ${ENV_MAX_ATTEMPTS} mast be a number, got "${value}"`);
@@ -31,7 +33,9 @@ export const NODE_MAX_ATTEMPT_CONFIG_OPTIONS: LoadedConfigSelectors<number> = {
   },
   configFileSelector: (profile) => {
     const value = profile[CONFIG_MAX_ATTEMPTS];
-    if (!value) return undefined;
+    if (!value) {
+      return undefined;
+    }
     const maxAttempt = parseInt(value);
     if (Number.isNaN(maxAttempt)) {
       throw new Error(`Shared config file entry ${CONFIG_MAX_ATTEMPTS} mast be a number, got "${value}"`);

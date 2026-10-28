@@ -112,7 +112,9 @@ export const buildHttpRpcRequest = async (
   }
   if (endpoint.headers) {
     for (const name in endpoint.headers) {
-      if (!hasOwn(endpoint.headers, name)) continue;
+      if (!hasOwn(endpoint.headers, name)) {
+        continue;
+      }
       contents.headers[name] = endpoint.headers[name];
     }
   }

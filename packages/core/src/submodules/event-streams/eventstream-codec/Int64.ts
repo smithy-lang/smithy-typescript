@@ -61,6 +61,8 @@ function negate(bytes: Uint8Array): void {
 
   for (let i = 7; i > -1; i--) {
     bytes[i]++;
-    if (bytes[i] !== 0) break;
+    if (bytes[i] !== 0) {
+      break;
+    }
   }
 }

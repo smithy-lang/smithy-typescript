@@ -107,7 +107,9 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       // Apply resolved endpoint headers per Endpoints 2.0 spec.
       if (endpoint.headers) {
         for (const name in endpoint.headers) {
-          if (!hasOwn(endpoint.headers, name)) continue;
+          if (!hasOwn(endpoint.headers, name)) {
+            continue;
+          }
           request.headers[name] = endpoint.headers[name].join(", ");
         }
       }
@@ -123,7 +125,9 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
       // Apply endpoint headers for deprecated Endpoint type if present
       if (endpoint.headers) {
         for (const name in endpoint.headers) {
-          if (!hasOwn(endpoint.headers, name)) continue;
+          if (!hasOwn(endpoint.headers, name)) {
+            continue;
+          }
           request.headers[name] = endpoint.headers[name];
         }
       }

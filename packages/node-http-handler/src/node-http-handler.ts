@@ -95,7 +95,9 @@ export class NodeHttpHandler implements HttpHandler<NodeHttpHandlerOptions> {
 
     if (sockets && requests) {
       for (const origin in sockets) {
-        if (!hasOwn(sockets, origin)) continue;
+        if (!hasOwn(sockets, origin)) {
+          continue;
+        }
         const socketsInUse = sockets[origin]?.length ?? 0;
         const requestsEnqueued = requests[origin]?.length ?? 0;
 

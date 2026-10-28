@@ -24,7 +24,9 @@ function makeRequest(headers: Record<string, string> = {}, body?: any): IHttpReq
 function makeContext(): any {
   return {
     streamCollector: async (stream: any) => {
-      if (stream instanceof Uint8Array) return stream;
+      if (stream instanceof Uint8Array) {
+        return stream;
+      }
       return new Uint8Array(0);
     },
   };

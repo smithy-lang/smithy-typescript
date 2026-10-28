@@ -8,7 +8,9 @@ import type { SelectorType } from "./types";
  * @internal
  */
 export const numberSelector = (obj: Record<string, string | undefined>, key: string, type: SelectorType) => {
-  if (!(key in obj)) return undefined;
+  if (!(key in obj)) {
+    return undefined;
+  }
 
   const numberValue = parseInt(obj[key] as string, 10);
   if (Number.isNaN(numberValue)) {

@@ -299,7 +299,9 @@ async function main() {
   const validated = [];
   for (const pkg of packages) {
     const pkgJsonPath = path.join(pkg.dir, "package.json");
-    if (!fs.existsSync(pkgJsonPath)) continue;
+    if (!fs.existsSync(pkgJsonPath)) {
+      continue;
+    }
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
     const hasDist = fs.existsSync(path.join(pkg.dir, "dist-cjs")) || fs.existsSync(path.join(pkg.dir, "dist-es"));
     if (hasDist && pkgJson.name && pkgJson.name.startsWith("@smithy/")) {

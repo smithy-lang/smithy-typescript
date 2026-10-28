@@ -27,15 +27,21 @@ if (!USE_TSC) {
  * Collect all TemplateLiteral span ranges [start, end] from an AST node.
  */
 function collectTemplateLiteralSpans(node, spans) {
-  if (!node || typeof node !== "object") return;
+  if (!node || typeof node !== "object") {
+    return;
+  }
   if (node.type === "TemplateLiteral") {
     spans.push([node.start, node.end]);
   }
   for (const key of Object.keys(node)) {
-    if (key === "type" || key === "start" || key === "end") continue;
+    if (key === "type" || key === "start" || key === "end") {
+      continue;
+    }
     const val = node[key];
     if (Array.isArray(val)) {
-      for (const item of val) collectTemplateLiteralSpans(item, spans);
+      for (const item of val) {
+        collectTemplateLiteralSpans(item, spans);
+      }
     } else if (val && typeof val === "object" && val.type) {
       collectTemplateLiteralSpans(val, spans);
     }
@@ -47,8 +53,10 @@ function collectTemplateLiteralSpans(node, spans) {
  * then strip blank lines only outside template literals.
  */
 function stripComments(code) {
-  const { comments, program } = parseSync("file.js", code);
-  if (!comments.length) return code;
+  const { comments } = parseSync("file.js", code);
+  if (!comments.length) {
+    return code;
+  }
   let result = "";
   let last = 0;
   for (const { start, end } of comments) {
@@ -98,7 +106,9 @@ const INLINE_LIMIT = 999;
  * that should not have their whitespace modified.
  */
 function collectProtectedSpans(node, spans) {
-  if (!node || typeof node !== "object") return;
+  if (!node || typeof node !== "object") {
+    return;
+  }
   const t = node.type;
   if (t === "TemplateLiteral") {
     spans.push([node.start, node.end]);
@@ -109,10 +119,14 @@ function collectProtectedSpans(node, spans) {
     return;
   }
   for (const key of Object.keys(node)) {
-    if (key === "type" || key === "start" || key === "end") continue;
+    if (key === "type" || key === "start" || key === "end") {
+      continue;
+    }
     const val = node[key];
     if (Array.isArray(val)) {
-      for (const item of val) collectProtectedSpans(item, spans);
+      for (const item of val) {
+        collectProtectedSpans(item, spans);
+      }
     } else if (val && typeof val === "object" && val.type) {
       collectProtectedSpans(val, spans);
     }
@@ -123,14 +137,20 @@ function collectProtectedSpans(node, spans) {
  * Collect spans of ObjectExpression and ArrayExpression nodes (leaf-first).
  */
 function collectLiteralSpans(node, spans) {
-  if (!node || typeof node !== "object") return;
+  if (!node || typeof node !== "object") {
+    return;
+  }
   const t = node.type;
   // Recurse first so children appear before parents (processed in reverse = parents first).
   for (const key of Object.keys(node)) {
-    if (key === "type" || key === "start" || key === "end") continue;
+    if (key === "type" || key === "start" || key === "end") {
+      continue;
+    }
     const val = node[key];
     if (Array.isArray(val)) {
-      for (const item of val) collectLiteralSpans(item, spans);
+      for (const item of val) {
+        collectLiteralSpans(item, spans);
+      }
     } else if (val && typeof val === "object" && val.type) {
       collectLiteralSpans(val, spans);
     }
@@ -159,13 +179,17 @@ function minifyFormat(code) {
     for (const node of literalNodes) {
       const { start, end } = node;
       const fragment = code.slice(start, end);
-      if (!fragment.includes("\n")) continue;
+      if (!fragment.includes("\n")) {
+        continue;
+      }
 
       const lineStart = code.lastIndexOf("\n", start - 1) + 1;
       const linePrefix = code.slice(lineStart, start);
       const inlined = fragment.replace(/\s*\n\s*/g, " ").replace(/\s{2,}/g, " ");
       let lineEnd = code.indexOf("\n", end);
-      if (lineEnd === -1) lineEnd = code.length;
+      if (lineEnd === -1) {
+        lineEnd = code.length;
+      }
       const fullLine = linePrefix + inlined + code.slice(end, lineEnd);
 
       if (fullLine.length <= INLINE_LIMIT) {
@@ -258,7 +282,9 @@ function minifyFormat(code) {
  * When a statement follows a semicolon on the same line, record a split point.
  */
 function collectStatementSplits(node, code, splits) {
-  if (!node || typeof node !== "object") return;
+  if (!node || typeof node !== "object") {
+    return;
+  }
   // Process statement lists (Program.body, BlockStatement.body, SwitchCase.consequent).
   const bodies = [];
   if (node.type === "Program" || node.type === "BlockStatement" || node.type === "StaticBlock") {
@@ -269,12 +295,16 @@ function collectStatementSplits(node, code, splits) {
   }
 
   for (const stmts of bodies) {
-    if (!Array.isArray(stmts)) continue;
+    if (!Array.isArray(stmts)) {
+      continue;
+    }
     // Determine the block's indentation from the first statement that starts at column 0
     // of its line (i.e., the line contains only indentation before the statement).
     let blockIndent = null;
     for (const stmt of stmts) {
-      if (!stmt) continue;
+      if (!stmt) {
+        continue;
+      }
       const ls = code.lastIndexOf("\n", stmt.start - 1) + 1;
       const before = code.slice(ls, stmt.start);
       if (/^\t*$/.test(before)) {
@@ -296,20 +326,28 @@ function collectStatementSplits(node, code, splits) {
     for (let i = 1; i < stmts.length; ++i) {
       const prev = stmts[i - 1];
       const curr = stmts[i];
-      if (!prev || !curr) continue;
+      if (!prev || !curr) {
+        continue;
+      }
       // Check if they're on the same line (no newline between prev.end and curr.start).
       const between = code.slice(prev.end, curr.start);
-      if (between.includes("\n")) continue;
+      if (between.includes("\n")) {
+        continue;
+      }
       splits.push({ pos: curr.start, indent: blockIndent });
     }
   }
 
   // Recurse into child nodes.
   for (const key of Object.keys(node)) {
-    if (key === "type" || key === "start" || key === "end") continue;
+    if (key === "type" || key === "start" || key === "end") {
+      continue;
+    }
     const val = node[key];
     if (Array.isArray(val)) {
-      for (const item of val) collectStatementSplits(item, code, splits);
+      for (const item of val) {
+        collectStatementSplits(item, code, splits);
+      }
     } else if (val && typeof val === "object" && val.type) {
       collectStatementSplits(val, code, splits);
     }

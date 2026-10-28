@@ -17,7 +17,9 @@ export class HeaderMarshaller {
     const chunks: Array<Uint8Array> = [];
 
     for (const headerName in headers) {
-      if (!hasOwn(headers, headerName)) continue;
+      if (!hasOwn(headers, headerName)) {
+        continue;
+      }
       const bytes = this.fromUtf8(headerName);
       if (bytes.byteLength > 255) {
         throw new Error(`@smithy/core/event-streams - header name exceeds 255 bytes: ${bytes.byteLength}`);

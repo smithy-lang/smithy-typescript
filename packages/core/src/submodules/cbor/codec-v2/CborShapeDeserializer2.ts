@@ -174,7 +174,9 @@ function readStruct(ns: NormalizedSchema, count: number, startPos: number): any 
   if (isUnion) {
     let resultEmpty = true;
     for (const _ in result) {
-      if (!hasOwn(result, _)) continue;
+      if (!hasOwn(result, _)) {
+        continue;
+      }
       resultEmpty = false;
       break;
     }
@@ -366,7 +368,9 @@ function readMapIndefinite(ns: NormalizedSchema): any {
         if (isUnion) {
           let resultEmpty = true;
           for (const _ in result) {
-            if (!hasOwn(result, _)) continue;
+            if (!hasOwn(result, _)) {
+              continue;
+            }
             resultEmpty = false;
             break;
           }
@@ -713,7 +717,9 @@ function transformObject(ns: NormalizedSchema, value: any): any {
   if (ns.isMapSchema()) {
     const targetSchema = ns.getValueSchema();
     for (const key in value) {
-      if (!hasOwn(value, key)) continue;
+      if (!hasOwn(value, key)) {
+        continue;
+      }
       newObject[key] = transformObject(targetSchema, value[key]);
     }
   } else if (ns.isStructSchema()) {
@@ -722,7 +728,9 @@ function transformObject(ns: NormalizedSchema, value: any): any {
     if (isUnion) {
       keys = new Set<string>();
       for (const k in value) {
-        if (!hasOwn(value, k)) continue;
+        if (!hasOwn(value, k)) {
+          continue;
+        }
         if (k !== "__type") {
           keys.add(k);
         }
@@ -739,7 +747,9 @@ function transformObject(ns: NormalizedSchema, value: any): any {
     if (isUnion && keys?.size === 1) {
       let newObjectEmpty = true;
       for (const _ in newObject) {
-        if (!hasOwn(newObject, _)) continue;
+        if (!hasOwn(newObject, _)) {
+          continue;
+        }
         newObjectEmpty = false;
         break;
       }
@@ -749,7 +759,9 @@ function transformObject(ns: NormalizedSchema, value: any): any {
       }
     } else if (typeof value.__type === "string") {
       for (const k in value) {
-        if (!hasOwn(value, k)) continue;
+        if (!hasOwn(value, k)) {
+          continue;
+        }
         if (!(k in newObject)) {
           newObject[k] = value[k];
         }

@@ -133,45 +133,55 @@ const timestampStructSchema = [1, "ns", "L", 0, [3, "ns", "TsStruct", 0, ["id", 
 
 function createListString() {
   const l = [];
-  for (let i = 0; i < 900 * DATA_SCALAR; ++i) l[i] = "string".repeat((Math.random() * 35) | 0);
+  for (let i = 0; i < 900 * DATA_SCALAR; ++i) {
+    l[i] = "string".repeat((Math.random() * 35) | 0);
+  }
   return l;
 }
 
 function createListFloat() {
   const l = [];
-  for (let i = 0; i < 6000 * DATA_SCALAR; ++i) l[i] = Math.random() * 3.4e38;
+  for (let i = 0; i < 6000 * DATA_SCALAR; ++i) {
+    l[i] = Math.random() * 3.4e38;
+  }
   return l;
 }
 
 function createListInt() {
   const l = [];
-  for (let i = 0; i < 17000 * DATA_SCALAR; ++i) l[i] = ((Math.random() * 20000) | 0) - 10000;
+  for (let i = 0; i < 17000 * DATA_SCALAR; ++i) {
+    l[i] = ((Math.random() * 20000) | 0) - 10000;
+  }
   return l;
 }
 
 function createListLongInt() {
   const l = [];
-  for (let i = 0; i < 10000 * DATA_SCALAR; ++i) l[i] = Math.floor(Math.random() * 0x7fffffff * 2 - 0x7fffffff);
+  for (let i = 0; i < 10000 * DATA_SCALAR; ++i) {
+    l[i] = Math.floor(Math.random() * 0x7fffffff * 2 - 0x7fffffff);
+  }
   return l;
 }
 
 function createMapStringString() {
   const m = {};
-  for (let i = 0; i < 324 * DATA_SCALAR; ++i)
+  for (let i = 0; i < 324 * DATA_SCALAR; ++i) {
     m["key".repeat((Math.random() * 10) | 0) + i] = "key".repeat((Math.random() * 155) | 0) + i + Math.random();
+  }
   return m;
 }
 
 function createMapStringLongInt() {
   const m = {};
-  for (let i = 0; i < 324 * DATA_SCALAR; ++i)
+  for (let i = 0; i < 324 * DATA_SCALAR; ++i) {
     m["key".repeat((Math.random() * 10) | 0) + i] = Math.floor(Math.random() * 0x7fffffff * 2 - 0x7fffffff);
+  }
   return m;
 }
 
 function createPutMetricDataLike() {
   const c = [];
-  for (let i = 0; i < 600 * DATA_SCALAR; ++i)
+  for (let i = 0; i < 600 * DATA_SCALAR; ++i) {
     c[i] = {
       MetricData: [
         {
@@ -183,6 +193,7 @@ function createPutMetricDataLike() {
       ],
       Namespace: "SITE/TRAFFIC",
     };
+  }
   return c;
 }
 
@@ -203,13 +214,15 @@ function createPutMetricDataRealistic() {
     })),
   };
   const c = [];
-  for (let i = 0; i < 80 * DATA_SCALAR; ++i) c[i] = req;
+  for (let i = 0; i < 80 * DATA_SCALAR; ++i) {
+    c[i] = req;
+  }
   return c;
 }
 
 function createNonAsciiStructs() {
   const c = [];
-  for (let i = 0; i < 600 * DATA_SCALAR; ++i)
+  for (let i = 0; i < 600 * DATA_SCALAR; ++i) {
     c[i] = {
       メトリック名: "PAGES_VISITED",
       ディメンション: [{ 名前: "UNIQUE_PAGES", 値: "URLS" }],
@@ -217,6 +230,7 @@ function createNonAsciiStructs() {
       数値: 1.0,
       名前空間: "SITE/TRAFFIC",
     };
+  }
   return c;
 }
 
@@ -224,7 +238,9 @@ function createBlobStructs() {
   const c = [];
   for (let i = 0; i < 500 * DATA_SCALAR; ++i) {
     const d = new Uint8Array(64);
-    for (let j = 0; j < 64; ++j) d[j] = (Math.random() * 256) | 0;
+    for (let j = 0; j < 64; ++j) {
+      d[j] = (Math.random() * 256) | 0;
+    }
     c[i] = { id: "item-" + i, data: d, name: "blob-entry-" + i };
   }
   return c;
@@ -232,8 +248,9 @@ function createBlobStructs() {
 
 function createTimestampStructs() {
   const c = [];
-  for (let i = 0; i < 1000 * DATA_SCALAR; ++i)
+  for (let i = 0; i < 1000 * DATA_SCALAR; ++i) {
     c[i] = { id: "event-" + i, createdAt: new Date(1700000000000 + i * 1000), value: Math.random() * 100 };
+  }
   return c;
 }
 

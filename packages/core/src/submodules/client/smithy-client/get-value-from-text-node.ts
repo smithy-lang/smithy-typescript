@@ -10,7 +10,9 @@ export const getValueFromTextNode = (obj: any) => {
   const textNodeName = "#text";
 
   for (const key in obj) {
-    if (!hasOwn(obj, key)) continue;
+    if (!hasOwn(obj, key)) {
+      continue;
+    }
     if (obj[key][textNodeName] !== undefined) {
       obj[key] = obj[key][textNodeName];
     } else if (typeof obj[key] === "object" && obj[key] !== null) {

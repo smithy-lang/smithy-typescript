@@ -9,8 +9,14 @@ import type { SelectorType } from "./types";
  * @internal
  */
 export const booleanSelector = (obj: Record<string, string | undefined>, key: string, type: SelectorType) => {
-  if (!(key in obj)) return undefined;
-  if (obj[key] === "true") return true;
-  if (obj[key] === "false") return false;
+  if (!(key in obj)) {
+    return undefined;
+  }
+  if (obj[key] === "true") {
+    return true;
+  }
+  if (obj[key] === "false") {
+    return false;
+  }
   throw new Error(`Cannot load ${type} "${key}". Expected "true" or "false", got ${obj[key]}.`);
 };

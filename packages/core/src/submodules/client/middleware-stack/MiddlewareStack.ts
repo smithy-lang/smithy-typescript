@@ -200,7 +200,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
       const aliases = getAllAliases(name, _aliases);
       if (aliases.length > 0) {
         if (aliases.some((alias) => entriesNameSet.has(alias))) {
-          if (!override) throw new Error(`Duplicate middleware name '${getMiddlewareNameWithAliases(name, _aliases)}'`);
+          if (!override) {
+            throw new Error(`Duplicate middleware name '${getMiddlewareNameWithAliases(name, _aliases)}'`);
+          }
           for (const alias of aliases) {
             const toOverrideIndex = absoluteEntries.findIndex(
               (entry) => entry.name === alias || entry.aliases?.some((a) => a === alias)
@@ -236,7 +238,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
       const aliases = getAllAliases(name, _aliases);
       if (aliases.length > 0) {
         if (aliases.some((alias) => entriesNameSet.has(alias))) {
-          if (!override) throw new Error(`Duplicate middleware name '${getMiddlewareNameWithAliases(name, _aliases)}'`);
+          if (!override) {
+            throw new Error(`Duplicate middleware name '${getMiddlewareNameWithAliases(name, _aliases)}'`);
+          }
           for (const alias of aliases) {
             const toOverrideIndex = relativeEntries.findIndex(
               (entry) => entry.name === alias || entry.aliases?.some((a) => a === alias)
@@ -270,8 +274,11 @@ export const constructStack = <Input extends object, Output extends object>(): M
     },
 
     remove: (toRemove: MiddlewareType<Input, Output> | string): boolean => {
-      if (typeof toRemove === "string") return removeByName(toRemove);
-      else return removeByReference(toRemove);
+      if (typeof toRemove === "string") {
+        return removeByName(toRemove);
+      } else {
+        return removeByReference(toRemove);
+      }
     },
 
     removeByTag: (toRemove: string): boolean => {
@@ -318,7 +325,9 @@ export const constructStack = <Input extends object, Output extends object>(): M
     },
 
     identifyOnResolve(toggle?: boolean) {
-      if (typeof toggle === "boolean") identifyOnResolve = toggle;
+      if (typeof toggle === "boolean") {
+        identifyOnResolve = toggle;
+      }
       return identifyOnResolve;
     },
 

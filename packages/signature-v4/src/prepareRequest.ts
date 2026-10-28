@@ -12,7 +12,9 @@ export const prepareRequest = (request: IHttpRequest): IHttpRequest => {
   request = HttpRequest.clone(request);
 
   for (const headerName in request.headers) {
-    if (!hasOwn(request.headers, headerName)) continue;
+    if (!hasOwn(request.headers, headerName)) {
+      continue;
+    }
     if (GENERATED_HEADERS.indexOf(headerName.toLowerCase()) > -1) {
       delete request.headers[headerName];
     }

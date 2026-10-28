@@ -12,7 +12,9 @@ export const getPayloadHash = async (
   hashConstructor: ChecksumConstructor | HashConstructor
 ): Promise<string> => {
   for (const headerName in headers) {
-    if (!hasOwn(headers, headerName)) continue;
+    if (!hasOwn(headers, headerName)) {
+      continue;
+    }
     if (headerName.toLowerCase() === SHA256_HEADER) {
       return headers[headerName];
     }

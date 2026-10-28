@@ -20,14 +20,14 @@
  * ```
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const root = path.join(__dirname, "..");
 
 const packages = fs.readdirSync(path.join(root, "packages"));
 
-const nonClientPackages = [...packages.map((p) => path.join(root, "packages", p))];
+const nonClientPackages = packages.map((p) => path.join(root, "packages", p));
 
 const deps = {
   /* @namespace/name: {

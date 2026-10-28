@@ -204,10 +204,6 @@ async function main() {
     }
   }
 
-  const knownErrors = errors.filter((e) => {
-    const key = e.replace(/unreachable file: /, "");
-    return KNOWN_UNREACHABLE.has(key);
-  });
   const newErrors = errors.filter((e) => {
     const key = e.replace(/unreachable file: /, "");
     return !KNOWN_UNREACHABLE.has(key);

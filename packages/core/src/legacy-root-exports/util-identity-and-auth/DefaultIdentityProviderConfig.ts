@@ -15,7 +15,9 @@ export class DefaultIdentityProviderConfig implements IdentityProviderConfig {
    */
   constructor(config: Record<HttpAuthSchemeId, IdentityProvider<Identity> | undefined>) {
     for (const key in config) {
-      if (!hasOwn(config, key)) continue;
+      if (!hasOwn(config, key)) {
+        continue;
+      }
       const value = config[key];
       if (value !== undefined) {
         this.authSchemes.set(key, value);

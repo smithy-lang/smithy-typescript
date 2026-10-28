@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-const path = require("path");
-const readline = require("readline");
+const path = require("node:path");
 
 const findFolders = require("./lib/findFolders");
 const findScripts = require("./lib/findScripts");
@@ -29,7 +28,7 @@ async function main() {
     ..._private.map((p) => new Package(p, path.join(root, "private", p))),
   ];
 
-  const [node, dispatcher, ...rest] = argv;
+  const [, , ...rest] = argv;
   const flags = rest.filter((f) => f.startsWith("--"));
   const options = {
     help: flags.includes("--help") || rest.length === 0,

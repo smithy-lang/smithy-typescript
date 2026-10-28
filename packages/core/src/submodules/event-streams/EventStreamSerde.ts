@@ -122,7 +122,9 @@ export class EventStreamSerde {
 
       let unionMember = "";
       for (const key in event) {
-        if (!hasOwn(event, key)) continue;
+        if (!hasOwn(event, key)) {
+          continue;
+        }
         if (key !== "__type") {
           unionMember = key;
           break;
@@ -181,7 +183,9 @@ export class EventStreamSerde {
     const asyncIterable = marshaller.deserialize(response.body, async (event) => {
       let unionMember = "";
       for (const key in event) {
-        if (!hasOwn(event, key)) continue;
+        if (!hasOwn(event, key)) {
+          continue;
+        }
         if (key !== "__type") {
           unionMember = key;
           break;
@@ -270,7 +274,9 @@ export class EventStreamSerde {
       }
 
       for (const key in firstEvent.value) {
-        if (!hasOwn(firstEvent.value, key)) continue;
+        if (!hasOwn(firstEvent.value, key)) {
+          continue;
+        }
         initialResponseContainer[key] = firstEvent.value[key];
       }
     }

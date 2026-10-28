@@ -123,7 +123,9 @@ async function waitForRpsInRange(
     await new Promise((r) => setTimeout(r, 500));
     const now = performance.now();
     const rps = handler.rpsInInterval(now - windowMs, now);
-    if (rps >= lower && rps <= upper) return;
+    if (rps >= lower && rps <= upper) {
+      return;
+    }
   }
 }
 

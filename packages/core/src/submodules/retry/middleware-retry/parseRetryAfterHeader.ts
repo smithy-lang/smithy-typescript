@@ -12,7 +12,9 @@ export function parseRetryAfterHeader(response: unknown, logger?: Logger): Date 
   }
 
   for (const header in response.headers) {
-    if (!hasOwn(response.headers, header)) continue;
+    if (!hasOwn(response.headers, header)) {
+      continue;
+    }
     const h = header.toLowerCase();
     if (h === "retry-after") {
       const retryAfter = response.headers[header];

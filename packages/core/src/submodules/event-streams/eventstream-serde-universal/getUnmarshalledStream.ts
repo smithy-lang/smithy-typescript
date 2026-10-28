@@ -24,7 +24,9 @@ export function getUnmarshalledStream<T extends Record<string, any>>(
       for await (const chunk of source) {
         const message = options.eventStreamCodec.decode(chunk);
         const type = await messageUnmarshaller(message);
-        if (type === undefined) continue;
+        if (type === undefined) {
+          continue;
+        }
         yield type;
       }
     },
@@ -63,7 +65,9 @@ export function getMessageUnmarshaller<T extends Record<string, any>>(
         [message.headers[":event-type"].value as string]: message,
       };
       const deserialized = await deserializer(event);
-      if (deserialized.$unknown) return;
+      if (deserialized.$unknown) {
+        return;
+      }
       return deserialized;
     } else {
       throw Error(`Unrecognizable event type: ${message.headers[":event-type"].value}`);

@@ -69,11 +69,15 @@ const getInstanceMetadataProvider = (init: RemoteProviderInit = {}) => {
 
       if (init.ec2MetadataV1Disabled || configValue) {
         const causes: string[] = [];
-        if (init.ec2MetadataV1Disabled)
+        if (init.ec2MetadataV1Disabled) {
           causes.push("credential provider initialization (runtime option ec2MetadataV1Disabled)");
-        if (fallbackBlockedFromProfile) causes.push(`config file profile (${PROFILE_AWS_EC2_METADATA_V1_DISABLED})`);
-        if (fallbackBlockedFromProcessEnv)
+        }
+        if (fallbackBlockedFromProfile) {
+          causes.push(`config file profile (${PROFILE_AWS_EC2_METADATA_V1_DISABLED})`);
+        }
+        if (fallbackBlockedFromProcessEnv) {
           causes.push(`process environment variable (${AWS_EC2_METADATA_V1_DISABLED})`);
+        }
 
         throw new InstanceMetadataV1FallbackError(
           `AWS EC2 Metadata v1 fallback has been blocked by AWS SDK configuration in the following: [${causes.join(

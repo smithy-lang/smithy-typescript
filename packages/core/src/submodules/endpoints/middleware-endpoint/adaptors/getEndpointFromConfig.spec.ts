@@ -11,7 +11,9 @@ describe(getEndpointFromConfig.name, () => {
   beforeEach(() => {
     process.env = { ...ORIGINAL_ENV };
     for (const key in fileRecord) {
-      if (!hasOwn(fileRecord, key)) continue;
+      if (!hasOwn(fileRecord, key)) {
+        continue;
+      }
       delete fileRecord[key];
     }
   });
@@ -19,7 +21,9 @@ describe(getEndpointFromConfig.name, () => {
   afterEach(() => {
     process.env = ORIGINAL_ENV;
     for (const key in fileRecord) {
-      if (!hasOwn(fileRecord, key)) continue;
+      if (!hasOwn(fileRecord, key)) {
+        continue;
+      }
       delete fileRecord[key];
     }
   });

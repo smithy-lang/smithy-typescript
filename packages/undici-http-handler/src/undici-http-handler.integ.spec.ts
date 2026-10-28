@@ -22,7 +22,9 @@ async function readFramedEvents(body: Readable): Promise<unknown[]> {
     buffer = Buffer.concat([buffer, chunk]);
     while (buffer.length >= 4) {
       const frameLength = buffer.readUInt32BE(0);
-      if (buffer.length < 4 + frameLength) break;
+      if (buffer.length < 4 + frameLength) {
+        break;
+      }
       events.push(JSON.parse(buffer.subarray(4, 4 + frameLength).toString()));
       buffer = buffer.subarray(4 + frameLength);
     }

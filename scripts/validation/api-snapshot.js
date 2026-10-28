@@ -38,7 +38,9 @@ for (const packageRoot of packageDirs) {
 
     if (packageJson.exports) {
       for (const [exportPath, exportConfig] of Object.entries(packageJson.exports)) {
-        if (exportPath === "." || exportPath === "./package.json") continue;
+        if (exportPath === "." || exportPath === "./package.json") {
+          continue;
+        }
         const subCjsPath = path.join(packageRoot, exportConfig.require || exportConfig.node);
         const subDtsPath = path.join(packageRoot, exportConfig.types || "");
         if (fs.existsSync(subCjsPath) && fs.existsSync(subDtsPath)) {
@@ -84,7 +86,9 @@ const checker = program.getTypeChecker();
  * as a type export even though the target is a class.
  */
 function isTypeOnlyAliasExport(sym) {
-  if (!(sym.flags & ts.SymbolFlags.Alias)) return false;
+  if (!(sym.flags & ts.SymbolFlags.Alias)) {
+    return false;
+  }
   for (const decl of sym.getDeclarations() || []) {
     // `export { type Foo }` / `import { type Foo }` -> specifier isTypeOnly
     if ((ts.isExportSpecifier(decl) || ts.isImportSpecifier(decl)) && decl.isTypeOnly) {
@@ -107,10 +111,14 @@ function isTypeOnlyAliasExport(sym) {
 function getTypeExports(dtsPath) {
   const typeExports = new Map();
   const sourceFile = program.getSourceFile(dtsPath);
-  if (!sourceFile) return typeExports;
+  if (!sourceFile) {
+    return typeExports;
+  }
 
   const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
-  if (!moduleSymbol) return typeExports;
+  if (!moduleSymbol) {
+    return typeExports;
+  }
 
   const exports = checker.getExportsOfModule(moduleSymbol);
   for (const sym of exports) {
@@ -132,13 +140,21 @@ function getTypeExports(dtsPath) {
         kind = "type(interface)";
       } else if (flags & ts.SymbolFlags.TypeAlias) {
         const type = checker.getDeclaredTypeOfSymbol(resolved);
-        if (type.isUnion()) kind = "type(union)";
-        else if (type.isIntersection()) kind = "type(intersection)";
-        else if (type.flags & ts.TypeFlags.String) kind = "type(string)";
-        else if (type.flags & ts.TypeFlags.Number) kind = "type(number)";
-        else if (type.flags & ts.TypeFlags.Boolean) kind = "type(boolean)";
-        else if (type.flags & ts.TypeFlags.Object) kind = "type(object)";
-        else kind = "type(alias)";
+        if (type.isUnion()) {
+          kind = "type(union)";
+        } else if (type.isIntersection()) {
+          kind = "type(intersection)";
+        } else if (type.flags & ts.TypeFlags.String) {
+          kind = "type(string)";
+        } else if (type.flags & ts.TypeFlags.Number) {
+          kind = "type(number)";
+        } else if (type.flags & ts.TypeFlags.Boolean) {
+          kind = "type(boolean)";
+        } else if (type.flags & ts.TypeFlags.Object) {
+          kind = "type(object)";
+        } else {
+          kind = "type(alias)";
+        }
       } else if (flags & ts.SymbolFlags.Class) {
         // A `type`-only re-export of a class: only the instance type is public.
         kind = "type(class)";
@@ -176,7 +192,7 @@ function checkModule(name, version, module, typeExports) {
       api[name][key] = key in module ? typeof module[key] : typeExports.get(key);
     }
   } else {
-    for (const symbol of [...new Set([...Object.keys(api[name]), ...allSymbols])]) {
+    for (const symbol of new Set([...Object.keys(api[name]), ...allSymbols])) {
       const inRuntime = symbol in module;
       const inTypes = typeExports.has(symbol);
       const inSnapshot = symbol in api[name];
@@ -211,7 +227,9 @@ const coreDir = path.join(root, "packages", "core");
 function createVariantProgram(variant) {
   const variantDtsPaths = [];
   for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
-    if (!dir.isDirectory()) continue;
+    if (!dir.isDirectory()) {
+      continue;
+    }
     const variantDts = path.join(coreDir, "dist-types", "submodules", dir.name, `index.${variant}.d.ts`);
     const nodeDts = path.join(coreDir, "dist-types", "submodules", dir.name, "index.d.ts");
     variantDtsPaths.push(fs.existsSync(variantDts) ? variantDts : nodeDts);
@@ -232,10 +250,14 @@ const variantPrograms = {
 };
 
 for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
-  if (!dir.isDirectory()) continue;
+  if (!dir.isDirectory()) {
+    continue;
+  }
   const sub = dir.name;
   const nodeIndex = path.join(coreDir, "dist-cjs", "submodules", sub, "index.js");
-  if (!fs.existsSync(nodeIndex)) continue;
+  if (!fs.existsSync(nodeIndex)) {
+    continue;
+  }
 
   const nodeModule = require(nodeIndex);
   const snapshotName = `@smithy/core/${sub}`;
@@ -243,7 +265,9 @@ for (const dir of fs.readdirSync(submodulesDir, { withFileTypes: true })) {
 
   for (const variant of ["browser", "native"]) {
     const variantIndex = path.join(coreDir, "dist-cjs", "submodules", sub, `index.${variant}.js`);
-    if (!fs.existsSync(variantIndex)) continue;
+    if (!fs.existsSync(variantIndex)) {
+      continue;
+    }
 
     const variantModule = require(variantIndex);
 

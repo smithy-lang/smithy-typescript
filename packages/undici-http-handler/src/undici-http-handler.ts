@@ -119,8 +119,12 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // Strip the Expect header — undici does not support 100-continue and
     // sends the body immediately, so the header is unnecessary.
     const headers = request.headers;
-    if (headers["Expect"] === "100-continue") delete headers["Expect"];
-    if (headers["expect"] === "100-continue") delete headers["expect"];
+    if (headers["Expect"] === "100-continue") {
+      delete headers["Expect"];
+    }
+    if (headers["expect"] === "100-continue") {
+      delete headers["expect"];
+    }
 
     // Strip transfer-encoding header for streaming bodies — undici manages
     // chunked encoding internally for streams, so the explicit header is not
@@ -128,8 +132,12 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
     // Uses the same duck-typing check as undici's isStream (pipe + on).
     const body = request.body as Readable | undefined;
     if (body && typeof body.pipe === "function" && typeof body.on === "function") {
-      if (headers["transfer-encoding"] === "chunked") delete headers["transfer-encoding"];
-      if (headers["Transfer-Encoding"] === "chunked") delete headers["Transfer-Encoding"];
+      if (headers["transfer-encoding"] === "chunked") {
+        delete headers["transfer-encoding"];
+      }
+      if (headers["Transfer-Encoding"] === "chunked") {
+        delete headers["Transfer-Encoding"];
+      }
     }
 
     // greater than 0 number or undefined.
@@ -157,15 +165,21 @@ export class UndiciHttpHandler implements HttpHandler<UndiciHttpHandlerOptions> 
       // Only allocate a new object if multi-value headers are present.
       let transformedHeaders: Record<string, string> | undefined;
       for (const key in responseHeaders) {
-        if (!hasOwn(responseHeaders, key)) continue;
+        if (!hasOwn(responseHeaders, key)) {
+          continue;
+        }
         const value = responseHeaders[key];
         if (Array.isArray(value)) {
           if (!transformedHeaders) {
             // Lazily copy all headers seen so far.
             transformedHeaders = {};
             for (const k in responseHeaders) {
-              if (!hasOwn(responseHeaders, k)) continue;
-              if (k === key) break;
+              if (!hasOwn(responseHeaders, k)) {
+                continue;
+              }
+              if (k === key) {
+                break;
+              }
               transformedHeaders[k] = responseHeaders[k] as string;
             }
           }

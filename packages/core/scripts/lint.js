@@ -51,10 +51,14 @@ for (const submodule of submodules) {
         exportEntry["react-native"] = expected;
         // reorder so react-native comes after types
         const reordered = {};
-        if (exportEntry.types) reordered.types = exportEntry.types;
+        if (exportEntry.types) {
+          reordered.types = exportEntry.types;
+        }
         reordered["react-native"] = exportEntry["react-native"];
         for (const [k, v] of Object.entries(exportEntry)) {
-          if (k !== "types" && k !== "react-native") reordered[k] = v;
+          if (k !== "types" && k !== "react-native") {
+            reordered[k] = v;
+          }
         }
         pkgJson.exports[`./${submodule}`] = reordered;
         fs.writeFileSync(path.join(root, "package.json"), JSON.stringify(pkgJson, null, 2) + "\n");
@@ -112,7 +116,9 @@ export * from "./dist-types/submodules/${submodule}/index";
  */
 for (const submodule of submodules) {
   const submodulePath = path.join(root, "src", "submodules", submodule);
-  if (!fs.lstatSync(submodulePath).isDirectory()) continue;
+  if (!fs.lstatSync(submodulePath).isDirectory()) {
+    continue;
+  }
 
   let hasBrowserVariant = false;
   let hasNativeVariant = false;
@@ -122,8 +128,12 @@ for (const submodule of submodules) {
       if (entry.isDirectory()) {
         scanDir(path.join(dir, entry.name));
       } else if (!entry.name.includes(".spec.") && !entry.name.includes(".integ.")) {
-        if (entry.name.endsWith(".browser.ts")) hasBrowserVariant = true;
-        if (entry.name.endsWith(".native.ts")) hasNativeVariant = true;
+        if (entry.name.endsWith(".browser.ts")) {
+          hasBrowserVariant = true;
+        }
+        if (entry.name.endsWith(".native.ts")) {
+          hasNativeVariant = true;
+        }
       }
     }
   };

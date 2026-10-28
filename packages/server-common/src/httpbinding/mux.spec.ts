@@ -123,7 +123,9 @@ describe("simple matching", () => {
   ];
 
   for (const key in matches) {
-    if (!hasOwn(matches, key)) continue;
+    if (!hasOwn(matches, key)) {
+      continue;
+    }
     const reqs = matches[key];
     for (const req of reqs) {
       it(`should match ${JSON.stringify(req)} to ${key}`, () => {

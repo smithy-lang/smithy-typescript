@@ -9,5 +9,5 @@ const root = path.join(__dirname, "..");
 const packages = path.join(root, "packages");
 
 for (const folder of fs.readdirSync(packages)) {
-  const pkgJson = require(path.join(packages, folder, "package.json"));
+  const _pkgJson = require(path.join(packages, folder, "package.json"));
 }

@@ -36,11 +36,15 @@ function validate(packageDir) {
 
   for (const distDir of ["dist-es", "dist-cjs"]) {
     const dir = path.join(packageDir, distDir);
-    if (!fs.existsSync(dir)) continue;
+    if (!fs.existsSync(dir)) {
+      continue;
+    }
 
     walkDir(dir, (filePath) => {
       const fileName = path.basename(filePath);
-      if (!fileName.endsWith(".js")) return;
+      if (!fileName.endsWith(".js")) {
+        return;
+      }
 
       // Count dots (excluding the final .js extension).
       const withoutExt = fileName.slice(0, -3);

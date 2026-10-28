@@ -13,7 +13,9 @@ export class HeaderFormatter {
     const chunks: Array<Uint8Array> = [];
 
     for (const headerName in headers) {
-      if (!hasOwn(headers, headerName)) continue;
+      if (!hasOwn(headers, headerName)) {
+        continue;
+      }
       const bytes = fromUtf8(headerName);
       chunks.push(Uint8Array.from([bytes.byteLength]), bytes, this.formatHeaderValue(headers[headerName]));
     }
@@ -150,6 +152,8 @@ function negate(bytes: Uint8Array): void {
 
   for (let i = 7; i > -1; i--) {
     bytes[i]++;
-    if (bytes[i] !== 0) break;
+    if (bytes[i] !== 0) {
+      break;
+    }
   }
 }

@@ -18,7 +18,9 @@ function main() {
   const errors = [];
   for (const pkg of packages) {
     const pkgJsonPath = path.join(pkg.dir, "package.json");
-    if (!fs.existsSync(pkgJsonPath)) continue;
+    if (!fs.existsSync(pkgJsonPath)) {
+      continue;
+    }
     validated.push(pkg);
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
     for (const file of REQUIRED_FILES) {

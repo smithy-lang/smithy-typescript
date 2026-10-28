@@ -9,7 +9,9 @@ describe("eventstream parsing", () => {
   const eventStreamCodec = new EventStreamCodec(toUtf8, fromUtf8);
 
   for (const vectorName in vectors) {
-    if (!hasOwn(vectors, vectorName)) continue;
+    if (!hasOwn(vectors, vectorName)) {
+      continue;
+    }
     const vector = vectors[vectorName];
     it(`should handle the ${vectorName} test case`, () => {
       if (vector.expectation === "failure") {

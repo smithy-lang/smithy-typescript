@@ -36,7 +36,9 @@ export class HttpResponse {
 
   static isInstance(response: unknown): response is HttpResponse {
     //determine if response is a valid HttpResponse
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
     const resp = response as any;
     return typeof resp.statusCode === "number" && typeof resp.headers === "object";
   }

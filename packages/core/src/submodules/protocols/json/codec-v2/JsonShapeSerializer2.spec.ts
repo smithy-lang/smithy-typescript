@@ -314,7 +314,9 @@ describe(JsonShapeSerializer2.name, () => {
 
     it("encodes larger blobs correctly", () => {
       const data = new Uint8Array(256);
-      for (let i = 0; i < 256; i++) data[i] = i;
+      for (let i = 0; i < 256; i++) {
+        data[i] = i;
+      }
       serializer.write(widget, { blob: data });
       const result = JSON.parse(decode(serializer.flush()));
       // Verify by decoding back

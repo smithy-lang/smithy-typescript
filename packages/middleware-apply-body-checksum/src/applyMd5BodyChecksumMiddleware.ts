@@ -61,7 +61,9 @@ export const getApplyMd5BodyChecksumPlugin = (config: Md5BodyChecksumResolvedCon
 const hasHeader = (soughtHeader: string, headers: HeaderBag): boolean => {
   soughtHeader = soughtHeader.toLowerCase();
   for (const headerName in headers) {
-    if (!hasOwn(headers, headerName)) continue;
+    if (!hasOwn(headers, headerName)) {
+      continue;
+    }
     if (soughtHeader === headerName.toLowerCase()) {
       return true;
     }
