@@ -7,6 +7,7 @@ import {
   parseEpochTimestamp,
   parseRfc3339DateTimeWithOffset,
   parseRfc7231DateTime,
+  writeKey,
 } from "@smithy/core/serde";
 import type {
   DocumentType,
@@ -24,7 +25,6 @@ import type { JsonSettings } from "../JsonSettings";
 import { jsonReviver } from "../jsonReviver";
 import { needsReviver } from "../needsReviver";
 import { parseJsonBody } from "../parseJsonBody";
-import { writeKey } from "../../writeKey";
 import { hasOwn } from "@smithy/core/transport";
 
 /**

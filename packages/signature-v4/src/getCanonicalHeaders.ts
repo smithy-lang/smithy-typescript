@@ -1,4 +1,4 @@
-import { writeKey } from "@smithy/core/protocols";
+import { hasOwn, writeKey } from "@smithy/core/serde";
 import type { HeaderBag, HttpRequest } from "@smithy/types";
 
 import { ALWAYS_UNSIGNABLE_HEADERS, PROXY_HEADER_PATTERN, SEC_HEADER_PATTERN } from "./constants";
@@ -19,7 +19,7 @@ export const getCanonicalHeaders = (
 
     const canonicalHeaderName = headerName.toLowerCase();
     if (
-      Object.prototype.hasOwnProperty.call(ALWAYS_UNSIGNABLE_HEADERS, canonicalHeaderName) ||
+      hasOwn(ALWAYS_UNSIGNABLE_HEADERS, canonicalHeaderName) ||
       unsignableHeaders?.has(canonicalHeaderName) ||
       PROXY_HEADER_PATTERN.test(canonicalHeaderName) ||
       SEC_HEADER_PATTERN.test(canonicalHeaderName)

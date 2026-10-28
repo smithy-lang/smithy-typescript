@@ -1,4 +1,4 @@
-import { hasOwn } from "@smithy/core/transport";
+import { hasOwn } from "@smithy/core/serde";
 import { HttpRequest } from "@smithy/core/protocols";
 import type { HeaderBag } from "@smithy/types";
 import { describe, expect, test as it } from "vitest";

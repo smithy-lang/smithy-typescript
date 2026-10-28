@@ -398,8 +398,7 @@
     "RpcProtocol": "function",
     "SerdeContext": "function",
     "SmithyRpcV2JsonProtocol": "function",
-    "ToStringShapeSerializer": "function",
-    "writeKey": "function"
+    "ToStringShapeSerializer": "function"
   },
   "@smithy/core/retry": {
     "AdaptiveRetryStrategy": "function",
@@ -562,7 +561,8 @@
     "toUtf8": "function",
     "Uint8ArrayBlobAdapter": "function",
     "V1OrV2Endpoint": "type(object)",
-    "v4": "function"
+    "v4": "function",
+    "writeKey": "function"
   },
   "@smithy/core/transport": {
     "getSmithyContext": "function",
