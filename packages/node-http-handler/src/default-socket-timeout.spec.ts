@@ -23,7 +23,7 @@ const withDefault = <T extends object>(options: T, defaultSocketTimeout: number)
   ({ ...options, defaultSocketTimeout }) as T;
 
 // Matches the key a client offers its service default under.
-const FALLBACK_DEFAULT_SOCKET_TIMEOUT = Symbol.for("defaultSocketTimeout") as any;
+const FALLBACK_DEFAULT_SOCKET_TIMEOUT = Symbol.for("@smithy/defaultSocketTimeout") as any;
 
 // Real-timer windows with wide margins so a loaded CI event loop cannot flip a result.
 const WINDOW = 500; // the service default under test

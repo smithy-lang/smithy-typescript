@@ -45,7 +45,7 @@ export const getHttpHandlerExtensionConfiguration = <HandlerConfig extends { log
   // Offered the same way: the handler keeps its own defaultSocketTimeout if it has one.
   if (runtimeConfig.defaultSocketTimeout) {
     runtimeConfig.requestHandler?.updateHttpClientConfig?.(
-      Symbol.for("defaultSocketTimeout") as unknown as keyof HandlerConfig,
+      Symbol.for("@smithy/defaultSocketTimeout") as unknown as keyof HandlerConfig,
       runtimeConfig.defaultSocketTimeout as HandlerConfig[keyof HandlerConfig]
     );
   }

@@ -7,7 +7,7 @@ import { getHttpHandlerExtensionConfiguration, resolveHttpHandlerRuntimeConfig }
  * handlers do: `Symbol.for` makes every copy of this key equal.
  */
 const FALLBACK_LOGGER = Symbol.for("logger");
-const FALLBACK_DEFAULT_SOCKET_TIMEOUT = Symbol.for("defaultSocketTimeout");
+const FALLBACK_DEFAULT_SOCKET_TIMEOUT = Symbol.for("@smithy/defaultSocketTimeout");
 
 describe("getHttpHandlerExtensionConfiguration", () => {
   const createMockHandler = () => ({
