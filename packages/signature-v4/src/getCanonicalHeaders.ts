@@ -1,3 +1,4 @@
+import { hasOwn, writeKey } from "@smithy/core/serde";
 import type { HeaderBag, HttpRequest } from "@smithy/types";
 
 import { ALWAYS_UNSIGNABLE_HEADERS, PROXY_HEADER_PATTERN, SEC_HEADER_PATTERN } from "./constants";
@@ -18,7 +19,7 @@ export const getCanonicalHeaders = (
 
     const canonicalHeaderName = headerName.toLowerCase();
     if (
-      canonicalHeaderName in ALWAYS_UNSIGNABLE_HEADERS ||
+      hasOwn(ALWAYS_UNSIGNABLE_HEADERS, canonicalHeaderName) ||
       unsignableHeaders?.has(canonicalHeaderName) ||
       PROXY_HEADER_PATTERN.test(canonicalHeaderName) ||
       SEC_HEADER_PATTERN.test(canonicalHeaderName)
@@ -30,6 +31,9 @@ export const getCanonicalHeaders = (
 
     // https://www.rfc-editor.org/rfc/rfc9110.html#name-field-values
     // https://www.rfc-editor.org/rfc/rfc9110.html#section-5.6.3
+    if (canonicalHeaderName === "__proto__") {
+      writeKey(canonical);
+    }
     canonical[canonicalHeaderName] = headers[headerName]
       .replace(/[\r\n]/g, " ")
       .replace(/[ \t]+/g, " ")

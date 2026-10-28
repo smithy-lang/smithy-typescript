@@ -112,3 +112,4 @@ export const v4 = bindV4(_getRandomValues);
 export const generateIdempotencyToken = v4;
 
 export { hasOwn } from "@smithy/core/transport";
+export { writeKey } from "./writeKey";
