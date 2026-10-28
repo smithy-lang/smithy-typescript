@@ -30,19 +30,20 @@ describe(HttpBindingNormalizedSchema.name, () => {
 
     expect(HttpBindingNormalizedSchema.of(() => structure)).toBe(schema);
     expect((structure as any)[Symbol.for("@smithy/schema-x")]).toBe(schema);
-    expect(first.map(([, , location]) => location)).toEqual([
+    expect(first.request.memberBindings.map(([, , location]) => location)).toEqual([
       0b100_000, 0b100_001, 0b100_110, 0b100_111, 0b100_010, 0b100_011, 0b100_100, 0b100_101,
     ]);
-    expect(first.map(([, , , wireName]) => wireName).filter(Boolean)).toEqual(["x-test", "x-meta-", "q"]);
-    expect(Array.from(first.responseBody)).toEqual(["body", "label", "query", "queryParams"]);
-    expect(first.responseBody.schema?.[4]).toEqual(["body", "label", "query", "queryParams"]);
-    expect(first.schema?.[4]).toEqual(["body"]);
-    expect(first.responseBody.discardResponseBody).toBe(false);
-    expect(first.responsePayload).toBe(first[6]);
-    expect(first.responseCode).toBe(first[7]);
-    expect(first.responseHeaders["x-test"]).toBe(first[2]);
-    expect(first.responsePrefixHeaders).toEqual([first[3]]);
-    expect((first[1][1][1] >> 17) & 1).toBe(1);
+    const { request, response } = first;
+    const memberBindings = request.memberBindings;
+    expect(memberBindings.map(([, , , wireName]) => wireName).filter(Boolean)).toEqual(["x-test", "x-meta-", "q"]);
+    expect(response.bodyMemberNames).toEqual(["body", "label", "query", "queryParams"]);
+    expect(response.syntheticBodySchema?.[4]).toEqual(["body", "label", "query", "queryParams"]);
+    expect(request.syntheticBodySchema?.[4]).toEqual(["body"]);
+    expect(response.bindings.payload).toBe(memberBindings[6]);
+    expect(response.bindings.statusCode).toBe(memberBindings[7]);
+    expect(response.bindings.headers["x-test"]).toBe(memberBindings[2]);
+    expect(response.bindings.prefixHeaders).toEqual([memberBindings[3]]);
+    expect((memberBindings[1][1][1] >> 17) & 1).toBe(1);
   });
 
   it("resolves content types and payload kinds from the cached binding", () => {
@@ -53,7 +54,22 @@ describe(HttpBindingNormalizedSchema.name, () => {
     const document = HttpBindingNormalizedSchema.of(struct("Document", { value: 0 }));
     expect(resolveHttpBindingContentType("application/json", document)).toBe("application/json");
     expect(hasHttpBindingUnstructuredPayload(document)).toBe(false);
-    expect(document.getHttpBindings().responseBody.discardResponseBody).toBe(true);
+    expect(document.getHttpBindings().response.bindings.payload).toBeUndefined();
+  });
+
+  it("indexes __proto__ members and headers", () => {
+    const bindings = HttpBindingNormalizedSchema.of([
+      3,
+      "example",
+      "Reserved",
+      0,
+      ["__proto__"],
+      [[0, { httpHeader: "__proto__" }]],
+    ] satisfies StaticStructureSchema).getHttpBindings();
+    const binding = bindings.request.memberBindings[0];
+
+    expect(bindings.request.byName["__proto__"]).toBe(binding);
+    expect(bindings.response.bindings.headers["__proto__"]).toBe(binding);
   });
 
   it("caches operation HTTP and endpoint traits", () => {
@@ -91,7 +107,7 @@ describe(HttpBindingNormalizedSchema.name, () => {
         events: [[3, "example", "Events", { streaming: 1 }, [], []], { httpPayload: 1 }],
       })
     );
-    const [token, dates, sparse, stream, events] = schema.getHttpBindings();
+    const [token, dates, sparse, stream, events] = schema.getHttpBindings().request.memberBindings;
 
     expect(token[1][1] & 0xff).toBe(0);
     expect((token[1][1] >> 8) & 0b11).toBe(2);
@@ -109,7 +125,8 @@ describe(HttpBindingNormalizedSchema.name, () => {
     let recursiveList: any;
     recursiveList = [1, "example", "RecursiveList", 0, () => recursiveList];
 
-    const [body] = HttpBindingNormalizedSchema.of(struct("Recursive", { body: () => recursiveList })).getHttpBindings();
+    const [body] = HttpBindingNormalizedSchema.of(struct("Recursive", { body: () => recursiveList })).getHttpBindings()
+      .request.memberBindings;
 
     expect(body[1][2]).toBeUndefined();
   });

@@ -52,13 +52,11 @@ export class HttpInterceptingShapeSerializer<CodecShapeSerializer extends ShapeS
     this.writeCodec(ns, value);
   }
 
-  /** @internal */
   public writeHttpBinding(binding: HttpBindingValue, value: unknown, location: HttpBindingLocation): void {
     this.stringSerializer.writeHttpBinding(binding, value, location);
     this.buffer = this.stringSerializer.flush();
   }
 
-  /** @internal */
   public writeCodec(schema: ISchema, value: unknown): void {
     this.codecSerializer.write(schema, value);
   }

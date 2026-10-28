@@ -2,6 +2,9 @@ import { hasOwn, HttpRequest } from "@smithy/core/transport";
 import type { TypeRegistry } from "@smithy/core/schema";
 import { sdkStreamMixin, splitEvery, splitHeader } from "@smithy/core/serde";
 import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BooleanSchema,
   DocumentSchema,
   Endpoint,
   EndpointBearer,
@@ -38,7 +41,6 @@ type HttpBindingDeserializer = Pick<
   HttpInterceptingShapeDeserializer<any>,
   "readHttpBinding" | "readPayload" | "readCodec"
 >;
-type HttpBodyMemberNames = HttpBindingIndex["responseBody"];
 
 /**
  * Base for HTTP-binding protocols. Downstream examples
@@ -63,7 +65,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     const endpoint: Endpoint = await context.endpoint();
 
     const ns = HttpBindingNormalizedSchema.of(operationSchema?.input);
-    const bindings = ns.getHttpBindings();
+    const bindings = ns.getHttpBindings().request;
     const operation = getHttpOperationBindings(operationSchema);
 
     const request = new HttpRequest({ query, headers });
@@ -93,15 +95,17 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
   private serializeHttpBindings(
     input: any,
     request: HttpRequest,
-    bindings: HttpBindingIndex,
+    bindings: HttpBindingIndex["request"],
     operation: ReturnType<typeof getHttpOperationBindings>
   ): AsyncIterable<any> | undefined {
     const serializer = this.serializer;
     const directSerializer =
-      "writeCodec" in serializer ? (serializer as typeof serializer & HttpBindingSerializer) : undefined;
+      typeof (serializer as typeof serializer & Partial<HttpBindingSerializer>).writeCodec === "function"
+        ? (serializer as typeof serializer & HttpBindingSerializer)
+        : undefined;
     const query = request.query;
     const headers = request.headers;
-    const bodySchema = bindings.schema;
+    const bodySchema = bindings.syntheticBodySchema;
     let hasBodyValue = false;
     let payload: any;
     let eventStream: AsyncIterable<any> | undefined;
@@ -112,11 +116,15 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     const sparse =
       (prototype === Object.prototype || prototype === null) &&
       !bindings.hasIdempotency &&
-      bindings.responsePrefixHeaders.length === 0 &&
-      names.length * 2 < bindings.length;
-    const length = sparse ? names.length : bindings.length;
+      !bindings.hasPrefixHeaders &&
+      names.length * 2 < bindings.memberBindings.length;
+    const length = sparse ? names.length : bindings.memberBindings.length;
     for (let i = 0; i < length; ++i) {
-      const binding = sparse ? bindings.byName[names[i]] : bindings[i];
+      const binding = sparse
+        ? hasOwn(bindings.byName, names[i])
+          ? bindings.byName[names[i]]
+          : undefined
+        : bindings.memberBindings[i];
       if (!binding) {
         continue;
       }
@@ -258,7 +266,13 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
   ): string {
     const flags = value[1];
     const type = flags & 0xff;
-    if (directSerializer && !(flags & 0x700) && (type < 3 || type === 17 || type === 19)) {
+    if (
+      directSerializer &&
+      !(flags & 0x700) &&
+      (type <= (2 satisfies BooleanSchema) ||
+        type === (17 satisfies BigIntegerSchema) ||
+        type === (19 satisfies BigDecimalSchema))
+    ) {
       return String(data);
     }
     if (directSerializer) {
@@ -272,7 +286,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
   private serializePath(
     segments: readonly HttpPathSegment[],
     labels: Record<string, string> | undefined,
-    bindings: HttpBindingIndex
+    bindings: HttpBindingIndex["request"]
   ): string {
     let path = "";
     for (const [value, kind] of segments) {
@@ -282,7 +296,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       }
       const replacement = labels?.[value];
       if (replacement === undefined) {
-        if (bindings.byName[value]?.[2] === (0b100_001 satisfies HttpLabel)) {
+        if (hasOwn(bindings.byName, value) && bindings.byName[value][2] === (0b100_001 satisfies HttpLabel)) {
           throw new Error(`No value provided for input HTTP label: ${value}.`);
         }
         path += `{${value}${kind === 2 ? "+" : ""}}`;
@@ -303,8 +317,11 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
   ): Promise<Output> {
     const deserializer = this.deserializer;
     const directDeserializer =
-      "readCodec" in deserializer ? (deserializer as typeof deserializer & HttpBindingDeserializer) : undefined;
+      typeof (deserializer as typeof deserializer & Partial<HttpBindingDeserializer>).readCodec === "function"
+        ? (deserializer as typeof deserializer & HttpBindingDeserializer)
+        : undefined;
     const ns = HttpBindingNormalizedSchema.of(operationSchema.output);
+    const responseBindings = ns.getHttpBindings().response;
 
     const dataObject: any = {};
 
@@ -323,8 +340,8 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       const bytes: Uint8Array = await collectBody(response.body, context);
       if (bytes.byteLength > 0) {
         const dataFromBody = await (directDeserializer
-          ? directDeserializer.readCodec(nonHttpBindingMembers.schema!, bytes)
-          : deserializer.read(nonHttpBindingMembers.schema!, bytes));
+          ? directDeserializer.readCodec(responseBindings.syntheticBodySchema!, bytes)
+          : deserializer.read(responseBindings.syntheticBodySchema!, bytes));
         for (const member of nonHttpBindingMembers) {
           if (dataFromBody[member] != null) {
             dataObject[member] = dataFromBody[member];
@@ -333,7 +350,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       }
       // Due to Smithy validation, we can assume that the members with no HTTP
       // bindings DO NOT contain an event stream.
-    } else if (nonHttpBindingMembers.discardResponseBody) {
+    } else if (!responseBindings.bindings.payload) {
       await collectBody(response.body, context);
     }
 
@@ -353,32 +370,36 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     response: IHttpResponse,
     headerBindings: Set<string>,
     dataObject: any
-  ): Promise<HttpBodyMemberNames>;
+  ): Promise<string[]>;
   protected async deserializeHttpMessage(
     schema: Schema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: IHttpResponse,
     dataObject: any
-  ): Promise<HttpBodyMemberNames>;
+  ): Promise<string[]>;
   protected async deserializeHttpMessage(
     schema: Schema,
     context: HandlerExecutionContext & SerdeFunctions,
     response: IHttpResponse,
     arg4: unknown,
     arg5?: unknown
-  ): Promise<HttpBodyMemberNames> {
+  ): Promise<string[]> {
     const dataObject: any = arg4 instanceof Set ? arg5 : arg4;
 
     const deserializer = this.deserializer;
     const directDeserializer =
-      "readCodec" in deserializer ? (deserializer as typeof deserializer & HttpBindingDeserializer) : undefined;
+      typeof (deserializer as typeof deserializer & Partial<HttpBindingDeserializer>).readCodec === "function"
+        ? (deserializer as typeof deserializer & HttpBindingDeserializer)
+        : undefined;
     const ns = HttpBindingNormalizedSchema.of(schema);
-    const { responseBody, responsePayload, responseCode, responseHeaders, responsePrefixHeaders } =
-      ns.getHttpBindings();
+    const {
+      bodyMemberNames,
+      bindings: { payload, statusCode, headers: responseHeaders, prefixHeaders },
+    } = ns.getHttpBindings().response;
     const headers = response.headers;
 
-    if (responsePayload) {
-      const [memberName, value] = responsePayload;
+    if (payload) {
+      const [memberName, value] = payload;
       const [memberSchema, flags] = value;
       const stream = (flags >> 11) & 0b11;
       if (stream) {
@@ -413,7 +434,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         delete headers[header];
         headers[lower] = headerValue;
       }
-      const binding = responseHeaders[lower];
+      const binding = hasOwn(responseHeaders, lower) ? responseHeaders[lower] : undefined;
       if (!binding) {
         continue;
       }
@@ -436,7 +457,7 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       }
     }
 
-    for (const [memberName, [, , collectionValue], , wireName] of responsePrefixHeaders) {
+    for (const [memberName, [, , collectionValue], , wireName] of prefixHeaders) {
       dataObject[memberName] = {};
       for (const header in headers) {
         if (!hasOwn(headers, header)) {
@@ -452,10 +473,10 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       }
     }
 
-    if (responseCode) {
-      dataObject[responseCode[0]] = response.statusCode;
+    if (statusCode) {
+      dataObject[statusCode[0]] = response.statusCode;
     }
 
-    return responseBody;
+    return bodyMemberNames;
   }
 }
