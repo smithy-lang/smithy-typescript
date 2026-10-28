@@ -398,7 +398,8 @@
     "RpcProtocol": "function",
     "SerdeContext": "function",
     "SmithyRpcV2JsonProtocol": "function",
-    "ToStringShapeSerializer": "function"
+    "ToStringShapeSerializer": "function",
+    "writeKey": "function"
   },
   "@smithy/core/retry": {
     "AdaptiveRetryStrategy": "function",

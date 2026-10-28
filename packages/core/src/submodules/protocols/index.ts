@@ -6,6 +6,7 @@ export { RpcProtocol } from "./RpcProtocol";
 export { AbstractRpcV2Protocol } from "./AbstractRpcV2Protocol";
 export { RequestBuilder, requestBuilder } from "./requestBuilder";
 export { resolvedPath } from "./resolve-path";
+export { writeKey } from "./writeKey";
 export { FromStringShapeDeserializer } from "./serde/FromStringShapeDeserializer";
 export { HttpInterceptingShapeDeserializer } from "./serde/HttpInterceptingShapeDeserializer";
 export { HttpInterceptingShapeSerializer } from "./serde/HttpInterceptingShapeSerializer";
