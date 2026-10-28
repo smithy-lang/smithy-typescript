@@ -156,7 +156,8 @@ export abstract class HttpProtocol extends SerdeContext implements ClientProtoco
     }
 
     let resolvedHostPrefix = hostPrefix;
-    for (const [name, [, flags]] of HttpBindingNormalizedSchema.of(operationSchema.input).getHttpBindings()) {
+    for (const [name, [, flags]] of HttpBindingNormalizedSchema.of(operationSchema.input).getHttpBindings().request
+      .memberBindings) {
       if (!((flags >> 17) & 1)) {
         continue;
       }

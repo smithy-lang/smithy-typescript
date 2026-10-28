@@ -1,8 +1,12 @@
 import { LazyJsonString, dateToUtcString, generateIdempotencyToken, quoteHeader, toBase64 } from "@smithy/core/serde";
 import type {
+  BlobSchema,
   CodecSettings,
+  ListSchemaModifier,
   Schema,
   ShapeSerializer,
+  StreamingBlobSchema,
+  TimestampDefaultSchema,
   TimestampDateTimeSchema,
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
@@ -34,7 +38,6 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
     this.writeHttpBinding(ns.getHttpBindingValue(location, traits), value, location);
   }
 
-  /** @internal */
   public writeHttpBinding(
     [ns, flags, collectionValue]: HttpBindingValue,
     value: unknown,
@@ -47,7 +50,7 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
           this.stringBuffer = "null";
           return;
         }
-        if (schema >= 4 && schema <= 7) {
+        if (schema >= (4 satisfies TimestampDefaultSchema) && schema <= (7 satisfies TimestampEpochSecondsSchema)) {
           if (!(value instanceof Date)) {
             throw new Error(
               `@smithy/core/protocols - received non-Date value ${value} when schema expected Date in ${ns.getName(
@@ -57,10 +60,10 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
           }
           const bindingFormat = this.settings.httpBindings ? (flags >> 14) & 0b11 : 0;
           const format =
-            this.settings.timestampFormat.useTrait && schema > 4
+            this.settings.timestampFormat.useTrait && schema > (4 satisfies TimestampDefaultSchema)
               ? schema
               : bindingFormat
-                ? bindingFormat + 4
+                ? bindingFormat + (4 satisfies TimestampDefaultSchema)
                 : this.settings.timestampFormat.default;
           switch (format) {
             case 5 satisfies TimestampDateTimeSchema:
@@ -78,14 +81,19 @@ export class ToStringShapeSerializer extends SerdeContext implements ShapeSerial
           }
           return;
         }
-        if ((schema === 21 || schema === 42) && "byteLength" in (value as Uint8Array)) {
+        if (
+          (schema === (21 satisfies BlobSchema) || schema === (42 satisfies StreamingBlobSchema)) &&
+          "byteLength" in (value as Uint8Array)
+        ) {
           this.stringBuffer = (this.serdeContext?.base64Encoder ?? toBase64)(value as Uint8Array);
           return;
         }
-        if ((schema & 0b1100_0000) === 0b0100_0000 && Array.isArray(value)) {
+        if ((schema & 0b1100_0000) === (0b0100_0000 satisfies ListSchemaModifier) && Array.isArray(value)) {
           collectionValue ??= ns.getHttpBindingCollectionValue(location);
           const valueSchemaType = collectionValue[1] & 0xff;
-          const isTimestamp = valueSchemaType >= 4 && valueSchemaType <= 7;
+          const isTimestamp =
+            valueSchemaType >= (4 satisfies TimestampDefaultSchema) &&
+            valueSchemaType <= (7 satisfies TimestampEpochSecondsSchema);
           let buffer = "";
           for (const item of value) {
             this.writeHttpBinding(collectionValue, item, location);

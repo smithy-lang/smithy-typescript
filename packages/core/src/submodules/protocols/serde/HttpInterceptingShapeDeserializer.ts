@@ -1,5 +1,13 @@
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
-import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
+import type {
+  BlobSchema,
+  CodecSettings,
+  Schema,
+  SerdeFunctions,
+  ShapeDeserializer,
+  StreamingBlobSchema,
+  StringSchema,
+} from "@smithy/types";
 
 import {
   HttpBindingNormalizedSchema,
@@ -57,25 +65,22 @@ export class HttpInterceptingShapeDeserializer<CodecShapeDeserializer extends Sh
     return this.readCodec(ns, data);
   }
 
-  /** @internal */
   public readHttpBinding(binding: HttpBindingValue, data: string | Uint8Array, location: HttpBindingLocation): any {
     const value = typeof data === "string" ? data : (this.serdeContext?.utf8Encoder ?? toUtf8)(data);
     return this.stringDeserializer.readHttpBinding(binding, value, location);
   }
 
-  /** @internal */
   public readPayload([schema, flags]: HttpBindingValue, data: string | Uint8Array): any | Promise<any> {
     const type = flags & 0xff;
-    if (type === 21 || type === 42) {
+    if (type === (21 satisfies BlobSchema) || type === (42 satisfies StreamingBlobSchema)) {
       return typeof data === "string" ? (this.serdeContext?.utf8Decoder ?? fromUtf8)(data) : data;
     }
-    if (type === 0) {
+    if (type === (0 satisfies StringSchema)) {
       return typeof data === "string" ? data : (this.serdeContext?.utf8Encoder ?? toUtf8)(data);
     }
     return this.readCodec(schema, data);
   }
 
-  /** @internal */
   public readCodec(schema: Schema, data: string | Uint8Array): any | Promise<any> {
     return this.codecDeserializer.read(schema, data);
   }

@@ -16,8 +16,8 @@ export function determineTimestampFormat(
   ns: NormalizedSchema,
   settings: CodecSettings
 ): TimestampDateTimeSchema | TimestampHttpDateSchema | TimestampEpochSecondsSchema {
-  const schema = ns.getSchema();
   if (settings.timestampFormat.useTrait) {
+    const schema = ns.getSchema();
     if (
       schema === (5 satisfies TimestampDateTimeSchema) ||
       schema === (6 satisfies TimestampHttpDateSchema) ||

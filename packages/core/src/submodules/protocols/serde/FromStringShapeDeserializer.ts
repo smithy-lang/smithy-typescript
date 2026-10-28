@@ -9,9 +9,18 @@ import {
   toUtf8,
 } from "@smithy/core/serde";
 import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BlobSchema,
+  BooleanSchema,
   CodecSettings,
+  ListSchemaModifier,
+  NumericSchema,
   Schema,
   ShapeDeserializer,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampDefaultSchema,
   TimestampDateTimeSchema,
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
@@ -41,32 +50,31 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
     return this.readHttpBinding(ns.getHttpBindingValue(location, traits), data, location);
   }
 
-  /** @internal */
   public readHttpBinding(
     [ns, flags, collectionValue]: HttpBindingValue,
     data: string,
     location: HttpBindingLocation
   ): any {
     const schema = flags & 0xff;
-    if ((schema & 0b1100_0000) === 0b0100_0000) {
+    if ((schema & 0b1100_0000) === (0b0100_0000 satisfies ListSchemaModifier)) {
       collectionValue ??= ns.getHttpBindingCollectionValue(location);
       return splitHeader(data).map((item) => this.readHttpBinding(collectionValue!, item, location));
     }
 
     switch (schema) {
-      case 21:
-      case 42:
+      case 21 satisfies BlobSchema:
+      case 42 satisfies StreamingBlobSchema:
         return (this.serdeContext?.base64Decoder ?? fromBase64)(data);
-      case 4:
-      case 5:
-      case 6:
-      case 7: {
+      case 4 satisfies TimestampDefaultSchema:
+      case 5 satisfies TimestampDateTimeSchema:
+      case 6 satisfies TimestampHttpDateSchema:
+      case 7 satisfies TimestampEpochSecondsSchema: {
         const bindingFormat = this.settings.httpBindings ? (flags >> 14) & 0b11 : 0;
         const format =
-          this.settings.timestampFormat.useTrait && schema > 4
+          this.settings.timestampFormat.useTrait && schema > (4 satisfies TimestampDefaultSchema)
             ? schema
             : bindingFormat
-              ? bindingFormat + 4
+              ? bindingFormat + (4 satisfies TimestampDefaultSchema)
               : this.settings.timestampFormat.default;
 
         switch (format) {
@@ -81,7 +89,7 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
             return new Date(data as string | number);
         }
       }
-      case 0: {
+      case 0 satisfies StringSchema: {
         const media = (flags >> 8) & 0b11;
         if (!media) {
           return data;
@@ -94,13 +102,13 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
         }
         return media === 2 ? LazyJsonString.from(intermediateValue) : intermediateValue;
       }
-      case 1:
+      case 1 satisfies NumericSchema:
         return Number(data);
-      case 2:
+      case 2 satisfies BooleanSchema:
         return data.toLowerCase() === "true";
-      case 17:
+      case 17 satisfies BigIntegerSchema:
         return BigInt(data);
-      case 19:
+      case 19 satisfies BigDecimalSchema:
         return new NumericValue(data, "bigDecimal");
       default:
         return data;

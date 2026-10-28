@@ -1,5 +1,18 @@
 import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
-import type { OperationSchema, StaticStructureSchema } from "@smithy/types";
+import type {
+  BlobSchema,
+  ListSchemaModifier,
+  OperationSchema,
+  StaticSchemaIdStruct,
+  StaticStructureSchema,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampDefaultSchema,
+  TimestampEpochSecondsSchema,
+  TimestampHttpDateSchema,
+} from "@smithy/types";
+
+import { writeKey } from "./writeKey";
 
 export type HttpBody = 0b100_000;
 export type HttpLabel = 0b100_001;
@@ -20,7 +33,11 @@ export type HttpBindingLocation =
   | HttpQueryParams
   | HttpResponseCode;
 
-/** The low byte is the schema type. Higher bits cache HTTP serde traits. @internal */
+/**
+ * The low byte is the schema type. Higher bits cache HTTP serde traits.
+ *
+ * @internal
+ */
 export type HttpBindingValue = readonly [
   schema: HttpBindingNormalizedSchema,
   flags: number,
@@ -44,24 +61,37 @@ export type HttpOperationBindings = readonly [
 ];
 
 const HTTP_BINDINGS = Symbol.for("@smithy/schema-x");
-export type HttpBindingIndex = HttpBinding[] & {
-  byName: Readonly<Record<string, HttpBinding>>;
-  hasIdempotency?: boolean;
-  schema?: StaticStructureSchema;
-  contentType?: string | null;
-  responseBody: string[] & {
-    discardResponseBody?: boolean;
-    schema?: StaticStructureSchema;
+export type HttpBindingIndex = {
+  request: {
+    memberBindings: HttpBinding[];
+    byName: Record<string, HttpBinding>;
+    hasIdempotency?: boolean;
+    hasPrefixHeaders?: boolean;
+    syntheticBodySchema?: StaticStructureSchema;
+    contentTypeInstruction?: string | null;
   };
-  responsePayload?: HttpBinding;
-  responseCode?: HttpBinding;
-  responseHeaders: Readonly<Record<string, HttpBinding>>;
-  responsePrefixHeaders: readonly HttpBinding[];
+  response: {
+    bodyMemberNames: string[];
+    syntheticBodySchema?: StaticStructureSchema;
+    bindings: {
+      payload?: HttpBinding;
+      statusCode?: HttpBinding;
+      headers: Record<string, HttpBinding>;
+      prefixHeaders: HttpBinding[];
+    };
+  };
 };
 type HttpBindingCache<T> = { [HTTP_BINDINGS]?: T };
 
-/** A normalized schema with lazily cached HTTP binding metadata. @internal */
+/**
+ * A normalized schema with lazily cached HTTP binding metadata.
+ *
+ * @internal
+ */
 export class HttpBindingNormalizedSchema extends NormalizedSchema {
+  private static readonly identity = Symbol.for("@smithy/HttpBindingNormalizedSchema");
+
+  private readonly identity = HttpBindingNormalizedSchema.identity;
   private bindings?: HttpBindingIndex;
 
   private constructor(schema: NormalizedSchema) {
@@ -70,16 +100,17 @@ export class HttpBindingNormalizedSchema extends NormalizedSchema {
 
   public static of(schema: Parameters<typeof NormalizedSchema.of>[0]): HttpBindingNormalizedSchema {
     const ns = NormalizedSchema.of(schema);
-    if (HttpBindingNormalizedSchema.prototype.isPrototypeOf(ns)) {
+    if ((ns as HttpBindingNormalizedSchema).identity === HttpBindingNormalizedSchema.identity) {
       return ns as HttpBindingNormalizedSchema;
     }
-    const cache = ns.isMemberSchema() ? ns : ns.getSchema();
-    return ((
-      (typeof cache !== "object" || cache === null ? ns : cache) as HttpBindingCache<HttpBindingNormalizedSchema>
-    )[HTTP_BINDINGS] ??= new HttpBindingNormalizedSchema(ns));
+    const schemaCache = ns.isMemberSchema() ? ns : ns.getSchema();
+    const cache = typeof schemaCache === "object" && schemaCache !== null ? schemaCache : ns;
+    return ((cache as HttpBindingCache<HttpBindingNormalizedSchema>)[HTTP_BINDINGS] ??= new HttpBindingNormalizedSchema(
+      ns
+    ));
   }
 
-  public getHttpBindingLocation(traits = this.getMergedTraits()): HttpBindingLocation {
+  public getHttpBindingLocation(traits: ReturnType<NormalizedSchema["getMergedTraits"]>): HttpBindingLocation {
     if (traits.httpPayload) {
       return 0b100_100 satisfies HttpPayload;
     }
@@ -106,33 +137,48 @@ export class HttpBindingNormalizedSchema extends NormalizedSchema {
 
   public getHttpBindingValue(
     location: HttpBindingLocation,
-    traits = this.getMergedTraits(),
+    traits: ReturnType<NormalizedSchema["getMergedTraits"]>,
     nested = false
   ): HttpBindingValue {
     const raw = this.getSchema();
-    const type = typeof raw === "number" ? raw & 0xff : this.isListSchema() ? 0b0100_0000 : 0xff;
+    const type =
+      typeof raw === "number" ? raw & 0xff : this.isListSchema() ? (0b0100_0000 satisfies ListSchemaModifier) : 0xff;
     const slot = location & 0b111;
     const media = (
       traits.mediaType ? (traits.mediaType === "application/json" || traits.mediaType.endsWith("+json") ? 2 : 1) : 0
     ) satisfies 0 | 1 | 2;
-    const stream = (traits.streaming || type === 42 ? (this.isStructSchema() ? 2 : 1) : 0) satisfies 0 | 1 | 2;
-    const timestamp = (type >= 4 && type <= 7 ? (slot >= 6 ? 2 : slot > 0 && slot < 4 ? 1 : 0) : 0) satisfies 0 | 1 | 2;
+    const stream = (
+      traits.streaming || type === (42 satisfies StreamingBlobSchema) ? (this.isStructSchema() ? 2 : 1) : 0
+    ) satisfies 0 | 1 | 2;
+    const timestamp = (
+      type >= (4 satisfies TimestampDefaultSchema) && type <= (7 satisfies TimestampEpochSecondsSchema)
+        ? slot >= 6
+          ? 2
+          : slot > 0 && slot < 4
+            ? 1
+            : 0
+        : 0
+    ) satisfies 0 | 1 | 2;
     let flags =
       type |
       (media << 8) |
-      (Number(!!traits.idempotencyToken) << 10) |
+      ((traits.idempotencyToken ? 1 : 0) << 10) |
       (stream << 11) |
-      (Number(!!traits.sparse) << 13) |
+      ((traits.sparse ? 1 : 0) << 13) |
       (timestamp << 14) |
-      (Number(!!traits.hostLabel) << 17) |
-      (Number(location === (0b100_100 satisfies HttpPayload) && typeof raw !== "object") << 18);
+      ((traits.hostLabel ? 1 : 0) << 17) |
+      ((location === (0b100_100 satisfies HttpPayload) && typeof raw !== "object" ? 1 : 0) << 18);
     const category = type & 0b1100_0000;
     const collectionValue =
-      slot & 0b010 && (category === 0b0100_0000 || (!nested && slot & 1))
+      slot & 0b010 && (category === (0b0100_0000 satisfies ListSchemaModifier) || (!nested && slot & 1))
         ? this.getHttpBindingCollectionValue(location, traits)
         : undefined;
     const valueType = (collectionValue?.[1] ?? 0) & 0xff;
-    flags |= Number(slot >= 6 && (valueType === 4 || valueType === 6)) << 16;
+    flags |=
+      (slot >= 6 &&
+      (valueType === (4 satisfies TimestampDefaultSchema) || valueType === (6 satisfies TimestampHttpDateSchema))
+        ? 1
+        : 0) << 16;
     return [this, flags, collectionValue];
   }
 
@@ -151,19 +197,23 @@ export class HttpBindingNormalizedSchema extends NormalizedSchema {
 }
 
 const buildHttpBindings = (schema: HttpBindingNormalizedSchema): HttpBindingIndex => {
-  const bodyMemberNames: HttpBindingIndex["responseBody"] = [];
+  const bodyMemberNames: string[] = [];
   const bodyMemberSchemas: StaticStructureSchema[5] = [];
   const requestBodyMemberNames: StaticStructureSchema[4] = [];
   const requestBodyMemberSchemas: StaticStructureSchema[5] = [];
-  const byName: Record<string, HttpBinding> = Object.create(null);
-  const headers: Record<string, HttpBinding> = Object.create(null);
+  const memberBindings: HttpBinding[] = [];
+  const byName: Record<string, HttpBinding> = {};
+  const headers: Record<string, HttpBinding> = {};
   const prefixHeaders: HttpBinding[] = [];
-  const bindings: HttpBindingIndex = Object.assign([], {
-    byName,
-    responseBody: bodyMemberNames,
-    responseHeaders: headers,
-    responsePrefixHeaders: prefixHeaders,
-  });
+  const responseBindings = { headers, prefixHeaders } as HttpBindingIndex["response"]["bindings"];
+  const bindings: HttpBindingIndex = {
+    request: { memberBindings, byName },
+    response: {
+      bodyMemberNames,
+      bindings: responseBindings,
+    },
+  };
+  const { request, response } = bindings;
 
   for (const [name, member] of schema.structIterator()) {
     const bindingSchema = HttpBindingNormalizedSchema.of(member);
@@ -172,11 +222,14 @@ const buildHttpBindings = (schema: HttpBindingNormalizedSchema): HttpBindingInde
     const wireName = traits.httpHeader?.toLowerCase() ?? traits.httpPrefixHeaders?.toLowerCase() ?? traits.httpQuery;
     const value = bindingSchema.getHttpBindingValue(location, traits);
     const binding: HttpBinding = [name, value, location, wireName];
+    if (name === "__proto__") {
+      writeKey(byName);
+    }
     byName[name] = binding;
     if ((value[1] >> 10) & 1) {
-      bindings.hasIdempotency = true;
+      request.hasIdempotency = true;
     }
-    bindings.push(binding);
+    memberBindings.push(binding);
 
     const slot = location & 0b111;
     if (slot === 0) {
@@ -188,26 +241,33 @@ const buildHttpBindings = (schema: HttpBindingNormalizedSchema): HttpBindingInde
       bodyMemberSchemas.push(member);
     } else if ((slot & 0b110) === 0b100) {
       if (slot & 0b001) {
-        bindings.responseCode = binding;
+        responseBindings.statusCode = binding;
       } else {
-        bindings.responsePayload = binding;
+        responseBindings.payload = binding;
         const type = value[1] & 0xff;
-        bindings.contentType =
+        request.contentTypeInstruction =
           traits.mediaType ??
-          (type === 0 ? "text/plain" : type === 21 || type === 42 ? "application/octet-stream" : null);
+          (type === (0 satisfies StringSchema)
+            ? "text/plain"
+            : type === (21 satisfies BlobSchema) || type === (42 satisfies StreamingBlobSchema)
+              ? "application/octet-stream"
+              : null);
       }
     } else if (slot & 0b001) {
+      request.hasPrefixHeaders = true;
       prefixHeaders.push(binding);
     } else {
+      if (wireName === "__proto__") {
+        writeKey(headers);
+      }
       headers[wireName!] = binding;
     }
   }
-  if (bindings.contentType === undefined && requestBodyMemberNames.length) {
-    bindings.contentType = null;
+  if (request.contentTypeInstruction === undefined && requestBodyMemberNames.length) {
+    request.contentTypeInstruction = null;
   }
-  bindings.schema = createBodySchema(schema, requestBodyMemberNames, requestBodyMemberSchemas);
-  bodyMemberNames.discardResponseBody = bindings.responsePayload === undefined;
-  bodyMemberNames.schema = createBodySchema(schema, [...bodyMemberNames], bodyMemberSchemas);
+  request.syntheticBodySchema = createBodySchema(schema, requestBodyMemberNames, requestBodyMemberSchemas);
+  response.syntheticBodySchema = createBodySchema(schema, bodyMemberNames, bodyMemberSchemas);
   return bindings;
 };
 
@@ -239,29 +299,36 @@ const buildHttpOperationBindings = (schema: OperationSchema): HttpOperationBindi
   ];
 };
 
-const EMPTY_BINDINGS: HttpBindingIndex = Object.assign([], {
-  byName: {},
-  responseBody: Object.assign([], { discardResponseBody: true }),
-  responseHeaders: Object.create(null),
-  responsePrefixHeaders: [],
-});
+const EMPTY_BINDINGS: HttpBindingIndex = {
+  request: { memberBindings: [], byName: {} },
+  response: {
+    bodyMemberNames: [],
+    bindings: { headers: {}, prefixHeaders: [] },
+  },
+};
 
-/** @internal */
+/**
+ * @internal
+ */
 export const getHttpOperationBindings = (schema: OperationSchema): HttpOperationBindings =>
   ((schema as HttpBindingCache<HttpOperationBindings>)[HTTP_BINDINGS] ??= buildHttpOperationBindings(schema));
 
-/** @internal */
+/**
+ * @internal
+ */
 export const resolveHttpBindingContentType = (
   defaultContentType: string,
   schema: NormalizedSchema
 ): string | undefined => {
-  const contentType = HttpBindingNormalizedSchema.of(schema).getHttpBindings().contentType;
+  const contentType = HttpBindingNormalizedSchema.of(schema).getHttpBindings().request.contentTypeInstruction;
   return contentType === null ? defaultContentType : contentType;
 };
 
-/** @internal */
+/**
+ * @internal
+ */
 export const hasHttpBindingUnstructuredPayload = (schema: NormalizedSchema): boolean =>
-  !!((HttpBindingNormalizedSchema.of(schema).getHttpBindings().responsePayload?.[1][1] ?? 0) & (1 << 18));
+  !!((HttpBindingNormalizedSchema.of(schema).getHttpBindings().response.bindings.payload?.[1][1] ?? 0) & (1 << 18));
 
 const createBodySchema = (
   schema: NormalizedSchema,
@@ -272,10 +339,17 @@ const createBodySchema = (
     return undefined;
   }
   const source = schema.getSchema() as StaticStructureSchema;
-  const body: StaticStructureSchema = [3, source[1], source[2], schema.getMergedTraits(), memberNames, memberSchemas];
+  const body: StaticStructureSchema = [
+    3 satisfies StaticSchemaIdStruct,
+    source[1],
+    source[2],
+    schema.getMergedTraits(),
+    memberNames,
+    memberSchemas,
+  ];
   const required = source[6];
   const bodyRequired =
-    required && memberNames.reduce((count, name) => count + Number(source[4].indexOf(name) < required), 0);
+    required && memberNames.reduce((count, name) => count + (source[4].indexOf(name) < required ? 1 : 0), 0);
   if (bodyRequired) {
     body[6] = bodyRequired;
   }
