@@ -12,7 +12,9 @@ describe(sdkStreamMixin.name, () => {
     new Promise((resolve, reject) => {
       data.forEach((chunk) => {
         stream.write(chunk, (err) => {
-          if (err) reject(err);
+          if (err) {
+            reject(err);
+          }
         });
       });
       stream.end(resolve);

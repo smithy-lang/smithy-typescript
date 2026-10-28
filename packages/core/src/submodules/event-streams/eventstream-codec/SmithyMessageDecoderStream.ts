@@ -21,7 +21,9 @@ export class SmithyMessageDecoderStream<T> implements AsyncIterable<T> {
   private async *asyncIterator() {
     for await (const message of this.options.messageStream) {
       const deserialized = await this.options.deserializer(message);
-      if (deserialized === undefined) continue;
+      if (deserialized === undefined) {
+        continue;
+      }
       yield deserialized;
     }
   }

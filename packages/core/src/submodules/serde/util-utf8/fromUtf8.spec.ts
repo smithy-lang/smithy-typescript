@@ -23,7 +23,9 @@ const utf8StringsToByteArrays: Record<string, Uint8Array> = {
 
 describe("fromUtf8", () => {
   for (const string in utf8StringsToByteArrays) {
-    if (!hasOwn(utf8StringsToByteArrays, string)) continue;
+    if (!hasOwn(utf8StringsToByteArrays, string)) {
+      continue;
+    }
     it(`should UTF-8 decode "${string}" to the correct value`, () => {
       expect(fromUtf8(string)).toEqual(utf8StringsToByteArrays[string]);
     });

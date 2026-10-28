@@ -11,7 +11,9 @@ export const moveHeadersToQuery = (
 ): IHttpRequest & { query: QueryParameterBag } => {
   const { headers, query = {} as QueryParameterBag } = HttpRequest.clone(request);
   for (const name in headers) {
-    if (!hasOwn(headers, name)) continue;
+    if (!hasOwn(headers, name)) {
+      continue;
+    }
     const lname = name.toLowerCase();
     if (
       (lname.slice(0, 6) === "x-amz-" && !options.unhoistableHeaders?.has(lname)) ||

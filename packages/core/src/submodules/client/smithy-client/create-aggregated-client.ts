@@ -41,7 +41,9 @@ export const createAggregatedClient = (
       if (typeof optionsOrCb === "function") {
         this.send(command, optionsOrCb);
       } else if (typeof cb === "function") {
-        if (typeof optionsOrCb !== "object") throw new Error(`Expected http options but got ${typeof optionsOrCb}`);
+        if (typeof optionsOrCb !== "object") {
+          throw new Error(`Expected http options but got ${typeof optionsOrCb}`);
+        }
         this.send(command, optionsOrCb || {}, cb);
       } else {
         return this.send(command, optionsOrCb);

@@ -129,8 +129,12 @@ ${toHex(hashedRequest)}`;
       // Ref: "Remove Dot Segments" https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
       const normalizedPathSegments = [];
       for (const pathSegment of path.split("/")) {
-        if (pathSegment?.length === 0) continue;
-        if (pathSegment === ".") continue;
+        if (pathSegment?.length === 0) {
+          continue;
+        }
+        if (pathSegment === ".") {
+          continue;
+        }
         if (pathSegment === "..") {
           normalizedPathSegments.pop();
         } else {

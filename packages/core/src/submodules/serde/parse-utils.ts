@@ -297,7 +297,9 @@ export const expectUnion = (value: unknown): Record<string, any> | undefined => 
 
   const setKeys = [];
   for (const k in asObject) {
-    if (!hasOwn(asObject, k)) continue;
+    if (!hasOwn(asObject, k)) {
+      continue;
+    }
     if (asObject[k] != null) {
       setKeys.push(k);
     }

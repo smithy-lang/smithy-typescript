@@ -13,7 +13,9 @@ describe("fromEnv", () => {
 
     beforeEach(() => {
       envVarGetter.mockImplementation((env: Record<string, string>) => {
-        if (env[ENV_VAR_NAME]) return env[ENV_VAR_NAME];
+        if (env[ENV_VAR_NAME]) {
+          return env[ENV_VAR_NAME];
+        }
         throw new CredentialsProviderError(`Not found in ENV: ${ENV_VAR_NAME}`);
       });
       delete process.env[ENV_VAR_NAME];

@@ -137,7 +137,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
         headers[memberTraits.httpHeader.toLowerCase() as string] = String(serializer.flush());
       } else if (typeof memberTraits.httpPrefixHeaders === "string") {
         for (const key in inputMemberValue) {
-          if (!hasOwn(inputMemberValue, key)) continue;
+          if (!hasOwn(inputMemberValue, key)) {
+            continue;
+          }
           const val = inputMemberValue[key];
           const amalgam = memberTraits.httpPrefixHeaders + key;
           serializer.write([memberNs.getValueSchema(), { httpHeader: amalgam }], val);
@@ -190,7 +192,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
 
     if (traits.httpQueryParams) {
       for (const key in data) {
-        if (!hasOwn(data, key)) continue;
+        if (!hasOwn(data, key)) {
+          continue;
+        }
         if (!(key in query)) {
           const val = data[key];
           const valueSchema = ns.getValueSchema();
@@ -246,7 +250,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
     }
 
     for (const header in response.headers) {
-      if (!hasOwn(response.headers, header)) continue;
+      if (!hasOwn(response.headers, header)) {
+        continue;
+      }
       const value = response.headers[header];
       delete response.headers[header];
       response.headers[header.toLowerCase()] = value;
@@ -365,7 +371,9 @@ export abstract class HttpBindingProtocol extends HttpProtocol {
       } else if (memberTraits.httpPrefixHeaders !== undefined) {
         dataObject[memberName] = {};
         for (const header in response.headers) {
-          if (!hasOwn(response.headers, header)) continue;
+          if (!hasOwn(response.headers, header)) {
+            continue;
+          }
           if (header.startsWith(memberTraits.httpPrefixHeaders)) {
             const value = response.headers[header];
             const valueSchema = memberSchema.getValueSchema();

@@ -19,12 +19,20 @@ const getHomeDirCacheKey = (): string => {
 export const getHomeDir = (): string => {
   const { HOME, USERPROFILE, HOMEPATH, HOMEDRIVE = `C:${sep}` } = process.env;
 
-  if (HOME) return HOME;
-  if (USERPROFILE) return USERPROFILE;
-  if (HOMEPATH) return `${HOMEDRIVE}${HOMEPATH}`;
+  if (HOME) {
+    return HOME;
+  }
+  if (USERPROFILE) {
+    return USERPROFILE;
+  }
+  if (HOMEPATH) {
+    return `${HOMEDRIVE}${HOMEPATH}`;
+  }
 
   const homeDirCacheKey = getHomeDirCacheKey();
-  if (!homeDirCache[homeDirCacheKey]) homeDirCache[homeDirCacheKey] = homedir();
+  if (!homeDirCache[homeDirCacheKey]) {
+    homeDirCache[homeDirCacheKey] = homedir();
+  }
 
   return homeDirCache[homeDirCacheKey];
 };

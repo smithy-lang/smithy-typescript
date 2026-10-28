@@ -18,7 +18,9 @@ export class ServiceException extends Error {
    * Checks if a value is an instance of ServiceException (duck typed)
    */
   public static isInstance(value: unknown): value is ServiceException {
-    if (!value) return false;
+    if (!value) {
+      return false;
+    }
     const candidate = value as ServiceException;
     return (
       ServiceException.prototype.isPrototypeOf(candidate) ||

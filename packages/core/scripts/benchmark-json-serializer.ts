@@ -172,13 +172,17 @@ function createEscapyMap(numKeys: number) {
 
 function createListString(count: number) {
   const l: string[] = [];
-  for (let i = 0; i < count; i++) l[i] = "string".repeat(((Math.random() * 35) | 0) + 1);
+  for (let i = 0; i < count; i++) {
+    l[i] = "string".repeat(((Math.random() * 35) | 0) + 1);
+  }
   return l;
 }
 
 function createListFloat(count: number) {
   const l: number[] = [];
-  for (let i = 0; i < count; i++) l[i] = Math.random() * 3.4e38;
+  for (let i = 0; i < count; i++) {
+    l[i] = Math.random() * 3.4e38;
+  }
   return l;
 }
 
@@ -326,7 +330,9 @@ function runVariant(variant: "multipass" | "byte"): BenchResult[] {
     for (let i = 0; i < Math.min(iterations, 50); i++) {
       serializer.write(schema, data);
       const r = serializer.flush();
-      if (typeof r === "string") Buffer.from(r, "utf8");
+      if (typeof r === "string") {
+        Buffer.from(r, "utf8");
+      }
     }
 
     // Measure: include Buffer.from() for string output to capture full wire-ready cost.

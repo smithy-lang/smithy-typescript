@@ -42,7 +42,9 @@ describe("getCanonicalHeaders", () => {
       hostname: "foo.us-east-1.amazonaws.com",
     });
     for (const headerName in ALWAYS_UNSIGNABLE_HEADERS) {
-      if (!hasOwn(ALWAYS_UNSIGNABLE_HEADERS, headerName)) continue;
+      if (!hasOwn(ALWAYS_UNSIGNABLE_HEADERS, headerName)) {
+        continue;
+      }
       request.headers[headerName] = "baz";
     }
 

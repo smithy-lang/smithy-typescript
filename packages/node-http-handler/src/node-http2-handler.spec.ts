@@ -74,7 +74,9 @@ describe(NodeHttp2Handler.name, () => {
     mockH2Server.removeAllListeners("request");
     vi.clearAllMocks();
     for (const p in mockH2Servers) {
-      if (!hasOwn(mockH2Servers, p)) continue;
+      if (!hasOwn(mockH2Servers, p)) {
+        continue;
+      }
       mockH2Servers[p].removeAllListeners("request");
       mockH2Servers[p].close();
     }

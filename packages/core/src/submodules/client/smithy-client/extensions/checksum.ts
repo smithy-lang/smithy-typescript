@@ -34,7 +34,9 @@ export const getChecksumConfiguration = (runtimeConfig: PartialChecksumRuntimeCo
   const checksumAlgorithms: ChecksumAlgorithm[] = [];
 
   for (const id in AlgorithmId) {
-    if (!hasOwn(AlgorithmId, id)) continue;
+    if (!hasOwn(AlgorithmId, id)) {
+      continue;
+    }
     const algorithmId = AlgorithmId[id as keyof typeof AlgorithmId];
     if (runtimeConfig[algorithmId] === undefined) {
       continue;

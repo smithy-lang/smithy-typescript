@@ -354,7 +354,9 @@ function writeStruct(ns: NormalizedSchema, value: Record<string, unknown>, serde
 
   if (typeof value.__type === "string") {
     for (const k in value) {
-      if (!hasOwn(value, k)) continue;
+      if (!hasOwn(value, k)) {
+        continue;
+      }
       if (!memberNames.includes(k)) {
         writeString(k);
         writeUntypedValue(value[k]);
@@ -421,7 +423,9 @@ function writeMap(ns: NormalizedSchema, value: Record<string, unknown>, isDocume
 
   const keys: string[] = [];
   for (const k in value) {
-    if (!hasOwn(value, k)) continue;
+    if (!hasOwn(value, k)) {
+      continue;
+    }
     const v = value[k];
     if (isDocument ? v !== undefined : v != null || sparse) {
       keys.push(k);

@@ -15,7 +15,9 @@ export const toEndpointV1 = (endpoint: string | Endpoint | EndpointV2): Endpoint
       if (endpoint.headers) {
         v1Endpoint.headers = {};
         for (const name in endpoint.headers) {
-          if (!hasOwn(endpoint.headers, name)) continue;
+          if (!hasOwn(endpoint.headers, name)) {
+            continue;
+          }
           v1Endpoint.headers[name.toLowerCase()] = endpoint.headers[name].join(", ");
         }
       }

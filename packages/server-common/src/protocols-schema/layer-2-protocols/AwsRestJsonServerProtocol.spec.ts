@@ -17,8 +17,12 @@ function makeRequest(overrides: Partial<IHttpRequest> = {}): IHttpRequest {
 function makeContext(): any {
   return {
     streamCollector: async (stream: any) => {
-      if (stream instanceof Uint8Array) return stream;
-      if (stream === undefined || stream === null) return new Uint8Array(0);
+      if (stream instanceof Uint8Array) {
+        return stream;
+      }
+      if (stream === undefined || stream === null) {
+        return new Uint8Array(0);
+      }
       return new Uint8Array(0);
     },
   };

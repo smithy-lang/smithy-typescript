@@ -14,8 +14,11 @@ export const compressStream = async (body: ReadableStream): Promise<ReadableStre
         } else {
           controller.enqueue(data);
           if (final) {
-            if (endCallback) endCallback();
-            else controller.terminate();
+            if (endCallback) {
+              endCallback();
+            } else {
+              controller.terminate();
+            }
           }
         }
       };

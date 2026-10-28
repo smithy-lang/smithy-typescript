@@ -9,7 +9,9 @@ export const readableStreamToIterable = <T>(readableStream: ReadableStream<T>): 
     try {
       while (true) {
         const { done, value } = await reader.read();
-        if (done) return;
+        if (done) {
+          return;
+        }
         yield value as T;
       }
     } finally {

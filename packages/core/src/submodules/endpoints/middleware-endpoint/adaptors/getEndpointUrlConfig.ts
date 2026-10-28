@@ -18,11 +18,15 @@ export const getEndpointUrlConfig = (serviceId: string): LoadedConfigSelectors<s
     // The value provided by a service-specific environment variable.
     const serviceSuffixParts = serviceId.split(" ").map((w) => w.toUpperCase());
     const serviceEndpointUrl = env[[ENV_ENDPOINT_URL, ...serviceSuffixParts].join("_")];
-    if (serviceEndpointUrl) return serviceEndpointUrl;
+    if (serviceEndpointUrl) {
+      return serviceEndpointUrl;
+    }
 
     // The value provided by the global endpoint environment variable.
     const endpointUrl = env[ENV_ENDPOINT_URL];
-    if (endpointUrl) return endpointUrl;
+    if (endpointUrl) {
+      return endpointUrl;
+    }
 
     return undefined;
   },
@@ -40,12 +44,16 @@ export const getEndpointUrlConfig = (serviceId: string): LoadedConfigSelectors<s
       const servicePrefixParts = serviceId.split(" ").map((w) => w.toLowerCase());
       const endpointUrl =
         servicesSection[[servicePrefixParts.join("_"), CONFIG_ENDPOINT_URL].join(CONFIG_PREFIX_SEPARATOR)];
-      if (endpointUrl) return endpointUrl;
+      if (endpointUrl) {
+        return endpointUrl;
+      }
     }
 
     // The value provided by the global parameter from a profile in the shared configuration file.
     const endpointUrl = profile[CONFIG_ENDPOINT_URL];
-    if (endpointUrl) return endpointUrl;
+    if (endpointUrl) {
+      return endpointUrl;
+    }
 
     return undefined;
   },

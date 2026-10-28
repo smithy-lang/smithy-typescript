@@ -11,7 +11,9 @@ export const getCanonicalQuery = ({ query = {} }: HttpRequest): string => {
   const keys: Array<string> = [];
   const serialized: Record<string, string> = {};
   for (const key in query) {
-    if (!hasOwn(query, key)) continue;
+    if (!hasOwn(query, key)) {
+      continue;
+    }
     if (key.toLowerCase() === SIGNATURE_HEADER) {
       continue;
     }

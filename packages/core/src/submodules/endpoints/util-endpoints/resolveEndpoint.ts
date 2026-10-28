@@ -15,7 +15,9 @@ export const resolveEndpoint = (ruleSetObject: RuleSetObject, options: EndpointR
   options.logger?.debug?.(`${debugId} Initial EndpointParams: ${toDebugString(endpointParams)}`);
 
   for (const paramKey in parameters) {
-    if (!hasOwn(parameters, paramKey)) continue;
+    if (!hasOwn(parameters, paramKey)) {
+      continue;
+    }
     const parameter = parameters[paramKey];
     const endpointParam = endpointParams[paramKey];
 

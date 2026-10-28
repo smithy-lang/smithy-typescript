@@ -554,7 +554,9 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
           const out: unknown[] = [];
           for (let i = 0; i < value.length; ++i) {
             const v = value[i];
-            if (v == null && !sparse) continue;
+            if (v == null && !sparse) {
+              continue;
+            }
             if (Number.isNaN(v) || v === Infinity || v === -Infinity) {
               out.push(String(v));
             } else {
@@ -600,7 +602,9 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
       if (valueSchema.isStringSchema() || valueSchema.isNumericSchema() || valueSchema.isBooleanSchema()) {
         let modifications: Record<string, number | null> | undefined;
         for (const k in value) {
-          if (!hasOwn(value, k)) continue;
+          if (!hasOwn(value, k)) {
+            continue;
+          }
           const v = value[k];
           if (Number.isNaN(v) || v === Infinity || v === -Infinity) {
             (modifications ??= {})[k] = v as number;
@@ -625,7 +629,9 @@ export class JsonShapeSerializer2 extends SerdeContextConfig implements ShapeSer
     let first = true;
 
     for (const k in value) {
-      if (!hasOwn(value, k)) continue;
+      if (!hasOwn(value, k)) {
+        continue;
+      }
       const v = value[k];
       if (isDocument ? v === undefined : v == null && !sparse) {
         continue;

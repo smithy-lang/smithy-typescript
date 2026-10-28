@@ -4,7 +4,9 @@ import type { HeaderBag } from "@smithy/types";
 export const hasHeader = (soughtHeader: string, headers: HeaderBag): boolean => {
   soughtHeader = soughtHeader.toLowerCase();
   for (const headerName in headers) {
-    if (!hasOwn(headers, headerName)) continue;
+    if (!hasOwn(headers, headerName)) {
+      continue;
+    }
     if (soughtHeader === headerName.toLowerCase()) {
       return true;
     }
@@ -17,7 +19,9 @@ export const hasHeader = (soughtHeader: string, headers: HeaderBag): boolean => 
 export const getHeaderValue = (soughtHeader: string, headers: HeaderBag): string | undefined => {
   soughtHeader = soughtHeader.toLowerCase();
   for (const headerName in headers) {
-    if (!hasOwn(headers, headerName)) continue;
+    if (!hasOwn(headers, headerName)) {
+      continue;
+    }
     if (soughtHeader === headerName.toLowerCase()) {
       return headers[headerName];
     }
@@ -30,7 +34,9 @@ export const getHeaderValue = (soughtHeader: string, headers: HeaderBag): string
 export const deleteHeader = (soughtHeader: string, headers: HeaderBag) => {
   soughtHeader = soughtHeader.toLowerCase();
   for (const headerName in headers) {
-    if (!hasOwn(headers, headerName)) continue;
+    if (!hasOwn(headers, headerName)) {
+      continue;
+    }
     if (soughtHeader === headerName.toLowerCase()) {
       delete headers[headerName];
     }

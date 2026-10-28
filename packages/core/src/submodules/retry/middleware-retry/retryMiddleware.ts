@@ -134,9 +134,15 @@ const getRetryErrorInfo = (error: SdkError, logger?: Logger): RetryErrorInfo => 
 };
 
 const getRetryErrorType = (error: SdkError): RetryErrorType => {
-  if (isThrottlingError(error)) return "THROTTLING";
-  if (isTransientError(error)) return "TRANSIENT";
-  if (isServerError(error)) return "SERVER_ERROR";
+  if (isThrottlingError(error)) {
+    return "THROTTLING";
+  }
+  if (isTransientError(error)) {
+    return "TRANSIENT";
+  }
+  if (isServerError(error)) {
+    return "SERVER_ERROR";
+  }
   return "CLIENT_ERROR";
 };
 

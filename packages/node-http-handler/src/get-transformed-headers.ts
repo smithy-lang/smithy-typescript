@@ -6,7 +6,9 @@ const getTransformedHeaders = (headers: IncomingHttpHeaders) => {
   const transformedHeaders: HeaderBag = {};
 
   for (const name in headers) {
-    if (!hasOwn(headers, name)) continue;
+    if (!hasOwn(headers, name)) {
+      continue;
+    }
     const headerValues = <string>headers[name];
     transformedHeaders[name] = Array.isArray(headerValues) ? headerValues.join(",") : headerValues;
   }

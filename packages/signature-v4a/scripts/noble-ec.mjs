@@ -6,7 +6,9 @@ import { p256 } from "@noble/curves/nist.js";
  */
 export class Ec {
   constructor(curve) {
-    if (curve !== "p256") throw new Error(`Unsupported curve: ${curve}`);
+    if (curve !== "p256") {
+      throw new Error(`Unsupported curve: ${curve}`);
+    }
   }
 
   keyFromPrivate(privateKey) {

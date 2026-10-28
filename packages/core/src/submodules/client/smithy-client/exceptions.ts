@@ -43,7 +43,9 @@ export class ServiceException extends Error implements SmithyException, Metadata
    * Checks if a value is an instance of ServiceException (duck typed)
    */
   public static isInstance(value: unknown): value is ServiceException {
-    if (!value) return false;
+    if (!value) {
+      return false;
+    }
     const candidate = value as ServiceException;
     return (
       ServiceException.prototype.isPrototypeOf(candidate) ||
@@ -58,7 +60,9 @@ export class ServiceException extends Error implements SmithyException, Metadata
    */
   public static [Symbol.hasInstance](instance: unknown): boolean {
     // Handle null/undefined
-    if (!instance) return false;
+    if (!instance) {
+      return false;
+    }
     const candidate = instance as ServiceException;
     // For ServiceException, check only $-props
     if (this === ServiceException) {

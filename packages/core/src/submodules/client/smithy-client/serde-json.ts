@@ -19,7 +19,9 @@ export const _json = (obj: any): any => {
   if (typeof obj === "object") {
     const target: any = {};
     for (const key in obj) {
-      if (!hasOwn(obj, key)) continue;
+      if (!hasOwn(obj, key)) {
+        continue;
+      }
       if (obj[key] == null) {
         continue;
       }
