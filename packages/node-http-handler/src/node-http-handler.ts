@@ -337,21 +337,19 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
   public updateHttpClientConfig(key: keyof NodeHttpHandlerOptions, value: NodeHttpHandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
-      if ((key as unknown) === Symbol.for("logger")) {
-        // A client offers its logger under this key: take it only if this
-        // handler has no logger of its own.
-        return {
-          ...config,
-          logger: config.logger ?? (value as Logger),
-        };
-      }
-      if ((key as unknown) === Symbol.for("@smithy/defaultSocketTimeout")) {
-        // A client offers its service default under this key: take it only if
-        // this handler has no defaultSocketTimeout of its own.
-        return {
-          ...config,
-          defaultSocketTimeout: resolveDefaultSocketTimeout(config) ?? (value as number),
-        };
+      switch (key as unknown) {
+        case Symbol.for("logger"):
+          // A client offers its logger under this key: take it only if this
+          // handler has no logger of its own.
+          key = "logger";
+          value = config.logger ?? (value as Logger);
+          break;
+        case Symbol.for("@smithy/defaultSocketTimeout"):
+          // A client offers its service default under this key: take it only if
+          // this handler has no defaultSocketTimeout of its own.
+          key = "defaultSocketTimeout" as typeof key;
+          value = resolveDefaultSocketTimeout(config) ?? (value as number);
+          break;
       }
       return {
         ...config,
