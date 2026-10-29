@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.2.5
+
+### Patch Changes
+
+- 1ab6bae: Update undici to 7.30.1.
+- Updated dependencies [6f250ec]
+- Updated dependencies [0f58fed]
+  - @smithy/core@3.38.0
+
 ## 3.2.4
 
 ### Patch Changes

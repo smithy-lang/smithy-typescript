@@ -1,5 +1,14 @@
 # Change Log
 
+## 5.7.5
+
+### Patch Changes
+
+- 0f58fed: Export the shared `writeKey` helper and include headers named after Object prototype properties in canonical request signatures.
+- Updated dependencies [6f250ec]
+- Updated dependencies [0f58fed]
+  - @smithy/core@3.38.0
+
 ## 5.7.4
 
 ### Patch Changes
