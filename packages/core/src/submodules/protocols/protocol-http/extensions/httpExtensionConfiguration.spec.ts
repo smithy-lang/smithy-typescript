@@ -7,6 +7,7 @@ import { getHttpHandlerExtensionConfiguration, resolveHttpHandlerRuntimeConfig }
  * handlers do: `Symbol.for` makes every copy of this key equal.
  */
 const FALLBACK_LOGGER = Symbol.for("logger");
+const FALLBACK_DEFAULT_SOCKET_TIMEOUT = Symbol.for("@smithy/defaultSocketTimeout");
 
 describe("getHttpHandlerExtensionConfiguration", () => {
   const createMockHandler = () => ({
@@ -85,6 +86,33 @@ describe("getHttpHandlerExtensionConfiguration", () => {
 
       // should not throw
       getHttpHandlerExtensionConfiguration({ requestHandler: legacyHandler, logger } as any);
+    });
+  });
+
+  describe("client defaultSocketTimeout offer", () => {
+    it("offers the service default to the handler under the fallback key", () => {
+      const handler = createMockHandler();
+
+      getHttpHandlerExtensionConfiguration({ requestHandler: handler, defaultSocketTimeout: 300000 } as any);
+
+      expect(handler.updateHttpClientConfig).toHaveBeenCalledWith(FALLBACK_DEFAULT_SOCKET_TIMEOUT, 300000);
+      expect(handler.updateHttpClientConfig).not.toHaveBeenCalledWith("defaultSocketTimeout", expect.anything());
+    });
+
+    it("does not call updateHttpClientConfig when defaultSocketTimeout is not set", () => {
+      const handler = createMockHandler();
+
+      getHttpHandlerExtensionConfiguration({ requestHandler: handler, defaultSocketTimeout: undefined } as any);
+
+      expect(handler.updateHttpClientConfig).not.toHaveBeenCalled();
+    });
+
+    it("does not throw for a handler that predates updateHttpClientConfig", () => {
+      const legacyHandler = { metadata: {}, handle: vi.fn() };
+
+      expect(() =>
+        getHttpHandlerExtensionConfiguration({ requestHandler: legacyHandler, defaultSocketTimeout: 300000 } as any)
+      ).not.toThrow();
     });
   });
 

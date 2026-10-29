@@ -319,6 +319,14 @@ export class NodeHttp2Handler implements HttpHandler<NodeHttp2HandlerOptions> {
   public updateHttpClientConfig(key: keyof NodeHttp2HandlerOptions, value: NodeHttp2HandlerOptions[typeof key]): void {
     this.config = undefined;
     this.configProvider = this.configProvider.then((config) => {
+      switch (key as unknown) {
+        case Symbol.for("@smithy/defaultSocketTimeout"):
+          // A client offers its service default under this key: take it only if
+          // this handler has no defaultSocketTimeout of its own.
+          key = "defaultSocketTimeout" as typeof key;
+          value = resolveDefaultSocketTimeout(config) ?? (value as number);
+          break;
+      }
       return {
         ...config,
         [key]: value,

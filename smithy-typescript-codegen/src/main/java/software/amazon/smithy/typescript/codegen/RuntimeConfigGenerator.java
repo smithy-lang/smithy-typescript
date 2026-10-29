@@ -129,7 +129,13 @@ final class RuntimeConfigGenerator {
             writer.write("[]");
         }
     );
-    private final Map<String, String> runtimeConfigDefaultValuePrefixes = MapUtils.of("requestHandler", "");
+    private final Map<String, String> runtimeConfigDefaultValuePrefixes = MapUtils.of(
+        "requestHandler",
+        "",
+        // Not a client input: it is offered to the request handler the client builds.
+        "defaultSocketTimeout",
+        ""
+    );
 
     RuntimeConfigGenerator(
         TypeScriptSettings settings,
