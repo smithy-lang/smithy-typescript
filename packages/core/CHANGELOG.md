@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.38.0
+
+### Minor Changes
+
+- 6f250ec: Let clients offer a service default idle timeout to the request handler through updateHttpClientConfig, taken only when the handler has none of its own.
+- 0f58fed: Export the shared `writeKey` helper and include headers named after Object prototype properties in canonical request signatures.
+
 ## 3.37.0
 
 ### Minor Changes

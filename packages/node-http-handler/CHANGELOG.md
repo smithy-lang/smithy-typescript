@@ -1,5 +1,17 @@
 # Change Log
 
+## 4.14.0
+
+### Minor Changes
+
+- 6f250ec: Let clients offer a service default idle timeout to the request handler through updateHttpClientConfig, taken only when the handler has none of its own.
+
+### Patch Changes
+
+- Updated dependencies [6f250ec]
+- Updated dependencies [0f58fed]
+  - @smithy/core@3.38.0
+
 ## 4.13.0
 
 ### Minor Changes
