@@ -1,6 +1,6 @@
 import http, { type Server as HttpServer } from "node:http";
 import https, { type Server as HttpsServer } from "node:https";
-import type { AddressInfo } from "node:net";
+import type { AddressInfo, Socket } from "node:net";
 import { AbortController as AbortControllerPolyfill } from "@smithy/abort-controller";
 import { HttpRequest } from "@smithy/core/protocols";
 import { afterAll, afterEach, beforeAll, describe, expect, test as it, vi } from "vitest";
@@ -90,6 +90,40 @@ describe("http", () => {
     expect(response.headers).toBeDefined();
     expect(response.headers).toMatchObject(mockResponse.headers);
     expect(response.body).toBeDefined();
+  });
+
+  it("uses one Agent for concurrent first requests, so destroy() closes every socket", async () => {
+    mockHttpServer.addListener("request", createResponseFunction({ statusCode: 200, headers: {}, body: "ok" }));
+    const nodeHttpHandler = new NodeHttpHandler();
+    const request = () =>
+      new HttpRequest({
+        hostname: "localhost",
+        method: "GET",
+        port: (mockHttpServer.address() as AddressInfo).port,
+        protocol: "http:",
+        path: "/",
+        headers: {},
+      });
+    const serverSockets: Socket[] = [];
+    const onConnection = (socket: Socket) => serverSockets.push(socket);
+    mockHttpServer.on("connection", onConnection);
+
+    const inFlight = Array.from({ length: 5 }, () => nodeHttpHandler.handle(request()));
+    nodeHttpHandler.updateHttpClientConfig("requestTimeout", 1000);
+    inFlight.push(...Array.from({ length: 5 }, () => nodeHttpHandler.handle(request())));
+    const responses = await Promise.all(inFlight);
+    await Promise.all(responses.map(({ response }) => getResponseBody(response)));
+    mockHttpServer.off("connection", onConnection);
+    expect(serverSockets.length).toBeGreaterThan(0);
+
+    const closed = serverSockets.map((socket) => new Promise((resolve) => socket.once("close", resolve)));
+    nodeHttpHandler.destroy();
+    const unclosed = Symbol("unclosed");
+    const result = await Promise.race([
+      Promise.all(closed),
+      new Promise((resolve) => setTimeout(resolve, 500, unclosed)),
+    ]);
+    expect(result).not.toBe(unclosed);
   });
 
   [

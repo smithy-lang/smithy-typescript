@@ -377,6 +377,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
     } = options || {};
     const keepAlive = true;
     const maxSockets = 50;
+    let httpAgentPromise: Promise<hAgentType> | undefined;
 
     return {
       connectionTimeout,
@@ -385,18 +386,19 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       defaultSocketTimeout: resolveDefaultSocketTimeout(options),
       socketAcquisitionWarningTimeout,
       throwOnRequestTimeout,
-      httpAgentProvider: async () => {
-        const node_http = await import("node:http");
-        const { Agent, request } = node_http.default ?? node_http;
-        hRequest = request;
-        hAgent = Agent;
+      httpAgentProvider: () =>
+        (httpAgentPromise ??= (async () => {
+          const node_http = await import("node:http");
+          const { Agent, request } = node_http.default ?? node_http;
+          hRequest = request;
+          hAgent = Agent;
 
-        if (httpAgent instanceof hAgent || typeof (httpAgent as hAgentType)?.destroy === "function") {
-          this.externalAgent = true;
-          return httpAgent as hAgentType;
-        }
-        return new hAgent({ keepAlive, maxSockets, ...httpAgent });
-      },
+          if (httpAgent instanceof hAgent || typeof (httpAgent as hAgentType)?.destroy === "function") {
+            this.externalAgent = true;
+            return httpAgent as hAgentType;
+          }
+          return new hAgent({ keepAlive, maxSockets, ...httpAgent });
+        })()),
       httpsAgent: (() => {
         if (httpsAgent instanceof node_https.Agent || typeof (httpsAgent as hsAgentType)?.destroy === "function") {
           this.externalAgent = true;
