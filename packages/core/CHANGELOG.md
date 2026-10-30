@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.38.1
+
+### Patch Changes
+
+- 6871574: Redact sensitive fields within list items and map values in schema-based logging.
+
 ## 3.38.0
 
 ### Minor Changes
