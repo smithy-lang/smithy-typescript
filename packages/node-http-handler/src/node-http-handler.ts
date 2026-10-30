@@ -310,7 +310,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // Re-validated here because updateHttpClientConfig can set the untyped option directly.
       const defaultSocketTimeout = config.socketTimeout === undefined ? resolveDefaultSocketTimeout(config) : undefined;
       if (defaultSocketTimeout) {
-        // Service default: fail the body with TimeoutError on a post-headers stall.
+        // Service default: labeled as such in the TimeoutError.
         socketTimeoutId = setSocketTimeout(req, reject, defaultSocketTimeout, true);
       } else {
         socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);

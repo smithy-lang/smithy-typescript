@@ -2,8 +2,6 @@
 "@smithy/node-http-handler": patch
 ---
 
-Register configured positive socket idle timeouts with the full rolling idle window once the socket connects, and keep them armed through response bodies. Preserve completed but unread bodies for configured and service-default timeouts, and fail incomplete bodies with `TimeoutError`. Service-default timeout deferral and timing are unchanged.
-
-Close stalled unfinished uploads after a complete response without discarding its unread body, including when the response is fully consumed and timeout registration precedes socket assignment.
+Keep configured and service-default socket idle timeouts armed through response bodies, so a body that stalls after fast headers fails with `TimeoutError` instead of hanging. Both now register the full idle window on the connected socket immediately, without the previous 3000 ms deferral. For a complete body, close the socket and leave the buffered body readable.
 
 Socket inactivity includes caller pauses while reading an incomplete body, so consumer backpressure can still trigger `socketTimeout`.
