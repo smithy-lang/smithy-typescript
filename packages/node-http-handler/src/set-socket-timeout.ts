@@ -5,17 +5,16 @@ import type { ClientRequest, IncomingMessage } from "node:http";
  * Sets a rolling socket idle timeout that stays armed through the response body.
  *
  * @param isServiceDefault - whether timeoutInMs is the service default, which labels the error.
- * @returns 0, so the handler's clearTimeouts() on headers cannot cancel the timeout. It is
- * removed when the request closes.
+ * The timeout is not cancelled on headers. It is removed when the request closes.
  */
 export const setSocketTimeout = (
   request: ClientRequest,
   reject: (err: Error) => void,
   timeoutInMs = 0,
   isServiceDefault = false
-): number => {
-  if (!(timeoutInMs > 0)) {
-    return 0;
+): void => {
+  if (!Number.isFinite(timeoutInMs) || timeoutInMs <= 0) {
+    return;
   }
   let response: IncomingMessage | undefined;
   request.once("response", (res) => (response = res));
@@ -56,5 +55,4 @@ export const setSocketTimeout = (
   };
 
   registerTimeout();
-  return 0;
 };

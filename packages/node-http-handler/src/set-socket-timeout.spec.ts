@@ -1,8 +1,7 @@
 import { EventEmitter } from "node:events";
-import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
+import { beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setSocketTimeout } from "./set-socket-timeout";
-import { timing } from "./timing";
 
 describe("setSocketTimeout", () => {
   const clientRequest: any = {
@@ -12,21 +11,8 @@ describe("setSocketTimeout", () => {
     once: vi.fn(),
   };
 
-  vi.spyOn(timing, "setTimeout").mockImplementation(((fn: Function, ms: number) => {
-    return setTimeout(fn, ms);
-  }) as any);
-  vi.spyOn(timing, "clearTimeout").mockImplementation(((timer: any) => {
-    return clearTimeout(timer);
-  }) as any);
-
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
-  });
-
-  afterAll(() => {
-    vi.clearAllMocks();
-    vi.useRealTimers();
   });
 
   it(`sets the socket's timeout if provided`, () => {
@@ -36,8 +22,8 @@ describe("setSocketTimeout", () => {
     expect(clientRequest.socket.setTimeout).toHaveBeenLastCalledWith(100, expect.any(Function));
   });
 
-  it(`does not register a socket timeout if not provided`, () => {
-    expect(setSocketTimeout(clientRequest, vi.fn())).toBe(0);
+  it.each([undefined, 0, -1, NaN, Infinity])(`does not register a socket timeout for %p`, (timeoutInMs) => {
+    setSocketTimeout(clientRequest, vi.fn(), timeoutInMs);
 
     expect(clientRequest.socket.setTimeout).not.toHaveBeenCalled();
     expect(clientRequest.once).not.toHaveBeenCalled();
@@ -130,11 +116,9 @@ describe("setSocketTimeout", () => {
     it("times out a stalled body after fast headers with the full configured idle window", () => {
       const request = makeRequest();
       const reject = vi.fn();
-      const id = setSocketTimeout(request, reject, 30000);
+      setSocketTimeout(request, reject, 30000);
 
       request.emit("response");
-      // The handler clears its timeouts on headers.
-      timing.clearTimeout(id);
 
       expect(request.socket.setTimeout).toHaveBeenCalledWith(30000, expect.any(Function));
       expect(request.destroy).not.toHaveBeenCalled();
