@@ -1,7 +1,21 @@
-import { NormalizedSchema } from "@smithy/core/schema";
 import { fromUtf8, toUtf8 } from "@smithy/core/serde";
-import type { CodecSettings, Schema, SerdeFunctions, ShapeDeserializer } from "@smithy/types";
+import type {
+  BlobSchema,
+  CodecSettings,
+  Schema,
+  SerdeFunctions,
+  ShapeDeserializer,
+  StreamingBlobSchema,
+  StringSchema,
+} from "@smithy/types";
 
+import {
+  HttpBindingNormalizedSchema,
+  type HttpBindingLocation,
+  type HttpBindingValue,
+  type HttpHeader,
+  type HttpPayload,
+} from "../HttpBindingNormalizedSchema";
 import { SerdeContext } from "../SerdeContext";
 import { FromStringShapeDeserializer } from "./FromStringShapeDeserializer";
 
@@ -38,27 +52,36 @@ export class HttpInterceptingShapeDeserializer<CodecShapeDeserializer extends Sh
   }
 
   public read(schema: Schema, data: string | Uint8Array): any | Promise<any> {
-    const ns = NormalizedSchema.of(schema);
+    const ns = HttpBindingNormalizedSchema.of(schema);
     const traits = ns.getMergedTraits();
-    const toString = this.serdeContext?.utf8Encoder ?? toUtf8;
 
     if (traits.httpHeader || traits.httpResponseCode) {
-      return this.stringDeserializer.read(ns, toString(data));
+      const value = ns.getHttpBindingValue(0b100_110 satisfies HttpHeader, traits);
+      return this.readHttpBinding(value, data, 0b100_110 satisfies HttpHeader);
     }
     if (traits.httpPayload) {
-      if (ns.isBlobSchema()) {
-        const toBytes = this.serdeContext?.utf8Decoder ?? fromUtf8;
-        if (typeof data === "string") {
-          return toBytes(data);
-        }
-        return data;
-      } else if (ns.isStringSchema()) {
-        if ("byteLength" in (data as Uint8Array)) {
-          return toString(data);
-        }
-        return data;
-      }
+      return this.readPayload(ns.getHttpBindingValue(0b100_100 satisfies HttpPayload, traits), data);
     }
-    return this.codecDeserializer.read(ns, data);
+    return this.readCodec(ns, data);
+  }
+
+  public readHttpBinding(binding: HttpBindingValue, data: string | Uint8Array, location: HttpBindingLocation): any {
+    const value = typeof data === "string" ? data : (this.serdeContext?.utf8Encoder ?? toUtf8)(data);
+    return this.stringDeserializer.readHttpBinding(binding, value, location);
+  }
+
+  public readPayload([schema, flags]: HttpBindingValue, data: string | Uint8Array): any | Promise<any> {
+    const type = flags & 0xff;
+    if (type === (21 satisfies BlobSchema) || type === (42 satisfies StreamingBlobSchema)) {
+      return typeof data === "string" ? (this.serdeContext?.utf8Decoder ?? fromUtf8)(data) : data;
+    }
+    if (type === (0 satisfies StringSchema)) {
+      return typeof data === "string" ? data : (this.serdeContext?.utf8Encoder ?? toUtf8)(data);
+    }
+    return this.readCodec(schema, data);
+  }
+
+  public readCodec(schema: Schema, data: string | Uint8Array): any | Promise<any> {
+    return this.codecDeserializer.read(schema, data);
   }
 }

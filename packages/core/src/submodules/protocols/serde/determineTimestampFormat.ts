@@ -17,18 +17,17 @@ export function determineTimestampFormat(
   settings: CodecSettings
 ): TimestampDateTimeSchema | TimestampHttpDateSchema | TimestampEpochSecondsSchema {
   if (settings.timestampFormat.useTrait) {
+    const schema = ns.getSchema();
     if (
-      ns.isTimestampSchema() &&
-      (ns.getSchema() === (5 satisfies TimestampDateTimeSchema) ||
-        ns.getSchema() === (6 satisfies TimestampHttpDateSchema) ||
-        ns.getSchema() === (7 satisfies TimestampEpochSecondsSchema))
+      schema === (5 satisfies TimestampDateTimeSchema) ||
+      schema === (6 satisfies TimestampHttpDateSchema) ||
+      schema === (7 satisfies TimestampEpochSecondsSchema)
     ) {
-      return ns.getSchema() as TimestampDateTimeSchema | TimestampHttpDateSchema | TimestampEpochSecondsSchema;
+      return schema;
     }
   }
 
   const { httpLabel, httpPrefixHeaders, httpHeader, httpQuery } = ns.getMergedTraits();
-
   const bindingFormat = settings.httpBindings
     ? typeof httpPrefixHeaders === "string" || Boolean(httpHeader)
       ? (6 satisfies TimestampHttpDateSchema)

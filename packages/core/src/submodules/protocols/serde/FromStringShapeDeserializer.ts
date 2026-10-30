@@ -1,4 +1,3 @@
-import { NormalizedSchema } from "@smithy/core/schema";
 import {
   LazyJsonString,
   NumericValue,
@@ -10,16 +9,29 @@ import {
   toUtf8,
 } from "@smithy/core/serde";
 import type {
+  BigDecimalSchema,
+  BigIntegerSchema,
+  BlobSchema,
+  BooleanSchema,
   CodecSettings,
+  ListSchemaModifier,
+  NumericSchema,
   Schema,
   ShapeDeserializer,
+  StreamingBlobSchema,
+  StringSchema,
+  TimestampDefaultSchema,
   TimestampDateTimeSchema,
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
 } from "@smithy/types";
 
+import {
+  HttpBindingNormalizedSchema,
+  type HttpBindingLocation,
+  type HttpBindingValue,
+} from "../HttpBindingNormalizedSchema";
 import { SerdeContext } from "../SerdeContext";
-import { determineTimestampFormat } from "./determineTimestampFormat";
 
 /**
  * This deserializer reads strings.
@@ -32,63 +44,74 @@ export class FromStringShapeDeserializer extends SerdeContext implements ShapeDe
   }
 
   public read(_schema: Schema, data: string): any {
-    const ns = NormalizedSchema.of(_schema);
-
-    if (ns.isListSchema()) {
-      return splitHeader(data).map((item) => this.read(ns.getValueSchema(), item));
-    }
-
-    if (ns.isBlobSchema()) {
-      return (this.serdeContext?.base64Decoder ?? fromBase64)(data);
-    }
-
-    if (ns.isTimestampSchema()) {
-      const format = determineTimestampFormat(ns, this.settings);
-
-      switch (format) {
-        case 5 satisfies TimestampDateTimeSchema:
-          return _parseRfc3339DateTimeWithOffset(data);
-        case 6 satisfies TimestampHttpDateSchema:
-          return _parseRfc7231DateTime(data);
-        case 7 satisfies TimestampEpochSecondsSchema:
-          return _parseEpochTimestamp(data);
-        default:
-          console.warn("Missing timestamp format, parsing value with Date constructor:", data);
-          return new Date(data as string | number);
-      }
-    }
-
-    if (ns.isStringSchema()) {
-      const mediaType = ns.getMergedTraits().mediaType;
-      let intermediateValue: string | LazyJsonString = data;
-      if (mediaType) {
-        if (ns.getMergedTraits().httpHeader) {
-          intermediateValue = this.base64ToUtf8(intermediateValue);
-        }
-        const isJson = mediaType === "application/json" || mediaType.endsWith("+json");
-        if (isJson) {
-          intermediateValue = LazyJsonString.from(intermediateValue);
-        }
-        return intermediateValue;
-      }
-    }
-
-    if (ns.isNumericSchema()) {
-      return Number(data);
-    }
-    if (ns.isBigIntegerSchema()) {
-      return BigInt(data);
-    }
-    if (ns.isBigDecimalSchema()) {
-      return new NumericValue(data, "bigDecimal");
-    }
-    if (ns.isBooleanSchema()) {
-      return String(data).toLowerCase() === "true";
-    }
-    return data;
+    const ns = HttpBindingNormalizedSchema.of(_schema);
+    const traits = ns.getMergedTraits();
+    const location = ns.getHttpBindingLocation(traits);
+    return this.readHttpBinding(ns.getHttpBindingValue(location, traits), data, location);
   }
 
-  private base64ToUtf8(base64String: string): any {
-    return (this.serdeContext?.utf8Encoder ?? toUtf8)((this.serdeContext?.base64Decoder ?? fromBase64)(base64String));
+  public readHttpBinding(
+    [ns, flags, collectionValue]: HttpBindingValue,
+    data: string,
+    location: HttpBindingLocation
+  ): any {
+    const schema = flags & 0xff;
+    if ((schema & 0b1100_0000) === (0b0100_0000 satisfies ListSchemaModifier)) {
+      collectionValue ??= ns.getHttpBindingCollectionValue(location);
+      return splitHeader(data).map((item) => this.readHttpBinding(collectionValue!, item, location));
+    }
+
+    switch (schema) {
+      case 21 satisfies BlobSchema:
+      case 42 satisfies StreamingBlobSchema:
+        return (this.serdeContext?.base64Decoder ?? fromBase64)(data);
+      case 4 satisfies TimestampDefaultSchema:
+      case 5 satisfies TimestampDateTimeSchema:
+      case 6 satisfies TimestampHttpDateSchema:
+      case 7 satisfies TimestampEpochSecondsSchema: {
+        const bindingFormat = this.settings.httpBindings ? (flags >> 14) & 0b11 : 0;
+        const format =
+          this.settings.timestampFormat.useTrait && schema > (4 satisfies TimestampDefaultSchema)
+            ? schema
+            : bindingFormat
+              ? bindingFormat + (4 satisfies TimestampDefaultSchema)
+              : this.settings.timestampFormat.default;
+
+        switch (format) {
+          case 5 satisfies TimestampDateTimeSchema:
+            return _parseRfc3339DateTimeWithOffset(data);
+          case 6 satisfies TimestampHttpDateSchema:
+            return _parseRfc7231DateTime(data);
+          case 7 satisfies TimestampEpochSecondsSchema:
+            return _parseEpochTimestamp(data);
+          default:
+            console.warn("Missing timestamp format, parsing value with Date constructor:", data);
+            return new Date(data as string | number);
+        }
+      }
+      case 0 satisfies StringSchema: {
+        const media = (flags >> 8) & 0b11;
+        if (!media) {
+          return data;
+        }
+        let intermediateValue: string | LazyJsonString = data;
+        if ((location & 0b110) === 0b110) {
+          intermediateValue = (this.serdeContext?.utf8Encoder ?? toUtf8)(
+            (this.serdeContext?.base64Decoder ?? fromBase64)(intermediateValue)
+          );
+        }
+        return media === 2 ? LazyJsonString.from(intermediateValue) : intermediateValue;
+      }
+      case 1 satisfies NumericSchema:
+        return Number(data);
+      case 2 satisfies BooleanSchema:
+        return data.toLowerCase() === "true";
+      case 17 satisfies BigIntegerSchema:
+        return BigInt(data);
+      case 19 satisfies BigDecimalSchema:
+        return new NumericValue(data, "bigDecimal");
+      default:
+        return data;
+    }
   }
 }
