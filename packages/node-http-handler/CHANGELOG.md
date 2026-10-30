@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.14.1
+
+### Patch Changes
+
+- fe13e99: Create one http.Agent for concurrent first requests so destroy() closes every socket.
+- Updated dependencies [6871574]
+  - @smithy/core@3.38.1
+
 ## 4.14.0
 
 ### Minor Changes
