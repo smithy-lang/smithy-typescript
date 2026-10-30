@@ -40,7 +40,7 @@ class SchemaTraitWriterTest {
             String codeGeneration = subject.toString();
             assertEquals(
                 """
-                { [_s]: 1 }""",
+                { "streaming": 1 }""",
                 codeGeneration
             );
         }
