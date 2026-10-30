@@ -10,9 +10,9 @@ import { describe, expect, test as it } from "vitest";
 import { schemaLogFilter } from "./schemaLogFilter";
 
 describe(schemaLogFilter.name, () => {
-  it("should filter sensitive trait-marked fields", () => {
-    const sensitiveString: StaticSimpleSchema = [0, "ns", "SensitiveString", { sensitive: 1 }, 0];
+  const sensitiveString: StaticSimpleSchema = [0, "ns", "SensitiveString", { sensitive: 1 }, 0];
 
+  it("should filter sensitive trait-marked fields", () => {
     const schema: StaticStructureSchema = [
       3,
       "ns",
@@ -91,6 +91,38 @@ describe(schemaLogFilter.name, () => {
           c: "f",
         },
       },
+    });
+  });
+
+  it("should filter sensitive fields within list and map values", () => {
+    const value: StaticStructureSchema = [
+      3,
+      "ns",
+      "Value",
+      0,
+      ["public", "sensitive"],
+      [0 satisfies StringSchema, sensitiveString],
+    ];
+    const schema: StaticStructureSchema = [
+      3,
+      "ns",
+      "Collections",
+      0,
+      ["list", "map"],
+      [
+        [1, "ns", "ValueList", 0, value],
+        [2, "ns", "ValueMap", 0, 0 satisfies StringSchema, value],
+      ],
+    ];
+
+    expect(
+      schemaLogFilter(schema, {
+        list: [{ public: "visible", sensitive: "secret" }],
+        map: { key: { public: "visible", sensitive: "secret" } },
+      })
+    ).toEqual({
+      list: [{ public: "visible", sensitive: "***SensitiveInformation***" }],
+      map: { key: { public: "visible", sensitive: "***SensitiveInformation***" } },
     });
   });
 });
