@@ -1,7 +1,8 @@
 import { EventEmitter } from "node:events";
-import { beforeEach, describe, expect, test as it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { setSocketTimeout } from "./set-socket-timeout";
+import { timing } from "./timing";
 
 describe("setSocketTimeout", () => {
   const clientRequest: any = {
@@ -11,8 +12,21 @@ describe("setSocketTimeout", () => {
     once: vi.fn(),
   };
 
+  vi.spyOn(timing, "setTimeout").mockImplementation(((fn: Function, ms: number) => {
+    return setTimeout(fn, ms);
+  }) as any);
+  vi.spyOn(timing, "clearTimeout").mockImplementation(((timer: any) => {
+    return clearTimeout(timer);
+  }) as any);
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterAll(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it(`sets the socket's timeout if provided`, () => {
@@ -106,12 +120,26 @@ describe("setSocketTimeout", () => {
       [6000, false],
       [300000, false],
       [300000, true],
-    ])("arms the full %i ms window immediately (isServiceDefault=%s)", (timeoutInMs, isServiceDefault) => {
+    ])("defers the full %i ms window by 3000 ms (isServiceDefault=%s)", (timeoutInMs, isServiceDefault) => {
       const request = makeRequest();
       setSocketTimeout(request, vi.fn(), timeoutInMs, isServiceDefault);
+      expect(request.socket.setTimeout).not.toHaveBeenCalled();
 
+      vi.advanceTimersByTime(3000);
       expect(request.socket.setTimeout).toHaveBeenCalledExactlyOnceWith(timeoutInMs, expect.any(Function));
     });
+
+    it.each([false, true])(
+      "registers nothing when the request closes within the deferral (isServiceDefault=%s)",
+      (isServiceDefault) => {
+        const request = makeRequest();
+        setSocketTimeout(request, vi.fn(), 300000, isServiceDefault);
+        request.emit("close");
+
+        vi.runAllTimers();
+        expect(request.socket.setTimeout).not.toHaveBeenCalled();
+      }
+    );
 
     it("times out a stalled body after fast headers with the full configured idle window", () => {
       const request = makeRequest();
@@ -119,6 +147,7 @@ describe("setSocketTimeout", () => {
       setSocketTimeout(request, reject, 30000);
 
       request.emit("response");
+      vi.advanceTimersByTime(3000);
 
       expect(request.socket.setTimeout).toHaveBeenCalledWith(30000, expect.any(Function));
       expect(request.destroy).not.toHaveBeenCalled();
@@ -140,6 +169,7 @@ describe("setSocketTimeout", () => {
         request.writableFinished = uploadFinished;
         setSocketTimeout(request, reject, 6000, isServiceDefault);
         request.emit("response");
+        vi.advanceTimersByTime(3000);
         request.res.complete = true;
 
         request.socket.setTimeout.mock.calls[0][1]();
@@ -155,6 +185,7 @@ describe("setSocketTimeout", () => {
       const reject = vi.fn();
       setSocketTimeout(request, reject, 300000, true);
       request.emit("response");
+      vi.advanceTimersByTime(3000);
 
       request.socket.setTimeout.mock.calls[0][1]();
       const error = reject.mock.calls[0][0];
