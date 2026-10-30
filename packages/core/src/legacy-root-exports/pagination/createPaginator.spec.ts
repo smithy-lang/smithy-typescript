@@ -1,7 +1,7 @@
 import type { PaginationConfiguration } from "@smithy/types";
 import { afterEach, describe, expect, test as it, vi } from "vitest";
 
-import { createPaginator } from "./createPaginator";
+import { createItemsPaginator, createPaginator } from "./createPaginator";
 
 describe(createPaginator.name, () => {
   class Client {
@@ -338,5 +338,88 @@ describe(createPaginator.name, () => {
     expect(client.send).toHaveBeenCalledTimes(5);
     expect(config.withCommand).toHaveBeenCalledTimes(5);
     expect(config.withCommand).toHaveBeenCalledWith(expect.any(CommandObjectToken));
+  });
+});
+
+describe(createItemsPaginator.name, () => {
+  // A fake page paginator yielding the given pages, so item extraction is tested in isolation.
+  const pagesOf = (...pages: any[]) =>
+    async function* () {
+      yield* pages;
+      return undefined;
+    };
+
+  const collect = async <T>(gen: AsyncGenerator<T>): Promise<T[]> => {
+    const out: T[] = [];
+    for await (const item of gen) {
+      out.push(item);
+    }
+    return out;
+  };
+
+  it("should yield each element of a list items member across pages", async () => {
+    const paginate = createItemsPaginator(pagesOf({ items: [1, 2] }, { items: [3] }, { items: [4, 5] }), "items");
+    expect(await collect(paginate({} as any, {}))).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("should resolve a nested (dotted) items path", async () => {
+    const paginate = createItemsPaginator(
+      pagesOf({ result: { items: ["a", "b"] } }, { result: { items: ["c"] } }),
+      "result.items"
+    );
+    expect(await collect(paginate({} as any, {}))).toEqual(["a", "b", "c"]);
+  });
+
+  it("should skip pages where the items member is absent or null", async () => {
+    const paginate = createItemsPaginator(pagesOf({ items: [1] }, {}, { items: null }, { items: [2] }), "items");
+    expect(await collect(paginate({} as any, {}))).toEqual([1, 2]);
+  });
+
+  it("should yield nothing for empty item lists", async () => {
+    const paginate = createItemsPaginator(pagesOf({ items: [] }, { items: [] }), "items");
+    expect(await collect(paginate({} as any, {}))).toEqual([]);
+  });
+
+  it("should yield [key, value] entries for a map items member (matches Java SDK Map.Entry)", async () => {
+    const paginate = createItemsPaginator(pagesOf({ items: { a: 1, b: 2 } }, { items: { c: 3 } }), "items");
+    expect(await collect(paginate({} as any, {}))).toEqual([
+      ["a", 1],
+      ["b", 2],
+      ["c", 3],
+    ]);
+  });
+
+  it("should yield a scalar items member as a single value", async () => {
+    const paginate = createItemsPaginator(pagesOf({ items: "only" }, { items: "next" }), "items");
+    expect(await collect(paginate({} as any, {}))).toEqual(["only", "next"]);
+  });
+
+  it("should work when composed with a real createPaginator (end-to-end)", async () => {
+    class ItemsClient {
+      private pages = 3;
+      async send() {
+        if (--this.pages > 0) {
+          return { items: [this.pages, this.pages], outToken: "T" };
+        }
+        return { items: [0] };
+      }
+    }
+    class ItemsCommand {
+      public constructor(public input: any) {}
+    }
+
+    const paginatePages = createPaginator<PaginationConfiguration, { inToken?: string }, { items: number[] }>(
+      ItemsClient,
+      ItemsCommand,
+      "inToken",
+      "outToken"
+    );
+    const paginateItems = createItemsPaginator<PaginationConfiguration, { inToken?: string }, number>(
+      paginatePages,
+      "items"
+    );
+
+    const items = await collect(paginateItems({ client: new ItemsClient() as any }, {}));
+    expect(items).toEqual([2, 2, 1, 1, 0]);
   });
 });
