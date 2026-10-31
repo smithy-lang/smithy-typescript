@@ -170,14 +170,12 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       let socketWarningTimeoutId: TimeoutId = -1;
       let connectionTimeoutId: TimeoutId = -1;
       let requestTimeoutId: TimeoutId = -1;
-      let socketTimeoutId: TimeoutId = -1;
       let keepAliveTimeoutId: TimeoutId = -1;
 
       const clearTimeouts = () => {
         timing.clearTimeout(socketWarningTimeoutId);
         timing.clearTimeout(connectionTimeoutId);
         timing.clearTimeout(requestTimeoutId);
-        timing.clearTimeout(socketTimeoutId);
         timing.clearTimeout(keepAliveTimeoutId);
       };
 
@@ -310,10 +308,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       // Re-validated here because updateHttpClientConfig can set the untyped option directly.
       const defaultSocketTimeout = config.socketTimeout === undefined ? resolveDefaultSocketTimeout(config) : undefined;
       if (defaultSocketTimeout) {
-        // Service default: fail the body with TimeoutError on a post-headers stall.
-        socketTimeoutId = setSocketTimeout(req, reject, defaultSocketTimeout, true);
+        // Service default: labeled as such in the TimeoutError.
+        setSocketTimeout(req, reject, defaultSocketTimeout, true);
       } else {
-        socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
+        setSocketTimeout(req, reject, config.socketTimeout);
       }
 
       // Workaround for bug report in Node.js https://github.com/nodejs/node/issues/47137

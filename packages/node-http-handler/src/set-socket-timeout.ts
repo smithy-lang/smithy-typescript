@@ -6,61 +6,65 @@ const DEFER_EVENT_LISTENER_TIME = 3000;
 
 /**
  * @internal
- * @param destroyResponseBodyOnTimeout - set by the service default. On timeout the response
- * body is destroyed with the TimeoutError, and the timeout stays armed through the body.
+ * Sets a rolling socket idle timeout that stays armed through the response body. Timeouts of
+ * 6000 ms or more register after 3000 ms, so requests that finish sooner skip the socket
+ * listener, and may fire up to 3000 ms late.
+ *
+ * @param isServiceDefault - whether timeoutInMs is the service default, which labels the error.
+ * The timeout is not cancelled on headers. It is removed, or its deferral cleared, when the
+ * request closes.
  */
 export const setSocketTimeout = (
   request: ClientRequest,
   reject: (err: Error) => void,
   timeoutInMs = 0,
-  destroyResponseBodyOnTimeout = false
-): NodeJS.Timeout | number => {
-  // Captured only for the service default, to fail the body on a post-headers stall.
-  let response: IncomingMessage | undefined;
-  if (destroyResponseBodyOnTimeout) {
-    request.once("response", (res) => (response = res));
+  isServiceDefault = false
+): void => {
+  if (!Number.isFinite(timeoutInMs) || timeoutInMs <= 0) {
+    return;
   }
+  let response: IncomingMessage | undefined;
+  request.once("response", (res) => (response = res));
 
-  const registerTimeout = (offset: number) => {
-    const timeout = timeoutInMs - offset;
-    const onTimeout = () => {
-      const error = Object.assign(
-        new Error(
-          `@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (${
-            destroyResponseBodyOnTimeout ? "service default socket timeout" : "configured by client requestHandler"
-          }).`
-        ),
-        { name: "TimeoutError" }
-      );
-      if (destroyResponseBodyOnTimeout) {
-        response?.destroy(error);
-      }
-      request.destroy();
-      reject(error);
-    };
+  const onTimeout = () => {
+    if (response?.complete) {
+      // The body is fully buffered and stays readable. Free the socket, which may still be
+      // held by an unfinished upload or an unread body.
+      request.socket?.destroy();
+      return;
+    }
+    const error = Object.assign(
+      new Error(
+        `@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (${
+          isServiceDefault ? "service default socket timeout" : "configured by client requestHandler"
+        }).`
+      ),
+      { name: "TimeoutError" }
+    );
+    // After headers the request promise has resolved, so the body carries the error.
+    response?.destroy(error);
+    request.destroy();
+    reject(error);
+  };
 
-    if (request.socket) {
-      request.socket.setTimeout(timeout, onTimeout);
-      request.on("close", () => request.socket?.removeListener("timeout", onTimeout));
+  // Registered on the socket rather than via request.setTimeout(), whose forwarding Node
+  // removes when an early response ends. Connection setup is left to connectionTimeout.
+  const registerTimeout = () => {
+    const { socket } = request;
+    if (!socket) {
+      request.once("socket", registerTimeout);
+    } else if (socket.connecting) {
+      socket.once("connect", registerTimeout);
     } else {
-      request.setTimeout(timeout, onTimeout);
+      socket.setTimeout(timeoutInMs, onTimeout);
+      request.on("close", () => socket.removeListener("timeout", onTimeout));
     }
   };
 
-  if (0 < timeoutInMs && timeoutInMs < 6000) {
-    registerTimeout(0);
-    return 0;
+  if (timeoutInMs < 6000) {
+    registerTimeout();
+    return;
   }
-
-  const deferralId = timing.setTimeout(
-    registerTimeout.bind(null, timeoutInMs === 0 ? 0 : DEFER_EVENT_LISTENER_TIME),
-    DEFER_EVENT_LISTENER_TIME
-  );
-  if (destroyResponseBodyOnTimeout) {
-    // Return 0, not deferralId, so the handler's clearTimeouts() on headers cannot cancel the
-    // deferral and the timeout stays armed through the body. Cancelled on request close instead.
-    request.once("close", () => timing.clearTimeout(deferralId));
-    return 0;
-  }
-  return deferralId;
+  const deferralId = timing.setTimeout(registerTimeout, DEFER_EVENT_LISTENER_TIME);
+  request.once("close", () => timing.clearTimeout(deferralId));
 };
