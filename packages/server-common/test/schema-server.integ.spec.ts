@@ -475,6 +475,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
     let h2CborClient: XYZServiceClient;
     let h2JsonRpcClient: XYZServiceClient;
     let h2RestJsonClient: XYZServiceClient;
+    let h2RpcV2JsonClient: XYZServiceClient;
 
     async function collectEvents(iterable: AsyncIterable<any>): Promise<any[]> {
       const events: any[] = [];
@@ -488,6 +489,7 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       const h2Handler = createXYZServiceHandler({
         protocols: [
           new SmithyRpcV2CborServerProtocol({ defaultNamespace: "org.xyz.v1" }),
+          new SmithyRpcV2JsonServerProtocol({ defaultNamespace: "org.xyz.v1", serviceName: "XYZService" }),
           new AwsJsonRpcServerProtocol({ defaultNamespace: "org.xyz.v1" }),
           new AwsRestJsonServerProtocol({ defaultNamespace: "org.xyz.v1" }),
         ],
@@ -638,12 +640,23 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
           defaultNamespace: "org.xyz.v1",
         },
       });
+
+      // Smithy RPCv2 JSON client — mirrors rpcV2JsonClient, over HTTP/2.
+      h2RpcV2JsonClient = new XYZServiceClient({
+        endpoint: h2BaseUrl,
+        apiKey: { apiKey: "test-key" },
+        protocol: SmithyRpcV2JsonProtocol,
+        protocolSettings: {
+          defaultNamespace: "org.xyz.v1",
+        },
+      });
     });
 
     afterAll(async () => {
       h2CborClient.destroy();
       h2JsonRpcClient.destroy();
       h2RestJsonClient.destroy();
+      h2RpcV2JsonClient.destroy();
       await new Promise<void>((resolve, reject) => {
         h2Server.close((err) => (err ? reject(err) : resolve()));
       });
@@ -828,6 +841,86 @@ describe("Multi-protocol schema SSDK over HTTP", () => {
       expect(events).toHaveLength(4);
       expect(events[0].notification?.topic).toBe("updates");
       expect(events[3].notification?.payload).toBe("event-3");
+    });
+
+    // --- Smithy RPC v2 JSON (smithy.protocols#rpcv2Json) ---
+
+    it("RPC v2 JSON: bidirectional event stream with initial message", async () => {
+      const response = await h2RpcV2JsonClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "rpcv2-json-session",
+          eventStream: (async function* () {
+            yield { alpha: { id: "rpcv2-evt-1" } };
+            yield { delta: { name: "rpcv2-trade", number: 64 } };
+          })(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-rpcv2-json-session");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(2);
+      expect(events[0].alpha?.id).toBe("rpcv2-json-session:rpcv2-evt-1");
+      expect(events[1].delta?.name).toBe("rpcv2-json-session:rpcv2-trade");
+      expect(events[1].delta?.number).toBe(64);
+    });
+
+    it("RPC v2 JSON: eventHeader and eventPayload (gamma)", async () => {
+      const response = await h2RpcV2JsonClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "rpcv2-gamma",
+          eventStream: (async function* () {
+            yield { gamma: { sequenceNumber: 7, payload: { message: "hello", values: [1, 2, 3] } } };
+          })(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-rpcv2-gamma");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(1);
+      expect(events[0].gamma?.sequenceNumber).toBe(7);
+      expect(events[0].gamma?.payload?.message).toBe("hello");
+      expect(events[0].gamma?.payload?.values).toEqual([1, 2, 3]);
+    });
+
+    it("RPC v2 JSON: empty event stream returns no events", async () => {
+      const response = await h2RpcV2JsonClient.send(
+        new TradeEventStreamCommand({
+          sessionId: "rpcv2-empty-stream",
+          eventStream: (async function* () {})(),
+        })
+      );
+      expect(response.sessionId).toBe("ack-rpcv2-empty-stream");
+      const events = await collectEvents(response.eventStream!);
+      expect(events).toHaveLength(0);
+    });
+
+    it("RPC v2 JSON: input-only event stream", async () => {
+      const { PublishEventsCommand } = await import("xyz-schema");
+      const response = await h2RpcV2JsonClient.send(
+        new PublishEventsCommand({
+          channel: "rpcv2-metrics",
+          events: (async function* () {
+            yield { log: { level: "INFO", message: "started" } };
+            yield { metric: { name: "cpu", value: 0.5 } };
+          })(),
+        })
+      );
+      expect(response.eventCount).toBe(2);
+      expect(response.message).toBe("Received 2 events on channel rpcv2-metrics");
+    });
+
+    it("RPC v2 JSON: output-only event stream", async () => {
+      const { SubscribeToEventsCommand } = await import("xyz-schema");
+      const response = await h2RpcV2JsonClient.send(
+        new SubscribeToEventsCommand({
+          channel: "rpcv2-news",
+          maxEvents: 3,
+        })
+      );
+      expect(response.subscriptionId).toBe("sub-rpcv2-news");
+      const events = await collectEvents(response.events!);
+      expect(events).toHaveLength(3);
+      expect(events[0].notification?.topic).toBe("rpcv2-news");
+      expect(events[0].notification?.payload).toBe("event-0");
+      expect(events[2].notification?.payload).toBe("event-2");
     });
   });
 
