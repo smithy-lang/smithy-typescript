@@ -1,4 +1,5 @@
 import type {
+  AbortSignal as DeprecatedAbortSignal,
   Provider,
   RetryErrorInfo,
   RetryErrorType,
@@ -85,7 +86,8 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
 
   public async refreshRetryTokenForRetry(
     token: StandardRetryToken,
-    errorInfo: RetryErrorInfo
+    errorInfo: RetryErrorInfo,
+    abortSignal?: AbortSignal | DeprecatedAbortSignal
   ): Promise<StandardRetryToken> {
     const maxAttempts = await this.getMaxAttempts();
 
@@ -115,7 +117,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
          */
         const longPollBackoff = retryCode === refusal.capacity && isLongPoll ? retryDelay : 0;
         if (longPollBackoff > 0) {
-          await new Promise((r) => setTimeout(r, longPollBackoff));
+          await abortableDelay(longPollBackoff, abortSignal);
         }
       } else {
         const capacityCost = this.getCapacityCost(errorType);
@@ -128,7 +130,12 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
           token.isLongPoll?.() ?? false
         );
 
-        await new Promise((r) => setTimeout(r, retryDelay));
+        try {
+          await abortableDelay(retryDelay, abortSignal);
+        } catch (error) {
+          this.capacity = Math.min(INITIAL_RETRY_TOKENS, this.capacity + capacityCost);
+          throw error;
+        }
         nextToken.$retryLog.acquisitionDelay = retryDelay;
 
         return nextToken;
@@ -197,3 +204,40 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     return errorType === "THROTTLING" || errorType === "TRANSIENT";
   }
 }
+
+const abortableDelay = (delay: number, abortSignal?: AbortSignal | DeprecatedAbortSignal): Promise<void> => {
+  if (!abortSignal) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
+  return new Promise((resolve, reject) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const cleanup = () => {
+      if (typeof (abortSignal as AbortSignal).removeEventListener === "function") {
+        (abortSignal as AbortSignal).removeEventListener("abort", onAbort);
+      } else if (abortSignal.onabort === onAbort) {
+        abortSignal.onabort = null;
+      }
+    };
+    const onAbort = () => {
+      clearTimeout(timeoutId);
+      cleanup();
+      reject(Object.assign(new Error("Request aborted"), { name: "AbortError" }));
+    };
+
+    timeoutId = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, delay);
+
+    if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
+      (abortSignal as AbortSignal).addEventListener("abort", onAbort, { once: true });
+    } else {
+      abortSignal.onabort = onAbort;
+    }
+
+    if (abortSignal.aborted) {
+      onAbort();
+    }
+  });
+};

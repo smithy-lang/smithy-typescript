@@ -1,3 +1,4 @@
+import type { AbortSignal as DeprecatedAbortSignal } from "./abort";
 import type { SdkError } from "./shapes";
 
 /**
@@ -160,7 +161,11 @@ export interface RetryStrategyV2 {
    * This method should either delay internally and return a token with 0 delay, OR
    * do not sleep and return a token with the desired delay duration.
    */
-  refreshRetryTokenForRetry(tokenToRenew: RetryToken, errorInfo: RetryErrorInfo): Promise<RetryToken>;
+  refreshRetryTokenForRetry(
+    tokenToRenew: RetryToken,
+    errorInfo: RetryErrorInfo,
+    abortSignal?: AbortSignal | DeprecatedAbortSignal
+  ): Promise<RetryToken>;
 
   /**
    * Upon successful completion of the operation, this function is called

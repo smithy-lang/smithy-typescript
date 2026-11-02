@@ -157,10 +157,11 @@ describe(Command.name, () => {
     ofSpy.mockRestore();
   });
 
-  it("places an externally owned recorder in the Smithy context and does not pass it to the transport", async () => {
+  it("places request context in the Smithy context and excludes the recorder from the transport", async () => {
     let capturedContext: any;
     const handleFn = vi.fn().mockResolvedValue({ response: {} });
     const existingMetricsRecorder = { addCount: vi.fn() };
+    const abortController = new AbortController();
 
     class MyCommand extends Command.classBuilder<any, any, any, any, any>()
       .m(function () {
@@ -195,7 +196,7 @@ describe(Command.name, () => {
         logger: {} as any,
         requestHandler: { handle: handleFn },
       },
-      { metricsRecorder, requestTimeout: 5000 }
+      { metricsRecorder, requestTimeout: 5000, abortSignal: abortController.signal }
     );
 
     await handler({ input: {} });
@@ -207,9 +208,13 @@ describe(Command.name, () => {
       customContext: true,
       conflictingContext: "generated",
       metricsRecorder,
+      abortSignal: abortController.signal,
     });
     expect(capturedContext.metricsRecorder).toBeUndefined();
-    expect(handleFn).toHaveBeenCalledWith(undefined, { requestTimeout: 5000 });
+    expect(handleFn).toHaveBeenCalledWith(undefined, {
+      requestTimeout: 5000,
+      abortSignal: abortController.signal,
+    });
 
     new MyCommand({}).resolveMiddleware(
       { concat: () => ({ resolve: (fn: any, ctx: any) => ((capturedContext = ctx), fn) }) } as any,

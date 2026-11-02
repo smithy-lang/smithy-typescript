@@ -1,6 +1,7 @@
 import { NoOpLogger } from "@smithy/core/client";
 import { HttpRequest } from "@smithy/core/protocols";
 import { v4 } from "@smithy/core/serde";
+import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 import type {
   AbsoluteLocation,
   FinalizeHandler,
@@ -49,6 +50,7 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
 
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
+        const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
         let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(
           (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "")
         );
@@ -83,8 +85,13 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             }
 
             try {
-              retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
-            } catch (ignoredRefreshError) {
+              retryToken = abortSignal
+                ? await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo, abortSignal)
+                : await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
+            } catch (refreshError) {
+              if (isAbortError(refreshError)) {
+                throw refreshError;
+              }
               if (!lastError.$metadata) {
                 lastError.$metadata = {};
               }
@@ -115,6 +122,9 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
 }
 
 const cooldown = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isAbortError = (error: unknown): boolean =>
+  typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";
 
 const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&
