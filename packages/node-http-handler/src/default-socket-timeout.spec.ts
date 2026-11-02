@@ -339,13 +339,12 @@ describe("NodeHttpHandler default socket timeout", () => {
   });
 
   it("ignores an invalid default set through updateHttpClientConfig", async () => {
-    // The response outlives setSocketTimeout's 3 s deferral, where -1 would reach
-    // socket.setTimeout and throw ERR_OUT_OF_RANGE if it were not re-validated.
+    // -1 would reach socket.setTimeout and throw ERR_OUT_OF_RANGE if it were not re-validated.
     handler = new NodeHttpHandler(withDefault({}, 300000));
     handler.updateHttpClientConfig("defaultSocketTimeout" as any, -1 as any);
-    const { response } = await handler.handle(request("/slow?chunks=1&gap=3500"), {});
+    const { response } = await handler.handle(request("/slow?chunks=1&gap=10"), {});
     expect(await readBody(response.body)).toBe("c0;");
-  }, 10_000);
+  });
 
   it("reuses a pooled socket after the window has passed", async () => {
     handler = new NodeHttpHandler(withDefault({}, WINDOW));

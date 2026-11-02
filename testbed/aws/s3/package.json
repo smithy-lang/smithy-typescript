@@ -4,7 +4,8 @@
   "description": "E2E test for S3 getObject using local @smithy packages.",
   "type": "module",
   "scripts": {
-    "test": "node ./s3-get-object.mjs"
+    "test": "node ./s3-get-object.mjs",
+    "socket-timeout": "node ./s3-socket-timeout.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "latest"
