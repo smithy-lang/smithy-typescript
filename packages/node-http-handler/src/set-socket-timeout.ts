@@ -5,14 +5,13 @@ import { timing } from "./timing";
 const DEFER_EVENT_LISTENER_TIME = 3000;
 
 /**
- * @internal
  * Sets a rolling socket idle timeout that stays armed through the response body. Timeouts of
  * 6000 ms or more register after 3000 ms, so requests that finish sooner skip the socket
- * listener, and may fire up to 3000 ms late.
+ * listener, and may fire up to 3000 ms late. The timeout is not cancelled on headers. It is
+ * removed, or its deferral cleared, when the request closes.
  *
+ * @internal
  * @param isServiceDefault - whether timeoutInMs is the service default, which labels the error.
- * The timeout is not cancelled on headers. It is removed, or its deferral cleared, when the
- * request closes.
  */
 export const setSocketTimeout = (
   request: ClientRequest,
