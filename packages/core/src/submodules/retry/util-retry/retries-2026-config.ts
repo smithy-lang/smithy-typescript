@@ -1,36 +1,33 @@
+import type {
+  DEFAULT_RETRY_DELAY_BASE,
+  RETRY_COST,
+  THROTTLING_RETRY_DELAY_BASE,
+  TIMEOUT_RETRY_COST,
+} from "./constants";
+
 /**
- * Retry parameters used by the standard retry strategy.
- *
- * The public constants in `./constants` keep their earlier values, which the
- * deprecated pre-SRA retry strategy still uses.
- *
  * @internal
  */
 export abstract class Retry {
-  /**
-   * Always true. Kept because previously published packages read this flag.
-   *
-   * @deprecated the 2026 retry behavior is always enabled. May be removed in a future major version.
-   */
-  public static readonly v2026 = true;
+  public static v2026 = typeof process !== "undefined" && process.env?.SMITHY_NEW_RETRIES_2026 === "true";
 
   public static delay() {
-    return 50;
+    return Retry.v2026 ? 50 : (100 satisfies typeof DEFAULT_RETRY_DELAY_BASE);
   }
 
   public static throttlingDelay() {
-    return 1_000;
+    return Retry.v2026 ? 1_000 : (500 satisfies typeof THROTTLING_RETRY_DELAY_BASE);
   }
 
   public static cost() {
-    return 14;
+    return Retry.v2026 ? 14 : (5 satisfies typeof RETRY_COST);
   }
 
   public static throttlingCost() {
-    return 5;
+    return Retry.v2026 ? 5 : (10 satisfies typeof TIMEOUT_RETRY_COST);
   }
 
   public static modifiedCostType() {
-    return "THROTTLING" as const;
+    return Retry.v2026 ? "THROTTLING" : "TRANSIENT";
   }
 }
