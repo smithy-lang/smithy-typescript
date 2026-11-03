@@ -1,7 +1,7 @@
 import { hasOwn } from "@smithy/core/transport";
 import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
-import { NumericValue, _parseEpochTimestamp, fromBase64 } from "@smithy/core/serde";
+import { NumericValue, _parseEpochTimestamp, fromBase64, writeKey } from "@smithy/core/serde";
 import type { Schema, ShapeDeserializer } from "@smithy/types";
 
 import { cbor } from "../cbor";
@@ -83,6 +83,9 @@ export class CborShapeDeserializer extends SerdeContext implements ShapeDeserial
         for (const key in value) {
           if (!hasOwn(value, key)) {
             continue;
+          }
+          if (key === "__proto__") {
+            writeKey(newObject);
           }
           const itemValue = this.readValue(targetSchema, value[key]);
           newObject[key] = itemValue;
