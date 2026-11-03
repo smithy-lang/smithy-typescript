@@ -1,5 +1,5 @@
 import type { RetryErrorInfo } from "@smithy/types";
-import { afterEach, describe, expect, test as it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { DefaultRetryToken } from "./DefaultRetryToken";
@@ -270,7 +270,18 @@ describe(StandardRetryStrategy.name, () => {
       expect(refreshed).toBeDefined();
     });
 
-    describe("long poll backoff", () => {
+    describe("with Retry.v2026 enabled", () => {
+      let originalV2026: boolean;
+
+      beforeEach(() => {
+        originalV2026 = Retry.v2026;
+        Retry.v2026 = true;
+      });
+
+      afterEach(() => {
+        Retry.v2026 = originalV2026;
+      });
+
       it("sleeps and throws for code 3 (capacity exhausted)", async () => {
         vi.mocked(DefaultRetryToken).mockImplementation(
           () =>
