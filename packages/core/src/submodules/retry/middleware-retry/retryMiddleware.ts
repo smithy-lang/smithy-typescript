@@ -25,6 +25,7 @@ import {
   isThrottlingError,
   isTransientError,
 } from "../service-error-classification/service-error-classification";
+import { abortableDelay } from "../util-retry/abortableDelay";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
 import type { RetryResolvedConfig } from "./configurations";
 import { parseRetryAfterHeader } from "./parseRetryAfterHeader";
@@ -51,9 +52,10 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
         const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
-        let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(
-          (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "")
-        );
+        const retryTokenScope = (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "");
+        let retryToken: RetryToken = abortSignal
+          ? await retryStrategy.acquireInitialRetryToken(retryTokenScope, abortSignal)
+          : await retryStrategy.acquireInitialRetryToken(retryTokenScope);
         let lastError: SdkError = new Error();
         let attempts = 0;
         let totalRetryDelay = 0;
@@ -106,7 +108,7 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
               // for internal V2 (SRA) retryStrategies, delay should be zero going forward.
               // This cooldown is for backwards compatibility with a user-implemented strategy
               // which returns a token with delay.
-              await cooldown(delay);
+              await abortableDelay(delay, abortSignal);
             }
           }
         }
@@ -120,8 +122,6 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       }
     };
 }
-
-const cooldown = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isAbortError = (error: unknown): boolean =>
   typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";

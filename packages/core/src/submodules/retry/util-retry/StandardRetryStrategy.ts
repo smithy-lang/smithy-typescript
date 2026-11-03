@@ -10,6 +10,7 @@ import type {
 
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { DefaultRetryToken } from "./DefaultRetryToken";
+import { abortableDelay } from "./abortableDelay";
 import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
 import { INITIAL_RETRY_TOKENS, NO_RETRY_INCREMENT } from "./constants";
 import { Retry } from "./retries-2026-config";
@@ -204,40 +205,3 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     return errorType === "THROTTLING" || errorType === "TRANSIENT";
   }
 }
-
-const abortableDelay = (delay: number, abortSignal?: AbortSignal | DeprecatedAbortSignal): Promise<void> => {
-  if (!abortSignal) {
-    return new Promise((resolve) => setTimeout(resolve, delay));
-  }
-
-  return new Promise((resolve, reject) => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const cleanup = () => {
-      if (typeof (abortSignal as AbortSignal).removeEventListener === "function") {
-        (abortSignal as AbortSignal).removeEventListener("abort", onAbort);
-      } else if (abortSignal.onabort === onAbort) {
-        abortSignal.onabort = null;
-      }
-    };
-    const onAbort = () => {
-      clearTimeout(timeoutId);
-      cleanup();
-      reject(Object.assign(new Error("Request aborted"), { name: "AbortError" }));
-    };
-
-    timeoutId = setTimeout(() => {
-      cleanup();
-      resolve();
-    }, delay);
-
-    if (typeof (abortSignal as AbortSignal).addEventListener === "function") {
-      (abortSignal as AbortSignal).addEventListener("abort", onAbort, { once: true });
-    } else {
-      abortSignal.onabort = onAbort;
-    }
-
-    if (abortSignal.aborted) {
-      onAbort();
-    }
-  });
-};

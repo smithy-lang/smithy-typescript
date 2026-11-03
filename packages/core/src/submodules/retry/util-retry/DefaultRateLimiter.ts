@@ -1,6 +1,7 @@
-import type { RetryErrorInfo } from "@smithy/types";
+import type { AbortSignal as DeprecatedAbortSignal, RetryErrorInfo } from "@smithy/types";
 
 import { isThrottlingError } from "../service-error-classification/service-error-classification";
+import { abortableDelay } from "./abortableDelay";
 import type { RateLimiter } from "./types";
 
 /**
@@ -43,7 +44,7 @@ export class DefaultRateLimiter implements RateLimiter {
    */
   // Wrapped in an arrow to preserve `this` binding — browsers throw
   // "Illegal invocation" if setTimeout is called with our class as `this` instead of window or undefined.
-  private static setTimeoutFn = (fn: Function, delay: number) => setTimeout(fn, delay);
+  private static setTimeoutFn = (fn: () => void, delay: number) => setTimeout(fn, delay);
 
   // User configurable constants
   private readonly beta: number;
@@ -114,8 +115,8 @@ export class DefaultRateLimiter implements RateLimiter {
     this.maxCapacity = this.minCapacity;
   }
 
-  public async getSendToken() {
-    return this.acquireTokenBucket(1);
+  public async getSendToken(abortSignal?: AbortSignal | DeprecatedAbortSignal) {
+    return this.acquireTokenBucket(1, abortSignal);
   }
 
   public updateClientSendingRate(response: any) {
@@ -150,7 +151,7 @@ export class DefaultRateLimiter implements RateLimiter {
     return Date.now() / 1000;
   }
 
-  private async acquireTokenBucket(amount: number) {
+  private async acquireTokenBucket(amount: number, abortSignal?: AbortSignal | DeprecatedAbortSignal) {
     // Client side throttling is not enabled until we see a throttling error.
     if (!this.enabled) {
       return;
@@ -160,7 +161,7 @@ export class DefaultRateLimiter implements RateLimiter {
 
     while (amount > this.availableTokens) {
       const delay = ((amount - this.availableTokens) / this.fillRate) * 1000;
-      await new Promise((resolve) => DefaultRateLimiter.setTimeoutFn(resolve, delay));
+      await abortableDelay(delay, abortSignal, DefaultRateLimiter.setTimeoutFn);
       this.refillTokenBucket();
     }
     this.availableTokens = this.availableTokens - amount;

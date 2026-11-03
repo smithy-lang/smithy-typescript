@@ -148,8 +148,13 @@ export interface RetryStrategyV2 {
    * adding it here offers us a lot of future flexibility for outage detection.
    * For example, it could be "us-east-1" on a shared retry strategy, or
    * "us-west-2-c:dynamodb".
+   *
+   * The optional abortSignal cancels any wait performed while acquiring the token.
    */
-  acquireInitialRetryToken(retryTokenScope: string): Promise<RetryToken>;
+  acquireInitialRetryToken(
+    retryTokenScope: string,
+    abortSignal?: AbortSignal | DeprecatedAbortSignal
+  ): Promise<RetryToken>;
 
   /**
    * After a failed operation call, this function is invoked to refresh the
@@ -160,6 +165,7 @@ export interface RetryStrategyV2 {
    *
    * This method should either delay internally and return a token with 0 delay, OR
    * do not sleep and return a token with the desired delay duration.
+   * The optional abortSignal cancels any wait performed before returning the token.
    */
   refreshRetryTokenForRetry(
     tokenToRenew: RetryToken,

@@ -3,4 +3,4 @@
 "@smithy/types": minor
 ---
 
-Allow an operation's `AbortSignal` to interrupt standard retry backoff, including Retry-After delays.
+Allow an operation's `AbortSignal` to interrupt retry backoff, adaptive rate-limiter waits, and custom retry-token delays.

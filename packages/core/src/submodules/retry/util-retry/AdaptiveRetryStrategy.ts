@@ -1,4 +1,11 @@
-import type { Provider, RetryErrorInfo, RetryStrategyV2, RetryToken, StandardRetryToken } from "@smithy/types";
+import type {
+  AbortSignal as DeprecatedAbortSignal,
+  Provider,
+  RetryErrorInfo,
+  RetryStrategyV2,
+  RetryToken,
+  StandardRetryToken,
+} from "@smithy/types";
 
 import { DefaultRateLimiter } from "./DefaultRateLimiter";
 import { StandardRetryStrategy, type StandardRetryStrategyOptions } from "./StandardRetryStrategy";
@@ -44,20 +51,39 @@ export class AdaptiveRetryStrategy implements RetryStrategyV2 {
       : new StandardRetryStrategy(maxAttemptsProvider as Provider<number>);
   }
 
-  public async acquireInitialRetryToken(retryTokenScope: string): Promise<RetryToken> {
+  public async acquireInitialRetryToken(
+    retryTokenScope: string,
+    abortSignal?: AbortSignal | DeprecatedAbortSignal
+  ): Promise<RetryToken> {
     const token = await this.standardRetryStrategy.acquireInitialRetryToken(retryTokenScope);
-    await this.rateLimiter.getSendToken();
+    if (abortSignal) {
+      await this.rateLimiter.getSendToken(abortSignal);
+    } else {
+      await this.rateLimiter.getSendToken();
+    }
     return token;
   }
 
   public async refreshRetryTokenForRetry(
     tokenToRenew: StandardRetryToken,
-    errorInfo: RetryErrorInfo
+    errorInfo: RetryErrorInfo,
+    abortSignal?: AbortSignal | DeprecatedAbortSignal
   ): Promise<RetryToken> {
     this.rateLimiter.updateClientSendingRate(errorInfo);
-    const token = await this.standardRetryStrategy.refreshRetryTokenForRetry(tokenToRenew, errorInfo);
+    const token = abortSignal
+      ? await this.standardRetryStrategy.refreshRetryTokenForRetry(tokenToRenew, errorInfo, abortSignal)
+      : await this.standardRetryStrategy.refreshRetryTokenForRetry(tokenToRenew, errorInfo);
     // called prior to return in case the token refresh throws (no need to wait in that case).
-    await this.rateLimiter.getSendToken();
+    try {
+      if (abortSignal) {
+        await this.rateLimiter.getSendToken(abortSignal);
+      } else {
+        await this.rateLimiter.getSendToken();
+      }
+    } catch (error) {
+      this.standardRetryStrategy.recordSuccess(token);
+      throw error;
+    }
     return token;
   }
 

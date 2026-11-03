@@ -155,6 +155,62 @@ describe(retryMiddleware.name, () => {
       expect(output.$metadata.attempts).toBe(1);
     });
 
+    it("passes the abort signal when acquiring the initial token", async () => {
+      const abortController = new AbortController();
+      const contextWithAbortSignal: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+      const next = vi.fn().mockResolvedValueOnce(mockSuccess);
+
+      await retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+      })(
+        next,
+        contextWithAbortSignal
+      )(args as FinalizeHandlerArguments<any>);
+
+      expect(mockRetryStrategy.acquireInitialRetryToken).toHaveBeenCalledWith(partitionId, abortController.signal);
+    });
+
+    it("aborts a custom retry-token delay without making another request", async () => {
+      vi.useFakeTimers();
+      const abortController = new AbortController();
+      const delayedRetryToken = {
+        ...mockRetryToken,
+        getRetryDelay: () => 1_000,
+      };
+      const retryStrategy = {
+        ...mockRetryStrategy,
+        refreshRetryTokenForRetry: vi.fn().mockResolvedValue(delayedRetryToken),
+      };
+      const next = vi.fn().mockRejectedValue(new Error("retryable"));
+      const contextWithAbortSignal: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+
+      const request = retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue(retryStrategy),
+      })(
+        next,
+        contextWithAbortSignal
+      )(args as FinalizeHandlerArguments<any>);
+
+      await vi.waitFor(() => expect(vi.getTimerCount()).toBe(1));
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
     describe("throws when token cannot be refreshed", () => {
       it("throw last request error", async () => {
         const requestError = new Error("mockRequestError");

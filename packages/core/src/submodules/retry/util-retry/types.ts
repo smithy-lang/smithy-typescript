@@ -1,3 +1,5 @@
+import type { AbortSignal as DeprecatedAbortSignal } from "@smithy/types";
+
 /**
  * @public
  */
@@ -7,8 +9,9 @@ export interface RateLimiter {
    * If there is not sufficient capacity, it will either sleep a certain amount
    * of time until the rate limiter can retrieve a token from its token bucket
    * or raise an exception indicating there is insufficient capacity.
+   * The optional abortSignal cancels this wait.
    */
-  getSendToken: () => Promise<void>;
+  getSendToken: (abortSignal?: AbortSignal | DeprecatedAbortSignal) => Promise<void>;
 
   /**
    * Updates the client sending rate based on response.
