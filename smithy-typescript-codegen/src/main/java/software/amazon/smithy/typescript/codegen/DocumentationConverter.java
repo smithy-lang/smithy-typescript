@@ -305,11 +305,13 @@ final class DocumentationConverter {
             return text;
         }
 
-        // MatchResult.group(String) is Java 20+, so address the group by index.
+        // MatchResult.group(String) is Java 20+, so address the group by index. The
+        // replacement is quoted because '$' and '\' are special there, and a numeric
+        // entity can decode to either.
         String decoded = HEX_ENTITY.matcher(text)
-            .replaceAll(match -> codePointToString(Integer.parseInt(match.group(1), 16)));
+            .replaceAll(match -> Matcher.quoteReplacement(codePointToString(Integer.parseInt(match.group(1), 16))));
         decoded = DECIMAL_ENTITY.matcher(decoded)
-            .replaceAll(match -> codePointToString(Integer.parseInt(match.group(1))));
+            .replaceAll(match -> Matcher.quoteReplacement(codePointToString(Integer.parseInt(match.group(1)))));
         decoded = decoded.replace("&nbsp;", " ");
 
         if (literalContext) {

@@ -439,4 +439,27 @@ public class DocumentationConverterTest {
             equalTo("Returns Array<string> and Promise<GetObjectCommandOutput>.")
         );
     }
+
+    @Test
+    public void decodesEntitiesForRegexSpecialCharacters() {
+        // '$' and '\' are special in a regex replacement, so decoding them used to throw.
+        assertThat(
+            DocumentationConverter.htmlToMarkdown("<p>Cost is &#36;5 per unit.</p>"),
+            equalTo("Cost is $5 per unit.")
+        );
+        assertThat(
+            DocumentationConverter.htmlToMarkdown("<p>Cost is &#x24;5 per unit.</p>"),
+            equalTo("Cost is $5 per unit.")
+        );
+        assertThat(
+            DocumentationConverter.htmlToMarkdown("<p>Path uses &#92;n escape.</p>"),
+            equalTo("Path uses \\n escape.")
+        );
+        assertThat(
+            DocumentationConverter.htmlToMarkdown("<p><code>&#36;{var}</code></p>"),
+            equalTo("`${var}`")
+        );
+        // '$1' and '\1' look like group references.
+        assertThat(DocumentationConverter.htmlToMarkdown("&#36;1 and &#92;1"), equalTo("$1 and \\1"));
+    }
 }
