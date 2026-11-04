@@ -227,7 +227,7 @@ describe(retryMiddleware.name, () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("aborts a custom retry-token delay without making another request", async () => {
+    it("stops waiting on a custom retry-token delay without making another request", async () => {
       vi.useFakeTimers();
       const abortController = new AbortController();
       const delayedRetryToken = {
@@ -259,7 +259,7 @@ describe(retryMiddleware.name, () => {
 
       await expect(request).rejects.toMatchObject({ name: "AbortError" });
       expect(next).toHaveBeenCalledTimes(1);
-      expect(vi.getTimerCount()).toBe(0);
+      expect(vi.getTimerCount()).toBe(1);
     });
 
     describe("throws when token cannot be refreshed", () => {

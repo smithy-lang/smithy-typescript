@@ -25,7 +25,7 @@ import {
   isThrottlingError,
   isTransientError,
 } from "../service-error-classification/service-error-classification";
-import { abortableDelay, abortablePromise, isAbortError } from "../util-retry/abortableDelay";
+import { isAbortError, race } from "../util-retry/race";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
 import type { RetryResolvedConfig } from "./configurations";
 import { parseRetryAfterHeader } from "./parseRetryAfterHeader";
@@ -47,16 +47,13 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
     ): FinalizeHandler<any, Output> =>
     async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
       const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
-      let retryStrategy = await abortablePromise(options.retryStrategy(), abortSignal);
-      const maxAttempts = await abortablePromise(options.maxAttempts(), abortSignal);
+      let retryStrategy = await race(options.retryStrategy(), abortSignal);
+      const maxAttempts = await race(options.maxAttempts(), abortSignal);
 
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
         const retryTokenScope = (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "");
-        let retryToken: RetryToken = await abortablePromise(
-          retryStrategy.acquireInitialRetryToken(retryTokenScope),
-          abortSignal
-        );
+        let retryToken: RetryToken = await race(retryStrategy.acquireInitialRetryToken(retryTokenScope), abortSignal);
         let lastError: SdkError = new Error();
         let attempts = 0;
         let totalRetryDelay = 0;
@@ -88,10 +85,7 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             }
 
             try {
-              retryToken = await abortablePromise(
-                retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo),
-                abortSignal
-              );
+              retryToken = await race(retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo), abortSignal);
             } catch (refreshError) {
               if (abortSignal?.aborted && isAbortError(refreshError)) {
                 throw refreshError;
@@ -110,7 +104,7 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
               // for internal V2 (SRA) retryStrategies, delay should be zero going forward.
               // This cooldown is for backwards compatibility with a user-implemented strategy
               // which returns a token with delay.
-              await abortableDelay(delay, abortSignal);
+              await race(new Promise((resolve) => setTimeout(resolve, delay)), abortSignal);
             }
           }
         }
