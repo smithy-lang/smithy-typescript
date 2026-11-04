@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.20.0
+
+### Minor Changes
+
+- d5e8c96: Return `AbortError` immediately when an operation is aborted during retry-token acquisition, backoff, or custom retry-token delays.
+
 ## 4.19.0
 
 ### Minor Changes

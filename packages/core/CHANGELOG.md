@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.39.0
+
+### Minor Changes
+
+- d5e8c96: Return `AbortError` immediately when an operation is aborted during retry-token acquisition, backoff, or custom retry-token delays.
+
+### Patch Changes
+
+- Updated dependencies [d5e8c96]
+  - @smithy/types@4.20.0
+
 ## 3.38.1
 
 ### Patch Changes
