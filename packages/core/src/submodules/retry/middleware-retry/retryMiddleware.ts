@@ -46,9 +46,9 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       context: HandlerExecutionContext
     ): FinalizeHandler<any, Output> =>
     async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
+      let retryStrategy = await options.retryStrategy();
+      const maxAttempts = await options.maxAttempts();
       const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
-      let retryStrategy = await race(options.retryStrategy(), abortSignal);
-      const maxAttempts = await race(options.maxAttempts(), abortSignal);
 
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
