@@ -100,6 +100,7 @@ export abstract class Command<
         commandInstance: this,
         ...smithyContext,
         ...(options?.metricsRecorder === undefined ? {} : { metricsRecorder: options.metricsRecorder }),
+        ...(options?.abortSignal === undefined ? {} : { abortSignal: options.abortSignal }),
       },
     };
     const { requestHandler } = configuration;

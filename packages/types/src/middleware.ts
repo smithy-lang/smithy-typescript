@@ -1,3 +1,4 @@
+import type { AbortSignal as DeprecatedAbortSignal } from "./abort";
 import type { SelectedHttpAuthScheme } from "./auth/HttpAuthScheme";
 import type { AuthScheme, HttpAuthDefinition } from "./auth/auth";
 import type { Command } from "./command";
@@ -581,6 +582,11 @@ export interface HandlerExecutionContext {
      * Transferred from request options to the Smithy context.
      */
     metricsRecorder?: MetricsRecorder<unknown>;
+    /**
+     * Transferred from request options to allow middleware to cancel
+     * asynchronous work outside of the request handler.
+     */
+    abortSignal?: AbortSignal | DeprecatedAbortSignal;
     /**
      * @deprecated
      * Do not assign arbitrary members to the Smithy Context,

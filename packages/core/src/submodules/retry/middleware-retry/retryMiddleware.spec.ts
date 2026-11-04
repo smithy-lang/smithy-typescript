@@ -1,5 +1,6 @@
 import { HttpResponse } from "@smithy/core/protocols";
 import { v4 } from "@smithy/core/serde";
+import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 import type { FinalizeHandlerArguments, HandlerExecutionContext, MiddlewareStack } from "@smithy/types";
 import { afterEach, beforeEach, describe, expect, test as it, vi } from "vitest";
 
@@ -9,6 +10,7 @@ import {
   isThrottlingError,
   isTransientError,
 } from "../service-error-classification/service-error-classification";
+import { StandardRetryStrategy } from "../util-retry/StandardRetryStrategy";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
 
 vi.mock("../service-error-classification/service-error-classification");
@@ -75,6 +77,7 @@ describe(retryMiddleware.name, () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   describe("RetryStrategy", () => {
@@ -152,6 +155,72 @@ describe(retryMiddleware.name, () => {
       expect(output.$metadata.attempts).toBe(1);
     });
 
+    it("aborts while acquiring the initial token", async () => {
+      const abortController = new AbortController();
+      const acquireInitialRetryToken = vi.fn(() => new Promise(() => {}));
+      const contextWithAbortSignal: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+      const next = vi.fn();
+
+      const request = retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue({
+          ...mockRetryStrategy,
+          acquireInitialRetryToken,
+          maxAttempts,
+        }),
+      })(
+        next,
+        contextWithAbortSignal
+      )(args as FinalizeHandlerArguments<any>);
+
+      await vi.waitFor(() => expect(acquireInitialRetryToken).toHaveBeenCalledTimes(1));
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(acquireInitialRetryToken).toHaveBeenCalledWith(partitionId);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("stops waiting on a custom retry-token delay without making another request", async () => {
+      vi.useFakeTimers();
+      const abortController = new AbortController();
+      const delayedRetryToken = {
+        ...mockRetryToken,
+        getRetryDelay: () => 1_000,
+      };
+      const retryStrategy = {
+        ...mockRetryStrategy,
+        refreshRetryTokenForRetry: vi.fn().mockResolvedValue(delayedRetryToken),
+      };
+      const next = vi.fn().mockRejectedValue(new Error("retryable"));
+      const contextWithAbortSignal: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+
+      const request = retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue(retryStrategy),
+      })(
+        next,
+        contextWithAbortSignal
+      )(args as FinalizeHandlerArguments<any>);
+
+      await vi.waitFor(() => expect(vi.getTimerCount()).toBe(1));
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(1);
+    });
+
     describe("throws when token cannot be refreshed", () => {
       it("throw last request error", async () => {
         const requestError = new Error("mockRequestError");
@@ -185,6 +254,43 @@ describe(retryMiddleware.name, () => {
           expect(error.$metadata.totalRetryDelay).toBeDefined();
         }
       });
+    });
+
+    it("aborts a Retry-After backoff without making another request", async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-11-02T12:00:00Z"));
+      vi.mocked(isThrottlingError).mockReturnValue(true);
+      const abortController = new AbortController();
+      const error = getErrorWithValues(3);
+      const next = vi.fn().mockRejectedValue(error);
+      const retryStrategy = new StandardRetryStrategy({
+        maxAttempts,
+        backoff: {
+          setDelayBase: vi.fn(),
+          computeNextBackoffDelay: () => 100,
+        },
+      });
+      const context: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+
+      const request = retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue(retryStrategy),
+      })(
+        next,
+        context
+      )(args as FinalizeHandlerArguments<any>);
+
+      await vi.waitFor(() => expect(vi.getTimerCount()).toBe(1));
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(vi.getTimerCount()).toBe(1);
     });
 
     describe("calls acquireInitialRetryToken and refreshes retry token", () => {

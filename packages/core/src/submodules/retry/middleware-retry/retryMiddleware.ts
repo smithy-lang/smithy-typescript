@@ -1,6 +1,7 @@
 import { NoOpLogger } from "@smithy/core/client";
 import { HttpRequest } from "@smithy/core/protocols";
 import { v4 } from "@smithy/core/serde";
+import { SMITHY_CONTEXT_KEY } from "@smithy/types";
 import type {
   AbsoluteLocation,
   FinalizeHandler,
@@ -24,6 +25,7 @@ import {
   isThrottlingError,
   isTransientError,
 } from "../service-error-classification/service-error-classification";
+import { isAbortError, race } from "../util-retry/race";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
 import type { RetryResolvedConfig } from "./configurations";
 import { parseRetryAfterHeader } from "./parseRetryAfterHeader";
@@ -46,12 +48,12 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
     async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
       let retryStrategy = await options.retryStrategy();
       const maxAttempts = await options.maxAttempts();
+      const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
 
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
-        let retryToken: RetryToken = await retryStrategy.acquireInitialRetryToken(
-          (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "")
-        );
+        const retryTokenScope = (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "");
+        let retryToken: RetryToken = await race(retryStrategy.acquireInitialRetryToken(retryTokenScope), abortSignal);
         let lastError: SdkError = new Error();
         let attempts = 0;
         let totalRetryDelay = 0;
@@ -83,8 +85,11 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             }
 
             try {
-              retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
-            } catch (ignoredRefreshError) {
+              retryToken = await race(retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo), abortSignal);
+            } catch (refreshError) {
+              if (abortSignal?.aborted && isAbortError(refreshError)) {
+                throw refreshError;
+              }
               if (!lastError.$metadata) {
                 lastError.$metadata = {};
               }
@@ -99,7 +104,7 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
               // for internal V2 (SRA) retryStrategies, delay should be zero going forward.
               // This cooldown is for backwards compatibility with a user-implemented strategy
               // which returns a token with delay.
-              await cooldown(delay);
+              await race(new Promise((resolve) => setTimeout(resolve, delay)), abortSignal);
             }
           }
         }
@@ -113,8 +118,6 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       }
     };
 }
-
-const cooldown = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&
