@@ -176,6 +176,25 @@ describe(StandardRetryStrategy.name, () => {
       expect(retryStrategy.getCapacity()).toBe(initialCapacity);
       expect(vi.getTimerCount()).toBe(0);
     });
+
+    it("aborts while resolving max attempts", async () => {
+      const maxAttemptsProvider = vi.fn(() => new Promise<number>(() => {}));
+      const retryStrategy = new StandardRetryStrategy(maxAttemptsProvider);
+      const token = {
+        getRetryCount: () => 0,
+        getRetryCost: () => undefined,
+        getRetryDelay: () => 0,
+        isLongPoll: () => false,
+      } as any;
+      const abortController = new AbortController();
+
+      const refresh = retryStrategy.refreshRetryTokenForRetry(token, errorInfo, abortController.signal);
+      abortController.abort();
+
+      await expect(refresh).rejects.toMatchObject({ name: "AbortError" });
+      expect(maxAttemptsProvider).toHaveBeenCalledTimes(1);
+      expect(retryStrategy.getCapacity()).toBe(500);
+    });
   });
 
   describe("retryCode", () => {

@@ -139,6 +139,47 @@ describe(retryMiddleware.name, () => {
       return error;
     };
 
+    it("aborts while resolving the retry strategy", async () => {
+      const abortController = new AbortController();
+      const maxAttemptsProvider = vi.fn().mockResolvedValue(maxAttempts);
+      const next = vi.fn();
+      const request = retryMiddleware({
+        maxAttempts: maxAttemptsProvider,
+        retryStrategy: vi.fn(() => new Promise(() => {})),
+      })(next, {
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      })(args as FinalizeHandlerArguments<any>);
+
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(maxAttemptsProvider).not.toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("aborts while resolving max attempts", async () => {
+      const abortController = new AbortController();
+      const maxAttemptsProvider = vi.fn(() => new Promise<number>(() => {}));
+      const next = vi.fn();
+      const request = retryMiddleware({
+        maxAttempts: maxAttemptsProvider,
+        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+      })(next, {
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      })(args as FinalizeHandlerArguments<any>);
+
+      await vi.waitFor(() => expect(maxAttemptsProvider).toHaveBeenCalledTimes(1));
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(mockRetryStrategy.acquireInitialRetryToken).not.toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+    });
+
     it("calls acquireInitialRetryToken and records success when next succeeds", async () => {
       const next = vi.fn().mockResolvedValueOnce(mockSuccess);
       const { output } = await retryMiddleware({

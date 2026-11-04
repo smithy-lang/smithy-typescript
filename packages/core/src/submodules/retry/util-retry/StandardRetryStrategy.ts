@@ -10,7 +10,7 @@ import type {
 
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { DefaultRetryToken } from "./DefaultRetryToken";
-import { abortableDelay } from "./abortableDelay";
+import { abortableDelay, abortablePromise, isAbortError } from "./abortableDelay";
 import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
 import { INITIAL_RETRY_TOKENS, NO_RETRY_INCREMENT } from "./constants";
 import { Retry } from "./retries-2026-config";
@@ -90,7 +90,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     errorInfo: RetryErrorInfo,
     abortSignal?: AbortSignal | DeprecatedAbortSignal
   ): Promise<StandardRetryToken> {
-    const maxAttempts = await this.getMaxAttempts();
+    const maxAttempts = await this.getMaxAttempts(abortSignal);
 
     const retryCode = this.retryCode(token, errorInfo, maxAttempts);
     const shouldRetry = retryCode === 0;
@@ -166,10 +166,13 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     return this.maxAttemptsProvider();
   }
 
-  private async getMaxAttempts() {
+  private async getMaxAttempts(abortSignal?: AbortSignal | DeprecatedAbortSignal) {
     try {
-      return await this.maxAttemptsProvider();
-    } catch (ignored) {
+      return await abortablePromise(this.maxAttemptsProvider(), abortSignal);
+    } catch (error) {
+      if (abortSignal?.aborted && isAbortError(error)) {
+        throw error;
+      }
       console.warn(`Max attempts provider could not resolve. Using default of ${DEFAULT_MAX_ATTEMPTS}`);
       return DEFAULT_MAX_ATTEMPTS;
     }

@@ -25,7 +25,7 @@ import {
   isThrottlingError,
   isTransientError,
 } from "../service-error-classification/service-error-classification";
-import { abortableDelay } from "../util-retry/abortableDelay";
+import { abortableDelay, abortablePromise, isAbortError } from "../util-retry/abortableDelay";
 import { INVOCATION_ID_HEADER, REQUEST_HEADER } from "../util-retry/constants";
 import type { RetryResolvedConfig } from "./configurations";
 import { parseRetryAfterHeader } from "./parseRetryAfterHeader";
@@ -46,12 +46,12 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       context: HandlerExecutionContext
     ): FinalizeHandler<any, Output> =>
     async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
-      let retryStrategy = await options.retryStrategy();
-      const maxAttempts = await options.maxAttempts();
+      const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
+      let retryStrategy = await abortablePromise(options.retryStrategy(), abortSignal);
+      const maxAttempts = await abortablePromise(options.maxAttempts(), abortSignal);
 
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
-        const abortSignal = context[SMITHY_CONTEXT_KEY]?.abortSignal;
         const retryTokenScope = (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "");
         let retryToken: RetryToken = abortSignal
           ? await retryStrategy.acquireInitialRetryToken(retryTokenScope, abortSignal)
@@ -122,9 +122,6 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       }
     };
 }
-
-const isAbortError = (error: unknown): boolean =>
-  typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";
 
 const isRetryStrategyV2 = (retryStrategy: RetryStrategy | RetryStrategyV2) =>
   typeof (retryStrategy as RetryStrategyV2).acquireInitialRetryToken !== "undefined" &&
