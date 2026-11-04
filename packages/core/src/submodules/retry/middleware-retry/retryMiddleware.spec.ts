@@ -196,25 +196,35 @@ describe(retryMiddleware.name, () => {
       expect(output.$metadata.attempts).toBe(1);
     });
 
-    it("passes the abort signal when acquiring the initial token", async () => {
+    it("aborts while acquiring the initial token", async () => {
       const abortController = new AbortController();
+      const acquireInitialRetryToken = vi.fn(() => new Promise(() => {}));
       const contextWithAbortSignal: HandlerExecutionContext = {
         partition_id: partitionId,
         [SMITHY_CONTEXT_KEY]: {
           abortSignal: abortController.signal,
         },
       };
-      const next = vi.fn().mockResolvedValueOnce(mockSuccess);
+      const next = vi.fn();
 
-      await retryMiddleware({
+      const request = retryMiddleware({
         maxAttempts: () => Promise.resolve(maxAttempts),
-        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, maxAttempts }),
+        retryStrategy: vi.fn().mockResolvedValue({
+          ...mockRetryStrategy,
+          acquireInitialRetryToken,
+          maxAttempts,
+        }),
       })(
         next,
         contextWithAbortSignal
       )(args as FinalizeHandlerArguments<any>);
 
-      expect(mockRetryStrategy.acquireInitialRetryToken).toHaveBeenCalledWith(partitionId, abortController.signal);
+      await vi.waitFor(() => expect(acquireInitialRetryToken).toHaveBeenCalledTimes(1));
+      abortController.abort();
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError" });
+      expect(acquireInitialRetryToken).toHaveBeenCalledWith(partitionId);
+      expect(next).not.toHaveBeenCalled();
     });
 
     it("aborts a custom retry-token delay without making another request", async () => {
@@ -321,8 +331,7 @@ describe(retryMiddleware.name, () => {
 
       await expect(request).rejects.toMatchObject({ name: "AbortError" });
       expect(next).toHaveBeenCalledTimes(1);
-      expect(retryStrategy.getCapacity()).toBe(500);
-      expect(vi.getTimerCount()).toBe(0);
+      expect(vi.getTimerCount()).toBe(1);
     });
 
     describe("calls acquireInitialRetryToken and refreshes retry token", () => {

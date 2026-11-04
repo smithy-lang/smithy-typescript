@@ -1,5 +1,4 @@
 import type {
-  AbortSignal as DeprecatedAbortSignal,
   Provider,
   RetryErrorInfo,
   RetryErrorType,
@@ -10,7 +9,6 @@ import type {
 
 import { DefaultRetryBackoffStrategy } from "./DefaultRetryBackoffStrategy";
 import { DefaultRetryToken } from "./DefaultRetryToken";
-import { abortableDelay, abortablePromise, isAbortError } from "./abortableDelay";
 import { DEFAULT_MAX_ATTEMPTS, RETRY_MODES } from "./config";
 import { INITIAL_RETRY_TOKENS, NO_RETRY_INCREMENT } from "./constants";
 import { Retry } from "./retries-2026-config";
@@ -87,10 +85,9 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
 
   public async refreshRetryTokenForRetry(
     token: StandardRetryToken,
-    errorInfo: RetryErrorInfo,
-    abortSignal?: AbortSignal | DeprecatedAbortSignal
+    errorInfo: RetryErrorInfo
   ): Promise<StandardRetryToken> {
-    const maxAttempts = await this.getMaxAttempts(abortSignal);
+    const maxAttempts = await this.getMaxAttempts();
 
     const retryCode = this.retryCode(token, errorInfo, maxAttempts);
     const shouldRetry = retryCode === 0;
@@ -118,7 +115,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
          */
         const longPollBackoff = retryCode === refusal.capacity && isLongPoll ? retryDelay : 0;
         if (longPollBackoff > 0) {
-          await abortableDelay(longPollBackoff, abortSignal);
+          await new Promise((r) => setTimeout(r, longPollBackoff));
         }
       } else {
         const capacityCost = this.getCapacityCost(errorType);
@@ -131,12 +128,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
           token.isLongPoll?.() ?? false
         );
 
-        try {
-          await abortableDelay(retryDelay, abortSignal);
-        } catch (error) {
-          this.capacity = Math.min(INITIAL_RETRY_TOKENS, this.capacity + capacityCost);
-          throw error;
-        }
+        await new Promise((r) => setTimeout(r, retryDelay));
         nextToken.$retryLog.acquisitionDelay = retryDelay;
 
         return nextToken;
@@ -166,13 +158,10 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
     return this.maxAttemptsProvider();
   }
 
-  private async getMaxAttempts(abortSignal?: AbortSignal | DeprecatedAbortSignal) {
+  private async getMaxAttempts() {
     try {
-      return await abortablePromise(this.maxAttemptsProvider(), abortSignal);
-    } catch (error) {
-      if (abortSignal?.aborted && isAbortError(error)) {
-        throw error;
-      }
+      return await this.maxAttemptsProvider();
+    } catch (ignored) {
       console.warn(`Max attempts provider could not resolve. Using default of ${DEFAULT_MAX_ATTEMPTS}`);
       return DEFAULT_MAX_ATTEMPTS;
     }

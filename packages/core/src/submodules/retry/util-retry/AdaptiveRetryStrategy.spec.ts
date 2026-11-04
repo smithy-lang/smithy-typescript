@@ -94,18 +94,6 @@ describe(AdaptiveRetryStrategy.name, () => {
       const token = await retryStrategy.acquireInitialRetryToken(retryTokenScope);
       expect(token).toStrictEqual(mockRetryToken);
     });
-
-    it("forwards the abort signal to getSendToken", async () => {
-      vi.spyOn(StandardRetryStrategy.prototype, "acquireInitialRetryToken").mockResolvedValue(mockRetryToken);
-      const abortSignal = new AbortController().signal;
-      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
-        rateLimiter: mockDefaultRateLimiter,
-      });
-
-      await retryStrategy.acquireInitialRetryToken(retryTokenScope, abortSignal);
-
-      expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledWith(abortSignal);
-    });
   });
 
   describe("refreshRetryTokenForRetry", () => {
@@ -176,37 +164,6 @@ describe(AdaptiveRetryStrategy.name, () => {
 
       expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledTimes(3);
       expect(mockDefaultRateLimiter.updateClientSendingRate).toHaveBeenCalledTimes(3);
-    });
-
-    it("forwards the abort signal to both retry waits", async () => {
-      const refreshRetryTokenForRetry = vi
-        .spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry")
-        .mockResolvedValue(mockRetryToken);
-      const abortSignal = new AbortController().signal;
-      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
-        rateLimiter: mockDefaultRateLimiter,
-      });
-
-      await retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo, abortSignal);
-
-      expect(refreshRetryTokenForRetry).toHaveBeenCalledWith(mockRetryToken, errorInfo, abortSignal);
-      expect(mockDefaultRateLimiter.getSendToken).toHaveBeenCalledWith(abortSignal);
-    });
-
-    it("returns retry capacity when the rate-limit wait is aborted", async () => {
-      vi.spyOn(StandardRetryStrategy.prototype, "refreshRetryTokenForRetry").mockResolvedValue(mockRetryToken);
-      const recordSuccess = vi.spyOn(StandardRetryStrategy.prototype, "recordSuccess");
-      const abortError = Object.assign(new Error("Request aborted"), { name: "AbortError" });
-      mockDefaultRateLimiter.getSendToken.mockRejectedValue(abortError);
-      const retryStrategy = new AdaptiveRetryStrategy(maxAttemptsProvider, {
-        rateLimiter: mockDefaultRateLimiter,
-      });
-
-      await expect(
-        retryStrategy.refreshRetryTokenForRetry(mockRetryToken, errorInfo, new AbortController().signal)
-      ).rejects.toBe(abortError);
-
-      expect(recordSuccess).toHaveBeenCalledWith(mockRetryToken);
     });
   });
 

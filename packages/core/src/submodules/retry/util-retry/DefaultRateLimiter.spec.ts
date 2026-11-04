@@ -40,26 +40,6 @@ describe(DefaultRateLimiter.name, () => {
       vi.runAllTimers();
       expect(spy).toHaveBeenLastCalledWith(expect.any(Function), delay);
     });
-
-    it("stops waiting when aborted", async () => {
-      vi.spyOn(Date, "now").mockImplementation(() => 0);
-      const rateLimiter = new DefaultRateLimiter();
-
-      vi.mocked(isThrottlingError).mockReturnValueOnce(true);
-      vi.spyOn(Date, "now").mockImplementation(() => 1_000);
-      rateLimiter.updateClientSendingRate({});
-      rateLimiter["availableTokens"] = 0;
-      rateLimiter["lastTimestamp"] = 1;
-
-      const abortController = new AbortController();
-      const sendToken = rateLimiter.getSendToken(abortController.signal);
-      expect(vi.getTimerCount()).toBe(1);
-
-      abortController.abort();
-
-      await expect(sendToken).rejects.toMatchObject({ name: "AbortError" });
-      expect(vi.getTimerCount()).toBe(0);
-    });
   });
 
   describe("cubicSuccess", () => {

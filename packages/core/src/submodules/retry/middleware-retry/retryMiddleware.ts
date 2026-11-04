@@ -53,9 +53,10 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
       if (isRetryStrategyV2(retryStrategy)) {
         retryStrategy = retryStrategy as RetryStrategyV2;
         const retryTokenScope = (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "");
-        let retryToken: RetryToken = abortSignal
-          ? await retryStrategy.acquireInitialRetryToken(retryTokenScope, abortSignal)
-          : await retryStrategy.acquireInitialRetryToken(retryTokenScope);
+        let retryToken: RetryToken = await abortablePromise(
+          retryStrategy.acquireInitialRetryToken(retryTokenScope),
+          abortSignal
+        );
         let lastError: SdkError = new Error();
         let attempts = 0;
         let totalRetryDelay = 0;
@@ -87,11 +88,12 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             }
 
             try {
-              retryToken = abortSignal
-                ? await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo, abortSignal)
-                : await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
+              retryToken = await abortablePromise(
+                retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo),
+                abortSignal
+              );
             } catch (refreshError) {
-              if (isAbortError(refreshError)) {
+              if (abortSignal?.aborted && isAbortError(refreshError)) {
                 throw refreshError;
               }
               if (!lastError.$metadata) {
