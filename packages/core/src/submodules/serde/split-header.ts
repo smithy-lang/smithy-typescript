@@ -7,14 +7,14 @@ export const splitHeader = (value: string): string[] => {
   const values = [];
 
   let withinQuotes = false;
-  let prevChar = undefined;
+  let escaped = false;
   let anchor = 0;
 
   for (let i = 0; i < z; ++i) {
     const char = value[i];
     switch (char) {
       case `"`:
-        if (prevChar !== "\\") {
+        if (!escaped) {
           withinQuotes = !withinQuotes;
         }
         break;
@@ -26,7 +26,7 @@ export const splitHeader = (value: string): string[] => {
         break;
       default:
     }
-    prevChar = char;
+    escaped = char === "\\" && !escaped;
   }
 
   values.push(value.slice(anchor));
@@ -39,6 +39,7 @@ export const splitHeader = (value: string): string[] => {
     }
     if (v[0] === `"` && v[z - 1] === `"`) {
       v = v.slice(1, z - 1);
+      return v.replace(/\\(["\\])/g, "$1");
     }
     return v.replace(/\\"/g, '"');
   });
