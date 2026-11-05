@@ -45,6 +45,7 @@
   },
   "@smithy/core": {
     "createIsIdentityExpiredFunction": "function",
+    "createItemsPaginator": "function",
     "createPaginator": "function",
     "DefaultIdentityProviderConfig": "function",
     "doesIdentityRequireRefresh": "function",
