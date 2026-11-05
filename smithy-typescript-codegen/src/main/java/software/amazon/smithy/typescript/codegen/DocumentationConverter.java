@@ -379,7 +379,7 @@ final class DocumentationConverter {
 
             // Outside a block this is a TSDoc tag or caption, not prose. Keep the lines.
             if (blockDepth == 0) {
-                out().append(decoded);
+                out().append(escapeAngleBrackets(decoded));
                 return;
             }
 
@@ -389,7 +389,7 @@ final class DocumentationConverter {
             if (collapsed.startsWith(" ") && atLineBoundaryOrSpace()) {
                 collapsed = collapsed.substring(1);
             }
-            out().append(collapsed);
+            out().append(escapeAngleBrackets(collapsed));
         }
 
         private void element(String name, boolean closing, String attributes, String raw) {
@@ -497,9 +497,14 @@ final class DocumentationConverter {
                         blockDepth++;
                     }
                 }
-                // Not a tag we know, so it's content. A generic or a placeholder.
-                default -> out().append(raw);
+                // Preserve unknown tag-shaped text visibly instead of letting the
+                // editor interpret it as HTML and hide it.
+                default -> out().append(escapeAngleBrackets(raw));
             }
+        }
+
+        private String escapeAngleBrackets(String text) {
+            return text.replace("<", "&lt;").replace(">", "&gt;");
         }
 
         private boolean isOpen(String name) {

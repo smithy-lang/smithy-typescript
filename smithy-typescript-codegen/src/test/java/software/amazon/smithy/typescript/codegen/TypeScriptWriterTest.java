@@ -95,6 +95,14 @@ public class TypeScriptWriterTest {
     }
 
     @Test
+    public void preservesTagShapedPlaceholdersInGeneratedDocs() {
+        TypeScriptWriter writer = new TypeScriptWriter("foo");
+        writer.writeDocs("<p>The S3SubPrefix can be a <bucket-name>/*</p>");
+
+        assertThat(writer.toString(), containsString("The S3SubPrefix can be a &lt;bucket-name&gt;/*"));
+    }
+
+    @Test
     public void convertsHtmlReachingWriteDocsFromAnyCaller() {
         // Operation @throws sections, enum value docs and package docs all build their
         // string and hand it to writeDocs, so converting there covers every caller.

@@ -224,10 +224,10 @@ public class DocumentationConverterTest {
     @Test
     public void leavesTypeScriptGenericsAlone() {
         // Documentation written by hand reaches this converter too, and a generic must not
-        // be mistaken for markup.
+        // be interpreted as HTML by the editor hover.
         assertThat(
             DocumentationConverter.htmlToMarkdown("<p>Returns Array<string> values.</p>"),
-            equalTo("Returns Array<string> values.")
+            equalTo("Returns Array&lt;string&gt; values.")
         );
     }
 
@@ -259,7 +259,7 @@ public class DocumentationConverterTest {
         );
         assertThat(
             DocumentationConverter.htmlToMarkdown("<p>Replace <account-id> with your account.</p>"),
-            equalTo("Replace <account-id> with your account.")
+            equalTo("Replace &lt;account-id&gt; with your account.")
         );
     }
 
@@ -283,6 +283,10 @@ public class DocumentationConverterTest {
     public void decodesNumericEntities() {
         assertThat(DocumentationConverter.htmlToMarkdown("<p>a &#150; b</p>"), equalTo("a \u2013 b"));
         assertThat(DocumentationConverter.htmlToMarkdown("<p>&#x41;&#66;</p>"), equalTo("AB"));
+        assertThat(
+            DocumentationConverter.htmlToMarkdown("<p>Use &#60;bucket-name&#62;/*.</p>"),
+            equalTo("Use &lt;bucket-name&gt;/*.")
+        );
     }
 
     @Test
@@ -347,7 +351,7 @@ public class DocumentationConverterTest {
         );
         assertThat(
             DocumentationConverter.htmlToMarkdown("<p>if a < b use <code>x</code></p>"),
-            equalTo("if a < b use `x`")
+            equalTo("if a &lt; b use `x`")
         );
     }
 
@@ -436,7 +440,7 @@ public class DocumentationConverterTest {
         );
         assertThat(
             DocumentationConverter.htmlToMarkdown("Returns Array<string> and Promise<GetObjectCommandOutput>."),
-            equalTo("Returns Array<string> and Promise<GetObjectCommandOutput>.")
+            equalTo("Returns Array&lt;string&gt; and Promise&lt;GetObjectCommandOutput&gt;.")
         );
     }
 
