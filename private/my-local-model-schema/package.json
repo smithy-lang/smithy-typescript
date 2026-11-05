@@ -35,7 +35,7 @@
     "downlevel-dts": "0.10.1",
     "premove": "4.0.0",
     "typescript": "~7.0.2",
-    "vitest": "^4.0.17"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=20.0.0"
