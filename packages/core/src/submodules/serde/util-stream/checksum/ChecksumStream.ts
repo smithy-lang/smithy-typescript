@@ -1,33 +1,19 @@
 import { Readable } from "node:stream";
-import type { Checksum, Encoder } from "@smithy/types";
+import type { Checksum, ChecksumSource, ChecksumValidationResult, Encoder } from "@smithy/types";
 
+import { fromBase64 } from "../../util-base64/fromBase64";
 import { toBase64 } from "../../util-base64/toBase64";
+import { ChecksumMismatchError } from "./ChecksumMismatchError";
+import type { ChecksumStreamInitBase } from "./ChecksumStreamInitBase";
 
 /**
  * @internal
  */
-export interface ChecksumStreamInit<T extends Readable | ReadableStream> {
-  /**
-   * Base64 value of the expected checksum.
-   */
-  expectedChecksum: string;
-  /**
-   * For error messaging, the location from which the checksum value was read.
-   */
-  checksumSourceLocation: string;
-  /**
-   * The checksum calculator.
-   */
-  checksum: Checksum;
+export interface ChecksumStreamInit<T extends Readable | ReadableStream> extends ChecksumStreamInitBase {
   /**
    * The stream to be checked.
    */
   source: T;
-
-  /**
-   * Optional base 64 encoder if calling from a request context.
-   */
-  base64Encoder?: Encoder;
 }
 
 /**
@@ -45,11 +31,26 @@ export interface ChecksumStreamInit<T extends Readable | ReadableStream> {
  * @internal
  */
 export class ChecksumStream extends Readable {
-  private readonly expectedChecksum: string;
+  private readonly expectedChecksum: string | (() => Promise<string>);
   private readonly checksumSourceLocation: string;
   private checksum: Checksum;
   private source: Readable;
   private readonly base64Encoder: Encoder;
+  private readonly algorithm?: string;
+  private readonly checksumSource?: ChecksumSource;
+  private readonly holdBackLastChunk: boolean;
+  private readonly onResult?: (result: ChecksumValidationResult) => void;
+
+  /**
+   * The most recent chunk, withheld from the readable side until the checksum
+   * comparison succeeds. Only used when holdBackLastChunk is enabled.
+   */
+  private heldChunk: Buffer | undefined;
+
+  /**
+   * Guards onResult so that it is called at most once.
+   */
+  private settled = false;
 
   public constructor({
     expectedChecksum,
@@ -57,6 +58,10 @@ export class ChecksumStream extends Readable {
     source,
     checksumSourceLocation,
     base64Encoder,
+    algorithm,
+    checksumSource,
+    holdBackLastChunk,
+    onResult,
   }: ChecksumStreamInit<Readable>) {
     super();
     if (typeof (source as Readable).pipe !== "function") {
@@ -70,6 +75,10 @@ export class ChecksumStream extends Readable {
     this.expectedChecksum = expectedChecksum;
     this.checksum = checksum;
     this.checksumSourceLocation = checksumSourceLocation;
+    this.algorithm = algorithm;
+    this.checksumSource = checksumSource;
+    this.holdBackLastChunk = holdBackLastChunk ?? false;
+    this.onResult = onResult;
 
     // Observe the source, updating the running checksum and forwarding each
     // chunk to this stream's readable side. The source is paused immediately
@@ -83,6 +92,17 @@ export class ChecksumStream extends Readable {
   }
 
   /**
+   * Report the terminal validation outcome, at most once.
+   */
+  private settle(result: ChecksumValidationResult): void {
+    if (this.settled) {
+      return;
+    }
+    this.settled = true;
+    this.onResult?.(result);
+  }
+
+  /**
    * Update the checksum and forward each source chunk to the readable side,
    * pausing the source when the readable side signals backpressure.
    */
@@ -93,10 +113,30 @@ export class ChecksumStream extends Readable {
     try {
       this.checksum.update(chunk);
     } catch (e: unknown) {
+      this.heldChunk = undefined;
+      this.settle({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: this.algorithm,
+        source: this.checksumSource,
+      });
       this.destroy(e as Error);
       return;
     }
-    if (!this.push(chunk)) {
+    if (!this.holdBackLastChunk) {
+      if (!this.push(chunk)) {
+        this.source.pause();
+      }
+      return;
+    }
+    /**
+     * Release the previously withheld chunk and withhold the new one. The
+     * source is left flowing when there was nothing to release, so that the
+     * next chunk (or the end of the source) is reached.
+     */
+    const release = this.heldChunk;
+    this.heldChunk = chunk;
+    if (release !== undefined && !this.push(release)) {
       this.source.pause();
     }
   };
@@ -108,29 +148,80 @@ export class ChecksumStream extends Readable {
     if (this.destroyed) {
       return;
     }
+
+    let expected: string;
+    let received: string;
     try {
-      const digest: Uint8Array = await this.checksum.digest();
-      const received = this.base64Encoder(digest);
-      if (this.expectedChecksum !== received) {
-        this.destroy(
-          new Error(
-            `Checksum mismatch: expected "${this.expectedChecksum}" but received "${received}"` +
-              ` in response header "${this.checksumSourceLocation}".`
-          )
-        );
-        return;
+      if (typeof this.expectedChecksum === "function") {
+        expected = await this.expectedChecksum();
+        // Validate deferred trailer Base64 before comparison; the decoded bytes are not needed.
+        fromBase64(expected);
+      } else {
+        expected = this.expectedChecksum;
       }
+      const digest: Uint8Array = await this.checksum.digest();
+      received = this.base64Encoder(digest);
     } catch (e: unknown) {
+      // The expected value could not be obtained, the digest failed, or the
+      // digest could not be encoded, so no comparison took place.
+      this.heldChunk = undefined;
+      this.settle({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: this.algorithm,
+        source: this.checksumSource,
+      });
       this.destroy(e as Error);
       return;
+    }
+
+    if (expected !== received) {
+      // Discard the withheld chunk so unvalidated bytes are never delivered.
+      this.heldChunk = undefined;
+      this.settle({
+        status: "FAILED",
+        validationPerformed: true,
+        validationAlgorithm: this.algorithm,
+        source: this.checksumSource,
+        receivedChecksum: expected,
+        calculatedChecksum: received,
+      });
+      this.destroy(
+        new ChecksumMismatchError({
+          receivedChecksum: expected,
+          calculatedChecksum: received,
+          sourceLocation: this.checksumSourceLocation,
+          algorithm: this.algorithm,
+          source: this.checksumSource,
+        })
+      );
+      return;
+    }
+
+    this.settle({
+      status: "SUCCEEDED",
+      validationPerformed: true,
+      validationAlgorithm: this.algorithm,
+      source: this.checksumSource,
+      receivedChecksum: expected,
+      calculatedChecksum: received,
+    });
+
+    if (this.heldChunk !== undefined) {
+      this.push(this.heldChunk);
+      this.heldChunk = undefined;
     }
     this.push(null);
   };
 
   /**
-   * Surface source errors on this stream.
+   * Surface source errors on this stream. A source failure of any kind, whether
+   * malformed framing or a transport interruption, means the comparison never
+   * ran over complete bytes, so validation fails rather than being reported as
+   * an incomplete read the consumer chose.
    */
   private onSourceError = (error: Error): void => {
+    this.settleSourceFailure();
     this.destroy(error);
   };
 
@@ -140,9 +231,25 @@ export class ChecksumStream extends Readable {
    */
   private onSourceClose = (): void => {
     if (!this.destroyed && !this.source.readableEnded) {
+      this.settleSourceFailure();
       this.destroy(new Error("Connection lost or stream closed before all data was received."));
     }
   };
+
+  /**
+   * Report a source failure discovered before the comparison could run,
+   * discarding any withheld bytes. No checksum values are reported because
+   * neither side of the comparison is known to be complete.
+   */
+  private settleSourceFailure(): void {
+    this.heldChunk = undefined;
+    this.settle({
+      status: "FAILED",
+      validationPerformed: false,
+      validationAlgorithm: this.algorithm,
+      source: this.checksumSource,
+    });
+  }
 
   /**
    * Resume the source so it flows at the rate this stream is consumed.
@@ -162,6 +269,19 @@ export class ChecksumStream extends Readable {
    * @internal
    */
   public _destroy(error: Error | null, callback: (error?: Error | null | undefined) => void): void {
+    /**
+     * Reaching here before the comparison has settled means the consumer
+     * cancelled or destroyed the stream, so no comparison ran. A successful end
+     * of stream, a mismatch, and a source failure all settle before destroying,
+     * so this is a no-op in those cases.
+     */
+    this.heldChunk = undefined;
+    this.settle({
+      status: "INCOMPLETE",
+      validationPerformed: false,
+      validationAlgorithm: this.algorithm,
+      source: this.checksumSource,
+    });
     this.source?.removeListener("data", this.onSourceData);
     this.source?.removeListener("end", this.onSourceEnd);
     this.source?.removeListener("error", this.onSourceError);

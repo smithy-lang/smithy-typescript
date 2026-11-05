@@ -115,7 +115,7 @@ describe(createChecksumStream.name, () => {
         throw new Error("stream was read successfully");
       } catch (e: unknown) {
         expect(String(e)).toEqual(
-          `Error: Checksum mismatch: expected "different-expected-checksum" but` +
+          `ChecksumMismatchError: Checksum mismatch: expected "different-expected-checksum" but` +
             ` received "${canonicalBase64}"` +
             ` in response header "my-header".`
         );
