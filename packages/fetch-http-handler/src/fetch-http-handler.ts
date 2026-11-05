@@ -142,6 +142,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
     }
 
     let removeSignalEventListener = () => {};
+    const timeout = requestTimeoutFn(requestTimeoutInMs);
 
     const fetchRequest = createRequest(url, requestOptions);
     const raceOfPromises = [
@@ -177,7 +178,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
           }),
         };
       }),
-      requestTimeoutFn(requestTimeoutInMs),
+      timeout.promise,
     ];
     if (abortSignal) {
       raceOfPromises.push(
@@ -198,7 +199,10 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
         })
       );
     }
-    return Promise.race(raceOfPromises).finally(removeSignalEventListener);
+    return Promise.race(raceOfPromises).finally(() => {
+      timeout.cancel();
+      removeSignalEventListener();
+    });
   }
 
   updateHttpClientConfig(key: keyof FetchHttpHandlerOptions, value: FetchHttpHandlerOptions[typeof key]): void {

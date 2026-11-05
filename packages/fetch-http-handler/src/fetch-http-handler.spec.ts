@@ -356,6 +356,39 @@ const globalFetch = global.fetch;
     });
   });
 
+  describe("request timeout cleanup", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("clears the request timeout timer once the response arrives", async () => {
+      vi.useFakeTimers();
+      const mockResponse = {
+        headers: {
+          entries: () => [],
+        },
+        blob: async () => new Blob(),
+      };
+      (global as any).fetch = vi.fn().mockResolvedValue(mockResponse);
+      const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 60_000 });
+
+      await fetchHttpHandler.handle({} as any, {});
+
+      // A pending timer keeps the settled race, and with it the response, reachable until it fires.
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("clears the request timeout timer when the request fails", async () => {
+      vi.useFakeTimers();
+      (global as any).fetch = vi.fn().mockRejectedValue(new Error("network error"));
+      const fetchHttpHandler = new FetchHttpHandler({ requestTimeout: 60_000 });
+
+      await expect(fetchHttpHandler.handle({} as any, {})).rejects.toThrow("network error");
+
+      expect(vi.getTimerCount()).toBe(0);
+    });
+  });
+
   it("will throw timeout error it timeout finishes before request", async () => {
     const mockFetch = vi.fn(() => {
       return new Promise(() => {});
