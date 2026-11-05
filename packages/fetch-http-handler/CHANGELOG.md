@@ -1,5 +1,11 @@
 # Change Log
 
+## 5.8.1
+
+### Patch Changes
+
+- 155aa37: Clear the `requestTimeout` timer once a request settles. The pending timer kept the request race, and the response it settled with, reachable until it fired, so every completed response (including a fully read body) was retained for the full `requestTimeout`.
+
 ## 5.8.0
 
 ### Minor Changes
