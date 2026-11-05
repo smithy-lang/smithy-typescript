@@ -116,6 +116,7 @@ export class FetchHttpHandler implements HttpHandler<FetchHttpHandlerOptions> {
       headers: new Headers(request.headers),
       method: method,
       credentials,
+      redirect: "error",
     };
     // cache property is not supported in workerd runtime
     // TODO: can we feature detect support for cache and not set this property when not supported?
