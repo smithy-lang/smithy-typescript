@@ -1,6 +1,7 @@
 export { collectBody } from "./collect-stream-body";
 export { extendedEncodeURIComponent } from "./extended-encode-uri-component";
 export { HttpBindingProtocol } from "./HttpBindingProtocol";
+export { hasHttpBindingUnstructuredPayload, resolveHttpBindingContentType } from "./HttpBindingNormalizedSchema";
 export { HttpProtocol } from "./HttpProtocol";
 export { RpcProtocol } from "./RpcProtocol";
 export { AbstractRpcV2Protocol } from "./AbstractRpcV2Protocol";
