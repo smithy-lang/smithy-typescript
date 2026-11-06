@@ -28,6 +28,7 @@ export const setConnectionTimeout = (
         )
       );
     }, timeoutInMs - offset);
+    request.once("close", () => timing.clearTimeout(timeoutId));
 
     const doWithSocket = (socket: typeof request.socket) => {
       if (socket?.connecting) {
