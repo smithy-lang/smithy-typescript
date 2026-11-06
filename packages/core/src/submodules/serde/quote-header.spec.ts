@@ -18,4 +18,14 @@ describe(quoteHeader.name, () => {
   it("should wrap header elements that include the delimiter and double quotes", () => {
     expect(quoteHeader(`"b,c"`)).toBe('"\\"b,c\\""');
   });
+
+  it("should not wrap header elements that include only backslashes", () => {
+    expect(quoteHeader(`b\\c`)).toBe(`b\\c`);
+  });
+
+  it("should escape backslashes when wrapping header elements", () => {
+    expect(quoteHeader(`a,\\`)).toBe(`"a,\\\\"`);
+    expect(quoteHeader(`a\\"b`)).toBe(`"a\\\\\\"b"`);
+    expect(quoteHeader(`\\",`)).toBe(`"\\\\\\","`);
+  });
 });
