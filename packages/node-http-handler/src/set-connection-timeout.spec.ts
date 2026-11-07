@@ -8,6 +8,7 @@ describe("setConnectionTimeout", () => {
   const reject = vi.fn();
   const clientRequest: any = {
     on: vi.fn(),
+    once: vi.fn(),
     destroy: vi.fn(),
   };
 
@@ -25,11 +26,13 @@ describe("setConnectionTimeout", () => {
   it("will not attach listeners if timeout is 0", () => {
     setConnectionTimeout(clientRequest, reject, 0);
     expect(clientRequest.on).not.toHaveBeenCalled();
+    expect(clientRequest.once).not.toHaveBeenCalled();
   });
 
   it("will not attach listeners if timeout is not provided", () => {
     setConnectionTimeout(clientRequest, reject);
     expect(clientRequest.on).not.toHaveBeenCalled();
+    expect(clientRequest.once).not.toHaveBeenCalled();
   });
 
   describe("when timeout is provided", () => {
@@ -93,6 +96,7 @@ describe("setConnectionTimeout", () => {
       setConnectionTimeout(clientRequest, reject, timeoutInMs);
       const request = {
         on: vi.fn(),
+        once: vi.fn(),
         socket: {
           on: vi.fn(),
           connecting: true,
@@ -132,6 +136,26 @@ describe("setConnectionTimeout", () => {
       // Fast-forward until timer has been executed.
       vi.runAllTimers();
       expect(clientRequest.destroy).not.toHaveBeenCalled();
+      expect(reject).not.toHaveBeenCalled();
+    });
+
+    it.each([100, 2000, 30000])("clears timeout if request closes before connecting (%i ms)", (timeoutInMs) => {
+      const request = Object.assign(new EventEmitter(), {
+        socket: { connecting: true, on: vi.fn() },
+        destroy: vi.fn(),
+      });
+
+      setConnectionTimeout(request as any, reject, timeoutInMs);
+      if (timeoutInMs >= 2000) {
+        vi.advanceTimersByTime(1000);
+      }
+      expect(vi.getTimerCount()).toBe(1);
+
+      request.emit("close");
+      expect(vi.getTimerCount()).toBe(0);
+
+      vi.advanceTimersByTime(timeoutInMs);
+      expect(request.destroy).not.toHaveBeenCalled();
       expect(reject).not.toHaveBeenCalled();
     });
   });
