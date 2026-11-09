@@ -80,7 +80,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
   }
 
   public async acquireInitialRetryToken(retryTokenScope: string): Promise<StandardRetryToken> {
-    return new DefaultRetryToken(Retry.delay(), 0, undefined, Retry.v2026 && retryTokenScope.includes(":longpoll"));
+    return new DefaultRetryToken(Retry.delay(), 0, undefined, retryTokenScope.includes(":longpoll"));
   }
 
   public async refreshRetryTokenForRetry(
@@ -113,7 +113,7 @@ export class StandardRetryStrategy implements RetryStrategyV2 {
          * that capacity is exhausted. Running out of attempts or having a
          * non-retryable error does *not* apply backoff.
          */
-        const longPollBackoff = Retry.v2026 && retryCode === refusal.capacity && isLongPoll ? retryDelay : 0;
+        const longPollBackoff = retryCode === refusal.capacity && isLongPoll ? retryDelay : 0;
         if (longPollBackoff > 0) {
           await new Promise((r) => setTimeout(r, longPollBackoff));
         }
