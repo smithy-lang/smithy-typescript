@@ -7,6 +7,8 @@ const year = `(\\d{4})`;
 const RFC3339_WITH_OFFSET = new RegExp(
   /^(\d{4})-(\d\d)-(\d\d)[tT](\d\d):(\d\d):(\d\d)(\.(\d+))?(([-+]\d\d:\d\d)|[zZ])$/
 );
+const IMF_FIXDATE_NATIVE =
+  /^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?:0[1-9]|[12]\d|3[01]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [1-9]\d{3} (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d GMT$/;
 const IMF_FIXDATE = new RegExp(`^${ddd}, ${date} ${mmm} ${year} ${time} GMT$`);
 const RFC_850_DATE = new RegExp(`^${ddd}, ${date}-${mmm}-(\\d\\d) ${time} GMT$`);
 const ASC_TIME = new RegExp(`^${ddd} ${mmm} ( [1-9]|\\d\\d) ${time} ${year}$`);
@@ -120,6 +122,10 @@ export const _parseRfc7231DateTime = (value: unknown): Date | undefined => {
   }
   if (typeof value !== "string") {
     throw new TypeError("RFC7231 timestamps must be strings.");
+  }
+
+  if (IMF_FIXDATE_NATIVE.test(value)) {
+    return new Date(value);
   }
 
   let day!: string;
