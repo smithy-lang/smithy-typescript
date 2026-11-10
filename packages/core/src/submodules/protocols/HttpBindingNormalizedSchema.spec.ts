@@ -2,12 +2,7 @@ import { op } from "@smithy/core/schema";
 import type { ListSchemaModifier, MapSchemaModifier, StaticStructureSchema, StringSchema } from "@smithy/types";
 import { describe, expect, it } from "vitest";
 
-import {
-  getHttpOperationBindings,
-  hasHttpBindingUnstructuredPayload,
-  HttpBindingNormalizedSchema,
-  resolveHttpBindingContentType,
-} from "./HttpBindingNormalizedSchema";
+import { getHttpOperationBindings, HttpBindingNormalizedSchema } from "./HttpBindingNormalizedSchema";
 
 const struct = (name: string, members: Record<string, any>) =>
   [3, "example", name, 0, Object.keys(members), Object.values(members)] as StaticStructureSchema;
@@ -46,14 +41,15 @@ describe(HttpBindingNormalizedSchema.name, () => {
     expect((memberBindings[1][1][1] >> 17) & 1).toBe(1);
   });
 
-  it("resolves content types and payload kinds from the cached binding", () => {
+  it("caches content type instructions and payload kinds", () => {
     const schema = HttpBindingNormalizedSchema.of(structure);
-    expect(resolveHttpBindingContentType("application/json", schema)).toBe("application/octet-stream");
-    expect(hasHttpBindingUnstructuredPayload(schema)).toBe(true);
+    const payload = schema.getHttpBindings().response.bindings.payload;
+
+    expect(schema.getHttpBindings().request.contentTypeInstruction).toBe("application/octet-stream");
+    expect((payload?.[1][1] ?? 0) & (1 << 18)).toBeTruthy();
 
     const document = HttpBindingNormalizedSchema.of(struct("Document", { value: 0 }));
-    expect(resolveHttpBindingContentType("application/json", document)).toBe("application/json");
-    expect(hasHttpBindingUnstructuredPayload(document)).toBe(false);
+    expect(document.getHttpBindings().request.contentTypeInstruction).toBeNull();
     expect(document.getHttpBindings().response.bindings.payload).toBeUndefined();
   });
 

@@ -1,4 +1,5 @@
 import { NormalizedSchema, translateTraits } from "@smithy/core/schema";
+import { writeKey } from "@smithy/core/serde";
 import type {
   BlobSchema,
   ListSchemaModifier,
@@ -11,8 +12,6 @@ import type {
   TimestampEpochSecondsSchema,
   TimestampHttpDateSchema,
 } from "@smithy/types";
-
-import { writeKey } from "./writeKey";
 
 export type HttpBody = 0b100_000;
 export type HttpLabel = 0b100_001;
@@ -312,23 +311,6 @@ const EMPTY_BINDINGS: HttpBindingIndex = {
  */
 export const getHttpOperationBindings = (schema: OperationSchema): HttpOperationBindings =>
   ((schema as HttpBindingCache<HttpOperationBindings>)[HTTP_BINDINGS] ??= buildHttpOperationBindings(schema));
-
-/**
- * @internal
- */
-export const resolveHttpBindingContentType = (
-  defaultContentType: string,
-  schema: NormalizedSchema
-): string | undefined => {
-  const contentType = HttpBindingNormalizedSchema.of(schema).getHttpBindings().request.contentTypeInstruction;
-  return contentType === null ? defaultContentType : contentType;
-};
-
-/**
- * @internal
- */
-export const hasHttpBindingUnstructuredPayload = (schema: NormalizedSchema): boolean =>
-  !!((HttpBindingNormalizedSchema.of(schema).getHttpBindings().response.bindings.payload?.[1][1] ?? 0) & (1 << 18));
 
 const createBodySchema = (
   schema: NormalizedSchema,
