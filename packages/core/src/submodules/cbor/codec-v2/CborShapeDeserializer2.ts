@@ -1,7 +1,7 @@
 import { hasOwn } from "@smithy/core/transport";
 import { SerdeContext } from "@smithy/core/protocols";
 import { NormalizedSchema } from "@smithy/core/schema";
-import { NumericValue, _parseEpochTimestamp, nv } from "@smithy/core/serde";
+import { NumericValue, _parseEpochTimestamp, nv, writeKey } from "@smithy/core/serde";
 import type { DocumentSchema, Schema, ShapeDeserializer } from "@smithy/types";
 
 import {
@@ -130,6 +130,9 @@ function readMap(ns: NormalizedSchema): any {
   const map: Record<string, any> = {};
   for (let i = 0; i < count; ++i) {
     const key = readUtf8String();
+    if (key === "__proto__") {
+      writeKey(map);
+    }
     map[key] = readValue(valueSchema);
   }
   return map;
@@ -413,6 +416,9 @@ function readMapIndefinite(ns: NormalizedSchema): any {
       return map;
     }
     const key = readUtf8String();
+    if (key === "__proto__") {
+      writeKey(map);
+    }
     map[key] = readValue(valueSchema);
   }
   throw new Error("expected break marker.");
@@ -719,6 +725,9 @@ function transformObject(ns: NormalizedSchema, value: any): any {
     for (const key in value) {
       if (!hasOwn(value, key)) {
         continue;
+      }
+      if (key === "__proto__") {
+        writeKey(newObject);
       }
       newObject[key] = transformObject(targetSchema, value[key]);
     }
