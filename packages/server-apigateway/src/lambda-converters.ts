@@ -109,7 +109,9 @@ function joinMultiValueHeaders(multiValueHeaders: APIGatewayProxyEventMultiValue
   }
   for (const [key, values] of Object.entries(multiValueHeaders)) {
     if (values !== undefined) {
-      result[key] = values.join(", ");
+      // Multiple Cookie header fields (sent separately by HTTP/2 clients) are combined with "; ",
+      // not ", ", because that is the separator in the Cookie header grammar (RFC 6265 section 4.2.1).
+      result[key] = values.join(key.toLowerCase() === "cookie" ? "; " : ", ");
     }
   }
   return result;
@@ -149,7 +151,16 @@ function filterUndefined(record: Record<string, string | undefined> | undefined)
 function expandHeaders(headers: HeaderBag): Record<string, string[]> {
   const result: Record<string, string[]> = {};
   for (const [key, value] of Object.entries(headers)) {
-    result[key] = value.split(",").map((v) => v.trim());
+    result[key] = key.toLowerCase() === "set-cookie" ? splitSetCookie(value) : value.split(",").map((v) => v.trim());
   }
   return result;
+}
+
+/**
+ * Splits a combined Set-Cookie value into one entry per cookie. A comma only separates two
+ * cookies when a new name=value pair follows it, so the comma inside an attribute such as
+ * "Expires=Wed, 09 Jun 2021 10:18:14 GMT" is kept.
+ */
+function splitSetCookie(value: string): string[] {
+  return value.split(/,(?=\s*[^\s;,=]+=)/).map((v) => v.trim());
 }
