@@ -5,6 +5,7 @@
 package software.amazon.smithy.typescript.codegen;
 
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,9 +17,12 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.PaginatedIndex;
 import software.amazon.smithy.model.knowledge.PaginationInfo;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.CollectionShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.PaginatedTrait;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
@@ -32,6 +36,8 @@ final class PaginationGenerator implements Runnable {
         "Interfaces.ts"
     ).toString();
 
+    private final Model model;
+    private final SymbolProvider symbolProvider;
     private final TypeScriptWriter writer;
     private final String aggregatedClientName;
     private final PaginationInfo paginatedInfo;
@@ -52,6 +58,8 @@ final class PaginationGenerator implements Runnable {
         TypeScriptWriter writer,
         String aggregatedClientName
     ) {
+        this.model = model;
+        this.symbolProvider = symbolProvider;
         this.writer = writer;
         this.aggregatedClientName = aggregatedClientName;
 
@@ -104,6 +112,7 @@ final class PaginationGenerator implements Runnable {
         );
 
         writePager();
+        writeItemsPager();
     }
 
     static String getOutputFileLocation(OperationShape operation) {
@@ -198,5 +207,73 @@ final class PaginationGenerator implements Runnable {
                 """
             )
             .popState();
+    }
+
+    /**
+     * Emits an item-level paginator (paginate{Operation}Items) when the @paginated
+     * trait declares an items member. It wraps the page paginator and yields items.
+     */
+    private void writeItemsPager() {
+        List<MemberShape> itemsPath = paginatedInfo.getItemsMemberPath();
+        if (itemsPath.isEmpty()) {
+            return;
+        }
+
+        String itemsPathString = paginatedInfo.getPaginatedTrait().getItems().get();
+        String itemType = resolveItemType(itemsPath.get(itemsPath.size() - 1));
+
+        writer.addImport("createItemsPaginator", null, TypeScriptDependency.SMITHY_CORE);
+
+        writer.writeDocs("@public");
+        writer
+            .pushState()
+            .putContext("operation", operationName)
+            .putContext("aggClient", aggregatedClientName)
+            .putContext("inputType", inputSymbol.getName())
+            .putContext("paginationType", paginationType)
+            .putContext("itemType", itemType)
+            .putContext("pagePaginator", "paginate" + operationName)
+            .putContext("itemsPath", itemsPathString)
+            .write(
+                """
+                export const paginate${operation:L}Items: (
+                  config: ${aggClient:L}PaginationConfiguration,
+                  input: ${inputType:L},
+                  ...rest: any[]
+                ) => Paginator<${itemType:L}> = createItemsPaginator<
+                  ${paginationType:L},
+                  ${inputType:L},
+                  ${itemType:L}
+                >(${pagePaginator:L}, ${itemsPath:S});
+                """
+            )
+            .popState();
+    }
+
+    /**
+     * Resolves the TypeScript item type for the paginated items member.
+     * List/set -> element type; map -> [keyType, valueType] tuple. Any other target should be a modeling error.
+     */
+    private String resolveItemType(MemberShape itemsMember) {
+        Shape target = model.expectShape(itemsMember.getTarget());
+        if (target instanceof CollectionShape) {
+            MemberShape element = ((CollectionShape) target).getMember();
+            return writer.format("$T", symbolProvider.toSymbol(element));
+        }
+        if (target instanceof MapShape) {
+            MapShape map = (MapShape) target;
+            return writer.format(
+                "[$T, $T]",
+                symbolProvider.toSymbol(map.getKey()),
+                symbolProvider.toSymbol(map.getValue())
+            );
+        }
+        throw new CodegenException(
+            String.format(
+                "Paginated items member %s of operation %s must target a list or map shape.",
+                itemsMember.getId(),
+                operationName
+            )
+        );
     }
 }
