@@ -1,4 +1,4 @@
-import { deref } from "@smithy/core/schema";
+import { deref, NormalizedSchema } from "@smithy/core/schema";
 import { getSmithyContext } from "@smithy/core/transport";
 import type {
   EndpointBearer,
@@ -47,7 +47,10 @@ export abstract class AbstractRpcV2Protocol extends RpcProtocol {
     Object.assign(request.headers, {
       "content-type": this.getDefaultContentType(),
       "smithy-protocol": this.getSmithyProtocolHeaderValue(),
-      accept: this.getDefaultContentType(),
+      // Per the Smithy RPC v2 specification, Accept MUST be the event stream media type for an event stream response.
+      accept: NormalizedSchema.of(operationSchema.output).getEventStreamMember()
+        ? "application/vnd.amazon.eventstream"
+        : this.getDefaultContentType(),
     });
     if (deref(operationSchema.input) === "unit") {
       delete request.body;

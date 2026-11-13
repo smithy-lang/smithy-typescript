@@ -4,7 +4,7 @@ POST https://localhost
 x-api-key: [object Object]
 content-type: application/json
 smithy-protocol: rpc-v2-json
-accept: application/json
+accept: application/vnd.amazon.eventstream
 content-length: 39
 amz-sdk-invocation-id: 1111abcd-uuid-uuid-uuid-000000001111
 amz-sdk-request: attempt=1; max=3

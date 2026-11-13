@@ -59,8 +59,8 @@ class TestProtocol extends HttpServerProtocol {
     return this.validateContentType(request);
   }
 
-  public testValidateAccept(request: IHttpRequest) {
-    return this.validateAccept(request);
+  public testValidateAccept(request: IHttpRequest, eventStreamResponse?: boolean) {
+    return this.validateAccept(request, eventStreamResponse);
   }
 
   public testGetHeaderValue(request: IHttpRequest, name: string) {
@@ -142,6 +142,23 @@ describe("HttpServerProtocol", () => {
     it("throws NotAcceptableException for incompatible accept", () => {
       const request = makeRequest({ accept: "text/xml" });
       expect(() => protocol.testValidateAccept(request)).toThrow(NotAcceptableException);
+    });
+
+    describe("for an event stream response", () => {
+      it("allows the event stream media type", () => {
+        const request = makeRequest({ accept: "application/vnd.amazon.eventstream" });
+        expect(() => protocol.testValidateAccept(request, true)).not.toThrow();
+      });
+
+      it("allows the default content type", () => {
+        const request = makeRequest({ accept: "application/json" });
+        expect(() => protocol.testValidateAccept(request, true)).not.toThrow();
+      });
+
+      it("throws NotAcceptableException when accept matches neither type", () => {
+        const request = makeRequest({ accept: "text/xml" });
+        expect(() => protocol.testValidateAccept(request, true)).toThrow(NotAcceptableException);
+      });
     });
   });
 

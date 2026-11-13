@@ -30,7 +30,8 @@ export abstract class RpcServerProtocol extends HttpServerProtocol {
     // application/vnd.amazon.eventstream, not the protocol's default.
     if (!eventStreamMember) {
       this.validateContentType(request);
-      this.validateAccept(request);
+      // An event stream response uses the event stream media type, and its errors use the default content type.
+      this.validateAccept(request, !!NormalizedSchema.of(operationSchema[5]).getEventStreamMember());
     }
 
     if (ns.getSchema() === "unit") {
