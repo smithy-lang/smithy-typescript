@@ -5,7 +5,7 @@
  */
 export function quoteHeader(part: string) {
   if (part.includes(",") || part.includes('"')) {
-    part = `"${part.replace(/"/g, '\\"')}"`;
+    part = `"${part.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
   }
   return part;
 }
