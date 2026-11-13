@@ -4,6 +4,7 @@ import { describe, expect, test as it, vi } from "vitest";
 
 import { toBase64 } from "../../util-base64/toBase64";
 import { toUtf8 } from "../../util-utf8/toUtf8";
+import { ChecksumMismatchError } from "./ChecksumMismatchError";
 import { ChecksumStream } from "./ChecksumStream";
 
 describe(ChecksumStream.name, () => {
@@ -29,6 +30,25 @@ describe(ChecksumStream.name, () => {
   const canonicalBase64 = toBase64(canonicalUtf8);
 
   const makeSource = () => Readable.from(Buffer.from(canonicalData.buffer, 0, 26));
+
+  /**
+   * A source that emits each byte as its own chunk, so that chunk-level
+   * behaviour such as hold-back is observable.
+   */
+  const makeChunkedSource = () => Readable.from(Array.from(canonicalData, (byte) => Buffer.from([byte])));
+
+  /**
+   * A source that is driven explicitly by the test and does not end until it is
+   * told to. Necessary because Readable.from() over an in-memory array reaches
+   * its end as soon as it is resumed, which would settle validation before a
+   * test could observe the intermediate state.
+   */
+  const makeManualSource = () => new Readable({ read() {} });
+
+  /**
+   * Yield to the event loop so that stream events are delivered.
+   */
+  const tick = () => new Promise((r) => setTimeout(r, 10));
 
   /**
    * Drain a Readable into a single Uint8Array.
@@ -159,19 +179,32 @@ describe(ChecksumStream.name, () => {
   });
 
   describe("error propagation", () => {
-    it("should surface errors thrown by checksum.update", async () => {
+    it("should report FAILED when checksum.update throws", async () => {
+      const error = new Error("update failed");
       const checksum = new Appender();
       vi.spyOn(checksum, "update").mockImplementation(() => {
-        throw new Error("update failed");
+        throw error;
       });
+      const onResult = vi.fn();
       const checksumStream = new ChecksumStream({
         expectedChecksum: canonicalBase64,
         checksum,
         checksumSourceLocation: "my-header",
         source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
       });
 
-      await expect(collect(checksumStream)).rejects.toThrow("update failed");
+      await expect(collect(checksumStream)).rejects.toBe(error);
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
     });
 
     it("should surface errors thrown by checksum.digest", async () => {
@@ -329,6 +362,602 @@ describe(ChecksumStream.name, () => {
       await expect(collect(checksumStream)).rejects.toThrow(
         "Connection lost or stream closed before all data was received."
       );
+    });
+  });
+
+  describe("ChecksumMismatchError", () => {
+    it("should throw a ChecksumMismatchError carrying the structured fields", async () => {
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: "different-expected-checksum",
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+      });
+
+      const error = await collect(checksumStream).then(
+        () => {
+          throw new Error("stream was read successfully");
+        },
+        (e) => e as ChecksumMismatchError
+      );
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ChecksumMismatchError);
+      expect(error.name).toEqual("ChecksumMismatchError");
+      expect(error.algorithm).toEqual("CRC32");
+      expect(error.source).toEqual("STREAM");
+      // The wire value, versus the value calculated locally.
+      expect(error.receivedChecksum).toEqual("different-expected-checksum");
+      expect(error.calculatedChecksum).toEqual(canonicalBase64);
+      expect(error.sourceLocation).toEqual("my-header");
+      // Not retryable: a second successful response would mask the failure.
+      expect("$retryable" in error).toBe(false);
+    });
+
+    it("should round-trip through JSON for transfer across a worker boundary", async () => {
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: "different-expected-checksum",
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        algorithm: "CRC64NVME",
+        checksumSource: "STORED",
+      });
+
+      const error = await collect(checksumStream).then(
+        () => {
+          throw new Error("stream was read successfully");
+        },
+        (e) => e as ChecksumMismatchError
+      );
+
+      const transferred = JSON.parse(JSON.stringify(error));
+      const reconstructed = new ChecksumMismatchError(transferred);
+
+      expect(reconstructed.name).toEqual(error.name);
+      expect(reconstructed.message).toEqual(error.message);
+      expect(reconstructed.algorithm).toEqual("CRC64NVME");
+      expect(reconstructed.source).toEqual("STORED");
+      expect(reconstructed.receivedChecksum).toEqual(error.receivedChecksum);
+      expect(reconstructed.calculatedChecksum).toEqual(error.calculatedChecksum);
+    });
+  });
+
+  describe("deferred expected checksum", () => {
+    it("should not call the provider until the source reaches its end", async () => {
+      const expectedChecksum = vi.fn().mockResolvedValue(toBase64("ab"));
+      const source = makeManualSource();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum,
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source,
+      });
+
+      checksumStream.resume();
+      source.push(Buffer.from("a"));
+      await tick();
+      // Data has flowed but the source has not ended, so no comparison is due.
+      expect(expectedChecksum).not.toHaveBeenCalled();
+
+      source.push(Buffer.from("b"));
+      source.push(null);
+      await tick();
+      expect(expectedChecksum).toHaveBeenCalledTimes(1);
+    });
+
+    it("should compare against the provider's value", async () => {
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.resolve(canonicalBase64),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+      });
+
+      expect(toUtf8(await collect(checksumStream))).toEqual(canonicalUtf8);
+    });
+
+    it("should report a mismatch against the provider's value", async () => {
+      const expected = toBase64("trailer-value");
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.resolve(expected),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+      });
+
+      await expect(collect(checksumStream)).rejects.toThrow(
+        `Checksum mismatch: expected "${expected}" but received "${canonicalBase64}"` +
+          ` in response header "x-amz-trailer".`
+      );
+    });
+
+    it("should surface an error thrown by the provider", async () => {
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.reject(new Error("trailer never arrived")),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+      });
+
+      await expect(collect(checksumStream)).rejects.toThrow("trailer never arrived");
+    });
+  });
+
+  describe("holdBackLastChunk", () => {
+    it("should withhold the most recent chunk until the comparison succeeds", async () => {
+      const source = makeManualSource();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: toBase64("abc"),
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+        holdBackLastChunk: true,
+      });
+
+      // Begin reading so the source is resumed.
+      expect(checksumStream.read()).toBe(null);
+
+      source.push(Buffer.from("a"));
+      await tick();
+      // The only chunk seen so far is withheld, so nothing is readable.
+      expect(checksumStream.read()).toBe(null);
+
+      source.push(Buffer.from("b"));
+      await tick();
+      // "a" is released now that a newer chunk is being withheld.
+      expect(checksumStream.read()?.toString()).toEqual("a");
+
+      source.push(Buffer.from("c"));
+      await tick();
+      expect(checksumStream.read()?.toString()).toEqual("b");
+
+      source.push(null);
+      await tick();
+      // The final withheld chunk is released once the checksum matches.
+      expect(checksumStream.read()?.toString()).toEqual("c");
+
+      await tick();
+      expect(checksumStream.read()).toBe(null);
+      await tick();
+      expect(checksumStream.readableEnded).toBe(true);
+    });
+
+    it("should deliver all bytes by the end of a successful stream", async () => {
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeChunkedSource(),
+        holdBackLastChunk: true,
+      });
+
+      expect(toUtf8(await collect(checksumStream))).toEqual(canonicalUtf8);
+    });
+
+    it("should discard the withheld chunk when the checksum does not match", async () => {
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: "different-expected-checksum",
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeChunkedSource(),
+        holdBackLastChunk: true,
+      });
+
+      const seen: number[] = [];
+      await expect(
+        (async () => {
+          for await (const chunk of checksumStream) {
+            seen.push(...chunk);
+          }
+        })()
+      ).rejects.toThrow(/Checksum mismatch/);
+
+      /**
+       * The withheld final byte was never delivered. Everything delivered is a
+       * prefix of the preceding bytes: destroying the stream discards whatever
+       * is still in its readable buffer, and how much that is depends on the
+       * consumer's read granularity, which is not the same across Node
+       * versions. Node 26 changed read() without a size to return one buffered
+       * chunk rather than the whole buffer concatenated, so the amount that
+       * reaches the consumer before the mismatch is not asserted here.
+       * @see https://github.com/nodejs/node/pull/60441
+       */
+      const delivered = toUtf8(new Uint8Array(seen));
+      expect(canonicalUtf8.slice(0, 25).startsWith(delivered)).toBe(true);
+      expect(delivered).not.toContain("z");
+    });
+
+    it("should compare without a withheld chunk for an empty payload", async () => {
+      const onResult = vi.fn();
+      const emptyDigest = toBase64("");
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: emptyDigest,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: Readable.from([]),
+        holdBackLastChunk: true,
+        onResult,
+      });
+
+      expect(await collect(checksumStream)).toEqual(new Uint8Array());
+      expect(onResult).toHaveBeenCalledWith(expect.objectContaining({ status: "SUCCEEDED" }));
+    });
+  });
+
+  describe("onResult", () => {
+    it.each([
+      ["deserialization", new Error("decoder failed")],
+      ["transport", new Error("socket reset")],
+    ])("should report FAILED for a %s source error", async (_description, sourceError) => {
+      const source = makeManualSource();
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source,
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+      const streamError = new Promise<Error>((resolve) => checksumStream.once("error", resolve));
+
+      source.emit("error", sourceError);
+
+      expect(await streamError).toBe(sourceError);
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report a malformed deferred Base64 value as a deserialization failure", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.resolve("!!!!"),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      const error = await collect(checksumStream).catch((error: unknown) => error);
+
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(ChecksumMismatchError);
+      expect(error).toMatchObject({ message: "Invalid base64 string." });
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report an empty deferred Base64 value as a mismatch", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.resolve(""),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      const error = await collect(checksumStream).catch((error: unknown) => error);
+
+      expect(error).toBeInstanceOf(ChecksumMismatchError);
+      expect(error).toMatchObject({
+        receivedChecksum: "",
+        calculatedChecksum: canonicalBase64,
+      });
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: true,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+        receivedChecksum: "",
+        calculatedChecksum: canonicalBase64,
+      });
+    });
+
+    it("should report exactly one INCOMPLETE result when cancelled while the provider is pending", async () => {
+      let resolveExpectedChecksum: (value: string) => void = () => {};
+      const expectedChecksum = vi.fn(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveExpectedChecksum = resolve;
+          })
+      );
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum,
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+      checksumStream.resume();
+
+      await tick();
+      expect(expectedChecksum).toHaveBeenCalledTimes(1);
+
+      checksumStream.destroy();
+      await tick();
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "INCOMPLETE",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+
+      resolveExpectedChecksum(canonicalBase64);
+      await tick();
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+    });
+
+    it("should report SUCCEEDED with the algorithm, source and both values", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      await collect(checksumStream);
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "SUCCEEDED",
+        validationPerformed: true,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+        receivedChecksum: canonicalBase64,
+        calculatedChecksum: canonicalBase64,
+      });
+    });
+
+    it("should report FAILED with both checksum values on a mismatch", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: "different-expected-checksum",
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        algorithm: "CRC32C",
+        checksumSource: "STORED",
+        onResult,
+      });
+
+      await expect(collect(checksumStream)).rejects.toThrow(/Checksum mismatch/);
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: true,
+        validationAlgorithm: "CRC32C",
+        source: "STORED",
+        receivedChecksum: "different-expected-checksum",
+        calculatedChecksum: canonicalBase64,
+      });
+    });
+
+    it("should report FAILED without a comparison when the provider rejects", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: () => Promise.reject(new Error("trailer never arrived")),
+        checksum: new Appender(),
+        checksumSourceLocation: "x-amz-trailer",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      await expect(collect(checksumStream)).rejects.toThrow("trailer never arrived");
+
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report FAILED without a comparison when checksum.digest rejects", async () => {
+      const error = new Error("digest failed");
+      const checksum = new Appender();
+      vi.spyOn(checksum, "digest").mockRejectedValue(error);
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum,
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        algorithm: "CRC32",
+        checksumSource: "STORED",
+        onResult,
+      });
+
+      await expect(collect(checksumStream)).rejects.toBe(error);
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STORED",
+      });
+    });
+
+    it("should report FAILED without a comparison when the Base64 encoder throws", async () => {
+      const error = new Error("encoding failed");
+      const base64Encoder = vi.fn((_input: Uint8Array): string => {
+        throw error;
+      });
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        base64Encoder,
+        algorithm: "CRC32",
+        checksumSource: "STORED",
+        onResult,
+      });
+
+      await expect(collect(checksumStream)).rejects.toBe(error);
+
+      expect(base64Encoder).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "FAILED",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STORED",
+      });
+    });
+
+    it("should report INCOMPLETE when the stream is destroyed before the end", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeChunkedSource(),
+        algorithm: "CRC32",
+        checksumSource: "STREAM",
+        onResult,
+      });
+
+      checksumStream.destroy();
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith({
+        status: "INCOMPLETE",
+        validationPerformed: false,
+        validationAlgorithm: "CRC32",
+        source: "STREAM",
+      });
+    });
+
+    it("should report INCOMPLETE when consumption stops early", async () => {
+      const onResult = vi.fn();
+      const source = makeManualSource();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+        onResult,
+      });
+
+      source.push(Buffer.from("partial"));
+
+      // Breaking out of a for-await loop destroys the stream. The source has
+      // more to send, so the comparison never runs.
+      for await (const _chunk of checksumStream) {
+        break;
+      }
+      await tick();
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "INCOMPLETE", validationPerformed: false })
+      );
+    });
+
+    it("should report FAILED when the source closes prematurely", async () => {
+      const onResult = vi.fn();
+      const source = new Readable({
+        read() {
+          this.push(Buffer.from("partial"));
+          this.destroy();
+        },
+      });
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+        onResult,
+      });
+
+      await expect(collect(checksumStream)).rejects.toThrow(
+        "Connection lost or stream closed before all data was received."
+      );
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith(expect.objectContaining({ status: "FAILED", validationPerformed: false }));
+    });
+
+    it("should stay pending when the stream is abandoned without being destroyed", async () => {
+      const onResult = vi.fn();
+      const source = makeManualSource();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source,
+        onResult,
+      });
+
+      // Read a single chunk, then stop without cancelling or destroying.
+      await new Promise<void>((resolve) => {
+        checksumStream.once("data", () => {
+          checksumStream.pause();
+          resolve();
+        });
+        source.push(Buffer.from("partial"));
+      });
+      await new Promise((r) => setTimeout(r, 50));
+
+      // Validation cannot be settled: the consumer may still resume.
+      expect(onResult).not.toHaveBeenCalled();
+
+      checksumStream.destroy();
+    });
+
+    it("should report a result at most once", async () => {
+      const onResult = vi.fn();
+      const checksumStream = new ChecksumStream({
+        expectedChecksum: canonicalBase64,
+        checksum: new Appender(),
+        checksumSourceLocation: "my-header",
+        source: makeSource(),
+        onResult,
+      });
+
+      await collect(checksumStream);
+      // Destroying after a successful end must not overwrite the result.
+      checksumStream.destroy();
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult).toHaveBeenCalledWith(expect.objectContaining({ status: "SUCCEEDED" }));
     });
   });
 

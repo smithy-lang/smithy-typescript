@@ -1,30 +1,13 @@
-import type { Checksum, Encoder } from "@smithy/types";
+import type { ChecksumStreamInitBase } from "./ChecksumStreamInitBase";
 
 /**
  * @internal
  */
-export interface ChecksumStreamInit {
-  /**
-   * Base64 value of the expected checksum.
-   */
-  expectedChecksum: string;
-  /**
-   * For error messaging, the location from which the checksum value was read.
-   */
-  checksumSourceLocation: string;
-  /**
-   * The checksum calculator.
-   */
-  checksum: Checksum;
+export interface ChecksumStreamInit extends ChecksumStreamInitBase {
   /**
    * The stream to be checked.
    */
   source: ReadableStream;
-
-  /**
-   * Optional base 64 encoder if calling from a request context.
-   */
-  base64Encoder?: Encoder;
 }
 
 const ReadableStreamRef = typeof ReadableStream === "function" ? ReadableStream : function (): void {};
