@@ -239,7 +239,10 @@ function readTag(ns: NormalizedSchema): any {
       numericString =
         exponent === 0
           ? mantissaStr
-          : mantissaStr.slice(0, mantissaStr.length + exponent) + "." + mantissaStr.slice(exponent);
+          : exponent > 0
+            ? // a positive exponent appends zeros, e.g. 4([2, 15]) is 1500.
+              mantissaStr + "0".repeat(exponent)
+            : mantissaStr.slice(0, mantissaStr.length + exponent) + "." + mantissaStr.slice(exponent);
       numericString = numericString.replace(/^0+/g, "");
       if (numericString === "") {
         numericString = "0";
