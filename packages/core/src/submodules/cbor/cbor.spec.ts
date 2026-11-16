@@ -323,7 +323,14 @@ describe("cbor", () => {
     });
 
     it("should round-trip NumericValue with exponent notation", () => {
-      for (const bigDecimal of ["1.5e10", "3E-20", "-2.0e+5", "100E3", "1e2", ".5e3"]) {
+      for (const [bigDecimal, expected] of [
+        ["1.5e10", "15000000000"],
+        ["3E-20", "0.00000000000000000003"],
+        ["-2.0e+5", "-200000"],
+        ["100E3", "100000"],
+        ["1e2", "100"],
+        [".5e3", "500"],
+      ]) {
         const numericValue = new NumericValue(bigDecimal, "bigDecimal");
         const serialized = cbor.serialize(numericValue);
 
@@ -335,6 +342,22 @@ describe("cbor", () => {
 
         const deserialized = cbor.deserialize(serialized);
         expect(deserialized).toBeInstanceOf(NumericValue);
+        expect(deserialized.string).toEqual(expected);
+      }
+    });
+
+    it("should decode decimal fractions with a positive exponent", () => {
+      // RFC 8949 section 3.4.4: the value of 4([e, m]) is m * 10^e.
+      for (const [hex, expected] of [
+        ["c48221196ab3", "273.15"], // 4([-2, 27315]), the RFC example
+        ["c482020f", "1500"], // 4([2, 15])
+        ["c4820301", "1000"], // 4([3, 1])
+        ["c4820433", "-200000"], // 4([4, -20])
+        ["c4820200", "0"], // 4([2, 0])
+      ]) {
+        const deserialized = cbor.deserialize(Buffer.from(hex, "hex"));
+        expect(deserialized).toBeInstanceOf(NumericValue);
+        expect(deserialized.string).toEqual(expected);
       }
     });
 

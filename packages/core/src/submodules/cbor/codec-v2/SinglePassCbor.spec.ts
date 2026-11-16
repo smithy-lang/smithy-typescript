@@ -485,12 +485,43 @@ describe("CborShapeDeserializer2", () => {
         [19 satisfies BigDecimalSchema],
       ] satisfies StaticStructureSchema;
 
-      const cases = ["1.5e10", "3E-20", "-2.0e+5", "100E3", "1e2", ".5e3"];
-      for (const str of cases) {
+      const cases = [
+        ["1.5e10", "15000000000"],
+        ["3E-20", "0.00000000000000000003"],
+        ["-2.0e+5", "-200000"],
+        ["100E3", "100000"],
+        ["1e2", "100"],
+        [".5e3", "500"],
+      ];
+      for (const [str, expected] of cases) {
         const data = { value: nv(str) };
         const result = assertEquivalentDeserialization(schema, data);
         expect(result.value).toBeInstanceOf(Object);
-        expect(result.value.string).toBeDefined();
+        expect(result.value.string).toEqual(expected);
+      }
+    });
+
+    it("deserializes decimal fractions with a positive exponent", () => {
+      const schema = [
+        3,
+        "ns",
+        "Measurement",
+        0,
+        ["value"],
+        [19 satisfies BigDecimalSchema],
+      ] satisfies StaticStructureSchema;
+
+      // RFC 8949 section 3.4.4: the value of 4([e, m]) is m * 10^e.
+      for (const [hex, expected] of [
+        ["c48221196ab3", "273.15"], // 4([-2, 27315]), the RFC example
+        ["c482020f", "1500"], // 4([2, 15])
+        ["c4820301", "1000"], // 4([3, 1])
+        ["c4820433", "-200000"], // 4([4, -20])
+        ["c4820200", "0"], // 4([2, 0])
+      ]) {
+        // {"value": 4([e, m])}
+        const bytes = Buffer.from("a16576616c7565" + hex, "hex");
+        expect(singlePassDe.read(schema, bytes).value.string).toEqual(expected);
       }
     });
 
