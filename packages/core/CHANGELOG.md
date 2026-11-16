@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.41.0
+
+### Minor Changes
+
+- ab3d7ee: Cache HTTP member binding information on structure schemas to improve serialization and deserialization performance.
+
+### Patch Changes
+
+- c364c48: Escape backslashes in quoted header list values and strip the escapes when parsing them.
+
 ## 3.40.0
 
 ### Minor Changes
