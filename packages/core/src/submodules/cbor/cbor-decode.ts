@@ -1,4 +1,4 @@
-import { nv } from "@smithy/core/serde";
+import { nv, writeKey } from "@smithy/core/serde";
 
 import {
   alloc,
@@ -212,6 +212,11 @@ function decodeMap(at: Uint32, to: Uint32): CborMapType {
 /**
  * Uses Object.create(null), which assigns values faster.
  * Paid for by a single setPrototypeOf.
+ *
+ * Because the map has a null prototype while entries are assigned, a wire key
+ * named "__proto__" becomes an own data property instead of setting the
+ * prototype. decodeMapSmall and decodeMapIndefinite must produce that same
+ * shape, which is why they guard the key with writeKey.
  */
 function decodeMapLarge(at: Uint32, to: Uint32, mapDataLength: number): CborMapType {
   const offset = _offset;
@@ -242,6 +247,9 @@ function decodeMapSmall(at: Uint32, to: Uint32, mapDataLength: number): CborMapT
   for (let i = 0; i < mapDataLength; ++i) {
     const key = decodeUtf8String(at, to);
     at += _offset;
+    if (key === "__proto__") {
+      writeKey(map);
+    }
     map[key] = decode(at, to);
     at += _offset;
   }
@@ -514,6 +522,9 @@ function decodeMapIndefinite(at: Uint32, to: Uint32): CborMapType {
     }
     const key = decodeUtf8String(at, to);
     at += _offset;
+    if (key === "__proto__") {
+      writeKey(map);
+    }
     map[key] = decode(at, to);
     at += _offset;
   }

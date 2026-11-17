@@ -160,6 +160,10 @@ const mapKey = fc
       maxLength: 20,
     })
   )
+  // __proto__ is excluded because fc.dictionary assigns keys via normal property
+  // assignment, which triggers the __proto__ setter instead of creating an own
+  // property. This makes the test data itself inconsistent. The __proto__ handling
+  // is covered by dedicated unit tests in cbor.proto.spec.ts instead.
   .filter((k) => k !== "__proto__");
 
 const arbNumber = fc.oneof(
