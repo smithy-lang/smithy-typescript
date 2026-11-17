@@ -90,7 +90,7 @@ export const expectNumber = (value: any): number | undefined => {
   throw new TypeError(`Expected number, got ${typeof value}: ${value}`);
 };
 
-const MAX_FLOAT = Math.ceil(2 ** 127 * (2 - 2 ** -23));
+const MAX_FLOAT = 2 ** 127 * (2 - 2 ** -24);
 
 /**
  * Asserts a value is a 32-bit float and returns it.
@@ -129,13 +129,12 @@ export const expectFloat32 = (value: any): number | undefined => {
     // Perfect, even if possible to achieve, would likely be too costly to
     // be worth it.
     //
-    // The maximum value of a 32-bit float. Since the 64-bit representation
-    // could be more or less, we just round it up to the nearest whole number.
-    // This further reduces our ability to be certain of the value, but it's
-    // an acceptable tradeoff.
+    // The maximum finite value that rounds to a finite 32-bit float. A JS
+    // number may be slightly above FLT_MAX while still rounding to FLT_MAX
+    // in float32, so use the IEEE-754 round-to-nearest overflow threshold.
     //
     // Compare against the absolute value to simplify things.
-    if (Math.abs(expected) > MAX_FLOAT) {
+    if (Math.abs(expected) >= MAX_FLOAT) {
       throw new TypeError(`Expected 32-bit float, got ${value}`);
     }
   }

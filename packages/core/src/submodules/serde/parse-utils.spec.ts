@@ -167,6 +167,9 @@ describe("expectFloat32", () => {
       2 ** -126,
       // Largest normal number
       2 ** 127 * (2 - 2 ** -23),
+      // Shortest decimal representation of FLT_MAX
+      3.4028235e38,
+      -3.4028235e38,
       // Largest number less than one
       1 - 2 ** -24,
       // Smallest number larger than one
@@ -187,9 +190,12 @@ describe("expectFloat32", () => {
   });
 
   describe("rejects doubles", () => {
-    it.each([2 ** 128, -(2 ** 128)])("rejects %s", (value) => {
-      expect(() => expectFloat32(value)).toThrowError();
-    });
+    it.each([2 ** 127 * (2 - 2 ** -24), -(2 ** 127 * (2 - 2 ** -24)), 2 ** 128, -(2 ** 128)])(
+      "rejects %s",
+      (value) => {
+        expect(() => expectFloat32(value)).toThrowError();
+      }
+    );
   });
 });
 
@@ -511,6 +517,8 @@ describe("strictParseFloat32", () => {
     expect(strictParseFloat32("1E1")).toEqual(10);
     expect(strictParseFloat32("1E+1")).toEqual(10);
     expect(strictParseFloat32("1E-1")).toEqual(0.1);
+    expect(strictParseFloat32("3.4028235e38")).toEqual(3.4028235e38);
+    expect(strictParseFloat32("-3.4028235e38")).toEqual(-3.4028235e38);
   });
 
   describe("accepts numbers", () => {
@@ -602,6 +610,9 @@ describe("limitedParseFloat32", () => {
       2 ** -126,
       // Largest normal number
       2 ** 127 * (2 - 2 ** -23),
+      // Shortest decimal representation of FLT_MAX
+      3.4028235e38,
+      -3.4028235e38,
       // Largest number less than one
       1 - 2 ** -24,
       // Smallest number larger than one
