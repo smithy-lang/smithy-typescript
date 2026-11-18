@@ -1,5 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
+import { toUtf8 } from "../util-utf8/toUtf8.browser";
 import { getAwsChunkedEncodingStream as getAwsChunkedEncodingStreamRs } from "./getAwsChunkedEncodingStream";
 import { getAwsChunkedEncodingStream } from "./getAwsChunkedEncodingStream.browser";
 
@@ -34,18 +35,23 @@ describe(getAwsChunkedEncodingStream.name, () => {
     });
   };
 
+  /**
+   * The encoder enqueues byte arrays, so chunks are concatenated as bytes and
+   * decoded once rather than coerced to strings individually.
+   */
   const validateStream = async (readableStream: ReadableStream, expectedBuffer: string) => {
-    let buffer = "";
+    const bytes: number[] = [];
     const reader = readableStream.getReader();
     while (true) {
       const { done, value } = await reader.read();
       if (done) {
         break;
       }
-      buffer += value;
+      expect(value).toBeInstanceOf(Uint8Array);
+      bytes.push(...value);
     }
     reader.releaseLock();
-    expect(buffer).toEqual(expectedBuffer);
+    expect(toUtf8(new Uint8Array(bytes))).toEqual(expectedBuffer);
   };
 
   describe("skips checksum computation", () => {
@@ -54,6 +60,7 @@ Hello\r
 5\r
 World\r
 0\r
+\r
 `;
 
     it("if none of the required options are passed", async () => {
