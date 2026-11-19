@@ -147,6 +147,26 @@ describe("convertEvent", () => {
       expect(request.headers["content-type"]).toBe("application/json");
     });
 
+    it("joins multiple cookie headers with a semicolon", () => {
+      const event = makeV1Event({
+        multiValueHeaders: {
+          cookie: ["a=1", "session=abc"],
+        },
+      });
+      const request = convertEvent(event);
+      expect(request.headers.cookie).toBe("a=1; session=abc");
+    });
+
+    it("joins multiple cookie headers regardless of header name casing", () => {
+      const event = makeV1Event({
+        multiValueHeaders: {
+          Cookie: ["a=1", "session=abc"],
+        },
+      });
+      const request = convertEvent(event);
+      expect(request.headers.Cookie).toBe("a=1; session=abc");
+    });
+
     it("converts multi-value query parameters", () => {
       const event = makeV1Event({
         multiValueQueryStringParameters: {
@@ -237,6 +257,34 @@ describe("convertVersion1Response", () => {
     });
     expect(result.body).toBe("created");
     expect(result.isBase64Encoded).toBe(false);
+  });
+
+  it("splits multiple Set-Cookie values without splitting the Expires date", () => {
+    const httpResponse = {
+      statusCode: 200,
+      headers: {
+        "set-cookie": "a=1; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Path=/, b=2; Max-Age=60, c=3",
+      },
+      body: "ok",
+    } as HttpResponse;
+
+    const result = convertVersion1Response(httpResponse);
+    expect(result.multiValueHeaders).toEqual({
+      "set-cookie": ["a=1; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Path=/", "b=2; Max-Age=60", "c=3"],
+    });
+  });
+
+  it("keeps a single Set-Cookie value with an Expires date intact", () => {
+    const httpResponse = {
+      statusCode: 200,
+      headers: { "Set-Cookie": "a=1; Expires=Wed, 09 Jun 2021 10:18:14 GMT" },
+      body: "ok",
+    } as HttpResponse;
+
+    const result = convertVersion1Response(httpResponse);
+    expect(result.multiValueHeaders).toEqual({
+      "Set-Cookie": ["a=1; Expires=Wed, 09 Jun 2021 10:18:14 GMT"],
+    });
   });
 
   it("base64 encodes Uint8Array body", () => {
