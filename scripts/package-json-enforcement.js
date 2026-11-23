@@ -258,7 +258,7 @@ module.exports = function (pkgJsonFilePath, overwrite = false) {
 
     for (const file of walkSync(srcDir)) {
       if (file.match(/\.(browser|native)\.ts$/) && !file.match(/\.spec\.|\.integ\./)) {
-        const relativePath = file.replace(srcDir, "").replace(/\.ts$/, "");
+        const relativePath = `/${path.relative(srcDir, file).split(path.sep).join("/")}`.replace(/\.ts$/, "");
         const canonicalPath = relativePath.replace(/\.(browser|native)$/, "");
         const variant = relativePath.match(/\.(browser|native)$/)[1];
 
