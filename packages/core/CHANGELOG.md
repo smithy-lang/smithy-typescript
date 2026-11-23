@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.41.1
+
+### Patch Changes
+
+- 07b8ae0: Keep `AbortSignal.reason` on errors thrown when an operation is aborted, as before the retry abort change.
+
 ## 3.41.0
 
 ### Minor Changes
