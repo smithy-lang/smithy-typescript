@@ -186,6 +186,71 @@ describe(retryMiddleware.name, () => {
       expect(next).not.toHaveBeenCalled();
     });
 
+    it("rethrows the request's abort error with the abort reason when aborted mid-request", async () => {
+      const abortController = new AbortController();
+      const reason = new Error("timeout reason");
+      const requestError = Object.assign(new Error("Request aborted"), { name: "AbortError", cause: reason });
+      const refreshRetryTokenForRetry = vi.fn();
+      const next = vi.fn(async () => {
+        abortController.abort(reason);
+        throw requestError;
+      });
+      const contextWithAbortSignal: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+
+      const request = retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue({ ...mockRetryStrategy, refreshRetryTokenForRetry, maxAttempts }),
+      })(
+        next,
+        contextWithAbortSignal
+      )(args as FinalizeHandlerArguments<any>);
+
+      const error = await request.catch((e) => e);
+      expect(error).toBe(requestError);
+      expect(error.cause).toBe(abortController.signal.reason);
+      expect(error.$metadata.attempts).toBe(1);
+      expect(refreshRetryTokenForRetry).not.toHaveBeenCalled();
+    });
+
+    it("uses the abort reason as the cause when aborted during backoff", async () => {
+      vi.useFakeTimers();
+      const abortController = new AbortController();
+      const reason = new Error("timeout reason");
+      const delayedRetryToken = {
+        ...mockRetryToken,
+        getRetryDelay: () => 1_000,
+      };
+      const retryStrategy = {
+        ...mockRetryStrategy,
+        refreshRetryTokenForRetry: vi.fn().mockResolvedValue(delayedRetryToken),
+      };
+      const next = vi.fn().mockRejectedValue(new Error("retryable"));
+      const contextWithAbortSignal: HandlerExecutionContext = {
+        partition_id: partitionId,
+        [SMITHY_CONTEXT_KEY]: {
+          abortSignal: abortController.signal,
+        },
+      };
+
+      const request = retryMiddleware({
+        maxAttempts: () => Promise.resolve(maxAttempts),
+        retryStrategy: vi.fn().mockResolvedValue(retryStrategy),
+      })(
+        next,
+        contextWithAbortSignal
+      )(args as FinalizeHandlerArguments<any>);
+
+      await vi.waitFor(() => expect(vi.getTimerCount()).toBe(1));
+      abortController.abort(reason);
+
+      await expect(request).rejects.toMatchObject({ name: "AbortError", cause: reason });
+    });
+
     it("stops waiting on a custom retry-token delay without making another request", async () => {
       vi.useFakeTimers();
       const abortController = new AbortController();
