@@ -211,6 +211,74 @@ describe(SmithyRpcV2JsonProtocol.name, () => {
         expect(JSON.parse(body)).toEqual(testCase.expected.body);
       });
     }
+
+    describe("event streams", () => {
+      // Smithy RPC v2 JSON: for requests with event streaming responses, the value of the
+      // Accept header MUST be application/vnd.amazon.eventstream.
+      const eventStreamInput: StaticStructureSchema = [
+        3,
+        "ns",
+        "EventStreamInput",
+        0,
+        ["events"],
+        [[4, "ns", "EventStream", { streaming: 1 }, [], []]],
+      ];
+      const eventStreamOutput: StaticStructureSchema = [
+        3,
+        "ns",
+        "EventStreamOutput",
+        0,
+        ["events"],
+        [[4, "ns", "EventStream", { streaming: 1 }, [], []]],
+      ];
+      const endpointContext = {
+        async endpoint() {
+          return {
+            protocol: "https:",
+            hostname: "example.com",
+            path: "/",
+          };
+        },
+      } as any;
+
+      it("should send the event stream Accept header for an operation with an event stream output", async () => {
+        const protocol = new SmithyRpcV2JsonProtocol({ defaultNamespace: "" });
+        const httpRequest = await protocol.serializeRequest(
+          {
+            namespace: "ns",
+            name: "dummy",
+            input: [3, "ns", "EventStreamInput", 0, ["name"], [0]],
+            output: eventStreamOutput,
+            traits: {},
+          },
+          { name: "a" },
+          endpointContext
+        );
+
+        expect(httpRequest.headers).toEqual({
+          accept: "application/vnd.amazon.eventstream",
+          "content-type": "application/json",
+          "smithy-protocol": "rpc-v2-json",
+        });
+      });
+
+      it("should keep the default Accept header for an operation with an event stream input only", async () => {
+        const protocol = new SmithyRpcV2JsonProtocol({ defaultNamespace: "" });
+        const httpRequest = await protocol.serializeRequest(
+          {
+            namespace: "ns",
+            name: "dummy",
+            input: eventStreamInput,
+            output: [3, "ns", "PlainOutput", 0, ["name"], [0]],
+            traits: {},
+          },
+          {},
+          endpointContext
+        );
+
+        expect(httpRequest.headers.accept).toBe("application/json");
+      });
+    });
   });
 
   describe("deserialization", () => {

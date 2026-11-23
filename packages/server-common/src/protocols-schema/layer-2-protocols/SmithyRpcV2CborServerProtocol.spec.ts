@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { SmithyRpcV2CborServerProtocol } from "./SmithyRpcV2CborServerProtocol";
-import { SerializationException, UnsupportedMediaTypeException } from "../../validation/errors";
+import { NotAcceptableException, SerializationException, UnsupportedMediaTypeException } from "../../validation/errors";
 import type { HttpRequest as IHttpRequest, StaticOperationSchema } from "@smithy/types";
 
 function makeRequest(headers: Record<string, string> = {}, body?: any): IHttpRequest {
@@ -26,6 +26,11 @@ function makeContext(): any {
 
 function makeUnitOpSchema(): StaticOperationSchema {
   return [9, "test", "MyOp", 0, "unit", "unit"] satisfies StaticOperationSchema;
+}
+
+function makeEventStreamOutputOpSchema(): StaticOperationSchema {
+  const streamingUnion: any = [4, "test", "Events", { streaming: 1 }, ["a"], [0]];
+  return [9, "test", "MyOp", 0, "unit", [3, "test", "MyOpOutput", 0, ["events"], [() => streamingUnion]]] as any;
 }
 
 describe("SmithyRpcV2CborServerProtocol", () => {
@@ -176,6 +181,33 @@ describe("SmithyRpcV2CborServerProtocol", () => {
       const request = makeRequest({ "smithy-protocol": "rpc-v2-cbor" });
       const result = await protocol.deserializeRequest(makeUnitOpSchema(), makeContext(), request);
       expect(result).toEqual({});
+    });
+  });
+
+  describe("request validation - Accept", () => {
+    it("accepts the event stream media type for an operation with an event stream output", async () => {
+      const request = makeRequest({
+        "smithy-protocol": "rpc-v2-cbor",
+        accept: "application/vnd.amazon.eventstream",
+      });
+      const result = await protocol.deserializeRequest(makeEventStreamOutputOpSchema(), makeContext(), request);
+      expect(result).toEqual({});
+    });
+
+    it("accepts the default content type for an operation with an event stream output", async () => {
+      const request = makeRequest({ "smithy-protocol": "rpc-v2-cbor", accept: "application/cbor" });
+      const result = await protocol.deserializeRequest(makeEventStreamOutputOpSchema(), makeContext(), request);
+      expect(result).toEqual({});
+    });
+
+    it("rejects the event stream media type for an operation without an event stream output", async () => {
+      const request = makeRequest({
+        "smithy-protocol": "rpc-v2-cbor",
+        accept: "application/vnd.amazon.eventstream",
+      });
+      await expect(protocol.deserializeRequest(makeUnitOpSchema(), makeContext(), request)).rejects.toBeInstanceOf(
+        NotAcceptableException
+      );
     });
   });
 

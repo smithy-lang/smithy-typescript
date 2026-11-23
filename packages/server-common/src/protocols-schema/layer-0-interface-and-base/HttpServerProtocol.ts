@@ -158,10 +158,17 @@ export abstract class HttpServerProtocol
 
   /**
    * Validates the Accept header is compatible with this protocol's response content type.
+   *
+   * @param eventStreamResponse - true when the operation responds with an event stream, so that
+   * application/vnd.amazon.eventstream is also acceptable.
    */
-  protected validateAccept(request: IHttpRequest): void {
+  protected validateAccept(request: IHttpRequest, eventStreamResponse = false): void {
     const accept = this.getHeaderValue(request, "accept");
-    if (accept !== undefined && !acceptMatches(accept, this.getDefaultContentType())) {
+    if (
+      accept !== undefined &&
+      !acceptMatches(accept, this.getDefaultContentType()) &&
+      !(eventStreamResponse && acceptMatches(accept, "application/vnd.amazon.eventstream"))
+    ) {
       throw new NotAcceptableException();
     }
   }
