@@ -2,6 +2,12 @@
 
 [Commit logs](https://github.com/smithy-lang/smithy-typescript/commits/main/smithy-typescript-codegen)
 
+## 0.56.0 (2026-11-23)
+
+### Features
+
+- Let clients offer a service default socket timeout ([#2333](https://github.com/smithy-lang/smithy-typescript/pull/2333))
+
 ## 0.55.0 (2026-10-27)
 
 ### Features
