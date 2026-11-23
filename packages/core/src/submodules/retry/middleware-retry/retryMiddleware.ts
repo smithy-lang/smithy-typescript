@@ -85,9 +85,13 @@ export function bindRetryMiddleware(isStreamingPayload: IsStreamingPayload) {
             }
 
             try {
+              if (abortSignal?.aborted) {
+                // the request itself was aborted: keep its error, which carries the abort reason.
+                throw lastError;
+              }
               retryToken = await race(retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo), abortSignal);
             } catch (refreshError) {
-              if (abortSignal?.aborted && isAbortError(refreshError)) {
+              if (refreshError !== lastError && abortSignal?.aborted && isAbortError(refreshError)) {
                 throw refreshError;
               }
               if (!lastError.$metadata) {
