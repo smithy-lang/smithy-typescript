@@ -106,6 +106,38 @@ describe("NodeHttpHandler", () => {
         expect(vi.mocked(hRequest as any).mock.calls[0][0]?.agent.maxSockets).toEqual(50);
       });
 
+      it("passes the Node global proxy environment to owned agents", async () => {
+        const httpAgentOptions = (http.globalAgent as any).options;
+        const httpsAgentOptions = (https.globalAgent as any).options;
+        const previousHttpProxyEnv = httpAgentOptions.proxyEnv;
+        const previousHttpsProxyEnv = httpsAgentOptions.proxyEnv;
+        const httpProxyEnv = { HTTP_PROXY: "http://proxy.example" };
+        const httpsProxyEnv = { HTTPS_PROXY: "http://proxy.example" };
+
+        httpAgentOptions.proxyEnv = httpProxyEnv;
+        httpsAgentOptions.proxyEnv = httpsProxyEnv;
+
+        try {
+          const nodeHttpHandler = new NodeHttpHandler();
+          await nodeHttpHandler.handle({ protocol: "http:", hostname: "[host]", path: "/" } as any);
+          await nodeHttpHandler.handle({ protocol: "https:", hostname: "[host]", path: "/" } as any);
+
+          expect((vi.mocked(hRequest as any).mock.calls[0][0]?.agent as any)?.options?.proxyEnv).toBe(httpProxyEnv);
+          expect((vi.mocked(hsRequest as any).mock.calls[0][0]?.agent as any)?.options?.proxyEnv).toBe(httpsProxyEnv);
+        } finally {
+          if (previousHttpProxyEnv === undefined) {
+            delete httpAgentOptions.proxyEnv;
+          } else {
+            httpAgentOptions.proxyEnv = previousHttpProxyEnv;
+          }
+          if (previousHttpsProxyEnv === undefined) {
+            delete httpsAgentOptions.proxyEnv;
+          } else {
+            httpsAgentOptions.proxyEnv = previousHttpsProxyEnv;
+          }
+        }
+      });
+
       it.each([
         ["an options hash", { socketAcquisitionWarningTimeout: randomSocketAcquisitionWarningTimeout }],
         [

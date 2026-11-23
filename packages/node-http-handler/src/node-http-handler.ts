@@ -29,6 +29,17 @@ interface ResolvedNodeHttpHandlerConfig extends Omit<NodeHttpHandlerOptions, "ht
   httpsAgent: hsAgentType;
 }
 
+type NodeAgentOptions = {
+  proxyEnv?: NodeJS.ProcessEnv;
+};
+
+type NodeAgentWithOptions = {
+  options?: NodeAgentOptions;
+};
+
+const getProxyEnv = (agent: hAgentType | hsAgentType): NodeJS.ProcessEnv | undefined =>
+  (agent as unknown as NodeAgentWithOptions).options?.proxyEnv;
+
 /**
  * A default of 0 means no timeout.
  *
@@ -205,11 +216,13 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         // Because awaiting 100-continue desynchronizes the request and request body transmission,
         // such requests must be offloaded to a separate Agent instance.
         // Additional logic will exist on the client using this handler to determine whether to add the header at all.
+        const proxyEnv = getProxyEnv(isSSL ? config.httpsAgent : config.httpAgent!);
         agent = new (isSSL ? node_https.Agent : hAgent!)({
           keepAlive: false,
           // This is an explicit value matching the default (Infinity).
           // This should allow the connection to close cleanly after making the single request.
           maxSockets: Infinity,
+          ...(proxyEnv ? { proxyEnv } : {}),
         });
       }
 
@@ -395,14 +408,16 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
             this.externalAgent = true;
             return httpAgent as hAgentType;
           }
-          return new hAgent({ keepAlive, maxSockets, ...httpAgent });
+          const proxyEnv = getProxyEnv(node_http.globalAgent);
+          return new hAgent({ keepAlive, maxSockets, ...(proxyEnv ? { proxyEnv } : {}), ...httpAgent });
         })()),
       httpsAgent: (() => {
         if (httpsAgent instanceof node_https.Agent || typeof (httpsAgent as hsAgentType)?.destroy === "function") {
           this.externalAgent = true;
           return httpsAgent as hsAgentType;
         }
-        return new node_https.Agent({ keepAlive, maxSockets, ...httpsAgent });
+        const proxyEnv = getProxyEnv(node_https.globalAgent);
+        return new node_https.Agent({ keepAlive, maxSockets, ...(proxyEnv ? { proxyEnv } : {}), ...httpsAgent });
       })(),
       logger,
     };
