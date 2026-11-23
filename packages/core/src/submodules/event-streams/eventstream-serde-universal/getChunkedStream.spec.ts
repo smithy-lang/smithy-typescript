@@ -1,5 +1,5 @@
 import { Readable, type ReadableOptions } from "node:stream";
-import { describe, expect, test as it } from "vitest";
+import { describe, expect, test as it, vi } from "vitest";
 
 import { getChunkedStream } from "./getChunkedStream";
 
@@ -66,6 +66,102 @@ export class MockEventMessageSource extends Readable {
 }
 
 describe("getChunkedStream", () => {
+  it.each([recordEventMessage, Buffer.concat([recordEventMessage, statsEventMessage])])(
+    "closes the source when the consumer stops after a message (%#)",
+    async (chunk) => {
+      const cleanup = vi.fn();
+      const source = (async function* () {
+        try {
+          yield chunk;
+          yield endEventMessage;
+        } finally {
+          await Promise.resolve();
+          cleanup();
+        }
+      })();
+
+      for await (const message of getChunkedStream(source)) {
+        expect(message).toEqual(new Uint8Array(recordEventMessage));
+        break;
+      }
+
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("closes the source when the consumer throws", async () => {
+    const cleanup = vi.fn();
+    const source = (async function* () {
+      try {
+        yield recordEventMessage;
+        yield endEventMessage;
+      } finally {
+        cleanup();
+      }
+    })();
+    const error = new Error("Consumer failed");
+
+    await expect(
+      (async () => {
+        for await (const message of getChunkedStream(source)) {
+          expect(message).toEqual(new Uint8Array(recordEventMessage));
+          throw error;
+        }
+      })()
+    ).rejects.toBe(error);
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the source when processing a message fails", async () => {
+    const cleanup = vi.fn();
+    const source = (async function* () {
+      try {
+        yield new Uint8Array([0, 0, 0, 1]);
+      } finally {
+        cleanup();
+      }
+    })();
+
+    await expect(getChunkedStream(source)[Symbol.asyncIterator]().next()).rejects.toBeInstanceOf(RangeError);
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it("destroys a readable source when the consumer stops early", async () => {
+    const source = new MockEventMessageSource({
+      messages: [recordEventMessage, statsEventMessage, endEventMessage],
+      emitSize: recordEventMessage.length,
+    });
+
+    try {
+      for await (const message of getChunkedStream(source)) {
+        expect(message).toEqual(new Uint8Array(recordEventMessage));
+        break;
+      }
+      expect(source.destroyed).toBe(true);
+    } finally {
+      source.destroy();
+    }
+  });
+
+  it("does not close a source iterator again after natural completion", async () => {
+    const close = vi.fn(async () => ({ done: true as const, value: undefined }));
+    const source = {
+      [Symbol.asyncIterator]: () => ({
+        next: vi
+          .fn()
+          .mockResolvedValueOnce({ done: false, value: recordEventMessage })
+          .mockResolvedValue({ done: true }),
+        return: close,
+      }),
+    };
+    const messages = [];
+    for await (const message of getChunkedStream(source)) {
+      messages.push(message);
+    }
+    expect(messages).toEqual([new Uint8Array(recordEventMessage)]);
+    expect(close).not.toHaveBeenCalled();
+  });
+
   it("splits payloads into individual messages", async () => {
     const messages = [];
     const mockMessages = [recordEventMessage, statsEventMessage, endEventMessage];
