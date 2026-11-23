@@ -18,20 +18,7 @@ export function getChunkedStream(source: AsyncIterable<Uint8Array>): AsyncIterab
   };
 
   const iterator = async function* () {
-    const sourceIterator = source[Symbol.asyncIterator]();
-    while (true) {
-      const { value, done } = await sourceIterator.next();
-      if (done) {
-        if (!currentMessageTotalLength) {
-          return;
-        } else if (currentMessageTotalLength === currentMessagePendingLength) {
-          yield currentMessage as Uint8Array;
-        } else {
-          throw new Error("Truncated event message received.");
-        }
-        return;
-      }
-
+    for await (const value of source) {
       const chunkLength = value.length;
       let currentOffset = 0;
 
@@ -89,6 +76,14 @@ export function getChunkedStream(source: AsyncIterable<Uint8Array>): AsyncIterab
           currentMessagePendingLength = 0;
         }
       }
+    }
+
+    if (!currentMessageTotalLength) {
+      return;
+    } else if (currentMessageTotalLength === currentMessagePendingLength) {
+      yield currentMessage as Uint8Array;
+    } else {
+      throw new Error("Truncated event message received.");
     }
   };
 
