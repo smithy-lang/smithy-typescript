@@ -23,6 +23,10 @@ export function getChunkedStream(source: AsyncIterable<Uint8Array>): AsyncIterab
       const { value, done } = await sourceIterator.next();
       if (done) {
         if (!currentMessageTotalLength) {
+          if (currentMessagePendingLength > 0) {
+            // the source ended in the 4-byte total length of a message
+            throw new Error("Truncated event message received.");
+          }
           return;
         } else if (currentMessageTotalLength === currentMessagePendingLength) {
           yield currentMessage as Uint8Array;
