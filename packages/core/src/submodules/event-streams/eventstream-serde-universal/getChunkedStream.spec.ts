@@ -160,4 +160,26 @@ describe("getChunkedStream", () => {
     }
     expect(error!.message).toEqual("Truncated event message received.");
   });
+
+  it.each([0, 1, 2, 3, 4, 5])("ends after a message and %i bytes of the next message", async (cut) => {
+    const source = (async function* () {
+      yield recordEventMessage;
+      yield endEventMessage.subarray(0, cut);
+    })();
+    const messages: Uint8Array[] = [];
+    let error: Error | undefined = undefined;
+    try {
+      for await (const msg of getChunkedStream(source)) {
+        messages.push(msg);
+      }
+    } catch (err) {
+      error = err;
+    }
+    expect(messages.length).toBe(1);
+    if (cut === 0) {
+      expect(error).toBeUndefined();
+    } else {
+      expect(error?.message).toEqual("Truncated event message received.");
+    }
+  });
 });
