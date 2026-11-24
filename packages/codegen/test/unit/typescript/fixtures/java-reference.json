@@ -1,0 +1,12 @@
+{
+  "imports1": "// @ts-ignore: json\nimport pkg from \"../../package.json\"; // eslint-disable-line\n\nimport type { OnlyType2 } from \"@aws-sdk/Types\";\nimport { type Type1, type Type2 as T2, alpha as beta, Zed } from \"@smithy/types\";\nimport { B } from \"alpha-pkg\";\nimport { A } from \"Beta-pkg\";\n\nimport { Up } from \"../../../Up\";\nimport { Bar } from \"../../commands/Bar\";\nimport { Foo } from \"../Foo\";\nimport { Self } from \"../index\";\nimport type { OnlyType } from \"../OnlyType\";\n\n",
+  "imports2": "import {\n  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,\n  BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB,\n  CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,\n} from \"@smithy/some-long-package-name\";\nimport type {\n  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,\n  YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY,\n  ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ as Zed,\n} from \"@smithy/types\";\n\nimport { Foo } from \"./commands\";\nimport { Foo } from \"./models/Foo\";\n\n",
+  "imports3": "import { J, K } from \"../..\";\nimport { L } from \"../../..\";\nimport { I } from \"../../../../../i\";\nimport { H } from \"../../../../h\";\nimport { G } from \"../../../g\";\nimport { F } from \"../../x\";\n\n",
+  "writer1": "// smithy-typescript generated code\nimport { cbor } from \"@smithy/core/cbor\";\nimport { type MetadataBearer as __MetadataBearer, Z } from \"@smithy/types\";\nimport { fs } from \"fs\";\n\nimport { Rel } from \"../sibling\";\n\n/**\n * Hello $L *\\/ {x}\n * line2\n */\nexport const x = \"a\\\"b$\";\nif (a) {\n  b();\n}\n",
+  "writer2": "// smithy-typescript generated code\n// @ts-ignore: why\nimport x from \"y\"; // eslint-disable-line\nimport { a } from \"b\";\n\nconst q = 1;\n",
+  "writer3": "// smithy-typescript generated code\n\n  const q = 1;\n",
+  "writer4": "// smithy-typescript generated code\nclass A {}\nclass B {\n  x\n}\nclass C {\n  x\n}\nclass D {}\n",
+  "punct": "abc.|abc.|a\nb",
+  "deps": "^4.20.0 ^3.41.1 0.6.0 ^6.0.0 0.0.0",
+  "utils": "\"a-b\" ab \"1a\" \"a\\\"c\" | \"b\""
+}

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "declarationDir": "dist-types",
+    "rootDir": "src",
+    "noCheck": false,
+    "paths": {
+      "@smithy/codegen/internal": ["./src/submodules/internal/index.ts"]
+    }
+  },
+  "extends": "../../tsconfig.types.json",
+  "include": ["src/"]
+}
