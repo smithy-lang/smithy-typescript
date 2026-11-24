@@ -434,6 +434,29 @@ describe(EventStreamSerde.name, () => {
         ]);
       });
 
+      it("skips unknown event types with the names of Object.prototype members", async () => {
+        const events = {
+          async *[Symbol.asyncIterator]() {
+            yield { A: { name: "a" } };
+            for (const eventType of ["toString", "constructor", "__proto__", "hasOwnProperty"]) {
+              yield { [eventType]: { name: eventType } };
+            }
+            yield { B: { name: "b" } };
+          },
+        };
+        const response = new HttpResponse({
+          statusCode: 200,
+          body: eventStreamMarshaller.serialize(events, messageSerializer),
+        });
+
+        const asyncIterable = await eventStreamSerde.deserializeEventStream({
+          response,
+          responseSchema: NormalizedSchema.of(eventStreamContainerSchema),
+        });
+
+        expect(await collect(asyncIterable)).toEqual([{ A: { name: `a` } }, { B: { name: `b` } }]);
+      });
+
       it("deserializes event streams containing an initial-response", async () => {
         const response = new HttpResponse({
           statusCode: 200,
