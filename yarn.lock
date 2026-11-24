@@ -1831,6 +1831,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@smithy/codegen@workspace:packages/codegen":
+  version: 0.0.0-use.local
+  resolution: "@smithy/codegen@workspace:packages/codegen"
+  dependencies:
+    concurrently: "npm:7.0.0"
+    premove: "npm:4.0.0"
+    tslib: "npm:^2.6.2"
+  languageName: unknown
+  linkType: soft
+
 "@smithy/config-resolver@workspace:packages/config-resolver":
   version: 0.0.0-use.local
   resolution: "@smithy/config-resolver@workspace:packages/config-resolver"

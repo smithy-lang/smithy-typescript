@@ -1,0 +1,67 @@
+{
+  "name": "@smithy/codegen",
+  "version": "0.0.0",
+  "private": true,
+  "description": "JavaScript port of the Smithy TypeScript schema-based client codegen",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "AWS Smithy Team",
+    "email": "",
+    "url": "https://smithy.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smithy-lang/smithy-typescript.git",
+    "directory": "packages/codegen"
+  },
+  "files": [
+    "./internal.d.ts",
+    "./internal.js",
+    "dist-*/**"
+  ],
+  "sideEffects": false,
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "module": "./dist-es/index.js",
+      "node": "./dist-cjs/index.js",
+      "import": "./dist-es/index.js",
+      "require": "./dist-cjs/index.js"
+    },
+    "./package.json": {
+      "module": "./package.json",
+      "node": "./package.json",
+      "import": "./package.json",
+      "require": "./package.json"
+    },
+    "./internal": {
+      "types": "./dist-types/submodules/internal/index.d.ts",
+      "module": "./dist-es/submodules/internal/index.js",
+      "node": "./dist-cjs/submodules/internal/index.js",
+      "import": "./dist-es/submodules/internal/index.js",
+      "require": "./dist-cjs/submodules/internal/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/snapshot-dependency-versions.js && concurrently 'yarn:build:types' 'yarn:build:es:cjs'",
+    "build:es:cjs": "node ../../scripts/compilation/es_cjs.js",
+    "build:types": "node scripts/snapshot-dependency-versions.js && premove dist-types && yarn g:tsc -p tsconfig.types.json",
+    "clean": "premove dist-cjs dist-es dist-types",
+    "dev": "node scripts/snapshot-dependency-versions.js && npx tsx --tsconfig tsconfig.test.json scripts/dev.ts",
+    "snapshot": "node scripts/snapshot-dependency-versions.js",
+    "test": "node scripts/snapshot-dependency-versions.js && yarn g:vitest run --config vitest.config.mts"
+  },
+  "dependencies": {
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "concurrently": "7.0.0",
+    "premove": "4.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

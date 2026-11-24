@@ -63,3 +63,7 @@ local.properties
 
 # doc-gen
 api-extractor-packages
+# JavaScript codegen dev output: generated clients are ignored, diffs against private/ are tracked
+private-js/*
+!private-js/*.diffs/
+packages/codegen/src/typescript/DependencyVersionsSnapshot.ts

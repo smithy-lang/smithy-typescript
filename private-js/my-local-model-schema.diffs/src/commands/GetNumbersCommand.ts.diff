@@ -1,0 +1,17 @@
+--- expected/src/commands/GetNumbersCommand.ts
++++ actual/src/commands/GetNumbersCommand.ts
+@@ -84,12 +84,12 @@
+  *
+  * @throws {@link CodedThrottlingError} (client fault)
+  *
++ * @throws {@link HaltError} (client fault)
++ *
+  * @throws {@link MysteryThrottlingError} (client fault)
+  *
+  * @throws {@link RetryableError} (client fault)
+  *
+- * @throws {@link HaltError} (client fault)
+- *
+  * @throws {@link XYZServiceServiceException} (client fault)
+  *
+  * @throws {@link MainServiceLinkedError} (client fault)

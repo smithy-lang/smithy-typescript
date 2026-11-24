@@ -1,0 +1,144 @@
+--- expected/test/functional/rpcv2cbor.spec.ts
++++ actual/test/functional/rpcv2cbor.spec.ts
+@@ -598,9 +598,9 @@
+ });
+ 
+ /**
+- * Parses simple RpcV2 Cbor errors
++ * Parses a complex error with no message member
+  */
+-it.skip("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
++it.skip("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
+   const client = new RpcV2ProtocolClient({
+     ...clientParams,
+     requestHandler: new ResponseDeserializationTestHandler(
+@@ -610,7 +610,7 @@
+         "smithy-protocol": "rpc-v2-cbor",
+         "content-type": "application/cbor",
+       },
+-      `v2ZfX3R5cGV4LnNtaXRoeS5wcm90b2NvbHRlc3RzLnJwY3YyQ2JvciNJbnZhbGlkR3JlZXRpbmdnTWVzc2FnZWJIaf8=`
++      `v2ZfX3R5cGV4K3NtaXRoeS5wcm90b2NvbHRlc3RzLnJwY3YyQ2JvciNDb21wbGV4RXJyb3JoVG9wTGV2ZWxpVG9wIGxldmVsZk5lc3RlZL9jRm9vY2Jhcv//`
+     ),
+   });
+ 
+@@ -620,16 +620,19 @@
+   try {
+     await client.send(command);
+   } catch (err) {
+-    if (err.name !== "InvalidGreeting") {
++    if (err.name !== "ComplexError") {
+       console.log(err);
+-      fail(`Expected a InvalidGreeting to be thrown, got ${err.name} instead`);
++      fail(`Expected a ComplexError to be thrown, got ${err.name} instead`);
+       return;
+     }
+     const r: any = err;
+     expect(r.$metadata.httpStatusCode).toBe(400);
+     const paramsToValidate: any = [
+       {
+-        message: "Hi",
++        TopLevel: "Top level",
++        Nested: {
++          Foo: "bar",
++        },
+       },
+     ][0];
+     Object.keys(paramsToValidate).forEach((param) => {
+@@ -648,10 +651,7 @@
+   fail("Expected an exception to be thrown from response");
+ });
+ 
+-/**
+- * Parses a complex error with no message member
+- */
+-it.skip("RpcV2CborComplexError:Error:GreetingWithErrors", async () => {
++it.skip("RpcV2CborEmptyComplexError:Error:GreetingWithErrors", async () => {
+   const client = new RpcV2ProtocolClient({
+     ...clientParams,
+     requestHandler: new ResponseDeserializationTestHandler(
+@@ -661,7 +661,7 @@
+         "smithy-protocol": "rpc-v2-cbor",
+         "content-type": "application/cbor",
+       },
+-      `v2ZfX3R5cGV4K3NtaXRoeS5wcm90b2NvbHRlc3RzLnJwY3YyQ2JvciNDb21wbGV4RXJyb3JoVG9wTGV2ZWxpVG9wIGxldmVsZk5lc3RlZL9jRm9vY2Jhcv//`
++      `v2ZfX3R5cGV4K3NtaXRoeS5wcm90b2NvbHRlc3RzLnJwY3YyQ2JvciNDb21wbGV4RXJyb3L/`
+     ),
+   });
+ 
+@@ -678,31 +678,15 @@
+     }
+     const r: any = err;
+     expect(r.$metadata.httpStatusCode).toBe(400);
+-    const paramsToValidate: any = [
+-      {
+-        TopLevel: "Top level",
+-        Nested: {
+-          Foo: "bar",
+-        },
+-      },
+-    ][0];
+-    Object.keys(paramsToValidate).forEach((param) => {
+-      expect(
+-        r[param],
+-        `The output field ${param} should have been defined in ${JSON.stringify(
+-          r,
+-          (_, v) => (typeof v === "bigint" ? v.toString() : v),
+-          2
+-        )}`
+-      ).toBeDefined();
+-      expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
+-    });
+     return;
+   }
+   fail("Expected an exception to be thrown from response");
+ });
+ 
+-it.skip("RpcV2CborEmptyComplexError:Error:GreetingWithErrors", async () => {
++/**
++ * Parses simple RpcV2 Cbor errors
++ */
++it.skip("RpcV2CborInvalidGreetingError:Error:GreetingWithErrors", async () => {
+   const client = new RpcV2ProtocolClient({
+     ...clientParams,
+     requestHandler: new ResponseDeserializationTestHandler(
+@@ -712,7 +696,7 @@
+         "smithy-protocol": "rpc-v2-cbor",
+         "content-type": "application/cbor",
+       },
+-      `v2ZfX3R5cGV4K3NtaXRoeS5wcm90b2NvbHRlc3RzLnJwY3YyQ2JvciNDb21wbGV4RXJyb3L/`
++      `v2ZfX3R5cGV4LnNtaXRoeS5wcm90b2NvbHRlc3RzLnJwY3YyQ2JvciNJbnZhbGlkR3JlZXRpbmdnTWVzc2FnZWJIaf8=`
+     ),
+   });
+ 
+@@ -722,13 +706,29 @@
+   try {
+     await client.send(command);
+   } catch (err) {
+-    if (err.name !== "ComplexError") {
++    if (err.name !== "InvalidGreeting") {
+       console.log(err);
+-      fail(`Expected a ComplexError to be thrown, got ${err.name} instead`);
++      fail(`Expected a InvalidGreeting to be thrown, got ${err.name} instead`);
+       return;
+     }
+     const r: any = err;
+     expect(r.$metadata.httpStatusCode).toBe(400);
++    const paramsToValidate: any = [
++      {
++        message: "Hi",
++      },
++    ][0];
++    Object.keys(paramsToValidate).forEach((param) => {
++      expect(
++        r[param],
++        `The output field ${param} should have been defined in ${JSON.stringify(
++          r,
++          (_, v) => (typeof v === "bigint" ? v.toString() : v),
++          2
++        )}`
++      ).toBeDefined();
++      expect(equivalentContents(paramsToValidate[param], r[param])).toBe(true);
++    });
+     return;
+   }
+   fail("Expected an exception to be thrown from response");

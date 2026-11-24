@@ -1,0 +1,16 @@
+{
+  "c1": "a\n  b\nc",
+  "c2": "x in y",
+  "c3": "a  b   \n  c",
+  "c4": "- x,\n- y\n",
+  "c5": "{\n  l1\n  l2\n}",
+  "c6": "pre l1\n    l2 post",
+  "c7": "k=v;",
+  "c8": "q and \"r\"",
+  "c9": "$ $L [1, 2]",
+  "w1": "a\n    b\n    c\n        d\ne\n",
+  "w2": "// a\n//\n// b\n",
+  "w3": "abc\nd\n",
+  "w4": "y\nz\n",
+  "w5": "a\nb\n"
+}

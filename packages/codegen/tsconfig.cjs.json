@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "dist-cjs",
+    "rootDir": "src",
+    "paths": {
+      "@smithy/codegen/internal": ["./src/submodules/internal/index.ts"]
+    }
+  },
+  "extends": "../../tsconfig.cjs.json",
+  "include": ["src/"],
+  "exclude": ["src/**/*.fixture.ts", "src/**/*.spec.ts"]
+}

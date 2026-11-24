@@ -11,6 +11,11 @@ const packages = path.join(root, "packages");
 const walk = require("./utils/walk");
 const pkgJsonEnforcement = require("./package-json-enforcement");
 
+/**
+ * Packages whose sources contain code templates that look like imports, so they are not scanned.
+ */
+const skipped = ["@smithy/codegen"];
+
 const node_libraries = [
   "buffer",
   "child_process",
@@ -43,6 +48,9 @@ const node_libraries = [
   const errors = [];
   for (const packageFolder of fs.readdirSync(packages)) {
     const pkgJsonPath = path.join(packages, packageFolder, "package.json");
+    if (skipped.includes(require(pkgJsonPath).name)) {
+      continue;
+    }
     errors.push(...pkgJsonEnforcement(pkgJsonPath, true));
     const srcPath = path.join(packages, packageFolder, "src");
     const pkgJson = require(pkgJsonPath);
