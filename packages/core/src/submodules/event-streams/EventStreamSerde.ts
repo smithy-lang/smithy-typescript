@@ -201,7 +201,7 @@ export class EventStreamSerde {
           [initialResponseMarker]: true,
           ...dataObject,
         };
-      } else if (unionMember in memberSchemas) {
+      } else if (hasOwn(memberSchemas, unionMember)) {
         const eventStreamSchema = memberSchemas[unionMember];
 
         if (eventStreamSchema.isStructSchema()) {
