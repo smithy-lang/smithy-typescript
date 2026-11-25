@@ -22,6 +22,11 @@ export const isClockSkewError = (error: SdkError) => CLOCK_SKEW_ERROR_CODES.incl
 export const isClockSkewCorrectedError = (error: SdkError) => error.$metadata?.clockSkewCorrected;
 
 /**
+ * @returns whether the credentials that signed the request were invalidated, so a retry signs with refreshed credentials.
+ */
+export const isCredentialsInvalidatedError = (error: SdkError) => error.$metadata?.credentialsInvalidated;
+
+/**
  *
  * @internal
  */
@@ -62,6 +67,7 @@ export const isTransientError = (error: SdkError, depth = 0): boolean =>
   error?.name !== "AbortError" &&
   (isRetryableByTrait(error) ||
     isClockSkewCorrectedError(error) ||
+    isCredentialsInvalidatedError(error) ||
     (error.name === "InvalidSignatureException" && error.message?.includes("Signature expired")) ||
     TRANSIENT_ERROR_CODES.includes(error.name) ||
     NODEJS_TIMEOUT_ERROR_CODES.includes((error as { code?: string })?.code || "") ||

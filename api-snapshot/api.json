@@ -427,6 +427,7 @@
     "isBrowserNetworkError": "function",
     "isClockSkewCorrectedError": "function",
     "isClockSkewError": "function",
+    "isCredentialsInvalidatedError": "function",
     "isNodeJsHttp2TransientError": "function",
     "isRetryableByTrait": "function",
     "isServerError": "function",

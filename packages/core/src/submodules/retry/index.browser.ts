@@ -8,6 +8,7 @@ export {
   isRetryableByTrait,
   isClockSkewError,
   isClockSkewCorrectedError,
+  isCredentialsInvalidatedError,
   isBrowserNetworkError,
   isThrottlingError,
   isTransientError,
