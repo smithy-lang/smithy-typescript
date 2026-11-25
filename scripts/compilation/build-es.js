@@ -412,8 +412,9 @@ function processDir(dir, srcDir, outDir) {
   return count;
 }
 
-// Resolve the tsc binary path from the workspace root node_modules/.bin.
-const tscPath = path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc");
+// Run the workspace compiler through Node instead of a platform-specific package-manager shim.
+const typescriptPackage = require.resolve("typescript/package.json");
+const tscPath = path.resolve(path.dirname(typescriptPackage), require(typescriptPackage).bin.tsc);
 
 /**
  * Transpile src/ -> dist-es/ for a given package directory.
@@ -428,7 +429,7 @@ function buildEs(packageDir) {
 
   if (USE_TSC) {
     // Dispatch tsc CLI directly — tsconfig.es.json already has noCheck: true.
-    execFileSync(tscPath, ["-p", "tsconfig.es.json"], {
+    execFileSync(process.execPath, [tscPath, "-p", "tsconfig.es.json"], {
       cwd: packageDir,
       stdio: "inherit",
     });
