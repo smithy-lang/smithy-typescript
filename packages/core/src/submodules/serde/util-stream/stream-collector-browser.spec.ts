@@ -1,6 +1,6 @@
 import { describe, expect, test as it } from "vitest";
 
-import { streamCollector } from "./stream-collector.browser";
+import { collectReadableStream, streamCollector } from "./stream-collector.browser";
 
 describe("streamCollector (browser)", () => {
   it("collects a Blob into Uint8Array", async () => {
@@ -37,4 +37,54 @@ describe("streamCollector (browser)", () => {
     const result = await streamCollector(stream);
     expect(result).toEqual(new Uint8Array(0));
   });
+
+  for (const collect of [collectReadableStream, streamCollector]) {
+    describe(`${collect.name} reader cleanup`, () => {
+      it.each([{ chunks: [] }, { chunks: [new Uint8Array([1, 2]), new Uint8Array([3, 4])] }])(
+        "releases the reader after collecting $chunks.length chunks",
+        async ({ chunks }) => {
+          const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+              for (const chunk of chunks) {
+                controller.enqueue(chunk);
+              }
+              controller.close();
+            },
+          });
+
+          expect(await collect(stream)).toEqual(new Uint8Array(chunks.flatMap((chunk) => [...chunk])));
+          expect(stream.locked).toBe(false);
+          const reader = stream.getReader();
+          try {
+            expect(await reader.read()).toEqual({ done: true, value: undefined });
+          } finally {
+            reader.releaseLock();
+          }
+        }
+      );
+
+      it.each([false, true])("releases the reader after a read error (after chunk: %s)", async (afterChunk) => {
+        const error = new Error("source read failed");
+        let reads = 0;
+        const stream = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            if (afterChunk && reads++ === 0) {
+              controller.enqueue(new Uint8Array([1, 2]));
+            } else {
+              controller.error(error);
+            }
+          },
+        });
+
+        await expect(collect(stream)).rejects.toBe(error);
+        expect(stream.locked).toBe(false);
+        const reader = stream.getReader();
+        try {
+          await expect(reader.read()).rejects.toBe(error);
+        } finally {
+          reader.releaseLock();
+        }
+      });
+    });
+  }
 });

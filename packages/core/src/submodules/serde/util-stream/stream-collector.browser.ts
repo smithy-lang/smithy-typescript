@@ -25,15 +25,19 @@ export async function collectReadableStream(stream: ReadableStream): Promise<Uin
   const chunks = [];
   const reader = stream.getReader();
   let length = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (value) {
-      chunks.push(value);
-      length += value.length;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (value) {
+        chunks.push(value);
+        length += value.length;
+      }
+      if (done) {
+        break;
+      }
     }
-    if (done) {
-      break;
-    }
+  } finally {
+    reader.releaseLock();
   }
   return concatBytes(chunks, length);
 }
