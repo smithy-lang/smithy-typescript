@@ -8,6 +8,11 @@ import { alphabetByEncoding, bitsPerByte, bitsPerLetter } from "./constants-for-
  * @see https://tools.ietf.org/html/rfc4648#section-4
  */
 export const fromBase64 = (input: string): Uint8Array => {
+  const paddingIndex = input.indexOf("=");
+  if (input.length % 4 !== 0 || (paddingIndex !== -1 && (paddingIndex < input.length - 2 || !input.endsWith("=")))) {
+    throw new TypeError("Incorrect padding on base64 string.");
+  }
+
   let totalByteLength = (input.length / 4) * 3;
   if (input.slice(-2) === "==") {
     totalByteLength -= 2;
