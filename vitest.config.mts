@@ -13,7 +13,7 @@ export default defineConfig({
       // with the benchmark harness but zero it() tests, which vitest rejects.
       "private/my-local-model-schema-json/test/functional/**",
     ],
-    include: ["packages/**/*.spec.ts", "private/**/*.spec.ts"],
+    include: ["packages/**/*.spec.ts", "private/**/*.spec.ts", "scripts/**/*.spec.ts"],
     environment: "node",
     globals: true,
   },
