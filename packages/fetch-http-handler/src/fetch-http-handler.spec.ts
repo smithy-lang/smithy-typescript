@@ -47,6 +47,7 @@ const globalFetch = global.fetch;
     const response = await fetchHttpHandler.handle({} as any, {});
 
     expect(mockFetch.mock.calls.length).toBe(1);
+    expect(mockRequest).toHaveBeenLastCalledWith(expect.any(String), expect.objectContaining({ redirect: "error" }));
     expect(await blobToText(response.response.body)).toBe("FOO");
   });
 
@@ -587,6 +588,7 @@ const globalFetch = global.fetch;
           return {
             referrer: "me",
             cache: "reload",
+            redirect: "follow",
             headers: {
               a: "a",
               b: req.headers.b,
@@ -607,6 +609,7 @@ const globalFetch = global.fetch;
       expect(mockRequest.mock.calls[0][1]).toEqual({
         referrer: "me",
         cache: "reload",
+        redirect: "follow",
         headers: {
           a: "a",
           b: "b",
