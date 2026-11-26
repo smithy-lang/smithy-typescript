@@ -226,6 +226,18 @@ describe("HeaderMarshaller", () => {
       ).toThrowError("Invalid UUID received");
     });
 
+    it("should reject an invalid timestamp instead of encoding the Unix epoch", () => {
+      expect(() => marshaller.format({ time: { type: "timestamp", value: new Date(NaN) } })).toThrowError(
+        "NaN must be finite to represent as an Int64"
+      );
+    });
+
+    it.each([0, -1, 8640000000000000, -8640000000000000])("should round-trip timestamp %s", (milliseconds) => {
+      const headers: MessageHeaders = { time: { type: "timestamp", value: new Date(milliseconds) } };
+      const encoded = marshaller.format(headers);
+      expect(marshaller.parse(new DataView(encoded.buffer))).toEqual(headers);
+    });
+
     describe("size validation", () => {
       it("should format a 32767-byte string value", () => {
         expect(() => marshaller.format({ h: { type: "string", value: "a".repeat(32767) } })).not.toThrow();

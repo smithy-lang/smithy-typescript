@@ -19,8 +19,11 @@ export class Int64 {
   }
 
   static fromNumber(number: number): Int64 {
-    // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
-    if (number > 9_223_372_036_854_775_807 || number < -9_223_372_036_854_775_808) {
+    if (!Number.isFinite(number)) {
+      throw new Error(`${number} must be finite to represent as an Int64`);
+    }
+    // 2^63 - 1 rounds up to 2^63 as a JavaScript number, so use an exclusive upper bound.
+    if (number >= 2 ** 63 || number < -(2 ** 63)) {
       throw new Error(`${number} is too large (or, if negative, too small) to represent as an Int64`);
     }
 
