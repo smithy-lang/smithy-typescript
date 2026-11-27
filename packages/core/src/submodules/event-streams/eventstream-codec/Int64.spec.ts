@@ -43,6 +43,27 @@ describe("Int64", () => {
     );
   });
 
+  it.each([NaN, Infinity, -Infinity, 2 ** 63, 2 ** 63 + 2048, -(2 ** 63) - 2048])(
+    "should reject an unrepresentable number: %s",
+    (number) => {
+      expect(() => Int64.fromNumber(number)).toThrow();
+    }
+  );
+
+  it.each([
+    [2 ** 63 - 1024, [0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfc, 0x00]],
+    [-(2 ** 63), [0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]],
+    [-(2 ** 63) + 1024, [0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00]],
+  ])("should preserve a representable boundary: %s", (number, bytes) => {
+    const value = Int64.fromNumber(number);
+    expect(value.bytes).toEqual(Uint8Array.from(bytes));
+    expect(value.valueOf()).toBe(number);
+  });
+
+  it.each([0, -0, 1.4, 1.5, -1.4, -1.5])("should preserve rounding for %s", (number) => {
+    expect(Int64.fromNumber(number).valueOf()).toBe(Math.round(number) || 0);
+  });
+
   it("should throw when a number larger than 2^63 -1 is provided", () => {
     // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
     expect(() => Int64.fromNumber(9_323_372_036_854_775_807)).toThrow();
