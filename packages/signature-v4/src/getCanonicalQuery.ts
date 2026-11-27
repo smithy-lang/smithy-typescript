@@ -9,7 +9,8 @@ import { SIGNATURE_HEADER } from "./constants";
  */
 export const getCanonicalQuery = ({ query = {} }: HttpRequest): string => {
   const keys: Array<string> = [];
-  const serialized: Record<string, string> = {};
+  // No prototype, so a query key named "__proto__" is stored as an own property instead of being ignored.
+  const serialized: Record<string, string> = Object.create(null);
   for (const key in query) {
     if (!hasOwn(query, key)) {
       continue;
