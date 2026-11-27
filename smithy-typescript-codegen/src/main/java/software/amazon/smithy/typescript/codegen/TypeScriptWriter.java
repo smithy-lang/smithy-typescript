@@ -205,9 +205,12 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
      * @return Returns the writer.
      */
     public TypeScriptWriter writeDocs(String docs) {
+        // Model docs are HTML and editors drop it. Converting here instead of at the call
+        // sites covers everything: @throws, enum values, package docs.
+        String markdown = DocumentationConverter.htmlToMarkdown(docs);
         // Docs can have valid $ characters that shouldn't run through formatters.
         // Escapes multi-line comment closings.
-        writeDocs(() -> write(docs.replace("$", "$$").replace("*/", "*\\/")));
+        writeDocs(() -> write(markdown.replace("$", "$$").replace("*/", "*\\/")));
         return this;
     }
 
