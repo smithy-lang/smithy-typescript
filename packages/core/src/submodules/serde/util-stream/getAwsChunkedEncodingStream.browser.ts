@@ -1,4 +1,24 @@
-import type { GetAwsChunkedEncodingStream, GetAwsChunkedEncodingStreamOptions } from "@smithy/types";
+import type { Checksum, GetAwsChunkedEncodingStream, GetAwsChunkedEncodingStreamOptions, Hash } from "@smithy/types";
+
+// fetch requires Uint8Array chunks in a ReadableStream request body.
+const toBytes = (chunk: unknown, encoder: TextEncoder): Uint8Array => {
+  if (chunk instanceof Uint8Array) {
+    return chunk;
+  }
+  if (typeof chunk === "string") {
+    return encoder.encode(chunk);
+  }
+  if (ArrayBuffer.isView(chunk)) {
+    return new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+  }
+  if (chunk instanceof ArrayBuffer || Object.prototype.toString.call(chunk) === "[object ArrayBuffer]") {
+    return new Uint8Array(chunk as ArrayBuffer);
+  }
+  throw new TypeError(
+    `aws-chunked encoding: unsupported stream chunk type ${Object.prototype.toString.call(chunk)}; ` +
+      `expected string, Uint8Array, ArrayBufferView or ArrayBuffer.`
+  );
+};
 
 /**
  * @internal
@@ -15,30 +35,42 @@ export const getAwsChunkedEncodingStream: GetAwsChunkedEncodingStream<ReadableSt
     checksumAlgorithmFn !== undefined &&
     checksumLocationName !== undefined &&
     streamHasher !== undefined;
-  const digest = checksumRequired ? streamHasher!(checksumAlgorithmFn!, readableStream) : undefined;
+  // Checksum the bytes actually sent; the browser streamHasher only reads Blobs.
+  const hash: Checksum | Hash | undefined = checksumRequired ? new checksumAlgorithmFn!() : undefined;
 
-  Promise.resolve(digest).catch(() => {
-    // Block unhandled rejection; the original promise is awaited later.
-  });
-
+  const encoder = new TextEncoder();
   // ToDo: Validate the ReadableStream and getReader() is accessible before calling.
   // ReactNative doesn't support ReadableStream. They might not be available in older browsers, or some polyfills.
   const reader = readableStream.getReader();
-  return new ReadableStream({
+  return new ReadableStream<Uint8Array>({
     async pull(controller) {
-      const { value, done } = await reader.read();
+      while (true) {
+        const { value, done } = await reader.read();
 
-      if (done) {
-        controller.enqueue(`0\r\n`);
-        if (checksumRequired) {
-          const checksum = base64Encoder!(await digest!);
-          controller.enqueue(`${checksumLocationName}:${checksum}\r\n`);
-          controller.enqueue(`\r\n`);
+        if (done) {
+          controller.enqueue(encoder.encode(`0\r\n`));
+          if (hash) {
+            const checksum = base64Encoder!(await hash.digest());
+            controller.enqueue(encoder.encode(`${checksumLocationName}:${checksum}\r\n\r\n`));
+          }
+          controller.close();
+          return;
         }
-        controller.close();
-      } else {
-        controller.enqueue(`${(bodyLengthChecker(value) || 0).toString(16)}\r\n${value}\r\n`);
+
+        const bytes = toBytes(value, encoder);
+        // A zero-length chunk would terminate the body.
+        if (bytes.byteLength === 0) {
+          continue;
+        }
+        hash?.update(bytes);
+        controller.enqueue(encoder.encode(`${bytes.byteLength.toString(16)}\r\n`));
+        controller.enqueue(bytes);
+        controller.enqueue(encoder.encode("\r\n"));
+        return;
       }
+    },
+    async cancel(reason) {
+      await reader.cancel(reason);
     },
   });
 };
