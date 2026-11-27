@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.42.0
+
+### Minor Changes
+
+- 9c7c01b: Retry errors whose signing credentials were invalidated, marked by `$metadata.credentialsInvalidated`.
+
+### Patch Changes
+
+- Updated dependencies [9c7c01b]
+  - @smithy/types@4.21.0
+
 ## 3.41.1
 
 ### Patch Changes
