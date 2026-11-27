@@ -86,6 +86,13 @@ export type SdkError = Error &
        * This is specific to AWS SDK and sigv4.
        */
       readonly clockSkewCorrected?: true;
+      /**
+       * If present, will have value of true and indicates that the credentials that signed
+       * the request were invalidated after the service rejected them, so a retry signs with
+       * refreshed credentials.
+       * This is specific to AWS SDK and sigv4.
+       */
+      readonly credentialsInvalidated?: true;
     };
     cause?: Error;
   };

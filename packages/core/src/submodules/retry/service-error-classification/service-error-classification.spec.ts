@@ -11,6 +11,7 @@ import {
 } from "./constants";
 import {
   isClockSkewError,
+  isCredentialsInvalidatedError,
   isNodeJsHttp2TransientError,
   isRetryableByTrait,
   isServerError,
@@ -67,6 +68,20 @@ describe("isClockSkewError", () => {
       break;
     }
   }
+});
+
+describe("isCredentialsInvalidatedError", () => {
+  const withMetadata = ($metadata: Record<string, unknown> | undefined) =>
+    Object.assign(new Error(), { name: "ExpiredToken", $metadata }) as SdkError;
+
+  it("returns true when the signing credentials were invalidated", () => {
+    expect(isCredentialsInvalidatedError(withMetadata({ credentialsInvalidated: true }))).toBe(true);
+  });
+
+  it("returns a falsy value when the flag is not set", () => {
+    expect(isCredentialsInvalidatedError(withMetadata({ httpStatusCode: 400 }))).toBeFalsy();
+    expect(isCredentialsInvalidatedError(withMetadata(undefined))).toBeFalsy();
+  });
 });
 
 describe("isThrottlingError", () => {
@@ -162,6 +177,25 @@ describe("isTransientError", () => {
   NODEJS_NETWORK_ERROR_CODES.forEach((code) => {
     it(`should declare error with cause with the code "${code}" to be a Transient error`, () => {
       checkForErrorType(isTransientError, { code }, true);
+    });
+  });
+
+  describe("invalidated credentials", () => {
+    it("should declare an error whose credentials were invalidated to be a Transient error", () => {
+      const error = Object.assign(new Error(), {
+        name: "ExpiredToken",
+        $metadata: { httpStatusCode: 400, credentialsInvalidated: true },
+      });
+      expect(isTransientError(error as SdkError)).toBe(true);
+    });
+
+    it("should not declare the same error to be a Transient error without the flag", () => {
+      checkForErrorType(isTransientError, { name: "ExpiredToken", httpStatusCode: 400 }, false);
+    });
+
+    it("should not declare an AbortError to be a Transient error even with the flag", () => {
+      const error = Object.assign(new Error(), { name: "AbortError", $metadata: { credentialsInvalidated: true } });
+      expect(isTransientError(error as SdkError)).toBe(false);
     });
   });
 
