@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.21.0
+
+### Minor Changes
+
+- 9c7c01b: Retry errors whose signing credentials were invalidated, marked by `$metadata.credentialsInvalidated`.
+
 ## 4.20.0
 
 ### Minor Changes
