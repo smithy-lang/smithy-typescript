@@ -68,9 +68,49 @@ export function createPaginator<
 }
 
 /**
+ * Creates an item-level paginator by wrapping a page-level paginator and
+ * yielding the elements of each page's items member instead of the pages.
+ *
+ * Delegating to the page paginator preserves token handling, pageSize,
+ * withCommand, and stopOnSameToken behavior.
+ *
  * @internal
  */
-const get = (fromObject: any, path: string): any => {
+export function createItemsPaginator<
+  PaginationConfigType extends PaginationConfiguration,
+  InputType extends object,
+  ItemType,
+>(
+  paginator: (config: PaginationConfigType, input: InputType, ...additionalArguments: any[]) => Paginator<any>,
+  itemsPath: string
+): (config: PaginationConfigType, input: InputType, ...additionalArguments: any[]) => Paginator<ItemType> {
+  return async function* paginateItems(
+    config: PaginationConfigType,
+    input: InputType,
+    ...additionalArguments: any[]
+  ): Paginator<ItemType> {
+    for await (const page of paginator(config, input, ...additionalArguments)) {
+      const items = get(page, itemsPath);
+      if (items == null) {
+        continue;
+      }
+      if (Array.isArray(items)) {
+        yield* items;
+      } else if (typeof items === "object") {
+        // Map-typed items member: yield each [key, value] entry.
+        yield* Object.entries(items) as ItemType[];
+      } else {
+        yield items;
+      }
+    }
+    return undefined;
+  };
+}
+
+/**
+ * @internal
+ */
+export const get = (fromObject: any, path: string): any => {
   let cursor = fromObject;
   const pathComponents = path.split(".");
   for (const step of pathComponents) {

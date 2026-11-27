@@ -9,7 +9,13 @@ import {
 } from "@smithy/smithy-rpcv2-cbor-schema";
 import { requireRequestsFrom } from "@smithy/util-test/src";
 import { describe, expect, test as it } from "vitest";
-import { GetNumbersCommand, XYZService, type GetNumbersCommandOutput } from "xyz-schema";
+import {
+  GetNumbersCommand,
+  type GetNumbersCommandOutput,
+  paginateGetNumbers,
+  paginateGetNumbersItems,
+  XYZService,
+} from "xyz-schema";
 
 import { NumericValue } from "./submodules/serde";
 
@@ -200,5 +206,64 @@ describe("types", () => {
   it("empty input may be instantiated without parameters", () => {
     new EmptyInputOutputCommand();
     new SimpleScalarPropertiesCommand();
+  });
+});
+
+describe("item paginators", () => {
+  const cborPage = (body: object) =>
+    new HttpResponse({
+      headers: { "smithy-protocol": "rpc-v2-cbor" },
+      statusCode: 200,
+      body: cbor.serialize(body),
+    });
+
+  it("should flatten list items across pages via paginateGetNumbersItems", async () => {
+    const xyz = new XYZService({ endpoint: "https://localhost", apiKey: async () => ({ apiKey: "test-key" }) });
+    const testHandler = requireRequestsFrom(xyz).toMatch({ hostname: /^localhost$/ });
+
+    testHandler.respondWith(
+      cborPage({ numbers: [1, 2], nextToken: "t1" } as GetNumbersCommandOutput),
+      cborPage({ numbers: [3], nextToken: "t2" } as GetNumbersCommandOutput),
+      cborPage({ numbers: [4, 5] } as GetNumbersCommandOutput)
+    );
+
+    const items: number[] = [];
+    for await (const n of paginateGetNumbersItems({ client: xyz }, {})) {
+      items.push(n);
+    }
+    expect(items).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("should skip pages whose items member is absent", async () => {
+    const xyz = new XYZService({ endpoint: "https://localhost", apiKey: async () => ({ apiKey: "test-key" }) });
+    const testHandler = requireRequestsFrom(xyz).toMatch({ hostname: /^localhost$/ });
+
+    testHandler.respondWith(
+      cborPage({ numbers: [10], nextToken: "t1" } as GetNumbersCommandOutput),
+      cborPage({ nextToken: "t2" } as GetNumbersCommandOutput),
+      cborPage({ numbers: [20] } as GetNumbersCommandOutput)
+    );
+
+    const items: number[] = [];
+    for await (const n of paginateGetNumbersItems({ client: xyz }, {})) {
+      items.push(n);
+    }
+    expect(items).toEqual([10, 20]);
+  });
+
+  it("page and item paginators yield consistent data", async () => {
+    const xyz = new XYZService({ endpoint: "https://localhost", apiKey: async () => ({ apiKey: "test-key" }) });
+    const testHandler = requireRequestsFrom(xyz).toMatch({ hostname: /^localhost$/ });
+
+    testHandler.respondWith(
+      cborPage({ numbers: [1, 2], nextToken: "t1" } as GetNumbersCommandOutput),
+      cborPage({ numbers: [3] } as GetNumbersCommandOutput)
+    );
+
+    const flatFromPages: number[] = [];
+    for await (const page of paginateGetNumbers({ client: xyz }, {})) {
+      flatFromPages.push(...(page.numbers ?? []));
+    }
+    expect(flatFromPages).toEqual([1, 2, 3]);
   });
 });
