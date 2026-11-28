@@ -13,8 +13,9 @@ export class ConfiguredRetryStrategy extends StandardRetryStrategy implements Re
   private readonly computeNextBackoffDelay: (attempt: number) => number;
 
   /**
-   * @param maxAttempts - the maximum number of retry attempts allowed.
-   *                      e.g., if set to 3, then 4 total requests are possible.
+   * @param maxAttempts - the maximum number of attempts allowed, including the initial request.
+   *                      e.g., if set to 3, then at most 3 total requests are made (the initial request
+   *                      and up to 2 retries). If set to 1, no retries are made.
    * @param computeNextBackoffDelay - a millisecond delay for each retry or a function that takes the retry attempt
    *                                  and returns the delay.
    *
